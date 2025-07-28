@@ -71,6 +71,7 @@ public class PortalController(
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
     IMapper mapper,
     QuotaHelper quotaHelper,
+    ApiDateTimeHelper apiDateTimeHelper,
     IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
     IdentityClient client)
@@ -266,8 +267,8 @@ public class PortalController(
 
         if (currentUserType is EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin)
         {
-            result.DueDate = source.DueDate;
-            result.DelayDueDate = source.DelayDueDate;
+            result.DueDate = apiDateTimeHelper.Get(source.DueDate);
+            result.DelayDueDate = apiDateTimeHelper.Get(source.DelayDueDate);
         }
         
         if (await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
@@ -277,7 +278,7 @@ public class PortalController(
             result.Enterprise = tenantExtra.Enterprise;
             result.Developer = tenantExtra.Developer;
             result.CustomerId = source.CustomerId;
-            result.LicenseDate = source.LicenseDate;
+            result.LicenseDate = apiDateTimeHelper.Get(source.LicenseDate);
             result.Quotas = source.Quotas.Concat(source.OverdueQuotas ?? []).ToList();
         }
         

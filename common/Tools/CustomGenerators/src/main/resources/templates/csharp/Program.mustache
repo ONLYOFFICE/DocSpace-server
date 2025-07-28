@@ -29,11 +29,14 @@ public class Program
             var folderInstance = new FilesFoldersApi(config);
             var getFolderMy = await folderInstance.GetMyFolderAsync();
 
-            var folderMyId = getFolderMy.Response.Current.Id;
+            var actual = (FolderContentDtoInteger)getFolderMy.Response.ActualInstance;
+            var folderMyId = actual.Current.Id;
+
             var folderSettings = new CreateFolder("Folder"){};
             var createFolder = await folderInstance.CreateFolderAsync(folderMyId, folderSettings);
-            var createdFolderId = createFolder.Response.Id;
-            Console.WriteLine(createFolder.Response.Id);
+            var createdFolderIdActual = (FolderDtoInteger)createFolder.Response.ActualInstance;
+            var createdFolderId = createdFolderIdActual.Id;
+            Console.WriteLine(createdFolderId);
 
             var getFolderInfo = await folderInstance.GetFolderByFolderIdAsync(createdFolderId);
 
@@ -41,7 +44,8 @@ public class Program
             var updatedFolderSettings = new CreateFolder("UpdatedTitle") { };
 
             var renameFolder = await folderInstance.RenameFolderAsync(createdFolderId, updatedFolderSettings);
-            var titleNew = renameFolder.Response.Title;
+            var titleNewActual = (FolderDtoInteger)renameFolder.Response.ActualInstance;
+            var titleNew = titleNewActual.Title;
             if (updatedFolderSettings.Title == titleNew)
             {
                 Console.WriteLine("Success");
@@ -54,6 +58,14 @@ public class Program
             };
             var deleteFolder = await folderInstance.DeleteFolderAsync(createdFolderId, deleteRequestSettings);
             Console.WriteLine(deleteFolder.StatusCode);
+
+            var roomInstance = new RoomsApi(config);
+
+            var sort = SortedByType.DateAndTime;
+
+            var getRoom = await roomInstance.GetRoomsFolderAsync(null, null, 0, null, null, null, null, null, null, null, 100, null, sort.ToString(), SortOrder.Descending, null, "current.security,folders.id");
+
+            Console.WriteLine(getRoom.Response);
 
             var backupInstance = new BackupApi(config);
 

@@ -1,40 +1,48 @@
 package com.example.codegen;
 
-import com.samskivert.mustache.Mustache.Lambda;
-import com.samskivert.mustache.Mustache;
-import com.samskivert.mustache.Template;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Map;
-import java.util.List;
-
 import org.openapitools.codegen.model.ModelMap;
 import org.openapitools.codegen.model.ModelsMap;
 import org.openapitools.codegen.languages.PythonClientCodegen;
 import org.openapitools.codegen.SupportingFile;
 import org.openapitools.codegen.CodegenModel;
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.CodegenParameter;
+import org.openapitools.codegen.CodegenOperation;
+
+import java.util.List;
+import java.util.Map;
 
 public class MyPythonCodegen extends PythonClientCodegen {
 
     public MyPythonCodegen() {
         super();
-        this.outputFolder = "generated-code/my-python-custom";
+        this.outputFolder = "generated-code/my-python";
         this.templateDir = "templates/python";
         this.embeddedTemplateDir = "python";
 
         supportingFiles.add(new SupportingFile("main.mustache", "", "main.py"));
+        
+        supportingFiles.add(new SupportingFile(
+            "AUTHORS.mustache", "", "AUTHORS.md"
+        ));
+
+        supportingFiles.add(new SupportingFile(
+            "LICENSE.mustache", "", "LICENSE"
+        ));
+
+        supportingFiles.add(new SupportingFile(
+            "CHANGELOG.mustache", "", "CHANGELOG.md"
+        ));
     }
 
-        @Override
+    @Override
     public void processOpts() {
         super.processOpts();
 
-        String baseURL = openAPI.getServers().get(0).getUrl();
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
             ServerVariables serverVars = server.getVariables();
@@ -45,6 +53,50 @@ public class MyPythonCodegen extends PythonClientCodegen {
                 }
             }
         }
+
+        supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
+            f.getDestinationFilename().equals(".openapi-generator-ignore")
+        );
+    }
+
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
+        super.postProcessOperationsWithModels(objs, allModels);
+
+        if (objs != null && objs.getOperations() != null) {
+            OperationMap operationMap = objs.getOperations();
+            List<CodegenOperation> operationList = operationMap.getOperation();
+            if (operationList != null) {
+                for (CodegenOperation op : operationList) { 
+
+                    if ("GET".equalsIgnoreCase(op.httpMethod)) {
+                        boolean allAreQueryParams = op.allParams.stream()
+                            .allMatch(p -> Boolean.TRUE.equals(p.isQueryParam));
+
+                        boolean hasCountParam = op.allParams.stream()
+                            .anyMatch(p -> "count".equals(p.baseName));
+
+                        if (allAreQueryParams && hasCountParam) {
+                            CodegenParameter fieldsParam = new CodegenParameter();
+                            fieldsParam.baseName = "fields";
+                            fieldsParam.paramName = "fields";
+                            fieldsParam.dataType = "string";
+                            fieldsParam.description = "Comma-separated list of fields to include in the response";
+                            fieldsParam.required = false;
+                            fieldsParam.isQueryParam = true;
+                            fieldsParam.isPrimitiveType = true;
+                            fieldsParam.isNullable = true;
+                            fieldsParam.collectionFormat = "csv";
+
+                            op.allParams.add(fieldsParam);
+                            op.queryParams.add(fieldsParam);
+                        }
+                    }
+                }
+            }
+        }
+
+        return objs;
     }
 
     @Override
@@ -60,9 +112,19 @@ public class MyPythonCodegen extends PythonClientCodegen {
         return objs;
     }
 
+    public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
+        super.postProcessSupportingFileData(objs);
+
+        objs.put("x-authorizationUrl", "{{authBaseUrl}}/oauth2/authorize");
+        objs.put("x-tokenUrl", "{{authBaseUrl}}/oauth2/token");
+        objs.put("x-openIdConnectUrl", "{{authBaseUrl}}/.well-known/openid-configuration");
+
+        return objs;
+    }
+
     @Override
     public String getName() {
-        return "my-python-custom";
+        return "my-python";
     }
 
     @Override
