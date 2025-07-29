@@ -329,8 +329,14 @@ internal abstract class SecurityBaseDao<T>(
                     var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
                         (security, user) => new { security, user });
 
-                    var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
-                        (security, group) => new { security, group });
+                    var groupQuery = q
+                        .GroupJoin(filesDbContext.Groups, 
+                            s => s.Subject, 
+                            g => g.Id,
+                            (security, groups) => new { security, groups })
+                        .SelectMany(
+                            x => x.groups.DefaultIfEmpty(), 
+                            (x, group) => new { x.security, group });
 
                     if (textSearch)
                     {
@@ -498,8 +504,14 @@ internal abstract class SecurityBaseDao<T>(
                     var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
                         (security, user) => new { security, user });
 
-                    var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
-                        (security, group) => new { security, group });
+                    var groupQuery = q
+                        .GroupJoin(filesDbContext.Groups, 
+                            s => s.Subject, 
+                            g => g.Id,
+                            (security, groups) => new { security, groups })
+                        .SelectMany(
+                            x => x.groups.DefaultIfEmpty(), 
+                            (x, group) => new { x.security, group });
 
                     if (searchByText)
                     {
@@ -533,22 +545,22 @@ internal abstract class SecurityBaseDao<T>(
                     var userQuery2 = userQuery1.Select(r => new SecurityOrderRecord
                             {
                                 Security = r.security, 
-                        Order = r.user.ActivationStatus == EmployeeActivationStatus.Pending 
-                            ? 4 
-                            : r.ug != null 
-                                ? 3 
-                                : r.security.Share == FileShare.RoomManager 
-                                    ? 0 
-                                    : 2,
-                        Name = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? r.user.Email : r.user.FirstName
+                                Order = r.user.ActivationStatus == EmployeeActivationStatus.Pending 
+                                    ? 4 
+                                    : r.ug != null 
+                                        ? 3 
+                                        : r.security.Share == FileShare.RoomManager 
+                                            ? 0 
+                                            : 2,
+                                Name = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? r.user.Email : r.user.FirstName
                             });
 
                     var groupQuery1 = groupQuery.Select(r => new SecurityOrderRecord
                     {
-                                    Security = r.security,
+                        Security = r.security,
                         Order = 1,
                         Name = r.group.Name
-                                });
+                    });
 
                     q = userQuery2.Concat(groupQuery1)
                         .OrderBy(r => r.Order)
@@ -596,30 +608,45 @@ internal abstract class SecurityBaseDao<T>(
         {
             yield break;
         }
-
+        
+        List<GroupInfoWithShared> result = [];
+        
         var tenantId = _tenantManager.GetCurrentTenantId();
         var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
+        await using var ctx = await _dbContextFactory.CreateDbContextAsync();
+        var strategy = ctx.Database.CreateExecutionStrategy();
 
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext);
-
-        if (offset > 0)
+        await strategy.ExecuteAsync(async () =>
         {
-            q = q.Skip(offset);
-        }
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+            
+            var everyoneGroup = GetEveryoneGroup(tenantId);
+            filesDbContext.Groups.Add(everyoneGroup);
+            await filesDbContext.SaveChangesAsync();
+            
+            var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext);
 
-        if (count > 0)
-        {
-            q = q.Take(count);
-        }
+            if (offset > 0)
+            {
+                q = q.Skip(offset);
+            }
 
-        await foreach (var r in q.ToAsyncEnumerable())
+            if (count > 0)
+            {
+                q = q.Take(count);
+            }
+
+            foreach (var r in await q.ToListAsync())
+            {
+                result.Add(new GroupInfoWithShared { GroupInfo = mapper.Map<DbGroup, GroupInfo>(r.Group), Shared = r.Shared });
+            }
+           
+        });
+
+        foreach (var r in result)
         {
-            yield return new GroupInfoWithShared
-            { 
-                GroupInfo = mapper.Map<DbGroup, GroupInfo>(r.Group),
-                Shared = r.Shared 
-            };
+            yield return r;
         }
     }
 
@@ -631,16 +658,47 @@ internal abstract class SecurityBaseDao<T>(
         }
         
         var tenantId = _tenantManager.GetCurrentTenantId();
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
+        
+        await using var ctx = await _dbContextFactory.CreateDbContextAsync();
+        var strategy = ctx.Database.CreateExecutionStrategy();
+        var count = 0;
+        
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
-        var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext);
+            var everyoneGroup = GetEveryoneGroup(tenantId);
 
-        return await q.CountAsync();
+            filesDbContext.Groups.Add(everyoneGroup);
+
+            await filesDbContext.SaveChangesAsync();
+
+            var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
+
+            var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext);
+
+            count = await q.CountAsync();
+        });
+        
+        return count;
     }
 
-    private static IQueryable<GroupWithShared> GetGroupsWithSharedQuery(int tenantId, string entryId, string text, FileEntry entry, bool excludeShared, FilesDbContext filesDbContext)
+    private static DbGroup GetEveryoneGroup(int tenantId)
     {
+        var everyoneGroup = new DbGroup
+        {
+            Id = Constants.GroupEveryone.ID, 
+            Name = Constants.GroupEveryone.Name, 
+            TenantId = tenantId, 
+            LastModified = DateTime.UtcNow,
+            CategoryId = Constants.GroupEveryone.CategoryID
+        };
+        return everyoneGroup;
+    }
+
+    private IQueryable<GroupWithShared> GetGroupsWithSharedQuery(int tenantId, string entryId, string text, FileEntry entry, bool excludeShared, FilesDbContext filesDbContext)
+    {  
         var q = filesDbContext.Groups.Where(g => g.TenantId == tenantId && !g.Removed);
 
         if (!string.IsNullOrEmpty(text))
