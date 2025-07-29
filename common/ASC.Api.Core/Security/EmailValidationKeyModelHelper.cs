@@ -79,17 +79,7 @@ public class EmailValidationKeyModelHelper(
 
         if (encryptedEmail && !string.IsNullOrEmpty(_email))
         {
-            // Convert from URL-safe Base64 to standard Base64
-            var email = _email.ToString().Replace('-', '+').Replace('_', '/');
-
-            // Add padding if necessary
-            switch (email.Length % 4)
-            {
-                case 2: email += "=="; break;
-                case 3: email += "="; break;
-            }
-
-            _email = instanceCrypto.Decrypt(email);
+            _email = instanceCrypto.Decrypt(_email.ToString().Base64FromUrlSafe());
         }
 
         return new EmailValidationKeyModel

@@ -251,7 +251,7 @@ public class CommonLinkUtility(
             if (encryptEmail)
             {
                 link += $"&enc=true";
-                email = instanceCrypto.Encrypt(email).Replace('+', '-').Replace('/', '_').Replace("=", ""); // make base64 url safe;
+                email = instanceCrypto.Encrypt(email).Base64ToUrlSafe();
             }
 
             link += $"&email={HttpUtility.UrlEncode(email)}";

@@ -160,4 +160,38 @@ public static class StringExtension
 
         return 0;
     }
+
+    /// <summary>
+    /// Convert standard Base64 to URL-safe Base64
+    /// </summary>
+    public static string Base64ToUrlSafe(this string base64String)
+    {
+        if (string.IsNullOrEmpty(base64String))
+        {
+            return base64String;
+        }
+
+        return base64String.Replace('+', '-').Replace('/', '_').TrimEnd('=');
+    }
+
+    /// <summary>
+    /// Convert URL-safe Base64 to standard Base64
+    /// </summary>
+    public static string Base64FromUrlSafe(this string base64String)
+    {
+        if (string.IsNullOrEmpty(base64String))
+        {
+            return base64String;
+        }
+
+        base64String = base64String.Replace('-', '+').Replace('_', '/');
+
+        switch (base64String.Length % 4)
+        {
+            case 2: base64String += "=="; break;
+            case 3: base64String += "="; break;
+        }
+
+        return base64String;
+    }
 }
