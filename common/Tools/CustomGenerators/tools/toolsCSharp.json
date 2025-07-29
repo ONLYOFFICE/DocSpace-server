@@ -13,6 +13,7 @@
     "licenseName": "Apache-2.0",
     "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-csharp",
     "library": "httpclient",
-    "targetFramework": "net9.0"
+    "targetFramework": "net9.0",
+    "useOneOfDiscriminatorLookup": false
   }
 }
