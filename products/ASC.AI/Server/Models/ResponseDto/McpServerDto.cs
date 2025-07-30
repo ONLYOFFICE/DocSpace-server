@@ -24,34 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Common.Database;
+namespace ASC.AI.Models.ResponseDto;
 
-public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDbContext(options)
+public class McpServerDto : IMapFrom<McpServerOptions>
 {
-    public DbSet<DbChat> Chats { get; set; }
-    public DbSet<DbChatMessage> Messages { get; set; }
-    public DbSet<DbAiProvider> Providers { get; set; }
-    public DbSet<DbAiSettings> Settings { get; set; }
-    public DbSet<DbRoomSettings> RoomSettings { get; set; }
-    public DbSet<DbMcpServerOptions> McpServers { get; set; }
-    public DbSet<McpToolsSettings> McpSettings { get; set; }
-    public DbSet<DbRoomServer> McpRoomServers { get; set; }
+    public Guid Id { get; init; }
+    public required string Name { get; init; }
+    public required string Endpoint { get; init; }
+    public Dictionary<string, string>? Headers { get; init; }
     
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public void Mapping(Profile profile)
     {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddDbFolder()
-            .AddUser()
-            .AddDbChat()
-            .AddDbChatMessages()
-            .AddAiProviders()
-            .AddAiSettings()
-            .AddDbRoomSettings()
-            .AddMcpServers()
-            .AddMcpToolsSettings()
-            .AddMcpRoomMap()
-            .AddDbFunctions();
+        profile.CreateMap<McpServerOptions, McpServerDto>()
+            .ForMember(dest => dest.Endpoint, opt => 
+                opt.MapFrom(src => src.Endpoint.ToString()));
     }
 }

@@ -24,29 +24,54 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.MCP;
+namespace ASC.AI.Core.Common.Database.Models;
 
-public class McpServerOptions : IMapFrom<DbMcpServerOptions>
+public class DbRoomServer : BaseEntity
 {
-    public Guid Id { get; init; }
     public int TenantId { get; init; }
-    public required string Name { get; set; }
-    public required Uri Endpoint { get; set; }
-    public Dictionary<string, string>? Headers { get; set; }
+    public int RoomId { get; init; }
+    public Guid ServerId { get; init; }
     
-    public SseClientTransportOptions ToTransportOptions(TimeSpan? connectionTimeout = null) => new()
-    {
-        Name = Name,
-        Endpoint = Endpoint,
-        AdditionalHeaders = Headers,
-        TransportMode = HttpTransportMode.AutoDetect,
-        ConnectionTimeout = connectionTimeout ?? TimeSpan.FromSeconds(15)
-    };
+    public DbFolder Room { get; init; } = null!;
+    public DbTenant Tenant { get; init; } = null!;
 
-    public void Mapping(AutoMapper.Profile profile)
+    public override object[] GetKeys()
     {
-        profile.CreateMap<DbMcpServerOptions, McpServerOptions>()
-            .ForMember(dest => dest.Endpoint, opt => 
-                opt.MapFrom(src => new Uri(src.Endpoint)));
+        return [TenantId, RoomId, ServerId];
+    }
+}
+
+public static class DbMcpRoomMapExtensions
+{
+    public static ModelBuilderWrapper AddMcpRoomMap(this ModelBuilderWrapper modelBuilder)
+    {
+        modelBuilder.Entity<DbRoomServer>().Navigation(e => e.Tenant).AutoInclude(false);
+        modelBuilder.Entity<DbRoomServer>().Navigation(e => e.Room).AutoInclude(false);
+        return modelBuilder.Add(MySqlAddMcpRoomMap, Provider.MySql);
+    }
+
+    private static void MySqlAddMcpRoomMap(ModelBuilder builder)
+    {
+        builder.Entity<DbRoomServer>(entity =>
+        {
+            entity.ToTable("ai_mcp_room_servers")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+            
+            entity.HasKey(e => new { e.TenantId, e.RoomId, e.ServerId } )
+                .HasName("PRIMARY");
+            
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
+            
+            entity.Property(e => e.RoomId)
+                .HasColumnName("room_id");
+            
+            entity.Property(e => e.ServerId)
+                .HasColumnName("server_id")
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+        });
     }
 }

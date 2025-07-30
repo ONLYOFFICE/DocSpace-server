@@ -30,8 +30,31 @@ namespace ASC.AI.Api;
 [DefaultRoute]
 [ApiController]
 [ControllerName("ai")]
-public class McpController(McpService mcpService)
+public class McpController(McpService mcpService, IMapper mapper) : ControllerBase
 {
+    [HttpPost("rooms/{roomId}/mcp")]
+    public async Task<McpRoomDto> AddRoomServersAsync(AddRoomServersRequestDto inDto)
+    {
+        var servers = await mcpService.AddServersToRoomAsync(inDto.RoomId, inDto.Body.Servers);
+        
+        return mapper.Map<McpServerOptions, McpRoomDto>(servers.First());
+    }
+
+    [HttpGet("rooms/{roomId}/mcp")]
+    public async Task<List<McpRoomDto>> GetRoomServersAsync(GetRoomServersRequestDto inDto)
+    {
+        var servers = await mcpService.GetServersAsync(inDto.RoomId);
+        
+        return mapper.Map<List<McpServerOptions>, List<McpRoomDto>>(servers);
+    }
+
+    [HttpDelete("rooms/{roomId}/mcp")]
+    public async Task<NoContentResult> DeleteRoomServersAsync(DeleteRoomServersRequestDto inDto)
+    {
+        await mcpService.DeleteServersFromRoomAsync(inDto.RoomId, inDto.Body.Servers);
+        return NoContent();
+    }
+
     [HttpPut("rooms/{roomId}/mcp/{serverId}/tools")]
     public async Task<List<McpToolDto>> SetToolsAsync(SetMcpToolsRequestDto inDto)
     {

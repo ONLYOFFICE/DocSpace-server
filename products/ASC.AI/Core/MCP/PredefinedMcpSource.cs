@@ -63,7 +63,7 @@ public class PredefinedMcpSource
         _servers = list;
     }
 
-    public IMcpServerOptionsBuilder? GetServerDataBuilder(Guid serverId)
+    public IMcpServerOptionsBuilder? GetServerOptionsBuilder(Guid serverId)
     {
         return _servers.GetValueOrDefault(serverId);
     }

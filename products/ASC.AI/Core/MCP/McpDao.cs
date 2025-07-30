@@ -27,8 +27,186 @@
 namespace ASC.AI.Core.MCP;
 
 [Scope]
-public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory)
+public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper mapper)
 {
+    public async Task<McpServerOptions> AddServerAsync(int tenantId, string endpoint, string name, Dictionary<string, string>? headers)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        
+        var server = new DbMcpServerOptions
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            Name = name,
+            Endpoint = endpoint,
+            Headers = headers
+        };
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+            await context.McpServers.AddAsync(server);
+            await context.SaveChangesAsync();
+        });
+
+        return mapper.Map<DbMcpServerOptions, McpServerOptions>(server);
+    }
+    
+    public async Task<McpServerOptions?> GetServerAsync(int tenantId, Guid id)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var server = await dbContext.GetServerAsync(tenantId, id);
+        
+        return server == null ? null : mapper.Map<DbMcpServerOptions, McpServerOptions>(server);
+    }
+    
+    public async Task<List<McpServerOptions>> GetServersAsync(int tenantId, List<Guid> ids)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var servers = await dbContext.GetServersAsync(tenantId, ids).ToListAsync();
+        
+        return mapper.Map<List<DbMcpServerOptions>, List<McpServerOptions>>(servers);
+    }
+
+    public async IAsyncEnumerable<McpServerOptions> GetServersAsync(int tenantId, int offset, int count)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        await foreach (var server in dbContext.GetServersAsync(tenantId, offset, count))
+        {
+            yield return mapper.Map<DbMcpServerOptions, McpServerOptions>(server);
+        }
+    }
+    
+    public async Task<int> GetServersCountAsync(int tenantId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        return await dbContext.GetServersCountAsync(tenantId);
+    }
+
+    public async Task<McpServerOptions?> UpdateServerAsync(McpServerOptions options)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+
+        var server = await dbContext.GetServerAsync(options.TenantId, options.Id);
+        if (server == null)
+        {
+            return null;
+        }
+
+        server.Name = options.Name;
+        server.Endpoint = options.Endpoint.ToString();
+        server.Headers = options.Headers;
+        
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+            context.McpServers.Update(server);
+            await context.SaveChangesAsync();
+        });
+
+        return options;
+    }
+    
+    public async Task DeleteServersAsync(int tenantId, List<Guid> ids)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+            var transaction = await context.Database.BeginTransactionAsync();
+            
+            await context.DeleteServersAsync(tenantId, ids);
+            await context.DeleteSettingsAsync(tenantId, ids);
+            await context.DeleteRoomServersAsync(tenantId, ids);
+            
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        });
+    }
+    
+    public async Task AddRoomServersAsync(int tenantId, int roomId, IEnumerable<Guid> ids)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+
+        var maps = ids.Select(x => 
+            new DbRoomServer
+            {
+                TenantId = tenantId, 
+                RoomId = roomId, 
+                ServerId = x
+            });
+        
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+            await context.AddRangeAsync(maps);
+            await context.SaveChangesAsync();
+        });
+    }
+
+    public async Task<McpRoomServer?> GetRoomServerAsync(int tenantId, int roomId, Guid serverId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        var result = await dbContext.GetRoomServerAsync(tenantId, roomId, serverId);
+        if (result == null)
+        {
+            return null;
+        }
+        
+        var options = result.Options == null ? null : mapper.Map<DbMcpServerOptions, McpServerOptions>(result.Options);
+        return new McpRoomServer { Id = result.ServerId, Options = options };
+    }
+    
+    public async IAsyncEnumerable<McpRoomServer> GetRoomServersAsync(int tenantId, int roomId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        await foreach (var item in dbContext.GetRoomServersAsync(tenantId, roomId))
+        {
+            if (item.Options == null)
+            {
+                yield return new McpRoomServer
+                {
+                    Id = item.ServerId, 
+                    Options = null
+                };
+            }
+            else
+            {
+                yield return new McpRoomServer
+                {
+                    Id = item.ServerId, 
+                    Options = mapper.Map<DbMcpServerOptions, McpServerOptions>(item.Options)
+                };
+            }
+        }
+    }
+    
+    public async Task<int> GetRoomServersCountAsync(int tenantId, int roomId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        return await dbContext.GetRoomServersCountAsync(tenantId, roomId);
+    }
+    
+    public async Task DeleteServersFromRoomAsync(int tenantId, int roomId, List<Guid> serversIds)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+            await context.DeleteRoomServersAsync(tenantId, roomId, serversIds);
+            await context.DeleteSettingsAsync(tenantId, roomId, serversIds);
+            await context.SaveChangesAsync();
+        });
+    }
+
     public async Task<McpToolsSettings> SetToolsSettingsAsync(int tenantId, int roomId, Guid userId, Guid serverId, HashSet<string> disabledTools)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -76,7 +254,8 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory)
         return settings!;
     }
     
-    public async Task<IReadOnlyDictionary<Guid, McpToolsSettings>> GetToolsSettings(int tenantId, int roomId, Guid userId, IEnumerable<Guid> serversIds)
+    public async Task<IReadOnlyDictionary<Guid, McpToolsSettings>> GetToolsSettings(int tenantId, int roomId, Guid userId, 
+        IEnumerable<Guid> serversIds)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         return await dbContext.GetToolsSettings(tenantId, roomId, userId, serversIds)

@@ -127,6 +127,9 @@ public class MigrationContext : DbContext
     public DbSet<DbChat> Chats { get; set; }
     public DbSet<DbChatMessage> ChatMessages { get; set; }
     public DbSet<DbAiProvider> AiProviders { get; set; }
+    
+    public DbSet<DbMcpServerOptions> McpServers { get; set; }
+    public DbSet<DbRoomServer> RoomServers { get; set; }
 
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
@@ -206,6 +209,8 @@ public class MigrationContext : DbContext
             .AddDbChatMessages()
             .AddAiProviders()
             .AddAiSettings()
+            .AddMcpServers()
+            .AddMcpRoomMap()
             .AddMcpToolsSettings()
             .AddDbFunctions();
     }
