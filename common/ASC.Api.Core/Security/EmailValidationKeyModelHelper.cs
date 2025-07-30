@@ -74,13 +74,7 @@ public class EmailValidationKeyModelHelper(
 
         request.TryGetValue("first", out var first);
 
-        request.TryGetValue("enc", out var encryptedEmailKey);
-        bool.TryParse(encryptedEmailKey, out var encryptedEmail);
-
-        if (encryptedEmail && !string.IsNullOrEmpty(_email))
-        {
-            _email = instanceCrypto.Decrypt(_email.ToString().Base64FromUrlSafe());
-        }
+        request.TryGetValue("encemail", out var encEmail);
 
         return new EmailValidationKeyModel
         {
@@ -89,13 +83,19 @@ public class EmailValidationKeyModelHelper(
             Key = key,
             Type = cType,
             UiD = userId,
-            First = first
+            First = first,
+            EncEmail = encEmail
         };
     }
 
     public async Task<ValidationResult> ValidateAsync(EmailValidationKeyModel inDto)
     {
-        var (key, emplType, email, uiD, type, first) = inDto;
+        var (key, emplType, email, uiD, type, first, encEmail) = inDto;
+
+        if (string.IsNullOrEmpty(email))
+        {
+            email = inDto.DecryptEncEmail(instanceCrypto);
+        }
 
         ValidationResult checkKeyResult;
         UserInfo userInfo;

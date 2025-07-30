@@ -250,11 +250,13 @@ public class CommonLinkUtility(
         {
             if (encryptEmail)
             {
-                link += $"&enc=true";
-                email = instanceCrypto.Encrypt(email).Base64ToUrlSafe();
+                var encryptedEmail = instanceCrypto.Encrypt(email).Base64ToUrlSafe();
+                link += $"&encemail={HttpUtility.UrlEncode(encryptedEmail)}";
             }
-
-            link += $"&email={HttpUtility.UrlEncode(email)}";
+            else
+            {
+                link += $"&email={HttpUtility.UrlEncode(email)}";
+            }
         }
 
         if (userId != Guid.Empty)

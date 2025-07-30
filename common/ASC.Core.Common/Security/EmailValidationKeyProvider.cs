@@ -200,6 +200,11 @@ public class EmailValidationKeyModel
     public string Email { get; init; }
 
     /// <summary>
+    /// The encrypted email address.
+    /// </summary>
+    public string EncEmail { get; init; }
+
+    /// <summary>
     /// The user ID.
     /// </summary>
     public Guid? UiD { get; init; }
@@ -219,8 +224,13 @@ public class EmailValidationKeyModel
     /// </summary>
     public string RoomId { get; init; }
 
-    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string first)
+    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string first, out string encEmail)
     {
-        (key, emplType, email, uiD, type, first) = (Key, EmplType, Email, UiD, Type, First);
+        (key, emplType, email, uiD, type, first, encEmail) = (Key, EmplType, Email, UiD, Type, First, EncEmail);
+    }
+
+    public string DecryptEncEmail(InstanceCrypto instanceCrypto)
+    {
+        return string.IsNullOrEmpty(EncEmail) ? EncEmail : instanceCrypto.Decrypt(EncEmail.ToString().Base64FromUrlSafe());
     }
 }

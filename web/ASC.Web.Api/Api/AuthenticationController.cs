@@ -69,6 +69,7 @@ public class AuthenticationController(
     BruteForceLoginManager bruteForceLoginManager,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
     InvitationService invitationService,
+    InstanceCrypto instanceCrypto,
     UserSocketManager socketManager,
     LoginProfileTransport loginProfileTransport,
     AuditEventsRepository auditEventsRepository,
@@ -356,7 +357,9 @@ public class AuthenticationController(
             return new ConfirmDto { Result = await emailValidationKeyModelHelper.ValidateAsync(inDto)};
         }
 
-        var result = await invitationService.ConfirmAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.RoomId, inDto.UiD);
+        var email = string.IsNullOrEmpty(inDto.Email) ? inDto.DecryptEncEmail(instanceCrypto) : inDto.Email;
+
+        var result = await invitationService.ConfirmAsync(inDto.Key, email, inDto.EmplType ?? default, inDto.RoomId, inDto.UiD);
 
         return mapper.Map<Validation, ConfirmDto>(result);
     }
