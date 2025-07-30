@@ -134,7 +134,7 @@ public class StudioNotifyService(
 
         var postfix = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
-        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(email, ConfirmType.EmailChange, postfix, user.Id);
+        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(email, ConfirmType.EmailChange, postfix, user.Id, true);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeEmail", GetCulture(user));
 

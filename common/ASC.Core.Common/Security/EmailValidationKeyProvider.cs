@@ -228,9 +228,4 @@ public class EmailValidationKeyModel
     {
         (key, emplType, email, uiD, type, first, encEmail) = (Key, EmplType, Email, UiD, Type, First, EncEmail);
     }
-
-    public string DecryptEncEmail(InstanceCrypto instanceCrypto)
-    {
-        return string.IsNullOrEmpty(EncEmail) ? EncEmail : instanceCrypto.Decrypt(EncEmail.ToString().Base64FromUrlSafe());
-    }
 }

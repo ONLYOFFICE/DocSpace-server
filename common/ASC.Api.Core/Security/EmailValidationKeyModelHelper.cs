@@ -92,10 +92,9 @@ public class EmailValidationKeyModelHelper(
     {
         var (key, emplType, email, uiD, type, first, encEmail) = inDto;
 
-        if (string.IsNullOrEmpty(email))
-        {
-            email = inDto.DecryptEncEmail(instanceCrypto);
-        }
+        email = string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(encEmail)
+            ? instanceCrypto.Decrypt(encEmail.Base64FromUrlSafe())
+            : email;
 
         ValidationResult checkKeyResult;
         UserInfo userInfo;

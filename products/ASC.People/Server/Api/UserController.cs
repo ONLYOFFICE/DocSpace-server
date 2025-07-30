@@ -67,6 +67,7 @@ public class UserController(
     IHttpClientFactory httpClientFactory,
     IHttpContextAccessor httpContextAccessor,
     SettingsManager settingsManager,
+    InstanceCrypto instanceCrypto,
     InvitationService invitationService,
     FileSecurity fileSecurity,
     UsersQuotaSyncOperation usersQuotaSyncOperation,
@@ -531,17 +532,21 @@ public class UserController(
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
-        
-        if (!string.IsNullOrEmpty(inDto.MemberBase.Email))
+
+        var email = string.IsNullOrEmpty(inDto.MemberBase.Email) && !string.IsNullOrEmpty(inDto.MemberBase.EncEmail)
+            ? instanceCrypto.Decrypt(inDto.MemberBase.EncEmail.Base64FromUrlSafe())
+            : inDto.MemberBase.Email;
+
+        if (!string.IsNullOrEmpty(email))
         {
-            var email = (inDto.MemberBase.Email ?? "").Trim();
+            email = email.Trim();
 
             if (!email.TestEmailRegex())
             {
                 throw new ArgumentException(Resource.ErrorNotCorrectEmail);
             }
             
-            var address = new MailAddress(inDto.MemberBase.Email);
+            var address = new MailAddress(email);
             if (!string.Equals(address.Address, user.Email, StringComparison.OrdinalIgnoreCase))
             {
                 user.Email = address.Address.ToLowerInvariant();
