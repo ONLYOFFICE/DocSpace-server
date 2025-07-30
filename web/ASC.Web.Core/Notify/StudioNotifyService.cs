@@ -154,7 +154,7 @@ public class StudioNotifyService(
 
     public async Task SendEmailActivationInstructionsAsync(UserInfo user, string email)
     {
-        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(email, ConfirmType.EmailActivation, null, user.Id);
+        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(email, ConfirmType.EmailActivation, null, user.Id, true);
         var shortLink  = await urlShortener.GetShortenLinkAsync(confirmationUrl);
         
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonActivateEmail", GetCulture(user));
@@ -822,7 +822,7 @@ public class StudioNotifyService(
 
             if (u.ActivationStatus != EmployeeActivationStatus.Activated)
             {
-                var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(u.Email, ConfirmType.EmailActivation, null, u.Id);
+                var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(u.Email, ConfirmType.EmailActivation, null, u.Id, true);
                 var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirm", culture);
                 orangeButton = TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl));
 

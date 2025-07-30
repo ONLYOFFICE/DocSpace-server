@@ -277,7 +277,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                     var client = workContext.RegisterClient(scope.ServiceProvider, source);
                     var urlShortener = scope.ServiceProvider.GetRequiredService<IUrlShortener>();
 
-                    var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(ldapUserInfo.Email, ConfirmType.EmailActivation);
+                    var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(ldapUserInfo.Email, ConfirmType.EmailActivation, encryptEmail: true);
                    
                     await client.SendNoticeToAsync(
                         NotifyConstants.ActionLdapActivation,
