@@ -113,12 +113,20 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
             await _persistentConnection.TryConnectAsync();
         }
 
-        var policy = Policy.Handle<BrokerUnreachableException>()
-            .Or<SocketException>()
-            .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+        var builder = new ResiliencePipelineBuilder();
+
+        var pipeline = builder.AddRetry(new RetryStrategyOptions
+        {
+            MaxRetryAttempts = _retryCount,
+            Delay = TimeSpan.FromSeconds(1),
+            BackoffType = DelayBackoffType.Exponential,
+            ShouldHandle = new PredicateBuilder().Handle<BrokerUnreachableException>().Handle<SocketException>(),
+            OnRetry = args =>
             {
-                _logger.WarningCouldNotPublishEvent(@event.Id, time.TotalSeconds, ex);
-            });
+                _logger.WarningCouldNotPublishEvent(@event.Id, args.Duration.TotalSeconds, args.Outcome.Exception);
+                return ValueTask.CompletedTask;
+            }
+        }).Build();
 
         var eventName = @event.GetType().Name;
 
@@ -132,7 +140,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
         var body = _serializer.Serialize(@event);
 
-        await policy.Execute(async () =>
+        await pipeline.ExecuteAsync(async (_) =>
         {
             // TODO: check this method
             var properties = new BasicProperties

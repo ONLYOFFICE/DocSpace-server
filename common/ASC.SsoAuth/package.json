@@ -28,7 +28,7 @@
     "node-forge": "^0.10.0",
     "nodemon": "2.0.4",
     "request": "^2.88.2",
-    "samlify": "^2.7.6",
+    "samlify": "^2.8.0",
     "serve-favicon": "^2.5.0",
     "url": "^0.11.0",
     "winston": "^3.8.2",

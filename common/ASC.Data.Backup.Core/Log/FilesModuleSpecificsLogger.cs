@@ -31,5 +31,5 @@ internal static partial class FilesModuleSpecificsLogger
     public static partial void ErrorCanNotPrepareData(this ILogger<ModuleProvider> logger, string data, Exception exception);
 
     [LoggerMessage(LogLevel.Error, "Can not prepare value {value}")]
-    public static partial void ErrorCanNotPrepareValue(this ILogger<ModuleProvider> logger, object value, Exception exception);
+    public static partial void ErrorCanNotPrepareValue(this ILogger<ModuleProvider> logger, string value, Exception exception);
 }

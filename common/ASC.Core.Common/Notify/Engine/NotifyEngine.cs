@@ -206,7 +206,7 @@ public class NotifyEngine(Context context,
         catch (Exception ex)
         {
             responses.Add(new SendResponse(request.NotifyAction, null, request.Recipient, SendResult.Impossible));
-            _logger.ErrorPrepare(ex, request.NotifyAction, request.Recipient);
+            _logger.ErrorPrepare(ex, request.NotifyAction.ToString(), request.Recipient.ToString());
         }
 
         if (request._senderNames is { Length: > 0 })
