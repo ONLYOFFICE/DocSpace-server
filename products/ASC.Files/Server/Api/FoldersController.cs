@@ -331,7 +331,8 @@ public class FoldersControllerCommon(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     UserManager userManager,
-    SecurityContext securityContext)
+    SecurityContext securityContext,
+    FilesSettingsHelper filesSettingsHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -422,12 +423,11 @@ public class FoldersControllerCommon(
     /// </summary>
     /// <short>Get the "Recent" section</short>
     /// <path>api/2.0/files/@recent</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Recent\" section contents", typeof(FolderContentDto<int>))]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [SwaggerResponse(404, "The required folder was not found")]
-    [HttpGet("recent")]
+    [HttpGet("@recent")]
     public async Task<FolderContentDto<int>> GetRecentFolder(GetRecentFolderRequestDto inDto)
     {
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderRecentAsync, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, inDto.Extension);
@@ -510,7 +510,12 @@ public class FoldersControllerCommon(
         {
             withoutTrash = true;
         }
-
+        
+        if (await filesSettingsHelper.GetRecentSection())
+        {
+            yield return await globalFolderHelper.FolderRecentAsync;
+        }
+        
         var my = await globalFolderHelper.FolderMyAsync;
         if (my != 0)
         {
