@@ -1030,7 +1030,7 @@ public class TariffService(
         return result;
     }
 
-    private async Task<bool> IsFreeTariffAsync(Tariff tariff)
+    public async Task<bool> IsFreeTariffAsync(Tariff tariff)
     {
         var freeTariff = await tariff.Quotas.ToAsyncEnumerable().FirstOrDefaultAwaitAsync(async tariffRow =>
         {
