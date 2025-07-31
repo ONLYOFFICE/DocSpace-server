@@ -322,7 +322,7 @@ internal abstract class SecurityBaseDao<T>(
             await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
             var everyoneGroup = GetEveryoneGroup(tenantId);
-            filesDbContext.Groups.Add(everyoneGroup);
+            await filesDbContext.Groups.AddAsync(everyoneGroup);
             await filesDbContext.SaveChangesAsync();
             var q = await GetPureSharesQuery(tenantId, entry, filterType, filesDbContext);
             var textSearch = !string.IsNullOrEmpty(text);
@@ -453,7 +453,7 @@ internal abstract class SecurityBaseDao<T>(
             await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
             var everyoneGroup = GetEveryoneGroup(tenantId);
-            filesDbContext.Groups.Add(everyoneGroup);
+            await filesDbContext.Groups.AddAsync(everyoneGroup);
             await filesDbContext.SaveChangesAsync();
 
             var q = await GetPureSharesQuery(tenantId, entry, filterType, filesDbContext);
@@ -621,7 +621,7 @@ internal abstract class SecurityBaseDao<T>(
             await using var tx = await filesDbContext.Database.BeginTransactionAsync();
             
             var everyoneGroup = GetEveryoneGroup(tenantId);
-            filesDbContext.Groups.Add(everyoneGroup);
+            await filesDbContext.Groups.AddAsync(everyoneGroup);
             await filesDbContext.SaveChangesAsync();
             
             var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext);
@@ -669,7 +669,7 @@ internal abstract class SecurityBaseDao<T>(
 
             var everyoneGroup = GetEveryoneGroup(tenantId);
 
-            filesDbContext.Groups.Add(everyoneGroup);
+            await filesDbContext.Groups.AddAsync(everyoneGroup);
 
             await filesDbContext.SaveChangesAsync();
 
