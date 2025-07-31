@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Message = ASC.AI.Core.Chat.Models.Message;
+using Message = ASC.AI.Core.Chat.Data.Message;
 using TextContent = Microsoft.Extensions.AI.TextContent;
 
 namespace ASC.AI.Core.Chat.History;

@@ -27,7 +27,6 @@
 global using System.Reflection;
 global using System.Text.RegularExpressions;
 
-global using ASC.AI.Core.Common.Database.Models;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.EF.Model.Chat;

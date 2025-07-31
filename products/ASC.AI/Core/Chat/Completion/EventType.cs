@@ -24,35 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Text;
+namespace ASC.AI.Core.Chat.Completion;
 
-[Scope]
-public class FileTextProcessor(IFileDao<int> fileDao, ITextExtractor textExtractor, ITextSplitter textSplitter)
+public enum EventType
 {
-    public async Task<List<string>> GetTextChunksAsync(int fileId, SplitterSettings settings)
-    {
-        var file = await fileDao.GetFileAsync(fileId);
-        if (file == null)
-        {
-            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-        
-        return await GetTextChunksAsync(file, settings);
-    }
+    NewToken,
+    ToolCall,
+    ToolResult,
+    Metadata,
+    Error
+}
 
-    public async Task<List<string>> GetTextChunksAsync(File<int> file, SplitterSettings settings)
+public static class EventTypeExtensions
+{
+    public static string ToEventString(this EventType type) => type switch
     {
-        await using var stream = await fileDao.GetFileStreamAsync(file);
-        
-        await using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
-        
-        var memory = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
-        
-        var text = await textExtractor.ExtractAsync(memory);
-        
-        return string.IsNullOrEmpty(text) 
-            ? [] 
-            : textSplitter.Split(text, settings.MaxTokensPerChunk, settings.ChunkOverlap);
-    }
+        EventType.NewToken => "new_token",
+        EventType.ToolCall => "tool_call",
+        EventType.ToolResult => "tool_result",
+        EventType.Metadata => "metadata",
+        EventType.Error => "error",
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
+    };
 }

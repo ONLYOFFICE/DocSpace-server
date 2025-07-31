@@ -24,28 +24,31 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using ASC.AI.Core.Database;
+global using ASC.AI.Core.Database.Models;
+global using ASC.AI.Core.Chat.Data;
 global using ASC.AI.Core.Chat.Extensions;
 global using ASC.AI.Core.Chat.History;
-global using ASC.AI.Core.Chat.Models;
-global using ASC.AI.Core.Common.Models;
-global using ASC.AI.Core.Common.Database;
-global using ASC.AI.Core.Common.Database.Models;
-global using ASC.AI.Core.Common.Services;
 global using ASC.AI.Core.MCP;
-global using ASC.AI.Core.ProviderModels;
-global using ASC.AI.Core.ProviderModels.Clients;
+global using ASC.AI.Core.Provider;
+global using ASC.AI.Core.Provider.Data;
+global using ASC.AI.Core.Provider.Model;
 global using ASC.AI.Core.Settings;
 global using ASC.AI.Core.Text;
 
 global using ASC.Common;
 global using ASC.Common.Log;
 global using ASC.Common.Mapping;
+global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Web;
 
 global using ASC.Core;
+global using ASC.Core.Billing;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.EF.Model.Chat;
+global using ASC.Core.Notify.Socket;
+global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 
 global using ASC.ElasticSearch;
@@ -60,6 +63,7 @@ global using ASC.Security.Cryptography;
 
 global using ASC.Web.Core;
 global using ASC.Web.Files.Services.WCFService.FileOperations;
+global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Utility;
 
 global using Anthropic.SDK;
@@ -88,5 +92,7 @@ global using System.Net.Http.Json;
 global using System.Runtime.CompilerServices;
 global using System.Security;
 global using System.Text.Encodings.Web;
+global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
+global using System.Threading.Channels;

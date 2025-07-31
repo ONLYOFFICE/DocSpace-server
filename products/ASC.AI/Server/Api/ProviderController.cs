@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ProviderDto = ASC.AI.Models.ResponseDto.ProviderDto;
+
 namespace ASC.AI.Api;
 
 [Scope]
@@ -31,14 +33,14 @@ namespace ASC.AI.Api;
 [ApiController]
 [ControllerName("ai")]
 public class ProviderController(
-    AiConfigurationService configurationService, 
+    AiProviderService providerService, 
     ApiDateTimeHelper apiDateTimeHelper,
     ApiContext apiContext) : ControllerBase
 {
     [HttpPost("providers")]
     public async Task<ProviderDto> AddProviderAsync(CreateProviderRequestDto inDto)
     {
-        var provider = await configurationService.AddProviderAsync(inDto.Title, inDto.Url, inDto.Key, inDto.Type);
+        var provider = await providerService.AddProviderAsync(inDto.Title, inDto.Url, inDto.Key, inDto.Type);
 
         return provider.ToDto(apiDateTimeHelper);
     }
@@ -46,9 +48,9 @@ public class ProviderController(
     [HttpGet("providers")]
     public async Task<List<ProviderDto>> GetProvidersAsync(PaginatedRequestDto inDto)
     {
-        var totalCountTask = configurationService.GetProvidersTotalCountAsync();
+        var totalCountTask = providerService.GetProvidersTotalCountAsync();
         
-        var providers = await configurationService.GetProvidersAsync(inDto.StartIndex, inDto.Count)
+        var providers = await providerService.GetProvidersAsync(inDto.StartIndex, inDto.Count)
             .Select(x => x.ToDto(apiDateTimeHelper))
             .ToListAsync();
 
@@ -62,7 +64,7 @@ public class ProviderController(
     [HttpPut("providers/{id}")]
     public async Task<ProviderDto> UpdateProviderAsync(UpdateProviderRequestDto inDto)
     {
-        var provider = await configurationService.UpdateProviderAsync(inDto.Id, inDto.Body.Title, inDto.Body.Url, inDto.Body.Key);
+        var provider = await providerService.UpdateProviderAsync(inDto.Id, inDto.Body.Title, inDto.Body.Url, inDto.Body.Key);
 
         return provider.ToDto(apiDateTimeHelper);
     }
@@ -70,7 +72,7 @@ public class ProviderController(
     [HttpDelete("providers")]
     public async Task<NoContentResult> DeleteProvidersAsync(RemoveProviderRequestDto inDto)
     {
-        await configurationService.DeleteProvidersAsync(inDto.Ids);
+        await providerService.DeleteProvidersAsync(inDto.Ids);
 
         return NoContent();
     }

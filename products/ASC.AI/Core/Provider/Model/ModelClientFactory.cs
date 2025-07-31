@@ -24,35 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Text;
+namespace ASC.AI.Core.Provider.Model;
 
 [Scope]
-public class FileTextProcessor(IFileDao<int> fileDao, ITextExtractor textExtractor, ITextSplitter textSplitter)
+public class ModelClientFactory(IHttpClientFactory httpClientFactory)
 {
-    public async Task<List<string>> GetTextChunksAsync(int fileId, SplitterSettings settings)
+    public IModelClient Create(ProviderType type)
     {
-        var file = await fileDao.GetFileAsync(fileId);
-        if (file == null)
+        return type switch
         {
-            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-        
-        return await GetTextChunksAsync(file, settings);
-    }
-
-    public async Task<List<string>> GetTextChunksAsync(File<int> file, SplitterSettings settings)
-    {
-        await using var stream = await fileDao.GetFileStreamAsync(file);
-        
-        await using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
-        
-        var memory = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
-        
-        var text = await textExtractor.ExtractAsync(memory);
-        
-        return string.IsNullOrEmpty(text) 
-            ? [] 
-            : textSplitter.Split(text, settings.MaxTokensPerChunk, settings.ChunkOverlap);
+            ProviderType.OpenAi or ProviderType.OpenAiCompatible or ProviderType.DocSpaceAi => 
+                new OpenAiModelClient(httpClientFactory.CreateClient()),
+            ProviderType.TogetherAi => 
+                new TogetherAiModelClient(httpClientFactory.CreateClient()),
+            ProviderType.Anthropic =>
+                new AnthropicModelClient(httpClientFactory.CreateClient()),
+            _ => throw new ArgumentOutOfRangeException(nameof(type))
+        };
     }
 }

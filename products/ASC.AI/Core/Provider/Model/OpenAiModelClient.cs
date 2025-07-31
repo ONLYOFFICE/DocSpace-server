@@ -24,35 +24,38 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Text;
+namespace ASC.AI.Core.Provider.Model;
 
-[Scope]
-public class FileTextProcessor(IFileDao<int> fileDao, ITextExtractor textExtractor, ITextSplitter textSplitter)
+public class OpenAiModelClient(HttpClient client) : IModelClient
 {
-    public async Task<List<string>> GetTextChunksAsync(int fileId, SplitterSettings settings)
+    private const string EndpointPart = "models";
+    private const string AuthScheme = "Bearer";
+    
+    public async Task<List<ModelInfo>> GetModelsAsync(string endpoint, string apiKey, Scope? scope, IReadOnlyDictionary<string, string>? headers = null)
     {
-        var file = await fileDao.GetFileAsync(fileId);
-        if (file == null)
+        var request = new HttpRequestMessage(HttpMethod.Get, $"{endpoint.TrimEnd('/')}/{EndpointPart}");
+        request.Headers.Authorization = new AuthenticationHeaderValue(AuthScheme, apiKey);
+
+        if (headers is { Count: > 0 })
         {
-            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            foreach (var (key, value) in headers)
+            {
+                request.Headers.Add(key, value);
+            }
         }
-        
-        return await GetTextChunksAsync(file, settings);
+
+        var response = (await client.SendAsync(request)).EnsureSuccessStatusCode();
+        return await GetModelsDataAsync(response, scope);
     }
 
-    public async Task<List<string>> GetTextChunksAsync(File<int> file, SplitterSettings settings)
+    protected virtual async Task<List<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response, Scope? scope)
     {
-        await using var stream = await fileDao.GetFileStreamAsync(file);
-        
-        await using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
-        
-        var memory = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
-        
-        var text = await textExtractor.ExtractAsync(memory);
-        
-        return string.IsNullOrEmpty(text) 
-            ? [] 
-            : textSplitter.Split(text, settings.MaxTokensPerChunk, settings.ChunkOverlap);
+        var content = await response.Content.ReadFromJsonAsync<Response>();
+        return content?.Data ?? [];
+    }
+    
+    private class Response
+    {
+        public required List<ModelInfo> Data { get; init; }
     }
 }

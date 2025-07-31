@@ -24,35 +24,32 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Text;
+namespace ASC.AI.Core.Chat.Data;
 
-[Scope]
-public class FileTextProcessor(IFileDao<int> fileDao, ITextExtractor textExtractor, ITextSplitter textSplitter)
+public class AttachmentMessageContent : MessageContent
 {
-    public async Task<List<string>> GetTextChunksAsync(int fileId, SplitterSettings settings)
-    {
-        var file = await fileDao.GetFileAsync(fileId);
-        if (file == null)
-        {
-            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
+    private const string Pattern = 
+        """
+        ### Attachment:
         
-        return await GetTextChunksAsync(file, settings);
+        **Title**: {0}
+        
+        **Content**: 
+        {1}
+        """;
+    
+    public required JsonElement Id { get; init; }
+    public required string Title { get; init; }
+    public required string Extension { get; init; }
+    public required string Content { get; init; }
+
+    public static implicit operator AIContent(AttachmentMessageContent attachment)
+    {
+        return new TextContent(attachment.Content);
     }
 
-    public async Task<List<string>> GetTextChunksAsync(File<int> file, SplitterSettings settings)
+    public override string ToMarkdown()
     {
-        await using var stream = await fileDao.GetFileStreamAsync(file);
-        
-        await using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
-        
-        var memory = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
-        
-        var text = await textExtractor.ExtractAsync(memory);
-        
-        return string.IsNullOrEmpty(text) 
-            ? [] 
-            : textSplitter.Split(text, settings.MaxTokensPerChunk, settings.ChunkOverlap);
+        return string.Format(Pattern, Title, Content);
     }
 }

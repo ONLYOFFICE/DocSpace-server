@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ChatParameters = ASC.AI.Core.Common.Models.ChatParameters;
-
 namespace ASC.AI.Core.Chat.Completion;
 
 [Scope]
@@ -38,7 +36,7 @@ public class ChatCompletionRunner(
     McpService mcpService,
     ChatClientFactory chatClientFactory,
     ILogger<ChatCompletionGenerator> logger,
-    AiConfigurationService configurationService,
+    AiProviderService providerService,
     AttachmentHandler attachmentHandler,
     ChatSocketClient chatSocketClient)
 {
@@ -47,7 +45,7 @@ public class ChatCompletionRunner(
     {
         ArgumentException.ThrowIfNullOrEmpty(message);
         
-        var (config, contextFolderId) = await GetRungConfigAsync(roomId);
+        var config = await GetRungConfigAsync(roomId);
         
         var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
         var toolTask = mcpService.GetToolsAsync(roomId);
@@ -57,7 +55,7 @@ public class ChatCompletionRunner(
         
         var messages = new List<ChatMessage>
         {
-            new(ChatRole.System, ChatPromptTemplate.GetPrompt(config.Parameters.Prompt, contextFolderId, roomId)),
+            new(ChatRole.System, ChatPromptTemplate.GetPrompt(config.Prompt, config.ContextFolderId, roomId)),
             userMessage
         };
         
@@ -71,7 +69,14 @@ public class ChatCompletionRunner(
         
         var toolHolder = await toolTask;
         
-        var client = chatClientFactory.Create(config, toolHolder.Tools);
+        var client = chatClientFactory.Create(new ChatClientOptions
+        {
+            Endpoint = config.Url,
+            Key = config.Key,
+            Provider = config.ProviderType,
+            ModelId = config.ModelId,
+            Tools = toolHolder.Tools
+        });
         
         return new ChatCompletionGenerator(client, logger, chatSocketClient, messages, toolHolder, writerFactory);
     }
@@ -89,7 +94,7 @@ public class ChatCompletionRunner(
             throw new ItemNotFoundException("Chat not found");
         }
 
-        var (config, contextFolderId) = await GetRungConfigAsync(chat.RoomId);
+        var config = await GetRungConfigAsync(chat.RoomId);
         
         var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
         var toolsTask = mcpService.GetToolsAsync(chat.RoomId);
@@ -103,7 +108,7 @@ public class ChatCompletionRunner(
         
         var messages = new List<ChatMessage>(history.Count + 2)
         {
-            new(ChatRole.System, ChatPromptTemplate.GetPrompt(config.Parameters.Prompt, contextFolderId, chat.RoomId))
+            new(ChatRole.System, ChatPromptTemplate.GetPrompt(config.Prompt, config.ContextFolderId, chat.RoomId))
         };
         
         messages.AddRange(history);
@@ -113,32 +118,36 @@ public class ChatCompletionRunner(
         
         var toolHolder = await toolsTask;
         
-        var client = chatClientFactory.Create(config, toolHolder.Tools);
+        var client = chatClientFactory.Create(new ChatClientOptions
+        {
+            Endpoint = config.Url,
+            Key = config.Key,
+            Provider = config.ProviderType,
+            ModelId = config.ModelId,
+            Tools = toolHolder.Tools
+        });
 
         return new ChatCompletionGenerator(client, logger, chatSocketClient, messages, toolHolder, writerFactory);
     }
 
-    private async Task<(RunConfiguration config, int contextFolderId)> GetRungConfigAsync(int roomId)
+    private async Task<ChatConfiguration> GetRungConfigAsync(int roomId)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         
         var room = await GetRoomAsync(folderDao, roomId);
         var resultStorage = await folderDao.GetFoldersAsync(room.Id, FolderType.ResultStorage).FirstAsync();
         
-        var provider = await configurationService.GetProviderAsync(room.SettingsChatProviderId);
+        var provider = await providerService.GetProviderAsync(room.SettingsChatProviderId);
 
-        var config = new RunConfiguration
+        return new ChatConfiguration
         {
             Url = provider.Url,
             Key = provider.Key,
             ProviderType = provider.Type,
-            Parameters = new ChatParameters
-            {
-                ModelId = room.SettingsChatParameters.ModelId, 
-                Prompt = room.SettingsChatParameters.Prompt
-            }
+            ModelId = room.SettingsChatParameters.ModelId,
+            Prompt = room.SettingsChatParameters.Prompt,
+            ContextFolderId = resultStorage.Id
         };
-        return (config, resultStorage.Id);
     }
     
     private async Task<Folder<int>> GetRoomAsync(IFolderDao<int> folderDao, int roomId)
@@ -181,5 +190,15 @@ public class ChatCompletionRunner(
         contents.Add(new TextContent(message));
 
         return new ChatMessage { Role = ChatRole.User, Contents = contents };
+    }
+
+    private class ChatConfiguration
+    {
+        public ProviderType ProviderType { get; init; }
+        public required string Url { get; init; }
+        public required string Key { get; init; }
+        public required string ModelId { get; init; }
+        public string? Prompt { get; init; }
+        public int ContextFolderId { get; init; }
     }
 }

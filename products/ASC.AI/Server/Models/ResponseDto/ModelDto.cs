@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class ModelDto : IMapFrom<Model>
+public class ModelDto : IMapFrom<ModelData>
 {
     public int ProviderId { get; init; }
     public required string ProviderTitle { get; init; }

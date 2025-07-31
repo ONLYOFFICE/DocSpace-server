@@ -24,35 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Text;
+namespace ASC.AI.Core.Provider.Model;
 
-[Scope]
-public class FileTextProcessor(IFileDao<int> fileDao, ITextExtractor textExtractor, ITextSplitter textSplitter)
+public class AnthropicModelClient(HttpClient httpClient) : IModelClient
 {
-    public async Task<List<string>> GetTextChunksAsync(int fileId, SplitterSettings settings)
+    public async Task<List<ModelInfo>> GetModelsAsync(string endpoint, string apiKey, Scope? scope, IReadOnlyDictionary<string, string>? headers = null)
     {
-        var file = await fileDao.GetFileAsync(fileId);
-        if (file == null)
-        {
-            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
+        var client = new AnthropicClient(new APIAuthentication(apiKey), httpClient);
         
-        return await GetTextChunksAsync(file, settings);
-    }
-
-    public async Task<List<string>> GetTextChunksAsync(File<int> file, SplitterSettings settings)
-    {
-        await using var stream = await fileDao.GetFileStreamAsync(file);
+        var response = await client.Models.ListModelsAsync();
         
-        await using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
-        
-        var memory = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
-        
-        var text = await textExtractor.ExtractAsync(memory);
-        
-        return string.IsNullOrEmpty(text) 
-            ? [] 
-            : textSplitter.Split(text, settings.MaxTokensPerChunk, settings.ChunkOverlap);
+        return response.Models.Select(x => new ModelInfo { Id = x.Id }).ToList();
     }
 }

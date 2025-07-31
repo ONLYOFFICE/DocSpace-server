@@ -24,35 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Text;
+namespace ASC.AI.Core.Provider.Model;
 
-[Scope]
-public class FileTextProcessor(IFileDao<int> fileDao, ITextExtractor textExtractor, ITextSplitter textSplitter)
+public class TogetherAiModelClient(HttpClient client) : OpenAiModelClient(client)
 {
-    public async Task<List<string>> GetTextChunksAsync(int fileId, SplitterSettings settings)
+    protected override async Task<List<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response, Scope? scope)
     {
-        var file = await fileDao.GetFileAsync(fileId);
-        if (file == null)
+        var content = await response.Content.ReadFromJsonAsync<IEnumerable<TogetherModel>>();
+        if (content == null)
         {
-            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            return [];
         }
-        
-        return await GetTextChunksAsync(file, settings);
+
+        if (scope is Scope.Chat)
+        {
+            content = content.Where(x => x.Type == "chat");
+        }
+
+        return content.OfType<ModelInfo>().ToList();
     }
 
-    public async Task<List<string>> GetTextChunksAsync(File<int> file, SplitterSettings settings)
+    private class TogetherModel : ModelInfo
     {
-        await using var stream = await fileDao.GetFileStreamAsync(file);
-        
-        await using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
-        
-        var memory = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
-        
-        var text = await textExtractor.ExtractAsync(memory);
-        
-        return string.IsNullOrEmpty(text) 
-            ? [] 
-            : textSplitter.Split(text, settings.MaxTokensPerChunk, settings.ChunkOverlap);
+        public required string Type { get; init; }
     }
 }

@@ -24,35 +24,34 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Text;
+namespace ASC.AI.Core.Database;
 
-[Scope]
-public class FileTextProcessor(IFileDao<int> fileDao, ITextExtractor textExtractor, ITextSplitter textSplitter)
+public partial class AiDbContext
 {
-    public async Task<List<string>> GetTextChunksAsync(int fileId, SplitterSettings settings)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public Task<int> UpdateRoomSettingsAsync(int tenantId, IEnumerable<int> providersIds)
     {
-        var file = await fileDao.GetFileAsync(fileId);
-        if (file == null)
-        {
-            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-        
-        return await GetTextChunksAsync(file, settings);
+        return Queries.UpdateRoomSettingsAsync(this, tenantId, providersIds);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt,  PreCompileQuery.DefaultGuid, null])]
+    public IAsyncEnumerable<McpToolsSettings> GetToolsSettings(int tenantId, int roomId, Guid userId, IEnumerable<Guid> serversIds)
+    {
+        return Queries.GetToolsSettings(this, tenantId, roomId, userId, serversIds);
+    }
+}
 
-    public async Task<List<string>> GetTextChunksAsync(File<int> file, SplitterSettings settings)
-    {
-        await using var stream = await fileDao.GetFileStreamAsync(file);
-        
-        await using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
-        
-        var memory = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
-        
-        var text = await textExtractor.ExtractAsync(memory);
-        
-        return string.IsNullOrEmpty(text) 
-            ? [] 
-            : textSplitter.Split(text, settings.MaxTokensPerChunk, settings.ChunkOverlap);
-    }
+static file class Queries
+{
+    public static readonly Func<AiDbContext, int, IEnumerable<int>, Task<int>> UpdateRoomSettingsAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, IEnumerable<int> providersIds) =>
+            ctx.RoomSettings
+                .Where(x => x.TenantId == tenantId && providersIds.Contains(x.ChatProviderId))
+                .ExecuteUpdate(x => 
+                    x.SetProperty(y => y.ChatProviderId, 0)));
+    
+    public static readonly Func<AiDbContext, int, int, Guid, IEnumerable<Guid>, IAsyncEnumerable<McpToolsSettings>> GetToolsSettings =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int roomId, Guid userId, IEnumerable<Guid> serversIds) => 
+            ctx.McpSettings.Where(x => 
+                x.TenantId == tenantId && x.RoomId == roomId && x.UserId == userId && serversIds.Contains(x.ServerId)));
 }

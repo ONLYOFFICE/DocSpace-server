@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.ApiModels.ResponseDto;
-
 namespace ASC.AI.Api;
 
 [Scope]
@@ -54,7 +52,7 @@ public class ChatController(
 
         await foreach (var completion in generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted))
         {
-            await Response.WriteAsync($"event: {completion.Type.ToText()}\ndata: {completion.Content}\n\n");
+            await Response.WriteAsync($"event: {completion.Type.ToEventString()}\ndata: {completion.Content}\n\n");
             await Response.Body.FlushAsync();
         }
         
@@ -73,7 +71,7 @@ public class ChatController(
 
         await foreach (var completion in generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted))
         {
-            await Response.WriteAsync($"event: {completion.Type.ToText()}\ndata: {completion.Content}\n\n");
+            await Response.WriteAsync($"event: {completion.Type.ToEventString()}\ndata: {completion.Content}\n\n");
             await Response.Body.FlushAsync();
         }
         
@@ -140,6 +138,6 @@ public class ChatController(
     public async Task<IEnumerable<ModelDto>> GetChatModelsAsync(GetChatModelsRequestDto inDto)
     {
         var models = await chatService.GetModelsAsync(inDto.ProviderId);
-        return mapper.Map<IEnumerable<Model>, IEnumerable<ModelDto>>(models);
+        return mapper.Map<IEnumerable<ModelData>, IEnumerable<ModelDto>>(models);
     }
 }

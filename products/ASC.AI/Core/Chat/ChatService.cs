@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ChatParameters = ASC.AI.Core.Common.Models.ChatParameters;
-
 namespace ASC.AI.Core.Chat;
 
 [Scope]
@@ -35,7 +33,7 @@ public class ChatService(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     TenantManager tenantManager,
-    AiConfigurationService aiConfigurationService)
+    AiProviderService aiProviderService)
 {
     public async Task<ChatSession> RenameChatAsync(Guid chatId, string title)
     {
@@ -97,21 +95,9 @@ public class ChatService(
         await chatDao.DeleteChatsAsync(tenantManager.GetCurrentTenantId(), [chat.Id]);
     }
 
-    public Task<ModelConfiguration> SetChatConfigurationAsync(int providerId, string modelId)
+    public Task<IEnumerable<ModelData>> GetModelsAsync(int? providerId)
     {
-        var chatSettings = new ChatParameters { ModelId = modelId };
-
-        return aiConfigurationService.SetConfigurationAsync(providerId, Scope.Chat, chatSettings);
-    }
-
-    public Task<ModelConfiguration> GetChatConfigurationAsync()
-    {
-        return aiConfigurationService.GetConfigurationAsync(Scope.Chat);
-    }
-
-    public Task<IEnumerable<Model>> GetModelsAsync(int? providerId)
-    {
-        return aiConfigurationService.GetModelsAsync(providerId, Scope.Chat);
+        return aiProviderService.GetModelsAsync(providerId, Scope.Chat);
     }
 
     public async Task<ChatSession> GetChatAsync(Guid chatId)

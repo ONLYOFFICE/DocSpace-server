@@ -24,35 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Text;
+namespace ASC.AI.Core.Chat.Data;
 
-[Scope]
-public class FileTextProcessor(IFileDao<int> fileDao, ITextExtractor textExtractor, ITextSplitter textSplitter)
+public class Message(int id, Role role, List<MessageContent> contents, DateTime createdOn)
 {
-    public async Task<List<string>> GetTextChunksAsync(int fileId, SplitterSettings settings)
+    public int Id { get; } = id;
+    public Role Role { get; } = role;
+    public List<MessageContent> Contents { get; } = contents;
+    public DateTime CreatedOn { get; } = createdOn;
+    
+    public string ToMarkdown(TenantUtil tenantUtil)
     {
-        var file = await fileDao.GetFileAsync(fileId);
-        if (file == null)
+        var builder = new StringBuilder();
+
+        builder.Append($"## [{Role.ToStringFast()}] {tenantUtil.DateTimeFromUtc(CreatedOn).ToString("g")}");
+        builder.Append("\n\n");
+        
+        foreach (var content in Contents)
         {
-            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            builder.Append($"{content.ToMarkdown()}");
+            builder.Append("\n\n");
         }
         
-        return await GetTextChunksAsync(file, settings);
-    }
-
-    public async Task<List<string>> GetTextChunksAsync(File<int> file, SplitterSettings settings)
-    {
-        await using var stream = await fileDao.GetFileStreamAsync(file);
-        
-        await using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
-        
-        var memory = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
-        
-        var text = await textExtractor.ExtractAsync(memory);
-        
-        return string.IsNullOrEmpty(text) 
-            ? [] 
-            : textSplitter.Split(text, settings.MaxTokensPerChunk, settings.ChunkOverlap);
+        return builder.ToString();
     }
 }
