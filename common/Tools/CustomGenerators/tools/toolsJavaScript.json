@@ -14,6 +14,7 @@
     "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-javascript",
     "withSeparateModelsAndApi": true,
     "modelPackage": "models",
-    "apiPackage": "api"
+    "apiPackage": "api",
+    "excludeTests": true
   }
 }
