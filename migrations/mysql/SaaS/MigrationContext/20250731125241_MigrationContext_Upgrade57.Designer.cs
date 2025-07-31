@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20250730091943_MigrationContext_Upgrade57")]
+    [Migration("20250731125241_MigrationContext_Upgrade57")]
     partial class MigrationContext_Upgrade57
     {
         /// <inheritdoc />
@@ -24,7 +24,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .HasAnnotation("ProductVersion", "8.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("ASC.AI.Core.Common.Database.Models.DbAiProvider", b =>
+            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbAiProvider", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -81,45 +81,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
-            modelBuilder.Entity("ASC.AI.Core.Common.Database.Models.DbAiSettings", b =>
-                {
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int")
-                        .HasColumnName("tenant_id");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("user_id")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<int>("Scope")
-                        .HasColumnType("int")
-                        .HasColumnName("scope");
-
-                    b.Property<int>("ProviderId")
-                        .HasColumnType("int")
-                        .HasColumnName("provider_id");
-
-                    b.Property<string>("Parameters")
-                        .IsRequired()
-                        .HasColumnType("json")
-                        .HasColumnName("run_settings")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.HasKey("TenantId", "UserId", "Scope", "ProviderId")
-                        .HasName("PRIMARY");
-
-                    b.HasIndex("TenantId", "ProviderId")
-                        .HasDatabaseName("IX_tenant_id_provider_id");
-
-                    b.ToTable("ai_settings", (string)null);
-
-                    b.HasAnnotation("MySql:CharSet", "utf8");
-                });
-
-            modelBuilder.Entity("ASC.AI.Core.Common.Database.Models.DbMcpServerOptions", b =>
+            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbMcpServerOptions", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -156,7 +118,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("Id")
                         .HasName("PRIMARY");
 
-                    b.HasIndex("TenantId");
+                    b.HasIndex("TenantId", "Id")
+                        .HasDatabaseName("IX_tenant_id_id");
 
                     b.ToTable("ai_mcp_servers", (string)null);
 
@@ -165,7 +128,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("Relational:Collation", "utf8_general_ci");
                 });
 
-            modelBuilder.Entity("ASC.AI.Core.Common.Database.Models.DbRoomServer", b =>
+            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbRoomServer", b =>
                 {
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
@@ -8443,7 +8406,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
-            modelBuilder.Entity("ASC.AI.Core.Common.Database.Models.DbAiProvider", b =>
+            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbAiProvider", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
@@ -8454,7 +8417,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("ASC.AI.Core.Common.Database.Models.DbAiSettings", b =>
+            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbMcpServerOptions", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
@@ -8465,18 +8428,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("ASC.AI.Core.Common.Database.Models.DbMcpServerOptions", b =>
-                {
-                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("ASC.AI.Core.Common.Database.Models.DbRoomServer", b =>
+            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbRoomServer", b =>
                 {
                     b.HasOne("ASC.Files.Core.EF.DbFolder", "Room")
                         .WithMany()
