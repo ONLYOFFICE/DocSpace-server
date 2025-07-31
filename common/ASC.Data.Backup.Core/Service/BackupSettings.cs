@@ -33,6 +33,7 @@ public class BackupSettings
     public ServiceConfigurationElement Service { get; set; }
     public SchedulerConfigurationElement Scheduler { get; set; }
     public CleanerConfigurationElement Cleaner { get; set; }
+    public QuotaConfigurationElement Quota { get; set; }
 
     public class SchedulerConfigurationElement
     {
@@ -48,5 +49,12 @@ public class BackupSettings
     public class ServiceConfigurationElement
     {
         public int WorkerCount { get; set; }
+    }
+
+    public class QuotaConfigurationElement
+    {
+        public int Free { get; set; }
+        public int Paid { get; set; }
+        public int ServiceAccount { get; set; }
     }
 }
