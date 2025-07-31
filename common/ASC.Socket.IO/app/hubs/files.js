@@ -130,18 +130,23 @@ module.exports = (io) => {
       const tenant = sess?.portal?.tenantId || "unknown";
       const user = sess?.user?.id || "unknown";
       const sessId = sess?.id;
+      const room = data.dump ? `restore` : getRoom("restore");
 
       logger.info(`WS: restore backup in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
 
-      if(data.dump)
-      {
-        var room = `restore`;
-      }
-      else
-      {
-        var room = getRoom("restore");
-      }
       socket.to(room).emit("restore-backup");
+    });
+
+    socket.on("storage-ecnryption", (data) => {
+      const sess = socket.handshake.session;
+      const tenant = sess?.portal?.tenantId || "unknown";
+      const user = sess?.user?.id || "unknown";
+      const sessId = sess?.id;
+      const room = `encryption`;
+
+      logger.info(`WS: storage ecnryption in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
+
+      socket.to(room).emit("storage-ecnryption");
     });
 
     function changeSubscription(roomParts, individual, changeFunc) {
