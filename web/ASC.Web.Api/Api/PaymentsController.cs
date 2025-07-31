@@ -773,7 +773,10 @@ public class PaymentController(
 
         var result = await tariffService.PerformCustomerOperationAsync(tenant.Id, inDto.ServiceAccount, inDto.SessionId, inDto.Quantity);
 
-        messageService.Send(MessageAction.CustomerOperationPerformed);
+        if (result)
+        {
+            messageService.Send(MessageAction.CustomerOperationPerformed);
+        }
 
         return result;
     }
