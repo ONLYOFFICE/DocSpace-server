@@ -28,6 +28,7 @@ namespace ASC.AI.Core.Settings;
 
 public class SseMcpSettings
 {
+    public Guid Id { get; init; }
     public required string Name { get; init; }
     public string? Endpoint { get; init; }
     public Dictionary<string, string>? Headers { get; init; }

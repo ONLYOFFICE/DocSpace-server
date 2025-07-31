@@ -30,8 +30,18 @@ namespace ASC.AI.Api;
 [DefaultRoute]
 [ApiController]
 [ControllerName("ai")]
-public class McpController(McpService mcpService, IMapper mapper) : ControllerBase
+public class McpController(McpService mcpService, IMapper mapper, ApiContext apiContext) : ControllerBase
 {
+    [HttpGet("mcp")]
+    public async Task<List<McpServerDto>> GetServersAsync(PaginatedRequestDto inDto)
+    {
+        var (servers, count) = await mcpService.GetServersAsync(inDto.StartIndex, inDto.Count);
+        
+        apiContext.SetCount(servers.Count).SetTotalCount(count);
+        
+        return mapper.Map<List<McpServer>, List<McpServerDto>>(servers);
+    }
+    
     [HttpPost("rooms/{roomId}/mcp")]
     public async Task<McpRoomDto> AddRoomServersAsync(AddRoomServersRequestDto inDto)
     {

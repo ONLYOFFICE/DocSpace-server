@@ -34,7 +34,7 @@ public class McpService(
     IFolderDao<int> folderDao,
     FileSecurity fileSecurity,
     IHttpClientFactory httpClientFactory,
-    PredefinedMcpSource predefinedMcpSource,
+    ConfigMcpSource configMcpSource,
     ILogger<McpService> logger,
     IServiceProvider serviceProvider,
     UserManager userManager,
@@ -112,19 +112,36 @@ public class McpService(
         return updatedServer;
     }
     
-    public async Task<(List<McpServerOptions> servers, int totalCount)> GetServersAsync(int offset, int count)
+    public async Task<(List<McpServer> servers, int totalCount)> GetServersAsync(int offset, int count)
     {
         await ThrowIfNotAccessAsync();
         
         var tenantId = tenantManager.GetCurrentTenantId();
+
+        var servers = new List<McpServer>();
+
+        servers.AddRange(configMcpSource.Servers.Skip(offset).Take(count));
+        offset = Math.Max(0, offset - configMcpSource.Servers.Count);
+        count = Math.Max(0, count - servers.Count);
         
         var totalTask = mcpDao.GetServersCountAsync(tenantId);
-        
-        var servers = await mcpDao.GetServersAsync(tenantId, offset, count).ToListAsync();
+
+        if (count > 0)
+        {
+            var dbServers = await mcpDao.GetServersAsync(tenantId, offset, count)
+                .Select(x => new McpServer
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Type = ServerType.Custom
+                }).ToListAsync();
+            
+            servers.AddRange(dbServers);
+        }
         
         var totalCount = await totalTask;
         
-        return (servers, totalCount);
+        return (servers, totalCount + configMcpSource.Servers.Count);
     }
 
     public async Task<List<McpServerOptions>> GetServersAsync(int roomId)
@@ -145,7 +162,7 @@ public class McpService(
         {
             if (roomServer.Options == null)
             {
-                var builder = predefinedMcpSource.GetServerOptionsBuilder(roomServer.Id);
+                var builder = configMcpSource.GetServerOptionsBuilder(roomServer.Id);
                 if (builder == null)
                 {
                     continue;
@@ -180,7 +197,7 @@ public class McpService(
 
         var tenantId = tenantManager.GetCurrentTenantId();
         
-        var servers = ids.Select(predefinedMcpSource.GetServerOptionsBuilder)
+        var servers = ids.Select(configMcpSource.GetServerOptionsBuilder)
             .OfType<IMcpServerOptionsBuilder>()
             .Select(builder => builder.Build(serviceProvider))
             .ToList();
@@ -304,7 +321,7 @@ public class McpService(
         }
         else
         {
-            var builder = predefinedMcpSource.GetServerOptionsBuilder(serverId);
+            var builder = configMcpSource.GetServerOptionsBuilder(serverId);
             server = builder?.Build(serviceProvider);
         }
         

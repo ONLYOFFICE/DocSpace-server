@@ -30,6 +30,7 @@ global using ASC.AI.Core.Chat.Data;
 global using ASC.AI.Core.Chat.Extensions;
 global using ASC.AI.Core.Chat.History;
 global using ASC.AI.Core.MCP;
+global using ASC.AI.Core.MCP.Data;
 global using ASC.AI.Core.Provider;
 global using ASC.AI.Core.Provider.Data;
 global using ASC.AI.Core.Provider.Model;

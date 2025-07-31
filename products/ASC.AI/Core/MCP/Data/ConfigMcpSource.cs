@@ -24,21 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.MCP;
+namespace ASC.AI.Core.MCP.Data;
 
 [Singleton]
-public class PredefinedMcpSource
+public class ConfigMcpSource
 {
+    public readonly IReadOnlyList<McpServer> Servers;
+    
     private readonly FrozenDictionary<string, Guid> _mcpNameIdMap =
         new Dictionary<string, Guid>
         {
             {"onlyoffice-docspace", new Guid("883da87d-5ae0-49fd-8cb9-2cb82181667e")}
         }.ToFrozenDictionary();
     
-    private readonly Dictionary<Guid, IMcpServerOptionsBuilder> _servers = [];
-    public IEnumerable<IMcpServerOptionsBuilder> Servers => _servers.Values;
+    private readonly Dictionary<Guid, IMcpServerOptionsBuilder> _builders = [];
     
-    public PredefinedMcpSource(IConfiguration configuration)
+    public ConfigMcpSource(IConfiguration configuration)
     {
         var settings = configuration.GetSection("ai:mcp").Get<List<SseMcpSettings>>();
         if (settings == null)
@@ -46,26 +47,48 @@ public class PredefinedMcpSource
             return;
         }
 
-        var list = new Dictionary<Guid, IMcpServerOptionsBuilder>();
+        var builders = new Dictionary<Guid, IMcpServerOptionsBuilder>();
+        var servers = new List<McpServer>();
 
         foreach (var item in settings)
         {
-            if (string.IsNullOrEmpty(item.Endpoint) || !_mcpNameIdMap.TryGetValue(item.Name, out var id))
+            if (string.IsNullOrEmpty(item.Endpoint) || item.Id == Guid.Empty)
             {
                 continue;
             }
-
-            var builder = new DocspaceMcpOptionsBuilder(id, item.Name, item.Endpoint);
             
-            list.Add(id, builder);
+            IMcpServerOptionsBuilder builder;
+            
+            if (_mcpNameIdMap.ContainsKey(item.Name))
+            {
+                builder = new DocSpaceMcpOptionsBuilder(item.Id, item.Name, item.Endpoint);
+                servers.Add(new McpServer
+                {
+                    Id = item.Id,
+                    Name = item.Name,
+                    Type = ServerType.DocSpace
+                });
+            }
+            else
+            {
+                builder = new CustomMcpOptionsBuilder(item.Id, item.Name, item.Endpoint, item.Headers);
+                servers.Add(new McpServer
+                {
+                    Id = item.Id,
+                    Name = item.Name,
+                    Type = ServerType.Custom
+                });
+            }
+            
+            builders.Add(item.Id, builder);
         }
 
-        _servers = list;
+        _builders = builders;
+        Servers = servers;
     }
 
     public IMcpServerOptionsBuilder? GetServerOptionsBuilder(Guid serverId)
     {
-        return _servers.GetValueOrDefault(serverId);
+        return _builders.GetValueOrDefault(serverId);
     }
 }
-

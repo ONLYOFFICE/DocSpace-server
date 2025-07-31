@@ -24,11 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.AI.Core.MCP.Data;
 
-public class McpServerDto : IMapFrom<McpServer>
+public class McpRoomServer
 {
     public Guid Id { get; init; }
-    public required string Name { get; init; }
-    public ServerType ServerType { get; init; }
+    public McpServerOptions? Options { get; init; }
 }

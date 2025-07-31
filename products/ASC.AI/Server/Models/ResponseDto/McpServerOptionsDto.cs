@@ -24,9 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.MCP;
+namespace ASC.AI.Models.ResponseDto;
 
-public interface IMcpServerOptionsBuilder
+public class McpServerOptionsDto : IMapFrom<McpServerOptions>
 {
-    public McpServerOptions Build(IServiceProvider serviceProvider);
+    public Guid Id { get; init; }
+    public required string Name { get; init; }
+    public required string Endpoint { get; init; }
+    public Dictionary<string, string>? Headers { get; init; }
+    
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<McpServerOptions, McpServerOptionsDto>()
+            .ForMember(dest => dest.Endpoint, opt => 
+                opt.MapFrom(src => src.Endpoint.ToString()));
+    }
 }

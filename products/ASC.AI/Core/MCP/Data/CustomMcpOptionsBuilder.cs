@@ -24,29 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.MCP;
+namespace ASC.AI.Core.MCP.Data;
 
-public class McpServerOptions : IMapFrom<DbMcpServerOptions>
+public class CustomMcpOptionsBuilder(Guid id, string name, string endpoint, Dictionary<string, string>? headers) : IMcpServerOptionsBuilder
 {
-    public Guid Id { get; init; }
-    public int TenantId { get; init; }
-    public required string Name { get; set; }
-    public required Uri Endpoint { get; set; }
-    public Dictionary<string, string>? Headers { get; set; }
+    private McpServerOptions? _options;
     
-    public SseClientTransportOptions ToTransportOptions(TimeSpan? connectionTimeout = null) => new()
+    public McpServerOptions Build(IServiceProvider serviceProvider)
     {
-        Name = Name,
-        Endpoint = Endpoint,
-        AdditionalHeaders = Headers,
-        TransportMode = HttpTransportMode.AutoDetect,
-        ConnectionTimeout = connectionTimeout ?? TimeSpan.FromSeconds(15)
-    };
-
-    public void Mapping(AutoMapper.Profile profile)
-    {
-        profile.CreateMap<DbMcpServerOptions, McpServerOptions>()
-            .ForMember(dest => dest.Endpoint, opt => 
-                opt.MapFrom(src => new Uri(src.Endpoint)));
+        if (_options != null)
+        {
+            return _options;
+        }
+        
+        _options = new McpServerOptions
+        {
+            Id = id,
+            Name = name,
+            Endpoint = new Uri(endpoint),
+            Headers = headers
+        };
+        
+        return _options;
     }
 }

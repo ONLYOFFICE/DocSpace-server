@@ -35,6 +35,7 @@ global using ASC.AI.Core.Provider.Data;
 global using ASC.AI.Models.ResponseDto;
 global using ASC.AI.Models.RequestDto;
 global using ASC.AI.Core.MCP;
+global using ASC.AI.Core.MCP.Data;
 
 global using ASC.Common;
 global using ASC.Common.Mapping;
