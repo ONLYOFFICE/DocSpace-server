@@ -27,6 +27,7 @@
 using System.Text.Json;
 
 using ASC.Core.Configuration;
+using ASC.Web.Core.PublicResources;
 
 namespace ASC.Data.Backup.Services;
 
@@ -34,7 +35,7 @@ namespace ASC.Data.Backup.Services;
 public sealed class BackupSchedulerService(
     ILogger<BackupSchedulerService> logger,
     IServiceScopeFactory scopeFactory,
-    IConfiguration configuration,
+    BackupConfigurationService backupConfigurationService,
     CoreBaseSettings coreBaseSettings,
     IEventBus eventBus)
      : ActivePassiveBackgroundService<BackupSchedulerService>(logger, scopeFactory)
@@ -42,7 +43,7 @@ public sealed class BackupSchedulerService(
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
     private readonly IEventBus _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
 
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } = configuration.GetSection("backup").Get<BackupSettings>().Scheduler.Period;
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = backupConfigurationService.Settings.Scheduler.Period;
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
@@ -50,6 +51,7 @@ public sealed class BackupSchedulerService(
 
         var tariffService = serviceScope.ServiceProvider.GetRequiredService<ITariffService>();
         var backupRepository = serviceScope.ServiceProvider.GetRequiredService<BackupRepository>();
+        var backupService = serviceScope.ServiceProvider.GetRequiredService<BackupService>();
         var backupSchedule = serviceScope.ServiceProvider.GetRequiredService<Schedule>();
         var tenantManager = serviceScope.ServiceProvider.GetRequiredService<TenantManager>();
 
@@ -79,6 +81,20 @@ public sealed class BackupSchedulerService(
 
                     if (tariff.State < TariffState.Delay)
                     {
+
+                        var canCreate = await backupService.CheckBackupQuotaAsync(schedule.TenantId);
+
+                        Session billingSession = null;
+
+                        if (!canCreate)
+                        {
+                            billingSession = await backupService.OpenCustomerSessionForBackupAsync(schedule.TenantId, false);
+                            if (billingSession == null)
+                            {
+                                throw new BillingException(Resource.ErrorNotAllowedOption);
+                            }
+                        }
+
                         schedule.LastBackupTime = DateTime.UtcNow;
 
                         await backupRepository.SaveBackupScheduleAsync(schedule);
@@ -93,7 +109,8 @@ public sealed class BackupSchedulerService(
                                                  createBy: Constants.CoreSystem.ID,
                                                  isScheduled: true,
                                                  dump: schedule.Dump,
-                                                 backupsStored: schedule.BackupsStored
+                                                 backupsStored: schedule.BackupsStored,
+                                                 billingSessionId: billingSession?.SessionId ?? 0
                                           ));
                     }
                     else

@@ -34,11 +34,14 @@ namespace ASC.Data.Backup.Services;
 [Scope]
 public class BackupService(
         ILogger<BackupService> logger,
+        BackupConfigurationService backupConfigurationService,
         BackupStorageFactory backupStorageFactory,
         BackupWorker backupWorker,
         BackupRepository backupRepository,
         TenantExtra tenantExtra,
+        ITariffService tariffService,
         TenantManager tenantManager,
+        UserManager userManager,
         MessageService messageService,
         CoreBaseSettings coreBaseSettings,
         AuthContext authContext,
@@ -50,7 +53,7 @@ public class BackupService(
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
 
-    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null)
+    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null, int billingSessionId = 0)
     {
         await DemandPermissionsBackupAsync();
 
@@ -66,7 +69,8 @@ public class BackupService(
             StorageType = storageType,
             StorageParams = storageParams,
             Dump = dump,
-            ServerBaseUri = serverBaseUri
+            ServerBaseUri = serverBaseUri,
+            BillingSessionId = billingSessionId
         };
 
         switch (storageType)
@@ -478,6 +482,90 @@ public class BackupService(
         }
 
         return schedule;
+    }
+
+
+    public async Task<bool> CheckBackupQuotaAsync(int tenantId)
+    {
+        await DemandPermissionsBackupAsync();
+
+        if (coreBaseSettings.Standalone)
+        {
+            return true;
+        }
+
+        var currentTariff = await tariffService.GetTariffAsync(tenantId);
+        var isFreeTariff = await tariffService.IsFreeTariffAsync(currentTariff);
+
+        var backupQuota = isFreeTariff
+            ? backupConfigurationService.Settings.Quota.Free
+            : backupConfigurationService.Settings.Quota.Paid;
+
+        if (backupQuota == 0)
+        {
+            return false;
+        }
+
+        var to = DateTime.UtcNow;
+        var from = to.AddMonths(-1);
+        var backupsCount = await backupRepository.GetBackupsCountAsync(tenantId, from, to);
+
+        return backupsCount < backupQuota;
+    }
+
+    public async Task<Session> OpenCustomerSessionForBackupAsync(int tenantId, bool checkPayer = true)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        if (checkPayer)
+        {
+            var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
+            if (authContext.CurrentAccount.ID != payer.Id)
+            {
+                throw new SecurityException($"payerEmail {customerInfo?.Email}, payerId {payer.Id}, currentId {authContext.CurrentAccount.ID}");
+            }
+        }
+
+        var serviceAccount = backupConfigurationService.Settings.Quota.ServiceAccount;
+        var externalRef = Guid.NewGuid().ToString();
+
+        var result = await tariffService.OpenCustomerSessionAsync(tenantId, serviceAccount, externalRef, 1);
+
+        return result;
+    }
+
+    public async Task<bool> PerformCustomerOperationForBackupAsync(int tenantId, int sessionId)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return false;
+        }
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            return false;
+        }
+
+        var serviceAccount = backupConfigurationService.Settings.Quota.ServiceAccount;
+
+        var result = await tariffService.PerformCustomerOperationAsync(tenantId, serviceAccount, sessionId, 1);
+
+        if (result)
+        {
+            messageService.Send(MessageAction.CustomerOperationPerformed);
+        }
+
+        return result;
     }
 
     private async Task<ScheduleResponse> InnerGetScheduleAsync(int tenantId, bool? dump)

@@ -40,6 +40,7 @@ public class BackupProgressItem : BaseBackupProgressItem
     private string _storageBasePath;
     private int _limit;
     private string _serverBaseUri;
+    private int _billingSessionId;
     private readonly ILogger<BackupProgressItem> _logger;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly NotifyHelper _notifyHelper;
@@ -59,7 +60,7 @@ public class BackupProgressItem : BaseBackupProgressItem
         _notifyHelper = notifyHelper;
     }
 
-    public void Init(BackupSchedule schedule, bool isScheduled, string tempFolder, int limit)
+    public void Init(BackupSchedule schedule, bool isScheduled, string tempFolder, int limit, int billingSessionId)
     {
         Init();
         BackupProgressItemType = BackupProgressItemType.Backup;
@@ -72,6 +73,7 @@ public class BackupProgressItem : BaseBackupProgressItem
         _tempFolder = tempFolder;
         _limit = limit;
         Dump = schedule.Dump;
+        _billingSessionId = billingSessionId;
     }
 
     public void Init(StartBackupRequest request, bool isScheduled, string tempFolder, int limit)
@@ -88,6 +90,7 @@ public class BackupProgressItem : BaseBackupProgressItem
         _limit = limit;
         Dump = request.Dump;
         _serverBaseUri = request.ServerBaseUri;
+        _billingSessionId = request.BillingSessionId;
     }
 
     protected override async Task DoJob()
@@ -96,6 +99,7 @@ public class BackupProgressItem : BaseBackupProgressItem
 
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         var backupStorageFactory = scope.ServiceProvider.GetService<BackupStorageFactory>();
+        var backupService = scope.ServiceProvider.GetService<BackupService>();
         var backupRepository = scope.ServiceProvider.GetService<BackupRepository>();
         var backupPortalTask = scope.ServiceProvider.GetService<BackupPortalTask>();
         var tempStream = scope.ServiceProvider.GetService<TempStream>();
@@ -180,6 +184,11 @@ public class BackupProgressItem : BaseBackupProgressItem
             IsCompleted = true;
             await socketManager.BackupProgressAsync((int)Percentage, Dump);
             await PublishChanges();
+
+            if (_billingSessionId > 0)
+            {
+                await backupService.PerformCustomerOperationForBackupAsync(TenantId, _billingSessionId);
+            }
         }
         catch (Exception error)
         {

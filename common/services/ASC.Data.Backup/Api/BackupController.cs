@@ -29,6 +29,8 @@ using ASC.Data.Storage;
 using ASC.Data.Backup.Services;
 
 using Swashbuckle.AspNetCore.Annotations;
+using ASC.Core.Billing;
+using ASC.Web.Core.PublicResources;
 
 namespace ASC.Data.Backup.Controllers;
 
@@ -200,15 +202,28 @@ public class BackupController(
         {
             storageParams.TryAdd("subdir", "backup");
         }
-        
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var canCreate = await backupService.CheckBackupQuotaAsync(tenantId);
+
+        Session billingSession = null;
+
+        if (!canCreate)
+        {
+            billingSession = await backupService.OpenCustomerSessionForBackupAsync(tenantId);
+            if (billingSession == null)
+            {
+                throw new BillingException(Resource.ErrorNotAllowedOption);
+            }
+        }
 
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
             ? commonLinkUtility.GetFullAbsolutePath("")
             : null;
-        
+
         var taskId = await backupService.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
-        var tenantId = tenantManager.GetCurrentTenantId();
-        
+
         await eventBus.PublishAsync(new BackupRequestIntegrationEvent(
              tenantId: tenantId,
              storageParams: storageParams,
@@ -216,7 +231,8 @@ public class BackupController(
              createBy: CurrentUserId,
              dump: inDto.Dump,
              taskId: taskId,
-             serverBaseUri: serverBaseUri
+             serverBaseUri: serverBaseUri,
+             billingSessionId: billingSession?.SessionId ?? 0
         ));
 
         return await backupService.GetBackupProgressAsync(inDto.Dump);

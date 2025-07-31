@@ -140,7 +140,7 @@ public class BackupWorker(
         }
     }
 
-    public async Task StartScheduledBackupAsync(BackupSchedule schedule)
+    public async Task StartScheduledBackupAsync(BackupSchedule schedule, int billingSessionId)
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
@@ -155,7 +155,7 @@ public class BackupWorker(
             {
                 item = serviceProvider.GetService<BackupProgressItem>();
 
-                item.Init(schedule, true, TempFolder, _limit);
+                item.Init(schedule, true, TempFolder, _limit, billingSessionId);
 
                 await _backupProgressQueue.EnqueueTask(item);
             }
