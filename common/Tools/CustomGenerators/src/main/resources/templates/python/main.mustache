@@ -1,6 +1,9 @@
 {{>partial_header}}
 
 from {{packageName}} import Configuration, ApiClient, AuthenticationApi, FilesFoldersApi, BackupApi
+from {{packageName}}.api.authentication.authentication_api import AuthenticationApi
+from {{packageName}}.api.backup.backup_api import FoldersApi
+from {{packageName}}.api.files.folders_api import BackupApi
 from {{packageName}}.models.auth_requests_dto import AuthRequestsDto
 from {{packageName}}.models.create_folder import CreateFolder
 from {{packageName}}.models.delete_folder import DeleteFolder
@@ -21,7 +24,7 @@ def main():
             auth_response = auth_instance.authenticate_me(auth_request_data)
             token = auth_response.response.token
             custom_headers = {"Authorization": f"Bearer {token}"}
-            folder_instance = FilesFoldersApi(api_client)
+            folder_instance = FoldersApi(api_client)
             responseFolderMy = folder_instance.get_my_folder(_headers=custom_headers)
             print(responseFolderMy.response.current.id)
 
