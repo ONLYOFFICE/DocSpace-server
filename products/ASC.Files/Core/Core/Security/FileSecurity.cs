@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Actions = ASC.Web.Studio.Core.Notify.Actions;
+using Folder = DocuSign.eSign.Model.Folder;
 
 namespace ASC.Files.Core.Security;
 
@@ -973,6 +974,12 @@ public class FileSecurity(IDaoFactory daoFactory,
         if (e.FileEntryType == FileEntryType.Folder)
         {
             if (folder == null)
+            {
+                return false;
+            }
+
+            if (folder.FolderType == FolderType.Knowledge && 
+                action is not (FilesSecurityActions.Read or FilesSecurityActions.MoveTo or FilesSecurityActions.CopyTo))
             {
                 return false;
             }

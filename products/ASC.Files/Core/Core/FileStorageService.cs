@@ -837,11 +837,15 @@ public class FileStorageService //: IFileStorageService
             
             if (folderType == FolderType.AiRoom)
             {
+                var knowledge = serviceProvider.GetService<Folder<T>>();
+                knowledge.Title = FilesCommonResource.KnowledgeFolder;
+                knowledge.FolderType = FolderType.Knowledge;
+                
                 var resultStorage = serviceProvider.GetService<Folder<T>>();
-                resultStorage.Title = "Result storage";
+                resultStorage.Title = FilesCommonResource.ResultStorageFolder;
                 resultStorage.FolderType = FolderType.ResultStorage;
                 
-                folderId = await folderDao.SaveFolderAsync(newFolder, [resultStorage]);
+                folderId = await folderDao.SaveFolderAsync(newFolder, [knowledge, resultStorage]);
             }
             else
             {
