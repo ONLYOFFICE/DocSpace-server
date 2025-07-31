@@ -271,7 +271,7 @@ public class UserManager(
             return [];
         }
 
-        var words = text.Split([' '], StringSplitOptions.RemoveEmptyEntries);
+        var words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (words.Length == 0)
         {
             return [];

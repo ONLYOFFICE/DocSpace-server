@@ -128,7 +128,7 @@ public class Tenant : IMapFrom<DbTenant>
         {
             if (_domains.Count == 0 && !string.IsNullOrEmpty(TrustedDomainsRaw))
             {
-                _domains = TrustedDomainsRaw.Split(['|'],
+                _domains = TrustedDomainsRaw.Split('|',
                     StringSplitOptions.RemoveEmptyEntries).ToList();
             }
 

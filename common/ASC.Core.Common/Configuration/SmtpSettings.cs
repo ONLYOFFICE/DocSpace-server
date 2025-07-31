@@ -105,7 +105,7 @@ public class SmtpSettings
             return Empty;
         }
 
-        var props = value.Split(['#'], StringSplitOptions.None);
+        var props = value.Split('#');
         props = Array.ConvertAll(props, p => !string.IsNullOrEmpty(p) ? p : null);
 
         var host = HttpUtility.UrlDecode(props[3]);
