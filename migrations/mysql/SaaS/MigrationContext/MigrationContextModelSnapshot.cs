@@ -125,7 +125,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("Relational:Collation", "utf8_general_ci");
                 });
 
-            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbRoomServer", b =>
+            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbRoomMcpServer", b =>
                 {
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
@@ -146,7 +146,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("ai_mcp_room_servers", (string)null);
+                    b.ToTable("ai_mcp_rooms_servers", (string)null);
 
                     b
                         .HasAnnotation("MySql:CharSet", "utf8")
@@ -1643,7 +1643,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex("TenantId", "RoomId", "UserId", "ModifiedOn")
                         .HasDatabaseName("IX_tenant_id_room_id_user_id_modified_on");
 
-                    b.ToTable("ai_chat", (string)null);
+                    b.ToTable("ai_chats", (string)null);
 
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
@@ -1681,7 +1681,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasIndex("ChatId");
 
-                    b.ToTable("ai_chat_messages", (string)null);
+                    b.ToTable("ai_chats_messages", (string)null);
 
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
@@ -7459,7 +7459,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
-            modelBuilder.Entity("ASC.Files.Core.EF.McpToolsSettings", b =>
+            modelBuilder.Entity("ASC.Files.Core.EF.McpSettings", b =>
                 {
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
@@ -7483,7 +7483,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Tools")
                         .HasColumnType("json")
-                        .HasColumnName("tools")
+                        .HasColumnName("tool_config")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
@@ -7494,7 +7494,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ai_mcp_tools", (string)null);
+                    b.ToTable("ai_mcp_settings", (string)null);
 
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
@@ -8425,7 +8425,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbRoomServer", b =>
+            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbRoomMcpServer", b =>
                 {
                     b.HasOne("ASC.Files.Core.EF.DbFolder", "Room")
                         .WithMany()
@@ -8925,7 +8925,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("ASC.Files.Core.EF.McpToolsSettings", b =>
+            modelBuilder.Entity("ASC.Files.Core.EF.McpSettings", b =>
                 {
                     b.HasOne("ASC.Files.Core.EF.DbFolder", "Room")
                         .WithMany()

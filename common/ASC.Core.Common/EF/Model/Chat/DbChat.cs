@@ -49,7 +49,7 @@ public class DbChat : BaseEntity
 
 public static class DbChatSessionExtensions
 {
-    public static ModelBuilderWrapper AddDbChat(this ModelBuilderWrapper modelBuilder)
+    public static ModelBuilderWrapper AddDbChats(this ModelBuilderWrapper modelBuilder)
     {
         modelBuilder.Entity<DbChat>().Navigation(x => x.Messages).AutoInclude(false);
         modelBuilder.Entity<DbChat>().Navigation(e => e.Tenant).AutoInclude(false);
@@ -63,7 +63,7 @@ public static class DbChatSessionExtensions
     {
         modelBuilder.Entity<DbChat>(entity =>
         {
-            entity.ToTable("ai_chat")
+            entity.ToTable("ai_chats")
                 .HasCharSet("utf8");
             
             entity.HasKey(e => e.Id)

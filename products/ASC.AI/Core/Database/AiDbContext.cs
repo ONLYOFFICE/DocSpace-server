@@ -33,8 +33,8 @@ public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDb
     public DbSet<DbAiProvider> Providers { get; set; }
     public DbSet<DbRoomSettings> RoomSettings { get; set; }
     public DbSet<DbMcpServerOptions> McpServers { get; set; }
-    public DbSet<McpToolsSettings> McpSettings { get; set; }
-    public DbSet<DbRoomServer> McpRoomServers { get; set; }
+    public DbSet<McpSettings> McpSettings { get; set; }
+    public DbSet<DbRoomMcpServer> RoomMcpServers { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,13 +43,13 @@ public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDb
             .AddDbTenant()
             .AddDbFolder()
             .AddUser()
-            .AddDbChat()
-            .AddDbChatMessages()
+            .AddDbChats()
+            .AddDbChatsMessages()
             .AddAiProviders()
             .AddDbRoomSettings()
             .AddMcpServers()
-            .AddMcpToolsSettings()
-            .AddMcpRoomMap()
+            .AddMcpSettings()
+            .AddRoomMcpServers()
             .AddDbFunctions();
     }
 }

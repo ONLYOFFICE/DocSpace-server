@@ -28,7 +28,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .Annotation("MySql:CharSet", "utf8");
 
             migrationBuilder.CreateTable(
-                name: "ai_chat",
+                name: "ai_chats",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
@@ -46,7 +46,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 {
                     table.PrimaryKey("PRIMARY", x => x.id);
                     table.ForeignKey(
-                        name: "FK_ai_chat_tenants_tenants_tenant_id",
+                        name: "FK_ai_chats_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
                         principalTable: "tenants_tenants",
                         principalColumn: "id",
@@ -55,7 +55,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .Annotation("MySql:CharSet", "utf8");
 
             migrationBuilder.CreateTable(
-                name: "ai_mcp_room_servers",
+                name: "ai_mcp_rooms_servers",
                 columns: table => new
                 {
                     tenant_id = table.Column<int>(type: "int", nullable: false),
@@ -67,13 +67,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 {
                     table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.room_id, x.server_id });
                     table.ForeignKey(
-                        name: "FK_ai_mcp_room_servers_files_folder_room_id",
+                        name: "FK_ai_mcp_rooms_servers_files_folder_room_id",
                         column: x => x.room_id,
                         principalTable: "files_folder",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ai_mcp_room_servers_tenants_tenants_tenant_id",
+                        name: "FK_ai_mcp_rooms_servers_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
                         principalTable: "tenants_tenants",
                         principalColumn: "id",
@@ -110,7 +110,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .Annotation("Relational:Collation", "utf8_general_ci");
 
             migrationBuilder.CreateTable(
-                name: "ai_mcp_tools",
+                name: "ai_mcp_settings",
                 columns: table => new
                 {
                     tenant_id = table.Column<int>(type: "int", nullable: false),
@@ -119,26 +119,26 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     room_id = table.Column<int>(type: "int", nullable: false),
                     user_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
-                    tools = table.Column<string>(type: "json", nullable: true, collation: "utf8_general_ci")
+                    tool_config = table.Column<string>(type: "json", nullable: true, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.room_id, x.user_id, x.server_id });
                     table.ForeignKey(
-                        name: "FK_ai_mcp_tools_core_user_user_id",
+                        name: "FK_ai_mcp_settings_core_user_user_id",
                         column: x => x.user_id,
                         principalTable: "core_user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ai_mcp_tools_files_folder_room_id",
+                        name: "FK_ai_mcp_settings_files_folder_room_id",
                         column: x => x.room_id,
                         principalTable: "files_folder",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ai_mcp_tools_tenants_tenants_tenant_id",
+                        name: "FK_ai_mcp_settings_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
                         principalTable: "tenants_tenants",
                         principalColumn: "id",
@@ -176,7 +176,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .Annotation("MySql:CharSet", "utf8");
 
             migrationBuilder.CreateTable(
-                name: "ai_chat_messages",
+                name: "ai_chats_messages",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "int", nullable: false)
@@ -192,9 +192,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 {
                     table.PrimaryKey("PRIMARY", x => x.id);
                     table.ForeignKey(
-                        name: "FK_ai_chat_messages_ai_chat_chat_id",
+                        name: "FK_ai_chats_messages_ai_chats_chat_id",
                         column: x => x.chat_id,
-                        principalTable: "ai_chat",
+                        principalTable: "ai_chats",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -207,22 +207,22 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_tenant_id_id",
-                table: "ai_chat",
+                table: "ai_chats",
                 columns: new[] { "tenant_id", "id" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_tenant_id_room_id_user_id_modified_on",
-                table: "ai_chat",
+                table: "ai_chats",
                 columns: new[] { "tenant_id", "room_id", "user_id", "modified_on" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ai_chat_messages_chat_id",
-                table: "ai_chat_messages",
+                name: "IX_ai_chats_messages_chat_id",
+                table: "ai_chats_messages",
                 column: "chat_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ai_mcp_room_servers_room_id",
-                table: "ai_mcp_room_servers",
+                name: "IX_ai_mcp_rooms_servers_room_id",
+                table: "ai_mcp_rooms_servers",
                 column: "room_id");
 
             migrationBuilder.CreateIndex(
@@ -231,13 +231,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 columns: new[] { "tenant_id", "id" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ai_mcp_tools_room_id",
-                table: "ai_mcp_tools",
+                name: "IX_ai_mcp_settings_room_id",
+                table: "ai_mcp_settings",
                 column: "room_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ai_mcp_tools_user_id",
-                table: "ai_mcp_tools",
+                name: "IX_ai_mcp_settings_user_id",
+                table: "ai_mcp_settings",
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
@@ -250,22 +250,22 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ai_chat_messages");
+                name: "ai_chats_messages");
 
             migrationBuilder.DropTable(
-                name: "ai_mcp_room_servers");
+                name: "ai_mcp_rooms_servers");
 
             migrationBuilder.DropTable(
                 name: "ai_mcp_servers");
 
             migrationBuilder.DropTable(
-                name: "ai_mcp_tools");
+                name: "ai_mcp_settings");
 
             migrationBuilder.DropTable(
                 name: "ai_providers");
 
             migrationBuilder.DropTable(
-                name: "ai_chat");
+                name: "ai_chats");
 
             migrationBuilder.DropIndex(
                 name: "IX_chat_provider_id",

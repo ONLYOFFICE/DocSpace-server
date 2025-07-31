@@ -316,7 +316,7 @@ public class McpService(
         return server;
     }
     
-    private async Task<IReadOnlyDictionary<string, bool>> GetToolsAsync(McpServerOptions server, McpToolsSettings? settings)
+    private async Task<IReadOnlyDictionary<string, bool>> GetToolsAsync(McpServerOptions server, McpSettings? settings)
     {
         var transport = new SseClientTransport(server.ToTransportOptions(), httpClientFactory.CreateClient());
 
@@ -363,7 +363,7 @@ public class McpService(
     }
 
     private async Task<McpContainer?> ConnectAsync(
-        McpServerOptions options, McpToolsSettings? settings, HttpClient httpClient)
+        McpServerOptions options, McpSettings? settings, HttpClient httpClient)
     {
         var transportOptions = new SseClientTransportOptions
         {

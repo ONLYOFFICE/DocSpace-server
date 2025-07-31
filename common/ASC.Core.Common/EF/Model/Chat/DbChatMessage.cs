@@ -51,7 +51,7 @@ public class DbChatMessage : BaseEntity
 
 public static class DbChatMessageExtensions
 {
-    public static ModelBuilderWrapper AddDbChatMessages(this ModelBuilderWrapper modelBuilder)
+    public static ModelBuilderWrapper AddDbChatsMessages(this ModelBuilderWrapper modelBuilder)
     {
         modelBuilder.Entity<DbChatMessage>().Navigation(e => e.Chat).AutoInclude(false);
         modelBuilder.Add(MySqlAddDbChatMessage, Provider.MySql);
@@ -63,7 +63,7 @@ public static class DbChatMessageExtensions
     {
         modelBuilder.Entity<DbChatMessage>(entity =>
         {
-            entity.ToTable("ai_chat_messages")
+            entity.ToTable("ai_chats_messages")
                 .HasCharSet("utf8");
             
             entity.HasKey(e => new { e.Id })

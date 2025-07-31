@@ -24,75 +24,52 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using User = ASC.Core.Common.EF.User;
+namespace ASC.AI.Core.Database.Models;
 
-namespace ASC.Files.Core.EF;
+public class DbRoomMcpServer : BaseEntity
+{
+    public int TenantId { get; init; }
+    public int RoomId { get; init; }
+    public Guid ServerId { get; init; }
+    
+    public DbFolder Room { get; init; } = null!;
+    public DbTenant Tenant { get; init; } = null!;
 
-public class McpToolsSettings : BaseEntity
-{ 
-    public int TenantId { get; set; }
-    public Guid ServerId { get; set; }
-    public int RoomId { get; set; }
-    public Guid UserId { get; set; }
-    public Tools Tools { get; set; }
-    
-    public DbTenant Tenant { get; set; }
-    public DbFolder Room { get; set; }
-    public User User { get; set; }
-    
     public override object[] GetKeys()
     {
-        return [TenantId, RoomId, UserId, ServerId];
+        return [TenantId, RoomId, ServerId];
     }
 }
 
-public class Tools
+public static class DbMcpRoomMapExtensions
 {
-    public required HashSet<string> Excluded { get; set; }
-}
-
-public static class DbMcpToolsSettingsExtensions 
-{
-    public static ModelBuilderWrapper AddMcpToolsSettings(this ModelBuilderWrapper modelBuilder)
+    public static ModelBuilderWrapper AddRoomMcpServers(this ModelBuilderWrapper modelBuilder)
     {
-        modelBuilder.Entity<McpToolsSettings>().Navigation(e => e.Tenant).AutoInclude(false);
-        modelBuilder.Entity<McpToolsSettings>().Navigation(e => e.Room).AutoInclude(false);
-        modelBuilder.Entity<McpToolsSettings>().Navigation(e => e.User).AutoInclude(false);
-        
-        return modelBuilder.Add(MySqlAddMcpToolsSettings, Provider.MySql);
+        modelBuilder.Entity<DbRoomMcpServer>().Navigation(e => e.Tenant).AutoInclude(false);
+        modelBuilder.Entity<DbRoomMcpServer>().Navigation(e => e.Room).AutoInclude(false);
+        return modelBuilder.Add(MySqlAddMcpRoomMap, ASC.Core.Common.EF.Provider.MySql);
     }
 
-    private static void MySqlAddMcpToolsSettings(this ModelBuilder modelBuilder)
+    private static void MySqlAddMcpRoomMap(ModelBuilder builder)
     {
-        modelBuilder.Entity<McpToolsSettings>(entity =>
+        builder.Entity<DbRoomMcpServer>(entity =>
         {
-            entity.ToTable("ai_mcp_tools")
-                .HasCharSet("utf8");
+            entity.ToTable("ai_mcp_rooms_servers")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
             
-            entity.HasKey(e => new { e.TenantId, e.RoomId, e.UserId, e.ServerId } )
+            entity.HasKey(e => new { e.TenantId, e.RoomId, e.ServerId } )
                 .HasName("PRIMARY");
-
+            
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id");
-
+            
             entity.Property(e => e.RoomId)
                 .HasColumnName("room_id");
             
-            entity.Property(e => e.UserId)
-                .HasColumnName("user_id")
-                .HasColumnType("char(36)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-
             entity.Property(e => e.ServerId)
                 .HasColumnName("server_id")
                 .HasColumnType("char(36)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-            
-            entity.Property(e => e.Tools)
-                .HasColumnName("tools")
-                .HasColumnType("json")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });

@@ -131,7 +131,7 @@ public class MigrationContext : DbContext
     public DbSet<DbAiProvider> AiProviders { get; set; }
     
     public DbSet<DbMcpServerOptions> McpServers { get; set; }
-    public DbSet<DbRoomServer> RoomServers { get; set; }
+    public DbSet<DbRoomMcpServer> RoomServers { get; set; }
 
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
@@ -207,12 +207,12 @@ public class MigrationContext : DbContext
             .AddIdentityScope()
             .AddIdentityShedlock()
             .AddUserRelation()
-            .AddDbChat()
-            .AddDbChatMessages()
+            .AddDbChats()
+            .AddDbChatsMessages()
             .AddAiProviders()
             .AddMcpServers()
-            .AddMcpRoomMap()
-            .AddMcpToolsSettings()
+            .AddRoomMcpServers()
+            .AddMcpSettings()
             .AddDbFunctions();
     }
 }

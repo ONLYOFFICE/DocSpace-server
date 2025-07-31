@@ -109,7 +109,7 @@ static file class McpQueries
 
     public static readonly Func<Core.Database.AiDbContext, int, int, Guid, Task<RoomServerQueryResult?>> GetRoomServerAsync =
         EF.CompileAsyncQuery((Core.Database.AiDbContext ctx, int tenantId, int roomId, Guid id) =>
-            ctx.McpRoomServers
+            ctx.RoomMcpServers
                 .Where(x => x.TenantId == tenantId && x.RoomId == roomId && x.ServerId == id)
                 .Select(x =>
                     new RoomServerQueryResult
@@ -137,12 +137,12 @@ static file class McpQueries
     
     public static readonly Func<Core.Database.AiDbContext, int, int, Task<int>> GetRoomServersCount =
         EF.CompileAsyncQuery((Core.Database.AiDbContext ctx, int tenantId, int roomId) =>
-            ctx.McpRoomServers
+            ctx.RoomMcpServers
                 .Count(x => x.TenantId == tenantId && x.RoomId == roomId));
 
     public static readonly Func<Core.Database.AiDbContext, int, int, IAsyncEnumerable<RoomServerQueryResult>> GetRoomServersAsync =
         EF.CompileAsyncQuery((Core.Database.AiDbContext ctx, int tenantId, int roomId) =>
-            ctx.McpRoomServers
+            ctx.RoomMcpServers
                 .GroupJoin(
                     ctx.McpServers,
                     m => new { tenantId = m.TenantId, id = m.ServerId },
@@ -179,13 +179,13 @@ static file class McpQueries
     
     public static readonly Func<Core.Database.AiDbContext, int, IEnumerable<Guid>, Task<int>> DeleteRoomServersAsync =
         EF.CompileAsyncQuery((Core.Database.AiDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
-            ctx.McpRoomServers
+            ctx.RoomMcpServers
                 .Where(x => x.TenantId == tenantId && ids.Contains(x.ServerId))
                 .ExecuteDelete());
     
     public static readonly Func<Core.Database.AiDbContext, int, int, IEnumerable<Guid>, Task<int>> DeleteRoomServersByRoomAsync =
         EF.CompileAsyncQuery((Core.Database.AiDbContext ctx, int tenantId, int roomId, IEnumerable<Guid> ids) =>
-            ctx.McpRoomServers
+            ctx.RoomMcpServers
                 .Where(x => x.TenantId == tenantId && x.RoomId == roomId && ids.Contains(x.ServerId))
                 .ExecuteDelete());
 }

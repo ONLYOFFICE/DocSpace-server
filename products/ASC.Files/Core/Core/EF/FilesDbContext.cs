@@ -81,8 +81,8 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddUserGroup()
             .AddFilesAuditReference()
             .AddUserRelation()
-            .AddDbChat()
-            .AddDbChatMessages()
+            .AddDbChats()
+            .AddDbChatsMessages()
             .AddDbFunctions();
     }
 }

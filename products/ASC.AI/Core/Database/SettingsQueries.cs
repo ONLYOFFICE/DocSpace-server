@@ -35,7 +35,7 @@ public partial class AiDbContext
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt,  PreCompileQuery.DefaultGuid, null])]
-    public IAsyncEnumerable<McpToolsSettings> GetToolsSettings(int tenantId, int roomId, Guid userId, IEnumerable<Guid> serversIds)
+    public IAsyncEnumerable<McpSettings> GetToolsSettings(int tenantId, int roomId, Guid userId, IEnumerable<Guid> serversIds)
     {
         return Queries.GetToolsSettings(this, tenantId, roomId, userId, serversIds);
     }
@@ -50,7 +50,7 @@ static file class Queries
                 .ExecuteUpdate(x => 
                     x.SetProperty(y => y.ChatProviderId, 0)));
     
-    public static readonly Func<AiDbContext, int, int, Guid, IEnumerable<Guid>, IAsyncEnumerable<McpToolsSettings>> GetToolsSettings =
+    public static readonly Func<AiDbContext, int, int, Guid, IEnumerable<Guid>, IAsyncEnumerable<McpSettings>> GetToolsSettings =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int roomId, Guid userId, IEnumerable<Guid> serversIds) => 
             ctx.McpSettings.Where(x => 
                 x.TenantId == tenantId && x.RoomId == roomId && x.UserId == userId && serversIds.Contains(x.ServerId)));

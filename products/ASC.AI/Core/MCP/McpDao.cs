@@ -134,7 +134,7 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper map
         var strategy = dbContext.Database.CreateExecutionStrategy();
 
         var maps = ids.Select(x => 
-            new DbRoomServer
+            new DbRoomMcpServer
             {
                 TenantId = tenantId, 
                 RoomId = roomId, 
@@ -207,7 +207,7 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper map
         });
     }
 
-    public async Task<McpToolsSettings> SetToolsSettingsAsync(int tenantId, int roomId, Guid userId, Guid serverId, HashSet<string> disabledTools)
+    public async Task<McpSettings> SetToolsSettingsAsync(int tenantId, int roomId, Guid userId, Guid serverId, HashSet<string> disabledTools)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -220,7 +220,7 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper map
 
             if (settings == null)
             {
-                settings = new McpToolsSettings
+                settings = new McpSettings
                 {
                     TenantId = tenantId,
                     RoomId = roomId,
@@ -254,7 +254,7 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper map
         return settings!;
     }
     
-    public async Task<IReadOnlyDictionary<Guid, McpToolsSettings>> GetToolsSettings(int tenantId, int roomId, Guid userId, 
+    public async Task<IReadOnlyDictionary<Guid, McpSettings>> GetToolsSettings(int tenantId, int roomId, Guid userId, 
         IEnumerable<Guid> serversIds)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -262,7 +262,7 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper map
             .ToDictionaryAsync(x => x.ServerId, x => x);
     }
     
-    public async Task<McpToolsSettings?> GetToolsSettings(int tenantId, int roomId, Guid userId, Guid serverId)
+    public async Task<McpSettings?> GetToolsSettings(int tenantId, int roomId, Guid userId, Guid serverId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         return await dbContext.GetToolsSettings(tenantId, roomId, userId, [serverId]).FirstOrDefaultAsync();
