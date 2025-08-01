@@ -811,7 +811,7 @@ public class EntryManager(IDaoFactory daoFactory,
     public async Task<IEnumerable<FileEntry>> GetRecentAsync(FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent)
     {
         var tagDao = daoFactory.GetTagDao<int>();
-        var tags = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.Recent).Where(tag => tag.EntryType == FileEntryType.File).Select(r => r.EntryId);
+        var tags = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.Recent, TagType.RecentByLink).Where(tag => tag.EntryType == FileEntryType.File).Select(r => r.EntryId);
 
         var fileIdsInt = Enumerable.Empty<int>();
         var fileIdsString = Enumerable.Empty<string>();

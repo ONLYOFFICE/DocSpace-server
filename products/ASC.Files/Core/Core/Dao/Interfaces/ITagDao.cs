@@ -31,7 +31,7 @@ public interface ITagDao<T>
     IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, TagType tagType, IEnumerable<FileEntry<T>> fileEntries);
     IAsyncEnumerable<Tag> GetTagsAsync(T entryId, FileEntryType entryType, TagType? tagType, Guid? owner = null, string name = null);
     IAsyncEnumerable<Tag> GetTagsAsync(TagType tagType, IEnumerable<FileEntry<T>> fileEntries);
-    IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, TagType tagType);
+    IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, params IEnumerable<TagType> tagType);
     IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<T> parentFolder, bool deepSearch);
     IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, IEnumerable<FileEntry<T>> fileEntries);
     IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, FileEntry<T> fileEntry);

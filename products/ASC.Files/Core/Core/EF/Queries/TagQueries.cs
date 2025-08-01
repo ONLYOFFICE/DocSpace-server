@@ -100,10 +100,10 @@ public partial class FilesDbContext
         return TagQueries.GetTagsByEntryTypeAsync(this, tenantId, tagType, entryType, mappedId, owner, name);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, TagType.Custom, PreCompileQuery.DefaultGuid])]
-    public IAsyncEnumerable<TagLinkData> TagsByOwnerAsync(int tenantId, TagType tagType, Guid owner)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, TagType.Custom])]
+    public IAsyncEnumerable<TagLinkData> TagsByOwnerAsync(int tenantId, Guid owner, params IEnumerable<TagType> tagType)
     {
-        return TagQueries.TagsByOwnerAsync(this, tenantId, tagType, owner);
+        return TagQueries.TagsByOwnerAsync(this, tenantId, owner, tagType);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, TagType.Custom])]
@@ -424,14 +424,14 @@ static file class TagQueries
             .Where(r => r.Link.EntryId == mappedId)
             .Where(r => name == null || r.Tag.Name == name));
 
-    public static readonly Func<FilesDbContext, int, TagType, Guid, IAsyncEnumerable<TagLinkData>> TagsByOwnerAsync =
+    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<TagType>, IAsyncEnumerable<TagLinkData>> TagsByOwnerAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, TagType tagType, Guid owner) =>
+            (FilesDbContext ctx, int tenantId, Guid owner, IEnumerable<TagType> tagType) =>
                 ctx.Tag.Where(r => r.TenantId == tenantId)
                     .Join(ctx.TagLink, r => r.Id, l => l.TagId,
                         (tag, link) => new TagLinkData { Tag = tag, Link = link })
                     .Where(r => r.Link.TenantId == r.Tag.TenantId)
-                    .Where(r => r.Tag.Type == tagType)
+                    .Where(r => tagType.Contains(r.Tag.Type))
                     .Where(r => owner == Guid.Empty || r.Tag.Owner == owner)
                     .OrderByDescending(r => r.Link.CreateOn)
                     .AsQueryable());
