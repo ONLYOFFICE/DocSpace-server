@@ -85,6 +85,16 @@ public class AccountingClient
         return await RequestAsync<Session>(HttpMethod.Post, "/session/open", data: data);
     }
 
+    public async Task CloseCustomerSessionAsync(int sessionId)
+    {
+        var queryParams = new NameValueCollection
+        {
+            { "sessionId", sessionId.ToString() }
+        };
+
+        _ = await RequestAsync<string>(HttpMethod.Put, $"/session/close", queryParams);
+    }
+
     public async Task PerformCustomerOperationAsync(string portalId, int serviceAccount, int sessionId, int quantity)
     {
         var data = new
