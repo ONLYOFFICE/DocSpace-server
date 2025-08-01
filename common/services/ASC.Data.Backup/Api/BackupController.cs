@@ -402,4 +402,18 @@ public class BackupController(
     {
         return backupService.GetTmpFolder();
     }
+
+    /// <summary>
+    /// Returns the backup service information by account number.
+    /// </summary>
+    /// <short>Get the backup service information</short>
+    /// <path>api/2.0/backup/serviceinfo</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Backup")]
+    [HttpGet("serviceinfo")]
+    [SwaggerResponse(200, "Backup service information", typeof(ServiceInfo))]
+    public async Task<ServiceInfo> GetBackupServiceInfoAsync()
+    {
+        return await backupService.GetBackupServiceInfoAsync();
+    }
 }

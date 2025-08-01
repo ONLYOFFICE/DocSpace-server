@@ -586,6 +586,22 @@ public class BackupService(
         return result;
     }
 
+    public async Task<ServiceInfo> GetBackupServiceInfoAsync()
+    {
+        await DemandPermissionsBackupAsync();
+
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var serviceAccount = backupConfigurationService.Settings.Quota.ServiceAccount;
+
+        var result = await tariffService.GetServiceInfoAsync(serviceAccount);
+
+        return result;
+    }
+
     private async Task<ScheduleResponse> InnerGetScheduleAsync(int tenantId, bool? dump)
     {
         var schedule = await backupRepository.GetBackupScheduleAsync(tenantId, dump);
