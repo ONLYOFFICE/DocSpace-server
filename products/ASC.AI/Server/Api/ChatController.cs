@@ -45,16 +45,13 @@ public class ChatController(
     {
         var generator = await chatCompletionRunner.StartNewChatAsync(
             inDto.RoomId, inDto.Body.Message, inDto.Body.Files);
-        
-        Response.Headers.ContentType = "text/event-stream";
-        Response.Headers.CacheControl = "no-cache";
-        Response.Headers.KeepAlive = "keep-alive";
 
-        await foreach (var completion in generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted))
-        {
-            await Response.WriteAsync($"event: {completion.Type.ToEventString()}\ndata: {completion.Content}\n\n");
-            await Response.Body.FlushAsync();
-        }
+        var source = generator
+            .GenerateCompletionAsync(Request.HttpContext.RequestAborted)
+            .Select(x => 
+                $"event: {x.Type.ToEventString()}\ndata: {x.Content}\n\n");
+
+        await this.StreamSentEventAsync(source, Request.HttpContext.RequestAborted);
         
         return Ok();
     }
@@ -65,15 +62,12 @@ public class ChatController(
         var generator = await chatCompletionRunner.StartChatAsync(
             inDto.ChatId, inDto.Body.Message, inDto.Body.Files);
         
-        Response.Headers.ContentType = "text/event-stream";
-        Response.Headers.CacheControl = "no-cache";
-        Response.Headers.KeepAlive = "keep-alive";
+        var source = generator
+            .GenerateCompletionAsync(Request.HttpContext.RequestAborted)
+            .Select(x => 
+                $"event: {x.Type.ToEventString()}\ndata: {x.Content}\n\n");
 
-        await foreach (var completion in generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted))
-        {
-            await Response.WriteAsync($"event: {completion.Type.ToEventString()}\ndata: {completion.Content}\n\n");
-            await Response.Body.FlushAsync();
-        }
+        await this.StreamSentEventAsync(source, Request.HttpContext.RequestAborted);
         
         return Ok();
     }
