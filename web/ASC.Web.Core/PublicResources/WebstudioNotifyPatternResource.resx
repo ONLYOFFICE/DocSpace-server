@@ -2561,4 +2561,28 @@ $TrulyYours</value>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Action required: Unable to auto top up the Wallet balance in your ${LetterLogoText} DocSpace</value>
   </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Open DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Password changed successfully
+
+Your password for the account *$UserName*, *$UserEmail* was successfully changed on *$Date* in DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Device: *$Device*
+#if($Location != "")
+Location: *$Location*
+#end
+Browser: *$Browser*
+
+If this action was made by you — no further steps are required. If this change looks suspicious or was not authorized by you, please reset your password immediately and disable access to DocSpace for this device.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Your password was changed successfully</value>
+  </data>
 </root>
