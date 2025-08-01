@@ -160,6 +160,8 @@ public class FolderDto<T> : FileEntryDto<T>
     public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
     
     public ChatSettings ChatSettings { get; set; }
+    
+    public RoomType? RootRoomType { get; set; }
 }
 
 [Scope]

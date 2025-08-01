@@ -521,18 +521,6 @@ public class EntryManager(IDaoFactory daoFactory,
             }
             else
             {
-                if (parent.FolderType == FolderType.AiRoom)
-                {
-                    parent = searchArea switch
-                    {
-                        SearchArea.Knowledge => await folderDao.GetFoldersAsync(parent.Id, FolderType.Knowledge)
-                            .FirstOrDefaultAsync(),
-                        SearchArea.ResultStorage => await folderDao.GetFoldersAsync(parent.Id, FolderType.ResultStorage)
-                            .FirstOrDefaultAsync(),
-                        _ => parent
-                    };
-                }
-                
                 var containingMyFiles = false;
                 if (parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder or FolderType.FillingFormsRoom)
                 {

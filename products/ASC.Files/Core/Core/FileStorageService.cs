@@ -221,6 +221,18 @@ public class FileStorageService //: IFileStorageService
 
                 parent.ParentRoomType = parentRoom.FolderType;
             }
+
+            if (parent.FolderType == FolderType.AiRoom)
+            {
+                parent = searchArea switch
+                {
+                    SearchArea.Knowledge => await folderDao.GetFoldersAsync(parent.Id, FolderType.Knowledge)
+                        .FirstOrDefaultAsync(),
+                    SearchArea.ResultStorage => await folderDao.GetFoldersAsync(parent.Id, FolderType.ResultStorage)
+                        .FirstOrDefaultAsync(),
+                    _ => parent
+                };
+            }
         }
         catch (Exception e)
         {
@@ -362,21 +374,23 @@ public class FileStorageService //: IFileStorageService
             [
                 ..breadCrumbs.Select(object (f) =>
                 {
-                    if (f.FileEntryType == FileEntryType.Folder)
+                    if (f.FileEntryType != FileEntryType.Folder)
                     {
-                        switch (f)
-                        {
-                            case Folder<string> f1:
-                                return new { f1.Id, f1.Title, RoomType = DocSpaceHelper.MapToRoomType(f1.FolderType) };
-                            case Folder<int> f2:
-                                {
-                                    var title = f2.FolderType is FolderType.Recent && searchArea == SearchArea.RecentByLinks
-                                        ? FilesUCResource.MyFiles
-                                        : f2.Title;
+                        return 0;
+                    }
 
-                                    return new { f2.Id, title, RoomType = DocSpaceHelper.MapToRoomType(f2.FolderType) };
-                                }
-                        }
+                    switch (f)
+                    {
+                        case Folder<string> f1:
+                            return new { f1.Id, f1.Title, RoomType = DocSpaceHelper.MapToRoomType(f1.FolderType), f1.FolderType };
+                        case Folder<int> f2:
+                            {
+                                var title = f2.FolderType is FolderType.Recent && searchArea == SearchArea.RecentByLinks
+                                    ? FilesUCResource.MyFiles
+                                    : f2.Title;
+
+                                return new { f2.Id, title, RoomType = DocSpaceHelper.MapToRoomType(f2.FolderType), f2.FolderType };
+                            }
                     }
 
                     return 0;
