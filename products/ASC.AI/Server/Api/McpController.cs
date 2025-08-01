@@ -32,7 +32,7 @@ namespace ASC.AI.Api;
 [ControllerName("ai")]
 public class McpController(McpService mcpService, IMapper mapper, ApiContext apiContext) : ControllerBase
 {
-    [HttpGet("mcp")]
+    [HttpGet("servers")]
     public async Task<List<McpServerDto>> GetServersAsync(PaginatedRequestDto inDto)
     {
         var (servers, count) = await mcpService.GetServersAsync(inDto.StartIndex, inDto.Count);
@@ -42,7 +42,7 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
         return mapper.Map<List<McpServer>, List<McpServerDto>>(servers);
     }
     
-    [HttpPost("rooms/{roomId}/mcp")]
+    [HttpPost("rooms/{roomId}/servers")]
     public async Task<McpRoomDto> AddRoomServersAsync(AddRoomServersRequestDto inDto)
     {
         var servers = await mcpService.AddServersToRoomAsync(inDto.RoomId, inDto.Body.Servers);
@@ -50,7 +50,7 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
         return mapper.Map<McpServerOptions, McpRoomDto>(servers.First());
     }
 
-    [HttpGet("rooms/{roomId}/mcp")]
+    [HttpGet("rooms/{roomId}/servers")]
     public async Task<List<McpRoomDto>> GetRoomServersAsync(GetRoomServersRequestDto inDto)
     {
         var servers = await mcpService.GetServersAsync(inDto.RoomId);
@@ -58,14 +58,14 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
         return mapper.Map<List<McpServerOptions>, List<McpRoomDto>>(servers);
     }
 
-    [HttpDelete("rooms/{roomId}/mcp")]
+    [HttpDelete("rooms/{roomId}/servers")]
     public async Task<NoContentResult> DeleteRoomServersAsync(DeleteRoomServersRequestDto inDto)
     {
         await mcpService.DeleteServersFromRoomAsync(inDto.RoomId, inDto.Body.Servers);
         return NoContent();
     }
 
-    [HttpPut("rooms/{roomId}/mcp/{serverId}/tools")]
+    [HttpPut("rooms/{roomId}/servers/{serverId}/tools")]
     public async Task<List<McpToolDto>> SetToolsAsync(SetMcpToolsRequestDto inDto)
     {
         var tools = await mcpService.SetToolsSettingsAsync(inDto.RoomId, inDto.ServerId, 
@@ -77,7 +77,7 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
         }).ToList();
     }
 
-    [HttpGet("rooms/{roomId}/mcp/{serverId}/tools")]
+    [HttpGet("rooms/{roomId}/servers/{serverId}/tools")]
     public async Task<List<McpToolDto>> GetToolsAsync(GetMcpToolsRequestDto inDto)
     {
         var tools = await mcpService.GetToolsAsync(inDto.RoomId, inDto.ServerId);
