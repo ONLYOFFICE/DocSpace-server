@@ -1188,6 +1188,13 @@ public class TariffService(
         return await accountingClient.OpenCustomerSessionAsync(portalId, serviceAccount, externalRef, quantity);
     }
 
+    public async Task<bool> CloseCustomerSessionAsync(int tenantId, int sessionId)
+    {
+        await accountingClient.CloseCustomerSessionAsync(sessionId);
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
+        return true;
+    }
+
     public async Task<bool> PerformCustomerOperationAsync(int tenantId, int serviceAccount, int sessionId, int quantity)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
