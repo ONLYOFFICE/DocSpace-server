@@ -543,6 +543,24 @@ public class BackupService(
         return result;
     }
 
+    public async Task<bool> CloseCustomerSessionForBackupAsync(int tenantId, int sessionId)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return false;
+        }
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            return false;
+        }
+
+        var result = await tariffService.CloseCustomerSessionAsync(tenantId, sessionId);
+
+        return result;
+    }
+
     public async Task<bool> PerformCustomerOperationForBackupAsync(int tenantId, int sessionId)
     {
         if (!tariffService.IsConfigured())
