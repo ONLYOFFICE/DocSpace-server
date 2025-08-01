@@ -195,6 +195,15 @@ public class BackupProgressItem : BaseBackupProgressItem
             _logger.ErrorRunJob(Id, TenantId, tempFile, _storageBasePath, error);
             Exception = error;
             IsCompleted = true;
+
+            try
+            {
+                await backupService.CloseCustomerSessionForBackupAsync(TenantId, _billingSessionId);
+            }
+            catch (Exception closeCustomerSessionError)
+            {
+                _logger.ErrorWithException(closeCustomerSessionError);
+            }
         }
         finally
         {
