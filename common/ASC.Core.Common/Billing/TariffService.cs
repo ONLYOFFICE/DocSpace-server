@@ -1227,6 +1227,11 @@ public class TariffService(
         return accountingClient.GetSupportedCurrencies();
     }
 
+    public async Task<ServiceInfo> GetServiceInfoAsync(int serviceAccount)
+    {
+        return await accountingClient.GetServiceInfoAsync(serviceAccount);
+    }
+
     #endregion
 
 

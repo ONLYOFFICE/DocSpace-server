@@ -51,6 +51,7 @@ public interface ITariffService
     Task<Report> GetCustomerOperationsAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal, int? offset, int? limit);
     Task<List<Currency>> GetAllAccountingCurrenciesAsync();
     List<string> GetSupportedAccountingCurrencies();
+    Task<ServiceInfo> GetServiceInfoAsync(int serviceAccount);
 
     Task<bool> IsFreeTariffAsync(Tariff tariff);
 }

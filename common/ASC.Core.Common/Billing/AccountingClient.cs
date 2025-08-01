@@ -149,6 +149,11 @@ public class AccountingClient
         return _configuration.Currencies;
     }
 
+    public async Task<ServiceInfo> GetServiceInfoAsync(int serviceAccount)
+    {
+        return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/account/{serviceAccount}");
+    }
+
 
     private async Task<T> RequestAsync<T>(HttpMethod httpMethod, string path, NameValueCollection queryParams = null, object data = null, bool addPolicy = false)
     {
@@ -328,6 +333,36 @@ public class Session
     public string Currency { get; init; }
 }
 
+/// <summary>
+/// Represents a service information.
+/// </summary>
+public class ServiceInfo
+{
+    /// <summary>
+    /// The service ID.
+    /// </summary>
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The price value.
+    /// </summary>
+    public decimal PriceValue { get; init; }
+
+    /// <summary>
+    /// The currency ID.
+    /// </summary>
+    public int CurrencyId { get; init; }
+
+    /// <summary>
+    /// The name.
+    /// </summary>
+    public string Name { get; init; }
+
+    /// <summary>
+    /// The account number.
+    /// </summary>
+    public int AccountNumber { get; init; }
+}
 
 /// <summary>
 /// Represents a report containing a collection of operations.
