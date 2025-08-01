@@ -48,6 +48,17 @@ public class OpenCustomerSessionRequestDto
 }
 
 /// <summary>
+/// Client session close parameters
+/// </summary>
+public class CloseCustomerSessionRequestDto
+{
+    /// <summary>
+    /// Session ID
+    /// </summary>
+    public int SessionId { get; set; }
+}
+
+/// <summary>
 /// Parameters for performing a customer operation
 /// </summary>
 public class PerformCustomerOperationRequestDto

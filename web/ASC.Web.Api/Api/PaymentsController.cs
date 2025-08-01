@@ -743,6 +743,39 @@ public class PaymentController(
     }
 
     /// <summary>
+    /// Trying to close a customer session and unblock amount money on the balance.
+    /// </summary>
+    /// <short>
+    /// Close customer session
+    /// </short>
+    /// <path>api/2.0/portal/payment/customer/closesession</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is succesfully provided", typeof(bool))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpPut("customer/closesession")]
+    public async Task<bool> CloseCustomerSession(CloseCustomerSessionRequestDto inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return false;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return false;
+        }
+
+        await DemandPayerAsync(customerInfo);
+
+        var result = await tariffService.CloseCustomerSessionAsync(tenant.Id, inDto.SessionId);
+        return result;
+    }
+
+    /// <summary>
     /// Perform customer operation and return true if the operation is succesfully provided.
     /// </summary>
     /// <short>
