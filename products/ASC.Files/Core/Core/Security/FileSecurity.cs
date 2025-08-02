@@ -1329,9 +1329,9 @@ public class FileSecurity(IDaoFactory daoFactory,
                     }
                 }
                 
-                if (action == FilesSecurityActions.EditInternal  && file != null)
+                if (action == FilesSecurityActions.EditInternal  && (file != null || folder != null && !isRoom))
                 { 
-                    var fileFolder = parentFolders?.LastOrDefault();
+                    var fileFolder = parentFolders?.FirstOrDefault(r=> DocSpaceHelper.IsRoom(r.FolderType));
                     if (fileFolder?.FolderType is FolderType.VirtualRooms or FolderType.VirtualDataRoom or FolderType.PublicRoom)
                     {
                         return false;
