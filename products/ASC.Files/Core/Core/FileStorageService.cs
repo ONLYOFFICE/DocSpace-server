@@ -5067,9 +5067,7 @@ public class FileStorageService //: IFileStorageService
                 throw GenerateException(new InvalidOperationException(result.Warning));
             }
 
-            var processedItem = result.ProcessedItems[0];
-
-            return !result.Changed ? processedItem : result.ProcessedItems[0];
+            return result.ProcessedItems.FirstOrDefault();
         }
         catch (Exception e)
         {

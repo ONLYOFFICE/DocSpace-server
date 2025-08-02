@@ -1055,7 +1055,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
-                if (action == FilesSecurityActions.EditInternal && folder.FolderType is FolderType.VirtualRooms or FolderType.VirtualDataRoom)
+                if (action == FilesSecurityActions.EditInternal && folder.FolderType is FolderType.VirtualRooms or FolderType.VirtualDataRoom or FolderType.PublicRoom)
                 {
                     return false;
                 }
@@ -1305,7 +1305,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                        FilesSecurityActions.Duplicate or 
                        FilesSecurityActions.EditHistory or 
                        FilesSecurityActions.SubmitToFormGallery or 
-                       FilesSecurityActions.Embed && 
+                       FilesSecurityActions.Embed or 
+                       FilesSecurityActions.EditInternal &&
                    file != null )
                 {
                     var fileFolder = parentFolders?.LastOrDefault();
@@ -1325,6 +1326,15 @@ public class FileSecurity(IDaoFactory daoFactory,
                     if (isDocSpaceAdmin)
                     {
                         return true;
+                    }
+                }
+                
+                if (action == FilesSecurityActions.EditInternal  && file != null)
+                { 
+                    var fileFolder = parentFolders?.LastOrDefault();
+                    if (fileFolder?.FolderType is FolderType.VirtualRooms or FolderType.VirtualDataRoom or FolderType.PublicRoom)
+                    {
+                        return false;
                     }
                 }
                 

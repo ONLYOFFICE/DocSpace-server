@@ -153,19 +153,6 @@ public class FileSharingAceHelper(
                     {
                         w.FileShareOptions.ExpirationDate = default;
                     }
-
-                    if (w.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
-                    {
-                        if (room is { FolderType: FolderType.VirtualDataRoom})
-                        {
-                            w.FileShareOptions.Internal = true;
-                        }
-                        
-                        if (room is { FolderType: FolderType.PublicRoom})
-                        {
-                            w.FileShareOptions.Internal = false;
-                        }
-                    }
                 }
             } 
             else
@@ -176,13 +163,29 @@ public class FileSharingAceHelper(
                 {
                     continue;
                 }
-                
-                var entryRoom = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folder != null ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+            }
+            
+            if (existedShare != null && existedShare.Options?.Internal != w.FileShareOptions.Internal && !await fileSecurity.CanEditInternalAsync(entry))
+            {
+                continue;
+            }
+            
+            if (w.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
+            {
+                var roomType = room?.FolderType;
 
-                if (entryRoom is { FolderType: FolderType.VirtualDataRoom})
+                if (roomType == null)
                 {
-                    w.FileShareOptions.Internal = true;
+                    var entryRoom = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folder != null ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+                    roomType = entryRoom?.FolderType;
                 }
+
+                w.FileShareOptions.Internal = roomType switch
+                {
+                    FolderType.VirtualDataRoom => true,
+                    FolderType.PublicRoom => false,
+                    _ => w.FileShareOptions.Internal
+                };
             }
             
             if (!string.IsNullOrEmpty(w.FileShareOptions?.Password))
