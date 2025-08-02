@@ -180,6 +180,8 @@ public class ExternalLinkHelper(
 
             info.Id = folder.Id.ToString();
             info.Title = folder.Title;
+            info.EntryType = FileEntryType.Folder;
+            info.IsRoom = DocSpaceHelper.IsRoom(folder.FolderType);
         
             return folder;
         }
@@ -192,7 +194,8 @@ public class ExternalLinkHelper(
         
         info.Id = file.Id.ToString();
         info.Title = file.Title;
-
+        info.EntryType = FileEntryType.File;
+        
         return file;
     }
     
@@ -212,6 +215,7 @@ public class ExternalLinkHelper(
         
         info.EntityId = file.Id.ToString();
         info.EntryTitle = file.Title;
+        info.EntryType = FileEntryType.File;
     }
 
     private async Task<bool> MarkAsync<T>(Folder<T> room, Guid linkId, Guid userId)
