@@ -2726,7 +2726,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
     }
 
-    public IDictionary<string, bool> GetFileAccesses<T>(File<T> file, SubjectType subjectType)
+    public async Task<IDictionary<string, bool>> GetFileAccesses<T>(File<T> file, SubjectType subjectType)
     {
         var result = new Dictionary<string, bool>();
 
@@ -2742,6 +2742,9 @@ public class FileSecurity(IDaoFactory daoFactory,
             return null;
         }
 
+        var parentFolders = await GetFileParentFolders(file.ParentId);
+        var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
+        
         foreach (var s in shares)
         {
             if (s is  FileShare.Restrict or FileShare.None || (s is FileShare.Read && !file.IsForm))
@@ -2758,8 +2761,8 @@ public class FileSecurity(IDaoFactory daoFactory,
 
             switch (s)
             {
-                case FileShare.Editing when file.RootFolderType == FolderType.USER && canEdit:
-                case FileShare.FillForms when file.IsForm:
+                case FileShare.Editing when (file.IsForm && room?.FolderType != FolderType.FillingFormsRoom || !file.IsForm) && canEdit:
+                case FileShare.FillForms when file.IsForm && room?.FolderType == FolderType.FillingFormsRoom:
                 case FileShare.CustomFilter when !file.IsForm && canCustomFiltering:
                 case FileShare.Comment when !file.IsForm && canComment:
                 case FileShare.Review when !file.IsForm && canReview:
