@@ -349,6 +349,15 @@ public class FileStorageService //: IFileStorageService
             return x is File<int> f2 && !await fileConverter.IsConverting(f2);
         }).ToEnumerable();
 
+        if (parentRoom != null)
+        {
+            entries = entries.Select(r =>
+            {
+                r.ParentRoomType = parentRoom.FolderType;
+                return r;
+            });
+        }
+        
         if (parent.FolderType == FolderType.Recent && searchArea == SearchArea.RecentByLinks)
         {
             parent.Title = FilesUCResource.MyFiles;
