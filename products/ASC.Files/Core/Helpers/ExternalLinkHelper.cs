@@ -226,8 +226,8 @@ public class ExternalLinkHelper(
         }
         
         info.EntityId = file.Id.ToString();
-        info.EntryTitle = file.Title;
-        info.EntryType = FileEntryType.File;
+        info.EntityTitle = file.Title;
+        info.EntityType = FileEntryType.File;
     }
     
     private async Task GetSubFolderAndProcessAsync<T>(T id, string rootId, ValidationInfo info)
@@ -246,8 +246,8 @@ public class ExternalLinkHelper(
         }
         
         info.EntityId =  folder.Id.ToString();
-        info.EntryTitle = folder.Title;
-        info.EntryType = FileEntryType.Folder;
+        info.EntityTitle = folder.Title;
+        info.EntityType = FileEntryType.Folder;
     }
 
     private async Task<bool> MarkAsync<T>(Folder<T> room, Guid linkId, Guid userId)

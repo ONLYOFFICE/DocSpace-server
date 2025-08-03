@@ -376,12 +376,12 @@ public class ValidationInfo
     /// <summary>
     /// The entry title of the external data.
     /// </summary>
-    public string EntryTitle { get; set; }
+    public string EntityTitle { get; set; }
     
     /// <summary>
     /// The entry type of the external data.
     /// </summary>
-    public FileEntryType? EntryType { get; set; }
+    public FileEntryType? EntityType { get; set; }
     
     /// <summary>
     /// Indicates whether the entity represents a room.
