@@ -953,10 +953,6 @@ public class FileSharing(
         };
         
         w.CanEditAccess = authContext.CurrentAccount.ID != w.Id && w.SubjectType is SubjectType.User or SubjectType.Group && canEditAccess;
-        if (record.SubjectType == SubjectType.PrimaryExternalLink)
-        {
-            w.CanEditExpirationDate = w.CanEditExpirationDate && entry.ParentRoomType != FolderType.PublicRoom;
-        }
 
         if (!record.IsLink)
         {
@@ -1005,6 +1001,10 @@ public class FileSharing(
         if (room is {FolderType: FolderType.VirtualDataRoom})
         {
             w.CanEditDenyDownload = !room.SettingsDenyDownload;
+        }
+        if (room is {FolderType: FolderType.PublicRoom} && record.SubjectType == SubjectType.PrimaryExternalLink)
+        {
+            w.CanEditExpirationDate = false;
         }
         return w;
     }
