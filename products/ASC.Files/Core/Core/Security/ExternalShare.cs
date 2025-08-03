@@ -362,7 +362,12 @@ public class ValidationInfo
     /// The external data title.
     /// </summary>
     public string Title { get; set; }
-
+    
+    /// <summary>
+    /// The type of the external data.
+    /// </summary>
+    public FileEntryType? Type { get; set; }
+    
     /// <summary>
     /// The entity ID of the external data.
     /// </summary>
