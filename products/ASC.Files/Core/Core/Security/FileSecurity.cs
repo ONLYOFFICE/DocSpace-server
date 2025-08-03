@@ -489,6 +489,11 @@ public class FileSecurity(IDaoFactory daoFactory,
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.EditInternal);
     }
 
+    public async Task<bool> CanEditExpirationAsync<T>(FileEntry<T> entry)
+    {
+        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.EditExpiration);
+    }
+
     public async Task<bool> CanEditHistoryAsync<T>(FileEntry<T> entry)
     {
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.EditHistory);
@@ -1059,6 +1064,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     return false;
                 }
+
+                if (action == FilesSecurityActions.EditExpiration && folder.FolderType is FolderType.FillingFormsRoom)
+                {
+                    return false;
+                }
                 
                 if (!isGuest)
                 {
@@ -1306,7 +1316,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                        FilesSecurityActions.EditHistory or 
                        FilesSecurityActions.SubmitToFormGallery or 
                        FilesSecurityActions.Embed or 
-                       FilesSecurityActions.EditInternal &&
+                       FilesSecurityActions.EditInternal or
+                       FilesSecurityActions.EditExpiration &&
                    file != null )
                 {
                     var fileFolder = parentFolders?.LastOrDefault();
@@ -1328,16 +1339,19 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return true;
                     }
                 }
-                
-                if (action == FilesSecurityActions.EditInternal  && (file != null || folder != null && !isRoom))
-                { 
-                    var fileFolder = parentFolders?.FirstOrDefault(r=> DocSpaceHelper.IsRoom(r.FolderType));
-                    if (fileFolder?.FolderType is FolderType.VirtualRooms or FolderType.VirtualDataRoom or FolderType.PublicRoom)
+
+                if (file != null || folder != null && !isRoom)
+                {                        
+                    var fileFolder = parentFolders?.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
+                    
+                    switch (action)
                     {
-                        return false;
+                        case FilesSecurityActions.EditInternal when fileFolder?.FolderType is FolderType.VirtualRooms or FolderType.VirtualDataRoom or FolderType.PublicRoom:
+                        case FilesSecurityActions.EditExpiration when fileFolder?.FolderType is FolderType.FillingFormsRoom:
+                            return false;
                     }
                 }
-                
+
                 if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
                 {
                     return true;
@@ -1807,6 +1821,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         break;
                 }
                 break;
+            case FilesSecurityActions.EditExpiration:
             case FilesSecurityActions.EditInternal:
             case FilesSecurityActions.EditAccess:
             case FilesSecurityActions.ReadLinks:
@@ -3044,6 +3059,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         OpenForm,
         
         [Description("Edit internal")]
-        EditInternal
+        EditInternal,
+        
+        [Description("Edit expiration")]
+        EditExpiration
     }
 }

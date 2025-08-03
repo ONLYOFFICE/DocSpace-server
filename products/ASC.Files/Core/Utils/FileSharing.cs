@@ -55,8 +55,14 @@ public class FileSharingAceHelper(
     private const int MaxAdditionalExternalLinks = 5;
     private const int MaxPrimaryExternalLinks = 1;
 
-    public async Task<AceProcessingResult<T>> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message, string culture = null, 
-        bool socket = true, bool beforeOwnerChange = false)
+    public async Task<AceProcessingResult<T>> SetAceObjectAsync<T>(
+        List<AceWrapper> aceWrappers, 
+        FileEntry<T> entry, 
+        bool notify, 
+        string message, 
+        string culture = null, 
+        bool socket = true, 
+        bool beforeOwnerChange = false)
     {
         if (entry == null)
         {
@@ -165,9 +171,16 @@ public class FileSharingAceHelper(
                 }
             }
             
-            if (existedShare != null && existedShare.Options?.Internal != w.FileShareOptions.Internal && !await fileSecurity.CanEditInternalAsync(entry))
+            if (existedShare != null)
             {
-                continue;
+                if (existedShare.Options?.Internal != w.FileShareOptions.Internal && !await fileSecurity.CanEditInternalAsync(entry))
+                {
+                    continue;
+                }
+                if (existedShare.Options.ExpirationDate != w.FileShareOptions.ExpirationDate && !await fileSecurity.CanEditExpirationAsync(entry) && (folder?.FolderType != FolderType.PublicRoom || w.SubjectType != SubjectType.PrimaryExternalLink))
+                {
+                    continue;
+                }
             }
             
             if (w.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
@@ -532,9 +545,10 @@ public class FileSharing(
 
         var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
         var canEditInternal = await fileSecurity.CanEditInternalAsync(entry);
+        var canEditExpiration = await fileSecurity.CanEditExpirationAsync(entry);
         await foreach (var record in fileSecurity.GetPureSharesAsync(entry, subjects))
         {
-            yield return await ToAceAsync(entry, record, canEditAccess, canEditInternal);
+            yield return await ToAceAsync(entry, record, canEditAccess, canEditInternal, canEditExpiration);
         }
     }
 
@@ -547,6 +561,7 @@ public class FileSharing(
 
         var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
         var canEditInternal = await fileSecurity.CanEditInternalAsync(entry);
+        var canEditExpiration = await fileSecurity.CanEditExpirationAsync(entry);
         
         var canAccess = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType)
             ? await CheckAccessAsync(entry, filterType)
@@ -574,7 +589,7 @@ public class FileSharing(
 
         await foreach (var record in records)
         {
-            yield return await ToAceAsync(entry, record, canEditAccess, canEditInternal);
+            yield return await ToAceAsync(entry, record, canEditAccess, canEditInternal, canEditExpiration);
         }
     }
 
@@ -616,6 +631,7 @@ public class FileSharing(
         var shares = await fileSecurity.GetSharesAsync(entry);
         var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
         var canEditInternal = await fileSecurity.CanEditInternalAsync(entry);
+        var canEditExpiration = await fileSecurity.CanEditExpirationAsync(entry);
         var canReadLinks = await fileSecurity.CanReadLinksAsync(entry);
         
         var records = shares
@@ -636,7 +652,7 @@ public class FileSharing(
                 continue;
             }
 
-            var ace = await ToAceAsync(entry, r, canEditAccess, canEditInternal);
+            var ace = await ToAceAsync(entry, r, canEditAccess, canEditInternal, canEditExpiration);
             
             if (ace.SubjectType == SubjectType.Group && ace.Id == Constants.LostGroupInfo.ID)
             {
@@ -923,7 +939,7 @@ public class FileSharing(
         yield return owner;
     }
 
-    private async Task<AceWrapper> ToAceAsync<T>(FileEntry<T> entry, FileShareRecord<T> record, bool canEditAccess, bool canEditInternal)
+    private async Task<AceWrapper> ToAceAsync<T>(FileEntry<T> entry, FileShareRecord<T> record, bool canEditAccess, bool canEditInternal, bool canEditExpiration)
     {
         var w = new AceWrapper
         {
@@ -932,11 +948,16 @@ public class FileSharing(
             Access = record.Share,
             FileShareOptions = record.Options,
             SubjectType = record.SubjectType,
-            CanEditInternal = canEditInternal
+            CanEditInternal = canEditInternal,
+            CanEditExpirationDate = canEditExpiration
         };
         
         w.CanEditAccess = authContext.CurrentAccount.ID != w.Id && w.SubjectType is SubjectType.User or SubjectType.Group && canEditAccess;
-        
+        if (record.SubjectType == SubjectType.PrimaryExternalLink)
+        {
+            w.CanEditExpirationDate = w.CanEditExpirationDate && entry.ParentRoomType != FolderType.PublicRoom;
+        }
+
         if (!record.IsLink)
         {
             if (w.SubjectType == SubjectType.Group)

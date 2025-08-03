@@ -93,6 +93,11 @@ public class AceWrapper : IMapFrom<RoomInvitation>
     public bool CanEditInternal { get; set; }
 
     /// <summary>
+    /// Indicates whether the expiration date of access permissions can be edited.
+    /// </summary>
+    public bool CanEditExpirationDate { get; set; }
+
+    /// <summary>
     /// Determines whether the user has permission to modify the deny download setting for the file share.
     /// </summary>
     public bool CanEditDenyDownload { get; set; } = true;
