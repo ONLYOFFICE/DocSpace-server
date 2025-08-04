@@ -232,7 +232,8 @@ public class BackupController(
              dump: inDto.Dump,
              taskId: taskId,
              serverBaseUri: serverBaseUri,
-             billingSessionId: billingSession?.SessionId ?? 0
+             billingSessionId: billingSession?.SessionId ?? 0,
+             billingSessionExpire: billingSession?.Expire ?? default
         ));
 
         return await backupService.GetBackupProgressAsync(inDto.Dump);

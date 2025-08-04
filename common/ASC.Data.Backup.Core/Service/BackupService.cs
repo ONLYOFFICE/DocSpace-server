@@ -52,8 +52,9 @@ public class BackupService(
     {
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
+    private const int BackupCustomerSessionDuration = 86400; // 60 * 60 * 24;
 
-    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null, int billingSessionId = 0)
+    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null, int billingSessionId = 0, DateTime billingSessionExpire = default)
     {
         await DemandPermissionsBackupAsync();
 
@@ -69,8 +70,7 @@ public class BackupService(
             StorageType = storageType,
             StorageParams = storageParams,
             Dump = dump,
-            ServerBaseUri = serverBaseUri,
-            BillingSessionId = billingSessionId
+            ServerBaseUri = serverBaseUri
         };
 
         switch (storageType)
@@ -91,7 +91,7 @@ public class BackupService(
 
         messageService.Send(MessageAction.StartBackupSetting);
 
-        var progress = await backupWorker.StartBackupAsync(backupRequest, enqueueTask, taskId);
+        var progress = await backupWorker.StartBackupAsync(backupRequest, enqueueTask, taskId, billingSessionId, billingSessionExpire);
         if (!string.IsNullOrEmpty(progress.Error))
         {
             throw new FaultException();
@@ -538,7 +538,7 @@ public class BackupService(
         var serviceAccount = backupConfigurationService.Settings.Quota.ServiceAccount;
         var externalRef = Guid.NewGuid().ToString();
 
-        var result = await tariffService.OpenCustomerSessionAsync(tenantId, serviceAccount, externalRef, 1);
+        var result = await tariffService.OpenCustomerSessionAsync(tenantId, serviceAccount, externalRef, 1, BackupCustomerSessionDuration);
 
         return result;
     }
@@ -561,7 +561,25 @@ public class BackupService(
         return result;
     }
 
-    public async Task<bool> PerformCustomerOperationForBackupAsync(int tenantId, int sessionId)
+    public async Task<Session> ExtendCustomerSessionForBackupAsync(int tenantId, int sessionId)
+    {
+        if (sessionId <= 0 || !tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        var result = await tariffService.ExtendCustomerSessionAsync(tenantId, sessionId, BackupCustomerSessionDuration);
+
+        return result;
+    }
+
+    public async Task<bool> CompleteCustomerSessionForBackupAsync(int tenantId, int sessionId)
     {
         if (sessionId <= 0 || !tariffService.IsConfigured())
         {
@@ -576,7 +594,7 @@ public class BackupService(
 
         var serviceAccount = backupConfigurationService.Settings.Quota.ServiceAccount;
 
-        var result = await tariffService.PerformCustomerOperationAsync(tenantId, serviceAccount, sessionId, 1);
+        var result = await tariffService.CompleteCustomerSessionAsync(tenantId, serviceAccount, sessionId, 1);
 
         if (result)
         {

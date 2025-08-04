@@ -110,7 +110,8 @@ public sealed class BackupSchedulerService(
                                                  isScheduled: true,
                                                  dump: schedule.Dump,
                                                  backupsStored: schedule.BackupsStored,
-                                                 billingSessionId: billingSession?.SessionId ?? 0
+                                                 billingSessionId: billingSession?.SessionId ?? 0,
+                                                 billingSessionExpire: billingSession?.Expire ?? default
                                           ));
                     }
                     else

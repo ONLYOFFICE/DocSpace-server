@@ -29,7 +29,7 @@ using System.Text.Json;
 namespace ASC.Data.Backup.Services;
 
 [Transient]
-public class BackupProgressItem : BaseBackupProgressItem
+public class BackupProgressItem : BaseBackupProgressItem, IDisposable
 {
     private Dictionary<string, string> _storageParams;
     private string _tempFolder;
@@ -41,6 +41,8 @@ public class BackupProgressItem : BaseBackupProgressItem
     private int _limit;
     private string _serverBaseUri;
     private int _billingSessionId;
+    private DateTime _billingSessionExpire;
+    private readonly SemaphoreSlim _billingSessionSemaphore = new(1, 1);
     private readonly ILogger<BackupProgressItem> _logger;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly NotifyHelper _notifyHelper;
@@ -60,7 +62,7 @@ public class BackupProgressItem : BaseBackupProgressItem
         _notifyHelper = notifyHelper;
     }
 
-    public void Init(BackupSchedule schedule, bool isScheduled, string tempFolder, int limit, int billingSessionId)
+    public void Init(BackupSchedule schedule, bool isScheduled, string tempFolder, int limit, int billingSessionId, DateTime billingSessionExpire)
     {
         Init();
         BackupProgressItemType = BackupProgressItemType.Backup;
@@ -74,9 +76,10 @@ public class BackupProgressItem : BaseBackupProgressItem
         _limit = limit;
         Dump = schedule.Dump;
         _billingSessionId = billingSessionId;
+        _billingSessionExpire = billingSessionExpire;
     }
 
-    public void Init(StartBackupRequest request, bool isScheduled, string tempFolder, int limit)
+    public void Init(StartBackupRequest request, bool isScheduled, string tempFolder, int limit, int billingSessionId, DateTime billingSessionExpire)
     {
         Init();
         BackupProgressItemType = BackupProgressItemType.Backup;
@@ -90,7 +93,8 @@ public class BackupProgressItem : BaseBackupProgressItem
         _limit = limit;
         Dump = request.Dump;
         _serverBaseUri = request.ServerBaseUri;
-        _billingSessionId = request.BillingSessionId;
+        _billingSessionId = billingSessionId;
+        _billingSessionExpire = billingSessionExpire;
     }
 
     protected override async Task DoJob()
@@ -131,6 +135,23 @@ public class BackupProgressItem : BaseBackupProgressItem
                 Percentage = 0.9 * args.Progress;
                 await socketManager.BackupProgressAsync((int)Percentage, Dump);
                 await PublishChanges();
+
+                if (_billingSessionId > 0 && _billingSessionExpire.Subtract(DateTime.UtcNow) < TimeSpan.FromHours(1))
+                {
+                    await _billingSessionSemaphore.WaitAsync();
+                    try
+                    {
+                        if (_billingSessionExpire.Subtract(DateTime.UtcNow) < TimeSpan.FromHours(1))
+                        {
+                            var extensedSession = await backupService.ExtendCustomerSessionForBackupAsync(TenantId, _billingSessionId);
+                            _billingSessionExpire = extensedSession.Expire;
+                        }
+                    }
+                    finally
+                    {
+                        _billingSessionSemaphore.Release();
+                    }
+                }
             };
 
             await backupPortalTask.RunJob();
@@ -185,7 +206,7 @@ public class BackupProgressItem : BaseBackupProgressItem
             await socketManager.BackupProgressAsync((int)Percentage, Dump);
             await PublishChanges();
 
-            await backupService.PerformCustomerOperationForBackupAsync(TenantId, _billingSessionId);
+            await backupService.CompleteCustomerSessionForBackupAsync(TenantId, _billingSessionId);
         }
         catch (Exception error)
         {
@@ -231,5 +252,10 @@ public class BackupProgressItem : BaseBackupProgressItem
     public override object Clone()
     {
         return MemberwiseClone();
+    }
+
+    public void Dispose()
+    {
+        _billingSessionSemaphore.Dispose();
     }
 }

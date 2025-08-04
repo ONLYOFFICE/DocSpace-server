@@ -96,7 +96,7 @@ public class BackupWorker(
         }
     }
 
-    public async Task<BackupProgress> StartBackupAsync(StartBackupRequest request, bool enqueueTask = true, string taskId = null)
+    public async Task<BackupProgress> StartBackupAsync(StartBackupRequest request, bool enqueueTask = true, string taskId = null, int billingSessionId = 0, DateTime billingSessionExpire = default)
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
@@ -119,7 +119,7 @@ public class BackupWorker(
 
                 item = serviceProvider.GetService<BackupProgressItem>();
 
-                item.Init(request, false, TempFolder, _limit);
+                item.Init(request, false, TempFolder, _limit, billingSessionId, billingSessionExpire);
 
                 if (!string.IsNullOrEmpty(taskId))
                 {
@@ -140,7 +140,7 @@ public class BackupWorker(
         }
     }
 
-    public async Task StartScheduledBackupAsync(BackupSchedule schedule, int billingSessionId)
+    public async Task StartScheduledBackupAsync(BackupSchedule schedule, int billingSessionId, DateTime billingSessionExpire)
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
@@ -155,7 +155,7 @@ public class BackupWorker(
             {
                 item = serviceProvider.GetService<BackupProgressItem>();
 
-                item.Init(schedule, true, TempFolder, _limit, billingSessionId);
+                item.Init(schedule, true, TempFolder, _limit, billingSessionId, billingSessionExpire);
 
                 await _backupProgressQueue.EnqueueTask(item);
             }

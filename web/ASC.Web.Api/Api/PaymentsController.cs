@@ -738,7 +738,7 @@ public class PaymentController(
 
         await DemandPayerAsync(customerInfo);
 
-        var result = await tariffService.OpenCustomerSessionAsync(tenant.Id, inDto.ServiceAccount, inDto.ExternalRef, inDto.Quantity);
+        var result = await tariffService.OpenCustomerSessionAsync(tenant.Id, inDto.ServiceAccount, inDto.ExternalRef, inDto.Quantity, inDto.Duration);
         return result;
     }
 
@@ -776,18 +776,51 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Perform customer operation and return true if the operation is succesfully provided.
+    /// Trying to extend a customer session.
     /// </summary>
     /// <short>
-    /// Perform customer operation
+    /// Extend customer session
     /// </short>
-    /// <path>api/2.0/portal/payment/customer/performoperation</path>
+    /// <path>api/2.0/portal/payment/customer/extendsession</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The customer session", typeof(Session))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpPut("customer/extendsession")]
+    public async Task<Session> ExtendCustomerSession(ExtendCustomerSessionRequestDto inDto)
+    {
+        if (inDto.SessionId <= 0 || inDto.Duration <= 0 || !tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        await DemandPayerAsync(customerInfo);
+
+        var result = await tariffService.ExtendCustomerSessionAsync(tenant.Id, inDto.SessionId, inDto.Duration);
+        return result;
+    }
+
+    /// <summary>
+    /// Complete customer session and return true if the operation is succesfully provided.
+    /// </summary>
+    /// <short>
+    /// Complete customer session
+    /// </short>
+    /// <path>api/2.0/portal/payment/customer/completesession</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Boolean value: true if the operation is succesfully provided", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpPost("customer/performoperation")]
-    public async Task<bool> PerformCustomerOperation(PerformCustomerOperationRequestDto inDto)
+    [HttpPost("customer/completesession")]
+    public async Task<bool> CompleteCustomerSession(CompleteCustomerSessionRequestDto inDto)
     {
         if (inDto.SessionId <= 0 || !tariffService.IsConfigured())
         {
@@ -804,7 +837,7 @@ public class PaymentController(
 
         await DemandPayerAsync(customerInfo);
 
-        var result = await tariffService.PerformCustomerOperationAsync(tenant.Id, inDto.ServiceAccount, inDto.SessionId, inDto.Quantity);
+        var result = await tariffService.CompleteCustomerSessionAsync(tenant.Id, inDto.ServiceAccount, inDto.SessionId, inDto.Quantity);
 
         if (result)
         {

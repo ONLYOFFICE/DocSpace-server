@@ -1182,10 +1182,10 @@ public class TariffService(
         return balance;
     }
 
-    public async Task<Session> OpenCustomerSessionAsync(int tenantId, int serviceAccount, string externalRef, int quantity)
+    public async Task<Session> OpenCustomerSessionAsync(int tenantId, int serviceAccount, string externalRef, int quantity, int duration)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await accountingClient.OpenCustomerSessionAsync(portalId, serviceAccount, externalRef, quantity);
+        return await accountingClient.OpenCustomerSessionAsync(portalId, serviceAccount, externalRef, quantity, duration);
     }
 
     public async Task<bool> CloseCustomerSessionAsync(int tenantId, int sessionId)
@@ -1195,10 +1195,17 @@ public class TariffService(
         return true;
     }
 
-    public async Task<bool> PerformCustomerOperationAsync(int tenantId, int serviceAccount, int sessionId, int quantity)
+    public async Task<Session> ExtendCustomerSessionAsync(int tenantId, int sessionId, int duration)
+    {
+        var session = await accountingClient.ExtendCustomerSessionAsync(sessionId, duration);
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
+        return session;
+    }
+
+    public async Task<bool> CompleteCustomerSessionAsync(int tenantId, int serviceAccount, int sessionId, int quantity)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        await accountingClient.PerformCustomerOperationAsync(portalId, serviceAccount, sessionId, quantity);
+        await accountingClient.CompleteCustomerSessionAsync(portalId, serviceAccount, sessionId, quantity);
         await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         return true;
     }

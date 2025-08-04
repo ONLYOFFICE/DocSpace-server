@@ -45,6 +45,11 @@ public class OpenCustomerSessionRequestDto
     /// Quantity
     /// </summary>
     public int Quantity { get; set; }
+
+    /// <summary>
+    /// Duration
+    /// </summary>
+    public int Duration { get; set; }
 }
 
 /// <summary>
@@ -59,9 +64,25 @@ public class CloseCustomerSessionRequestDto
 }
 
 /// <summary>
-/// Parameters for performing a customer operation
+/// Client session extend parameters
 /// </summary>
-public class PerformCustomerOperationRequestDto
+public class ExtendCustomerSessionRequestDto
+{
+    /// <summary>
+    /// Session ID
+    /// </summary>
+    public int SessionId { get; set; }
+
+    /// <summary>
+    /// Duration
+    /// </summary>
+    public int Duration { get; set; }
+}
+
+/// <summary>
+/// Client session complete parameters
+/// </summary>
+public class CompleteCustomerSessionRequestDto
 {
     /// <summary>
     /// Service account

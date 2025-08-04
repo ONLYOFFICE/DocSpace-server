@@ -44,7 +44,8 @@ public record BackupRequestIntegrationEvent : IntegrationEvent
                                   string serverBaseUri = null,
                                   bool dump = false,
                                   string taskId = null,
-                                  int billingSessionId = 0) : base(createBy, tenantId)
+                                  int billingSessionId = 0,
+                                  DateTime billingSessionExpire = default) : base(createBy, tenantId)
     {
         StorageType = storageType;
         StorageParams = storageParams;
@@ -55,6 +56,7 @@ public record BackupRequestIntegrationEvent : IntegrationEvent
         Dump = dump;
         TaskId = taskId;
         BillingSessionId = billingSessionId;
+        BillingSessionExpire = billingSessionExpire;
     }
 
     [ProtoMember(1)]
@@ -83,5 +85,8 @@ public record BackupRequestIntegrationEvent : IntegrationEvent
 
     [ProtoMember(10)]
     public int BillingSessionId { get; private init; }
+
+    [ProtoMember(11)]
+    public DateTime BillingSessionExpire { get; private init; }
 }
 

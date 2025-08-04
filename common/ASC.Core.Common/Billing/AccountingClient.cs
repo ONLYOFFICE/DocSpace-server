@@ -72,14 +72,15 @@ public class AccountingClient
         return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/balance/{portalId}", addPolicy: addPolicy);
     }
 
-    public async Task<Session> OpenCustomerSessionAsync(string portalId, int serviceAccount, string externalRef, int quantity)
+    public async Task<Session> OpenCustomerSessionAsync(string portalId, int serviceAccount, string externalRef, int quantity, int duration)
     {
         var data = new
         {
             CustomerName = portalId,
             ServiceAccount = serviceAccount,
             ExternalRef = externalRef,
-            Quantity = quantity
+            Quantity = quantity,
+            Duration = duration
         };
 
         return await RequestAsync<Session>(HttpMethod.Post, "/session/open", data: data);
@@ -95,7 +96,18 @@ public class AccountingClient
         _ = await RequestAsync<string>(HttpMethod.Put, $"/session/close", queryParams);
     }
 
-    public async Task PerformCustomerOperationAsync(string portalId, int serviceAccount, int sessionId, int quantity)
+    public async Task<Session> ExtendCustomerSessionAsync(int sessionId, int duration)
+    {
+        var queryParams = new NameValueCollection
+        {
+            { "sessionId", sessionId.ToString() },
+            { "duration", duration.ToString() }
+        };
+
+        return await RequestAsync<Session>(HttpMethod.Put, $"/session/extend", queryParams);
+    }
+
+    public async Task CompleteCustomerSessionAsync(string portalId, int serviceAccount, int sessionId, int quantity)
     {
         var data = new
         {
@@ -105,7 +117,7 @@ public class AccountingClient
             Quantity = quantity
         };
 
-        _ = await RequestAsync<string>(HttpMethod.Post, "/operation/provided", data: data);
+        _ = await RequestAsync<string>(HttpMethod.Post, "/operation/sessionComplete", data: data);
     }
 
     public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal, int? offset, int? limit)
@@ -331,6 +343,11 @@ public class Session
     /// The three-character ISO 4217 currency symbol of the reserved amount.
     /// </summary>
     public string Currency { get; init; }
+
+    /// <summary>
+    /// The expiration date of the session.
+    /// </summary>
+    public DateTime Expire { get; init; }
 }
 
 /// <summary>

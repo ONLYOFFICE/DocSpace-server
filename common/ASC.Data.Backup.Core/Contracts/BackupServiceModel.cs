@@ -59,7 +59,6 @@ public class StartBackupRequest
     public Dictionary<string, string> StorageParams { get; init; }
     public string ServerBaseUri { get; init; }
     public bool Dump { get; init; }
-    public int BillingSessionId { get; init; }
 }
 
 /// <summary>
