@@ -1032,7 +1032,7 @@ public class PortalController(
     /// <short>
     /// Generate the Document Server license quota report
     /// </short>
-    /// <path>api/2.0/portal/quota/licensequota/report</path>
+    /// <path>apisystem/portal/quota/licensequota/report</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "URL to the xlsx report file", typeof(IActionResult))]
     [HttpPost("licensequota/report")]
