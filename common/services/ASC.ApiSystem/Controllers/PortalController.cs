@@ -997,7 +997,7 @@ public class PortalController(
     [HttpGet("licensequota")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
-    public async Task<IActionResult> GetDocumentServerLicenseQuotaAsync()
+    public async Task<IActionResult> GetDocumentServerLicenseQuotaAsync([FromQuery] bool useCache = true)
     {
         if (!coreBaseSettings.Standalone)
         {
@@ -1008,12 +1008,21 @@ public class PortalController(
             });
         }
 
-        var (userQuota, license) = await documentServiceLicense.GetLicenseQuotaAsync();
+        var (userQuota, license) = await documentServiceLicense.GetLicenseQuotaAsync(useCache);
+
+        userQuota ??= [];
+
+        var totalUsers = userQuota.Count;
+        var portalUsers = userQuota.Where(u => Guid.TryParse(u.Key, out _)).Count();
+        var externalUsers = totalUsers - portalUsers;
 
         return Ok(new
         {
             userQuota,
-            license
+            license,
+            totalUsers,
+            portalUsers,
+            externalUsers
         });
     }
 
@@ -1029,7 +1038,7 @@ public class PortalController(
     [HttpPost("licensequota/report")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
-    public async Task<IActionResult> CreateDocumentServerLicenseQuotaReport()
+    public async Task<IActionResult> CreateDocumentServerLicenseQuotaReport([FromQuery] bool useCache = true)
     {
         if (!coreBaseSettings.Standalone)
         {
@@ -1042,7 +1051,7 @@ public class PortalController(
 
         var reportName = string.Format(Resource.DocumentServerLicenseQuotaReportName + ".csv", DateTime.UtcNow.ToShortDateString());
 
-        var (userQuota, _) = await documentServiceLicense.GetLicenseQuotaAsync();
+        var (userQuota, _) = await documentServiceLicense.GetLicenseQuotaAsync(useCache);
 
         if (userQuota == null)
         {
