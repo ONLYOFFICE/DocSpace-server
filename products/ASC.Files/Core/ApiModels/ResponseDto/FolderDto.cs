@@ -283,6 +283,11 @@ public class FolderDtoHelper(
             result.Type = folder.FolderType;
         }
 
+        if (folder.FolderType is FolderType.Knowledge or FolderType.ResultStorage)
+        {
+            result.Type = folder.FolderType;
+        }
+
         result.Lifetime = mapper.Map<RoomDataLifetime, RoomDataLifetimeDto>(folder.SettingsLifetime);
 
         if (folder.SettingsChatParameters != null)
