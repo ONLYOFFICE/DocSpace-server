@@ -573,7 +573,18 @@ public class UserController(
             try
             {
                 await securityContext.SetUserPasswordHashAsync(inDto.UserId, inDto.MemberBase.PasswordHash);
-                messageService.Send(MessageAction.UserUpdatedPassword);
+
+                var messageTarget = MessageTarget.Create(inDto.UserId);
+                messageService.Send(MessageAction.UserUpdatedPassword, messageTarget);
+
+                var passwordChangeEvent = (await auditEventsRepository.GetByFilterAsync(
+                    userId: securityContext.CurrentAccount.ID,
+                    action: MessageAction.UserUpdatedPassword,
+                    target: messageTarget.ToString(),
+                    limit: 1))
+                    .FirstOrDefault();
+
+                await studioNotifyService.SendUserPasswordChangedAsync(user, passwordChangeEvent);
 
                 await cookiesManager.ResetUserCookieAsync(inDto.UserId, false);
                 messageService.Send(MessageAction.CookieSettingsUpdated);

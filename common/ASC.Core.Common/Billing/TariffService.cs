@@ -66,6 +66,7 @@ public class TariffService(
     BillingClient billingClient,
     AccountingClient accountingClient,
     IServiceProvider serviceProvider,
+    ResiliencePipelineProvider<string> resiliencePipelineProvider,
     TenantExtraConfig tenantExtraConfig)
     : ITariffService
 {
@@ -167,8 +168,8 @@ public class TariffService(
                             }
                             else
                             {
-                                await AddInitialQuotaAsync(asynctariff, tenantId);
-                            }
+                            await AddInitialQuotaAsync(asynctariff, tenantId);
+                        }
                         }
 
                         if (asynctariff.Id == tariff.Id)
@@ -1121,11 +1122,9 @@ public class TariffService(
             return result;
         }
 
-        var retryPolicy = Policy
-            .HandleResult<bool>(result => result == false)
-            .WaitAndRetryAsync(15, retryAttempt => TimeSpan.FromSeconds(1));
+        var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingClient.BalanceResiliencePipelineName);
 
-        var updated = await retryPolicy.ExecuteAsync(async () =>
+        var updated = await pipeline.ExecuteAsync(async (_) =>
         {
             var newBalance = await GetCustomerBalanceAsync(tenantId, true);
             var newBalanceAmount = newBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;

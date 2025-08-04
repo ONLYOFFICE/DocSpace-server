@@ -63,7 +63,7 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
                 }
                 catch (Exception err)
                 {
-                    _log.ErrorIntercept(interceptor.Name, NotifyAction, Recipient, err);
+                    _log.ErrorIntercept(interceptor.Name, NotifyAction.ToString(), Recipient.ToString(), err);
                 }
             }
         }

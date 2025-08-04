@@ -36,3 +36,4 @@ global using ASC.EventBus.Serializers;
 global using Autofac;
 global using Microsoft.Extensions.Logging;
 global using Polly;
+global using Polly.Retry;

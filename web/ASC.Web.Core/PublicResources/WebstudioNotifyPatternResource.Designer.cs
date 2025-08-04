@@ -430,6 +430,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Open DocSpace.
+        /// </summary>
+        public static string ButtonOpenDocSpace {
+            get {
+                return ResourceManager.GetString("ButtonOpenDocSpace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Purchase now.
         /// </summary>
         public static string ButtonPurchaseNow {
@@ -1302,6 +1311,28 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_opensource_user_welcome_v1 {
             get {
                 return ResourceManager.GetString("pattern_opensource_user_welcome_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to h1.Password changed successfully
+        ///
+        ///Your password for the account *$UserName*, *$UserEmail* was successfully changed on *$Date* in DocSpace: &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
+        ///
+        ///IP: *$IP*
+        ///Device: *$Device*
+        ///#if($Location != &quot;&quot;)
+        ///Location: *$Location*
+        ///#end
+        ///Browser: *$Browser*
+        ///
+        ///If this action was made by you — no further steps are required. If this change looks suspicious or was not authorized by you, please reset your password immediately and disable access to DocSpace for this device.
+        ///
+        ///$ [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_password_changed {
+            get {
+                return ResourceManager.GetString("pattern_password_changed", resourceCulture);
             }
         }
         
@@ -2619,6 +2650,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_opensource_user_welcome_v1 {
             get {
                 return ResourceManager.GetString("subject_opensource_user_welcome_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your password was changed successfully.
+        /// </summary>
+        public static string subject_password_changed {
+            get {
+                return ResourceManager.GetString("subject_password_changed", resourceCulture);
             }
         }
         
