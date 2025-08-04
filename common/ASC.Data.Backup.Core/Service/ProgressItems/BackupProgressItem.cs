@@ -185,10 +185,7 @@ public class BackupProgressItem : BaseBackupProgressItem
             await socketManager.BackupProgressAsync((int)Percentage, Dump);
             await PublishChanges();
 
-            if (_billingSessionId > 0)
-            {
-                await backupService.PerformCustomerOperationForBackupAsync(TenantId, _billingSessionId);
-            }
+            await backupService.PerformCustomerOperationForBackupAsync(TenantId, _billingSessionId);
         }
         catch (Exception error)
         {

@@ -545,7 +545,7 @@ public class BackupService(
 
     public async Task<bool> CloseCustomerSessionForBackupAsync(int tenantId, int sessionId)
     {
-        if (!tariffService.IsConfigured())
+        if (sessionId <= 0 || !tariffService.IsConfigured())
         {
             return false;
         }
@@ -563,7 +563,7 @@ public class BackupService(
 
     public async Task<bool> PerformCustomerOperationForBackupAsync(int tenantId, int sessionId)
     {
-        if (!tariffService.IsConfigured())
+        if (sessionId <= 0 || !tariffService.IsConfigured())
         {
             return false;
         }
