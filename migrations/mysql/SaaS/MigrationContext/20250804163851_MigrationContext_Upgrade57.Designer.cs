@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20250804112211_MigrationContext_Upgrade57")]
+    [Migration("20250804163851_MigrationContext_Upgrade57")]
     partial class MigrationContext_Upgrade57
     {
         /// <inheritdoc />
@@ -7472,8 +7472,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("room_id");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)")
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("user_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");

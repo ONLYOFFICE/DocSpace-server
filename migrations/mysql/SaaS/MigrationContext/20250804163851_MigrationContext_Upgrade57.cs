@@ -117,7 +117,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     server_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
                     room_id = table.Column<int>(type: "int", nullable: false),
-                    user_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                    user_id = table.Column<string>(type: "varchar(36)", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
                     tool_config = table.Column<string>(type: "json", nullable: true, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8")
