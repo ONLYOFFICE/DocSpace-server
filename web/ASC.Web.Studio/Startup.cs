@@ -79,9 +79,9 @@ public class Startup : BaseStartup
 
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        var services = builder.Services;
         await base.ConfigureServices(builder);
 
+        var services = builder.Services;
         services.AddMemoryCache();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
@@ -102,19 +102,6 @@ public class Startup : BaseStartup
         services.AddActivePassiveHostedService<TopUpWalletService>(_configuration);
         services.AddActivePassiveHostedService<RenewSubscriptionService>(_configuration);
 
-        var lifeTime = TimeSpan.FromMinutes(5);
-
-        services.AddHttpClient(WebhookSender.WEBHOOK)
-                .SetHandlerLifetime(lifeTime);
-             
-        services.AddHttpClient(WebhookSender.WEBHOOK_SKIP_SSL)
-                .SetHandlerLifetime(lifeTime)
-                .ConfigurePrimaryHttpMessageHandler(_ =>
-                {
-                    return new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-                    };
-                });
+        services.AddWebhookSenderHttpClient(_configuration);
     }
 }

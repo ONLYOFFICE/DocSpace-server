@@ -1,9 +1,5 @@
 {{>partial_header}}
 
-using System;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
 namespace {{packageName}}.{{modelPackage}}
 {
     /// <summary>
@@ -14,34 +10,26 @@ namespace {{packageName}}.{{modelPackage}}
         /// <summary>
         ///  Custom JSON serializer
         /// </summary>
-        static public readonly JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
+        static public readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions
         {
             // OpenAPI generated types generally hide default constructors.
-            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-            MissingMemberHandling = MissingMemberHandling.Error,
-            ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy
-                {
-                    OverrideSpecifiedNames = false
-                }
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            Converters = {
+                new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
             }
         };
 
         /// <summary>
         ///  Custom JSON serializer for objects with additional properties
         /// </summary>
-        static public readonly JsonSerializerSettings AdditionalPropertiesSerializerSettings = new JsonSerializerSettings
+        static public readonly JsonSerializerOptions AdditionalPropertiesSerializerOptions = new JsonSerializerOptions
         {
             // OpenAPI generated types generally hide default constructors.
-            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-            MissingMemberHandling = MissingMemberHandling.Ignore,
-            ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy
-                {
-                    OverrideSpecifiedNames = false
-                }
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.Never,
+            Converters = {
+                new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
             }
         };
 

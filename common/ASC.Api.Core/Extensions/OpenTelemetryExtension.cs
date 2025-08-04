@@ -26,7 +26,6 @@
 
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace ASC.Api.Core.Extensions;
@@ -56,15 +55,13 @@ public static class OpenTelemetryExtension
             logging.IncludeFormattedMessage = true;
             logging.IncludeScopes = true;
         });
-        
+
         builder.Services.AddOpenTelemetry()
-            .ConfigureResource(resource => resource.AddService(telemetrySettings.ServiceName))
             .WithMetrics(metrics =>
             {
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation()
-                    .AddProcessInstrumentation()
                     .AddFusionCacheInstrumentation();
 
                 if (telemetrySettings.InfluxDB != null)
@@ -77,11 +74,14 @@ public static class OpenTelemetryExtension
                         options.Org = telemetrySettings.InfluxDB.Org;
                     });
                 }
+                
+                metrics.AddMeter("MySqlConnector");
             })
             .WithTracing(tracing =>
             {
-                tracing.AddSource(builder.Environment.ApplicationName)
+                tracing
                     .AddHttpClientInstrumentation()
+                    .AddAspNetCoreInstrumentation()
                     .AddFusionCacheInstrumentation();
             });
         

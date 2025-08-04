@@ -356,6 +356,10 @@ public class EditorConfiguration<T>(
                 title = FilesJSResource.TitleNewFilePresentation;
                 break;
 
+            case FileType.Pdf:
+                title = FilesJSResource.TitleNewFilePdfFormText;
+                break;
+
             default:
                 return null;
         }
@@ -577,11 +581,6 @@ public class PermissionsConfig
     /// Defines if the document can be printed or not.
     /// </summary>
     public bool Print { get; set; } = true;
-
-    /// <summary>
-    /// Specifies whether to display the "Rename..." button when using the "onRequestRename" event.
-    /// </summary>
-    public bool Rename { get; set; }
 
     /// <summary>
     /// Defines if the document can be reviewed or not.
@@ -845,6 +844,7 @@ public class CustomerConfig(
 [Transient(GenericArguments = [typeof(string)])]
 public class CustomizationConfig<T>(
     CoreBaseSettings coreBaseSettings,
+    TenantManager tenantManager,
     SettingsManager settingsManager,
     FileUtility fileUtility,
     FilesSettingsHelper filesSettingsHelper,
@@ -863,7 +863,22 @@ public class CustomizationConfig<T>(
     [JsonIgnore]
     public string GobackUrl;
 
-    public bool About => !coreBaseSettings.Standalone && !coreBaseSettings.CustomMode;
+    public async Task<bool> IsAboutPageVisible()
+    {
+        if (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode)
+        {
+            return true;
+        }
+
+        var quota = await tenantManager.GetCurrentTenantQuotaAsync();
+        if (!quota.Branding)
+        {
+            return true;
+        }
+
+        var companyWhiteLabelSettings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>();
+        return !companyWhiteLabelSettings.HideAbout;
+    }
 
     public CustomerConfig Customer { get; set; } = customerConfig;
 

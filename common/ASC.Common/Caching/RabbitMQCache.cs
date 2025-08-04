@@ -51,7 +51,6 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
         _actions = new ConcurrentDictionary<string, List<Action<T>>>();
 
         var rabbitMQConfiguration = configuration.GetSection("rabbitmq").Get<RabbitMQSettings>();
-
         _factory = rabbitMQConfiguration.GetConnectionFactory();
         _initializeTask = InitializeAsync();
     }

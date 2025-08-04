@@ -32,9 +32,9 @@ namespace ASC.Files.Tests.FilesController;
 [Collection("Test Collection")]
 public class CreateFileTest(
     FilesApiFactory filesFactory, 
-    WebApplicationFactory<WebApiProgram> apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    WepApiFactory apiFactory, 
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
 
@@ -110,7 +110,7 @@ public class CreateFileTest(
         //Arrange
         var file = new CreateFileJsonElement("test.docx");
         
-        await Assert.ThrowsAsync<Docspace.Client.ApiException>(async () => await _filesFilesApi.CreateFileAsync(Random.Shared.Next(10000, 20000), file, cancellationToken: TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateFileAsync(Random.Shared.Next(10000, 20000), file, cancellationToken: TestContext.Current.CancellationToken));
     }
     
     [Theory]
@@ -132,8 +132,8 @@ public class CreateFileTest(
         var file = new CreateFileJsonElement(longFileName);
         
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
-            async () => await _filesFilesApi.CreateFileAsync(
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.CreateFileAsync(
                 await GetFolderIdAsync(FolderType.USER, Initializer.Owner), 
                 file, 
                 cancellationToken: TestContext.Current.CancellationToken));
@@ -158,7 +158,7 @@ public class CreateFileTest(
             createNewIfExist: true
         );
         
-        var result = (await _filesFilesApi.CreateTextFileAsync(userFolderId, createParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.CreateTextFileAsync(userFolderId, createParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -186,7 +186,7 @@ public class CreateFileTest(
             createNewIfExist: true
         );
         
-        var result = (await _filesFilesApi.CreateHtmlFileAsync(userFolderId, createParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.CreateHtmlFileAsync(userFolderId, createParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();

@@ -33,16 +33,16 @@ internal static partial class DispatchEngineLogger
     public const string ResponseMessage = "[{subject}] sended to [{recipient}] over {senderName}, status: {result}";
 
     [LoggerMessage(LogLevel.Debug, "[{action}]->[{recipient}] by [{senderName}] to [{address}] at {date}\r\n\r\n[{subject}]\r\n{body}\r\n{dots}")]
-    public static partial void LogMessage(this ILogger logger, INotifyAction action, string recipient, string senderName, string address, DateTime date, string subject, string body, string dots);
+    public static partial void LogMessage(this ILogger logger, string action, string recipient, string senderName, string address, DateTime date, string subject, string body, string dots);
 
     [LoggerMessage(LogLevel.Debug, ResponseMessage)]
-    public static partial void LogDebugResponce(this ILogger logger, string subject, IDirectRecipient recipient, string senderName, SendResult result);
+    public static partial void LogDebugResponce(this ILogger logger, string subject, string recipient, string senderName, SendResult result);
 
     [LoggerMessage(LogLevel.Debug, ResponseMessage)]
-    public static partial void LogDebugResponceWithException(this ILogger logger, string subject, IDirectRecipient recipient, string senderName, SendResult result, Exception? exception);
+    public static partial void LogDebugResponceWithException(this ILogger logger, string subject, string recipient, string senderName, SendResult result, Exception? exception);
 
     [LoggerMessage(LogLevel.Error, ResponseMessage)]
-    public static partial void LogErrorResponceWithException(this ILogger logger, string subject, IDirectRecipient recipient, string senderName, SendResult result, Exception? exception);
+    public static partial void LogErrorResponceWithException(this ILogger logger, string subject, string recipient, string senderName, SendResult result, Exception? exception);
 
     [LoggerMessage(LogLevel.Debug, "LogOnly: {LogOnly}")]
     public static partial void LogOnly(this ILogger logger, bool logOnly);

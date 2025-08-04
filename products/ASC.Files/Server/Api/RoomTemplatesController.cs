@@ -133,6 +133,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <short>Get public settings</short>
     /// <path>api/2.0/files/roomtemplate/{id}/public</path>
     [Tags("Rooms")]
+    [SwaggerResponse(200, "Ok", typeof(bool))]
     [HttpGet("{id}/public")]
     public async Task<bool> GetPublicSettings(PublicDto inDto)
     {
@@ -146,6 +147,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <short>Set public settings</short>
     /// <path>api/2.0/files/roomtemplate/public</path>
     [Tags("Rooms")]
+    [SwaggerResponse(200, "Ok")]
     [HttpPut("public")]
     public async Task SetPublicSettings(SetPublicDto inDto)
     {

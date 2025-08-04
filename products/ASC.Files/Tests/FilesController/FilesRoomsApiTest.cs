@@ -24,16 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using FileShare = Docspace.Model.FileShare;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
 public class FilesRoomsApiTest(
     FilesApiFactory filesFactory, 
-    WebApplicationFactory<WebApiProgram> apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    WepApiFactory apiFactory, 
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
     [Fact]
@@ -371,5 +369,36 @@ public class FilesRoomsApiTest(
         
         // Assert
         newItems.Should().NotBeNull();
+    }
+    
+    [Fact]
+    public async Task CreateDocxFile_InRoom_ReturnsFileData()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        // Create a room
+        var roomTitle = "Room for DocX " + Guid.NewGuid().ToString()[..8];
+        var createdRoom = (await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.CustomRoom), 
+            TestContext.Current.CancellationToken)).Response;
+            
+        // Act
+        var fileName = "Test Document.docx";
+        var file = await CreateFile(fileName, createdRoom.Id);
+        
+        // Assert
+        file.Should().NotBeNull();
+        file.Title.Should().Be(fileName);
+        file.FileExst.Should().Be(".docx");
+        
+        // Verify a file exists in the room's contents
+        var roomFiles = (await _foldersApi.GetFolderByFolderIdAsync(
+            createdRoom.Id,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+            
+        roomFiles.Should().NotBeNull();
+        roomFiles.Files.Should().NotBeEmpty();
+        roomFiles.Files.Should().Contain(f => f.Title == fileName);
     }
 }

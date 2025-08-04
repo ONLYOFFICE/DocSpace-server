@@ -395,7 +395,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         _docsEditionFeature = new TenantQuotaFeatureFlag(this) { Name = "docs", Visible = false };
         _ldapFeature = new TenantQuotaFeatureFlag(this) { Name = "ldap", Order = 3, EmployeeType = EmployeeType.DocSpaceAdmin };
         _ssoFeature = new TenantQuotaFeatureFlag(this) { Name = "sso", Order = 5, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _brandingFeature = new TenantQuotaFeatureFlag(this) { Name = "branding", Visible = false };
+        _brandingFeature = new TenantQuotaFeatureFlag(this) { Name = "branding", Order = 12, EmployeeType = EmployeeType.DocSpaceAdmin };
         _customizationFeature = new TenantQuotaFeatureFlag(this) { Name = "customization", Order = 4, EmployeeType = EmployeeType.DocSpaceAdmin };
         _lifetimeFeature = new TenantQuotaFeatureFlag(this) { Name = "lifetime", Standalone = true };
         _customFeature = new TenantQuotaFeatureFlag(this) { Name = "custom", Visible = false };

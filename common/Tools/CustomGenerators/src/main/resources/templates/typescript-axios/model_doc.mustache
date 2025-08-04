@@ -14,7 +14,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```typescript
-import { {{classname}} } from '{{#npmName}}{{.}}{{/npmName}}{{^npmName}}./api{{/npmName}}';
+import { {{classname}} } from '{{#packageName}}{{.}}{{/packageName}}{{^packageName}}./api{{/packageName}}';
 
 const instance: {{classname}} = {
 {{#vars}}

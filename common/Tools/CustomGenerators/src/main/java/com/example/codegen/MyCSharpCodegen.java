@@ -18,7 +18,7 @@ import org.openapitools.codegen.CodegenProperty;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.stream.Collectors;
 
 public class MyCSharpCodegen extends CSharpClientCodegen {
 
@@ -60,6 +60,22 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
             "ExampleProject.mustache", packageFolder + ".Example", packageName + ".Example.csproj"
         ));
 
+        supportingFiles.add(new SupportingFile(
+            "GlobalUsing.mustache", packageFolder, "GlobalUsings.cs"
+        ));
+
+        supportingFiles.add(new SupportingFile(
+            "AUTHORS.mustache", "", "AUTHORS.md"
+        ));
+
+        supportingFiles.add(new SupportingFile(
+            "LICENSE.mustache", "", "LICENSE"
+        ));
+
+        supportingFiles.add(new SupportingFile(
+            "CHANGELOG.mustache", "", "CHANGELOG.md"
+        ));
+
     }
 
     @Override
@@ -70,8 +86,27 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
             CodegenModel model = mo.getModel();
             if ("ApiDateTime".equals(model.classname)) {
                 model.vendorExtensions.put("isApiDateTime", true);
+
+                for (CodegenProperty prop : model.vars) {
+                    prop.isReadOnly = false;
+                }
             }
+            for (CodegenProperty prop : model.vars) {
+                if ("version_Changed".equalsIgnoreCase(prop.baseName)) {
+                    prop.name = "VersionChangedField";
+                    prop.baseName = "versionChangedField";
+                    prop.getter = "getVersionChangedField";
+                    prop.setter = "setVersionChangedField";
+                    prop.nameInCamelCase = "versionChangedField";
+                    prop.nameInPascalCase = "VersionChangedField";
+                    prop.nameInSnakeCase = "VERSION_CHANGED_FIELD";
+                }
+            }
+            model.readWriteVars = model.vars.stream()
+            .filter(v -> !v.isReadOnly)
+            .collect(Collectors.toList());
         }
+        
 
         return objs;
     }
@@ -89,6 +124,30 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
                         String dashedId = toDashCase(op.operationId);
                         String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";
                         op.vendorExtensions.put("x-seealsoUrl", seealsoUrl);
+                    }
+
+                    if ("GET".equalsIgnoreCase(op.httpMethod)) {
+                        boolean allAreQueryParams = op.allParams.stream()
+                            .allMatch(p -> Boolean.TRUE.equals(p.isQueryParam));
+
+                        boolean hasCountParam = op.allParams.stream()
+                            .anyMatch(p -> "count".equals(p.baseName));
+
+                        if (allAreQueryParams && hasCountParam) {
+                            CodegenParameter fieldsParam = new CodegenParameter();
+                            fieldsParam.baseName = "fields";
+                            fieldsParam.paramName = "fields";
+                            fieldsParam.dataType = "string";
+                            fieldsParam.description = "Comma-separated list of fields to include in the response";
+                            fieldsParam.required = false;
+                            fieldsParam.isQueryParam = true;
+                            fieldsParam.isPrimitiveType = true;
+                            fieldsParam.isNullable = true;
+                            fieldsParam.collectionFormat = "csv";
+
+                            op.allParams.add(fieldsParam);
+                            op.queryParams.add(fieldsParam);
+                        }
                     }
 
                     if (op.allParams != null) {
@@ -117,6 +176,14 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
         }
 
         return objs;
+    }
+
+    @Override
+    public String escapeReservedWord(String name) {
+        if (isReservedWord(name) || name.matches("^\\d.*")) {
+            return "@" + name;
+        }
+        return name;
     }
 
 

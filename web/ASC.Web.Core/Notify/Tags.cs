@@ -42,6 +42,9 @@ public static class Tags
     public const string SettingsLink = "SettingsLink";
     public const string InviteLink = "InviteLink";
     public const string Date = "Date";
+    public const string Device = "Device";
+    public const string Location = "Location";
+    public const string Browser = "Browser";
     public const string IP = "IP";
     public const string AuthorLink = "AuthorLink";
     public const string Activities = "Activities";
