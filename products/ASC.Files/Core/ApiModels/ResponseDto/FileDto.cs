@@ -181,11 +181,6 @@ public class FileDto<T> : FileEntryDto<T>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
     /// <summary>
-    /// The available external rights of the file.
-    /// </summary>
-    public IDictionary<string, bool> AvailableExternalRights { get; set; }
-
-    /// <summary>
     /// The time when the file was last opened.
     /// </summary>
     public ApiDateTime LastOpened { get; set; }

@@ -2795,6 +2795,50 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         return result;
     }
+
+    public async Task<IDictionary<string, bool>> GetFolderAccesses<T>(Folder<T> folder, SubjectType subjectType)
+    {
+        var result = new Dictionary<string, bool>();
+        
+        if (!AvailableFileAccesses.TryGetValue(folder.RootFolderType, out var subjectShares)
+            || !subjectShares.TryGetValue(subjectType, out var shares))
+        {
+            return null;
+        }
+
+        var parentFolders = await GetFileParentFolders(folder.ParentId);
+        var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
+        var isFormRoom = DocSpaceHelper.IsFormsFillingFolder(folder);
+        foreach (var s in shares)
+        {
+            if (s is FileShare.Restrict or FileShare.None || (s is FileShare.Read && !isFormRoom))
+            {
+                result.Add(s.ToStringFast(), true);
+                continue;
+            }
+
+            switch (s)
+            {
+                case FileShare.Editing when !isFormRoom:
+                case FileShare.Comment when !isFormRoom:
+                case FileShare.Review when !isFormRoom:
+                case FileShare.FillForms when isFormRoom:
+                    result.Add(s.ToStringFast(), true);
+                    break;
+                case FileShare.CustomFilter:
+                    break;
+                default:
+                    if (!isFormRoom)
+                    {
+                        result.Add(s.ToStringFast(), false);
+                    }
+
+                    break;
+            }
+        }
+
+        return result;
+    }
     
     public static bool IsAvailableAccess(FileShare share, SubjectType subjectType, FolderType roomType)
     {

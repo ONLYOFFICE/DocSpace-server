@@ -197,6 +197,11 @@ public abstract class FileEntryDto<T> : FileEntryDto
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     /// <summary>
+    /// The available external rights of the file entry.
+    /// </summary>
+    public IDictionary<string, bool> AvailableExternalRights { get; set; }
+    
+    /// <summary>
     /// The request token of the file entry.
     /// </summary>
     public string RequestToken { get; set; }
