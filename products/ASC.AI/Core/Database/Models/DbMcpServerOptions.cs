@@ -24,31 +24,36 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.AI.Core.Database.Models;
 
-public class DbMcpServerOptions : BaseEntity, IMapFrom<McpServerOptions>
+public class DbMcpServerOptions : BaseEntity
 {
     public int TenantId { get; set; }
     public Guid Id { get; set; }
-    [MaxLength(128)]
-    public required string Name { get; set; }
+    [MaxLength(128)] public required string Name { get; set; }
     public required string Endpoint { get; set; }
-    public Dictionary<string, string>? Headers { get; set; }
-    
+    public string? Headers { get; set; }
+
     public DbTenant Tenant { get; set; } = null!;
 
     public override object[] GetKeys()
     {
         return [Id];
     }
-    
-    public void Mapping(Profile profile)
+
+    public async Task<McpServerOptions> ToMcpServerOptions(InstanceCrypto crypto)
     {
-        profile.CreateMap<DbMcpServerOptions, McpServerOptions>()
-            .ForMember(dest => dest.Endpoint, opt => 
-                opt.MapFrom(src => new Uri(src.Endpoint)));
+        var options = new McpServerOptions { Id = Id, TenantId = TenantId, Name = Name, Endpoint = new Uri(Endpoint) };
+
+        if (Headers == null)
+        {
+            return options;
+        }
+
+        var headersJson = await crypto.DecryptAsync(Headers);
+        options.Headers = JsonSerializer.Deserialize<Dictionary<string, string>>(headersJson);
+
+        return options;
     }
 }
 
@@ -97,7 +102,7 @@ public static class DbMcpServerOptionsExtensions
             
             entity.Property(e => e.Headers)
                 .HasColumnName("headers")
-                .HasColumnType("json")
+                .HasColumnType("text")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });

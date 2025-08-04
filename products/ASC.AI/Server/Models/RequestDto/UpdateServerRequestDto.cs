@@ -24,22 +24,24 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.MCP.Data;
+namespace ASC.AI.Models.RequestDto;
 
-public class McpServerOptions
+public class UpdateServerRequestDto
 {
+    [FromRoute(Name = "id")]
     public Guid Id { get; init; }
-    public int TenantId { get; init; }
-    public required string Name { get; set; }
-    public required Uri Endpoint { get; set; }
-    public Dictionary<string, string>? Headers { get; set; }
     
-    public SseClientTransportOptions ToTransportOptions(TimeSpan? connectionTimeout = null) => new()
-    {
-        Name = Name,
-        Endpoint = Endpoint,
-        AdditionalHeaders = Headers,
-        TransportMode = HttpTransportMode.AutoDetect,
-        ConnectionTimeout = connectionTimeout ?? TimeSpan.FromSeconds(15)
-    };
+    [FromBody]
+    public required UpdateServerRequestBody Body { get; init; }
+}
+
+public class UpdateServerRequestBody
+{
+    [MaxLength(128)]
+    public string? Name { get; init; }
+    
+    [Url]
+    public string? Endpoint { get; init; }
+    
+    public Dictionary<string, string>? Headers { get; init; }
 }

@@ -93,7 +93,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .Annotation("MySql:CharSet", "utf8"),
                     endpoint = table.Column<string>(type: "text", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
-                    headers = table.Column<string>(type: "json", nullable: true, collation: "utf8_general_ci")
+                    headers = table.Column<string>(type: "text", nullable: true, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8")
                 },
                 constraints: table =>

@@ -24,22 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel.DataAnnotations;
-
 namespace ASC.AI.Models.RequestDto;
 
-public class AddMcpServerRequestDto
+public class DeleteServersRequestDto
 {
-    public required AddMcpServerRequestBody Body { get; init; }
+    [FromBody]
+    public required DeleteServersRequestBody Body { get; init; }
 }
 
-public class AddMcpServerRequestBody
+public class DeleteServersRequestBody
 {
-    [MaxLength(128)]
-    public required string Name { get; init; }
-    
-    [Url]
-    public required string Endpoint { get; init; }
-    
-    public Dictionary<string, string>? Headers { get; init; }
+    public required List<Guid> Servers { get; init; }
 }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20250731130509_MigrationContext_Upgrade57")]
+    [Migration("20250804112211_MigrationContext_Upgrade57")]
     partial class MigrationContext_Upgrade57
     {
         /// <inheritdoc />
@@ -98,7 +98,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Headers")
-                        .HasColumnType("json")
+                        .HasColumnType("text")
                         .HasColumnName("headers")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");

@@ -32,6 +32,30 @@ namespace ASC.AI.Api;
 [ControllerName("ai")]
 public class McpController(McpService mcpService, IMapper mapper, ApiContext apiContext) : ControllerBase
 {
+    [HttpPost("servers")]
+    public async Task<McpServerOptionsDto> AddServerAsync(AddServerRequestDto inDto)
+    {
+        var server = await mcpService.AddServerAsync(inDto.Body.Endpoint, inDto.Body.Name, inDto.Body.Headers);
+        
+        return mapper.Map<McpServerOptions, McpServerOptionsDto>(server);
+    }
+    
+    [HttpPut("servers/{id}")]
+    public async Task<McpServerOptionsDto> UpdateServerAsync(UpdateServerRequestDto inDto)
+    {
+        var server = await mcpService.UpdateServerAsync(inDto.Id, inDto.Body.Endpoint, inDto.Body.Name, inDto.Body.Headers);
+        
+        return mapper.Map<McpServerOptions, McpServerOptionsDto>(server);
+    }
+    
+    [HttpDelete("servers")]
+    public async Task<NoContentResult> DeleteServerAsync(DeleteServersRequestDto inDto)
+    {
+        await mcpService.DeleteServersAsync(inDto.Body.Servers);
+        
+        return NoContent();
+    }
+    
     [HttpGet("servers")]
     public async Task<List<McpServerDto>> GetServersAsync(PaginatedRequestDto inDto)
     {

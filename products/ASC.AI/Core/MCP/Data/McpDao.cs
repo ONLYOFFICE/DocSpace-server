@@ -27,7 +27,7 @@
 namespace ASC.AI.Core.MCP.Data;
 
 [Scope]
-public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper mapper)
+public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCrypto crypto)
 {
     public async Task<McpServerOptions> AddServerAsync(int tenantId, string endpoint, string name, Dictionary<string, string>? headers)
     {
@@ -39,9 +39,14 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper map
             Id = Guid.NewGuid(),
             TenantId = tenantId,
             Name = name,
-            Endpoint = endpoint,
-            Headers = headers
+            Endpoint = endpoint
         };
+
+        if (headers is { Count: > 0 })
+        {
+            var headersJson = JsonSerializer.Serialize(headers);
+            server.Headers = await crypto.EncryptAsync(headersJson);
+        }
 
         await strategy.ExecuteAsync(async () =>
         {
@@ -50,23 +55,35 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper map
             await context.SaveChangesAsync();
         });
 
-        return mapper.Map<DbMcpServerOptions, McpServerOptions>(server);
+        return new McpServerOptions
+        {
+            Id = server.Id,
+            TenantId = server.TenantId,
+            Name = server.Name,
+            Endpoint = new Uri(server.Endpoint),
+            Headers = headers
+        };
     }
     
     public async Task<McpServerOptions?> GetServerAsync(int tenantId, Guid id)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var server = await dbContext.GetServerAsync(tenantId, id);
-        
-        return server == null ? null : mapper.Map<DbMcpServerOptions, McpServerOptions>(server);
+
+        if (server == null)
+        {
+            return null;
+        }
+
+        return await server.ToMcpServerOptions(crypto);
     }
     
     public async Task<List<McpServerOptions>> GetServersAsync(int tenantId, List<Guid> ids)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var servers = await dbContext.GetServersAsync(tenantId, ids).ToListAsync();
-        
-        return mapper.Map<List<DbMcpServerOptions>, List<McpServerOptions>>(servers);
+        return await dbContext.GetServersAsync(tenantId, ids)
+            .SelectAwait(async x => await x.ToMcpServerOptions(crypto))
+            .ToListAsync();
     }
 
     public async IAsyncEnumerable<McpServerOptions> GetServersAsync(int tenantId, int offset, int count)
@@ -74,7 +91,7 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper map
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         await foreach (var server in dbContext.GetServersAsync(tenantId, offset, count))
         {
-            yield return mapper.Map<DbMcpServerOptions, McpServerOptions>(server);
+            yield return await server.ToMcpServerOptions(crypto);
         }
     }
     
@@ -97,7 +114,15 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper map
 
         server.Name = options.Name;
         server.Endpoint = options.Endpoint.ToString();
-        server.Headers = options.Headers;
+        if (options.Headers is { Count: > 0 })
+        {
+            var headersJson = JsonSerializer.Serialize(options.Headers);
+            server.Headers = await crypto.EncryptAsync(headersJson);
+        }
+        else
+        {
+            server.Headers = null;
+        }
         
         await strategy.ExecuteAsync(async () =>
         {
@@ -159,7 +184,10 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper map
             return null;
         }
         
-        var options = result.Options == null ? null : mapper.Map<DbMcpServerOptions, McpServerOptions>(result.Options);
+        var options = result.Options == null 
+            ? null 
+            : await result.Options.ToMcpServerOptions(crypto);
+        
         return new McpRoomServer { Id = result.ServerId, Options = options };
     }
     
@@ -181,7 +209,7 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper map
                 yield return new McpRoomServer
                 {
                     Id = item.ServerId, 
-                    Options = mapper.Map<DbMcpServerOptions, McpServerOptions>(item.Options)
+                    Options = await item.Options.ToMcpServerOptions(crypto)
                 };
             }
         }
