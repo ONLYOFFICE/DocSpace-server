@@ -123,7 +123,9 @@ public class FileStorageService //: IFileStorageService
         {
             folder.NewForMe = tag.Count;
         }
-
+        
+        await DetermineParentRoomType(folder);
+        
         var tags = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, null, authContext.CurrentAccount.ID).ToListAsync();
         folder.Pinned = tags.Any(r => r.Type == TagType.Pin);
         folder.IsFavorite = tags.Any(r => r.Type == TagType.Favorite);
@@ -1338,6 +1340,8 @@ public class FileStorageService //: IFileStorageService
             }
         }
 
+        await DetermineParentRoomType(file);
+        
         var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
         if (fileType == FileType.Pdf)
@@ -5139,6 +5143,18 @@ public class FileStorageService //: IFileStorageService
 
     private static readonly FrozenDictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> _fileMessageActions =
         new Dictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> { { SubjectType.ExternalLink, new Dictionary<EventType, MessageAction> { { EventType.Create, MessageAction.FileExternalLinkCreated }, { EventType.Update, MessageAction.FileExternalLinkUpdated }, { EventType.Remove, MessageAction.FileExternalLinkDeleted } }.ToFrozenDictionary() } }.ToFrozenDictionary();
+    
+    private async Task DetermineParentRoomType<T>(FileEntry<T> entry)
+    {
+        if (entry.RootFolderType == FolderType.VirtualRooms && entry.ParentRoomType == null)
+        {
+            var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(r => DocSpaceHelper.IsRoom(r.FolderType));
+            if (room != null)
+            {
+                entry.ParentRoomType = room.FolderType;
+            }
+        }
+    }
 }
 
 public class FileModel<T, TTempate>
