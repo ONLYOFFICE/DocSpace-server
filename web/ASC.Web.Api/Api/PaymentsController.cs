@@ -756,7 +756,7 @@ public class PaymentController(
     [HttpPut("customer/closesession")]
     public async Task<bool> CloseCustomerSession(CloseCustomerSessionRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
+        if (inDto.SessionId <= 0 || !tariffService.IsConfigured())
         {
             return false;
         }
@@ -789,7 +789,7 @@ public class PaymentController(
     [HttpPost("customer/performoperation")]
     public async Task<bool> PerformCustomerOperation(PerformCustomerOperationRequestDto inDto)
     {
-        if (!tariffService.IsConfigured())
+        if (inDto.SessionId <= 0 || !tariffService.IsConfigured())
         {
             return false;
         }
