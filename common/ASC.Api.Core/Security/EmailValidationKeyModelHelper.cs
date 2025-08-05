@@ -88,7 +88,7 @@ public class EmailValidationKeyModelHelper(
         };
     }
 
-    public async Task<ValidationResult> ValidateAsync(EmailValidationKeyModel inDto)
+    public async Task<(ValidationResult, string)> ValidateAsync(EmailValidationKeyModel inDto)
     {
         var (key, emplType, email, uiD, type, first, encEmail) = inDto;
 
@@ -200,7 +200,7 @@ public class EmailValidationKeyModelHelper(
                 userInfo = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
                 if (userInfo == null || Equals(userInfo, Constants.LostUser) || userInfo.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && authContext.CurrentAccount.ID != uiD || userInfo.Email != email)
                 {
-                    return ValidationResult.Invalid;
+                    return (ValidationResult.Invalid, null);
                 }
 
                 checkKeyResult = provider.ValidateEmailKey(email + type + uiD, key, provider.ValidEmailKeyInterval);
@@ -226,7 +226,7 @@ public class EmailValidationKeyModelHelper(
                     .FirstOrDefault(x=> x.Description.Contains(key));
                 if (authLinkActivatedEvent != null)
                 {
-                    return ValidationResult.Invalid;
+                    return (ValidationResult.Invalid, null);
                 }
 
                 checkKeyResult = provider.ValidateEmailKey(email + type + first, key, provider.ValidAuthKeyInterval);
@@ -278,7 +278,7 @@ public class EmailValidationKeyModelHelper(
                 break;
         }
 
-        return checkKeyResult;
+        return (checkKeyResult, checkKeyResult == ValidationResult.Ok ? email : null);
 
         async Task<bool> CheckOwnerRights(string email)
         {

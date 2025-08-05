@@ -199,16 +199,18 @@ public class InvitationService(
     {
         if (confirmType is ConfirmType.EmpInvite)
         {
+            var (validationResult, _) = await validationHelper.ValidateAsync(new EmailValidationKeyModel
+            {
+                Key = key,
+                Email = email,
+                Type = ConfirmType.EmpInvite,
+                EmplType = employeeType,
+                UiD = userId
+            });
+
             return new InvitationLinkData
             {
-                Result = await validationHelper.ValidateAsync(new EmailValidationKeyModel
-                {
-                    Key = key,
-                    Email = email,
-                    Type = ConfirmType.EmpInvite,
-                    EmplType = employeeType,
-                    UiD = userId
-                }),
+                Result = validationResult,
                 ConfirmType = confirmType,
                 EmployeeType = employeeType,
                 LinkType = InvitationLinkType.Individual

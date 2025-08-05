@@ -353,7 +353,8 @@ public class AuthenticationController(
 
         if (inDto.Type != ConfirmType.LinkInvite)
         {
-            return new ConfirmDto { Result = await emailValidationKeyModelHelper.ValidateAsync(inDto)};
+            var (validationResult, validationEmail) = await emailValidationKeyModelHelper.ValidateAsync(inDto);
+            return new ConfirmDto { Result = validationResult, Email = validationEmail };
         }
 
         var email = string.IsNullOrEmpty(inDto.Email) && !string.IsNullOrEmpty(inDto.EncEmail)
@@ -435,8 +436,8 @@ public class AuthenticationController(
             if (inDto.ConfirmData != null)
             {
                 var email = inDto.ConfirmData.Email;
-                    
-                var checkKeyResult = await emailValidationKeyModelHelper.ValidateAsync(new EmailValidationKeyModel { Key = inDto.ConfirmData.Key, Email = email, Type = ConfirmType.Auth, First = inDto.ConfirmData.First.ToString() });
+
+                var (checkKeyResult, _) = await emailValidationKeyModelHelper.ValidateAsync(new EmailValidationKeyModel { Key = inDto.ConfirmData.Key, Email = email, Type = ConfirmType.Auth, First = inDto.ConfirmData.First.ToString() });
 
                 if (checkKeyResult == ValidationResult.Ok)
                 {
