@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -137,16 +137,16 @@ module.exports = (io) => {
       socket.to(room).emit("restore-backup");
     });
 
-    socket.on("storage-ecnryption", (data) => {
+    socket.on("storage-encryption", (data) => {
       const sess = socket.handshake.session;
       const tenant = sess?.portal?.tenantId || "unknown";
       const user = sess?.user?.id || "unknown";
       const sessId = sess?.id;
       const room = `encryption`;
 
-      logger.info(`WS: storage ecnryption in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
+      logger.info(`WS: storage encryption in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
 
-      socket.to(room).emit("storage-ecnryption");
+      socket.to(room).emit("storage-encryption");
     });
 
     function changeSubscription(roomParts, individual, changeFunc) {
