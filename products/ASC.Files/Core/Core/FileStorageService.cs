@@ -232,6 +232,8 @@ public class FileStorageService //: IFileStorageService
                         .FirstOrDefaultAsync(),
                     _ => parent
                 };
+                
+                parentId = parent.Id;
             }
         }
         catch (Exception e)
