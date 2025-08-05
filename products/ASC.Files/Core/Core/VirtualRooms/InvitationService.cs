@@ -186,6 +186,7 @@ public class InvitationService(
 
         if (validation.Result is EmailValidationKeyProvider.ValidationResult.Ok)
         {
+            validation.Email = email;
             return validation;
         }
 
@@ -347,6 +348,7 @@ public class Validation
     public EmailValidationKeyProvider.ValidationResult Result { get; set; }
     public string RoomId { get; set; }
     public string Title { get; set; }
+    public string Email { get; set; }
 }
 
 public class InvitationLinkData
