@@ -67,7 +67,6 @@ public class UserController(
     IHttpClientFactory httpClientFactory,
     IHttpContextAccessor httpContextAccessor,
     SettingsManager settingsManager,
-    InstanceCrypto instanceCrypto,
     InvitationService invitationService,
     FileSecurity fileSecurity,
     UsersQuotaSyncOperation usersQuotaSyncOperation,

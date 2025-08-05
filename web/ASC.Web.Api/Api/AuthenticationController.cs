@@ -69,7 +69,6 @@ public class AuthenticationController(
     BruteForceLoginManager bruteForceLoginManager,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
     InvitationService invitationService,
-    InstanceCrypto instanceCrypto,
     UserSocketManager socketManager,
     LoginProfileTransport loginProfileTransport,
     AuditEventsRepository auditEventsRepository,
