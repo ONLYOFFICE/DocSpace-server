@@ -75,9 +75,18 @@ public class ConfirmAuthHandler(
                 }
                 else
                 {
-                    userId = emailValidationKeyModel.Type is ConfirmType.EmailActivation or ConfirmType.EmpInvite or ConfirmType.LinkInvite ? 
-                        Constants.CoreSystem.ID : 
-                        (await userManager.GetUserByEmailAsync(emailValidationKeyModel.Email)).Id;
+                    if (emailValidationKeyModel.Type is ConfirmType.EmailActivation or ConfirmType.EmpInvite or ConfirmType.LinkInvite)
+                    {
+                        userId = Constants.CoreSystem.ID;
+                    }
+                    else
+                    {
+                        var email = string.IsNullOrEmpty(emailValidationKeyModel.Email) && !string.IsNullOrEmpty(emailValidationKeyModel.EncEmail)
+                            ? emailValidationKeyModelHelper.DecryptEmail(emailValidationKeyModel.EncEmail)
+                            : emailValidationKeyModel.Email;
+
+                        userId = (await userManager.GetUserByEmailAsync(email)).Id;
+                    }
                 }
             }
             else

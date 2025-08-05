@@ -92,9 +92,7 @@ public class EmailValidationKeyModelHelper(
     {
         var (key, emplType, email, uiD, type, first, encEmail) = inDto;
 
-        email = string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(encEmail)
-            ? instanceCrypto.Decrypt(encEmail.Base64FromUrlSafe())
-            : email;
+        email = string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(encEmail) ? DecryptEmail(encEmail) : email;
 
         ValidationResult checkKeyResult;
         UserInfo userInfo;
@@ -289,7 +287,12 @@ public class EmailValidationKeyModelHelper(
             return ownerId.Equals(user.Id);
         }
     }
-    
+
+    public string DecryptEmail(string encryptedEmail)
+    {
+        return instanceCrypto.Decrypt(encryptedEmail.Base64FromUrlSafe());
+    }
+
     private static Dictionary<string, StringValues> ParseQuery(string queryString)
     {
         var result = ParseNullableQuery(queryString);

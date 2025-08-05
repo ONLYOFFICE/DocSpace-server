@@ -534,7 +534,7 @@ public class UserController(
         }
 
         var email = string.IsNullOrEmpty(inDto.MemberBase.Email) && !string.IsNullOrEmpty(inDto.MemberBase.EncEmail)
-            ? instanceCrypto.Decrypt(inDto.MemberBase.EncEmail.Base64FromUrlSafe())
+            ? emailValidationKeyModelHelper.DecryptEmail(inDto.MemberBase.EncEmail)
             : inDto.MemberBase.Email;
 
         if (!string.IsNullOrEmpty(email))

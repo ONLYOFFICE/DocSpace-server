@@ -358,7 +358,7 @@ public class AuthenticationController(
         }
 
         var email = string.IsNullOrEmpty(inDto.Email) && !string.IsNullOrEmpty(inDto.EncEmail)
-            ? instanceCrypto.Decrypt(inDto.EncEmail.Base64FromUrlSafe())
+            ? emailValidationKeyModelHelper.DecryptEmail(inDto.EncEmail)
             : inDto.Email;
 
         var result = await invitationService.ConfirmAsync(inDto.Key, email, inDto.EmplType ?? default, inDto.RoomId, inDto.UiD);
