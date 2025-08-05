@@ -794,7 +794,7 @@ public class UserController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var link = commonLinkUtility.GetConfirmationEmailUrl(targetUser.Email, ConfirmType.GuestShareLink, $"{currentUserId}{inDto.UserId}", currentUserId);
+        var link = commonLinkUtility.GetConfirmationEmailUrl(targetUser.Email, ConfirmType.GuestShareLink, $"{currentUserId}{inDto.UserId}", currentUserId, encryptEmail: true);
 
         return await urlShortener.GetShortenLinkAsync(link);
     }
