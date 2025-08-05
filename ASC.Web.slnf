@@ -35,6 +35,7 @@
       "migrations\\postgre\\SaaS\\ASC.Migrations.PostgreSql.SaaS.csproj",
       "products\\ASC.AI\\Core\\ASC.AI.Core.csproj",
       "products\\ASC.AI\\Server\\ASC.AI.csproj",
+      "products\\ASC.AI\\Service\\ASC.AI.Service.csproj",
       "products\\ASC.Files\\Core\\ASC.Files.Core.csproj",
       "products\\ASC.Files\\Server\\ASC.Files.csproj",
       "products\\ASC.Files\\Service\\ASC.Files.Service.csproj",

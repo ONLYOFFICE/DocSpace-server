@@ -97,6 +97,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AI.Core", "products\ASC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AI", "products\ASC.AI\Server\ASC.AI.csproj", "{1F2AEF6E-12EB-4E8E-8A13-D12F711F51A9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AI.Service", "products\ASC.AI\Service\ASC.AI.Service.csproj", "{91B8E070-9067-4198-9619-1157E2559106}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -271,6 +273,10 @@ Global
 		{1F2AEF6E-12EB-4E8E-8A13-D12F711F51A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F2AEF6E-12EB-4E8E-8A13-D12F711F51A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F2AEF6E-12EB-4E8E-8A13-D12F711F51A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91B8E070-9067-4198-9619-1157E2559106}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91B8E070-9067-4198-9619-1157E2559106}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91B8E070-9067-4198-9619-1157E2559106}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91B8E070-9067-4198-9619-1157E2559106}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
