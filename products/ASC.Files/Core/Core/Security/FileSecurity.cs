@@ -62,41 +62,40 @@ public class FileSecurity(IDaoFactory daoFactory,
     public readonly FileShare DefaultRoomTemplatesShare = FileShare.Restrict;
 
     public static readonly HashSet<FileShare> PaidShares = [FileShare.RoomManager];
+    private static HashSet<FileShare> DefaultFileAccess => [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None];
+    private static readonly FrozenDictionary<SubjectType, HashSet<FileShare>> _defaultFileShareDictionary = new Dictionary<SubjectType, HashSet<FileShare>>
+    {
+        { SubjectType.ExternalLink, DefaultFileAccess },
+        { SubjectType.PrimaryExternalLink, DefaultFileAccess }
+    }.ToFrozenDictionary();
 
-    public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableUserFileAccesses =
+    private static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> _availableUserFileAccesses =
         new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>
     {
-        {
-            FolderType.USER, new Dictionary<SubjectType, HashSet<FileShare>>
+        { FolderType.USER, _defaultFileShareDictionary }
+    }.ToFrozenDictionary();
+    
+
+    private static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> _availableRoomFileAccesses =
+        new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>
+    {
+        { FolderType.CustomRoom, _defaultFileShareDictionary },
+        { FolderType.PublicRoom, _defaultFileShareDictionary },
+        { FolderType.EditingRoom, _defaultFileShareDictionary },
+        { FolderType.VirtualDataRoom, _defaultFileShareDictionary },
+        { FolderType.FillingFormsRoom,
+            new Dictionary<SubjectType, HashSet<FileShare>>
             {
-                { 
-                    SubjectType.ExternalLink, 
-                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.FillForms, FileShare.Restrict, FileShare.None]
-                },
-                { 
-                    SubjectType.PrimaryExternalLink, 
-                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.FillForms, FileShare.Restrict, FileShare.None]
-                }
+                { SubjectType.ExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] },
+                { SubjectType.PrimaryExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] }
             }.ToFrozenDictionary()
         }
     }.ToFrozenDictionary();
-    
-    public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableUserFolderAccesses =
+
+    private static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> _availableUserFolderAccesses =
         new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>
     {
-        {
-            FolderType.USER, new Dictionary<SubjectType, HashSet<FileShare>>
-            {
-                { 
-                    SubjectType.ExternalLink, 
-                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None]
-                },
-                { 
-                    SubjectType.PrimaryExternalLink, 
-                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None]
-                }
-            }.ToFrozenDictionary()
-        }
+        { FolderType.USER, _defaultFileShareDictionary }
     }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses =
@@ -122,8 +121,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                             FileShare.Comment, FileShare.Read, FileShare.None
                         ]
                     },
-                    { SubjectType.ExternalLink, [FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None] },
-                    { SubjectType.PrimaryExternalLink, [FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None] }
+                    { SubjectType.ExternalLink, DefaultFileAccess },
+                    { SubjectType.PrimaryExternalLink, DefaultFileAccess }
                 }.ToFrozenDictionary()
             },
             {
@@ -133,8 +132,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.None] },
                     { SubjectType.Group, [FileShare.ContentCreator] },
                     { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Read, FileShare.None] },
-                    { SubjectType.ExternalLink, [FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None] },
-                    { SubjectType.PrimaryExternalLink, [FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None] }
+                    { SubjectType.ExternalLink, DefaultFileAccess },
+                    { SubjectType.PrimaryExternalLink, DefaultFileAccess }
                 }.ToFrozenDictionary()
             },
             {
@@ -2749,7 +2748,7 @@ public class FileSecurity(IDaoFactory daoFactory,
     public async Task<IDictionary<string, bool>> GetFileAccesses<T>(File<T> file, SubjectType subjectType)
     {        
         var room = new Folder<T>();
-        var subjectShares = new Dictionary<SubjectType, HashSet<FileShare>>().ToFrozenDictionary();
+        FrozenDictionary<SubjectType, HashSet<FileShare>> subjectShares;
         var shares = new HashSet<FileShare>();
         
         var result = new Dictionary<string, bool>();
@@ -2762,7 +2761,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (file.RootFolderType == FolderType.USER)
         {
-            if (!AvailableUserFileAccesses.TryGetValue(file.RootFolderType, out subjectShares) ||
+            if (!_availableUserFileAccesses.TryGetValue(file.RootFolderType, out subjectShares) ||
                 !subjectShares.TryGetValue(subjectType, out shares))
             {
                 return null;
@@ -2774,7 +2773,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
             if (room != null)
             {
-                if (!AvailableRoomAccesses.TryGetValue(room.FolderType, out subjectShares) ||
+                if (!_availableRoomFileAccesses.TryGetValue(room.FolderType, out subjectShares) ||
                     !subjectShares.TryGetValue(subjectType, out shares))
                 {
                     return null;
@@ -2820,12 +2819,12 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public async Task<IDictionary<string, bool>> GetFolderAccesses<T>(Folder<T> folder, SubjectType subjectType)
     {
-        var subjectShares = new Dictionary<SubjectType, HashSet<FileShare>>().ToFrozenDictionary();
+        FrozenDictionary<SubjectType, HashSet<FileShare>> subjectShares;
         var shares = new HashSet<FileShare>();
         
         if (folder.RootFolderType == FolderType.USER)
         {
-            if (!AvailableUserFileAccesses.TryGetValue(folder.RootFolderType, out subjectShares) ||
+            if (!_availableUserFolderAccesses.TryGetValue(folder.RootFolderType, out subjectShares) ||
                 !subjectShares.TryGetValue(subjectType, out shares))
             {
                 return null;
@@ -2837,7 +2836,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
             if (room != null)
             {
-                if (!AvailableRoomAccesses.TryGetValue(room.FolderType, out subjectShares) ||
+                if (!_availableRoomFileAccesses.TryGetValue(room.FolderType, out subjectShares) ||
                     !subjectShares.TryGetValue(subjectType, out shares))
                 {
                     return null;
