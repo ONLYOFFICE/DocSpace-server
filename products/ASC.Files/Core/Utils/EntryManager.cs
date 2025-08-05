@@ -110,30 +110,9 @@ public class BreadCrumbsManager(
         }
         else
         {
-            switch (firstVisible.FolderType)
-            {
-                case FolderType.DEFAULT:
-                    if (!firstVisible.ProviderEntry)
-                    {
-                        rootId = await globalFolderHelper.FolderShareAsync;
-                    }
-                    else
-                    {
-                        rootId = firstVisible.RootFolderType switch
-                        {
-                            FolderType.USER => authContext.CurrentAccount.ID == firstVisible.RootCreateBy
-                                ? await globalFolderHelper.FolderMyAsync
-                                : await globalFolderHelper.FolderShareAsync,
-                            FolderType.COMMON => await globalFolderHelper.FolderCommonAsync,
-                            _ => rootId
-                        };
-                    }
-                    break;
-
-                case FolderType.BUNCH:
-                    rootId = await globalFolderHelper.FolderProjectsAsync;
-                    break;
-            }
+            rootId = authContext.CurrentAccount.ID == firstVisible.RootCreateBy
+                ? await globalFolderHelper.FolderMyAsync
+                : rootId;
         }
 
         var folderDaoInt = daoFactory.GetFolderDao<int>();
