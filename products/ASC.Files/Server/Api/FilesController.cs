@@ -527,7 +527,7 @@ public abstract class FilesController<T>(
             inDto.Id, 
             FileEntryType.File, 
             inDto.File.LinkId, 
-            null, 
+            inDto.File.Title, 
             inDto.File.Access,
             inDto.File.ExpirationDate,
             inDto.File.Password,

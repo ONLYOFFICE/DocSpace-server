@@ -45,7 +45,13 @@ public class FileLinkRequest
     /// The link expiration date.
     /// </summary>
     public ApiDateTime ExpirationDate { get; set; }
-
+    
+    /// <summary>
+    /// The link name.
+    /// </summary>
+    [StringLength(255)]
+    public string Title { get; set; }
+    
     /// <summary>
     /// The link scope, whether it is internal or not.
     /// </summary>
