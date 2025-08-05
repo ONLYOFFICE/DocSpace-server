@@ -515,7 +515,7 @@ public class PortalController(
                                 Uri.SchemeDelimiter,
                                 tenant.GetTenantDomain(coreSettings),
                                 rewriter != null && !rewriter.IsDefaultPort ? $":{rewriter.Port}" : "",
-                                commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth, messageDate.ToString(CultureInfo.InvariantCulture))
+                                commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth, messageDate.ToString(CultureInfo.InvariantCulture), encryptEmail: true)
                );
 
         cookiesManager.ClearCookies(CookiesType.AuthKey);

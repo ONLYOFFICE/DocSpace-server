@@ -121,7 +121,7 @@ public class StudioNotifyService(
         var cultureInfo = GetCulture(userInfo);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonOpenDocSpace", cultureInfo);
-        var confirmationUrl = commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetConfirmationUrlRelative(userInfo.TenantId, userInfo.Email, ConfirmType.Auth, null, userInfo.Id));
+        var confirmationUrl = commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetConfirmationUrlRelative(userInfo.TenantId, userInfo.Email, ConfirmType.Auth, null, userInfo.Id, encryptEmail: true));
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         var location = string.Empty;

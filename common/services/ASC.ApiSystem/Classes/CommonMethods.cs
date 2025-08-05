@@ -73,7 +73,7 @@ public class CommonMethods(
 
     public string CreateReference(int tenantId, string requestUriScheme, string tenantDomain, string email, bool first = false)
     {
-        var url = commonLinkUtility.GetConfirmationUrlRelative(tenantId, email, ConfirmType.Auth, first ? "true" : "");
+        var url = commonLinkUtility.GetConfirmationUrlRelative(tenantId, email, ConfirmType.Auth, first ? "true" : "", encryptEmail: true);
         return $"{requestUriScheme}{Uri.SchemeDelimiter}{tenantDomain}/{url}{(first ? "&first=true" : "")}";
     }
 
