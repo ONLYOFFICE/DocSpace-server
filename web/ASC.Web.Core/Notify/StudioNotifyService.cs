@@ -928,7 +928,7 @@ public class StudioNotifyService(
 
     private async Task<string> GenerateActivationConfirmUrlAsync(UserInfo user)
     {
-        var confirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.Activation, user.Id, user.Id);
+        var confirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.Activation, user.Id, user.Id, encryptEmail: true);
 
         return  await urlShortener.GetShortenLinkAsync(confirmUrl + $"&firstname={HttpUtility.UrlEncode(user.FirstName)}&lastname={HttpUtility.UrlEncode(user.LastName)}");
     }
