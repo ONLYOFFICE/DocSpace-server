@@ -619,7 +619,7 @@ public class PortalController(
                         (await tariffService.GetPaymentsAsync(tenant.Id)).Any() &&
                         !(await tenantManager.GetCurrentTenantQuotaAsync()).Trial;
 
-        var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalRemove);
+        var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalRemove, encryptEmail: true);
             
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), showAutoRenewText);
     }
@@ -772,7 +772,7 @@ public class PortalController(
         }
 
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
-        var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalRemove);
+        var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalRemove, encryptEmail: true);
 
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), false, false);
     }
