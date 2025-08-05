@@ -190,7 +190,7 @@ public class CommonLinkUtility(
     {
         var tenant = _tenantManager.GetCurrentTenant();
         
-        var link = GetConfirmationEmailUrl(email, ConfirmType.LinkInvite, employeeType.ToStringFast() + tenant.Alias, createdBy)
+        var link = GetConfirmationEmailUrl(email, ConfirmType.LinkInvite, employeeType.ToStringFast() + tenant.Alias, createdBy, encryptEmail: true)
                    + $"&emplType={employeeType:d}";
         
         if (!string.IsNullOrEmpty(culture))

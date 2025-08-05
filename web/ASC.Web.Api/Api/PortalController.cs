@@ -160,7 +160,7 @@ public class PortalController(
 
         var link = commonLinkUtility.GetConfirmationEmailUrl(string.Empty, ConfirmType.LinkInvite, 
                 (int)inDto.EmployeeType + authContext.CurrentAccount.ID.ToString() + tenant.Alias, 
-                authContext.CurrentAccount.ID) + $"&emplType={inDto.EmployeeType:d}";
+                authContext.CurrentAccount.ID, encryptEmail: true) + $"&emplType={inDto.EmployeeType:d}";
 
         return await urlShortener.GetShortenLinkAsync(link);
     }
