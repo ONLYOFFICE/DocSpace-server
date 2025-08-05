@@ -148,7 +148,7 @@ public class TfaappController(
                                 ? ConfirmType.PhoneActivation
                                 : ConfirmType.PhoneAuth;
 
-            return commonLinkUtility.GetConfirmationEmailUrl(user.Email, confirmType);
+            return commonLinkUtility.GetConfirmationEmailUrl(user.Email, confirmType, encryptEmail: true);
         }
 
         if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))

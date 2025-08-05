@@ -206,7 +206,7 @@ public class AuthenticationController(
                 return new AuthenticationTokenDto
                 {
                     Sms = true,
-                    ConfirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PhoneActivation)
+                    ConfirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PhoneActivation, encryptEmail: true)
                 };
             }
 
@@ -217,7 +217,7 @@ public class AuthenticationController(
                 Sms = true,
                 PhoneNoise = SmsSender.BuildPhoneNoise(user.MobilePhone),
                 Expires = new ApiDateTime(tenantManager, timeZoneConverter, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval)),
-                ConfirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PhoneAuth)
+                ConfirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PhoneAuth, encryptEmail: true)
             };
         }
 

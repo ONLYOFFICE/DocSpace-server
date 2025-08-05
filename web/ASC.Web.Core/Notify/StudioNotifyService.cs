@@ -310,7 +310,7 @@ public class StudioNotifyService(
 
     public async Task SendMsgMobilePhoneChangeAsync(UserInfo userInfo)
     {
-        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email.ToLower(), ConfirmType.PhoneActivation);
+        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email.ToLower(), ConfirmType.PhoneActivation, encryptEmail: true);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangePhone", GetCulture(userInfo));
 
