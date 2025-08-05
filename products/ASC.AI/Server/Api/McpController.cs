@@ -35,7 +35,7 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     [HttpPost("servers")]
     public async Task<McpServerOptionsDto> AddServerAsync(AddServerRequestDto inDto)
     {
-        var server = await mcpService.AddServerAsync(inDto.Body.Endpoint, inDto.Body.Name, inDto.Body.Headers);
+        var server = await mcpService.AddServerAsync(inDto.Body.Endpoint, inDto.Body.Name, inDto.Body.Headers, inDto.Body.Description);
         
         return mapper.Map<McpServerOptions, McpServerOptionsDto>(server);
     }
@@ -43,7 +43,8 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     [HttpPut("servers/{id}")]
     public async Task<McpServerOptionsDto> UpdateServerAsync(UpdateServerRequestDto inDto)
     {
-        var server = await mcpService.UpdateServerAsync(inDto.Id, inDto.Body.Endpoint, inDto.Body.Name, inDto.Body.Headers);
+        var server = await mcpService.UpdateServerAsync(inDto.Id, inDto.Body.Endpoint, inDto.Body.Name, 
+            inDto.Body.Headers, inDto.Body.Description, inDto.Body.Enabled);
         
         return mapper.Map<McpServerOptions, McpServerOptionsDto>(server);
     }
@@ -57,9 +58,9 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     }
     
     [HttpGet("servers")]
-    public async Task<List<McpServerDto>> GetServersAsync(PaginatedRequestDto inDto)
+    public async Task<List<McpServerDto>> GetServersAsync(GetServersRequestDto inDto)
     {
-        var (servers, count) = await mcpService.GetServersAsync(inDto.StartIndex, inDto.Count);
+        var (servers, count) = await mcpService.GetServersAsync(inDto.Status, inDto.StartIndex, inDto.Count);
         
         apiContext.SetCount(servers.Count).SetTotalCount(count);
         

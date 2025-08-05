@@ -42,7 +42,8 @@ public class McpService(
 {
     private const int MaxMcpServersByRoom = 5;
     
-    public async Task<McpServerOptions> AddServerAsync(string endpoint, string name, Dictionary<string, string>? headers)
+    public async Task<McpServerOptions> AddServerAsync(string endpoint, string name, Dictionary<string, string>? headers,
+        string? description)
     {
         ArgumentNullException.ThrowIfNull(endpoint);
         ArgumentNullException.ThrowIfNull(name);
@@ -62,11 +63,11 @@ public class McpService(
         
         await ThrowIfNotConnectAsync(transport);
         
-        return await mcpDao.AddServerAsync(tenantManager.GetCurrentTenantId(), endpoint, name, headers);
+        return await mcpDao.AddServerAsync(tenantManager.GetCurrentTenantId(), endpoint, name, headers, description);
     }
 
     public async Task<McpServerOptions> UpdateServerAsync(Guid serverId, string? url, string? name, 
-        Dictionary<string, string>? headers)
+        Dictionary<string, string>? headers, string? description, bool? enabled)
     {
         await ThrowIfNotAccessAsync();
 
@@ -95,6 +96,16 @@ public class McpService(
             needConnect = true;
         }
 
+        if (!string.IsNullOrEmpty(description))
+        {
+            server.Description = description;
+        }
+
+        if (enabled.HasValue)
+        {
+            server.Enabled = enabled.Value;
+        }
+
         if (needConnect)
         {
             var transportOptions = server.ToTransportOptions();
@@ -112,7 +123,8 @@ public class McpService(
         return updatedServer;
     }
     
-    public async Task<(List<McpServer> servers, int totalCount)> GetServersAsync(int offset, int count)
+    public async Task<(List<McpServer> servers, int totalCount)> GetServersAsync(
+        ConnectionStatus? status, int offset, int count)
     {
         await ThrowIfNotAccessAsync();
         
@@ -120,20 +132,25 @@ public class McpService(
 
         var servers = new List<McpServer>();
 
-        servers.AddRange(configMcpSource.Servers.Skip(offset).Take(count));
-        offset = Math.Max(0, offset - configMcpSource.Servers.Count);
-        count = Math.Max(0, count - servers.Count);
+        if (status is null or ConnectionStatus.Enabled)
+        {
+            servers.AddRange(configMcpSource.Servers.Skip(offset).Take(count));
+            offset = Math.Max(0, offset - configMcpSource.Servers.Count);
+            count = Math.Max(0, count - servers.Count);
+        }
         
         var totalTask = mcpDao.GetServersCountAsync(tenantId);
 
         if (count > 0)
         {
-            var dbServers = await mcpDao.GetServersAsync(tenantId, offset, count)
+            var dbServers = await mcpDao.GetServersAsync(tenantId, status, offset, count)
                 .Select(x => new McpServer
                 {
                     Id = x.Id,
                     Name = x.Name,
-                    Type = ServerType.Custom
+                    Description = x.Description,
+                    Enabled = x.Enabled,
+                    ServerType = ServerType.Custom
                 }).ToListAsync();
             
             servers.AddRange(dbServers);

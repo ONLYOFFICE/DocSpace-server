@@ -34,12 +34,6 @@ public partial class AiDbContext
         return McpQueries.GetServerAsync(this, tenantId, id);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
-    public IAsyncEnumerable<DbMcpServerOptions> GetServersAsync(int tenantId, int offset, int count)
-    {
-        return McpQueries.GetServersAsync(this, tenantId, offset, count);
-    }
-    
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<int> GetServersCountAsync(int tenantId)
     {
@@ -122,15 +116,6 @@ static file class McpQueries
     public static readonly Func<AiDbContext, int, IEnumerable<Guid>, IAsyncEnumerable<DbMcpServerOptions>> GetServersByIdsAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
             ctx.McpServers.Where(x => x.TenantId == tenantId && ids.Contains(x.Id)));
-    
-    public static readonly Func<AiDbContext, int, int, int, IAsyncEnumerable<DbMcpServerOptions>> GetServersAsync =
-        EF.CompileAsyncQuery(
-            (AiDbContext ctx, int tenantId, int offset, int count) => 
-                ctx.McpServers
-                    .Where(x => x.TenantId == tenantId)
-                    .OrderBy(x => x.Id)
-                    .Skip(offset)
-                    .Take(count));
 
     public static readonly Func<AiDbContext, int, Task<int>> GetServersCountAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId) =>

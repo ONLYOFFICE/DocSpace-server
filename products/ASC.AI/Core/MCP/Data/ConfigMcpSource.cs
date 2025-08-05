@@ -29,7 +29,7 @@ namespace ASC.AI.Core.MCP.Data;
 [Singleton]
 public class ConfigMcpSource
 {
-    public readonly IReadOnlyList<McpServer> Servers;
+    public readonly IReadOnlyList<McpServer> Servers = [];
     
     private readonly FrozenDictionary<string, Guid> _mcpNameIdMap =
         new Dictionary<string, Guid>
@@ -66,7 +66,9 @@ public class ConfigMcpSource
                 {
                     Id = item.Id,
                     Name = item.Name,
-                    Type = ServerType.DocSpace
+                    Description = "DocSpace MCP server",
+                    ServerType = ServerType.DocSpace,
+                    Enabled = true
                 });
             }
             else
@@ -76,7 +78,8 @@ public class ConfigMcpSource
                 {
                     Id = item.Id,
                     Name = item.Name,
-                    Type = ServerType.Custom
+                    ServerType = ServerType.Custom,
+                    Enabled = true
                 });
             }
             

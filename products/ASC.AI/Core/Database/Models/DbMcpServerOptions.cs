@@ -30,9 +30,16 @@ public class DbMcpServerOptions : BaseEntity
 {
     public int TenantId { get; set; }
     public Guid Id { get; set; }
-    [MaxLength(128)] public required string Name { get; set; }
+    
+    [MaxLength(128)] 
+    public required string Name { get; set; }
+    
+    [MaxLength(255)]
+    public string? Description { get; set; }
     public required string Endpoint { get; set; }
     public string? Headers { get; set; }
+    
+    public bool Enabled { get; set; }
 
     public DbTenant Tenant { get; set; } = null!;
 
@@ -43,7 +50,15 @@ public class DbMcpServerOptions : BaseEntity
 
     public async Task<McpServerOptions> ToMcpServerOptions(InstanceCrypto crypto)
     {
-        var options = new McpServerOptions { Id = Id, TenantId = TenantId, Name = Name, Endpoint = new Uri(Endpoint) };
+        var options = new McpServerOptions
+        {
+            Id = Id, 
+            TenantId = TenantId, 
+            Name = Name,
+            Description = Description,
+            Endpoint = new Uri(Endpoint),
+            Enabled = Enabled,
+        };
 
         if (Headers == null)
         {
@@ -105,6 +120,15 @@ public static class DbMcpServerOptionsExtensions
                 .HasColumnType("text")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.Description)
+                .HasColumnName("description")
+                .HasColumnType("varchar(255)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.Enabled)
+                .HasColumnName("enabled");
         });
     }
 }

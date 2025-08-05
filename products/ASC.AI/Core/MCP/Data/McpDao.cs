@@ -29,7 +29,8 @@ namespace ASC.AI.Core.MCP.Data;
 [Scope]
 public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCrypto crypto)
 {
-    public async Task<McpServerOptions> AddServerAsync(int tenantId, string endpoint, string name, Dictionary<string, string>? headers)
+    public async Task<McpServerOptions> AddServerAsync(int tenantId, string endpoint, string name, Dictionary<string, string>? headers,
+        string? description)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -39,7 +40,9 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
             Id = Guid.NewGuid(),
             TenantId = tenantId,
             Name = name,
-            Endpoint = endpoint
+            Endpoint = endpoint,
+            Description = description,
+            Enabled = true
         };
 
         if (headers is { Count: > 0 })
@@ -86,10 +89,17 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
             .ToListAsync();
     }
 
-    public async IAsyncEnumerable<McpServerOptions> GetServersAsync(int tenantId, int offset, int count)
+    public async IAsyncEnumerable<McpServerOptions> GetServersAsync(int tenantId, ConnectionStatus? status, int offset, int count)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        await foreach (var server in dbContext.GetServersAsync(tenantId, offset, count))
+        
+        var query = dbContext.McpServers.Where(x => x.TenantId == tenantId);
+        if (status.HasValue)
+        {
+            query = query.Where(x => x.Enabled == (status == ConnectionStatus.Enabled));
+        }
+        
+        await foreach (var server in query.Skip(offset).Take(count).ToAsyncEnumerable())
         {
             yield return await server.ToMcpServerOptions(crypto);
         }
@@ -111,24 +121,38 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
         {
             return null;
         }
-
-        server.Name = options.Name;
-        server.Endpoint = options.Endpoint.ToString();
-        if (options.Headers is { Count: > 0 })
-        {
-            var headersJson = JsonSerializer.Serialize(options.Headers);
-            server.Headers = await crypto.EncryptAsync(headersJson);
-        }
-        else
-        {
-            server.Headers = null;
-        }
         
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
+            var transaction = await context.Database.BeginTransactionAsync();
+            
+            server.Name = options.Name;
+            server.Endpoint = options.Endpoint.ToString();
+            server.Description = options.Description;
+        
+            if (options.Headers is { Count: > 0 })
+            {
+                var headersJson = JsonSerializer.Serialize(options.Headers);
+                server.Headers = await crypto.EncryptAsync(headersJson);
+            }
+            else
+            {
+                server.Headers = null;
+            }
+            
+            if (server.Enabled != options.Enabled && !options.Enabled)
+            {
+                server.Enabled = options.Enabled;
+                
+                await context.DeleteSettingsAsync(options.TenantId, [options.Id]);
+                await context.DeleteRoomServersAsync(options.TenantId, [options.Id]);
+            }
+            
             context.McpServers.Update(server);
             await context.SaveChangesAsync();
+            
+            await transaction.CommitAsync();
         });
 
         return options;

@@ -24,13 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.MCP.Data;
+namespace ASC.AI.Models.RequestDto;
 
-public class McpServer
+public class GetServersRequestDto : PaginatedRequestDto
 {
-    public Guid Id { get; init; }
-    public required string Name { get; init; }
-    public string? Description { get; init; }
-    public bool Enabled { get; init; }
-    public ServerType ServerType { get; init; }
+    public ConnectionStatus? Status { get; init; }
 }

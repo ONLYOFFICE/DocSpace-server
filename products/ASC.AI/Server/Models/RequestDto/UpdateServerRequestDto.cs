@@ -40,8 +40,13 @@ public class UpdateServerRequestBody
     [MaxLength(128)]
     public string? Name { get; init; }
     
+    [MaxLength(255)]
+    public string? Description { get; init; }
+    
     [Url]
     public string? Endpoint { get; init; }
+    
+    public bool? Enabled { get; init; }
     
     public Dictionary<string, string>? Headers { get; init; }
 }

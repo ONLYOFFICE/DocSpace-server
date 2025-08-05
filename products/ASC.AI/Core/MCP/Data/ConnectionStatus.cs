@@ -26,11 +26,8 @@
 
 namespace ASC.AI.Core.MCP.Data;
 
-public class McpServer
+public enum ConnectionStatus
 {
-    public Guid Id { get; init; }
-    public required string Name { get; init; }
-    public string? Description { get; init; }
-    public bool Enabled { get; init; }
-    public ServerType ServerType { get; init; }
+    Enabled,
+    Disabled
 }

@@ -31,8 +31,10 @@ public class McpServerOptions
     public Guid Id { get; init; }
     public int TenantId { get; init; }
     public required string Name { get; set; }
+    public string? Description { get; set; }
     public required Uri Endpoint { get; set; }
     public Dictionary<string, string>? Headers { get; set; }
+    public bool Enabled { get; set; }
     
     public SseClientTransportOptions ToTransportOptions(TimeSpan? connectionTimeout = null) => new()
     {

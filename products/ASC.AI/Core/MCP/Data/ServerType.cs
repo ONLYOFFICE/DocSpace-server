@@ -28,6 +28,6 @@ namespace ASC.AI.Core.MCP.Data;
 
 public enum ServerType
 {
-    DocSpace,
-    Custom
+    Custom,
+    DocSpace
 }
