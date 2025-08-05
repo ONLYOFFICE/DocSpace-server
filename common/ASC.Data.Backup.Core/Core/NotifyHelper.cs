@@ -124,7 +124,7 @@ public class NotifyHelper(UserManager userManager,
         foreach (var user in users.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
         {
             var hash = (await authManager.GetUserPasswordStampAsync(user.Id)).ToString("s", CultureInfo.InvariantCulture);
-            var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PasswordChange, hash, user.Id, true);
+            var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PasswordChange, hash, user.Id, encryptEmail: true);
 
             var orangeButtonText = BackupResource.ResourceManager.GetString("ButtonSetPassword", user.GetCulture());
 
@@ -159,7 +159,7 @@ public class NotifyHelper(UserManager userManager,
 
                     var newTenantId = toTenantId ?? tenant.Id;
                     var hash = (await authManager.GetUserPasswordStampAsync(user.Id)).ToString("s", CultureInfo.InvariantCulture);
-                    var confirmationUrl = url + "/" + commonLinkUtility.GetConfirmationUrlRelative(newTenantId, user.Email, ConfirmType.PasswordChange, hash, user.Id, true);
+                    var confirmationUrl = url + "/" + commonLinkUtility.GetConfirmationUrlRelative(newTenantId, user.Email, ConfirmType.PasswordChange, hash, user.Id, encryptEmail: true);
                     var culture = user.GetCulture();
 
                     var orangeButtonText = BackupResource.ResourceManager.GetString("ButtonSetPassword", culture);

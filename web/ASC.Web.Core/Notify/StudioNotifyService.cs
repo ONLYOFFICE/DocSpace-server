@@ -99,7 +99,7 @@ public class StudioNotifyService(
 
         var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
-        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id, true);
+        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id, encryptEmail: true);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString(initialPasswordAssignment ? "ButtonSetPassword" : "ButtonChangePassword", GetCulture(userInfo));
 
@@ -166,7 +166,7 @@ public class StudioNotifyService(
 
         var postfix = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
-        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(email, ConfirmType.EmailChange, postfix, user.Id, true);
+        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(email, ConfirmType.EmailChange, postfix, user.Id, encryptEmail: true);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeEmail", GetCulture(user));
 
@@ -186,7 +186,7 @@ public class StudioNotifyService(
 
     public async Task SendEmailActivationInstructionsAsync(UserInfo user, string email)
     {
-        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(email, ConfirmType.EmailActivation, null, user.Id, true);
+        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(email, ConfirmType.EmailActivation, null, user.Id, encryptEmail: true);
         var shortLink  = await urlShortener.GetShortenLinkAsync(confirmationUrl);
         
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonActivateEmail", GetCulture(user));
@@ -854,7 +854,7 @@ public class StudioNotifyService(
 
             if (u.ActivationStatus != EmployeeActivationStatus.Activated)
             {
-                var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(u.Email, ConfirmType.EmailActivation, null, u.Id, true);
+                var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(u.Email, ConfirmType.EmailActivation, null, u.Id, encryptEmail: true);
                 var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirm", culture);
                 orangeButton = TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl));
 
@@ -1123,7 +1123,7 @@ public class StudioNotifyService(
 
         var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
-        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id, true);
+        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id, encryptEmail: true);
 
         var cultureInfo = GetCulture(userInfo);
 
