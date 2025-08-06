@@ -46,6 +46,6 @@ public class ExternalShareDataRequestDto
     /// <summary>
     /// The unique folder identifier.
     /// </summary>
-    [FromQuery(Name = "fileId")]
+    [FromQuery(Name = "folderId")]
     public string FolderId { get; set; } = null;
 }
