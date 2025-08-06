@@ -2256,6 +2256,8 @@ internal class FileDao(
                     (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                     x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
                 ParentShared = filesDbContext.Security.Any(x => 
+                    x.TenantId == r.TenantId && 
+                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                     x.EntryType == FileEntryType.Folder && 
                     x.EntryId == filesDbContext.Tree
                         .Where(t => t.FolderId == r.ParentId)

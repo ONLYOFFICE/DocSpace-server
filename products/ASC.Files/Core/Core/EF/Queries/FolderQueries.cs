@@ -402,6 +402,8 @@ static file class FolderQueries
                                 (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                                 ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder))),
                             ParentShared = ctx.Security.Any(x => 
+                                x.TenantId == r.TenantId && 
+                                (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                                  x.EntryType == FileEntryType.Folder && 
                                   x.EntryId == ctx.Tree
                                       .Where(t => t.FolderId == r.ParentId)
