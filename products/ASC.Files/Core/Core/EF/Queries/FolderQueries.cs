@@ -400,15 +400,16 @@ static file class FolderQueries
                             Shared = ctx.Security.Any(x => 
                                 x.TenantId == r.TenantId && 
                                 (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                                ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder) ||
-                                 (x.EntryType == FileEntryType.Folder && 
+                                ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder))),
+                            ParentShared = ctx.Security.Any(x => 
+                                 x.EntryType == FileEntryType.Folder && 
                                   x.EntryId == ctx.Tree
                                       .Where(t => t.FolderId == r.ParentId)
                                       .OrderByDescending(t => t.Level)
                                       .Select(t => t.ParentId)
                                       .Skip(1)
                                       .FirstOrDefault()
-                                      .ToString()))),
+                                      .ToString()),
                             Settings = ctx.RoomSettings.Where(x => x.TenantId == r.TenantId && x.RoomId == r.Id).Distinct().FirstOrDefault(),
                             Order = (
                                 from f in ctx.FileOrder

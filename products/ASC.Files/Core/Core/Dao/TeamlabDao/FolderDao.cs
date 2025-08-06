@@ -1554,15 +1554,16 @@ internal class FolderDao(
                 Shared = filesDbContext.Security.Any(x => 
                     x.TenantId == r.TenantId && 
                     (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                    ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder) ||
-                     (x.EntryType == FileEntryType.Folder && 
-                      x.EntryId == filesDbContext.Tree
-                          .Where(t => t.FolderId == r.ParentId)
-                          .OrderByDescending(t => t.Level)
-                          .Select(t => t.ParentId)
-                          .Skip(1)
-                          .FirstOrDefault()
-                          .ToString()))),
+                    ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder))),
+                ParentShared = filesDbContext.Security.Any(x => 
+                    x.EntryType == FileEntryType.Folder && 
+                    x.EntryId == filesDbContext.Tree
+                        .Where(t => t.FolderId == r.ParentId)
+                        .OrderByDescending(t => t.Level)
+                        .Select(t => t.ParentId)
+                        .Skip(1)
+                        .FirstOrDefault()
+                        .ToString()),
                 Order = (
                     from f in filesDbContext.FileOrder
                     where (
@@ -1942,6 +1943,7 @@ public class DbFolderQuery
     public DbFolder Root { get; set; }
     public DbRoomSettings Settings { get; set; }
     public bool Shared { get; set; }
+    public bool ParentShared { get; set; }
     public int Order { get; set; }
 }
 

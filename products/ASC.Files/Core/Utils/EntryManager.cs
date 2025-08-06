@@ -511,15 +511,6 @@ public class EntryManager(IDaoFactory daoFactory,
                 
                 var foldersTask = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders,
                     excludeSubject, from, count, roomId, containingMyFiles, parent.FolderType);
-
-                if (parent.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
-                {
-                    foldersTask = foldersTask.Select(x =>
-                    {
-                        x.Shared = parent.Shared;
-                        return x;
-                    });
-                }
                 
                 var folders = await foldersTask.ToListAsync();
 
@@ -541,16 +532,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 
                 var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
                 excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType, formsItemDto, applyFormStepFilter: room is { FolderType: FolderType.VirtualDataRoom } && parent.ShareRecord is { Share: FileShare.FillForms });
-
-                if (parent.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
-                {
-                    filesTask = filesTask.Select(x =>
-                    {
-                        x.Shared = parent.Shared;
-                        return x;
-                    });
-                }
-
+                
                 var files = await filesTask.ToListAsync();
 
                 if (parent.FolderType == FolderType.FillingFormsRoom && securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))

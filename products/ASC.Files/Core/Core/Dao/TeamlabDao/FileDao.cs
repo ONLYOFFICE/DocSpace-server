@@ -2251,9 +2251,19 @@ internal class FileDao(
                         where f.TenantId == r.TenantId
                         select f
                     ).FirstOrDefault(),
-                Shared = filesDbContext.Security.Any(s => 
-                    s.TenantId == r.TenantId && s.EntryId == r.Id.ToString() && s.EntryType == FileEntryType.File && 
-                    (s.SubjectType == SubjectType.PrimaryExternalLink || s.SubjectType == SubjectType.ExternalLink))
+                Shared = filesDbContext.Security.Any(x => 
+                    x.TenantId == r.TenantId && 
+                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
+                ParentShared = filesDbContext.Security.Any(x => 
+                    x.EntryType == FileEntryType.Folder && 
+                    x.EntryId == filesDbContext.Tree
+                        .Where(t => t.FolderId == r.ParentId)
+                        .OrderByDescending(t => t.Level)
+                        .Select(t => t.ParentId)
+                        .Skip(1)
+                        .FirstOrDefault()
+                        .ToString())
             });
     }
     
@@ -2655,6 +2665,7 @@ public class DbFileQuery
     public DbFile File { get; init; }
     public DbFolder Root { get; set; }
     public bool Shared { get; set; }
+    public bool ParentShared { get; set; }
     public int Order { get; set; }
     public DbFilesSecurity SharedRecord { get; set; }
     public DateTime? LastOpened { get; set; }

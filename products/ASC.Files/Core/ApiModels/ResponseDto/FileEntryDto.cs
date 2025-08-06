@@ -62,6 +62,11 @@ public abstract class FileEntryDto
     public bool Shared { get; set; }
     
     /// <summary>
+    /// Indicates whether the parent entity is shared.
+    /// </summary>
+    public bool ParentShared { get; set; }
+    
+    /// <summary>
     /// The short Web URL.
     /// </summary>
     [Url]
@@ -138,6 +143,7 @@ public abstract class FileEntryDto
         Title = entry.Title;
         Access = entry.Access;
         Shared = entry.Shared;
+        ParentShared = entry.ParentShared;
         RootFolderType = entry.RootFolderType;
         ParentRoomType = entry.ParentRoomType;
         ProviderItem = entry.ProviderEntry.NullIfDefault();
@@ -279,6 +285,7 @@ public class FileEntryDtoHelper(
             Title = entry.Title,
             Access = entry.Access,
             Shared = entry.Shared,
+            ParentShared = entry.ParentShared,
             ShortWebUrl = shortWebUrl,
             Created = apiDateTimeHelper.Get(entry.CreateOn),
             CreatedBy = await employeeWrapperHelper.GetAsync(entry.CreateBy),

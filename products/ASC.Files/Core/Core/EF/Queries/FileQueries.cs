@@ -375,15 +375,16 @@ static file class FileQueries
                         Shared = ctx.Security.Any(x => 
                             x.TenantId == r.TenantId && 
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                            ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File) ||
-                             (x.EntryType == FileEntryType.Folder && 
+                            x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
+                        ParentShared = ctx.Security.Any(x => 
+                            x.EntryType == FileEntryType.Folder && 
                               x.EntryId == ctx.Tree
                                   .Where(t => t.FolderId == r.ParentId)
                                   .OrderByDescending(t => t.Level)
                                   .Select(t => t.ParentId)
                                   .Skip(1)
                                   .FirstOrDefault()
-                                  .ToString()))),
+                                  .ToString()),
                         Order = (
                             from f in ctx.FileOrder
                             where (
@@ -423,15 +424,16 @@ static file class FileQueries
                         Shared = ctx.Security.Any(x => 
                             x.TenantId == r.TenantId && 
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                            ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File) ||
-                             (x.EntryType == FileEntryType.Folder && 
-                              x.EntryId == ctx.Tree
-                                  .Where(t => t.FolderId == r.ParentId)
-                                  .OrderByDescending(t => t.Level)
-                                  .Select(t => t.ParentId)
-                                  .Skip(1)
-                                  .FirstOrDefault()
-                                  .ToString())))
+                            x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
+                        ParentShared = ctx.Security.Any(x => 
+                            x.EntryType == FileEntryType.Folder && 
+                            x.EntryId == ctx.Tree
+                                .Where(t => t.FolderId == r.ParentId)
+                                .OrderByDescending(t => t.Level)
+                                .Select(t => t.ParentId)
+                                .Skip(1)
+                                .FirstOrDefault()
+                                .ToString())
                     })
                     .SingleOrDefault());
 
@@ -443,7 +445,6 @@ static file class FileQueries
                     .Where(r => r.Id == fileId && r.Forcesave == ForcesaveType.None)
                     .Where(r => fileVersion < 0 || r.Version <= fileVersion)
                     .OrderByDescending(r => r.Version)
-
                     .Select(r => new DbFileQuery
                     {
                         File = r,
