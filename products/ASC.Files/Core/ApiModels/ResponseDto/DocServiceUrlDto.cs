@@ -46,6 +46,12 @@ public class DocServiceUrlDto
     /// </summary>
     public required string DocServiceUrl { get; set; }
 
+
+    /// <summary>
+    /// The URL used to preload the document service scripts.
+    /// </summary>
+    public required string DocServicePreloadUrl { get; set; }
+
     /// <summary>
     /// The internal document service URL.
     /// </summary>
