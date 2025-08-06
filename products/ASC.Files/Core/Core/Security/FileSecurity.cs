@@ -1073,6 +1073,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     return false;
                 }
+
+                if (action == FilesSecurityActions.EditAccess && folder.FolderType is FolderType.EditingRoom or FolderType.VirtualDataRoom)
+                {
+                    return false;
+                }
                 
                 if (!isGuest)
                 {
