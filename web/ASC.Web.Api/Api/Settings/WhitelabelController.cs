@@ -223,6 +223,7 @@ public class WhitelabelController(
         {
             var result = new WhiteLabelItemDto
             {
+                Type = logoType,
                 Name = logoType.ToStringFast(),
                 Size = TenantWhiteLabelSettings.GetSize(logoType)
             };
