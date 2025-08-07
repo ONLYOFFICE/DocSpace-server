@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.AI.Core.Embedding;
-using ASC.AI.Service.Vectorization.Data;
+using ASC.AI.Core.Vectorization.Data;
 using ASC.Common.Threading;
 using ASC.ElasticSearch.VectorData;
 
@@ -33,31 +33,25 @@ using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.AI.Core.Vectorization;
 
-public abstract class VectorizationTask<T>(IServiceScopeFactory serviceScopeFactory) 
+public abstract class VectorizationTask<T> 
     : DistributedTaskProgress where T : VectorizationTaskData
 {
+    private readonly IServiceScopeFactory _serviceScopeFactory = null!;
+
+    protected VectorizationTask() { }
+
+    protected VectorizationTask(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
+    
     protected T Data { get; private set; } = null!;
+    protected ILogger Logger { get; private set; } = null!;
 
     private const int BatchSize = 10;
     
-    // ReSharper disable once StaticMemberInGenericType
-    private static readonly SplitterSettings _splitterSettings = new()
-    {
-        MaxTokensPerChunk = 384, 
-        ChunkOverlap = 0.2f
-    };
-    
     private int _tenantId;
     private Guid _userId;
-
-    public void Init(string taskId, int tenantId, Guid userId, T data)
-    {
-        Id = taskId;
-        Status = DistributedTaskStatus.Created;
-        _tenantId = tenantId;
-        _userId = userId;
-        Data = data;
-    }
     
     public void Init(int tenantId, Guid userId, T data)
     {
@@ -66,47 +60,107 @@ public abstract class VectorizationTask<T>(IServiceScopeFactory serviceScopeFact
         Data = data;
     }
 
+    public void Init(string taskId, int tenantId, Guid userId, T data)
+    {
+        Id = taskId;
+        Init(tenantId, userId, data);
+    }
+
     protected abstract IAsyncEnumerable<File<int>> GetFilesAsync(IServiceProvider serviceProvider);
+    protected abstract int GetTotalFilesCount();
     
     protected override async Task DoJob()
     {
-        await using var scope = serviceScopeFactory.CreateAsyncScope();
-        
-        var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-        await tenantManager.SetCurrentTenantAsync(_tenantId);
-        
-        var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-        await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
-        
-        var fileProcessor = scope.ServiceProvider.GetRequiredService<FileTextProcessor>();
-        var embeddingGeneratorFactory = scope.ServiceProvider.GetRequiredService<EmbeddingGeneratorFactory>();
-        var embeddingGenerator = embeddingGeneratorFactory.Create();
-        var vectorStore = scope.ServiceProvider.GetRequiredService<VectorStore>();
-        
-        var collection = vectorStore.GetCollection<Chunk>("embedding", new VectorCollectionOptions
+        try
         {
-            Dimension = 1024,
-            ModelId = "intfloat/multilingual-e5-large-instruct"
-        });
+            await using var scope = _serviceScopeFactory.CreateAsyncScope();
+            Logger = scope.ServiceProvider.GetRequiredService<ILogger<VectorizationTask<T>>>();
 
-        await collection.EnsureCollectionExistsAsync(CancellationToken);
+            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            await tenantManager.SetCurrentTenantAsync(_tenantId);
 
-        await foreach (var file in GetFilesAsync(scope.ServiceProvider))
-        {
-            await VectorizeFileAsync(file, fileProcessor, embeddingGenerator, collection);
+            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+            await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
+
+            var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
+            var fileProcessor = scope.ServiceProvider.GetRequiredService<FileTextProcessor>();
+            var generatorFactory = scope.ServiceProvider.GetRequiredService<EmbeddingGeneratorFactory>();
+            var vectorStore = scope.ServiceProvider.GetRequiredService<VectorStore>();
+            var socketManager = scope.ServiceProvider.GetRequiredService<SocketManager>();
+
+            var fileDao = daoFactory.GetFileDao<int>();
+            var embeddingGenerator = generatorFactory.Create();
+            
+            var splitterSettings = new SplitterSettings
+            {
+                MaxTokensPerChunk = (int)(generatorFactory.Model.ContextLength * 0.75),
+                ChunkOverlap = 0.2f
+            };
+
+            var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName,
+                new VectorCollectionOptions
+                {
+                    Dimension = generatorFactory.Model.Dimension, 
+                    ModelId = generatorFactory.Model.Id
+                });
+            
+            await collection.EnsureCollectionExistsAsync(CancellationToken);
+
+            var totalFiles = GetTotalFilesCount();
+            var currentFileIndex = 0;
+
+            await foreach (var file in GetFilesAsync(scope.ServiceProvider))
+            {
+                var notify = false;
+                
+                try
+                {
+                    await VectorizeFileAsync(totalFiles, currentFileIndex, file, fileProcessor, splitterSettings,  
+                        embeddingGenerator, collection);
+                    currentFileIndex++;
+                    notify = true;
+                }
+                catch (Exception e)
+                {
+                    Logger.ErrorWithException(e);
+                    await ClenUpAsync(fileDao, file.Id);
+                    currentFileIndex++;
+                }
+                
+                if (notify)
+                {
+                    await socketManager.CreateFileAsync(file);
+                }
+            }
+            
+            Status = DistributedTaskStatus.Completed;
         }
-        
-        this.Percentage = 100;
-        await PublishChanges();
+        catch (Exception e)
+        {
+            Logger.ErrorWithException(e);
+            Exception = e;
+            Status = DistributedTaskStatus.Failted;
+        }
+        finally
+        {
+            IsCompleted = true;
+            this.Percentage = 100;
+            await PublishChanges();
+        }
     }
     
     private async Task VectorizeFileAsync(
-        File<int> file, 
+        int totalFiles,
+        int currentFileIndex,
+        File<int> file,
         FileTextProcessor fileProcessor,
+        SplitterSettings splitterSettings,
         IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
         VectorStoreCollection<Chunk> vectorStoreCollection)
     {
-        var textChunks = await fileProcessor.GetTextChunksAsync(file, _splitterSettings);
+        var textChunks = await fileProcessor.GetTextChunksAsync(file, splitterSettings);
+        var totalBatches = (textChunks.Count + BatchSize - 1) / BatchSize;
+        var currentBatch = 0;
 
         foreach (var batch in textChunks.Chunk(BatchSize))
         {
@@ -122,6 +176,26 @@ public abstract class VectorizationTask<T>(IServiceScopeFactory serviceScopeFact
                 }).ToList();
 
             await vectorStoreCollection.UpsertAsync(chunks, CancellationToken);
+            
+            currentBatch++;
+
+            var fileProgress = (double)currentBatch / totalBatches;
+            var totalProgress = (currentFileIndex + fileProgress) / totalFiles;
+            this.Percentage = Math.Min(99, (int)(totalProgress * 100));
+            await PublishChanges();
+        }
+    }
+
+    private async Task ClenUpAsync(IFileDao<int> fileDao, int fileId)
+    {
+        try
+        {
+            await fileDao.DeleteFileAsync(fileId);
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorWithException(e);
+            Exception = e;
         }
     }
 }

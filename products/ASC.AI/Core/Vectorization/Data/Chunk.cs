@@ -26,10 +26,13 @@
 
 using ASC.ElasticSearch.VectorData;
 
-namespace ASC.AI.Service.Vectorization.Data;
+namespace ASC.AI.Core.Vectorization.Data;
 
 public class Chunk
 {
+    [Ignore]
+    public static string IndexName => "files_embeddings";
+    
     public Guid Id { get; init; }
     public int TenantId { get; init; }
     public int FileId { get; init; }

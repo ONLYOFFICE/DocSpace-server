@@ -27,12 +27,29 @@
 namespace ASC.AI.Core.Embedding;
 
 [Singleton]
-public class EmbeddingGeneratorFactory(
-    IConfiguration configuration,
-    IHttpClientFactory httpClientFactory)
+public class EmbeddingGeneratorFactory
 {
-    private readonly EmbeddingSettings? _settings = 
-        configuration.GetSection("ai:embedding").Get<EmbeddingSettings>();
+    public EmbeddingModel Model => _model ?? throw new ArgumentNullException(nameof(_model));
+    
+    private readonly EmbeddingSettings? _settings;
+    private readonly EmbeddingModel? _model;
+    private readonly IHttpClientFactory _httpClientFactory;
+    
+    public EmbeddingGeneratorFactory(IConfiguration configuration, IHttpClientFactory httpClientFactory)
+    {
+        _httpClientFactory = httpClientFactory;
+
+        _settings = configuration.GetSection("ai:embedding").Get<EmbeddingSettings>();
+        if (_settings != null)
+        {
+            _model = new EmbeddingModel
+            {
+                Id = _settings.ModelId,
+                Dimension = _settings.Dimension,
+                ContextLength = _settings.ContextLength
+            };
+        }
+    }
     
     public IEmbeddingGenerator<string, Embedding<float>> Create()
     {
@@ -43,10 +60,12 @@ public class EmbeddingGeneratorFactory(
 
         if (!_settings.Url.Contains("api.openai.com"))
         {
-            return new OpenAiFloatEmbeddingGenerator(httpClientFactory.CreateClient(),
+            return new OpenAiFloatEmbeddingGenerator(_httpClientFactory.CreateClient(),
                 new GeneratorConfiguration
                 {
-                    Endpoint = _settings.Url, ApiKey = _settings.Key, ModelId = _settings.ModelId
+                    Endpoint = _settings.Url, 
+                    ApiKey = _settings.Key, 
+                    ModelId = _settings.ModelId
                 });
         }
 
@@ -54,11 +73,18 @@ public class EmbeddingGeneratorFactory(
         var options = new OpenAIClientOptions
         {
             Endpoint = new Uri(_settings.Url),
-            Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
+            Transport = new HttpClientPipelineTransport(_httpClientFactory.CreateClient())
         };
         
         var base64Client = new OpenAIClient(credential, options);
 
         return base64Client.GetEmbeddingClient(_settings.ModelId).AsIEmbeddingGenerator();
     }
+}
+
+public class EmbeddingModel
+{
+    public required string Id { get; init; }
+    public int Dimension { get; init; }
+    public int ContextLength { get; init; }
 }

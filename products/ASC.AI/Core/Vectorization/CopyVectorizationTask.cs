@@ -27,9 +27,17 @@
 namespace ASC.AI.Core.Vectorization;
 
 [Transient]
-public class CopyVectorizationTask(IServiceScopeFactory serviceScopeFactory)
-    : VectorizationTask<CopyVectorizationTaskData>(serviceScopeFactory)
+public class CopyVectorizationTask : VectorizationTask<CopyVectorizationTaskData>
 {
+    public CopyVectorizationTask() { }
+    
+    public CopyVectorizationTask(IServiceScopeFactory serviceScopeFactory) : base(serviceScopeFactory) { }
+    
+    protected override int GetTotalFilesCount()
+    {
+        return Data.FileIds.Count + Data.ThirdPartyFileIds.Count;
+    }
+    
     protected override async IAsyncEnumerable<File<int>> GetFilesAsync(IServiceProvider serviceProvider)
     {
         var daoFactory = serviceProvider.GetRequiredService<IDaoFactory>();
@@ -49,52 +57,52 @@ public class CopyVectorizationTask(IServiceScopeFactory serviceScopeFactory)
             yield break;
         }
         
-        var fileDao = daoFactory.GetFileDao<int>();
+        await foreach (var file in CopyFilesAsync(daoFactory, fileSecurity, Data.KnowledgeFolderId, Data.FileIds))
+        {
+            yield return file;
+        }
+        
+        await foreach (var file in CopyFilesAsync(daoFactory, fileSecurity, Data.KnowledgeFolderId, Data.ThirdPartyFileIds))
+        {
+            yield return file;
+        }
+    }
 
-        var files = await fileDao.GetFilesAsync(Data.FileIds).ToListAsync();
+    private async IAsyncEnumerable<File<int>> CopyFilesAsync<T>(
+        IDaoFactory daoFactory,
+        FileSecurity fileSecurity,
+        int knowledgeFolderId,
+        List<T> fileIds)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        
+        var files = await fileDao.GetFilesAsync(fileIds).ToListAsync();
+        
         foreach (var file in files)
         {
             if (CancellationToken.IsCancellationRequested)
             {
                 yield break;
             }
-            
-            if (!await fileSecurity.CanCopyAsync(file))
-            {
-                continue;
-            }
-                
-            var copyFile = await fileDao.CopyFileAsync(file.Id, knowledgeFolder.Id);
-            if (copyFile == null)
-            {
-                continue;
-            }
-                
-            yield return copyFile;
-        }
 
-        var thirdPartyFileDao = daoFactory.GetFileDao<string>();
-        
-        var thirdPartyFiles = await thirdPartyFileDao.GetFilesAsync(Data.ThirdPartyFileIds).ToListAsync();
-        foreach (var file in thirdPartyFiles)
-        {
-            if (CancellationToken.IsCancellationRequested)
-            {
-                yield break;
-            }
+            File<int> newFile;
             
-            if (!await fileSecurity.CanCopyAsync(file))
+            try
             {
+                if (!await fileSecurity.CanCopyAsync(file))
+                {
+                    continue;
+                }
+
+                newFile = await fileDao.CopyFileAsync(file.Id, knowledgeFolderId);
+            }
+            catch (Exception e)
+            {
+                Logger.ErrorWithException(e);
                 continue;
             }
                 
-            var copyFile = await thirdPartyFileDao.CopyFileAsync(file.Id, knowledgeFolder.Id);
-            if (copyFile == null)
-            {
-                continue;
-            }
-                
-            yield return copyFile;
+            yield return newFile;
         }
     }
 }
