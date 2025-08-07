@@ -24,28 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using ASC.AI.Core.Database;
+using ASC.EventBus.Events;
 
-global using ASC.Api.Core;
-global using ASC.Api.Core.Extensions;
+using ProtoBuf;
 
-global using ASC.Files.Core.Core;
-global using ASC.Files.Core.EF;
+namespace ASC.AI.Core.Vectorization.Events;
 
-global using ASC.Core.Common.EF;
-
-global using Autofac;
-
-global using Microsoft.Extensions.Hosting.WindowsServices;
-
-global using NLog;
-
-global using Service;
-
-global using System.Text;
-
-global using ASC.AI.Core.Vectorization.Events;
-global using ASC.Common;
-global using ASC.Core;
-global using ASC.EventBus.Abstractions;
-global using ASC.EventBus.Log;
+[ProtoContract]
+public record CopyVectorizeIntegrationEvent : IntegrationEvent
+{
+    private CopyVectorizeIntegrationEvent() : base() { }
+    
+    public CopyVectorizeIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId) { }
+    
+    [ProtoMember(1)]
+    public required string TaskId { get; set; }
+    
+    [ProtoMember(2)]
+    public CopyVectorizationTaskData Data { get; set; }
+}

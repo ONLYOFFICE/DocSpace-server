@@ -24,28 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using ASC.AI.Core.Database;
+namespace ASC.AI.Core.Vectorization;
 
-global using ASC.Api.Core;
-global using ASC.Api.Core.Extensions;
-
-global using ASC.Files.Core.Core;
-global using ASC.Files.Core.EF;
-
-global using ASC.Core.Common.EF;
-
-global using Autofac;
-
-global using Microsoft.Extensions.Hosting.WindowsServices;
-
-global using NLog;
-
-global using Service;
-
-global using System.Text;
-
-global using ASC.AI.Core.Vectorization.Events;
-global using ASC.Common;
-global using ASC.Core;
-global using ASC.EventBus.Abstractions;
-global using ASC.EventBus.Log;
+public abstract class VectorizationTaskData;

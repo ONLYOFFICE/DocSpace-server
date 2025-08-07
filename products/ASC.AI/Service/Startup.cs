@@ -24,11 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Core.Vectorization;
+using ASC.Common.Threading;
+
 namespace Service;
 
-public class Startup : BaseStartup
+public class Startup : BaseWorkerStartup
 {
-    public Startup(IConfiguration configuration) : base(configuration)
+    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
+        : base(configuration, hostEnvironment)
     {
         if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
@@ -50,5 +54,7 @@ public class Startup : BaseStartup
         services.AddBaseDbContextPool<FilesDbContext>();
         
         services.RegisterQuotaFeature();
+        
+        services.RegisterQueue<CopyVectorizationTask>();
     }
 }

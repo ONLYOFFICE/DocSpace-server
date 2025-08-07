@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Service.Handlers;
+using ASC.Common.DependencyInjection;
+
 var options = new WebApplicationOptions
 {
     Args = args,
@@ -52,20 +55,24 @@ try
 
     builder.Host.ConfigureDefault();
     
-    builder.WebHost.ConfigureDefaultKestrel((_, serverOptions) =>
-    {
-        serverOptions.Limits.MinResponseDataRate = null;
-    });
-    
-    var startup = new Startup(builder.Configuration);
+    var startup = new Startup(builder.Configuration, builder.Environment);
 
     await startup.ConfigureServices(builder);
     
-    builder.Host.ConfigureContainer<ContainerBuilder>(startup.ConfigureContainer);
+    builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
+    {
+        containerBuilder.Register(context.Configuration);
+    });
 
     var app = builder.Build();
 
-    startup.Configure(app, app.Environment);
+    startup.Configure(app);
+    
+    var sp = ((IApplicationBuilder)app).ApplicationServices;
+
+    var eventBus = sp.GetRequiredService<IEventBus>();
+
+    await eventBus.SubscribeAsync<CopyVectorizeIntegrationEvent, CopyVectorizeIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
 

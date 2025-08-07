@@ -24,28 +24,41 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using ASC.AI.Core.Database;
+using ASC.Common.Threading;
 
-global using ASC.Api.Core;
-global using ASC.Api.Core.Extensions;
+namespace ASC.AI.Core.Vectorization;
 
-global using ASC.Files.Core.Core;
-global using ASC.Files.Core.EF;
+[Singleton(GenericArguments = [typeof(CopyVectorizationTask), typeof(CopyVectorizationTaskData)])]
+public class VectorizationTaskService<T, TData>(
+    IDistributedTaskQueueFactory queueFactory) 
+    where T : VectorizationTask<TData> 
+    where TData : VectorizationTaskData
+{
+    private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>();
 
-global using ASC.Core.Common.EF;
+    public Task StartAsync(T task)
+    {
+        return _queue.EnqueueTask(task);
+    }
 
-global using Autofac;
+    public Task<string> StoreAsync(T task)
+    {
+        return _queue.PublishTask(task);
+    }
 
-global using Microsoft.Extensions.Hosting.WindowsServices;
-
-global using NLog;
-
-global using Service;
-
-global using System.Text;
-
-global using ASC.AI.Core.Vectorization.Events;
-global using ASC.Common;
-global using ASC.Core;
-global using ASC.EventBus.Abstractions;
-global using ASC.EventBus.Log;
+    public async Task<T?> GetAsync(string id)
+    {
+        return await _queue.PeekTask(id);
+    }
+    
+    public async Task TerminateAsync(string id)
+    {
+        var task = await _queue.PeekTask(id);
+        if (task == null)
+        {
+            return;
+        }
+        
+        await _queue.DequeueTask(task.Id);
+    }
+}

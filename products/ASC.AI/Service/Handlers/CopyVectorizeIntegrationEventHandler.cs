@@ -24,28 +24,33 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using ASC.AI.Core.Database;
+using ASC.AI.Core.Vectorization;
 
-global using ASC.Api.Core;
-global using ASC.Api.Core.Extensions;
+namespace ASC.AI.Service.Handlers;
 
-global using ASC.Files.Core.Core;
-global using ASC.Files.Core.EF;
-
-global using ASC.Core.Common.EF;
-
-global using Autofac;
-
-global using Microsoft.Extensions.Hosting.WindowsServices;
-
-global using NLog;
-
-global using Service;
-
-global using System.Text;
-
-global using ASC.AI.Core.Vectorization.Events;
-global using ASC.Common;
-global using ASC.Core;
-global using ASC.EventBus.Abstractions;
-global using ASC.EventBus.Log;
+[Scope]
+public class CopyVectorizeIntegrationEventHandler(
+    ILogger<CopyVectorizeIntegrationEventHandler> logger,
+    TenantManager tenantManager,
+    SecurityContext securityContext,
+    AuthManager authManager,
+    VectorizationTaskService<CopyVectorizationTask, CopyVectorizationTaskData> service,
+    IServiceProvider serviceProvider) 
+    : IIntegrationEventHandler<CopyVectorizeIntegrationEvent>
+{
+    public async Task Handle(CopyVectorizeIntegrationEvent @event)
+    {
+        CustomSynchronizationContext.CreateContext();
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        {
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
+            
+            var task = serviceProvider.GetRequiredService<CopyVectorizationTask>();
+            task.Init(@event.TaskId, @event.TenantId, @event.CreateBy, @event.Data);
+            
+            await service.StartAsync(task);
+        }
+    }
+}
