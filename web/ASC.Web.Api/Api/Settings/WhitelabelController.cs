@@ -221,6 +221,11 @@ public class WhitelabelController(
 
         foreach (var logoType in Enum.GetValues<WhiteLabelLogoType>())
         {
+            if (logoType == WhiteLabelLogoType.Notification)
+            {
+                continue;
+            }
+
             var result = new WhiteLabelItemDto
             {
                 Type = logoType,
