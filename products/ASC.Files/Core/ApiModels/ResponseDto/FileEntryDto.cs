@@ -267,7 +267,7 @@ public class FileEntryDtoHelper(
         
         var shortWebUrl = "";
         
-        if (entry.Shared)
+        if (entry.Shared || entry.ParentShared)
         {
             var linkId = await _externalShare.GetLinkIdAsync();
             var securityDao = _daoFactory.GetSecurityDao<int>();
