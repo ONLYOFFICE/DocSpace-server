@@ -218,9 +218,9 @@ public class ExternalLinkHelper(
             return;
         }
         
-        var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(file.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+        var parentFolder = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(file.ParentId).FirstOrDefaultAsync(f => f.Id.ToString() == rootId);
         
-        if (room == null || Equals(room.Id, null) || !string.Equals(room.Id.ToString(), rootId))
+        if (parentFolder == null || Equals(parentFolder.Id, null))
         {
             return;
         }
@@ -238,9 +238,9 @@ public class ExternalLinkHelper(
             return;
         }
         
-        var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folder.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+        var parentFolder = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => f.Id.ToString() == rootId);
         
-        if (room == null || Equals(room.Id, null) || !string.Equals(room.Id.ToString(), rootId))
+        if (parentFolder == null || Equals(parentFolder.Id, null))
         {
             return;
         }
