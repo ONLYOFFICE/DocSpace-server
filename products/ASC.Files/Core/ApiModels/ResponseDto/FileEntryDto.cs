@@ -60,12 +60,12 @@ public abstract class FileEntryDto
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool Shared { get; set; }
-    
+
     /// <summary>
     /// Indicates whether the parent entity is shared.
     /// </summary>
     public bool ParentShared { get; set; }
-    
+
     /// <summary>
     /// The short Web URL.
     /// </summary>
@@ -197,6 +197,12 @@ public abstract class FileEntryDto<T> : FileEntryDto
     /// </summary>
     public bool CanShare { get; set; }
 
+
+    /// <summary>
+    /// A dictionary representing the sharing settings for the file entry.
+    /// </summary>
+    public IDictionary<SubjectType, int> ShareSettings { get; set; }
+
     /// <summary>
     /// The actions that can be perforrmed with the file entry.
     /// </summary>
@@ -206,7 +212,7 @@ public abstract class FileEntryDto<T> : FileEntryDto
     /// The available external rights of the file entry.
     /// </summary>
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
-    
+
     /// <summary>
     /// The request token of the file entry.
     /// </summary>
@@ -264,9 +270,9 @@ public class FileEntryDtoHelper(
                 _ => entry.RootId
             };
         }
-        
+
         var shortWebUrl = "";
-        
+
         if (entry.Shared || entry.ParentShared)
         {
             var linkId = await _externalShare.GetLinkIdAsync();
@@ -276,6 +282,31 @@ public class FileEntryDtoHelper(
             {
                 var linkData = await _externalShare.GetLinkDataAsync(entry, record.Subject);
                 shortWebUrl = await _urlShortener.GetShortenLinkAsync(linkData.Url);
+            }
+        }
+
+        var canSetAccess = await fileSharingHelper.CanSetAccessAsync(entry);
+        Dictionary<SubjectType, int> shareSettings = null;
+
+        if (canSetAccess)
+        {
+            var primaryCount = await _fileSecurity.GetLinksSettings(entry, SubjectType.PrimaryExternalLink);
+            var additionalCount = await _fileSecurity.GetLinksSettings(entry, SubjectType.ExternalLink);
+
+            if (primaryCount > 0)
+            {
+                shareSettings = new Dictionary<SubjectType, int> 
+                {
+                    {
+                        SubjectType.PrimaryExternalLink, primaryCount
+                    } 
+                };
+            }
+
+            if (additionalCount > 0)
+            {                
+                shareSettings ??= new Dictionary<SubjectType, int>();
+                shareSettings.Add(SubjectType.ExternalLink, additionalCount);
             }
         }
 
@@ -297,7 +328,8 @@ public class FileEntryDtoHelper(
             ProviderItem = entry.ProviderEntry.NullIfDefault(),
             ProviderKey = entry.ProviderKey,
             ProviderId = entry.ProviderId.NullIfDefault(),
-            CanShare = await fileSharingHelper.CanSetAccessAsync(entry),
+            CanShare = canSetAccess,
+            ShareSettings = shareSettings,
             Security = entry.Security,
             OriginId = entry.OriginId,
             OriginTitle = entry.OriginTitle,
@@ -310,7 +342,7 @@ public class FileEntryDtoHelper(
     private async ValueTask<DateTime> GetDeletedPermanentlyOn<T>(FileEntry<T> entry)
     {
         var isGuest = await userManager.IsGuestAsync(securityContext.CurrentAccount.ID);
-        if (isGuest) 
+        if (isGuest)
         {
             var myId = await _globalFolderHelper.GetFolderMyAsync<int>();
 

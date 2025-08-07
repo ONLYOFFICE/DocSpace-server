@@ -234,8 +234,12 @@ public class FileDtoHelper(
         }
         
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
-        result.AvailableExternalRights = await _fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
-        
+
+        if (result.CanShare)
+        {
+            result.AvailableExternalRights = await _fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
+        }
+
         return result;
     }
 

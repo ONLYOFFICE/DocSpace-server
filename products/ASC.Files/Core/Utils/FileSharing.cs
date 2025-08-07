@@ -52,8 +52,6 @@ public class FileSharingAceHelper(
     PasswordSettingsManager passwordSettingsManager)
 {
     private const int MaxInvitationLinks = 1;
-    private const int MaxAdditionalExternalLinks = 5;
-    private const int MaxPrimaryExternalLinks = 1;
 
     public async Task<AceProcessingResult<T>> SetAceObjectAsync<T>(
         List<AceWrapper> aceWrappers, 
@@ -282,15 +280,23 @@ public class FileSharingAceHelper(
             {
                 if (w.IsLink && eventType == EventType.Create)
                 {
+                    var additionalLinksSettings = await fileSecurity.GetLinksSettings(entry, SubjectType.ExternalLink);
+                    var primaryLinksSettings = await fileSecurity.GetLinksSettings(entry, SubjectType.PrimaryExternalLink);
+
+                    if (primaryLinksSettings == 0)
+                    {
+                        primaryLinksSettings = additionalLinksSettings;
+                    }
+                    
                     var (filter, maxCount) = w.SubjectType switch
                     {
                         SubjectType.InvitationLink => (ShareFilterType.InvitationLink, MaxInvitationLinks),
-                        SubjectType.ExternalLink => (ShareFilterType.AdditionalExternalLink, MaxAdditionalExternalLinks),
-                        SubjectType.PrimaryExternalLink => (ShareFilterType.PrimaryExternalLink, MaxPrimaryExternalLinks),
+                        SubjectType.ExternalLink => (ShareFilterType.AdditionalExternalLink, additionalLinksSettings),
+                        SubjectType.PrimaryExternalLink => (ShareFilterType.PrimaryExternalLink, primaryLinksSettings),
                         _ => (ShareFilterType.Link, -1)
                     };
 
-                    if (maxCount > 0)
+                    if (maxCount >= 0)
                     {
                         handle = await distributedLockProvider.TryAcquireFairLockAsync($"{entry.Id}_{entry.FileEntryType}_links");
 

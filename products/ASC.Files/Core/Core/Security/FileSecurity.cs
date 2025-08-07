@@ -68,17 +68,12 @@ public class FileSecurity(IDaoFactory daoFactory,
         { SubjectType.ExternalLink, DefaultFileAccess },
         { SubjectType.PrimaryExternalLink, DefaultFileAccess }
     }.ToFrozenDictionary();
-
-    private static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> _availableUserFileAccesses =
-        new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>
-    {
-        { FolderType.USER, _defaultFileShareDictionary }
-    }.ToFrozenDictionary();
     
 
     private static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> _availableRoomFileAccesses =
         new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>
     {
+        { FolderType.USER, _defaultFileShareDictionary },
         { FolderType.CustomRoom, _defaultFileShareDictionary },
         { FolderType.PublicRoom, _defaultFileShareDictionary },
         { FolderType.EditingRoom, _defaultFileShareDictionary },
@@ -91,16 +86,57 @@ public class FileSecurity(IDaoFactory daoFactory,
             }.ToFrozenDictionary()
         }
     }.ToFrozenDictionary();
-
-    private static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> _availableUserFolderAccesses =
-        new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>
+    
+    private static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, int>> _linkCountRoomSettingsAccesses =
+        new Dictionary<FolderType, FrozenDictionary<SubjectType, int>>
     {
-        { FolderType.USER, _defaultFileShareDictionary }
+        { 
+            FolderType.CustomRoom,
+            new Dictionary<SubjectType, int>
+            {
+                { SubjectType.PrimaryExternalLink, 1 },
+                { SubjectType.ExternalLink, 5 }
+            }.ToFrozenDictionary()  
+        },
+        { 
+            FolderType.PublicRoom,
+            new Dictionary<SubjectType, int>
+            {                
+                { SubjectType.PrimaryExternalLink, 1 },
+                { SubjectType.ExternalLink, 5 }
+            }.ToFrozenDictionary() 
+        },
+        { 
+            FolderType.FillingFormsRoom,
+            new Dictionary<SubjectType, int>
+            {                
+                { SubjectType.PrimaryExternalLink, 1 }
+            }.ToFrozenDictionary()
+        }
     }.ToFrozenDictionary();
-
+    
+    private static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, int>> _linkCountRoomFileSettingsAccesses =
+        new Dictionary<FolderType, FrozenDictionary<SubjectType, int>>
+    {
+        { FolderType.USER, new Dictionary<SubjectType, int> { { SubjectType.ExternalLink, 6 } }.ToFrozenDictionary() },
+        { FolderType.CustomRoom, new Dictionary<SubjectType, int> { { SubjectType.ExternalLink, 6 } }.ToFrozenDictionary() },
+        { FolderType.VirtualDataRoom, new Dictionary<SubjectType, int> { { SubjectType.ExternalLink, 6 } }.ToFrozenDictionary() },
+        { FolderType.EditingRoom, new Dictionary<SubjectType, int> { { SubjectType.ExternalLink, 6 } }.ToFrozenDictionary() },
+        { 
+            FolderType.PublicRoom,
+            new Dictionary<SubjectType, int>
+            {                
+                { SubjectType.PrimaryExternalLink, 1 },
+                { SubjectType.ExternalLink, 5 }
+            }.ToFrozenDictionary() 
+        },
+        { FolderType.FillingFormsRoom, new Dictionary<SubjectType, int> { { SubjectType.PrimaryExternalLink, 1 } }.ToFrozenDictionary() }
+    }.ToFrozenDictionary();
+    
     public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses =
         new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>
         {
+            { FolderType.USER, _defaultFileShareDictionary },
             {
                 FolderType.CustomRoom, new Dictionary<SubjectType, HashSet<FileShare>>
                 {
@@ -259,7 +295,7 @@ public class FileSecurity(IDaoFactory daoFactory,
     private ConcurrentDictionary<string, FileShareRecord<int>> _cachedRecordsInternal;
     private ConcurrentDictionary<string, FileShareRecord<string>> _cachedRecordsThirdParty;
     private readonly ConcurrentDictionary<string, Guid> _cachedRoomOwner = new();
-
+    
     private ConcurrentDictionary<string, FileShareRecord<T>> GetCachedRecords<T>()
     {
         if (typeof(T) == typeof(int))
@@ -1076,7 +1112,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                 if (action == FilesSecurityActions.EditAccess && folder.FolderType is FolderType.EditingRoom or FolderType.VirtualDataRoom)
                 {
-                    return false;
+                    return _linkCountRoomSettingsAccesses.TryGetValue(folder.FolderType, out var accesses) && (accesses.TryGetValue(SubjectType.ExternalLink, out _) || accesses.TryGetValue(SubjectType.PrimaryExternalLink, out _));
                 }
                 
                 if (!isGuest)
@@ -2753,9 +2789,6 @@ public class FileSecurity(IDaoFactory daoFactory,
     public async Task<IDictionary<string, bool>> GetFileAccesses<T>(File<T> file, SubjectType subjectType)
     {        
         var room = new Folder<T>();
-        FrozenDictionary<SubjectType, HashSet<FileShare>> subjectShares;
-        var shares = new HashSet<FileShare>();
-        
         var result = new Dictionary<string, bool>();
 
         var mustConvert = fileUtility.MustConvert(file.Title);
@@ -2763,27 +2796,25 @@ public class FileSecurity(IDaoFactory daoFactory,
         var canCustomFiltering = fileUtility.CanWebCustomFilterEditing(file.Title);
         var canComment = fileUtility.CanWebComment(file.Title);
         var canReview = fileUtility.CanWebReview(file.Title);
+        
+        var parentRoomType = file.RootFolderType == FolderType.USER ? FolderType.USER : file.ParentRoomType;
+        var folderId = file.ParentId;
 
-        if (file.RootFolderType == FolderType.USER)
+        if (parentRoomType == null)
         {
-            if (!_availableUserFileAccesses.TryGetValue(file.RootFolderType, out subjectShares) ||
-                !subjectShares.TryGetValue(subjectType, out shares))
-            {
-                return null;
-            }
-        }
-        else
-        {
-            room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(file.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
-
+            room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+            
             if (room != null)
             {
-                if (!_availableRoomFileAccesses.TryGetValue(room.FolderType, out subjectShares) ||
-                    !subjectShares.TryGetValue(subjectType, out shares))
-                {
-                    return null;
-                }
+                parentRoomType = room.FolderType;
             }
+        }
+        
+        if (!parentRoomType.HasValue ||
+            !_availableRoomFileAccesses.TryGetValue(parentRoomType.Value, out var subjectShares) ||
+            !subjectShares.TryGetValue(subjectType, out var shares))
+        {
+            return null;
         }
         
         foreach (var s in shares)
@@ -2824,32 +2855,69 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public async Task<IDictionary<string, bool>> GetFolderAccesses<T>(Folder<T> folder, SubjectType subjectType)
     {
-        FrozenDictionary<SubjectType, HashSet<FileShare>> subjectShares;
-        var shares = new HashSet<FileShare>();
+        var room = DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
         
-        if (folder.RootFolderType == FolderType.USER)
+        var parentRoomType = folder.RootFolderType == FolderType.USER ? 
+            FolderType.USER : 
+            room?.FolderType ?? folder.ParentRoomType;
+        var folderId = folder.Id;
+
+        if (parentRoomType == null)
         {
-            if (!_availableUserFolderAccesses.TryGetValue(folder.RootFolderType, out subjectShares) ||
-                !subjectShares.TryGetValue(subjectType, out shares))
-            {
-                return null;
-            }
-        }
-        else
-        {
-            var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folder.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+            room ??= await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
 
             if (room != null)
             {
-                if (!_availableRoomFileAccesses.TryGetValue(room.FolderType, out subjectShares) ||
-                    !subjectShares.TryGetValue(subjectType, out shares))
-                {
-                    return null;
-                }
+                parentRoomType = room.FolderType;
             }
         }
         
+        if (!parentRoomType.HasValue ||
+            !_availableRoomFileAccesses.TryGetValue(parentRoomType.Value, out var subjectShares) ||
+            !subjectShares.TryGetValue(subjectType, out var shares))
+        {
+            return null;
+        }
+        
         return shares.ToDictionary(r => r.ToStringFast(), r=> true);
+    }
+    
+    public async Task<int> GetLinksSettings<T>(FileEntry<T> fileEntry, SubjectType subjectType)
+    {        
+        FrozenDictionary<FolderType, FrozenDictionary<SubjectType, int>> linkSettings;
+
+        var folder = fileEntry as Folder<T>;
+        var file = folder == null && fileEntry is File<T> ? fileEntry : null;
+        var room = folder != null && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
+        var parentRoomType = fileEntry.RootFolderType == FolderType.USER ? FolderType.USER : fileEntry.ParentRoomType;
+        
+        if (room != null)
+        {
+            parentRoomType = room.FolderType;
+            linkSettings = _linkCountRoomSettingsAccesses;
+        }
+        else
+        {            
+            var folderId = file != null ? file.ParentId : default;
+            folderId ??= folder != null ? folder.Id : default;
+
+            if (folderId != null)
+            {
+                room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+                if (room != null)
+                {
+                    parentRoomType = room.FolderType;
+                }
+            }
+            linkSettings = _linkCountRoomFileSettingsAccesses;
+        }
+        
+        if (parentRoomType.HasValue && linkSettings.TryGetValue(parentRoomType.Value, out var access) && access.TryGetValue(subjectType, out var i))
+        {
+            return i;
+        }
+        
+        return 0;
     }
     
     public static bool IsAvailableAccess(FileShare share, SubjectType subjectType, FolderType roomType)

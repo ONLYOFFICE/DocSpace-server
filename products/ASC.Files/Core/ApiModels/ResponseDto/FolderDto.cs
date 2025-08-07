@@ -282,8 +282,12 @@ public class FolderDtoHelper(
         }
 
         result.Lifetime = mapper.Map<RoomDataLifetime, RoomDataLifetimeDto>(folder.SettingsLifetime);
-        result.AvailableExternalRights = await _fileSecurity.GetFolderAccesses(folder, SubjectType.ExternalLink);
-        
+
+        if (result.CanShare)
+        {
+            result.AvailableExternalRights = await _fileSecurity.GetFolderAccesses(folder, SubjectType.ExternalLink);
+        }
+
         return result;
     }
     
