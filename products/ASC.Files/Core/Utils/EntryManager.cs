@@ -108,12 +108,6 @@ public class BreadCrumbsManager(
                 
             breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
         }
-        else
-        {
-            rootId = authContext.CurrentAccount.ID == firstVisible.RootCreateBy
-                ? await globalFolderHelper.FolderMyAsync
-                : rootId;
-        }
 
         var folderDaoInt = daoFactory.GetFolderDao<int>();
 
