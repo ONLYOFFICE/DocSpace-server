@@ -25,16 +25,14 @@ public class Program
             var token = authMe.Response.Token;
             config.DefaultHeaders["Authorization"] = $"Bearer {token}";
 
-            var folderInstance = new {{packageName}}.Api.Files.FoldersApi(config);
+            var folderInstance = new DocSpace.API.SDK.Api.Files.FoldersApi(config);
             var getFolderMy = await folderInstance.GetMyFolderAsync();
 
-            var actual = (FolderContentDtoInteger)getFolderMy.Response.ActualInstance;
-            var folderMyId = actual.Current.Id;
+            var folderMyId = getFolderMy.Response.Current.Id;
 
             var folderSettings = new CreateFolder("Folder"){};
             var createFolder = await folderInstance.CreateFolderAsync(folderMyId, folderSettings);
-            var createdFolderIdActual = (FolderDtoInteger)createFolder.Response.ActualInstance;
-            var createdFolderId = createdFolderIdActual.Id;
+            var createdFolderId = createFolder.Response.Id;
             Console.WriteLine(createdFolderId);
 
             var getFolderInfo = await folderInstance.GetFolderByFolderIdAsync(createdFolderId);
@@ -43,8 +41,7 @@ public class Program
             var updatedFolderSettings = new CreateFolder("UpdatedTitle") { };
 
             var renameFolder = await folderInstance.RenameFolderAsync(createdFolderId, updatedFolderSettings);
-            var titleNewActual = (FolderDtoInteger)renameFolder.Response.ActualInstance;
-            var titleNew = titleNewActual.Title;
+            var titleNew = renameFolder.Response.Title;
             if (updatedFolderSettings.Title == titleNew)
             {
                 Console.WriteLine("Success");

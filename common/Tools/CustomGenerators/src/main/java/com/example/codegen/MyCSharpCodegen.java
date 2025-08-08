@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.tags.Tag;
+import io.swagger.v3.oas.models.media.Schema;
 
 import org.openapitools.codegen.model.ModelMap;
 import org.openapitools.codegen.model.ModelsMap;
@@ -19,6 +20,7 @@ import org.openapitools.codegen.CodegenProperty;
 import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
 import org.openapitools.codegen.model.ApiInfoMap;
+import org.openapitools.codegen.utils.ModelUtils;
 
 import java.io.File;
 import java.util.List;
@@ -31,6 +33,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.LinkedHashMap;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 public class MyCSharpCodegen extends CSharpClientCodegen {
     
@@ -119,6 +123,31 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
             model.readWriteVars = model.vars.stream()
             .filter(v -> !v.isReadOnly)
             .collect(Collectors.toList());
+            if (model.getComposedSchemas() != null && model.getComposedSchemas().getAllOf() != null) {
+                model.getVendorExtensions().put("x-uses-allOf", true);
+                Set<String> localPropertyNames = new HashSet<>();
+                Schema modelSchema = this.openAPI.getComponents().getSchemas().get(model.schemaName);
+
+                if (ModelUtils.isAllOf(modelSchema)) {
+                    for (Object obj : modelSchema.getAllOf()) {
+                        if (obj instanceof Schema) {
+                            Schema allOfSchema = (Schema) obj;
+                            if ("object".equals(ModelUtils.getType(allOfSchema)) && allOfSchema.getProperties() != null) {
+                                localPropertyNames.addAll(allOfSchema.getProperties().keySet());
+                            }
+                        }
+                    }
+                }
+
+                List<CodegenProperty> localVars = new ArrayList<>();
+                for (CodegenProperty var : model.vars) {
+                    if (localPropertyNames.contains(var.baseName)) {
+                        localVars.add(var);
+                    }
+                }
+
+                model.getVendorExtensions().put("x-localVars", localVars);
+            }
         }
         
 

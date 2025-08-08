@@ -16,6 +16,9 @@ import org.openapitools.codegen.model.ApiInfoMap;
 import static org.openapitools.codegen.utils.StringUtils.underscore;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
 import org.openapitools.codegen.model.ApiInfoMap;
+import io.swagger.v3.oas.models.media.Schema;
+import org.openapitools.codegen.utils.ModelUtils;
+import org.openapitools.codegen.CodegenProperty;
 
 import java.util.List;
 import java.io.File;
@@ -28,6 +31,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.LinkedHashMap;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 public class MyPythonCodegen extends PythonClientCodegen {
 
@@ -135,6 +140,32 @@ public class MyPythonCodegen extends PythonClientCodegen {
             CodegenModel model = mo.getModel();
             if ("ApiDateTime".equals(model.classname)) {
                 model.vendorExtensions.put("isApiDateTime", true);
+            }
+
+            if (model.getComposedSchemas() != null && model.getComposedSchemas().getAllOf() != null) {
+                model.getVendorExtensions().put("x-uses-allOf", true);
+                Set<String> localPropertyNames = new HashSet<>();
+                Schema modelSchema = this.openAPI.getComponents().getSchemas().get(model.schemaName);
+
+                if (ModelUtils.isAllOf(modelSchema)) {
+                    for (Object obj : modelSchema.getAllOf()) {
+                        if (obj instanceof Schema) {
+                            Schema allOfSchema = (Schema) obj;
+                            if ("object".equals(ModelUtils.getType(allOfSchema)) && allOfSchema.getProperties() != null) {
+                                localPropertyNames.addAll(allOfSchema.getProperties().keySet());
+                            }
+                        }
+                    }
+                }
+
+                List<CodegenProperty> localVars = new ArrayList<>();
+                for (CodegenProperty var : model.vars) {
+                    if (localPropertyNames.contains(var.baseName)) {
+                        localVars.add(var);
+                    }
+                }
+
+                model.getVendorExtensions().put("x-localVars", localVars);
             }
         }
         return objs;
