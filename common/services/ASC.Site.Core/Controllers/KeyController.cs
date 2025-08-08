@@ -83,4 +83,48 @@ public class KeyController(
             throw;
         }
     }
+
+    [HttpPost("generateunsubscribeid")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
+    public async Task<GenerateUnsubscribeIdResponseDto> GenerateUnsubscribeId(GenerateUnsubscribeIdRequestDto inDto)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(inDto?.Email))
+            {
+                return null;
+            }
+
+            var unsubscribeId = await validationKeyProvider.EncryptAndEncode(inDto.Email);
+
+            return new GenerateUnsubscribeIdResponseDto(unsubscribeId);
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+            throw;
+        }
+    }
+
+    [HttpPost("validateunsubscribeid")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
+    public async Task<ValideteUnsubscribeIdResponseDto> ValidateUnsubscribeId(ValideteUnsubscribeIdRequestDto inDto)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(inDto?.UnsubscribeId))
+            {
+                return null;
+            }
+
+            var email = await validationKeyProvider.DecodeAndDecrypt(inDto.UnsubscribeId);
+
+            return new ValideteUnsubscribeIdResponseDto(email);
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+            throw;
+        }
+    }
 }

@@ -31,3 +31,9 @@ public record GenerateKeysResponseDto(string EmailKey, string LinkKey);
 
 public record ValideteKeysRequestDto(string EmailKey, string LinkKey, string Page);
 public record ValideteKeysResponseDto(string Email, bool Valid);
+
+public record GenerateUnsubscribeIdRequestDto(string Email);
+public record GenerateUnsubscribeIdResponseDto(string UnsubscribeId);
+
+public record ValideteUnsubscribeIdRequestDto(string UnsubscribeId);
+public record ValideteUnsubscribeIdResponseDto(string Email);
