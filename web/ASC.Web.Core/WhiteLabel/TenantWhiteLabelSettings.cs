@@ -228,6 +228,30 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             LogoAboutPageExt = null,
             DarkLogoAboutPageExt = null,
 
+            LogoSpreadsheetEditorExt = null,
+            DarkLogoSpreadsheetEditorExt = null,
+
+            LogoSpreadsheetEditorEmbedExt = null,
+            DarkLogoSpreadsheetEditorEmbedExt = null,
+
+            LogoPresentationEditorExt = null,
+            DarkLogoPresentationEditorExt = null,
+
+            LogoPresentationEditorEmbedExt = null,
+            DarkLogoPresentationEditorEmbedExt = null,
+
+            LogoPdfEditorExt = null,
+            DarkLogoPdfEditorExt = null,
+
+            LogoPdfEditorEmbedExt = null,
+            DarkLogoPdfEditorEmbedExt = null,
+
+            LogoDiagramEditorExt = null,
+            DarkLogoDiagramEditorExt = null,
+
+            LogoDiagramEditorEmbedExt = null,
+            DarkLogoDiagramEditorEmbedExt = null,
+
             IsDefaultLogoLightSmall = true,
             IsDefaultLogoDark = true,
             IsDefaultLogoFavicon = true,
@@ -235,6 +259,14 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             IsDefaultLogoDocsEditorEmbed = true,
             IsDefaultLogoLeftMenu = true,
             IsDefaultLogoAboutPage = true,
+            IsDefaultLogoSpreadsheetEditor = true,
+            IsDefaultLogoSpreadsheetEditorEmbed = true,
+            IsDefaultLogoPresentationEditor = true,
+            IsDefaultLogoPresentationEditorEmbed = true,
+            IsDefaultLogoPdfEditor = true,
+            IsDefaultLogoPdfEditorEmbed = true,
+            IsDefaultLogoDiagramEditor = true,
+            IsDefaultLogoDiagramEditorEmbed = true,
 
             LogoText = null
         };
@@ -261,7 +293,15 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             && IsDefaultLogoDocsEditor
             && IsDefaultLogoDocsEditorEmbed
             && IsDefaultLogoLeftMenu
-            && IsDefaultLogoAboutPage;
+            && IsDefaultLogoAboutPage
+            && IsDefaultLogoSpreadsheetEditor
+            && IsDefaultLogoSpreadsheetEditorEmbed
+            && IsDefaultLogoPresentationEditor
+            && IsDefaultLogoPresentationEditorEmbed
+            && IsDefaultLogoPdfEditor
+            && IsDefaultLogoPdfEditorEmbed
+            && IsDefaultLogoDiagramEditor
+            && IsDefaultLogoDiagramEditorEmbed;
     }
 
     public bool GetIsDefault(WhiteLabelLogoType type)
