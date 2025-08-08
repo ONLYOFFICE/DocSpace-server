@@ -40,9 +40,9 @@ public abstract class ApiControllerBase(FolderDtoHelper folderDtoHelper, FileDto
     protected readonly FolderDtoHelper _folderDtoHelper = folderDtoHelper;
     protected readonly FileDtoHelper _fileDtoHelper = fileDtoHelper;
 
-    protected async Task<FileEntryDto> GetFileEntryWrapperAsync(FileEntry r)
+    protected async Task<FileEntryBaseDto> GetFileEntryWrapperAsync(FileEntry r)
     {
-        FileEntryDto wrapper = null;
+        FileEntryBaseDto wrapper = null;
         if (r.FileEntryType == FileEntryType.Folder)
         {
             if (r is Folder<int> fol1)
