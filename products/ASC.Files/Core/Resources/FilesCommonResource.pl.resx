@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,13 +112,22 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AceShareLink" xml:space="preserve">
     <value>Portal zewnętrzny</value>
+  </data>
+  <data name="AceStatusEnum_Comment" xml:space="preserve">
+    <value>Komentarz</value>
+  </data>
+  <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
+    <value>Niestandardowy filtr</value>
+  </data>
+  <data name="AceStatusEnum_FillForms" xml:space="preserve">
+    <value>Wypełnianie formularzy</value>
   </data>
   <data name="AceStatusEnum_Read" xml:space="preserve">
     <value>Tylko do odczytu</value>
@@ -82,6 +150,9 @@
   <data name="Author_Me" xml:space="preserve">
     <value>Ja</value>
   </data>
+  <data name="CommentAutosave" xml:space="preserve">
+    <value>Zapisano automatycznie</value>
+  </data>
   <data name="CommentChangeOwner" xml:space="preserve">
     <value>Zmieniono właściciela</value>
   </data>
@@ -97,8 +168,20 @@
   <data name="CommentCreateByDocuSign" xml:space="preserve">
     <value>Utworzono przez DocuSign</value>
   </data>
+  <data name="CommentCreateFillFormDraft" xml:space="preserve">
+    <value>Utworzono, aby wypełnić formularz</value>
+  </data>
   <data name="CommentEdit" xml:space="preserve">
     <value>Edytowany</value>
+  </data>
+  <data name="CommentEditEncrypt" xml:space="preserve">
+    <value>Edytowano z szyfrowaniem</value>
+  </data>
+  <data name="CommentEncrypted" xml:space="preserve">
+    <value>Zaszyfrowano</value>
+  </data>
+  <data name="CommentForcesave" xml:space="preserve">
+    <value>Zapisano</value>
   </data>
   <data name="CommentOverwrite" xml:space="preserve">
     <value>Przepisany</value>
@@ -108,6 +191,9 @@
   </data>
   <data name="CommentRevertChanges" xml:space="preserve">
     <value>Przywrócono ze zmiany dokumentu {0}</value>
+  </data>
+  <data name="CommentSubmitFillForm" xml:space="preserve">
+    <value>Wysłano formularz</value>
   </data>
   <data name="CommentUpload" xml:space="preserve">
     <value>Przesłany</value>
@@ -139,9 +225,6 @@
   <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>W usłudze dokumentów wystąpił błąd</value>
   </data>
-  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
-    <value>Plik jest otwarty do edycji przez {0}. Obecnie funkcja współtworzenia nie jest obsługiwana dla tego formatu pliku.</value>
-  </data>
   <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>Plik jest otwarty do edycji w aplikacji mobilnej przez {0}</value>
   </data>
@@ -156,6 +239,9 @@
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Pliki większe niż {0} nie zostaną przeniesione</value>
+  </data>
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
+    <value>Nowa wersja nie może być taka sama jak obecna</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Nie można skopiować folderu do jego podfolderu</value>
@@ -192,6 +278,12 @@
   </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Nie można zezwolić na {0} dostawcy z podanych poświadczeń.</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
+    <value>Nie masz wystarczających uprawnień, aby skopiować plik</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
+    <value>Nie masz wystarczających uprawnień, aby skopiować katalog</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby utworzyć</value>
@@ -253,20 +345,69 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Nie możesz wyświetlić podglądu elementów znajdujących się w koszu</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Nieprawidłowy dostawca</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Nie można użyć tego katalogu do przechowywania pokoju</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Link z zaproszeniem jest nieprawidłowy lub wygasł</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Rola jest niedostępna dla tego rodzaju użytkownika</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Dany dostawca jest już podłączony do pokoju</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Nie masz uprawnień do skopiowania do tego katalogu</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Nie masz uprawnień do przeniesienia tego katalogu</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Nie masz wystarczających uprawnień, aby cofnąć archiwizację pokoju</value>
+  </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Nie możesz edytować zarchiwizowanych pokoi</value>
+  </data>
+  <data name="ErrorrMessage_PinRoom" xml:space="preserve">
+    <value>Nie możesz przypiąć pokoju</value>
+  </data>
   <data name="Everyone" xml:space="preserve">
     <value>Wszyscy</value>
   </data>
   <data name="Guest" xml:space="preserve">
     <value>Anonimowy użytkownik</value>
   </data>
+  <data name="IndexTitle" xml:space="preserve">
+    <value>Szukaj w treści dokumentów</value>
+  </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>Plik utworzony w folderze "{0}"</value>
+  </data>
+  <data name="MessageFileCreatedForm" xml:space="preserve">
+    <value>Dokument PDF jest gotowy do wypełnienia. Został zapisany w katalogu {0}</value>
+  </data>
+  <data name="MessageFillFormDraftCreated" xml:space="preserve">
+    <value>Kopia PDF jest tworzona w katalogu {0}. Wypełnij formularz i pobierz wynik w formacie PDF lub DOCX.</value>
+  </data>
+  <data name="MessageFillFormDraftDiscard" xml:space="preserve">
+    <value>Plik nie jest już wersją roboczą umożliwiającą wypełnienie formularza.</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>Zrób to też jako użytkownik|Powiąż konta Dropbox, Box i inne z działem 'Wspólne dokumenty'|Ustaw prawa dostępu do dokumentów i folderów w dziale 'Wspólne dokumenty'</value>
   </data>
   <data name="ProductDescription" xml:space="preserve">
     <value>Twórz, edytuj i udostępniaj dokumenty. Współtwórz je z innymi w czasie rzeczywistym. Gwarantowana 100% kompatybilność z formatem docx, xlsx, pptx.</value>
+  </data>
+  <data name="ProductDescriptionEx" xml:space="preserve">
+    <value>Edytuj dokumenty, udostępniaj je i współpracuj nad nimi w czasie rzeczywistym. Twórz współdzielone dokumenty i zarządzaj nimi, aby cały zespół miał do nich dostęp.
+Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
+  </data>
+  <data name="ProductDescriptionShort" xml:space="preserve">
+    <value>Przeglądaj i pobieraj współdzielone dokumenty. Przesyłaj pliki do współdzielonych katalogów. Najwyższy poziom kompatybilność z docx, xlsx i pptx gwarantowany.</value>
   </data>
   <data name="ProductName" xml:space="preserve">
     <value>Dokumenty</value>
@@ -282,6 +423,12 @@
   </data>
   <data name="UnlockComment" xml:space="preserve">
     <value>Plik jest odblokowany</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Edytujący</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Nie masz uprawnień do edycji pokoju</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>Administrator DocSpace</value>
@@ -310,111 +457,20 @@
   <data name="AceStatusEnum_Collaborator" xml:space="preserve">
     <value>Współpracownik</value>
   </data>
-  <data name="CommentSubmitFillForm" xml:space="preserve">
-    <value>Wysłano formularz</value>
-  </data>
-  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
-    <value>Nowa wersja nie może być taka sama jak obecna</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
-    <value>Nie masz wystarczających uprawnień, aby skopiować plik</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
-    <value>Nie masz wystarczających uprawnień, aby skopiować katalog</value>
-  </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Nieprawidłowy dostawca</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Nie można użyć tego katalogu do przechowywania pokoju</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Link z zaproszeniem jest nieprawidłowy lub wygasł</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Dany dostawca jest już podłączony do pokoju</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Rola jest niedostępna dla tego rodzaju użytkownika</value>
-  </data>
   <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
     <value>Nie masz wystarczających uprawnień, aby zarchiwizować pokój</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Nie masz uprawnień do skopiowania do tego katalogu</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Nie masz uprawnień do edycji pokoju</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Nie masz uprawnień do przeniesienia tego katalogu</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Nie masz wystarczających uprawnień, aby cofnąć archiwizację pokoju</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Nie możesz edytować zarchiwizowanych pokoi</value>
-  </data>
-  <data name="ErrorrMessage_PinRoom" xml:space="preserve">
-    <value>Nie możesz przypiąć pokoju</value>
-  </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Edytujący</value>
-  </data>
-  <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
-    <value>Niestandardowy filtr</value>
-  </data>
-  <data name="AceStatusEnum_Comment" xml:space="preserve">
-    <value>Komentarz</value>
-  </data>
-  <data name="AceStatusEnum_FillForms" xml:space="preserve">
-    <value>Wypełnianie formularzy</value>
-  </data>
-  <data name="CommentAutosave" xml:space="preserve">
-    <value>Zapisano automatycznie</value>
-  </data>
-  <data name="CommentCreateFillFormDraft" xml:space="preserve">
-    <value>Utworzono, aby wypełnić formularz</value>
-  </data>
-  <data name="CommentEditEncrypt" xml:space="preserve">
-    <value>Edytowano z szyfrowaniem</value>
-  </data>
-  <data name="CommentEncrypted" xml:space="preserve">
-    <value>Zaszyfrowano</value>
-  </data>
-  <data name="CommentForcesave" xml:space="preserve">
-    <value>Zapisano</value>
-  </data>
-  <data name="IndexTitle" xml:space="preserve">
-    <value>Szukaj w treści dokumentów</value>
-  </data>
-  <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Dokument PDF jest gotowy do wypełnienia. Został zapisany w katalogu {0}</value>
-  </data>
-  <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>Kopia PDF jest tworzona w katalogu {0}. Wypełnij formularz i pobierz wynik w formacie PDF lub DOCX.</value>
-  </data>
-  <data name="MessageFillFormDraftDiscard" xml:space="preserve">
-    <value>Plik nie jest już wersją roboczą umożliwiającą wypełnienie formularza.</value>
-  </data>
-  <data name="ProductDescriptionShort" xml:space="preserve">
-    <value>Przeglądaj i pobieraj współdzielone dokumenty. Przesyłaj pliki do współdzielonych katalogów. Najwyższy poziom kompatybilność z docx, xlsx i pptx gwarantowany.</value>
-  </data>
-  <data name="ProductDescriptionEx" xml:space="preserve">
-    <value>Edytuj dokumenty, udostępniaj je i współpracuj nad nimi w czasie rzeczywistym. Twórz współdzielone dokumenty i zarządzaj nimi, aby cały zespół miał do nich dostęp.
-Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Udostępniony link</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Link z zaproszeniem</value>
   </data>
   <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
     <value>Maksymalna liczba linków: {0}</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Przekroczono maksymalną liczbę prób wpisania hasła. Spróbuj ponownie później</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Link z zaproszeniem</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Udostępniony link</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Autor</value>
@@ -430,9 +486,6 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Autor eksportu</value>
-  </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Katalog</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Indeks</value>
@@ -458,11 +511,26 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Rodzaj</value>
   </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Katalog</value>
+  </data>
   <data name="Date" xml:space="preserve">
     <value>Data</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Użytkownik</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Link do formularza</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Otwórz plik</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Plik nie może zostać przesłany do tego pokoju. Spróbuj przesłać formularz PDF {0}.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Link do wypełnienia</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
     <value>Przenoszenie kilku plików do Pokoju do wypełniania formularzy nie jest obsługiwane. Przenoś po jednym formularzu PDF {0} na raz.</value>
@@ -473,35 +541,23 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
     <value>Plik nie może zostać przeniesiony do tego pokoju. Spróbuj przenieść formularz PDF {0}.</value>
   </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Plik nie może zostać przesłany do tego pokoju. Spróbuj przesłać formularz PDF {0}.</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Link do wypełnienia</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Link do formularza</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Numer formularza</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Twórca treści</value>
-  </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>Menedżer pokoju</value>
   </data>
   <data name="ExternalUser" xml:space="preserve">
     <value>Użytkownik zewnętrzny</value>
   </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Twórca treści</value>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Menedżer pokoju</value>
   </data>
   <data name="RoleEnum_RoomManager" xml:space="preserve">
     <value>Menedżer pokoju</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Otwórz plik</value>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Twórca treści</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Twórca treści</value>
   </data>
   <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
     <value>Nie można usunąć bieżącej wersji pliku</value>

@@ -42,7 +42,6 @@ public class FileUtilityConfiguration
     public readonly List<string> ExtsWebCommented;
     public readonly List<string> ExtsWebTemplate;
     public readonly List<string> ExtsMustConvert;
-    public readonly List<string> ExtsCoAuthoring;
     public readonly string MasterFormExtension;
     public readonly List<LogoColor> LogoColors;
     private readonly string _forceSave;
@@ -80,7 +79,6 @@ public class FileUtilityConfiguration
         ExtsWebRestrictedEditing = configuration.GetSection("files:docservice:formfilling-docs").Get<List<string>>() ?? [];
         ExtsWebCommented = configuration.GetSection("files:docservice:commented-docs").Get<List<string>>() ?? [];
         ExtsWebTemplate = configuration.GetSection("files:docservice:template-docs").Get<List<string>>() ?? [];
-        ExtsCoAuthoring = configuration.GetSection("files:docservice:coauthor-docs").Get<List<string>>() ?? [];
         MasterFormExtension = configuration["files:docservice:internal-form"] ?? ".docxf";
         
         ExtsIndexing = configuration.GetSection("files:index").Get<List<string>>() ?? [];
@@ -118,37 +116,34 @@ public class LogoColor
 public enum Accessibility
 {
     [SwaggerEnum("Image view")]
-    ImageView,
+    ImageView = 0,
 
     [SwaggerEnum("Media view")]
-    MediaView,
+    MediaView = 1,
 
     [SwaggerEnum("Web view")]
-    WebView,
+    WebView = 2,
 
     [SwaggerEnum("Web edit")]
-    WebEdit,
+    WebEdit = 3,
 
     [SwaggerEnum("Web review")]
-    WebReview,
+    WebReview = 4,
 
     [SwaggerEnum("Web custom filter editing")]
-    WebCustomFilterEditing,
+    WebCustomFilterEditing = 5,
 
     [SwaggerEnum("Web restricted editing")]
-    WebRestrictedEditing,
+    WebRestrictedEditing = 6,
 
     [SwaggerEnum("Web comment")]
-    WebComment,
-
-    [SwaggerEnum("CoAuhtoring")]
-    CoAuhtoring,
-
+    WebComment = 7,
+    
     [SwaggerEnum("Can convert")]
-    CanConvert,
+    CanConvert = 9,
 
     [SwaggerEnum("Must convert")]
-    MustConvert
+    MustConvert = 10
 }
 
 [Scope]
@@ -286,7 +281,6 @@ public class FileUtility(
                 Accessibility.WebCustomFilterEditing => CanWebCustomFilterEditing(fileName),
                 Accessibility.WebRestrictedEditing => CanWebRestrictedEditing(fileName),
                 Accessibility.WebComment => CanWebComment(fileName),
-                Accessibility.CoAuhtoring => CanCoAuthoring(fileName),
                 Accessibility.CanConvert => await CanConvert(file),
                 Accessibility.MustConvert => MustConvert(fileName),
                 _ => false
@@ -351,13 +345,7 @@ public class FileUtility(
         var ext = GetFileExtension(fileName);
         return ExtsWebCommented.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }
-
-    public bool CanCoAuthoring(string fileName)
-    {
-        var ext = GetFileExtension(fileName);
-        return ExtsCoAuthoring.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
-    }
-
+    
     public async Task<bool> CanConvert<T>(File<T> file)
     {
         var folderDao = daoFactory.GetCacheFolderDao<T>();
@@ -548,12 +536,7 @@ public class FileUtility(
             return fileUtilityConfiguration.ExtsMustConvert;
         }
     }
-
-    public List<string> ExtsCoAuthoring
-    {
-        get => fileUtilityConfiguration.ExtsCoAuthoring;
-    }
-
+    
     public static readonly ImmutableList<string> ExtsArchive = new List<string>
     {
                 ".zip", ".rar", ".ace", ".arc", ".arj",
