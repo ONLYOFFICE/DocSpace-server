@@ -2696,7 +2696,6 @@ public class FileSecurity(IDaoFactory daoFactory,
         var mustConvert = fileUtility.MustConvert(file.Title);
         var canEdit = fileUtility.CanWebEdit(file.Title);
         var canCustomFiltering = fileUtility.CanWebCustomFilterEditing(file.Title);
-        var canComment = fileUtility.CanWebComment(file.Title);
         var canReview = fileUtility.CanWebReview(file.Title);
 
         if (!AvailableFileAccesses.TryGetValue(file.RootFolderType, out var subjectShares)
@@ -2724,7 +2723,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 case FileShare.Editing when canEdit:
                 case FileShare.FillForms when file.IsForm:
                 case FileShare.CustomFilter when canCustomFiltering:
-                case FileShare.Comment when !file.IsForm && canComment:
+                case FileShare.Comment when !file.IsForm && canEdit:
                 case FileShare.Review when canReview:
                     result.Add(s.ToStringFast(), true);
                     break;

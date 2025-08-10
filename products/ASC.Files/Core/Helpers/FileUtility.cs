@@ -39,7 +39,6 @@ public class FileUtilityConfiguration
     public readonly List<string> ExtsWebReviewed;
     public readonly List<string> ExtsWebCustomFilterEditing;
     public readonly List<string> ExtsWebRestrictedEditing;
-    public readonly List<string> ExtsWebCommented;
     public readonly List<string> ExtsWebTemplate;
     public readonly List<string> ExtsMustConvert;
     public readonly string MasterFormExtension;
@@ -77,7 +76,6 @@ public class FileUtilityConfiguration
         ExtsWebReviewed = configuration.GetSection("files:docservice:reviewed-docs").Get<List<string>>() ?? [];
         ExtsWebCustomFilterEditing = configuration.GetSection("files:docservice:customfilter-docs").Get<List<string>>() ?? [];
         ExtsWebRestrictedEditing = configuration.GetSection("files:docservice:formfilling-docs").Get<List<string>>() ?? [];
-        ExtsWebCommented = configuration.GetSection("files:docservice:commented-docs").Get<List<string>>() ?? [];
         ExtsWebTemplate = configuration.GetSection("files:docservice:template-docs").Get<List<string>>() ?? [];
         MasterFormExtension = configuration["files:docservice:internal-form"] ?? ".docxf";
         
@@ -135,9 +133,6 @@ public enum Accessibility
 
     [SwaggerEnum("Web restricted editing")]
     WebRestrictedEditing = 6,
-
-    [SwaggerEnum("Web comment")]
-    WebComment = 7,
     
     [SwaggerEnum("Can convert")]
     CanConvert = 9,
@@ -280,7 +275,6 @@ public class FileUtility(
                 Accessibility.WebReview => CanWebReview(fileName),
                 Accessibility.WebCustomFilterEditing => CanWebCustomFilterEditing(fileName),
                 Accessibility.WebRestrictedEditing => CanWebRestrictedEditing(fileName),
-                Accessibility.WebComment => CanWebComment(fileName),
                 Accessibility.CanConvert => await CanConvert(file),
                 Accessibility.MustConvert => MustConvert(fileName),
                 _ => false
@@ -338,12 +332,6 @@ public class FileUtility(
     {
         var ext = GetFileExtension(fileName);
         return ExtsWebRestrictedEditing.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
-    }
-
-    public bool CanWebComment(string fileName)
-    {
-        var ext = GetFileExtension(fileName);
-        return ExtsWebCommented.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }
     
     public async Task<bool> CanConvert<T>(File<T> file)
@@ -503,19 +491,6 @@ public class FileUtility(
             }
 
             return fileUtilityConfiguration.ExtsWebRestrictedEditing;
-        }
-    }
-
-    public List<string> ExtsWebCommented
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(filesLinkUtility.DocServiceApiUrl))
-            {
-                return [];
-            }
-
-            return fileUtilityConfiguration.ExtsWebCommented;
         }
     }
 
