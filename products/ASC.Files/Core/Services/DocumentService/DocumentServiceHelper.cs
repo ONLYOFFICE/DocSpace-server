@@ -257,6 +257,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             rightToFillForms = fillFormsPossible = false;
         }
 
+        if (commentPossible && !fileUtility.CanWebComment(file.Title))
+        {
+            rightToComment = commentPossible = false;
+        }
+
         if (await fileTracker.IsEditingAsync(file.Id))
         {
             if ((editPossible || reviewPossible || fillFormsPossible || commentPossible)
@@ -525,7 +530,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             && !fileUtility.CanWebCustomFilterEditing(file.Title)
             && !fileUtility.CanWebEdit(file.Title)
             && !fileUtility.CanWebReview(file.Title)
-            && !fileUtility.CanWebRestrictedEditing(file.Title))
+            && !fileUtility.CanWebRestrictedEditing(file.Title)
+            && !fileUtility.CanWebComment(file.Title))
         {
             return true;
         }

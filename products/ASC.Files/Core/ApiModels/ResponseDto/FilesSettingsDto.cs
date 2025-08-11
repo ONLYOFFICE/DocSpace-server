@@ -72,6 +72,11 @@ public class FilesSettingsDto
     public List<string> ExtsWebRestrictedEditing { get; set; }
 
     /// <summary>
+    /// The list of extensions of the commented files.
+    /// </summary>
+    public List<string> ExtsWebCommented { get; set; }
+
+    /// <summary>
     /// The list of extensions of the template files.
     /// </summary>
     public List<string> ExtsWebTemplate { get; set; }
@@ -340,6 +345,7 @@ public class FilesSettingsDtoConverter(
             ExtsWebReviewed =  fileUtility.ExtsWebReviewed,
             ExtsWebCustomFilterEditing = fileUtility.ExtsWebCustomFilterEditing,
             ExtsWebRestrictedEditing = fileUtility.ExtsWebRestrictedEditing,
+            ExtsWebCommented = fileUtility.ExtsWebCommented,
             ExtsWebTemplate = fileUtility.ExtsWebTemplate,
             ExtsMustConvert = fileUtility.ExtsMustConvert,
             ExtsConvertible = await fileUtility.GetExtsConvertibleAsync(),
