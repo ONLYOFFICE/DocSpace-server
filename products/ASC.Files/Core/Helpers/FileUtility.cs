@@ -56,6 +56,7 @@ public class FileUtilityConfiguration
         ExtsWebPreviewed = [];
         ExtsWebCommented = [];
         ExtsWebReviewed = [];
+        ExtsWebEncrypt = [];
         
         foreach (var format in Formats)
         {
@@ -83,9 +84,13 @@ public class FileUtilityConfiguration
             {
                 ExtsWebReviewed.Add(format.Name);
             }
+            
+            if(format.Actions.Contains("encrypt"))
+            {
+                ExtsWebEncrypt.Add(format.Name);
+            }
         }
         
-        ExtsWebEncrypt = configuration.GetSection("files:docservice:encrypted-docs").Get<List<string>>() ?? [];
         ExtsWebCustomFilterEditing = configuration.GetSection("files:docservice:customfilter-docs").Get<List<string>>() ?? [];
         ExtsWebRestrictedEditing = configuration.GetSection("files:docservice:formfilling-docs").Get<List<string>>() ?? [];
         ExtsWebTemplate = configuration.GetSection("files:docservice:template-docs").Get<List<string>>() ?? [];
