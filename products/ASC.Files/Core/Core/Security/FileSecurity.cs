@@ -2897,9 +2897,16 @@ public class FileSecurity(IDaoFactory daoFactory,
             linkSettings = _linkCountRoomSettingsAccesses;
         }
         else
-        {            
-            var folderId = file != null ? file.ParentId : default;
-            folderId ??= folder != null ? folder.Id : default;
+        { 
+            T folderId = default; 
+            if (file != null)
+            { 
+                folderId = file.ParentId;
+            }
+            else if(folder != null)
+            { 
+                folderId = folder.Id;
+            }
 
             if (folderId != null)
             {
