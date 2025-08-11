@@ -495,6 +495,12 @@ public class BackupService(
         }
 
         var currentTariff = await tariffService.GetTariffAsync(tenantId);
+
+        if (currentTariff.State == TariffState.NotPaid)
+        {
+            return true;
+        }
+
         var isFreeTariff = await tariffService.IsFreeTariffAsync(currentTariff);
 
         var backupQuota = isFreeTariff
