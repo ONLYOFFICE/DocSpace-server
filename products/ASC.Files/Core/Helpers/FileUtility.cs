@@ -57,6 +57,7 @@ public class FileUtilityConfiguration
         ExtsWebCommented = [];
         ExtsWebReviewed = [];
         ExtsWebEncrypt = [];
+        ExtsWebCustomFilterEditing = [];
         
         foreach (var format in Formats)
         {
@@ -89,9 +90,13 @@ public class FileUtilityConfiguration
             {
                 ExtsWebEncrypt.Add(format.Name);
             }
+            
+            if(format.Actions.Contains("customfilter"))
+            {
+                ExtsWebCustomFilterEditing.Add(format.Name);
+            }
         }
         
-        ExtsWebCustomFilterEditing = configuration.GetSection("files:docservice:customfilter-docs").Get<List<string>>() ?? [];
         ExtsWebRestrictedEditing = configuration.GetSection("files:docservice:formfilling-docs").Get<List<string>>() ?? [];
         ExtsWebTemplate = configuration.GetSection("files:docservice:template-docs").Get<List<string>>() ?? [];
         MasterFormExtension = configuration["files:docservice:internal-form"] ?? ".docxf";
@@ -346,7 +351,7 @@ public class FileUtility(
     public bool CanWebCustomFilterEditing(string fileName)
     {
         var ext = GetFileExtension(fileName);
-        return ExtsWebCustomFilterEditing.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
+        return ExtsWebCustomFilterEditing.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase)) && CanWebEdit(fileName);
     }
 
     public bool CanWebRestrictedEditing(string fileName)
