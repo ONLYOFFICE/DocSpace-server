@@ -206,7 +206,7 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
             await socketManager.BackupProgressAsync((int)Percentage, Dump);
             await PublishChanges();
 
-            await backupService.CompleteCustomerSessionForBackupAsync(TenantId, _billingSessionId);
+            await backupService.CompleteCustomerSessionForBackupAsync(TenantId, _billingSessionId, _userId.ToString());
         }
         catch (Exception error)
         {

@@ -585,7 +585,7 @@ public class BackupService(
         return result;
     }
 
-    public async Task<bool> CompleteCustomerSessionForBackupAsync(int tenantId, int sessionId)
+    public async Task<bool> CompleteCustomerSessionForBackupAsync(int tenantId, int sessionId, string customerParticipantName)
     {
         if (sessionId <= 0 || !tariffService.IsConfigured())
         {
@@ -600,7 +600,7 @@ public class BackupService(
 
         var serviceAccount = backupConfigurationService.Settings.Quota.ServiceAccount;
 
-        var result = await tariffService.CompleteCustomerSessionAsync(tenantId, serviceAccount, sessionId, 1);
+        var result = await tariffService.CompleteCustomerSessionAsync(tenantId, serviceAccount, sessionId, 1, customerParticipantName);
 
         if (result)
         {

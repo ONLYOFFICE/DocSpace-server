@@ -107,14 +107,15 @@ public class AccountingClient
         return await RequestAsync<Session>(HttpMethod.Put, $"/session/extend", queryParams);
     }
 
-    public async Task CompleteCustomerSessionAsync(string portalId, int serviceAccount, int sessionId, int quantity)
+    public async Task CompleteCustomerSessionAsync(string portalId, int serviceAccount, int sessionId, int quantity, string customerParticipantName)
     {
         var data = new
         {
             CustomerName = portalId,
             ServiceAccount = serviceAccount,
             SessionId = sessionId,
-            Quantity = quantity
+            Quantity = quantity,
+            CustomerParticipantName = customerParticipantName
         };
 
         _ = await RequestAsync<string>(HttpMethod.Post, "/operation/sessionComplete", data: data);
