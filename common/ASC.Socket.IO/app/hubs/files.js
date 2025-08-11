@@ -142,7 +142,7 @@ module.exports = (io) => {
       const tenant = sess?.portal?.tenantId || "unknown";
       const user = sess?.user?.id || "unknown";
       const sessId = sess?.id;
-      const room = `encryption`;
+      const room = `storage-encryption`;
 
       logger.info(`WS: storage encryption in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
 
