@@ -47,10 +47,15 @@ public class OneOfResponseFilter : IOperationFilter
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
         var method = context.MethodInfo;
-        var responceAttribute = method.GetCustomAttributes<SwaggerResponseAttribute>().Where(attr => attr.StatusCode == 200 && attr.Type != null).ToList();
-        if (responceAttribute.Count > 1)
+        var responseAttributes = method.GetCustomAttributes<SwaggerResponseAttribute>().Where(attr => attr.StatusCode == 200 && attr.Type != null).ToList();
+        if (responseAttributes.Count > 1)
         {
-            var OneOfSchema = responceAttribute.Select(attr => context.SchemaGenerator.GenerateSchema(attr.Type!, context.SchemaRepository)).ToList();
+            var intType = responseAttributes.Select(attr => attr.Type).FirstOrDefault(t => t is { IsGenericType: true } && t.GetGenericArguments().Length == 1 && t.GetGenericArguments()[0] == typeof(int));
+            if (intType == null)
+            {
+                return;
+            }
+            var intTypeSchema = context.SchemaGenerator.GenerateSchema(intType, context.SchemaRepository);
 
             if (operation.Responses.TryGetValue("200", out var response))
             {
@@ -61,16 +66,13 @@ public class OneOfResponseFilter : IOperationFilter
                     {
                         content.Value.Schema = new OpenApiSchema
                         {
-                            OneOf = OneOfSchema,
+                            Items = intTypeSchema,
                             Type = "array"
                         };
                     }
                     else
                     {
-                        content.Value.Schema = new OpenApiSchema
-                        {
-                            OneOf = OneOfSchema
-                        };
+                        content.Value.Schema = intTypeSchema;
                     }
                 }
             }
@@ -95,7 +97,10 @@ public class DerivedSchemaFilter : ISchemaFilter
                 derivedArray.Add(new OpenApiString(schemaId));
             }
 
-            schema.Extensions.Add("x-derived-types", derivedArray);
+            if (derivedArray.Any())
+            {
+                schema.Extensions["x-derived-types"] = derivedArray;
+            }
         }
     }
 
