@@ -405,13 +405,7 @@ static file class FolderQueries
                                 x.TenantId == r.TenantId && 
                                 (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                                  x.EntryType == FileEntryType.Folder && 
-                                  x.EntryId == ctx.Tree
-                                      .Where(t => t.FolderId == r.ParentId)
-                                      .OrderByDescending(t => t.Level)
-                                      .Select(t => t.ParentId)
-                                      .Skip(1)
-                                      .FirstOrDefault()
-                                      .ToString()),
+                                ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                             Settings = ctx.RoomSettings.Where(x => x.TenantId == r.TenantId && x.RoomId == r.Id).Distinct().FirstOrDefault(),
                             Order = (
                                 from f in ctx.FileOrder

@@ -2259,13 +2259,7 @@ internal class FileDao(
                     x.TenantId == r.TenantId && 
                     (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                     x.EntryType == FileEntryType.Folder && 
-                    x.EntryId == filesDbContext.Tree
-                        .Where(t => t.FolderId == r.ParentId)
-                        .OrderByDescending(t => t.Level)
-                        .Select(t => t.ParentId)
-                        .Skip(1)
-                        .FirstOrDefault()
-                        .ToString())
+                    filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId))
             });
     }
     
