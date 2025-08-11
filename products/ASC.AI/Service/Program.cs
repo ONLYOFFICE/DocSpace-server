@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Service.Extensions;
 using ASC.AI.Service.Handlers;
 using ASC.Common.DependencyInjection;
 
@@ -37,7 +38,7 @@ var builder = WebApplication.CreateBuilder(options);
 
 builder.Configuration
     .AddDefaultConfiguration(builder.Environment)
-    .AddJsonFile("elastic.json", optional: false, reloadOnChange: true)
+    .AddAiServiceConfiguration(builder.Environment)
     .AddEnvironmentVariables()
     .AddCommandLine(args);
 
@@ -55,14 +56,14 @@ try
 
     builder.Host.ConfigureDefault();
     
-    var startup = new Startup(builder.Configuration, builder.Environment);
-
-    await startup.ConfigureServices(builder);
-    
     builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {
         containerBuilder.Register(context.Configuration);
     });
+    
+    var startup = new Startup(builder.Configuration, builder.Environment);
+
+    await startup.ConfigureServices(builder);
 
     var app = builder.Build();
 
