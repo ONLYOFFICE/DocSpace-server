@@ -81,8 +81,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         { FolderType.FillingFormsRoom,
             new Dictionary<SubjectType, HashSet<FileShare>>
             {
-                { SubjectType.ExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] },
-                { SubjectType.PrimaryExternalLink, [FileShare.FillForms, FileShare.Read, FileShare.None] }
+                { SubjectType.ExternalLink, [FileShare.FillForms, FileShare.None] },
+                { SubjectType.PrimaryExternalLink, [FileShare.FillForms, FileShare.None] }
             }.ToFrozenDictionary()
         }
     }.ToFrozenDictionary();
@@ -2864,7 +2864,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (parentRoomType == null)
         {
-            room ??= await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+            room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
 
             if (room != null)
             {
