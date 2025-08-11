@@ -55,6 +55,7 @@ public class FileUtilityConfiguration
         ExtsWebEdited = [];
         ExtsWebPreviewed = [];
         ExtsWebCommented = [];
+        ExtsWebReviewed = [];
         
         foreach (var format in Formats)
         {
@@ -77,10 +78,14 @@ public class FileUtilityConfiguration
             {
                 ExtsWebCommented.Add(format.Name);
             }
+            
+            if(format.Actions.Contains("review"))
+            {
+                ExtsWebReviewed.Add(format.Name);
+            }
         }
         
         ExtsWebEncrypt = configuration.GetSection("files:docservice:encrypted-docs").Get<List<string>>() ?? [];
-        ExtsWebReviewed = configuration.GetSection("files:docservice:reviewed-docs").Get<List<string>>() ?? [];
         ExtsWebCustomFilterEditing = configuration.GetSection("files:docservice:customfilter-docs").Get<List<string>>() ?? [];
         ExtsWebRestrictedEditing = configuration.GetSection("files:docservice:formfilling-docs").Get<List<string>>() ?? [];
         ExtsWebTemplate = configuration.GetSection("files:docservice:template-docs").Get<List<string>>() ?? [];
@@ -330,7 +335,7 @@ public class FileUtility(
     public bool CanWebReview(string fileName)
     {
         var ext = GetFileExtension(fileName);
-        return ExtsWebReviewed.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
+        return ExtsWebReviewed.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase)) && CanWebEdit(fileName);
     }
 
     public bool CanWebCustomFilterEditing(string fileName)
