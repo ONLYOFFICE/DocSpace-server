@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,40 +24,36 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Core.Vectorization;
 using ASC.Common.Threading;
 
-namespace ASC.AI.Core.Vectorization;
+namespace ASC.AI.Models.ResponseDto;
 
-[Singleton(GenericArguments = [typeof(CopyVectorizationTask), typeof(CopyVectorizationTaskData)])]
-public class VectorizationTaskService<T, TData>(
-    IDistributedTaskQueueFactory queueFactory) 
-    where T : VectorizationTask<TData> 
-    where TData : VectorizationTaskData
+public class VectorizationTaskDto
 {
-    private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>();
+    public required string Id { get; init; }
+    public int Percentage { get; init; }
+    public string? Error { get; init; }
+    public bool IsCompleted { get; init; }
+    public DistributedTaskStatus Status { get; init; }
+}
 
-    public Task StartAsync(T task)
+public static class VectorizationTaskExtensions
+{
+    public static VectorizationTaskDto? ToDto(this VectorizationTask? task)
     {
-        return _queue.EnqueueTask(task);
-    }
-
-    public Task<string> StoreAsync(T task)
-    {
-        return _queue.PublishTask(task);
-    }
-
-    public async Task<T?> GetAsync(string id)
-    {
-        return await _queue.PeekTask(id);
-    }
-
-    public async Task<List<T>> GetTasksAsync()
-    {
-        return await _queue.GetAllTasks();
-    }
-    
-    public async Task DeleteAsync(string id)
-    {
-        await _queue.DequeueTask(id);
+        if (task == null)
+        {
+            return null;
+        }
+        
+        return new VectorizationTaskDto
+        {
+            Id = VectorizationTaskIdHelper.MakeTaskId(task.Id, task.Type),
+            Error = task.Exception?.Message,
+            Percentage = (int)task.Percentage,
+            IsCompleted = task.IsCompleted,
+            Status = task.Status
+        };
     }
 }

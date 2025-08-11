@@ -33,8 +33,20 @@ using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.AI.Core.Vectorization;
 
+public enum VectorizationTaskType
+{
+    Copy,
+    Upload
+}
+
+public abstract class VectorizationTask : DistributedTaskProgress
+{
+    public Guid UserId { get; set; }
+    public VectorizationTaskType Type { get; set; }
+}
+
 public abstract class VectorizationTask<T> 
-    : DistributedTaskProgress where T : VectorizationTaskData
+    : VectorizationTask where T : VectorizationTaskData
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = null!;
 
@@ -51,12 +63,11 @@ public abstract class VectorizationTask<T>
     private const int BatchSize = 10;
     
     private int _tenantId;
-    private Guid _userId;
     
-    public void Init(int tenantId, Guid userId, T data)
+    public virtual void Init(int tenantId, Guid userId, T data)
     {
         _tenantId = tenantId;
-        _userId = userId;
+        UserId = userId;
         Data = data;
     }
 
@@ -80,7 +91,7 @@ public abstract class VectorizationTask<T>
             await tenantManager.SetCurrentTenantAsync(_tenantId);
 
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-            await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(UserId);
 
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
             var fileProcessor = scope.ServiceProvider.GetRequiredService<FileTextProcessor>();

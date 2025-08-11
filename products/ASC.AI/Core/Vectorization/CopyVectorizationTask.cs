@@ -32,7 +32,13 @@ public class CopyVectorizationTask : VectorizationTask<CopyVectorizationTaskData
     public CopyVectorizationTask() { }
     
     public CopyVectorizationTask(IServiceScopeFactory serviceScopeFactory) : base(serviceScopeFactory) { }
-    
+
+    public override void Init(int tenantId, Guid userId, CopyVectorizationTaskData data)
+    {
+        Type = VectorizationTaskType.Copy;
+        base.Init(tenantId, userId, data);
+    }
+
     protected override int GetTotalFilesCount()
     {
         return Data.FileIds.Count + Data.ThirdPartyFileIds.Count;

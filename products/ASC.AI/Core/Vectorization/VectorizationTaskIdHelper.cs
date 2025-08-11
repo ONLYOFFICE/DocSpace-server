@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,40 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Common.Threading;
-
 namespace ASC.AI.Core.Vectorization;
 
-[Singleton(GenericArguments = [typeof(CopyVectorizationTask), typeof(CopyVectorizationTaskData)])]
-public class VectorizationTaskService<T, TData>(
-    IDistributedTaskQueueFactory queueFactory) 
-    where T : VectorizationTask<TData> 
-    where TData : VectorizationTaskData
+public static class VectorizationTaskIdHelper
 {
-    private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>();
-
-    public Task StartAsync(T task)
+    private const string CopyPrefix = "copy_";
+    private const string UploadPrefix = "upload_";
+    
+    public static string MakeTaskId(string id, VectorizationTaskType type)
     {
-        return _queue.EnqueueTask(task);
-    }
-
-    public Task<string> StoreAsync(T task)
-    {
-        return _queue.PublishTask(task);
-    }
-
-    public async Task<T?> GetAsync(string id)
-    {
-        return await _queue.PeekTask(id);
-    }
-
-    public async Task<List<T>> GetTasksAsync()
-    {
-        return await _queue.GetAllTasks();
+        return type switch
+        {
+            VectorizationTaskType.Copy => $"{CopyPrefix}{id}",
+            VectorizationTaskType.Upload => $"{UploadPrefix}{id}",
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
     }
     
-    public async Task DeleteAsync(string id)
+    public static (string id, VectorizationTaskType type) ProcessId(string id)
     {
-        await _queue.DequeueTask(id);
+        return id switch
+        {
+            _ when id.StartsWith(CopyPrefix) => (id[CopyPrefix.Length..], VectorizationTaskType.Copy),
+            _ when id.StartsWith(UploadPrefix) => (id[UploadPrefix.Length..], VectorizationTaskType.Upload),
+            _ => throw new ArgumentOutOfRangeException(nameof(id), id, null)
+        };
     }
 }

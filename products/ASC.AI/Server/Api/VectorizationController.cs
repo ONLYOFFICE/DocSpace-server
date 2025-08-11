@@ -32,11 +32,35 @@ namespace ASC.AI.Api;
 [DefaultRoute]
 [ApiController]
 [ControllerName("ai")]
-public class VectorizationController(CopyVectorizationTaskPublisher vectorizationTaskPublisher) : ControllerBase
+public class VectorizationController(
+    CopyVectorizationTaskPublisher vectorizationTaskPublisher,
+    VectorizationTaskHolder taskHolder) : ControllerBase
 {
-    [HttpPost("vectorization/start")]
-    public async Task<CopyVectorizationTask> StartVectorizationAsync(VectorizationStartRequestBoy inDto)
+    [HttpPost("vectorization/tasks")]
+    public async Task<VectorizationTaskDto> StartTaskAsync(VectorizationStartRequestBoy inDto)
     {
-        return await vectorizationTaskPublisher.PublishAsync(inDto.KnowledgeFolderId, inDto.Files);
+        var task = await vectorizationTaskPublisher.PublishAsync(inDto.KnowledgeFolderId, inDto.Files);
+        return task.ToDto()!;
+    }
+
+    [HttpGet("vectorization/tasks/{id}")]
+    public async Task<VectorizationTaskDto?> GetTaskAsync(GetVectorizationTaskRequestDto inDto)
+    {
+        var task = await taskHolder.GetAsync(inDto.Id);
+        return task.ToDto();
+    }
+
+    [HttpGet("vectorization/tasks")]
+    public async Task<List<VectorizationTaskDto>> GetTasksAsync()
+    {
+        var tasks = taskHolder.GetAsync();
+        return await tasks.Select(t => t.ToDto()!).ToListAsync();
+    }
+    
+    [HttpDelete("vectorization/tasks/{id}")]
+    public async Task<NoContentResult> TerminateTaskAsync(GetVectorizationTaskRequestDto inDto)
+    {
+        await taskHolder.TerminateAsync(inDto.Id);
+        return NoContent();
     }
 }
