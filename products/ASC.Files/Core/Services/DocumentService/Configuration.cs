@@ -1145,28 +1145,37 @@ public class LogoConfig(
     TenantLogoHelper tenantLogoHelper)
 {
 
-    public async Task<string> GetImage(EditorType editorType)
+    public async Task<string> GetImage(FileType fileType, EditorType editorType)
     {
-        return editorType == EditorType.Embedded
-                ? commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed))
-                : commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor));
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, editorType == EditorType.Embedded);
+
+        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(logoType));
     }
 
-    public async Task<string> GetImageLight()
+    public async Task<string> GetImageLight(FileType fileType)
     {
-        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed));
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, embed: true);
+
+        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(logoType));
     }
 
-    public async Task<string> GetImageDark()
+    public async Task<string> GetImageDark(FileType fileType)
     {
-        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor));
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, embed: false);
+
+        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(logoType));
     }
 
-    public async Task<string> GetImageEmbedded(EditorType editorType)
+    public async Task<string> GetImageEmbedded(FileType fileType, EditorType editorType)
     {
-        return editorType != EditorType.Embedded
-                ? null
-                : commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed));
+        if (editorType != EditorType.Embedded)
+        {
+            return null;
+        }
+
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, true);
+
+        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(logoType));
     }
 
     public string Url
