@@ -2833,8 +2833,8 @@ public class FileSecurity(IDaoFactory daoFactory,
 
             switch (s)
             {
-                case FileShare.Editing when (file.IsForm && room?.FolderType != FolderType.FillingFormsRoom || !file.IsForm) && canEdit:
-                case FileShare.FillForms when file.IsForm && room?.FolderType == FolderType.FillingFormsRoom:
+                case FileShare.Editing when (file.IsForm && parentRoomType != FolderType.FillingFormsRoom || !file.IsForm) && canEdit:
+                case FileShare.FillForms when file.IsForm && parentRoomType == FolderType.FillingFormsRoom:
                 case FileShare.CustomFilter when !file.IsForm && canCustomFiltering:
                 case FileShare.Comment when !file.IsForm && canComment:
                 case FileShare.Review when !file.IsForm && canReview:
