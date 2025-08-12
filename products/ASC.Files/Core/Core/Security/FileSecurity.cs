@@ -62,7 +62,7 @@ public class FileSecurity(IDaoFactory daoFactory,
     public readonly FileShare DefaultRoomTemplatesShare = FileShare.Restrict;
 
     public static readonly HashSet<FileShare> PaidShares = [FileShare.RoomManager];
-    private static HashSet<FileShare> DefaultFileAccess => [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None];
+    private static HashSet<FileShare> DefaultFileAccess => [FileShare.Editing, FileShare.FillForms, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None];
     private static readonly FrozenDictionary<SubjectType, HashSet<FileShare>> _defaultFileShareDictionary = new Dictionary<SubjectType, HashSet<FileShare>>
     {
         { SubjectType.ExternalLink, DefaultFileAccess },
@@ -2834,7 +2834,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             switch (s)
             {
                 case FileShare.Editing when (file.IsForm && parentRoomType != FolderType.FillingFormsRoom || !file.IsForm) && canEdit:
-                case FileShare.FillForms when file.IsForm && parentRoomType == FolderType.FillingFormsRoom:
+                case FileShare.FillForms when file.IsForm:
                 case FileShare.CustomFilter when !file.IsForm && canCustomFiltering:
                 case FileShare.Comment when !file.IsForm && canComment:
                 case FileShare.Review when !file.IsForm && canReview:
