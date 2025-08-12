@@ -27,15 +27,13 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 public class TelegramController(
-    ApiContext apiContext,
     AuthContext authContext,
     WebItemManager webItemManager,
     IFusionCache fusionCache,
-    IHttpContextAccessor httpContextAccessor,
     TelegramHelper telegramHelper,
     TenantManager tenantManager
     )
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Checks if the current user is connected to the Telegram Bot or not.
