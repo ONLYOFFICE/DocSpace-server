@@ -459,6 +459,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     public async Task<DocServiceUrlDto> GetDocServiceUrl(DocServiceUrlRequestDto inDto)
     {
         var url = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl);
+        var preloadUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServicePreloadUrl);
 
         var dsVersion = "";
 
@@ -471,6 +472,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         {
             Version = dsVersion,
             DocServiceUrlApi = url,
+            DocServicePreloadUrl = preloadUrl,
             DocServiceUrl = filesLinkUtility.GetDocServiceUrl(),
             DocServiceUrlInternal =filesLinkUtility.GetDocServiceUrlInternal(),
             DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),
