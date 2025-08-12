@@ -34,6 +34,11 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class WhiteLabelItemDto
 {
     /// <summary>
+    /// The white label logo type.
+    /// </summary>
+    public WhiteLabelLogoType Type { get; set; }
+
+    /// <summary>
     /// The white label file name.
     /// </summary>
     public string Name { get; set; }

@@ -205,6 +205,12 @@
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_set_password|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
+  <!-- password_changed -->
+  <pattern id="password_changed">
+    <subject resource="|subject_password_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_password_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
   <!-- change_phone -->
   <pattern id="change_phone">
     <subject resource="|subject_change_phone|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />

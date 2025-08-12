@@ -42,7 +42,7 @@ public class AuditActionMapper(ILogger<AuditActionMapper> logger)
     {
         if (action == null)
         {
-            logger.ErrorThereIsNoActionText(action);
+            logger.ErrorThereIsNoActionText(action.ActionTextResourceName);
 
             return string.Empty;
         }

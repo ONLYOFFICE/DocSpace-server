@@ -26,8 +26,6 @@
 
 using System.Collections.Specialized;
 
-using Polly.Extensions.Http;
-
 namespace ASC.Core.Billing;
 
 [Singleton]
@@ -39,6 +37,8 @@ public class AccountingClient
     private readonly IHttpClientFactory _httpClientFactory;
 
     internal const string HttpClientName = "accountingHttpClient";
+    internal const string ResiliencePipelineName = "accountingResiliencePipeline";
+    internal const string BalanceResiliencePipelineName = "balanceResiliencePipeline";
 
     private readonly JsonSerializerOptions _deserializationOptions = new()
     {
@@ -405,16 +405,36 @@ public class Currency
     public string Code { get; init; }
 }
 
-public static class AccountingHttplClientExtension
+public static class AccountingHttpClientExtension
 {
     public static void AddAccountingHttpClient(this IServiceCollection services)
     {
         services.AddHttpClient(AccountingClient.HttpClientName)
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .AddPolicyHandler((_, _) => HttpPolicyExtensions.HandleTransientHttpError()
-                .OrResult(x => !x.IsSuccessStatusCode)
-                .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+            .AddResilienceHandler(AccountingClient.ResiliencePipelineName, builder =>
+            {
+                builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+                {
+                    MaxRetryAttempts = 2,
+                    Delay = TimeSpan.FromSeconds(1),
+                    BackoffType = DelayBackoffType.Exponential,
+                    ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                        .Handle<HttpRequestException>()
+                        .Handle<TaskCanceledException>()
+                        .HandleResult(response => !response.IsSuccessStatusCode),
+                });
+            });
 
+        services.AddResiliencePipeline<string, bool>(AccountingClient.BalanceResiliencePipelineName, pipelineBuilder =>
+        {
+            pipelineBuilder.AddRetry(new RetryStrategyOptions<bool>()
+            {
+                MaxRetryAttempts = 15,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Constant,
+                ShouldHandle = new PredicateBuilder<bool>().HandleResult(result => result == false)
+            });
+        });
     }
 }
 

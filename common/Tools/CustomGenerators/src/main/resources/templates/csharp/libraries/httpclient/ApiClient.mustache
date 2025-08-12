@@ -1,31 +1,5 @@
 {{>partial_header}}
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Reflection;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters;
-using System.Text;
-using System.Threading;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-{{^netStandard}}
-using System.Web;
-{{/netStandard}}
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using ErrorEventArgs = Newtonsoft.Json.Serialization.ErrorEventArgs;
-using System.Net.Http;
-using System.Net.Http.Headers;
-{{#supportsRetry}}
-using Polly;
-{{/supportsRetry}}
-
 namespace {{packageName}}.Client
 {
     /// <summary>
@@ -35,17 +9,12 @@ namespace {{packageName}}.Client
     {
         private readonly IReadableConfiguration _configuration;
         private static readonly string _contentType = "application/json";
-        private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings
+        private readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions
         {
-            // OpenAPI generated types generally hide default constructors.
-            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-            ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy
-                {
-                    OverrideSpecifiedNames = false
-                }
-            }
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = true
         };
 
         public CustomJsonCodec(IReadableConfiguration configuration)
@@ -53,9 +22,9 @@ namespace {{packageName}}.Client
             _configuration = configuration;
         }
 
-        public CustomJsonCodec(JsonSerializerSettings serializerSettings, IReadableConfiguration configuration)
+        public CustomJsonCodec(JsonSerializerOptions serializerOptions, IReadableConfiguration configuration)
         {
-            _serializerSettings = serializerSettings;
+            _serializerOptions = serializerOptions;
             _configuration = configuration;
         }
 
@@ -66,14 +35,14 @@ namespace {{packageName}}.Client
         /// <returns>A JSON string.</returns>
         public string Serialize(object obj)
         {
-            if (obj != null && obj is {{{packageName}}}.{{modelPackage}}.AbstractOpenAPISchema)
+            if (obj != null && obj is {{modelPackage}}.AbstractOpenAPISchema)
             {
                 // the object to be serialized is an oneOf/anyOf schema
-                return (({{{packageName}}}.{{modelPackage}}.AbstractOpenAPISchema)obj).ToJson();
+                return (({{modelPackage}}.AbstractOpenAPISchema)obj).ToJson();
             }
             else
             {
-                return JsonConvert.SerializeObject(obj, _serializerSettings);
+                return JsonSerializer.Serialize(obj, _serializerOptions);
             }
         }
 
@@ -118,7 +87,7 @@ namespace {{packageName}}.Client
                         var match = fileNameRegex.Match(header.ToString());
                         if (match.Success)
                         {
-                            string fileName = ClientUtils.SanitizeFilename(match.Groups[1].Value.Replace("\"", "").Replace("'", ""));
+                            var fileName = ClientUtils.SanitizeFilename(match.Groups[1].Value.Replace("\"", "").Replace("'", ""));
                             return new FileParameter(fileName, await response.Content.ReadAsStreamAsync().ConfigureAwait(false));
                         }
                     }
@@ -141,7 +110,7 @@ namespace {{packageName}}.Client
                         var match = fileNameRegex.Match(header.ToString());
                         if (match.Success)
                         {
-                            string fileName = filePath + ClientUtils.SanitizeFilename(match.Groups[1].Value.Replace("\"", "").Replace("'", ""));
+                            var fileName = filePath + ClientUtils.SanitizeFilename(match.Groups[1].Value.Replace("\"", "").Replace("'", ""));
                             File.WriteAllBytes(fileName, bytes);
                             return new FileStream(fileName, FileMode.Open);
                         }
@@ -164,7 +133,8 @@ namespace {{packageName}}.Client
             // at this point, it must be a model (json)
             try
             {
-                return JsonConvert.DeserializeObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), type, _serializerSettings);
+                var jsonString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                return JsonSerializer.Deserialize(jsonString, type, _serializerOptions);
             }
             catch (Exception e)
             {
@@ -201,17 +171,12 @@ namespace {{packageName}}.Client
         /// Specifies the settings on a <see cref="JsonSerializer" /> object.
         /// These settings can be adjusted to accommodate custom serialization rules.
         /// </summary>
-        public JsonSerializerSettings SerializerSettings { get; set; } = new JsonSerializerSettings
+        public JsonSerializerOptions SerializerSettings { get; set; } = new JsonSerializerOptions
         {
-            // OpenAPI generated types generally hide default constructors.
-            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-            ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy
-                {
-                    OverrideSpecifiedNames = false
-                }
-            }
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = true
         };
 
         /// <summary>
