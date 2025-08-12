@@ -335,7 +335,7 @@ public class TariffService(
         return productIds;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota)
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName)
     {
         if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
         {
@@ -346,7 +346,7 @@ public class TariffService(
 
         try
         {
-            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds, quantity.Values, productQuantityType, currency);
+            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds, quantity.Values, productQuantityType, currency, customerParticipantName);
 
             if (!changed)
             {

@@ -144,12 +144,13 @@ public class BillingClient
         return result == "\"ok\"";
     }
 
-    public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType, string currency)
+    public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType, string currency, string customerParticipantName)
     {
         var parameters = products.Select(p => Tuple.Create("ProductId", p))
             .Concat(quantity.Select(q => Tuple.Create("ProductQty", q.ToString())))
             .Concat([Tuple.Create("ProductQuantityType", ((int)productQuantityType).ToString())])
             .Concat([Tuple.Create("Currency", currency)])
+            .Concat([Tuple.Create("CustomerParticipantName", customerParticipantName)])
             .ToArray();
 
         var result = await RequestAsync("ChangeSubscription", portalId, parameters);

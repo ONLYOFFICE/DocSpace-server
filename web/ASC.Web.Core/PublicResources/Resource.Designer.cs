@@ -214,6 +214,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Automatic renewal.
+        /// </summary>
+        public static string AutoRenewal {
+            get {
+                return ResourceManager.GetString("AutoRenewal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to By SMS.
         /// </summary>
         public static string ButtonSmsEnable {

@@ -1188,4 +1188,7 @@
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Backup</value>
   </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Automatic renewal</value>
+  </data>
 </root>
