@@ -420,7 +420,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var userId = authContext.CurrentAccount.ID;
 
             var filesTotalCountTask = fileDao.GetFilesByTagCountAsync(userId, [TagType.Recent, TagType.RecentByLink], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
-            var files = await fileDao.GetFilesByTagAsync(userId, [TagType.Recent, TagType.RecentByLink], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, orderBy, from, count).ToListAsync();
+            var files = await fileDao.GetFilesByTagAsync(userId, [TagType.Recent, TagType.RecentByLink], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, new OrderBy(SortedByType.LastOpened, false), from, count).ToListAsync();
             
             entries.AddRange(files);
 

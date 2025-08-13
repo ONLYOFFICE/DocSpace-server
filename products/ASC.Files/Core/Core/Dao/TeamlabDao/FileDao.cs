@@ -2580,6 +2580,7 @@ internal class FileDao(
         IQueryable<FileByTagQuery> query;
         
         var tenantId = _tenantManager.GetCurrentTenantId();
+        var currentUserId = securityContext.CurrentAccount.ID;
         
         var initQuery = filesDbContext.Tag
             .Where(x => x.TenantId == tenantId && x.Owner == tagOwner && tagType.Contains(x.Type))
@@ -2609,7 +2610,7 @@ internal class FileDao(
                 {
                     Entry = x.f, 
                     Tag = x.t, 
-                    LastOpened = filesDbContext.AuditEvents.OrderByDescending(a => a.Date).Where(r => r.Target == x.f.Id.ToString() && r.TenantId == x.f.TenantId).Select(r => r.Date).LastOrDefault(), 
+                    LastOpened = filesDbContext.AuditEvents.OrderByDescending(a => a.Date).Where(r => r.Target == x.f.Id.ToString() && r.UserId == currentUserId && r.Action == (int)MessageAction.FileOpenedForChange && r.TenantId == x.f.TenantId).Select(r => r.Date).FirstOrDefault(), 
                     Security = filesDbContext.Security.FirstOrDefault(s => s.TenantId == tenantId && s.EntryType == FileEntryType.File && s.EntryId == x.f.Id.ToString()  && s.Subject.ToString() == x.t.Name)
                 })
                 .Where(x => x.Tag.Type == TagType.Recent || x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate == DateTime.MinValue || x.Security.Options.ExpirationDate > DateTime.UtcNow))); 
@@ -2620,7 +2621,7 @@ internal class FileDao(
             {
                 Entry = x.f, 
                 Tag = x.t, 
-                LastOpened = filesDbContext.AuditEvents.OrderByDescending(a => a.Date).Where(r => r.Target == x.f.Id.ToString() && r.TenantId == x.f.TenantId).Select(r=> r.Date).LastOrDefault()
+                LastOpened = filesDbContext.AuditEvents.OrderByDescending(a => a.Date).Where(r => r.Target == x.f.Id.ToString() && r.UserId == currentUserId && r.Action == (int)MessageAction.FileOpenedForChange && r.TenantId == x.f.TenantId).Select(r => r.Date).FirstOrDefault()
             });
         }
 
