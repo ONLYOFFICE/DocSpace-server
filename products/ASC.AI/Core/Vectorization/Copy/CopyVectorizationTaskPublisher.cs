@@ -27,7 +27,7 @@
 using ASC.AI.Core.Vectorization.Events;
 using ASC.EventBus.Abstractions;
 
-namespace ASC.AI.Core.Vectorization;
+namespace ASC.AI.Core.Vectorization.Copy;
 
 [Scope]
 public class CopyVectorizationTaskPublisher(
@@ -66,7 +66,7 @@ public class CopyVectorizationTaskPublisher(
 
         var taskId= await copyVectorizationTaskService.StoreAsync(task);
 
-        await eventBus.PublishAsync(new CopyVectorizeIntegrationEvent(userId, tenantId) 
+        await eventBus.PublishAsync(new CopyVectorizationIntegrationEvent(userId, tenantId) 
         { 
             TaskId = taskId, 
             Data = data 

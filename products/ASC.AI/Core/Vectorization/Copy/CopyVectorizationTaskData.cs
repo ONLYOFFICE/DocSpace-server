@@ -24,43 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Vectorization.Copy;
-using ASC.AI.Core.Vectorization.Upload;
-using ASC.Common.Threading;
+using ProtoBuf;
 
-namespace ASC.AI.Core.Vectorization;
+namespace ASC.AI.Core.Vectorization.Copy;
 
-[Singleton(GenericArguments = [typeof(CopyVectorizationTask), typeof(CopyVectorizationTaskData)])]
-[Singleton(GenericArguments = [typeof(UploadVectorizationTask), typeof(UploadVectorizationTaskData)])]
-public class VectorizationTaskService<T, TData>(
-    IDistributedTaskQueueFactory queueFactory) 
-    where T : VectorizationTask<TData> 
-    where TData : VectorizationTaskData
+[ProtoContract]
+public class CopyVectorizationTaskData : VectorizationTaskData
 {
-    private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>();
-
-    public Task StartAsync(T task)
-    {
-        return _queue.EnqueueTask(task);
-    }
-
-    public Task<string> StoreAsync(T task)
-    {
-        return _queue.PublishTask(task);
-    }
-
-    public async Task<T?> GetAsync(string id)
-    {
-        return await _queue.PeekTask(id);
-    }
-
-    public async Task<List<T>> GetTasksAsync()
-    {
-        return await _queue.GetAllTasks();
-    }
+    [ProtoMember(1)]
+    public List<int> FileIds { get; set; } = [];
     
-    public async Task DeleteAsync(string id)
-    {
-        await _queue.DequeueTask(id);
-    }
+    [ProtoMember(2)]
+    public List<string> ThirdPartyFileIds { get; set; } = [];
+    
+    [ProtoMember(3)]
+    public int KnowledgeFolderId { get; set; }
 }

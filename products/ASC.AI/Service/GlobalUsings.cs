@@ -40,8 +40,6 @@ global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using NLog;
 
-global using Service;
-
 global using System.Text;
 
 global using ASC.AI.Core.Vectorization.Events;

@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Service;
 using ASC.AI.Service.Extensions;
 using ASC.AI.Service.Handlers;
 using ASC.Common.DependencyInjection;
@@ -73,7 +74,8 @@ try
 
     var eventBus = sp.GetRequiredService<IEventBus>();
 
-    await eventBus.SubscribeAsync<CopyVectorizeIntegrationEvent, CopyVectorizeIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<CopyVectorizationIntegrationEvent, CopyVectorizationIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<UploadVectorizationIntegrationEvent, UploadVectorizationIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
 

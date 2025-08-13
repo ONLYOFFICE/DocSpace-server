@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,33 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Vectorization;
+namespace ASC.AI.Core.Vectorization.Upload;
 
-namespace ASC.AI.Service.Handlers;
-
-[Scope]
-public class CopyVectorizeIntegrationEventHandler(
-    ILogger<CopyVectorizeIntegrationEventHandler> logger,
-    TenantManager tenantManager,
-    SecurityContext securityContext,
-    AuthManager authManager,
-    VectorizationTaskService<CopyVectorizationTask, CopyVectorizationTaskData> service,
-    IServiceProvider serviceProvider) 
-    : IIntegrationEventHandler<CopyVectorizeIntegrationEvent>
+public class UploadVectorizationTaskData : VectorizationTaskData
 {
-    public async Task Handle(CopyVectorizeIntegrationEvent @event)
-    {
-        CustomSynchronizationContext.CreateContext();
-        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
-        {
-            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
-            
-            var task = serviceProvider.GetRequiredService<CopyVectorizationTask>();
-            task.Init(@event.TaskId, @event.TenantId, @event.CreateBy, @event.Data);
-            
-            await service.StartAsync(task);
-        }
-    }
+    public int FileId { get; set; }
 }

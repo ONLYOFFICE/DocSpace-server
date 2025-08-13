@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,43 +24,42 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Vectorization.Copy;
-using ASC.AI.Core.Vectorization.Upload;
-using ASC.Common.Threading;
+using ASC.AI.Core.Vectorization.Events;
+using ASC.EventBus.Abstractions;
 
-namespace ASC.AI.Core.Vectorization;
+namespace ASC.AI.Core.Vectorization.Upload;
 
-[Singleton(GenericArguments = [typeof(CopyVectorizationTask), typeof(CopyVectorizationTaskData)])]
-[Singleton(GenericArguments = [typeof(UploadVectorizationTask), typeof(UploadVectorizationTaskData)])]
-public class VectorizationTaskService<T, TData>(
-    IDistributedTaskQueueFactory queueFactory) 
-    where T : VectorizationTask<TData> 
-    where TData : VectorizationTaskData
+[Scope]
+public class UploadVectorizationTaskPublisher(
+    TenantManager tenantManager,
+    AuthContext authContext,
+    IServiceProvider serviceProvider,
+    IEventBus eventBus,
+    VectorizationTaskService<UploadVectorizationTask, UploadVectorizationTaskData> taskService)
 {
-    private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>();
+    public async Task<UploadVectorizationTask> PublishAsync(int fileId)
+    {
+        if (fileId <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(fileId), @"File id must be greater than 0");
+        }
+        
+        var task = serviceProvider.GetRequiredService<UploadVectorizationTask>();
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
 
-    public Task StartAsync(T task)
-    {
-        return _queue.EnqueueTask(task);
-    }
-
-    public Task<string> StoreAsync(T task)
-    {
-        return _queue.PublishTask(task);
-    }
-
-    public async Task<T?> GetAsync(string id)
-    {
-        return await _queue.PeekTask(id);
-    }
-
-    public async Task<List<T>> GetTasksAsync()
-    {
-        return await _queue.GetAllTasks();
-    }
-    
-    public async Task DeleteAsync(string id)
-    {
-        await _queue.DequeueTask(id);
+        var data = new UploadVectorizationTaskData { FileId = fileId };
+        
+        task.Init(tenantId, userId, data);
+        
+        var taskId = await taskService.StoreAsync(task);
+        
+        await eventBus.PublishAsync(new UploadVectorizationIntegrationEvent(userId, tenantId)
+        {
+            TaskId = taskId,
+            Data = data
+        });
+        
+        return (await taskService.GetAsync(taskId))!;
     }
 }

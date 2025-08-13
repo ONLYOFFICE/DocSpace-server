@@ -144,7 +144,9 @@ public abstract class VectorizationTask<T>
                 }
             }
             
-            Status = DistributedTaskStatus.Completed;
+            Status = Exception != null 
+                ? DistributedTaskStatus.Failted 
+                : DistributedTaskStatus.Completed;
         }
         catch (Exception e)
         {

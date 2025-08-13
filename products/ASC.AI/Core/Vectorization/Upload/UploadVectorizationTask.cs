@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,43 +24,34 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Vectorization.Copy;
-using ASC.AI.Core.Vectorization.Upload;
-using ASC.Common.Threading;
+namespace ASC.AI.Core.Vectorization.Upload;
 
-namespace ASC.AI.Core.Vectorization;
-
-[Singleton(GenericArguments = [typeof(CopyVectorizationTask), typeof(CopyVectorizationTaskData)])]
-[Singleton(GenericArguments = [typeof(UploadVectorizationTask), typeof(UploadVectorizationTaskData)])]
-public class VectorizationTaskService<T, TData>(
-    IDistributedTaskQueueFactory queueFactory) 
-    where T : VectorizationTask<TData> 
-    where TData : VectorizationTaskData
+public class UploadVectorizationTask : VectorizationTask<UploadVectorizationTaskData>
 {
-    private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>();
-
-    public Task StartAsync(T task)
+    protected override async IAsyncEnumerable<File<int>> GetFilesAsync(IServiceProvider serviceProvider)
     {
-        return _queue.EnqueueTask(task);
+        var daoFactory = serviceProvider.GetRequiredService<IDaoFactory>();
+        var fileDao = daoFactory.GetFileDao<int>();
+        var fileSecurity = serviceProvider.GetRequiredService<FileSecurity>();
+
+        var file = await fileDao.GetFileAsync(Data.FileId);
+        if (file == null)
+        {
+            Exception = new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            yield break;
+        }
+        
+        if (!await fileSecurity.CanReadAsync(file))
+        {
+            Exception = new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+            yield break;
+        }
+        
+        yield return file;
     }
 
-    public Task<string> StoreAsync(T task)
+    protected override int GetTotalFilesCount()
     {
-        return _queue.PublishTask(task);
-    }
-
-    public async Task<T?> GetAsync(string id)
-    {
-        return await _queue.PeekTask(id);
-    }
-
-    public async Task<List<T>> GetTasksAsync()
-    {
-        return await _queue.GetAllTasks();
-    }
-    
-    public async Task DeleteAsync(string id)
-    {
-        await _queue.DequeueTask(id);
+        return 1;
     }
 }

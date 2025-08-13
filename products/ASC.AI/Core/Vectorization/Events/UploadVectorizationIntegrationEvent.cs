@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,43 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Vectorization.Copy;
 using ASC.AI.Core.Vectorization.Upload;
-using ASC.Common.Threading;
+using ASC.EventBus.Events;
 
-namespace ASC.AI.Core.Vectorization;
+using ProtoBuf;
 
-[Singleton(GenericArguments = [typeof(CopyVectorizationTask), typeof(CopyVectorizationTaskData)])]
-[Singleton(GenericArguments = [typeof(UploadVectorizationTask), typeof(UploadVectorizationTaskData)])]
-public class VectorizationTaskService<T, TData>(
-    IDistributedTaskQueueFactory queueFactory) 
-    where T : VectorizationTask<TData> 
-    where TData : VectorizationTaskData
+namespace ASC.AI.Core.Vectorization.Events;
+
+[ProtoContract]
+public record UploadVectorizationIntegrationEvent : IntegrationEvent
 {
-    private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>();
-
-    public Task StartAsync(T task)
-    {
-        return _queue.EnqueueTask(task);
-    }
-
-    public Task<string> StoreAsync(T task)
-    {
-        return _queue.PublishTask(task);
-    }
-
-    public async Task<T?> GetAsync(string id)
-    {
-        return await _queue.PeekTask(id);
-    }
-
-    public async Task<List<T>> GetTasksAsync()
-    {
-        return await _queue.GetAllTasks();
-    }
+    private UploadVectorizationIntegrationEvent() : base() { }
     
-    public async Task DeleteAsync(string id)
-    {
-        await _queue.DequeueTask(id);
-    }
+    public UploadVectorizationIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId) { }
+    
+    [ProtoMember(1)]
+    public required string TaskId { get; set; }
+    
+    [ProtoMember(2)]
+    public UploadVectorizationTaskData Data { get; set; }
 }

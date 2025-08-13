@@ -24,10 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Vectorization;
+using ASC.AI.Core.Vectorization.Copy;
+using ASC.AI.Core.Vectorization.Upload;
 using ASC.Common.Threading;
 
-namespace Service;
+namespace ASC.AI.Service;
 
 public class Startup : BaseWorkerStartup
 {
@@ -56,5 +57,6 @@ public class Startup : BaseWorkerStartup
         services.RegisterQuotaFeature();
         
         services.RegisterQueue<CopyVectorizationTask>();
+        services.RegisterQueue<UploadVectorizationTask>();
     }
 }

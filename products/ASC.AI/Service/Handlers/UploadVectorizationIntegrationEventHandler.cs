@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,43 +24,34 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Vectorization.Copy;
+using ASC.AI.Core.Vectorization;
 using ASC.AI.Core.Vectorization.Upload;
-using ASC.Common.Threading;
 
-namespace ASC.AI.Core.Vectorization;
+namespace ASC.AI.Service.Handlers;
 
-[Singleton(GenericArguments = [typeof(CopyVectorizationTask), typeof(CopyVectorizationTaskData)])]
-[Singleton(GenericArguments = [typeof(UploadVectorizationTask), typeof(UploadVectorizationTaskData)])]
-public class VectorizationTaskService<T, TData>(
-    IDistributedTaskQueueFactory queueFactory) 
-    where T : VectorizationTask<TData> 
-    where TData : VectorizationTaskData
+[Scope]
+public class UploadVectorizationIntegrationEventHandler(
+    ILogger<UploadVectorizationIntegrationEventHandler> logger,
+    TenantManager tenantManager,
+    SecurityContext securityContext,
+    AuthManager authManager,
+    VectorizationTaskService<UploadVectorizationTask, UploadVectorizationTaskData> service,
+    IServiceProvider serviceProvider) 
+    : IIntegrationEventHandler<UploadVectorizationIntegrationEvent>
 {
-    private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>();
-
-    public Task StartAsync(T task)
+    public async Task Handle(UploadVectorizationIntegrationEvent @event)
     {
-        return _queue.EnqueueTask(task);
-    }
-
-    public Task<string> StoreAsync(T task)
-    {
-        return _queue.PublishTask(task);
-    }
-
-    public async Task<T?> GetAsync(string id)
-    {
-        return await _queue.PeekTask(id);
-    }
-
-    public async Task<List<T>> GetTasksAsync()
-    {
-        return await _queue.GetAllTasks();
-    }
-    
-    public async Task DeleteAsync(string id)
-    {
-        await _queue.DequeueTask(id);
+        CustomSynchronizationContext.CreateContext();
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        {
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
+            
+            var task = serviceProvider.GetRequiredService<UploadVectorizationTask>();
+            task.Init(@event.TaskId, @event.TenantId, @event.CreateBy, @event.Data);
+            
+            await service.StartAsync(task);
+        }
     }
 }

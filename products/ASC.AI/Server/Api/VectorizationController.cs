@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.AI.Core.Vectorization;
+using ASC.AI.Core.Vectorization.Copy;
 
 namespace ASC.AI.Api;
 

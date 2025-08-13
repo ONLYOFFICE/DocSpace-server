@@ -24,19 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Core.Vectorization.Copy;
+using ASC.EventBus.Events;
+
 using ProtoBuf;
 
-namespace ASC.AI.Core.Vectorization;
+namespace ASC.AI.Core.Vectorization.Events;
 
 [ProtoContract]
-public class CopyVectorizationTaskData : VectorizationTaskData
+public record CopyVectorizationIntegrationEvent : IntegrationEvent
 {
+    private CopyVectorizationIntegrationEvent() : base() { }
+    
+    public CopyVectorizationIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId) { }
+    
     [ProtoMember(1)]
-    public List<int> FileIds { get; set; } = [];
+    public required string TaskId { get; set; }
     
     [ProtoMember(2)]
-    public List<string> ThirdPartyFileIds { get; set; } = [];
-    
-    [ProtoMember(3)]
-    public int KnowledgeFolderId { get; set; }
+    public CopyVectorizationTaskData Data { get; set; }
 }
