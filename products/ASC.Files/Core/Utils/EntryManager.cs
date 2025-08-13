@@ -416,27 +416,17 @@ public class EntryManager(IDaoFactory daoFactory,
         }
         else if (parent.FolderType == FolderType.Recent)
         {
-            if (searchArea == SearchArea.RecentByLinks)
-            {
-                var fileDao = daoFactory.GetFileDao<T>();
-                var userId = authContext.CurrentAccount.ID;
+            var fileDao = daoFactory.GetFileDao<T>();
+            var userId = authContext.CurrentAccount.ID;
 
-                var filesTotalCountTask = fileDao.GetFilesByTagCountAsync(userId, TagType.RecentByLink, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
-                var files = await fileDao.GetFilesByTagAsync(userId, TagType.RecentByLink, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, orderBy, from, count).ToListAsync();
-                
-                entries.AddRange(files);
+            var filesTotalCountTask = fileDao.GetFilesByTagCountAsync(userId, [TagType.Recent, TagType.RecentByLink], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
+            var files = await fileDao.GetFilesByTagAsync(userId, [TagType.Recent, TagType.RecentByLink], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, orderBy, from, count).ToListAsync();
+            
+            entries.AddRange(files);
 
-                total = await filesTotalCountTask;
+            total = await filesTotalCountTask;
 
-                return (entries, total);
-            }
-            else
-            {
-                var files = await GetRecentAsync(filterType, subjectGroup, subjectId, searchText, extension, searchInContent);
-                entries.AddRange(files);
-
-                CalculateTotal();
-            }
+            return (entries, total);
         }
         else if (parent.FolderType == FolderType.Favorites)
         {

@@ -1869,7 +1869,7 @@ internal class FileDao(
         return await storage.GetReadStreamAsync(string.Empty, path, 0);
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesByTagAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+    public async IAsyncEnumerable<File<int>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
     {
         if (filterType == FilterType.FoldersOnly)
@@ -1899,7 +1899,7 @@ internal class FileDao(
                 SortedByType.Type => orderBy.IsAsc
                     ? q.OrderBy(r => DbFunctionsExtension.SubstringIndex(r.Entry.Title, '.', -1))
                     : q.OrderByDescending(r => DbFunctionsExtension.SubstringIndex(r.Entry.Title, '.', -1)),
-                SortedByType.LastOpened => orderBy.IsAsc ? q.OrderBy(r => r.TagLink.CreateOn) : q.OrderByDescending(r => r.TagLink.CreateOn),
+                SortedByType.LastOpened => orderBy.IsAsc ? q.OrderBy(r => r.LastOpened) : q.OrderByDescending(r => r.LastOpened),
                 _ => q.OrderBy(r => r.Entry.Title)
             };
         
@@ -1919,7 +1919,7 @@ internal class FileDao(
         }
     }
 
-    public async Task<int> GetFilesByTagCountAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+    public async Task<int> GetFilesByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject)
     {
         if (filterType == FilterType.FoldersOnly)
@@ -2231,7 +2231,7 @@ internal class FileDao(
                         select f
                     ).FirstOrDefault(),
                 SharedRecord = r.Security,
-                LastOpened = r.TagLink.CreateOn
+                LastOpened = r.LastOpened
             });
     }
     
@@ -2575,14 +2575,14 @@ internal class FileDao(
         return q;
     }
     
-    private IQueryable<FileByTagQuery> GetFilesByTagQuery(Guid tagOwner, TagType tagType, FilesDbContext filesDbContext)
+    private IQueryable<FileByTagQuery> GetFilesByTagQuery(Guid tagOwner, IEnumerable<TagType> tagType, FilesDbContext filesDbContext)
     {
         IQueryable<FileByTagQuery> query;
         
         var tenantId = _tenantManager.GetCurrentTenantId();
         
         var initQuery = filesDbContext.Tag
-            .Where(x => x.TenantId == tenantId && x.Owner == tagOwner && x.Type == tagType)
+            .Where(x => x.TenantId == tenantId && x.Owner == tagOwner && tagType.Contains(x.Type))
             .Join(filesDbContext.TagLink,
                 t => new
                 {
@@ -2602,39 +2602,17 @@ internal class FileDao(
                 (x, f) => new { f, x.l, x.t })
             .Where(x => x.f.CurrentVersion);
         
-        if (tagType == TagType.RecentByLink)
+        if (tagType.Any(r=> r is TagType.RecentByLink or TagType.Recent))
         {
-            query = initQuery.Join(filesDbContext.Security, 
-                    x => new
-                    {
-                        tenantId,
-                        entryId = x.l.EntryId,
-                        entryType = x.l.EntryType,
-                        subject = x.t.Name
-                    },
-                    s => new
-                    {
-                        tenantId = s.TenantId,
-                        entryId = s.EntryId,
-                        entryType = s.EntryType,
-                        subject = s.Subject.ToString()
-                    },
-                    (x, s) => new
-                    { 
-                        x.f,
-                        x.t,
-                        x.l,
-                        s, 
-                        expirationDate = (DateTime)(object)DbFunctionsExtension.JsonValue(nameof(s.Options), "ExpirationDate")
-                    })
-                .Where(x => x.s.Share != FileShare.Restrict && (x.expirationDate == DateTime.MinValue || x.expirationDate > DateTime.UtcNow))
+            query = initQuery
                 .Select(x => new FileByTagQuery
                 {
                     Entry = x.f, 
                     Tag = x.t, 
-                    TagLink = x.l, 
-                    Security = x.s
-                }); 
+                    LastOpened = filesDbContext.AuditEvents.OrderByDescending(a => a.Date).Where(r => r.Target == x.f.Id.ToString() && r.TenantId == x.f.TenantId).Select(r => r.Date).LastOrDefault(), 
+                    Security = filesDbContext.Security.FirstOrDefault(s => s.TenantId == tenantId && s.EntryType == FileEntryType.File && s.EntryId == x.f.Id.ToString()  && s.Subject.ToString() == x.t.Name)
+                })
+                .Where(x => x.Tag.Type == TagType.Recent || x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate == DateTime.MinValue || x.Security.Options.ExpirationDate > DateTime.UtcNow))); 
         }
         else
         {
@@ -2642,7 +2620,7 @@ internal class FileDao(
             {
                 Entry = x.f, 
                 Tag = x.t, 
-                TagLink = x.l
+                LastOpened = filesDbContext.AuditEvents.OrderByDescending(a => a.Date).Where(r => r.Target == x.f.Id.ToString() && r.TenantId == x.f.TenantId).Select(r=> r.Date).LastOrDefault()
             });
         }
 
@@ -2664,7 +2642,8 @@ public class FileByTagQuery : IQueryResult<DbFile>
 {
     public DbFile Entry { get; set; }
     public DbFilesTag Tag { get; set; }
-    public DbFilesTagLink TagLink { get; set; }
+    
+    public DateTime? LastOpened { get; set; }
     public DbFilesSecurity Security { get; set; }
 }
 
