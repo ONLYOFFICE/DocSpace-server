@@ -42,7 +42,7 @@ public partial class FileEntryDtoContext : JsonSerializerContext;
 [JsonDerivedType(typeof(FileDto<string>))]
 [JsonDerivedType(typeof(FolderDto<int>))]
 [JsonDerivedType(typeof(FolderDto<string>))]
-public abstract class FileEntryDto
+public abstract class FileEntryBaseDto
 {
     /// <summary>
     /// The file entry title.
@@ -127,7 +127,7 @@ public abstract class FileEntryDto
     /// </summary>
     public abstract FileEntryType FileEntryType { get; }
 
-    protected FileEntryDto(FileEntry entry)
+    protected FileEntryBaseDto(FileEntry entry)
     {
         Title = entry.Title;
         Access = entry.Access;
@@ -139,13 +139,13 @@ public abstract class FileEntryDto
         ProviderId = entry.ProviderId.NullIfDefault();
     }
 
-    protected FileEntryDto() { }
+    protected FileEntryBaseDto() { }
 }
 
 /// <summary>
 /// The generic file entry information.
 /// </summary>
-public abstract class FileEntryDto<T> : FileEntryDto
+public abstract class FileEntryDto<T> : FileEntryBaseDto
 {
     /// <summary>
     /// The file entry ID.
