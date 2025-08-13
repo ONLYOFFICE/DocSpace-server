@@ -2231,7 +2231,8 @@ internal class FileDao(
                         select f
                     ).FirstOrDefault(),
                 SharedRecord = r.Security,
-                LastOpened = r.LastOpened
+                LastOpened = r.LastOpened,
+                RoomInfo = r.RoomInfo
             });
     }
     
@@ -2603,26 +2604,25 @@ internal class FileDao(
                 (x, f) => new { f, x.l, x.t })
             .Where(x => x.f.CurrentVersion);
         
-        if (tagType.Any(r=> r is TagType.RecentByLink or TagType.Recent))
+        query = initQuery.Select(x => new FileByTagQuery
         {
-            query = initQuery
-                .Select(x => new FileByTagQuery
-                {
-                    Entry = x.f, 
-                    Tag = x.t, 
-                    LastOpened = filesDbContext.AuditEvents.OrderByDescending(a => a.Date).Where(r => r.Target == x.f.Id.ToString() && r.UserId == currentUserId && r.Action == (int)MessageAction.FileOpenedForChange && r.TenantId == x.f.TenantId).Select(r => r.Date).FirstOrDefault(), 
-                    Security = filesDbContext.Security.FirstOrDefault(s => s.TenantId == tenantId && s.EntryType == FileEntryType.File && s.EntryId == x.f.Id.ToString()  && s.Subject.ToString() == x.t.Name)
-                })
+            Entry = x.f, 
+            Tag = x.t, 
+            LastOpened = filesDbContext.AuditEvents.OrderByDescending(a => a.Date).Where(r => r.Target == x.f.Id.ToString() && r.UserId == currentUserId && r.Action == (int)MessageAction.FileOpenedForChange && r.TenantId == x.f.TenantId).Select(r => r.Date).FirstOrDefault(),
+            Security = filesDbContext.Security.FirstOrDefault(s => s.TenantId == tenantId && s.EntryType == FileEntryType.File && s.EntryId == x.f.Id.ToString()  && s.Subject.ToString() == x.t.Name),
+            RoomInfo = filesDbContext.Folders
+                        .Where(f => f.TenantId == x.f.TenantId && f.FolderType != FolderType.VirtualRooms)
+                        .Join(filesDbContext.Tree, f => f.Id, t => t.FolderId, (folder, tree) => new { folder, tree })
+                        .Where(t => t.tree.FolderId == x.f.ParentId)
+                        .OrderByDescending(t=> t.tree.Level)
+                        .Select(t => new RoomInfo<int>(t.folder.Id, t.folder.Title))
+                        .FirstOrDefault()
+        });
+        
+        if (tagType.Any(r => r is TagType.RecentByLink or TagType.Recent))
+        {
+            query = query
                 .Where(x => x.Tag.Type == TagType.Recent || x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate == DateTime.MinValue || x.Security.Options.ExpirationDate > DateTime.UtcNow))); 
-        }
-        else
-        {
-            query = initQuery.Select(x => new FileByTagQuery
-            {
-                Entry = x.f, 
-                Tag = x.t, 
-                LastOpened = filesDbContext.AuditEvents.OrderByDescending(a => a.Date).Where(r => r.Target == x.f.Id.ToString() && r.UserId == currentUserId && r.Action == (int)MessageAction.FileOpenedForChange && r.TenantId == x.f.TenantId).Select(r => r.Date).FirstOrDefault()
-            });
         }
 
         return query;
@@ -2635,6 +2635,8 @@ public class DbFileQuery
     public DbFolder Root { get; set; }
     public bool Shared { get; set; }
     public int Order { get; set; }
+    
+    public RoomInfo<int> RoomInfo { get; set; }
     public DbFilesSecurity SharedRecord { get; set; }
     public DateTime? LastOpened { get; set; }
 }
@@ -2644,9 +2646,12 @@ public class FileByTagQuery : IQueryResult<DbFile>
     public DbFile Entry { get; set; }
     public DbFilesTag Tag { get; set; }
     
+    public RoomInfo<int> RoomInfo { get; set; }
     public DateTime? LastOpened { get; set; }
     public DbFilesSecurity Security { get; set; }
 }
+
+public record RoomInfo<T>(T Id, string Title);
 
 public class DbFileQueryWithSecurity
 {

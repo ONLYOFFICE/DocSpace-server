@@ -64,7 +64,7 @@ public enum FileStatus
 }
 
 /// <summary>
-/// The file parameters.
+/// Represents a file with associated metadata and operations.
 /// </summary>
 [Transient(GenericArguments = [typeof(int)])]
 [Transient(GenericArguments = [typeof(string)])]
@@ -321,7 +321,12 @@ public class File<T> : FileEntry<T>
     /// The file force save type.
     /// </summary>
     public ForcesaveType Forcesave { get; set; }
-
+    
+    /// <summary>
+    /// Information about a room, including its identifier and title.
+    /// </summary>
+    public RoomInfo<T> RoomInfo { get; set; }
+    
     /// <summary>
     /// The file converted type.
     /// </summary>
