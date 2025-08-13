@@ -323,9 +323,9 @@ public class File<T> : FileEntry<T>
     public ForcesaveType Forcesave { get; set; }
     
     /// <summary>
-    /// Information about a room, including its identifier and title.
+    /// Parent room title.
     /// </summary>
-    public RoomInfo<T> RoomInfo { get; set; }
+    public string Location { get; set; }
     
     /// <summary>
     /// The file converted type.

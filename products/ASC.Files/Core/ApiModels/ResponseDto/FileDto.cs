@@ -452,9 +452,9 @@ public class FileDtoHelper(
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
             result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
             result.ThumbnailStatus = file.ThumbnailStatus;
-            if (file.RoomInfo != null)
+            if (!string.IsNullOrEmpty(file.Location))
             {
-                result.Location = file.RootFolderType == FolderType.USER ? FilesUCResource.MyFiles : file.RoomInfo.Title;
+                result.Location = file.RootFolderType == FolderType.USER ? FilesUCResource.MyFiles : file.Location;
             }
 
             var cacheKey = Math.Abs(result.Updated.GetHashCode());
