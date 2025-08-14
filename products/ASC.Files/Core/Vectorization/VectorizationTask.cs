@@ -93,6 +93,7 @@ public abstract class VectorizationTask<T>
             var generatorFactory = scope.ServiceProvider.GetRequiredService<EmbeddingGeneratorFactory>();
             var vectorStore = scope.ServiceProvider.GetRequiredService<VectorStore>();
             var socketManager = scope.ServiceProvider.GetRequiredService<SocketManager>();
+            var settings = scope.ServiceProvider.GetRequiredService<VectorizationSettings>();
 
             var fileDao = daoFactory.GetFileDao<int>();
             var embeddingGenerator = generatorFactory.Create();
@@ -100,7 +101,7 @@ public abstract class VectorizationTask<T>
             var splitterSettings = new SplitterSettings
             {
                 MaxTokensPerChunk = (int)(generatorFactory.Model.ContextLength * 0.75),
-                ChunkOverlap = 0.2f
+                ChunkOverlap = settings.ChunkOverlap
             };
 
             var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName,
@@ -121,8 +122,8 @@ public abstract class VectorizationTask<T>
                 
                 try
                 {
-                    await VectorizeFileAsync(totalFiles, currentFileIndex, file, fileProcessor, splitterSettings,  
-                        embeddingGenerator, collection);
+                    await VectorizeFileAsync(totalFiles, currentFileIndex, file, fileProcessor, splitterSettings, 
+                        settings, embeddingGenerator, collection);
                     currentFileIndex++;
                     notify = true;
                 }
@@ -164,14 +165,15 @@ public abstract class VectorizationTask<T>
         File<int> file,
         FileTextProcessor fileProcessor,
         SplitterSettings splitterSettings,
+        VectorizationSettings vectorizationSettings,
         IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
         VectorStoreCollection<Chunk> vectorStoreCollection)
     {
         var textChunks = await fileProcessor.GetTextChunksAsync(file, splitterSettings);
-        var totalBatches = (textChunks.Count + BatchSize - 1) / BatchSize;
+        var totalBatches = (textChunks.Count + vectorizationSettings.ChunksBatchSize - 1) / vectorizationSettings.ChunksBatchSize;
         var currentBatch = 0;
 
-        foreach (var batch in textChunks.Chunk(BatchSize))
+        foreach (var batch in textChunks.Chunk(vectorizationSettings.ChunksBatchSize))
         {
             var embeddings = await embeddingGenerator.GenerateAsync(batch, cancellationToken: CancellationToken);
             var chunks = batch.Select((text, index) => 

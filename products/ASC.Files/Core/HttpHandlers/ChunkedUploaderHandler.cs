@@ -218,13 +218,17 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                             var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id) { Data = data, ThirdPartyData = thirdPartyData };
 
                             await eventBus.PublishAsync(evt);
-                        }
-                        
-                        var knowledge = parents.FirstOrDefault(f => f.FolderType == FolderType.Knowledge);
-                        if (knowledge != null && session.File.Id is int id)
-                        {
-                            var task = await vectorizationTaskPublisher.PublishAsync(id);
-                            vectorizationTaskId = VectorizationTaskIdHelper.MakeTaskId(task.Id, task.Type);
+
+                            if (room.FolderType == FolderType.AiRoom && session.File.Id is int id)
+                            {
+                                var folder = await folderDao.GetFolderAsync(session.FolderId);
+
+                                if (folder is { FolderType: FolderType.Knowledge })
+                                {
+                                    var task = await vectorizationTaskPublisher.PublishAsync(id);
+                                    vectorizationTaskId = VectorizationTaskIdHelper.MakeTaskId(task.Id, task.Type);
+                                }
+                            }
                         }
                     }
                     

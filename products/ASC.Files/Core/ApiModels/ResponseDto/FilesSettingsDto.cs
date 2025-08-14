@@ -327,6 +327,16 @@ public class FilesSettingsDto
     /// Specifies whether to open the editor in the same tab or not.
     /// </summary>
     public bool OpenEditorInSameTab { get; set; }
+    
+    /// <summary>
+    /// List of extensions available for vectorization
+    /// </summary>
+    public List<string> ExtsFilesVectorized { get; set; }
+    
+    /// <summary>
+    /// The maximum file size for vectorization
+    /// </summary>
+    public long MaxVectorizationFileSize { get; set; }
 }
 
 
@@ -336,6 +346,7 @@ public class FilesSettingsDtoConverter(
     FilesLinkUtility filesLinkUtility,
     FilesSettingsHelper filesSettingsHelper,
     SetupInfo setupInfo,
+    VectorizationSettings vectorizationSettings,
     SearchSettingsHelper searchSettingsHelper)
 {
     public async Task<FilesSettingsDto> Get()
@@ -398,7 +409,9 @@ public class FilesSettingsDtoConverter(
             DefaultSharingAccessRights = await filesSettingsHelper.GetDefaultSharingAccessRights(),
             MaxUploadThreadCount = setupInfo.MaxUploadThreadCount,
             ChunkUploadSize = setupInfo.ChunkUploadSize,
-            OpenEditorInSameTab = await filesSettingsHelper.GetOpenEditorInSameTabAsync()
+            OpenEditorInSameTab = await filesSettingsHelper.GetOpenEditorInSameTabAsync(),
+            ExtsFilesVectorized = vectorizationSettings.SupportedFormats.ToList(),
+            MaxVectorizationFileSize = vectorizationSettings.MaxContentLength
         };
     }
 }

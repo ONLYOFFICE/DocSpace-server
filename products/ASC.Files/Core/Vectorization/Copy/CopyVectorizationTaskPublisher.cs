@@ -32,6 +32,8 @@ public class CopyVectorizationTaskPublisher(
     AuthContext authContext,
     IServiceProvider serviceProvider,
     IEventBus eventBus,
+    IDaoFactory daoFactory,
+    VectorizationSettings vectorizationSettings,
     VectorizationTaskService<CopyVectorizationTask, CopyVectorizationTaskData> copyVectorizationTaskService)
 {
     public async Task<CopyVectorizationTask> PublishAsync(int knowledgeFolderId, IEnumerable<JsonElement> files)
@@ -46,6 +48,9 @@ public class CopyVectorizationTaskPublisher(
         {
             throw new ArgumentException(@"Files must not be empty", nameof(files));
         }
+        
+        await CheckFilesAsync(fileIds);
+        await CheckFilesAsync(thirdPartyFileIds);
         
         var task = serviceProvider.GetRequiredService<CopyVectorizationTask>();
 
@@ -70,5 +75,22 @@ public class CopyVectorizationTaskPublisher(
         });
         
         return (await copyVectorizationTaskService.GetAsync(taskId))!;
+    }
+
+    private async Task CheckFilesAsync<T>(IEnumerable<T> files)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        await foreach (var file in fileDao.GetFilesAsync(files))
+        {
+            if (file.ContentLength > vectorizationSettings.MaxContentLength)
+            {
+                throw FileSizeComment.GetFileSizeException(vectorizationSettings.MaxContentLength);
+            }
+            
+            if (!vectorizationSettings.SupportedFormats.Contains(FileUtility.GetFileExtension(file.Title)))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+            }
+        }
     }
 }
