@@ -1185,4 +1185,7 @@
   <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
     <value>Balance top-up</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Transaction history</value>
+  </data>
 </root>

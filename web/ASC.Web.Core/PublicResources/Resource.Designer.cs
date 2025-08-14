@@ -151,6 +151,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Transaction history.
+        /// </summary>
+        public static string AccountingCustomerOperationsReportSheetName {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationsReportSheetName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Withdrawal.
         /// </summary>
         public static string AccountingCustomerOperationWithdrawal {

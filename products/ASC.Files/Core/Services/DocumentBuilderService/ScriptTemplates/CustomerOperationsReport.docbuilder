@@ -1,0 +1,141 @@
+builder.CreateFile("xlsx");
+
+var defaultFontSize = 11;
+var defaultFontColorBlack = Api.CreateColorFromRGB(0, 0, 0);
+var currentRowIndex = 1;
+var currentColIndex = 1;
+var MAX_COLUMN_WIDTH = 100;
+var MAX_ROW_HEIGHT = 125;
+
+var inputData = {
+    keys: ${dataKeys},
+    values: [${dataValues}]
+};
+
+var oWorksheet = Api.GetActiveSheet();
+
+function getMaxLineLength(text) {
+    if (!text || typeof text !== 'string') return 0;
+    var lines = text.split('\n');
+    var maxLength = 0;
+    for (var i = 0; i < lines.length; i++) {
+        if (lines[i].length > maxLength) {
+            maxLength = lines[i].length;
+        }
+    }
+    return maxLength;
+}
+
+function countLineBreaks(text) {
+    if (!text || typeof text !== 'string') return 0;
+    return (text.match(/\n/g) || []).length;
+}
+
+function toColumnName(num) {
+    for (var res = '', a = 1, b = 26; (num -= a) >= 0; a = b, b *= 26) {
+        res = String.fromCharCode(parseInt((num % b) / a) + 65) + res;
+    }
+    return res;
+}
+
+function customizeWorksheet() {
+    oWorksheet.SetName("${sheetName}");
+}
+
+function prepareData(startColIndex, startRowIndex) {
+    var kA = [];
+    for (var i = 0; i < inputData.keys.length; i++) {
+        kA.push({ value: inputData.keys[i], bold: true, fontColor: defaultFontColorBlack, valign: "center" });
+    }
+    var dataTable = [{
+        height: 19.5,
+        dataArray: kA
+    }];
+
+    for (var i = 0; i < inputData.values.length; i++) {
+        var rowValues = [];
+        for (var j = 0; j < inputData.values[i].length; j++) {
+            rowValues.push({ 
+                value: inputData.values[i][j].value,
+                url: inputData.values[i][j].url,
+                fontSize: (defaultFontSize + 1),
+                valign: "center",
+                format: inputData.values[i][j].format
+            });
+        }
+        dataTable.push({
+            height: 19.5,
+            dataArray: rowValues
+        });
+    }
+    return dataTable;
+}
+
+function writeCell(position, data) {
+    if (data == null) return;
+    var sRange = oWorksheet.GetRange(position);
+    if (data.format) sRange.SetNumberFormat(data.format);
+    if (data.url) {
+        oWorksheet.SetHyperlink(position, data.url, "", data.value);
+    } else if (data.value != null) {
+        sRange.SetValue(data.value);
+        sRange.SetWrap(true);
+    }
+    sRange.SetFontSize(data.fontSize || defaultFontSize);
+    sRange.SetFontColor(data.fontColor || defaultFontColorBlack);
+    sRange.SetBold(data.bold || false);
+    sRange.SetAlignHorizontal(data.halign || "left");
+    sRange.SetAlignVertical(data.valign || "bottom");
+    if (data.bgColor) sRange.SetFillColor(data.bgColor);
+}
+
+function writeTable(table) {
+    var columnMaxLengths = {};
+    var rowMaxBreaks = {};
+    var baseRowHeight = 19.5;
+    var lineHeight = 15;
+
+    for (var i = 0; i < table.length; i++) {
+        rowMaxBreaks[i] = 0;
+        for (var j = 0; j < table[i].dataArray.length; j++) {
+            var currentLength = getMaxLineLength(table[i].dataArray[j].value);
+            if (!columnMaxLengths[j] || currentLength > columnMaxLengths[j]) {
+                columnMaxLengths[j] = currentLength;
+            }
+            var breaksCount = countLineBreaks(table[i].dataArray[j].value);
+            if (breaksCount > rowMaxBreaks[i]) {
+                rowMaxBreaks[i] = breaksCount;
+            }
+        }
+    }
+
+    for (var i = 0; i < table.length; i++) {
+        var rowNum = currentRowIndex + i;
+        var calculatedHeight = baseRowHeight + (rowMaxBreaks[i] * lineHeight);
+        oWorksheet.GetRange("A" + rowNum).SetRowHeight(Math.min(calculatedHeight, MAX_ROW_HEIGHT));
+        for (var j = 0; j < table[i].dataArray.length; j++) {
+            var position = toColumnName(currentColIndex) + rowNum;
+            writeCell(position, table[i].dataArray[j]);
+            currentColIndex++;
+        }
+        currentColIndex = 1;
+    }
+
+    currentRowIndex += table.length;
+
+    for (var col in columnMaxLengths) {
+        if (columnMaxLengths.hasOwnProperty(col)) {
+            var columnLetter = toColumnName(parseInt(col) + 1);
+            oWorksheet.GetRange(columnLetter + "1").SetColumnWidth(Math.min(columnMaxLengths[col] * 1.2, MAX_COLUMN_WIDTH));
+        }
+    }
+}
+
+customizeWorksheet();
+var dataTable = prepareData(currentColIndex, currentRowIndex);
+writeTable(dataTable);
+oWorksheet.GetRange(toColumnName(1) + 1).Select();
+
+Api.Save();
+builder.SaveFile("xlsx", "${tempFileName}");
+builder.CloseFile();

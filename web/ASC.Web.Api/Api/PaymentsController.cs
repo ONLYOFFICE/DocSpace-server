@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.ApiModels.ResponseDto;
+using ASC.Files.Core.IntegrationEvents.Events;
+using ASC.Files.Core.Services.DocumentBuilderService;
 using ASC.Files.Core.Utils;
 
 using Microsoft.AspNetCore.RateLimiting;
@@ -54,10 +57,11 @@ public class PaymentController(
     PermissionContext permissionContext,
     TenantUtil tenantUtil,
     ApiDateTimeHelper apiDateTimeHelper,
-    TempStream tempStream,
     EmployeeDtoHelper employeeWrapperHelper,
-    CsvFileHelper csvFileHelper,
-    CsvFileUploader csvFileUploader)
+    IEventBus eventBus,
+    CommonLinkUtility commonLinkUtility,
+    DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
+    IServiceProvider serviceProvider)
     : ControllerBase
 {
     private readonly int _maxCount = 10;
@@ -814,106 +818,71 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Generates the customer operations report as csv file and save in Documents.
+    /// Start generating the customer operations report as xlsx file and save in Documents.
     /// </summary>
     /// <short>
-    /// Generate the customer operations report
+    /// Start generating the customer operations report
     /// </short>
     /// <path>api/2.0/portal/payment/customer/operationsreport</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "URL to the csv report file", typeof(string))]
+    [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
     [HttpPost("customer/operationsreport")]
-    public async Task<string> CreateCustomerOperationsReport(CustomerOperationsReportRequestDto inDto)
+    public async Task<DocumentBuilderTaskDto> CreateCustomerOperationsReport(CustomerOperationsReportRequestDto inDto)
     {
-        await DemandAdminAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = securityContext.CurrentAccount.ID;
 
-        if (!tariffService.IsConfigured())
-        {
-            return null;
-        }
+        var task = serviceProvider.GetService<CustomerOperationsReportTask>();
 
-        var tenant = tenantManager.GetCurrentTenant();
+        var baseUri = commonLinkUtility.ServerRootPath;
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            return null;
-        }
+        task.Init(baseUri, tenantId, userId, null);
 
-        inDto = inDto ?? new CustomerOperationsReportRequestDto();
+        var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
 
-        var utcStartDate = inDto.StartDate != null ? tenantUtil.DateTimeToUtc(inDto.StartDate.Value) : tenant.CreationDateTime;
-        var utcEndDate = inDto.EndDate != null ? tenantUtil.DateTimeToUtc(inDto.EndDate.Value) : DateTime.UtcNow;
+        var headers = MessageSettings.GetHttpHeaders(Request)?.ToDictionary(x => x.Key, x => x.Value.ToString()) ?? [];
 
-        var reportName = string.Format(Resource.AccountingCustomerOperationsReportName + ".csv",
-            utcStartDate.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture),
-            utcEndDate.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture));
+        var evt = new CustomerOperationsReportIntegrationEvent(userId, tenantId, baseUri, inDto.StartDate, inDto.EndDate, inDto.Credit, inDto.Withdrawal, headers, false);
 
-        await using var stream = tempStream.Create();
+        await eventBus.PublishAsync(evt);
 
-        var partialRecords = GetCustomerOperationsReportDataAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal);
-
-        await csvFileHelper.CreateLargeFileAsync(stream, partialRecords, new OperationMap());
-
-        var result = await csvFileUploader.UploadFile(stream, reportName);
-
-        messageService.Send(MessageAction.CustomerOperationsReportDownloaded);
-
-        return result;
+        return DocumentBuilderTaskDto.Get(taskProgress);
     }
 
-    private async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal)
+    /// <summary>
+    /// Get the status of generating a customer operations report.
+    /// </summary>
+    /// <short>Get the status of generating a customer operations report</short>
+    /// <path>api/2.0/portal/payment/customer/operationsreport</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
+    [HttpGet("customer/operationsreport")]
+    public async Task<DocumentBuilderTaskDto> GetRoomIndexExport()
     {
-        var offset = 0;
-        var limit = 1000;
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = securityContext.CurrentAccount.ID;
 
-        while (true)
-        {
-            var report = await tariffService.GetCustomerOperationsAsync(tenantId, utcStartDate, utcEndDate, credit, withdrawal, offset, limit);
+        var task = await documentBuilderTaskManager.GetTask(tenantId, userId);
 
-            if (report?.Collection == null)
-            {
-                yield return null;
-                break;
-            }
-
-            foreach (var operation in report.Collection)
-            {
-                operation.Description = OperationDto.GetServiceDesc(operation.Service);
-                operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
-
-                if (string.IsNullOrEmpty(operation.Service))
-                {
-                    operation.Quantity = 0;
-                }
-            }
-
-            yield return report.Collection;
-
-            if (report.CurrentPage == report.TotalPage)
-            {
-                break;
-            }
-
-            offset += limit;
-        }
+        return DocumentBuilderTaskDto.Get(task);
     }
 
-    internal class OperationMap : ClassMap<Operation>
+    /// <summary>
+    /// Terminates the generating a customer operations report.
+    /// </summary>
+    /// <short>Terminate the generating a customer operations report</short>
+    /// <path>api/2.0/portal/payment/customer/operationsreport</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Ok")]
+    [HttpDelete("customer/operationsreport")]
+    public async Task TerminateRoomIndexExport()
     {
-        public OperationMap()
-        {
-            Map(item => item.Date).TypeConverter<CsvFileHelper.CsvDateTimeConverter>();
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = securityContext.CurrentAccount.ID;
 
-            Map(item => item.Date).Name(Resource.AccountingCustomerOperationDate);
-            Map(item => item.Description).Name(Resource.AccountingCustomerOperationDescription);
-            Map(item => item.Service).Name(Resource.AccountingCustomerOperationService);
-            Map(item => item.ServiceUnit).Name(Resource.AccountingCustomerOperationServiceUnit);
-            Map(item => item.Quantity).Name(Resource.AccountingCustomerOperationQuantity);
-            Map(item => item.Currency).Name(Resource.AccountingCustomerOperationCurrency);
-            Map(item => item.Credit).Name(Resource.AccountingCustomerOperationCredit);
-            Map(item => item.Withdrawal).Name(Resource.AccountingCustomerOperationWithdrawal);
-        }
+        var evt = new CustomerOperationsReportIntegrationEvent(userId, tenantId, null, terminate: true);
+
+        await eventBus.PublishAsync(evt);
     }
 
     /// <summary>
