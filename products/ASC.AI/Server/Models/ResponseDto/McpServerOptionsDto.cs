@@ -30,6 +30,7 @@ public class McpServerOptionsDto : IMapFrom<McpServerOptions>
 {
     public Guid Id { get; init; }
     public required string Name { get; init; }
+    public string? Description { get; init; }
     public required string Endpoint { get; init; }
     public Dictionary<string, string>? Headers { get; init; }
     
