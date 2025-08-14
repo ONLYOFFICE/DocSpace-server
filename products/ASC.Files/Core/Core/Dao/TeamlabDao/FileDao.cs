@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Document = ASC.ElasticSearch.Document;
+using VectorChunk = ASC.Files.Core.Vectorization.Data.Chunk;
 
 namespace ASC.Files.Core.Data;
 
@@ -57,18 +58,19 @@ internal class FileDao(
         IQuotaService quotaService,
         EmailValidationKeyProvider emailValidationKeyProvider,
         StorageFactory storageFactory,
-    TenantQuotaController tenantQuotaController,
-    IDistributedLockProvider distributedLockProvider,
-    FileStorageService fileStorageService,
-    SocketManager socketManager,
-    SecurityContext securityContext,
-    TempStream tempStream,
-    FileChecker fileChecker,
-    EntryManager entryManager,
-    FileSharing fileSharing,
-    FilesMessageService filesMessageService,
-    QuotaSocketManager quotaSocketManager,
-    CustomQuota customQuota)
+        TenantQuotaController tenantQuotaController,
+        IDistributedLockProvider distributedLockProvider,
+        FileStorageService fileStorageService,
+        SocketManager socketManager,
+        SecurityContext securityContext,
+        TempStream tempStream,
+        FileChecker fileChecker,
+        EntryManager entryManager,
+        FileSharing fileSharing,
+        FilesMessageService filesMessageService,
+        QuotaSocketManager quotaSocketManager,
+        CustomQuota customQuota, 
+        VectorStore vectorStore)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -900,6 +902,12 @@ internal class FileDao(
             {
                 await factoryIndexer.DeleteAsync(d);
             }
+
+            var collection = vectorStore.GetCollection<VectorChunk>(VectorChunk.IndexName, null);
+            await collection.DeleteAsync(new VectorSearchOptions<VectorChunk>
+            {
+                Filter = x => x.TenantId == tenantId && x.FileId == fileId
+            });
 
             context.RemoveRange(toDeleteFiles);
 
@@ -2708,58 +2716,60 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         IQuotaService quotaService,
         EmailValidationKeyProvider emailValidationKeyProvider,
         StorageFactory storageFactory,
-    TenantQuotaController tenantQuotaController,
-    IDistributedLockProvider distributedLockProvider,
-    FileStorageService fileStorageService,
-    SocketManager socketManager,
-    SecurityContext securityContext,
-    TempStream tempStream,
-    FileChecker fileChecker,
-    EntryManager entryManager,
-    FileSharing fileSharing,
-    FilesMessageService filesMessageService,
-    QuotaSocketManager quotaSocketManager,
-    CustomQuota customQuota)
+        TenantQuotaController tenantQuotaController,
+        IDistributedLockProvider distributedLockProvider,
+        FileStorageService fileStorageService,
+        SocketManager socketManager,
+        SecurityContext securityContext,
+        TempStream tempStream,
+        FileChecker fileChecker,
+        EntryManager entryManager,
+        FileSharing fileSharing,
+        FilesMessageService filesMessageService,
+        QuotaSocketManager quotaSocketManager,
+        CustomQuota customQuota,
+        VectorStore vectorStore)
     : FileDao(
         logger,
-    factoryIndexer,
-    factoryIndexerFormData,
-    userManager,
-    fileUtility,
-    dbContextManager,
-    tenantManager,
-    tenantLogoManager,
-    tenantUtil,
-    setupInfo,
-    maxTotalSizeStatistic,
-    settingsManager,
-    authContext,
-    serviceProvider,
-    globalStore,
-    globalFolder,
-    global,
-    daoFactory,
-    chunkedUploadSessionHolder,
-    selectorFactory,
-    crossDao,
-    settings,
-    mapper,
-    thumbnailSettings,
-    quotaService,
-    emailValidationKeyProvider,
-    storageFactory,
-    tenantQuotaController,
-    distributedLockProvider,
-    fileStorageService,
-    socketManager,
-    securityContext,
-    tempStream,
-    fileChecker,
-    entryManager,
-    fileSharing,
-    filesMessageService,
-    quotaSocketManager,
-    customQuota), ICacheFileDao<int>
+        factoryIndexer,
+        factoryIndexerFormData,
+        userManager,
+        fileUtility,
+        dbContextManager,
+        tenantManager,
+        tenantLogoManager,
+        tenantUtil,
+        setupInfo,
+        maxTotalSizeStatistic,
+        settingsManager,
+        authContext,
+        serviceProvider,
+        globalStore,
+        globalFolder,
+        global,
+        daoFactory,
+        chunkedUploadSessionHolder,
+        selectorFactory,
+        crossDao,
+        settings,
+        mapper,
+        thumbnailSettings,
+        quotaService,
+        emailValidationKeyProvider,
+        storageFactory,
+        tenantQuotaController,
+        distributedLockProvider,
+        fileStorageService,
+        socketManager,
+        securityContext,
+        tempStream,
+        fileChecker,
+        entryManager,
+        fileSharing,
+        filesMessageService,
+        quotaSocketManager,
+        customQuota, 
+        vectorStore), ICacheFileDao<int>
 {
 
     private readonly ConcurrentDictionary<int, IEnumerable<FormRole>> _cache = new();
