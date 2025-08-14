@@ -829,7 +829,23 @@ public class PaymentController(
     [HttpPost("customer/operationsreport")]
     public async Task<DocumentBuilderTaskDto> CreateCustomerOperationsReport(CustomerOperationsReportRequestDto inDto)
     {
+        await DemandAdminAsync();
+
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
         var tenantId = tenantManager.GetCurrentTenantId();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        inDto = inDto ?? new CustomerOperationsReportRequestDto();
+
         var userId = securityContext.CurrentAccount.ID;
 
         var task = serviceProvider.GetService<CustomerOperationsReportTask>();
@@ -857,12 +873,24 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
     [HttpGet("customer/operationsreport")]
-    public async Task<DocumentBuilderTaskDto> GetRoomIndexExport()
+    public async Task<DocumentBuilderTaskDto> GetCustomerOperationsReport()
     {
-        var tenantId = tenantManager.GetCurrentTenantId();
-        var userId = securityContext.CurrentAccount.ID;
+        await DemandAdminAsync();
 
-        var task = await documentBuilderTaskManager.GetTask(tenantId, userId);
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        var task = await documentBuilderTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID);
 
         return DocumentBuilderTaskDto.Get(task);
     }
@@ -875,12 +903,24 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Ok")]
     [HttpDelete("customer/operationsreport")]
-    public async Task TerminateRoomIndexExport()
+    public async Task TerminateCustomerOperationsReport()
     {
-        var tenantId = tenantManager.GetCurrentTenantId();
-        var userId = securityContext.CurrentAccount.ID;
+        await DemandAdminAsync();
 
-        var evt = new CustomerOperationsReportIntegrationEvent(userId, tenantId, null, terminate: true);
+        if (!tariffService.IsConfigured())
+        {
+            return;
+        }
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            return;
+        }
+
+        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, terminate: true);
 
         await eventBus.PublishAsync(evt);
     }
