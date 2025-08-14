@@ -54,18 +54,18 @@ internal sealed class OpenSearchFilterTranslator<T>(Inferrer inferrer)
 
     private QueryContainer TranslateEqual(Expression left, Expression right)
     {
-        if (TryGetPropertyInfo(left, out var propertyInfo) && right is ConstantExpression { Value: var value })
+        if (TryGetPropertyInfo(left, out var propertyInfo) && TryGetValue(right, out var value))
         {
             var field = inferrer.Field(propertyInfo);
             return new MatchQuery { Field = field, Query = value?.ToString() };
         }
-        
-        if (TryGetPropertyInfo(right, out propertyInfo) && left is ConstantExpression { Value: var value2 })
+
+        if (TryGetPropertyInfo(right, out propertyInfo) && TryGetValue(left, out var value2))
         {
             var field = inferrer.Field(propertyInfo);
             return new MatchQuery { Field = field, Query = value2?.ToString() };
         }
-        
+
         throw new NotSupportedException("Invalid equality expression");
     }
 
@@ -81,6 +81,51 @@ internal sealed class OpenSearchFilterTranslator<T>(Inferrer inferrer)
         
         propertyInfo = null;
         return false;
+    }
+
+    private static bool TryGetValue(Expression expr, out object? value)
+    {
+        while (true)
+        {
+            switch (expr)
+            {
+                case ConstantExpression c:
+                    value = c.Value;
+                    return true;
+
+                case MemberExpression m:
+                    switch (m.Expression)
+                    {
+                        case ConstantExpression closure:
+                            {
+                                var container = closure.Value;
+                                switch (m.Member)
+                                {
+                                    case FieldInfo fi:
+                                        value = fi.GetValue(container);
+                                        return true;
+                                    case PropertyInfo pi:
+                                        value = pi.GetValue(container);
+                                        return true;
+                                }
+
+                                break;
+                            }
+                        case null when m.Member is FieldInfo staticFi:
+                            value = staticFi.GetValue(null);
+                            return true;
+                    }
+
+                    break;
+
+                case UnaryExpression { NodeType: ExpressionType.Convert } u:
+                    expr = u.Operand;
+                    continue;
+            }
+
+            value = null;
+            return false;
+        }
     }
 
     private QueryContainer TranslateAndAlso(Expression left, Expression right)
