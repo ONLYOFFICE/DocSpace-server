@@ -29,6 +29,8 @@ namespace ASC.AI.Core.MCP.Data;
 public class McpServer
 {
     public Guid Id { get; init; }
+    public string? Endpoint { get; init; }
+    public IDictionary<string, string>? Headers { get; init; }
     public required string Name { get; init; }
     public string? Description { get; init; }
     public bool Enabled { get; init; }

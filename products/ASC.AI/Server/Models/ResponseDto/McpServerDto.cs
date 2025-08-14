@@ -33,4 +33,6 @@ public class McpServerDto : IMapFrom<McpServer>
     public string? Description { get; init; }
     public bool Enabled { get; init; }
     public ServerType ServerType { get; init; }
+    public string? Endpoint { get; init; }
+    public IDictionary<string, string>? Headers { get; init; }
 }

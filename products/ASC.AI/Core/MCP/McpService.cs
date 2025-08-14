@@ -147,6 +147,8 @@ public class McpService(
                 .Select(x => new McpServer
                 {
                     Id = x.Id,
+                    Endpoint = x.Endpoint.ToString(),
+                    Headers = x.Headers,
                     Name = x.Name,
                     Description = x.Description,
                     Enabled = x.Enabled,
