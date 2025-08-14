@@ -799,70 +799,7 @@ public class EntryManager(IDaoFactory daoFactory,
         }
     }
 
-    public async Task<IEnumerable<FileEntry>> GetRecentAsync(FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent)
-    {
-        var tagDao = daoFactory.GetTagDao<int>();
-        var tags = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.Recent, TagType.RecentByLink).Where(tag => tag.EntryType == FileEntryType.File).Select(r => r.EntryId);
 
-        var fileIdsInt = Enumerable.Empty<int>();
-        var fileIdsString = Enumerable.Empty<string>();
-        var listFileIds = new List<string>();
-
-        await foreach (var fileId in tags)
-        {
-            if (fileId is int @int)
-            {
-                fileIdsInt = fileIdsInt.Append(@int);
-            }
-            if (fileId is string @string)
-            {
-                fileIdsString = fileIdsString.Append(@string);
-            }
-
-            listFileIds.Add(fileId.ToString());
-        }
-
-        var files = new List<FileEntry>();
-
-        var firstTask = GetRecentByIdsAsync(fileIdsInt, filter, subjectGroup, subjectId, searchText, extension, searchInContent).ToListAsync();
-        var secondTask = GetRecentByIdsAsync(fileIdsString, filter, subjectGroup, subjectId, searchText, extension, searchInContent).ToListAsync();
-
-        foreach (var items in await Task.WhenAll(firstTask.AsTask(), secondTask.AsTask()))
-        {
-            files.AddRange(items);
-        }
-
-        var result = files.OrderBy(file =>
-        {
-            var fileId = "";
-            if (file is File<int> fileInt)
-            {
-                fileId = fileInt.Id.ToString();
-            }
-            else if (file is File<string> fileString)
-            {
-                fileId = fileString.Id;
-            }
-
-            return listFileIds.IndexOf(fileId);
-        });
-
-        return result;
-    }
-
-    private async IAsyncEnumerable<FileEntry> GetRecentByIdsAsync<T>(IEnumerable<T> fileIds, FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string[] ext, bool searchInContent)
-    {
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var fileDao = daoFactory.GetFileDao<T>();
-
-        var files = fileSecurity.FilterReadAsync(fileDao.GetFilesFilteredAsync(fileIds, filter, subjectGroup, subjectId, searchText, ext, searchInContent).Where(file => file.RootFolderType != FolderType.TRASH));
-
-        await foreach (var file in files)
-        {
-            await CheckEntryAsync(folderDao, file);
-            yield return file;
-        }
-    }
 
     private async Task<(IEnumerable<FileEntry>, IEnumerable<FileEntry>)> GetFavoritesAsync(FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent)
     {

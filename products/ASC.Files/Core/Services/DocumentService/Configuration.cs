@@ -264,7 +264,8 @@ public class EditorConfiguration<T>(
     EntryManager entryManager,
     DocumentServiceTrackerHelper documentServiceTrackerHelper, 
     ExternalShare externalShare,
-    UserPhotoManager userPhotoManager)
+    UserPhotoManager userPhotoManager,
+    GlobalFolderHelper globalFolderHelper)
 {
     public PluginsConfig Plugins { get; } = pluginsConfig;
     public CustomizationConfig<T> Customization { get; } = customizationConfig;
@@ -400,7 +401,12 @@ public class EditorConfiguration<T>(
         };
 
         var folderDao = daoFactory.GetFolderDao<int>();
-        var files = (await entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, null, false))
+        var recentId = await globalFolderHelper.FolderRecentAsync;
+        var recent = await folderDao.GetFolderAsync(recentId);
+
+        var (entries, _) = await entryManager.GetEntriesAsync(recent, null, 0, 10, [filter], false, Guid.Empty, String.Empty, null, false, false, new OrderBy(SortedByType.LastOpened, false));
+        
+        var files = entries 
             .Cast<File<int>>()
             .Where(file => file != null && !Equals(fileId, file.Id))
             .ToList();
