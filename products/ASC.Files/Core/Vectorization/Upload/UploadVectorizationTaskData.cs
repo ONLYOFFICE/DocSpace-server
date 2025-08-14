@@ -24,34 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Vectorization.Upload;
+namespace ASC.Files.Core.Vectorization.Upload;
 
-public class UploadVectorizationTask : VectorizationTask<UploadVectorizationTaskData>
+[ProtoContract]
+public class UploadVectorizationTaskData : VectorizationTaskData
 {
-    protected override async IAsyncEnumerable<File<int>> GetFilesAsync(IServiceProvider serviceProvider)
-    {
-        var daoFactory = serviceProvider.GetRequiredService<IDaoFactory>();
-        var fileDao = daoFactory.GetFileDao<int>();
-        var fileSecurity = serviceProvider.GetRequiredService<FileSecurity>();
-
-        var file = await fileDao.GetFileAsync(Data.FileId);
-        if (file == null)
-        {
-            Exception = new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
-            yield break;
-        }
-        
-        if (!await fileSecurity.CanReadAsync(file))
-        {
-            Exception = new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
-            yield break;
-        }
-        
-        yield return file;
-    }
-
-    protected override int GetTotalFilesCount()
-    {
-        return 1;
-    }
+    [ProtoMember(1)]
+    public int FileId { get; set; }
 }

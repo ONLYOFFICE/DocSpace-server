@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,23 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Vectorization.Upload;
-using ASC.EventBus.Events;
-
-using ProtoBuf;
-
-namespace ASC.AI.Core.Vectorization.Events;
+namespace ASC.Files.Core.Vectorization.Copy;
 
 [ProtoContract]
-public record UploadVectorizationIntegrationEvent : IntegrationEvent
+public class CopyVectorizationTaskData : VectorizationTaskData
 {
-    private UploadVectorizationIntegrationEvent() : base() { }
-    
-    public UploadVectorizationIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId) { }
-    
     [ProtoMember(1)]
-    public required string TaskId { get; set; }
+    public List<int> FileIds { get; set; } = [];
     
     [ProtoMember(2)]
-    public UploadVectorizationTaskData Data { get; set; }
+    public List<string> ThirdPartyFileIds { get; set; } = [];
+    
+    [ProtoMember(3)]
+    public int KnowledgeFolderId { get; set; }
 }

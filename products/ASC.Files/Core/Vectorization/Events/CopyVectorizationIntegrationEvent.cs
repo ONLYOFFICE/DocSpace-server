@@ -24,9 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Text;
+using ASC.Files.Core.Vectorization.Copy;
 
-public interface ITextExtractor
+namespace ASC.Files.Core.Vectorization.Events;
+
+[ProtoContract]
+public record CopyVectorizationIntegrationEvent : IntegrationEvent
 {
-    public Task<string?> ExtractAsync(Memory<byte> content);
+    private CopyVectorizationIntegrationEvent() : base() { }
+    
+    public CopyVectorizationIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId) { }
+    
+    [ProtoMember(1)]
+    public required string TaskId { get; set; }
+    
+    [ProtoMember(2)]
+    public CopyVectorizationTaskData Data { get; set; }
 }

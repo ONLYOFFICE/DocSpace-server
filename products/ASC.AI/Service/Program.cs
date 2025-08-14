@@ -28,6 +28,7 @@ using ASC.AI.Service;
 using ASC.AI.Service.Extensions;
 using ASC.AI.Service.Handlers;
 using ASC.Common.DependencyInjection;
+using ASC.Files.Core.Vectorization.Events;
 
 var options = new WebApplicationOptions
 {

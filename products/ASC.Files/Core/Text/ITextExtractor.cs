@@ -24,19 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ProtoBuf;
+#nullable enable
+namespace ASC.AI.Core.Text;
 
-namespace ASC.AI.Core.Vectorization.Copy;
-
-[ProtoContract]
-public class CopyVectorizationTaskData : VectorizationTaskData
+public interface ITextExtractor
 {
-    [ProtoMember(1)]
-    public List<int> FileIds { get; set; } = [];
-    
-    [ProtoMember(2)]
-    public List<string> ThirdPartyFileIds { get; set; } = [];
-    
-    [ProtoMember(3)]
-    public int KnowledgeFolderId { get; set; }
+    public Task<string?> ExtractAsync(Memory<byte> content);
 }

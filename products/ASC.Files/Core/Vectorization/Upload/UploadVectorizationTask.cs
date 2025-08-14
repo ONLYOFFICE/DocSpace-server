@@ -24,30 +24,47 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Vectorization;
+namespace ASC.Files.Core.Vectorization.Upload;
 
-public static class VectorizationTaskIdHelper
+[Transient]
+public class UploadVectorizationTask : VectorizationTask<UploadVectorizationTaskData>
 {
-    private const string CopyPrefix = "copy_";
-    private const string UploadPrefix = "upload_";
+    public UploadVectorizationTask() { }
     
-    public static string MakeTaskId(string id, VectorizationTaskType type)
+    public UploadVectorizationTask(IServiceScopeFactory serviceScopeFactory) : base(serviceScopeFactory) { }
+    
+    public override void Init(int tenantId, Guid userId, UploadVectorizationTaskData data)
     {
-        return type switch
-        {
-            VectorizationTaskType.Copy => $"{CopyPrefix}{id}",
-            VectorizationTaskType.Upload => $"{UploadPrefix}{id}",
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-        };
+        Type = VectorizationTaskType.Upload;
+        base.Init(tenantId, userId, data);
     }
     
-    public static (string id, VectorizationTaskType type) ProcessId(string id)
+    protected override async IAsyncEnumerable<File<int>> GetFilesAsync(IServiceProvider serviceProvider)
     {
-        return id switch
+        var daoFactory = serviceProvider.GetRequiredService<IDaoFactory>();
+        var fileDao = daoFactory.GetFileDao<int>();
+        var fileSecurity = serviceProvider.GetRequiredService<FileSecurity>();
+
+        var file = await fileDao.GetFileAsync(Data.FileId);
+        if (file == null)
         {
-            _ when id.StartsWith(CopyPrefix) => (id[CopyPrefix.Length..], VectorizationTaskType.Copy),
-            _ when id.StartsWith(UploadPrefix) => (id[UploadPrefix.Length..], VectorizationTaskType.Upload),
-            _ => throw new ArgumentOutOfRangeException(nameof(id), id, null)
-        };
+            Exception = new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            Status = DistributedTaskStatus.Failted;
+            yield break;
+        }
+        
+        if (!await fileSecurity.CanReadAsync(file))
+        {
+            Exception = new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+            Status = DistributedTaskStatus.Failted;
+            yield break;
+        }
+        
+        yield return file;
+    }
+
+    protected override int GetTotalFilesCount()
+    {
+        return 1;
     }
 }

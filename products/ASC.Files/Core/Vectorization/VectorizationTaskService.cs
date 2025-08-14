@@ -24,20 +24,43 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.ElasticSearch.VectorData;
+#nullable enable
+using ASC.Files.Core.Vectorization.Copy;
+using ASC.Files.Core.Vectorization.Upload;
 
-namespace ASC.AI.Core.Vectorization.Data;
+namespace ASC.Files.Core.Vectorization;
 
-public class Chunk
+[Singleton(GenericArguments = [typeof(CopyVectorizationTask), typeof(CopyVectorizationTaskData)])]
+[Singleton(GenericArguments = [typeof(UploadVectorizationTask), typeof(UploadVectorizationTaskData)])]
+public class VectorizationTaskService<T, TData>(
+    IDistributedTaskQueueFactory queueFactory) 
+    where T : VectorizationTask<TData> 
+    where TData : VectorizationTaskData
 {
-    [Ignore]
-    public static string IndexName => "files_embeddings";
+    private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>();
+
+    public Task StartAsync(T task)
+    {
+        return _queue.EnqueueTask(task);
+    }
+
+    public Task<string> StoreAsync(T task)
+    {
+        return _queue.PublishTask(task);
+    }
+
+    public async Task<T?> GetAsync(string id)
+    {
+        return await _queue.PeekTask(id);
+    }
+
+    public async Task<List<T>> GetTasksAsync()
+    {
+        return await _queue.GetAllTasks();
+    }
     
-    public Guid Id { get; init; }
-    public int TenantId { get; init; }
-    public int FileId { get; init; }
-    public required string TextEmbedding { get; init; }
-    
-    [KnnVector]
-    public required float[] Embedding { get; init; }
+    public async Task DeleteAsync(string id)
+    {
+        await _queue.DequeueTask(id);
+    }
 }

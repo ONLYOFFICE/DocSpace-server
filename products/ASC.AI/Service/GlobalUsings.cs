@@ -42,7 +42,6 @@ global using NLog;
 
 global using System.Text;
 
-global using ASC.AI.Core.Vectorization.Events;
 global using ASC.Common;
 global using ASC.Core;
 global using ASC.EventBus.Abstractions;

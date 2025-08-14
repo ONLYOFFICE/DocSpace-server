@@ -24,8 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Vectorization;
-using ASC.AI.Core.Vectorization.Upload;
+using ASC.Files.Core.Vectorization;
+using ASC.Files.Core.Vectorization.Events;
+using ASC.Files.Core.Vectorization.Upload;
 
 namespace ASC.AI.Service.Handlers;
 

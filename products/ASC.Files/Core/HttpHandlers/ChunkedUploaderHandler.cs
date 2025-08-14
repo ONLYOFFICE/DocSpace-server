@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Vectorization;
+using ASC.Files.Core.Vectorization.Upload;
+
 using Microsoft.Net.Http.Headers;
 
 namespace ASC.Web.Files.HttpHandlers;
@@ -52,7 +55,8 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
     AuthContext authContext,
     IDaoFactory daoFactory,
     IEventBus eventBus,
-    WebhookManager webhookManager)
+    WebhookManager webhookManager,
+    UploadVectorizationTaskPublisher vectorizationTaskPublisher)
 {
     public async Task Invoke(HttpContext context)
     {
@@ -190,19 +194,20 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                     await fileUploader.DeleteLinkAndMarkAsync(session.File);
 
-                    await WriteSuccess(context, await ToResponseObject(session.File), (int)HttpStatusCode.Created);
-
                     await filesMessageService.SendAsync(session.File.Version > 1
                         ? MessageAction.FileUploadedWithOverwriting
                         : MessageAction.FileUploaded, session.File, session.File.Title);
 
                     await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, session.File);
 
+                    var vectorizationTaskId = string.Empty;
+
                     await socketManager.CreateFileAsync(session.File);
                     if (session.File.Version <= 1)
                     {
                         var folderDao = daoFactory.GetFolderDao<T>();
-                        var room = await folderDao.GetParentFoldersAsync(session.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+                        var parents = await folderDao.GetParentFoldersAsync(session.FolderId).ToListAsync();
+                        var room = parents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
                         if (room != null)
                         {
                             var data = room.Id is int rId && session.File.Id is int fId
@@ -217,7 +222,16 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                             await eventBus.PublishAsync(evt);
                         }
+                        
+                        var knowledge = parents.FirstOrDefault(f => f.FolderType == FolderType.Knowledge);
+                        if (knowledge != null && session.File.Id is int id)
+                        {
+                            var task = await vectorizationTaskPublisher.PublishAsync(id);
+                            vectorizationTaskId = VectorizationTaskIdHelper.MakeTaskId(task.Id, task.Type);
+                        }
                     }
+                    
+                    await WriteSuccess(context, await ToResponseObject(session.File, vectorizationTaskId), (int)HttpStatusCode.Created);
 
                     return;
             }
@@ -289,7 +303,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         }));
     }
 
-    private async Task<object> ToResponseObject<T>(File<T> file)
+    private async Task<object> ToResponseObject<T>(File<T> file, string taskId = null)
     {
         return new
         {
@@ -299,7 +313,8 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
             title = file.Title,
             provider_key = file.ProviderKey,
             uploaded = true,
-            file = await filesWrapperHelper.GetAsync(file)
+            file = await filesWrapperHelper.GetAsync(file),
+            vectorizationTaskId = taskId
         };
     }
 }

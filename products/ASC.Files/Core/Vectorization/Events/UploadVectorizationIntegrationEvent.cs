@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,52 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Text;
+using ASC.Files.Core.Vectorization.Upload;
 
-[Singleton(typeof(ITextExtractor))]
-public class OpenSearchTextExtractor(Client client) : ITextExtractor
+namespace ASC.Files.Core.Vectorization.Events;
+
+[ProtoContract]
+public record UploadVectorizationIntegrationEvent : IntegrationEvent
 {
-    private const string PipelineId = "attachments";
+    private UploadVectorizationIntegrationEvent() : base() { }
     
-    public async Task<string?> ExtractAsync(Memory<byte> content)
-    {
-        var document = new SimulatePipelineDocument
-        {
-            Index = "extract", //not used, needed to avoid error
-            Source = new Source
-            {
-                Document = new Document { Data = Convert.ToBase64String(content.Span) }
-            }
-        };
-        
-        var response = await client.Instance.Ingest
-            .SimulatePipelineAsync(s => 
-                s.Id(PipelineId)
-                    .Documents([document]));
-
-        if (!response.IsValid)
-        {
-            return null;
-        }
-        
-        var simulation = response.Documents.FirstOrDefault();
-        if (simulation == null)
-        {
-            return null;
-        }
-
-        var source = await simulation.Document.Source.AsAsync<Source>();
-        return source.Document?.Attachment?.Content;
-    }
-
-    private class Source
-    {
-        public Document? Document { get; set; }
-    }
-
-    private class Document
-    {
-        public string? Data { get; set; }
-        public Attachment? Attachment { get; set; }
-    }
+    public UploadVectorizationIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId) { }
+    
+    [ProtoMember(1)]
+    public required string TaskId { get; set; }
+    
+    [ProtoMember(2)]
+    public UploadVectorizationTaskData Data { get; set; }
 }

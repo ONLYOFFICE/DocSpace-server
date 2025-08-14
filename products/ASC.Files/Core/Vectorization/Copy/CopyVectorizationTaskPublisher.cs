@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,42 +24,54 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Vectorization.Events;
 using ASC.EventBus.Abstractions;
+using ASC.Files.Core.Vectorization.Events;
 
-namespace ASC.AI.Core.Vectorization.Upload;
+namespace ASC.Files.Core.Vectorization.Copy;
 
 [Scope]
-public class UploadVectorizationTaskPublisher(
+public class CopyVectorizationTaskPublisher(
     TenantManager tenantManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
     IEventBus eventBus,
-    VectorizationTaskService<UploadVectorizationTask, UploadVectorizationTaskData> taskService)
+    VectorizationTaskService<CopyVectorizationTask, CopyVectorizationTaskData> copyVectorizationTaskService)
 {
-    public async Task<UploadVectorizationTask> PublishAsync(int fileId)
+    public async Task<CopyVectorizationTask> PublishAsync(int knowledgeFolderId, IEnumerable<JsonElement> files)
     {
-        if (fileId <= 0)
+        if (knowledgeFolderId <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(fileId), @"File id must be greater than 0");
+            throw new ArgumentOutOfRangeException(nameof(knowledgeFolderId), @"Knowledge folder id must be greater than 0");
         }
         
-        var task = serviceProvider.GetRequiredService<UploadVectorizationTask>();
+        var (fileIds, thirdPartyFileIds) = FileOperationsManager.GetIds(files);
+        if (fileIds.Count == 0 && thirdPartyFileIds.Count == 0)
+        {
+            throw new ArgumentException(@"Files must not be empty", nameof(files));
+        }
+        
+        var task = serviceProvider.GetRequiredService<CopyVectorizationTask>();
+
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
 
-        var data = new UploadVectorizationTaskData { FileId = fileId };
+        var data = new CopyVectorizationTaskData
+        {
+            KnowledgeFolderId = knowledgeFolderId,
+            FileIds = fileIds,
+            ThirdPartyFileIds = thirdPartyFileIds
+        };
         
         task.Init(tenantId, userId, data);
-        
-        var taskId = await taskService.StoreAsync(task);
-        
-        await eventBus.PublishAsync(new UploadVectorizationIntegrationEvent(userId, tenantId)
-        {
-            TaskId = taskId,
-            Data = data
+
+        var taskId= await copyVectorizationTaskService.StoreAsync(task);
+
+        await eventBus.PublishAsync(new CopyVectorizationIntegrationEvent(userId, tenantId) 
+        { 
+            TaskId = taskId, 
+            Data = data 
         });
         
-        return (await taskService.GetAsync(taskId))!;
+        return (await copyVectorizationTaskService.GetAsync(taskId))!;
     }
 }

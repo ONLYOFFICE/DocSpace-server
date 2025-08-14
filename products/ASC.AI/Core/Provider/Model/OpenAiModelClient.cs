@@ -35,6 +35,7 @@ public class OpenAiModelClient(HttpClient client) : IModelClient
     {
         var request = new HttpRequestMessage(HttpMethod.Get, $"{endpoint.TrimEnd('/')}/{EndpointPart}");
         request.Headers.Authorization = new AuthenticationHeaderValue(AuthScheme, apiKey);
+        request.Headers.Add("AuthorizationJwt", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmFhNmU0LWYxMzMtMTFlYS1iMTI2LTAwZmZlZWM4YjRlZiIsIm5hbWUiOiJBZG1pbmlzdHJhdG9yIiwiY3VzdG9tZXJJZCI6IjEzMDhfc3RhbmQxIn0.6KJaCsdGJEF0lea7y1nSgGnS85XB_wW8aPEz2kV1Dds");
 
         if (headers is { Count: > 0 })
         {

@@ -24,6 +24,32 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Vectorization;
+using Microsoft.SemanticKernel.Text;
 
-public abstract class VectorizationTaskData;
+namespace ASC.AI.Core.Text;
+
+[Singleton(typeof(ITextSplitter))]
+public class TextSplitter : ITextSplitter
+{
+    public List<string> Split(string text, int maxTokensPerChunk, float chunkOverlap)
+    {
+        if (maxTokensPerChunk <= 0)
+        {
+            throw new ArgumentException(@"Max tokens per chunk must be greater than 0", nameof(maxTokensPerChunk));
+        }
+
+        if (chunkOverlap is < 0 or > 1)
+        {
+            throw new ArgumentException(@"Chunk overlap must be between 0 and 1", nameof(chunkOverlap));
+        }
+        
+        var overlapInTokens = (int)Math.Floor(chunkOverlap * maxTokensPerChunk);
+        
+#pragma warning disable SKEXP0050
+        var lines = TextChunker.SplitPlainTextLines(text, maxTokensPerChunk);
+        var chunks = TextChunker.SplitPlainTextParagraphs(lines, maxTokensPerChunk, overlapInTokens);
+#pragma warning restore SKEXP0050
+
+        return chunks;
+    }
+}

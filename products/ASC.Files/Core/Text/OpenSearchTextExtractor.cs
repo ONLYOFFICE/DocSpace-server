@@ -24,43 +24,55 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Vectorization.Copy;
-using ASC.AI.Core.Vectorization.Upload;
-using ASC.Common.Threading;
+#nullable enable
+using Attachment = OpenSearch.Client.Attachment;
 
-namespace ASC.AI.Core.Vectorization;
+namespace ASC.AI.Core.Text;
 
-[Singleton(GenericArguments = [typeof(CopyVectorizationTask), typeof(CopyVectorizationTaskData)])]
-[Singleton(GenericArguments = [typeof(UploadVectorizationTask), typeof(UploadVectorizationTaskData)])]
-public class VectorizationTaskService<T, TData>(
-    IDistributedTaskQueueFactory queueFactory) 
-    where T : VectorizationTask<TData> 
-    where TData : VectorizationTaskData
+[Singleton(typeof(ITextExtractor))]
+public class OpenSearchTextExtractor(Client client) : ITextExtractor
 {
-    private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>();
-
-    public Task StartAsync(T task)
-    {
-        return _queue.EnqueueTask(task);
-    }
-
-    public Task<string> StoreAsync(T task)
-    {
-        return _queue.PublishTask(task);
-    }
-
-    public async Task<T?> GetAsync(string id)
-    {
-        return await _queue.PeekTask(id);
-    }
-
-    public async Task<List<T>> GetTasksAsync()
-    {
-        return await _queue.GetAllTasks();
-    }
+    private const string PipelineId = "attachments";
     
-    public async Task DeleteAsync(string id)
+    public async Task<string?> ExtractAsync(Memory<byte> content)
     {
-        await _queue.DequeueTask(id);
+        var document = new SimulatePipelineDocument
+        {
+            Index = "extract", //not used, needed to avoid error
+            Source = new Source
+            {
+                Document = new Document { Data = Convert.ToBase64String(content.Span) }
+            }
+        };
+        
+        var response = await client.Instance.Ingest
+            .SimulatePipelineAsync(s => 
+                s.Id(PipelineId)
+                    .Documents([document]));
+
+        if (!response.IsValid)
+        {
+            return null;
+        }
+        
+        var simulation = response.Documents.FirstOrDefault();
+        if (simulation == null)
+        {
+            return null;
+        }
+
+        var source = await simulation.Document.Source.AsAsync<Source>();
+        return source.Document?.Attachment?.Content;
+    }
+
+    private class Source
+    {
+        public Document? Document { get; set; }
+    }
+
+    private class Document
+    {
+        public string? Data { get; set; }
+        public Attachment? Attachment { get; set; }
     }
 }

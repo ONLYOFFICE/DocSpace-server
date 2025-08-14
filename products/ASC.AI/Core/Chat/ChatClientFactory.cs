@@ -54,11 +54,14 @@ public class ChatClientFactory(IHttpClientFactory httpClientFactory)
         }
         else
         {
+            var httpClient = httpClientFactory.CreateClient();
+            httpClient.DefaultRequestHeaders.Add("AuthorizationJwt", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmFhNmU0LWYxMzMtMTFlYS1iMTI2LTAwZmZlZWM4YjRlZiIsIm5hbWUiOiJBZG1pbmlzdHJhdG9yIiwiY3VzdG9tZXJJZCI6IjEzMDhfc3RhbmQxIn0.6KJaCsdGJEF0lea7y1nSgGnS85XB_wW8aPEz2kV1Dds");
+            
             var credential = new ApiKeyCredential(options.Key);
             var openAiOptions = new OpenAIClientOptions
             {
                 Endpoint = new Uri(options.Endpoint),
-                Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
+                Transport = new HttpClientPipelineTransport(httpClient)
             };
         
             var openAiClient = new OpenAIClient(credential, openAiOptions);

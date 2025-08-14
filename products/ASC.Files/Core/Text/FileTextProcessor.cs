@@ -24,28 +24,37 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Core.Settings;
+
 namespace ASC.AI.Core.Text;
 
-[Singleton(typeof(ITextSplitter))]
-public class TextSplitter : ITextSplitter
+[Scope]
+public class FileTextProcessor(IFileDao<int> fileDao, ITextExtractor textExtractor, ITextSplitter textSplitter)
 {
-    public List<string> Split(string text, int maxTokensPerChunk, float chunkOverlap)
+    public async Task<List<string>> GetTextChunksAsync(int fileId, SplitterSettings settings)
     {
-        if (maxTokensPerChunk <= 0)
+        var file = await fileDao.GetFileAsync(fileId);
+        if (file == null)
         {
-            throw new ArgumentException(@"Max tokens per chunk must be greater than 0", nameof(maxTokensPerChunk));
-        }
-
-        if (chunkOverlap is < 0 or > 1)
-        {
-            throw new ArgumentException(@"Chunk overlap must be between 0 and 1", nameof(chunkOverlap));
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
         
-        var overlapInTokens = (int)Math.Floor(chunkOverlap * maxTokensPerChunk);
-        
-        var lines = TextChunker.SplitPlainTextLines(text, maxTokensPerChunk);
-        var chunks = TextChunker.SplitPlainTextParagraphs(lines, maxTokensPerChunk, overlapInTokens);
+        return await GetTextChunksAsync(file, settings);
+    }
 
-        return chunks;
+    public async Task<List<string>> GetTextChunksAsync(File<int> file, SplitterSettings settings)
+    {
+        await using var stream = await fileDao.GetFileStreamAsync(file);
+        
+        await using var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+        
+        var memory = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+        
+        var text = await textExtractor.ExtractAsync(memory);
+        
+        return string.IsNullOrEmpty(text) 
+            ? [] 
+            : textSplitter.Split(text, settings.MaxTokensPerChunk, settings.ChunkOverlap);
     }
 }

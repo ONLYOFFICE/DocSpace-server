@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,9 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Vectorization.Upload;
+using ASC.ElasticSearch.VectorData;
 
-public class UploadVectorizationTaskData : VectorizationTaskData
+namespace ASC.Files.Core.Vectorization.Data;
+
+public class Chunk
 {
-    public int FileId { get; set; }
+    [Ignore]
+    public static string IndexName => "files_embeddings";
+    
+    public Guid Id { get; init; }
+    public int TenantId { get; init; }
+    public int FileId { get; init; }
+    public required string TextEmbedding { get; init; }
+    
+    [KnnVector]
+    public required float[] Embedding { get; init; }
 }

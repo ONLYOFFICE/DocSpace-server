@@ -24,22 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Vectorization.Copy;
-using ASC.Common.Threading;
+#nullable enable
 
-namespace ASC.AI.Core.Vectorization;
+using ASC.Files.Core.Vectorization.Copy;
+using ASC.Files.Core.Vectorization.Upload;
+
+namespace ASC.Files.Core.Vectorization;
 
 [Scope]
 public class VectorizationTaskHolder(
     AuthContext authContext,
-    VectorizationTaskService<CopyVectorizationTask, CopyVectorizationTaskData> copyVectorizationTaskService)
+    VectorizationTaskService<CopyVectorizationTask, CopyVectorizationTaskData> copyVectorizationTaskService,
+    VectorizationTaskService<UploadVectorizationTask, UploadVectorizationTaskData> uploadVectorizationTaskService)
 {
     public async Task<VectorizationTask?> GetAsync(string id)
     {
         var (taskId, type) = VectorizationTaskIdHelper.ProcessId(id);
-        var task = type is VectorizationTaskType.Copy
+        
+        VectorizationTask? task = type is VectorizationTaskType.Copy
             ? await copyVectorizationTaskService.GetAsync(taskId)
-            : null;
+            : await uploadVectorizationTaskService.GetAsync(taskId);
         
         if (task == null || task.UserId != authContext.CurrentAccount.ID)
         {
@@ -53,28 +57,62 @@ public class VectorizationTaskHolder(
 
         task.Percentage = 100;
 
-        await copyVectorizationTaskService.DeleteAsync(task.Id);
+        if (type is VectorizationTaskType.Copy)
+        {
+            await copyVectorizationTaskService.DeleteAsync(task.Id);
+        }
+        else
+        {
+            await uploadVectorizationTaskService.DeleteAsync(task.Id);
+        }
 
         return task;
     }
 
     public async IAsyncEnumerable<VectorizationTask> GetAsync()
     {
-        var tasks = await copyVectorizationTaskService.GetTasksAsync();
-        foreach (var task in tasks)
+        var copyTasks = await copyVectorizationTaskService.GetTasksAsync();
+        foreach (var task in copyTasks)
         {
-            if (task.UserId != authContext.CurrentAccount.ID)
+            if (!await CheckTaskAsync(task, copyVectorizationTaskService))
             {
                 continue;
             }
-            
-            if (task.Status > DistributedTaskStatus.Running)
+
+            yield return task;
+        }
+        
+        var uploadTasks = await uploadVectorizationTaskService.GetTasksAsync();
+        foreach (var task in uploadTasks)
+        {
+            if (!await CheckTaskAsync(task, uploadVectorizationTaskService))
             {
-                task.Percentage = 100;
-                await copyVectorizationTaskService.DeleteAsync(task.Id);
+                continue;
             }
 
             yield return task;
+        }
+
+        yield break;
+
+        async Task<bool> CheckTaskAsync<T, TData>(VectorizationTask task, VectorizationTaskService<T, TData> service) 
+            where T : VectorizationTask<TData> 
+            where TData : VectorizationTaskData
+        {
+            if (task.UserId != authContext.CurrentAccount.ID)
+            {
+                return false;
+            }
+
+            if (task.Status <= DistributedTaskStatus.Running)
+            {
+                return true;
+            }
+
+            task.Percentage = 100;
+            await service.DeleteAsync(task.Id);
+
+            return true;
         }
     }
 

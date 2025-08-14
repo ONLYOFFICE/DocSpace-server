@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,23 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Vectorization.Copy;
-using ASC.EventBus.Events;
+namespace ASC.Files.Core.Vectorization;
 
-using ProtoBuf;
-
-namespace ASC.AI.Core.Vectorization.Events;
-
-[ProtoContract]
-public record CopyVectorizationIntegrationEvent : IntegrationEvent
+public static class VectorizationTaskIdHelper
 {
-    private CopyVectorizationIntegrationEvent() : base() { }
+    private const string CopyPrefix = "copy_";
+    private const string UploadPrefix = "upload_";
     
-    public CopyVectorizationIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId) { }
+    public static string MakeTaskId(string id, VectorizationTaskType type)
+    {
+        return type switch
+        {
+            VectorizationTaskType.Copy => $"{CopyPrefix}{id}",
+            VectorizationTaskType.Upload => $"{UploadPrefix}{id}",
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
     
-    [ProtoMember(1)]
-    public required string TaskId { get; set; }
-    
-    [ProtoMember(2)]
-    public CopyVectorizationTaskData Data { get; set; }
+    public static (string id, VectorizationTaskType type) ProcessId(string id)
+    {
+        return id switch
+        {
+            _ when id.StartsWith(CopyPrefix) => (id[CopyPrefix.Length..], VectorizationTaskType.Copy),
+            _ when id.StartsWith(UploadPrefix) => (id[UploadPrefix.Length..], VectorizationTaskType.Upload),
+            _ => throw new ArgumentOutOfRangeException(nameof(id), id, null)
+        };
+    }
 }

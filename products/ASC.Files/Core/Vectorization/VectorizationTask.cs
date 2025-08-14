@@ -25,13 +25,15 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.AI.Core.Embedding;
-using ASC.AI.Core.Vectorization.Data;
-using ASC.Common.Threading;
+using ASC.AI.Core.Settings;
+using ASC.AI.Core.Text;
 using ASC.ElasticSearch.VectorData;
 
-using SecurityContext = ASC.Core.SecurityContext;
+using Microsoft.Extensions.AI;
 
-namespace ASC.AI.Core.Vectorization;
+using Chunk = ASC.Files.Core.Vectorization.Data.Chunk;
+
+namespace ASC.Files.Core.Vectorization;
 
 public enum VectorizationTaskType
 {
@@ -90,7 +92,7 @@ public abstract class VectorizationTask<T>
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             await tenantManager.SetCurrentTenantAsync(_tenantId);
 
-            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+            var securityContext = scope.ServiceProvider.GetRequiredService<ASC.Core.SecurityContext>();
             await securityContext.AuthenticateMeWithoutCookieAsync(UserId);
 
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
@@ -143,10 +145,11 @@ public abstract class VectorizationTask<T>
                     await socketManager.CreateFileAsync(file);
                 }
             }
-            
-            Status = Exception != null 
-                ? DistributedTaskStatus.Failted 
-                : DistributedTaskStatus.Completed;
+
+            if (Status <= DistributedTaskStatus.Running)
+            {
+                Status = DistributedTaskStatus.Completed;
+            }
         }
         catch (Exception e)
         {
