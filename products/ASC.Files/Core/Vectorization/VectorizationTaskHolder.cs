@@ -26,9 +26,6 @@
 
 #nullable enable
 
-using ASC.Files.Core.Vectorization.Copy;
-using ASC.Files.Core.Vectorization.Upload;
-
 namespace ASC.Files.Core.Vectorization;
 
 [Scope]

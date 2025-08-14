@@ -35,8 +35,6 @@ global using ASC.AI.Core.Provider;
 global using ASC.AI.Core.Provider.Data;
 global using ASC.AI.Core.Provider.Model;
 global using ASC.AI.Core.Settings;
-global using ASC.AI.Core.Text;
-
 global using ASC.Common;
 global using ASC.Common.Log;
 global using ASC.Common.Mapping;
@@ -51,14 +49,12 @@ global using ASC.Core.Common.EF.Model.Chat;
 global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
-
-global using ASC.ElasticSearch;
-
 global using ASC.Files.Core;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
+global using ASC.Files.Core.Text;
 
 global using ASC.Security.Cryptography;
 

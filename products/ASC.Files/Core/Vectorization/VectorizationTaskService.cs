@@ -25,9 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 #nullable enable
-using ASC.Files.Core.Vectorization.Copy;
-using ASC.Files.Core.Vectorization.Upload;
-
 namespace ASC.Files.Core.Vectorization;
 
 [Singleton(GenericArguments = [typeof(CopyVectorizationTask), typeof(CopyVectorizationTaskData)])]

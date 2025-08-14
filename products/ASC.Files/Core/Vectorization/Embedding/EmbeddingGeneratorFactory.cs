@@ -25,16 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 #nullable enable
-using System.ClientModel;
-using System.ClientModel.Primitives;
 
-using ASC.AI.Core.Settings;
-
-using Microsoft.Extensions.AI;
-
-using OpenAI;
-
-namespace ASC.AI.Core.Embedding;
+namespace ASC.Files.Core.Vectorization.Embedding;
 
 [Singleton]
 public class EmbeddingGeneratorFactory

@@ -24,9 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Settings;
-
-namespace ASC.AI.Core.Text;
+namespace ASC.Files.Core.Text;
 
 [Scope]
 public class FileTextProcessor(IFileDao<int> fileDao, ITextExtractor textExtractor, ITextSplitter textSplitter)

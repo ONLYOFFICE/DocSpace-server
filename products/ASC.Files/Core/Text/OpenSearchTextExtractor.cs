@@ -25,9 +25,10 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 #nullable enable
+
 using Attachment = OpenSearch.Client.Attachment;
 
-namespace ASC.AI.Core.Text;
+namespace ASC.Files.Core.Text;
 
 [Singleton(typeof(ITextExtractor))]
 public class OpenSearchTextExtractor(Client client) : ITextExtractor

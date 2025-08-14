@@ -24,13 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Embedding;
-using ASC.AI.Core.Settings;
-using ASC.AI.Core.Text;
-using ASC.ElasticSearch.VectorData;
-
-using Microsoft.Extensions.AI;
-
 using Chunk = ASC.Files.Core.Vectorization.Data.Chunk;
 
 namespace ASC.Files.Core.Vectorization;
@@ -92,7 +85,7 @@ public abstract class VectorizationTask<T>
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             await tenantManager.SetCurrentTenantAsync(_tenantId);
 
-            var securityContext = scope.ServiceProvider.GetRequiredService<ASC.Core.SecurityContext>();
+            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             await securityContext.AuthenticateMeWithoutCookieAsync(UserId);
 
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();

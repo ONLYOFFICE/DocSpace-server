@@ -25,11 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 #nullable enable
-using System.Net.Http.Json;
 
-using Microsoft.Extensions.AI;
-
-namespace ASC.AI.Core.Embedding;
+namespace ASC.Files.Core.Vectorization.Embedding;
 
 public class OpenAiFloatEmbeddingGenerator : IEmbeddingGenerator<string, Embedding<float>>
 {

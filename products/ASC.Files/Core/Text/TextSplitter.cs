@@ -26,7 +26,7 @@
 
 using Microsoft.SemanticKernel.Text;
 
-namespace ASC.AI.Core.Text;
+namespace ASC.Files.Core.Text;
 
 [Singleton(typeof(ITextSplitter))]
 public class TextSplitter : ITextSplitter

@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.Vectorization;
-using ASC.Files.Core.Vectorization.Upload;
-
 using Microsoft.Net.Http.Headers;
 
 namespace ASC.Web.Files.HttpHandlers;

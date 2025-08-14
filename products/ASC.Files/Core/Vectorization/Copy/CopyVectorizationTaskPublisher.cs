@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.EventBus.Abstractions;
-using ASC.Files.Core.Vectorization.Events;
-
 namespace ASC.Files.Core.Vectorization.Copy;
 
 [Scope]
