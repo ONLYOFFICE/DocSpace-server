@@ -112,9 +112,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
         var scriptFilePath = tempPath.GetTempFileName(".docbuilder");
         var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
-        var outputFileName = string.Format(Resource.AccountingCustomerOperationsReportName + ".xlsx",
-            utcStartDate.ToString(usertCulture.DateTimeFormat.ShortDatePattern, CultureInfo.InvariantCulture),
-            utcEndDate.ToString(usertCulture.DateTimeFormat.ShortDatePattern, CultureInfo.InvariantCulture));
+        var outputFileName = string.Format(Resource.AccountingCustomerOperationsReportName + ".xlsx", utcStartDate.ToShortDateString(), utcEndDate.ToShortDateString());
 
         var keys = new[] {
             Resource.AccountingCustomerOperationDate,
