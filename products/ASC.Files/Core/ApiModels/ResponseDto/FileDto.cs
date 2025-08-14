@@ -204,7 +204,7 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// Location
     /// </summary>
-    public string Location { get; set; }
+    public LocationInfo Location { get; set; }
     
     /// <summary>
     /// The file entry type.
@@ -452,9 +452,13 @@ public class FileDtoHelper(
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
             result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
             result.ThumbnailStatus = file.ThumbnailStatus;
-            if (!string.IsNullOrEmpty(file.Location))
+            if (!string.IsNullOrEmpty(file.Location?.Title))
             {
-                result.Location = file.RootFolderType == FolderType.USER ? FilesUCResource.MyFiles : file.Location;
+                result.Location = new LocationInfo
+                { 
+                    Title = file.Location.Type == FolderType.USER ? FilesUCResource.MyFiles : file.Location.Title, 
+                    Type = file.Location.Type
+                };
             }
 
             var cacheKey = Math.Abs(result.Updated.GetHashCode());

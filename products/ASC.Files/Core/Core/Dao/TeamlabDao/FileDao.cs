@@ -1870,7 +1870,7 @@ internal class FileDao(
     }
 
     public async IAsyncEnumerable<File<int>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, OrderBy orderBy, int offset = 0, int count = -1)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -1879,7 +1879,7 @@ internal class FileDao(
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         
-        var q = GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
+        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location);
 
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
@@ -1920,7 +1920,7 @@ internal class FileDao(
     }
 
     public async Task<int> GetFilesByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject)
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -1929,7 +1929,7 @@ internal class FileDao(
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         
-        var q = GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
+        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location);
         
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
@@ -2576,7 +2576,7 @@ internal class FileDao(
         return q;
     }
     
-    private IQueryable<FileByTagQuery> GetFilesByTagQuery(Guid tagOwner, IEnumerable<TagType> tagType, FilesDbContext filesDbContext)
+    private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var currentUserId = securityContext.CurrentAccount.ID;
@@ -2612,16 +2612,34 @@ internal class FileDao(
                 .Where(f => f.TenantId == x.f.TenantId && f.FolderType != FolderType.VirtualRooms)
                 .Join(filesDbContext.Tree, f => f.Id, t => t.FolderId, (folder, tree) => new { folder, tree })
                 .Where(t => t.tree.FolderId == x.f.ParentId)
-                .OrderByDescending(t=> t.tree.Level)
-                .Select(t => t.folder.Title)
+                .OrderByDescending(t => t.tree.Level)
+                .Select(t => new LocationInfo{ Title = t.folder.Title, Type = t.folder.FolderType})
                 .FirstOrDefault()
         });
         
         if (tagType.Any(r => r is TagType.RecentByLink or TagType.Recent))
         {
+            switch (location)
+            {
+                case Location.Documents:
+                    query = query.Where(x => x.Tag.Type == TagType.Recent && x.Location.Type == FolderType.USER);
+                    break;
+                case Location.Room:
+                    query = query.Where(x => x.Tag.Type == TagType.Recent && DocSpaceHelper.RoomTypes.Contains(x.Location.Type));
+                    break;
+                case Location.Link:
+                    query = query.Where(x => x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)));
+                    break;
+                default:
+                    query = query
+                        .Where(x => x.Tag.Type == TagType.Recent || 
+                                    x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)));
+                    break;
+            }
+
             query = query
                 .Where(x => x.Tag.Type == TagType.Recent || 
-                            x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow))); 
+                            x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)));
         }
 
         return query;
@@ -2634,9 +2652,15 @@ public class DbFileQuery
     public DbFolder Root { get; set; }
     public bool Shared { get; set; }
     public int Order { get; set; }
-    public string Location { get; set; }
+    public LocationInfo Location { get; set; }
     public DbFilesSecurity SharedRecord { get; set; }
     public DateTime? LastOpened { get; set; }
+}
+
+public class LocationInfo
+{
+    public string Title { get; set; }
+    public FolderType Type { get; set; }
 }
 
 public class FileByTagQuery : IQueryResult<DbFile>
@@ -2644,7 +2668,7 @@ public class FileByTagQuery : IQueryResult<DbFile>
     public DbFile Entry { get; set; }
     public DbFilesTag Tag { get; set; }
     
-    public string Location { get; set; }
+    public LocationInfo Location { get; set; }
     public DateTime? LastOpened { get; set; }
     public DbFilesSecurity Security { get; set; }
 }

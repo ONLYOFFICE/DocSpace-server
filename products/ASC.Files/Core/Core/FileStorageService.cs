@@ -180,7 +180,8 @@ public class FileStorageService //: IFileStorageService
         ApplyFilterOption applyFilterOption = ApplyFilterOption.All,
         QuotaFilter quotaFilter = QuotaFilter.All,
         StorageFilter storageFilter = StorageFilter.None,
-        FormsItemDto formsItemDto = null)
+        FormsItemDto formsItemDto = null,
+        Location? location = null)
     {
         var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
 
@@ -299,7 +300,8 @@ public class FileStorageService //: IFileStorageService
                 applyFilterOption,
                 quotaFilter,
                 storageFilter,
-                formsItemDto);
+                formsItemDto,
+                location);
         }
         catch (Exception e)
         {

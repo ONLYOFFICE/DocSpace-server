@@ -325,7 +325,7 @@ public class File<T> : FileEntry<T>
     /// <summary>
     /// Parent room title.
     /// </summary>
-    public string Location { get; set; }
+    public LocationInfo Location { get; set; }
     
     /// <summary>
     /// The file converted type.
