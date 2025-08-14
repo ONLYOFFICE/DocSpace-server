@@ -146,7 +146,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             {
                 await foreach (var records in partialRecords)
                 {
-                    var text = Serialize(records, usertCulture, dateFormat, options);
+                    var text = Serialize(records, dateFormat, options);
                     await writer.WriteAsync(text);
                 }
             }
@@ -194,7 +194,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         }
     }
 
-    private static string Serialize(List<Operation> records, CultureInfo culture, string dateFormat, JsonSerializerOptions jsonSerializerOptions)
+    private static string Serialize(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions)
     {
         var sb = new StringBuilder();
 
@@ -202,7 +202,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         {
             var properties = new List<PropertyValue>
             {
-                new(record.Date.ToString("G", culture), dateFormat),
+                new(record.Date.ToString("G", CultureInfo.InvariantCulture), dateFormat),
                 new(record.Description, "@"),
                 new(record.Service, "@"),
                 new(record.ServiceUnit, "@"),
