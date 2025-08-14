@@ -166,12 +166,12 @@ public abstract class FilesController<T>(
     /// <short>Copy a file</short>
     /// <path>api/2.0/files/file/{fileId}/copyas</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Copied file entry information", typeof(FileEntryDto))]
+    [SwaggerResponse(200, "Copied file entry information", typeof(FileEntryBaseDto))]
     [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "File not found")]
     [HttpPost("file/{fileId}/copyas")]
-    public async Task<FileEntryDto> CopyFileAs(CopyAsRequestDto<T> inDto)
+    public async Task<FileEntryBaseDto> CopyFileAs(CopyAsRequestDto<T> inDto)
     {
         if (inDto.File.DestFolderId.ValueKind == JsonValueKind.Number)
         {

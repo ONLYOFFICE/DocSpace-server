@@ -296,7 +296,7 @@ public class OperationController(
             Files = await filesTask
         };
 
-        async IAsyncEnumerable<FileEntryDto> GetFilesDto(IEnumerable<FileEntry> fileEntries)
+        async IAsyncEnumerable<FileEntryBaseDto> GetFilesDto(IEnumerable<FileEntry> fileEntries)
         {
             foreach (var entry in fileEntries)
             {
@@ -312,10 +312,10 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<FileEntryDto>))]
+    [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpGet("move")]
-    public async IAsyncEnumerable<FileEntryDto> CheckMoveOrCopyBatchItems([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
+    public async IAsyncEnumerable<FileEntryBaseDto> CheckMoveOrCopyBatchItems([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {
         List<object> checkedFiles;
         List<object> checkedFolders;

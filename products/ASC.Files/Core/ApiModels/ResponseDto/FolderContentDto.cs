@@ -34,12 +34,12 @@ public class FolderContentDto<T>
     /// <summary>
     /// The list of files in the folder.
     /// </summary>
-    public List<FileEntryDto> Files { get; set; }
+    public List<FileEntryBaseDto> Files { get; set; }
 
     /// <summary>
     /// The list of folders in the folder. 
     /// </summary>
-    public List<FileEntryDto> Folders { get; set; }
+    public List<FileEntryBaseDto> Folders { get; set; }
 
     /// <summary>
     /// The current folder information.
@@ -156,7 +156,7 @@ public class FolderContentDtoHelper(
 
         return result;
 
-        async IAsyncEnumerable<FileEntryDto> GetEntriesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)
+        async IAsyncEnumerable<FileEntryBaseDto> GetEntriesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)
         {
             foreach (var e in fileEntries)
             {
@@ -171,7 +171,7 @@ public class FolderContentDtoHelper(
             }
         }
 
-        async IAsyncEnumerable<FileEntryDto> GetFilesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null)
+        async IAsyncEnumerable<FileEntryBaseDto> GetFilesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null)
         {
             foreach (var r in fileEntries)
             {
@@ -179,7 +179,7 @@ public class FolderContentDtoHelper(
             }
         }
 
-        async Task<FileEntryDto> GetFileDto(FileEntry fileEntry, string entriesOrder = null, IFolder contextFolder = null)
+        async Task<FileEntryBaseDto> GetFileDto(FileEntry fileEntry, string entriesOrder = null, IFolder contextFolder = null)
         {
             return fileEntry switch
             {
@@ -189,7 +189,7 @@ public class FolderContentDtoHelper(
             };
         }
 
-        async IAsyncEnumerable<FileEntryDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder = null)
+        async IAsyncEnumerable<FileEntryBaseDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder = null)
         {
             foreach (var r in folderEntries)
             {
@@ -197,7 +197,7 @@ public class FolderContentDtoHelper(
             }
         }
         
-        async Task<FileEntryDto> GetFolderDto(FileEntry folderEntry, string entriesOrder = null, IFolder contextFolder = null)
+        async Task<FileEntryBaseDto> GetFolderDto(FileEntry folderEntry, string entriesOrder = null, IFolder contextFolder = null)
         {
             switch (folderEntry)
             {
