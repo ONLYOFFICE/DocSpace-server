@@ -53,6 +53,7 @@ public class OwnerController(
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
     [SwaggerResponse(200, "Message about changing the portal owner", typeof(OwnerChangeInstructionsDto))]
+    [SwaggerResponse(400, "Owner's email is not activated")]
     [SwaggerResponse(403, "Collaborator can not be an owner")]
     [HttpPost("")]
     public async Task<OwnerChangeInstructionsDto> SendOwnerChangeInstructions(OwnerIdSettingsRequestDto inDto)
@@ -62,6 +63,11 @@ public class OwnerController(
         var curTenant = tenantManager.GetCurrentTenant();
         var owner = await userManager.GetUsersAsync(curTenant.OwnerId);
         var newOwner = await userManager.GetUsersAsync(inDto.OwnerId);
+
+        if (owner.ActivationStatus != EmployeeActivationStatus.Activated)
+        {
+            throw new ArgumentException("Owner's email is not activated");
+        }
 
         if (await userManager.IsGuestAsync(newOwner))
         {
