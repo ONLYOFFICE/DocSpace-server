@@ -34,7 +34,7 @@ public class UploadVectorizationTaskPublisher(
     IEventBus eventBus,
     VectorizationTaskService<UploadVectorizationTask, UploadVectorizationTaskData> taskService)
 {
-    public async Task<UploadVectorizationTask> PublishAsync(int fileId)
+    public async Task<UploadVectorizationTask> PublishAsync(int fileId, int parentId)
     {
         if (fileId <= 0)
         {
@@ -45,7 +45,11 @@ public class UploadVectorizationTaskPublisher(
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
 
-        var data = new UploadVectorizationTaskData { FileId = fileId };
+        var data = new UploadVectorizationTaskData
+        {
+            FileId = fileId,
+            ParentId = parentId
+        };
         
         task.Init(tenantId, userId, data);
         

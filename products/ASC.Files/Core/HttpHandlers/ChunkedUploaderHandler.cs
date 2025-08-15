@@ -219,13 +219,14 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                             await eventBus.PublishAsync(evt);
 
-                            if (room.FolderType == FolderType.AiRoom && session.File.Id is int id)
+                            if (room.FolderType == FolderType.AiRoom 
+                                && session.File.Id is int id && session.FolderId is int parentId)
                             {
                                 var folder = await folderDao.GetFolderAsync(session.FolderId);
 
                                 if (folder is { FolderType: FolderType.Knowledge })
                                 {
-                                    var task = await vectorizationTaskPublisher.PublishAsync(id);
+                                    var task = await vectorizationTaskPublisher.PublishAsync(id, parentId);
                                     vectorizationTaskId = VectorizationTaskIdHelper.MakeTaskId(task.Id, task.Type);
                                 }
                             }

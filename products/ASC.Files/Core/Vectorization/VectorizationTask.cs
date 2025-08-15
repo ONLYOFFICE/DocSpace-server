@@ -55,8 +55,6 @@ public abstract class VectorizationTask<T>
     protected T Data { get; private set; } = null!;
     protected ILogger Logger { get; private set; } = null!;
 
-    private const int BatchSize = 10;
-    
     private int _tenantId;
     
     public virtual void Init(int tenantId, Guid userId, T data)
@@ -103,6 +101,10 @@ public abstract class VectorizationTask<T>
                 MaxTokensPerChunk = (int)(generatorFactory.Model.ContextLength * 0.75),
                 ChunkOverlap = settings.ChunkOverlap
             };
+            
+            var folderDao = daoFactory.GetFolderDao<int>();
+            var room = await folderDao.GetParentFoldersAsync(Data.ParentId)
+                .FirstOrDefaultAsync(x => x.FolderType == FolderType.AiRoom);
 
             var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName,
                 new VectorCollectionOptions
@@ -122,7 +124,7 @@ public abstract class VectorizationTask<T>
                 
                 try
                 {
-                    await VectorizeFileAsync(totalFiles, currentFileIndex, file, fileProcessor, splitterSettings, 
+                    await VectorizeFileAsync(totalFiles, currentFileIndex, room.Id, file, fileProcessor, splitterSettings, 
                         settings, embeddingGenerator, collection);
                     currentFileIndex++;
                     notify = true;
@@ -162,6 +164,7 @@ public abstract class VectorizationTask<T>
     private async Task VectorizeFileAsync(
         int totalFiles,
         int currentFileIndex,
+        int roomId,
         File<int> file,
         FileTextProcessor fileProcessor,
         SplitterSettings splitterSettings,
@@ -181,6 +184,7 @@ public abstract class VectorizationTask<T>
                 { 
                     Id = Guid.NewGuid(), 
                     TenantId = _tenantId,
+                    RoomId = roomId,
                     FileId = file.Id, 
                     TextEmbedding = text, 
                     Embedding = embeddings[index].Vector.ToArray() 

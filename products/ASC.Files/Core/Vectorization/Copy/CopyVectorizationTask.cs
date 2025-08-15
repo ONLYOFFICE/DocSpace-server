@@ -43,14 +43,14 @@ public class CopyVectorizationTask : VectorizationTask<CopyVectorizationTaskData
     {
         return Data.FileIds.Count + Data.ThirdPartyFileIds.Count;
     }
-    
+
     protected override async IAsyncEnumerable<File<int>> GetFilesAsync(IServiceProvider serviceProvider)
     {
         var daoFactory = serviceProvider.GetRequiredService<IDaoFactory>();
         var folderDao = daoFactory.GetFolderDao<int>();
         var fileSecurity = serviceProvider.GetRequiredService<FileSecurity>();
 
-        var knowledgeFolder = await folderDao.GetFolderAsync(Data.KnowledgeFolderId);
+        var knowledgeFolder = await folderDao.GetFolderAsync(Data.ParentId);
         if (knowledgeFolder is not { FolderType: FolderType.Knowledge })
         {
             Exception = new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
@@ -63,12 +63,12 @@ public class CopyVectorizationTask : VectorizationTask<CopyVectorizationTaskData
             yield break;
         }
         
-        await foreach (var file in CopyFilesAsync(daoFactory, fileSecurity, Data.KnowledgeFolderId, Data.FileIds))
+        await foreach (var file in CopyFilesAsync(daoFactory, fileSecurity, Data.FileIds))
         {
             yield return file;
         }
         
-        await foreach (var file in CopyFilesAsync(daoFactory, fileSecurity, Data.KnowledgeFolderId, Data.ThirdPartyFileIds))
+        await foreach (var file in CopyFilesAsync(daoFactory, fileSecurity, Data.ThirdPartyFileIds))
         {
             yield return file;
         }
@@ -77,7 +77,6 @@ public class CopyVectorizationTask : VectorizationTask<CopyVectorizationTaskData
     private async IAsyncEnumerable<File<int>> CopyFilesAsync<T>(
         IDaoFactory daoFactory,
         FileSecurity fileSecurity,
-        int knowledgeFolderId,
         List<T> fileIds)
     {
         var fileDao = daoFactory.GetFileDao<T>();
@@ -100,7 +99,7 @@ public class CopyVectorizationTask : VectorizationTask<CopyVectorizationTaskData
                     continue;
                 }
 
-                newFile = await fileDao.CopyFileAsync(file.Id, knowledgeFolderId);
+                newFile = await fileDao.CopyFileAsync(file.Id, Data.ParentId);
             }
             catch (Exception e)
             {

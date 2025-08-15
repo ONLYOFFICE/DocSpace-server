@@ -59,7 +59,7 @@ public class CopyVectorizationTaskPublisher(
 
         var data = new CopyVectorizationTaskData
         {
-            KnowledgeFolderId = knowledgeFolderId,
+            ParentId = knowledgeFolderId,
             FileIds = fileIds,
             ThirdPartyFileIds = thirdPartyFileIds
         };

@@ -26,4 +26,9 @@
 
 namespace ASC.Files.Core.Vectorization;
 
-public abstract class VectorizationTaskData;
+[ProtoContract]
+public abstract class VectorizationTaskData
+{
+    [ProtoMember(1)]
+    public int ParentId { get; set; }
+}

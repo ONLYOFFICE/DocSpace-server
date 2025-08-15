@@ -33,6 +33,7 @@ public class Chunk
     
     public Guid Id { get; init; }
     public int TenantId { get; init; }
+    public int RoomId { get; init; }
     public int FileId { get; init; }
     public required string TextEmbedding { get; init; }
     

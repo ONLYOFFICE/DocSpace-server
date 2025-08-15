@@ -34,7 +34,4 @@ public class CopyVectorizationTaskData : VectorizationTaskData
     
     [ProtoMember(2)]
     public List<string> ThirdPartyFileIds { get; set; } = [];
-    
-    [ProtoMember(3)]
-    public int KnowledgeFolderId { get; set; }
 }
