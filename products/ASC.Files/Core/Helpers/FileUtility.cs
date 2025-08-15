@@ -54,44 +54,45 @@ public class FileUtilityConfiguration
 
         foreach (var format in Formats)
         {
+            var newFormatName = $".{format.Name.TrimStart('.')}";
             if(format.Actions.Contains("auto-convert"))
             {
-                ExtsMustConvert.Add(format.Name);
+                ExtsMustConvert.Add(newFormatName);
             }
             
             if(format.Actions.Contains("edit"))
             {
-                ExtsWebEdited.Add(format.Name);
+                ExtsWebEdited.Add(newFormatName);
             }
             
             if(format.Actions.Contains("view"))
             {
-                ExtsWebPreviewed.Add(format.Name);
+                ExtsWebPreviewed.Add(newFormatName);
             }
             
             if(format.Actions.Contains("comment"))
             {
-                ExtsWebCommented.Add(format.Name);
+                ExtsWebCommented.Add(newFormatName);
             }
             
             if(format.Actions.Contains("review"))
             {
-                ExtsWebReviewed.Add(format.Name);
+                ExtsWebReviewed.Add(newFormatName);
             }
             
             if(format.Actions.Contains("encrypt"))
             {
-                ExtsWebEncrypt.Add(format.Name);
+                ExtsWebEncrypt.Add(newFormatName);
             }
             
             if(format.Actions.Contains("customfilter"))
             {
-                ExtsWebCustomFilterEditing.Add(format.Name);
+                ExtsWebCustomFilterEditing.Add(newFormatName);
             }
             
             if(format.Actions.Contains("fill"))
             {
-                ExtsWebRestrictedEditing.Add(format.Name);
+                ExtsWebRestrictedEditing.Add(newFormatName);
             }
         }
         
