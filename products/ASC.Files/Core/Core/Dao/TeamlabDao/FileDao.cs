@@ -2610,10 +2610,10 @@ internal class FileDao(
             Security = filesDbContext.Security.FirstOrDefault(s => s.TenantId == tenantId && s.EntryType == FileEntryType.File && s.EntryId == x.f.Id.ToString()  && s.Subject.ToString() == x.t.Name),
             Location = filesDbContext.Folders
                 .Where(f => f.TenantId == x.f.TenantId && f.FolderType != FolderType.VirtualRooms)
-                .Join(filesDbContext.Tree, f => f.Id, t => t.FolderId, (folder, tree) => new { folder, tree })
+                .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
                 .Where(t => t.tree.FolderId == x.f.ParentId)
                 .OrderByDescending(t => t.tree.Level)
-                .Select(t => new LocationInfo{ Title = t.folder.Title, Type = t.folder.FolderType})
+                .Select(t => new LocationInfo { Title = t.folder.Title, Type = t.folder.FolderType, TagType = x.t.Type })
                 .FirstOrDefault()
         });
         
@@ -2661,6 +2661,7 @@ public class LocationInfo
 {
     public string Title { get; set; }
     public FolderType Type { get; set; }
+    public TagType TagType { get; set; }
 }
 
 public class FileByTagQuery : IQueryResult<DbFile>

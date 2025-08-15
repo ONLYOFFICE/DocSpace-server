@@ -452,17 +452,8 @@ public class FileDtoHelper(
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
             result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
             result.ThumbnailStatus = file.ThumbnailStatus;
-            if (!string.IsNullOrEmpty(file.Location?.Title))
-            {
-                if (file.Location.Type == FolderType.USER)
-                {
-                    result.Location = FilesUCResource.MyFiles;
-                }else if (DocSpaceHelper.IsRoom(file.Location.Type))
-                {
-                    result.Location = file.Location.Title;
-                }
-            }
-
+            result.Location = file.Location;
+            
             var cacheKey = Math.Abs(result.Updated.GetHashCode());
 
             if (file.ThumbnailStatus == Thumbnail.Created)
