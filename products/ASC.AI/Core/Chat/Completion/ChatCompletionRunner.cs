@@ -33,7 +33,7 @@ public class ChatCompletionRunner(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     TenantManager tenantManager,
-    McpService mcpService,
+    ChatTools chatTools,
     ChatClientFactory chatClientFactory,
     ILogger<ChatCompletionGenerator> logger,
     AiProviderService providerService,
@@ -48,7 +48,7 @@ public class ChatCompletionRunner(
         var config = await GetRungConfigAsync(roomId);
         
         var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
-        var toolTask = mcpService.GetToolsAsync(roomId);
+        var toolTask = chatTools.GetAsync(roomId);
         
         var attachments = await attachmentsTask;
         var userMessage = FormatUserMessage(message, attachments);
@@ -97,7 +97,7 @@ public class ChatCompletionRunner(
         var config = await GetRungConfigAsync(chat.RoomId);
         
         var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
-        var toolsTask = mcpService.GetToolsAsync(chat.RoomId);
+        var toolsTask = chatTools.GetAsync(chat.RoomId);
 
         var historyAdapter = HistoryHelper.GetAdapter(config.ProviderType);
         var history = await chatHistory.GetMessagesAsync(chatId, historyAdapter).ToListAsync();

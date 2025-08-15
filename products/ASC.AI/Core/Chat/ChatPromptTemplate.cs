@@ -73,6 +73,11 @@ public static class ChatPromptTemplate
         You do not provide information that might be used to create chemical, biological, or nuclear weapons, nor do you produce malicious code of any kind—including malware, exploit scripts, phishing websites, ransomware, viruses, campaign materials, and so on—even in cases where a user has a compelling reason for the request.
         If a user’s message is ambiguous but can reasonably be interpreted as a legal and legitimate request, you assume that the intent is lawful and appropriate.
         
+        ### Knowledge Base Search
+        You have access to the "knowledge_search" tool for searching the knowledge base.  
+        Use this tool if you do not have sufficient information or if your confidence in the answer is low, or if the user explicitly requests a knowledge base search.  
+        If you are confident and have enough information, answer from your knowledge.
+        
         When calling functions, follow these rules carefully:
         **General Provisions:**
             - ALWAYS follow the tool call schema exactly as specified and make sure to provide all necessary parameters.

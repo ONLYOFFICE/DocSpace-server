@@ -29,12 +29,15 @@ global using ASC.AI.Core.Database.Models;
 global using ASC.AI.Core.Chat.Data;
 global using ASC.AI.Core.Chat.Extensions;
 global using ASC.AI.Core.Chat.History;
+global using ASC.AI.Core.Knowledge;
 global using ASC.AI.Core.MCP;
 global using ASC.AI.Core.MCP.Data;
 global using ASC.AI.Core.Provider;
 global using ASC.AI.Core.Provider.Data;
 global using ASC.AI.Core.Provider.Model;
 global using ASC.AI.Core.Settings;
+global using ASC.AI.Core.Tool;
+
 global using ASC.Common;
 global using ASC.Common.Log;
 global using ASC.Common.Mapping;
@@ -55,6 +58,8 @@ global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Text;
+global using ASC.Files.Core.Vectorization.Data;
+global using ASC.Files.Core.Vectorization.Embedding;
 
 global using ASC.Security.Cryptography;
 
@@ -74,14 +79,14 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.AI;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
-global using Microsoft.SemanticKernel.Text;
 
 global using OpenAI;
 
-global using OpenSearch.Client;
+global using ASC.ElasticSearch.VectorData;
 
 global using System.ClientModel;
 global using System.ClientModel.Primitives;
+global using System.ComponentModel;
 global using System.Collections.Frozen;
 global using System.ComponentModel.DataAnnotations;
 global using System.Net.Http.Headers;

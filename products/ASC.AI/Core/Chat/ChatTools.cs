@@ -24,37 +24,31 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Knowledge;
+namespace ASC.AI.Core.Chat;
 
 [Scope]
-public class KnowledgeSearchEngine(
-    TenantManager tenantManager,
-    VectorStore vectorStore,
-    EmbeddingGeneratorFactory embeddingGeneratorFactory)
+public class ChatTools(
+    McpService mcpService,
+    KnowledgeSearchEngine searchEngine)
 {
-    public async Task<IEnumerable<Knowledge>> SearchAsync(int roomId, string query)
+    public async Task<ToolHolder> GetAsync(int roomId)
     {
-        var tenantId = tenantManager.GetCurrentTenantId();
+        var holder = await mcpService.GetToolsAsync(roomId);
         
-        var generator = embeddingGeneratorFactory.Create();
-        var embedding = await generator.GenerateAsync(query);
+        var searchTool = MakeSearchTool(roomId);
+        holder.AddTool(searchTool);
         
-        var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName, null);
-        var searchOptions = new VectorSearchOptions<Chunk>
-        {
-            Filter = x => x.TenantId == tenantId && x.RoomId == roomId
-        };
-        
-        var chunks = await collection.SearchAsync(
-            x => x.Embedding,
-            embedding.Vector.ToArray(),
-            5,
-            searchOptions).ToListAsync();
+        return holder;
+    }
 
-        return chunks.Select(x => new Knowledge
-        {
-            FileId = x.FileId,
-            Text = x.TextEmbedding
-        });
+    private AIFunction MakeSearchTool(int roomId)
+    {
+        return AIFunctionFactory.Create(
+            ([Description("Query to search")]string query) => searchEngine.SearchAsync(roomId, query), 
+            new AIFunctionFactoryOptions
+            {
+                Name = "knowledge_search",
+                Description = "Search in knowledge base"
+            });
     }
 }

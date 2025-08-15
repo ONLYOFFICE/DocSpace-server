@@ -24,15 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.MCP;
+namespace ASC.AI.Core.Tool;
 
-public class ToolHolder(IEnumerable<IMcpClient> clients, List<AITool>? tools) : IAsyncDisposable
+public class ToolHolder : IAsyncDisposable
 {
-    public List<AITool> Tools => tools ?? [];
+    public readonly List<AITool> Tools = [];
+    
+    private readonly List<IMcpClient> _clients = [];
+
+    public void AddTool(AITool tool)
+    {
+        Tools.Add(tool);
+    }
+
+    public void AddMcpTool(IMcpClient client, IEnumerable<AITool> tools)
+    {
+        _clients.Add(client);
+        Tools.AddRange(tools);
+    }
     
     public async ValueTask DisposeAsync()
     {
-        foreach (var client in clients)
+        foreach (var client in _clients)
         {
             await client.DisposeAsync();
         }

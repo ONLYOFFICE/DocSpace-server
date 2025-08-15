@@ -306,8 +306,7 @@ public class McpService(
         var tasks = servers.Select(data => 
             ConnectAsync(data, settingsMap.GetValueOrDefault(data.Id), httpClient));
 
-        var clients = new List<IMcpClient>();
-        var tools = new List<AITool>();
+        var holder = new ToolHolder();
         
         var result = await Task.WhenAll(tasks);
         foreach (var item in result)
@@ -317,11 +316,10 @@ public class McpService(
                 continue;
             }
 
-            clients.Add(item.Client);
-            tools.AddRange(item.Tools);
+            holder.AddMcpTool(item.Client, item.Tools);
         }
         
-        return new ToolHolder(clients, tools);
+        return holder;
     }
     
     private async Task<McpServerOptions> GetServerAsync(int roomId, Guid serverId)
