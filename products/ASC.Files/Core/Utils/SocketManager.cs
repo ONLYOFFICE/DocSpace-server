@@ -147,7 +147,17 @@ public class SocketManager(
     {
         await MakeRequest("end-restore", new { tenantId, dump, result });
     }
-
+    
+    public async Task AddFileToRecentAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    {
+        await MakeRequest("add-recent-file", file, true, users);
+    }
+    
+    public async Task RemoveFileFromRecentAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    {
+        await MakeRequest("delete-recent-file", file, true, users);
+    }
+    
     private async Task<IEnumerable<Guid>> GetRecipientListForForm<T>(File<T> form)
     {
         List<Guid> users = null;
@@ -188,6 +198,19 @@ public class SocketManager(
             await action();
         }
 
+        var parentId = entry.ParentId;
+        switch (method)
+        {
+            case "add-recent-file":
+                method = "create-file";
+                entry.ParentId = entry.FolderIdDisplay;
+                break;
+            case "delete-recent-file":
+                method = "delete-file";
+                entry.ParentId = entry.FolderIdDisplay;
+                break;
+        }
+
         var data = "";
 
         if (withData)
@@ -205,6 +228,8 @@ public class SocketManager(
                 userIds
             });
         }
+        
+        entry.ParentId = parentId;
     }
 
     private string FileRoom<T>(T fileId)

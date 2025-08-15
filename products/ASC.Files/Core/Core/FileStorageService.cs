@@ -3567,7 +3567,7 @@ public class FileStorageService //: IFileStorageService
             switch (e)
             {
                 case File<T> file:
-                    tasks.Add(socketManager.DeleteFileAsync(file, users: users));
+                    tasks.Add(socketManager.RemoveFileFromRecentAsync(file, users));
                     break;
                 case Folder<T> folder:
                     tasks.Add(socketManager.DeleteFolder(folder, users: users));

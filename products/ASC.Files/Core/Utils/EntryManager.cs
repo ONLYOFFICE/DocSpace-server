@@ -1944,7 +1944,7 @@ public class EntryManager(IDaoFactory daoFactory,
         await tagDao.SaveTagsAsync(tag);
 
         file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
-        await socketManager.CreateFileAsync(file, [authContext.CurrentAccount.ID]);
+        await socketManager.AddFileToRecentAsync(file, [authContext.CurrentAccount.ID]);
     }
 
     private async Task InitFormFillingFolders<T>(File<T> file, Folder<T> folder, EntryProperties<T> properties, IFolderDao<T> folderDao, IFileDao<T> fileDao, Guid createBy) {
