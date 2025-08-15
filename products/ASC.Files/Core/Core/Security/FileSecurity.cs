@@ -2879,7 +2879,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             return null;
         }
         
-        return shares.ToDictionary(r => r.ToStringFast(), r=> true);
+        return shares.ToDictionary(r => r.ToStringFast(), r => r != FileShare.FillForms);
     }
     
     public async Task<int> GetLinksSettings<T>(FileEntry<T> fileEntry, SubjectType subjectType)
