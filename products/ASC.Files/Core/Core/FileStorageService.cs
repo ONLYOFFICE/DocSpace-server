@@ -102,6 +102,54 @@ public class FileStorageService //: IFileStorageService
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
+    private static readonly FrozenDictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> _roomMessageActions =
+        new Dictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> 
+        {
+            {
+                SubjectType.InvitationLink, new Dictionary<EventType, MessageAction> 
+                {
+                    { EventType.Create, MessageAction.RoomInvitationLinkCreated }, 
+                    { EventType.Update, MessageAction.RoomInvitationLinkUpdated }, 
+                    { EventType.Remove, MessageAction.RoomInvitationLinkDeleted } 
+                }.ToFrozenDictionary()
+            },
+            {
+                SubjectType.ExternalLink, new Dictionary<EventType, MessageAction>
+                {
+                    { EventType.Create, MessageAction.RoomExternalLinkCreated }, 
+                    { EventType.Update, MessageAction.RoomExternalLinkUpdated }, 
+                    { EventType.Remove, MessageAction.RoomExternalLinkDeleted }
+                }.ToFrozenDictionary()
+            } 
+        }.ToFrozenDictionary();
+
+    private static readonly FrozenDictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> _fileMessageActions =
+        new Dictionary<SubjectType, FrozenDictionary<EventType, MessageAction>>
+        {
+            { 
+                SubjectType.ExternalLink, new Dictionary<EventType, MessageAction>
+                {
+                    { EventType.Create, MessageAction.FileExternalLinkCreated }, 
+                    { EventType.Update, MessageAction.FileExternalLinkUpdated },
+                    { EventType.Remove, MessageAction.FileExternalLinkDeleted }
+                }.ToFrozenDictionary() 
+            }
+        }.ToFrozenDictionary();
+
+    private static readonly FrozenDictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> _folderMessageActions =
+        new Dictionary<SubjectType, FrozenDictionary<EventType, MessageAction>>
+        {
+            { 
+                SubjectType.ExternalLink, new Dictionary<EventType, MessageAction>
+                {
+                    { EventType.Create, MessageAction.FolderExternalLinkCreated }, 
+                    { EventType.Update, MessageAction.FolderExternalLinkUpdated },
+                    { EventType.Remove, MessageAction.FolderExternalLinkDeleted }
+                }.ToFrozenDictionary() 
+            }
+        }.ToFrozenDictionary();
+
+    
     public async Task<Folder<T>> GetFolderAsync<T>(T folderId)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -4985,10 +5033,13 @@ public class FileStorageService //: IFileStorageService
         {
             options.Password = password;
         }
-//TODO: folders
-        var actions = entry.FileEntryType == FileEntryType.File
-            ? _fileMessageActions
-            : _roomMessageActions;
+
+        var actions = entry.FileEntryType switch
+        {
+            FileEntryType.File => _fileMessageActions,
+            FileEntryType.Folder => _folderMessageActions,
+            _ => _roomMessageActions
+        };
 
         var result = await SetAceLinkAsync(entry, primary ? SubjectType.PrimaryExternalLink : SubjectType.ExternalLink, linkId, share, options);
         if (result == null)
@@ -5137,12 +5188,6 @@ public class FileStorageService //: IFileStorageService
 
         await SetAceObjectAsync(aceCollection, false);
     }
-
-    private static readonly FrozenDictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> _roomMessageActions =
-        new Dictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> { { SubjectType.InvitationLink, new Dictionary<EventType, MessageAction> { { EventType.Create, MessageAction.RoomInvitationLinkCreated }, { EventType.Update, MessageAction.RoomInvitationLinkUpdated }, { EventType.Remove, MessageAction.RoomInvitationLinkDeleted } }.ToFrozenDictionary() }, { SubjectType.ExternalLink, new Dictionary<EventType, MessageAction> { { EventType.Create, MessageAction.RoomExternalLinkCreated }, { EventType.Update, MessageAction.RoomExternalLinkUpdated }, { EventType.Remove, MessageAction.RoomExternalLinkDeleted } }.ToFrozenDictionary() } }.ToFrozenDictionary();
-
-    private static readonly FrozenDictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> _fileMessageActions =
-        new Dictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> { { SubjectType.ExternalLink, new Dictionary<EventType, MessageAction> { { EventType.Create, MessageAction.FileExternalLinkCreated }, { EventType.Update, MessageAction.FileExternalLinkUpdated }, { EventType.Remove, MessageAction.FileExternalLinkDeleted } }.ToFrozenDictionary() } }.ToFrozenDictionary();
     
     private async Task DetermineParentRoomType<T>(FileEntry<T> entry)
     {
