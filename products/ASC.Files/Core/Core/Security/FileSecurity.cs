@@ -923,6 +923,14 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
         }
 
+        if (file != null && room is { FolderType: FolderType.AiRoom } && parentFolders.Any(x => x.FolderType == FolderType.Knowledge))
+        {
+            if (action is not (FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Delete))
+            {
+                return false;
+            }
+        }
+
         if (action == FilesSecurityActions.IndexExport && (!isRoom || !folder.SettingsIndexing))
         {
             return false;
