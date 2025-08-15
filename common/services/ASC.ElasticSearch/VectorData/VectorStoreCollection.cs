@@ -106,7 +106,7 @@ public class VectorStoreCollection<TRecord>(
             name,
             "semantic_search",
             async () => await openSearchClient.SearchAsync<TRecord>(
-                new SearchRequest(name) { Query = query }, 
+                new SearchRequest(name) { Query = query, Size = top }, 
                 cancellationToken));
 
         foreach (var hit in response.Hits)
