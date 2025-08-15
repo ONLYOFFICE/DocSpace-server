@@ -204,7 +204,7 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// Location
     /// </summary>
-    public LocationInfo Location { get; set; }
+    public string Location { get; set; }
     
     /// <summary>
     /// The file entry type.
@@ -454,11 +454,13 @@ public class FileDtoHelper(
             result.ThumbnailStatus = file.ThumbnailStatus;
             if (!string.IsNullOrEmpty(file.Location?.Title))
             {
-                result.Location = new LocationInfo
-                { 
-                    Title = file.Location.Type == FolderType.USER ? FilesUCResource.MyFiles : file.Location.Title, 
-                    Type = file.Location.Type
-                };
+                if (file.Location.Type == FolderType.USER)
+                {
+                    result.Location = FilesUCResource.MyFiles;
+                }else if (DocSpaceHelper.IsRoom(file.Location.Type))
+                {
+                    result.Location = file.Location.Title;
+                }
             }
 
             var cacheKey = Math.Abs(result.Updated.GetHashCode());
