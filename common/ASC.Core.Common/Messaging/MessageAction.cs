@@ -822,6 +822,9 @@ public enum MessageAction
     [SwaggerEnum("Promotional banners visibility settings changed")]
     BannerSettingsChanged = 6066,
 
+    [SwaggerEnum("Customer wallet services settings updated")]
+    CustomerWalletServicesSettingsUpdated = 6067,
+
     #endregion
 
     #region others

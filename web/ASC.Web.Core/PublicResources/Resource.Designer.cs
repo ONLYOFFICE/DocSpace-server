@@ -2977,11 +2977,47 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI tools.
+        /// </summary>
+        public static string TariffsFeature_aitools_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aitools_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add funds to your wallet to unlock AI features..
+        /// </summary>
+        public static string TariffsFeature_aitools_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aitools_wallet_price_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tracking user logins &amp; action.
         /// </summary>
         public static string TariffsFeature_audit {
             get {
                 return ResourceManager.GetString("TariffsFeature_audit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Backup.
+        /// </summary>
+        public static string TariffsFeature_backup_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_backup_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable backups for your DocSpace. Costs will be billed automatically..
+        /// </summary>
+        public static string TariffsFeature_backup_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_backup_wallet_price_count", resourceCulture);
             }
         }
         
@@ -3009,6 +3045,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_file_size_exception {
             get {
                 return ResourceManager.GetString("TariffsFeature_file_size_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of free backups should not exceed {0} within a month.
+        /// </summary>
+        public static string TariffsFeature_freebackup_exception {
+            get {
+                return ResourceManager.GetString("TariffsFeature_freebackup_exception", resourceCulture);
             }
         }
         

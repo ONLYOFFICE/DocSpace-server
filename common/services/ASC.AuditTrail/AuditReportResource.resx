@@ -1002,4 +1002,7 @@
   <data name="BannerSettingsChanged" xml:space="preserve">
     <value>Promotional banners visibility settings changed</value>
   </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Customer wallet enabled services settings updated</value>
+  </data>
 </root>

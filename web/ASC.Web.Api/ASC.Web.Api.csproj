@@ -41,6 +41,8 @@
       <EmbeddedResource Include="img\room.svg" />
       <EmbeddedResource Include="img\sso.svg" />
       <EmbeddedResource Include="img\thirdparty.svg" />
+      <EmbeddedResource Include="img\backup_wallet.svg" />
+      <EmbeddedResource Include="img\aitools_wallet.svg" />
       <EmbeddedResource Include="img\total_size_wallet.svg" />
       <EmbeddedResource Include="img\total_size.svg" />
       <EmbeddedResource Include="img\users.svg" />

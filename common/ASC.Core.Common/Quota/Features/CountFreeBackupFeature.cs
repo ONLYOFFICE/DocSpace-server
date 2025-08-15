@@ -24,32 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Common;
+namespace ASC.Core.Common.Quota.Features;
 
-public static class LockKeyHelper
+public class CountFreeBackupFeature(TenantQuota tenantQuota) : TenantQuotaFeatureCount(tenantQuota)
 {
-    public static string GetUsersCountCheckKey(int tenantId)
-    {
-        return $"users_count_check_{tenantId}";
-    }
+    public override int Default => default;
+    public override string Name { get => "free_backup"; }
 
-    public static string GetPaidUsersCountCheckKey(int tenantId)
+    protected internal override void Multiply(int quantity)
     {
-        return $"paid_users_count_check_{tenantId}";
-    }
-
-    public static string GetRoomsCountCheckKey(int tenantId)
-    {
-        return $"rooms_count_check_{tenantId}";
-    }
-
-    public static string GetUsersInRoomCountCheckKey(int tenantId)
-    {
-        return $"users_in_room_count_check_{tenantId}";
-    }
-
-    public static string GetFreeBackupsCountCheckKey(int tenantId)
-    {
-        return $"free_backups_count_check_{tenantId}";
     }
 }

@@ -26,7 +26,12 @@
 
 using System.Text.Json;
 
+using ASC.Common.Threading.DistributedLock.Abstractions;
+using ASC.Core.Common;
+using ASC.Core.Common.Settings;
 using ASC.Core.Configuration;
+using ASC.Core.Tenants;
+using ASC.Data.Backup.Core.Quota;
 using ASC.Web.Core.PublicResources;
 
 namespace ASC.Data.Backup.Services;
@@ -54,6 +59,9 @@ public sealed class BackupSchedulerService(
         var backupService = serviceScope.ServiceProvider.GetRequiredService<BackupService>();
         var backupSchedule = serviceScope.ServiceProvider.GetRequiredService<Schedule>();
         var tenantManager = serviceScope.ServiceProvider.GetRequiredService<TenantManager>();
+        var settingsManager = serviceScope.ServiceProvider.GetRequiredService<SettingsManager>();
+        var distributedLockProvider = serviceScope.ServiceProvider.GetRequiredService<IDistributedLockProvider>();
+        var freeBackupsChecker = serviceScope.ServiceProvider.GetRequiredService<CountFreeBackupChecker>();
 
         logger.DebugStartedToSchedule();
 
@@ -64,6 +72,8 @@ public sealed class BackupSchedulerService(
 
         logger.DebugBackupsSchedule(backupsToSchedule.Count);
 
+        IDistributedLockHandle lockHandle = null;
+
         foreach (var schedule in backupsToSchedule)
         {
             if (stoppingToken.IsCancellationRequested)
@@ -73,7 +83,7 @@ public sealed class BackupSchedulerService(
 
             try
             {
-                tenantManager.SetCurrentTenant(new ASC.Core.Tenants.Tenant(schedule.TenantId, String.Empty));
+                tenantManager.SetCurrentTenant(new Tenant(schedule.TenantId, String.Empty));
 
                 if (coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(schedule.TenantId)).AutoBackupRestore)
                 {
@@ -81,13 +91,22 @@ public sealed class BackupSchedulerService(
 
                     if (tariff.State < TariffState.Delay)
                     {
-
-                        var canCreate = await backupService.CheckBackupQuotaAsync(schedule.TenantId);
+                        lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetFreeBackupsCountCheckKey(schedule.TenantId), cancellationToken: stoppingToken);
 
                         Session billingSession = null;
 
-                        if (!canCreate)
+                        try
                         {
+                            await freeBackupsChecker.CheckAppend();
+                        }
+                        catch (TenantQuotaException)
+                        {
+                            var settings = await settingsManager.LoadAsync<TenantWalletServicesSettings>();
+                            if (!settings.EnabledServices.Contains(BackupService.BackupQuotaName))
+                            {
+                                throw;
+                            }
+
                             billingSession = await backupService.OpenCustomerSessionForBackupAsync(schedule.TenantId, false);
                             if (billingSession == null)
                             {
@@ -127,6 +146,13 @@ public sealed class BackupSchedulerService(
             catch (Exception error)
             {
                 logger.ErrorBackups(error);
+            }
+            finally
+            {
+                if (lockHandle != null)
+                {
+                    await lockHandle.ReleaseAsync();
+                }
             }
         }
     }

@@ -596,7 +596,31 @@ public class TariffService(
                 var result = cache.Get<IDictionary<string, Dictionary<string, decimal>>>(key);
                 if (result == null)
                 {
-                    result = await billingClient.GetProductPriceInfoAsync(partnerId, wallet, productIds);
+                    if (wallet)
+                    {
+                        var serviceAccounts = productIds.Where(x => int.TryParse(x, out var id) && id > 10000).ToArray();
+                        productIds = productIds.Where(x => !serviceAccounts.Contains(x)).ToArray();
+
+                        var accountingPrices = serviceAccounts.Length > 0
+                            ? await accountingClient.GetProductPriceInfoAsync(partnerId, serviceAccounts)
+                            : new Dictionary<string, Dictionary<string, decimal>>();
+
+                        var billingPrices = productIds.Length > 0
+                            ? await billingClient.GetProductPriceInfoAsync(partnerId, wallet, productIds)
+                            : new Dictionary<string, Dictionary<string, decimal>>();
+
+                        foreach (var billingPrice in billingPrices)
+                        {
+                            accountingPrices.Add(billingPrice.Key, billingPrice.Value);
+                        }
+
+                        result = accountingPrices;
+                    }
+                    else
+                    {
+                        result = await billingClient.GetProductPriceInfoAsync(partnerId, wallet, productIds);
+                    }
+
                     cache.Insert(key, result, DateTime.Now.AddHours(1));
                 }
 
@@ -1232,11 +1256,6 @@ public class TariffService(
     public List<string> GetSupportedAccountingCurrencies()
     {
         return accountingClient.GetSupportedCurrencies();
-    }
-
-    public async Task<ServiceInfo> GetServiceInfoAsync(int serviceAccount)
-    {
-        return await accountingClient.GetServiceInfoAsync(serviceAccount);
     }
 
     #endregion

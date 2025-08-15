@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,32 +24,39 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Common;
+namespace ASC.Core.Tenants;
 
-public static class LockKeyHelper
+/// <summary>
+/// Tenant wallet services settings
+/// </summary>
+public class TenantWalletServicesSettingsWrapper
 {
-    public static string GetUsersCountCheckKey(int tenantId)
+    /// <summary>
+    /// Tenant wallet services settings
+    /// </summary>
+    public TenantWalletServicesSettings Settings { get; set; }
+}
+
+
+[Scope]
+[Serializable]
+public class TenantWalletServicesSettings : ISettings<TenantWalletServicesSettings>
+{
+    /// <summary>
+    /// Enabled services
+    /// </summary>
+    public string[] EnabledServices { get; set; }
+
+    [JsonIgnore]
+    public Guid ID
     {
-        return $"users_count_check_{tenantId}";
+        get { return new Guid("{1285F7B0-9927-4911-9DA1-4F5D1F90FE73}"); }
     }
 
-    public static string GetPaidUsersCountCheckKey(int tenantId)
+    public TenantWalletServicesSettings GetDefault()
     {
-        return $"paid_users_count_check_{tenantId}";
+        return new TenantWalletServicesSettings();
     }
 
-    public static string GetRoomsCountCheckKey(int tenantId)
-    {
-        return $"rooms_count_check_{tenantId}";
-    }
-
-    public static string GetUsersInRoomCountCheckKey(int tenantId)
-    {
-        return $"users_in_room_count_check_{tenantId}";
-    }
-
-    public static string GetFreeBackupsCountCheckKey(int tenantId)
-    {
-        return $"free_backups_count_check_{tenantId}";
-    }
+    public DateTime LastModified { get; set; }
 }

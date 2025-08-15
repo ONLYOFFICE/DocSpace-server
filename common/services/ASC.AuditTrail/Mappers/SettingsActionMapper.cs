@@ -95,7 +95,7 @@ internal class ProductsActionMapper : IModuleActionMapper
                     MessageAction.WebhookUpdated,
                     MessageAction.ApiKeyUpdated,
                     MessageAction.CustomerWalletToppedUp, MessageAction.CustomerWalletTopUpSettingsUpdated, MessageAction.CustomerSubscriptionUpdated,
-                    MessageAction.BannerSettingsChanged
+                    MessageAction.BannerSettingsChanged, MessageAction.CustomerWalletServicesSettingsUpdated
                 ]
             },
             {

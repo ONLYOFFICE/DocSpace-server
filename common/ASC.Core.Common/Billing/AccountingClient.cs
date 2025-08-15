@@ -34,6 +34,7 @@ public class AccountingClient
     public readonly bool Configured;
 
     private readonly AccountingConfiguration _configuration;
+    private readonly ICache _cache;
     private readonly IHttpClientFactory _httpClientFactory;
 
     internal const string HttpClientName = "accountingHttpClient";
@@ -51,9 +52,10 @@ public class AccountingClient
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    public AccountingClient(IConfiguration configuration, IHttpClientFactory httpClientFactory)
+    public AccountingClient(IConfiguration configuration, ICache cache, IHttpClientFactory httpClientFactory)
     {
         _configuration = configuration.GetSection("core:accounting").Get<AccountingConfiguration>() ?? new AccountingConfiguration();
+        _cache = cache;
         _httpClientFactory = httpClientFactory;
 
         _configuration.Url = (_configuration.Url ?? "").Trim().TrimEnd('/');
@@ -154,7 +156,14 @@ public class AccountingClient
 
     public async Task<List<Currency>> GetAllCurrenciesAsync()
     {
-        return await RequestAsync<List<Currency>>(HttpMethod.Get, "/currency/all", null);
+        var key = "accounting-currencies";
+        var result = _cache.Get<List<Currency>>(key);
+        if (result == null)
+        {
+            result = await RequestAsync<List<Currency>>(HttpMethod.Get, "/currency/all", null);
+            _cache.Insert(key, result, DateTime.Now.AddDays(1));
+        }
+        return result;
     }
 
     public List<string> GetSupportedCurrencies()
@@ -167,6 +176,45 @@ public class AccountingClient
         return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/account/{serviceAccount}");
     }
 
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, string[] serviceAccounts)
+    {
+        var key = $"accounting-prices-{partnerId}-{string.Join(",", serviceAccounts)}";
+        var result = _cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
+
+        if (result != null)
+        {
+            return result;
+        }
+
+        var currencies = await GetAllCurrenciesAsync();
+
+        result = [];
+        foreach (var serviceAccount in serviceAccounts)
+        {
+            if (!int.TryParse(serviceAccount, out var serviceAccountId))
+            {
+                continue;
+            }
+
+            var serviceInfo = await GetServiceInfoAsync(serviceAccountId);
+            if (serviceInfo == null)
+            {
+                continue;
+            }
+
+            var currency = currencies.FirstOrDefault(c => c.Id == serviceInfo.CurrencyId);
+            var currencyCode = currency?.Code ?? "USD";
+
+            result.Add(serviceAccount, new Dictionary<string, decimal>
+            {
+                { currencyCode, serviceInfo.PriceValue }
+            });
+        }
+
+        _cache.Insert(key, result, DateTime.Now.AddDays(1));
+
+        return result;
+    }
 
     private async Task<T> RequestAsync<T>(HttpMethod httpMethod, string path, NameValueCollection queryParams = null, object data = null, bool addPolicy = false)
     {

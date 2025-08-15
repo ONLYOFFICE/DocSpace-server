@@ -27,6 +27,7 @@
 using System.Security;
 using System.Text.Json;
 
+using ASC.Common.Web;
 using ASC.Files.Core.Security;
 
 namespace ASC.Data.Backup.Services;
@@ -34,7 +35,6 @@ namespace ASC.Data.Backup.Services;
 [Scope]
 public class BackupService(
         ILogger<BackupService> logger,
-        BackupConfigurationService backupConfigurationService,
         BackupStorageFactory backupStorageFactory,
         BackupWorker backupWorker,
         BackupRepository backupRepository,
@@ -53,6 +53,8 @@ public class BackupService(
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
     private const int BackupCustomerSessionDuration = 86400; // 60 * 60 * 24;
+
+    public const string BackupQuotaName = "backup";
 
     public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null, int billingSessionId = 0, DateTime billingSessionExpire = default)
     {
@@ -484,41 +486,6 @@ public class BackupService(
         return schedule;
     }
 
-
-    public async Task<bool> CheckBackupQuotaAsync(int tenantId)
-    {
-        await DemandPermissionsBackupAsync();
-
-        if (coreBaseSettings.Standalone)
-        {
-            return true;
-        }
-
-        var currentTariff = await tariffService.GetTariffAsync(tenantId);
-
-        if (currentTariff.State == TariffState.NotPaid)
-        {
-            return true;
-        }
-
-        var isFreeTariff = await tariffService.IsFreeTariffAsync(currentTariff);
-
-        var backupQuota = isFreeTariff
-            ? backupConfigurationService.Settings.Quota.Free
-            : backupConfigurationService.Settings.Quota.Paid;
-
-        if (backupQuota == 0)
-        {
-            return false;
-        }
-
-        var to = DateTime.UtcNow;
-        var from = to.AddMonths(-1);
-        var backupsCount = await backupRepository.GetBackupsCountAsync(tenantId, from, to);
-
-        return backupsCount < backupQuota;
-    }
-
     public async Task<Session> OpenCustomerSessionForBackupAsync(int tenantId, bool checkPayer = true)
     {
         if (!tariffService.IsConfigured())
@@ -541,7 +508,7 @@ public class BackupService(
             }
         }
 
-        var serviceAccount = backupConfigurationService.Settings.Quota.ServiceAccount;
+        var serviceAccount = await GetBackupServiceAccountId();
         var externalRef = Guid.NewGuid().ToString();
 
         var result = await tariffService.OpenCustomerSessionAsync(tenantId, serviceAccount, externalRef, 1, BackupCustomerSessionDuration);
@@ -598,7 +565,7 @@ public class BackupService(
             return false;
         }
 
-        var serviceAccount = backupConfigurationService.Settings.Quota.ServiceAccount;
+        var serviceAccount = await GetBackupServiceAccountId();
 
         var result = await tariffService.CompleteCustomerSessionAsync(tenantId, serviceAccount, sessionId, 1, customerParticipantName);
 
@@ -606,22 +573,6 @@ public class BackupService(
         {
             messageService.Send(MessageAction.CustomerOperationPerformed);
         }
-
-        return result;
-    }
-
-    public async Task<ServiceInfo> GetBackupServiceInfoAsync()
-    {
-        await DemandPermissionsBackupAsync();
-
-        if (!tariffService.IsConfigured())
-        {
-            return null;
-        }
-
-        var serviceAccount = backupConfigurationService.Settings.Quota.ServiceAccount;
-
-        var result = await tariffService.GetServiceInfoAsync(serviceAccount);
 
         return result;
     }
@@ -687,6 +638,15 @@ public class BackupService(
         {
             throw new BillingException(Resource.ErrorNotAllowedOption);
         }
+    }
+
+    private async Task<int> GetBackupServiceAccountId()
+    {
+        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
+
+        var backupQuota = quotaList.FirstOrDefault(x => x.Name == BackupQuotaName);
+
+        return backupQuota == null ? throw new ItemNotFoundException("Backup quota not found") : int.Parse(backupQuota.ProductId);
     }
 }
 

@@ -377,6 +377,39 @@ public class TenantQuota : IMapFrom<DbQuota>
         set => _yearFeature.Value = value;
     }
 
+    private readonly CountFreeBackupFeature _countFreeBackup;
+
+    /// <summary>
+    /// The number of free backups within a month.
+    /// </summary>
+    public int CountFreeBackup
+    {
+        get => _countFreeBackup.Value;
+        set => _countFreeBackup.Value = value;
+    }
+
+    private readonly WalletFeatureFlag _backup;
+
+    /// <summary>
+    /// Specifies if the backup anabled as a wallet service or not.
+    /// </summary>
+    public bool Backup
+    {
+        get => _backup.Value;
+        set => _backup.Value = value;
+    }
+
+    private readonly WalletFeatureFlag _aiTools;
+
+    /// <summary>
+    /// Specifies if the AI tools anabled as a wallet service or not.
+    /// </summary>
+    public bool AITools
+    {
+        get => _aiTools.Value;
+        set => _aiTools.Value = value;
+    }
+
     public TenantQuota()
     {
         _featuresList = [];
@@ -405,6 +438,9 @@ public class TenantQuota : IMapFrom<DbQuota>
         _thirdPartyFeature = new TenantQuotaFeatureFlag(this) { Name = "thirdparty", Order = 9, EmployeeType = EmployeeType.DocSpaceAdmin };
         _statisticFeature = new TenantQuotaFeatureFlag(this) { Name = "statistic", Order = 10 };
         _yearFeature = new TenantQuotaFeatureFlag(this) { Name = "year", Order = 11, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _countFreeBackup = new CountFreeBackupFeature(this) { Order = 13, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _backup = new WalletFeatureFlag(this) { Name = "backup", Order = 14, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiTools = new WalletFeatureFlag(this) { Name = "aitools", Order = 14, EmployeeType = EmployeeType.DocSpaceAdmin };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -431,7 +467,10 @@ public class TenantQuota : IMapFrom<DbQuota>
             _contentSearchFeature,
             _thirdPartyFeature,
             _statisticFeature,
-            _yearFeature
+            _yearFeature,
+            _countFreeBackup,
+            _backup,
+            _aiTools
         };
     }
 

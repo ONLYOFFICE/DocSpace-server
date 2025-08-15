@@ -1191,4 +1191,19 @@
   <data name="AutoRenewal" xml:space="preserve">
     <value>Automatic renewal</value>
   </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>AI tools</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Add funds to your wallet to unlock AI features.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Enable backups for your DocSpace. Costs will be billed automatically.</value>
+  </data>
+  <data name="TariffsFeature_freebackup_exception" xml:space="preserve">
+    <value>The number of free backups should not exceed {0} within a month</value>
+  </data>
 </root>
