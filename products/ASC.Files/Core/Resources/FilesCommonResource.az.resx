@@ -509,4 +509,10 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Doldurmağa başlayın</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Qonaq</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Otaq administratoru</value>
+  </data>
 </root>

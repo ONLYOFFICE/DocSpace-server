@@ -174,6 +174,24 @@ public class FilesLinkUtility
         }
     }
 
+    private const string PreloadUrlKey = "preload";
+    public string DocServicePreloadUrl
+    {
+        get
+        {
+            var url = GetUrlSetting(PreloadUrlKey);
+            if (string.IsNullOrEmpty(url))
+            {
+                url = GetDocServiceUrl();
+                if (!string.IsNullOrEmpty(url))
+                {
+                    url += "web-apps/apps/api/documents/preload.html";
+                }
+            }
+            return url;
+        }
+    }
+
     public string DocServiceConverterUrl
     {
         get

@@ -568,4 +568,10 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Iniciar o preenchimento</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Convidado</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Administrador da Sala</value>
+  </data>
 </root>

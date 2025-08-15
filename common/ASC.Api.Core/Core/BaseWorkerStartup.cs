@@ -104,6 +104,9 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
         services.AddTransient<DistributedTaskProgress>();
+
+        services.AddBillingHttpClient();
+        services.AddAccountingHttpClient();
     }
 
     protected IEnumerable<Assembly> GetAutoMapperProfileAssemblies()

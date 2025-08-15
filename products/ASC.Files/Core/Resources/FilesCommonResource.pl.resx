@@ -568,4 +568,10 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Rozpocznij wypełnianie</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Gość</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Administrator pokoju</value>
+  </data>
 </root>

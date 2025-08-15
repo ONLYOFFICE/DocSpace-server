@@ -50,6 +50,11 @@ public class GroupSummaryDto
     /// </summary>
     [SwaggerSchemaCustom(Example = "Jake.Zazhitski")]
     public string Manager { get; set; }
+
+    /// <summary>
+    /// Indicates whether the group is a system group.
+    /// </summary>
+    public bool? IsSystem { get; set; }
 }
 
 [Scope]
@@ -61,7 +66,8 @@ public class GroupSummaryDtoHelper(UserManager userManager)
         {
             Id = group.ID, 
             Name = group.Name, 
-            Manager = (await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID))).UserName
+            Manager = (await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID))).UserName,
+            IsSystem = await userManager.IsSystemGroup(group.ID) ? true : null
         };
     }
 }

@@ -92,18 +92,24 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
             return true;
         }
 
-        var policy = Policy.Handle<SocketException>()
-            .Or<BrokerUnreachableException>()
-            .WaitAndRetryAsync(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
-            {
-                _logger.WarningRabbitMQCouldNotConnect(time.TotalSeconds, ex);
-            }
-        );
+        var builder = new ResiliencePipelineBuilder();
 
-        await policy.ExecuteAsync(async () =>
+        var pipeline = builder.AddRetry(new RetryStrategyOptions
         {
-            _connection = await _connectionFactory
-                    .CreateConnectionAsync();
+            MaxRetryAttempts = retryCount,
+            Delay = TimeSpan.FromSeconds(1),
+            BackoffType = DelayBackoffType.Exponential,
+            ShouldHandle = new PredicateBuilder().Handle<BrokerUnreachableException>().Handle<SocketException>(),
+            OnRetry = args =>
+            {
+                _logger.WarningRabbitMQCouldNotConnect(args.Duration.TotalSeconds, args.Outcome.Exception);
+                return ValueTask.CompletedTask;
+            }
+        }).Build();
+
+        await pipeline.ExecuteAsync(async (_) =>
+        {
+            _connection = await _connectionFactory.CreateConnectionAsync();
         });
 
         if (IsConnected)

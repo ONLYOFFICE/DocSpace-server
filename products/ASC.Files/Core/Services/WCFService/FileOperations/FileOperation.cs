@@ -334,10 +334,10 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
 
             await DoJob(scope);
         }
-        catch (AuthorizingException authError)
+        catch (Exception e)  when (e is AuthorizingException or FileNotFoundException or DirectoryNotFoundException)
         {
             Err = FilesCommonResource.ErrorMessage_SecurityException;
-            Logger.ErrorWithException(new SecurityException(Err, authError));
+            Logger.ErrorWithException(new SecurityException(Err, e));
         }
         catch (AggregateException ae)
         {
