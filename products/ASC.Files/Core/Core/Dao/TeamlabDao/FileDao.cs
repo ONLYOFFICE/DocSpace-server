@@ -2232,7 +2232,8 @@ internal class FileDao(
                     ).FirstOrDefault(),
                 SharedRecord = r.Security,
                 LastOpened = r.LastOpened,
-                Location = r.Location
+                OriginRoom = r.OriginRoom,
+                Origin = r.Origin
             });
     }
     
@@ -2608,34 +2609,35 @@ internal class FileDao(
             Tag = x.t, 
             LastOpened = filesDbContext.AuditEvents.OrderByDescending(a => a.Date).Where(r => r.Target == x.f.Id.ToString() && r.UserId == currentUserId && r.Action == (int)MessageAction.FileOpenedForChange && r.TenantId == x.f.TenantId).Select(r => r.Date).FirstOrDefault(),
             Security = filesDbContext.Security.FirstOrDefault(s => s.TenantId == tenantId && s.EntryType == FileEntryType.File && s.EntryId == x.f.Id.ToString()  && s.Subject.ToString() == x.t.Name),
-            Location = filesDbContext.Folders
+            OriginRoom = x.t.Type != TagType.RecentByLink ? 
+                filesDbContext.Folders
                 .Where(f => f.TenantId == x.f.TenantId && f.FolderType != FolderType.VirtualRooms)
                 .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
                 .Where(t => t.tree.FolderId == x.f.ParentId)
                 .OrderByDescending(t => t.tree.Level)
-                .Select(t => new LocationInfo { Title = t.folder.Title, Type = t.folder.FolderType, TagType = x.t.Type })
-                .FirstOrDefault()
+                .Select(t => new DbFolder { Id = t.folder.Id, Title = t.folder.Title })
+                .FirstOrDefault() :
+                null,
+            Origin = x.t.Type != TagType.RecentByLink ? 
+                filesDbContext.Folders
+                    .Where(f => f.TenantId == x.f.TenantId && f.FolderType != FolderType.VirtualRooms)
+                    .Join(filesDbContext.Tree, f => f.Id, t => t.FolderId, (folder, tree) => new { folder, tree })
+                    .Where(t => t.tree.FolderId == x.f.ParentId)
+                    .OrderByDescending(t => t.tree.Level)
+                    .Select(t => new DbFolder { Id = t.folder.Id, Title = t.folder.Title })
+                    .FirstOrDefault() :
+                null,
         });
         
         if (tagType.Any(r => r is TagType.RecentByLink or TagType.Recent))
         {
-            switch (location)
+            query = location switch
             {
-                case Location.Documents:
-                    query = query.Where(x => x.Tag.Type == TagType.Recent && x.Location.Type == FolderType.USER);
-                    break;
-                case Location.Room:
-                    query = query.Where(x => x.Tag.Type == TagType.Recent && DocSpaceHelper.RoomTypes.Contains(x.Location.Type));
-                    break;
-                case Location.Link:
-                    query = query.Where(x => x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)));
-                    break;
-                default:
-                    query = query
-                        .Where(x => x.Tag.Type == TagType.Recent || 
-                                    x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)));
-                    break;
-            }
+                Location.Documents => query.Where(x => x.Tag.Type == TagType.Recent && x.OriginRoom.FolderType == FolderType.USER),
+                Location.Room => query.Where(x => x.Tag.Type == TagType.Recent && DocSpaceHelper.RoomTypes.Contains(x.OriginRoom.FolderType)),
+                Location.Link => query.Where(x => x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow))),
+                _ => query.Where(x => x.Tag.Type == TagType.Recent || x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)))
+            };
 
             query = query
                 .Where(x => x.Tag.Type == TagType.Recent || 
@@ -2652,16 +2654,11 @@ public class DbFileQuery
     public DbFolder Root { get; set; }
     public bool Shared { get; set; }
     public int Order { get; set; }
-    public LocationInfo Location { get; set; }
+    
+    public DbFolder Origin { get; set; }
+    public DbFolder OriginRoom { get; set; }
     public DbFilesSecurity SharedRecord { get; set; }
     public DateTime? LastOpened { get; set; }
-}
-
-public class LocationInfo
-{
-    public string Title { get; set; }
-    public FolderType Type { get; set; }
-    public TagType TagType { get; set; }
 }
 
 public class FileByTagQuery : IQueryResult<DbFile>
@@ -2669,7 +2666,8 @@ public class FileByTagQuery : IQueryResult<DbFile>
     public DbFile Entry { get; set; }
     public DbFilesTag Tag { get; set; }
     
-    public LocationInfo Location { get; set; }
+    public DbFolder Origin { get; set; }
+    public DbFolder OriginRoom { get; set; }
     public DateTime? LastOpened { get; set; }
     public DbFilesSecurity Security { get; set; }
 }

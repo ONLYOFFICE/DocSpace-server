@@ -264,7 +264,7 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             OriginId = entry.OriginId,
             OriginTitle = entry.OriginTitle,
             OriginRoomId = entry.OriginRoomId,
-            OriginRoomTitle = entry.OriginRoomTitle,
+            OriginRoomTitle = Equals(entry.OriginRoomId, await _globalFolderHelper.GetFolderMyAsync<TId>()) ? FilesUCResource.MyFiles : entry.OriginRoomTitle, 
             AutoDelete = permanentlyDeletedOn != default ? apiDateTimeHelper.Get(permanentlyDeletedOn) : null
         };
     }

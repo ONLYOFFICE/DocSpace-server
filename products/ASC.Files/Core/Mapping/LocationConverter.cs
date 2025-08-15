@@ -24,32 +24,34 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
+
 namespace ASC.Files.Core.Mapping;
 
-public class LocationConverter: IValueConverter<LocationInfo, string>
-{
-    public string Convert(LocationInfo sourceMember, ResolutionContext context)
-    {
-        if (sourceMember == null || sourceMember.TagType == TagType.RecentByLink)
-        {
-            return null;
-        }
-
-        if (string.IsNullOrEmpty(sourceMember.Title))
-        {
-            return null;
-        }
-
-        if (sourceMember.Type == FolderType.USER)
-        {
-            return FilesUCResource.MyFiles;
-        }
-        
-        if (DocSpaceHelper.IsRoom(sourceMember.Type))
-        {
-            return sourceMember.Title;
-        }
-
-        return null;
-    }
-}
+// public class LocationConverter: IValueConverter<DbFolder, string>
+// {
+//     public string Convert(DbFolder sourceMember, ResolutionContext context)
+//     {
+//         if (sourceMember == null || sourceMember.TagType == TagType.RecentByLink)
+//         {
+//             return null;
+//         }
+//
+//         if (string.IsNullOrEmpty(sourceMember.Title))
+//         {
+//             return null;
+//         }
+//
+//         if (sourceMember.Type == FolderType.USER)
+//         {
+//             return FilesUCResource.MyFiles;
+//         }
+//         
+//         if (DocSpaceHelper.IsRoom(sourceMember.Type))
+//         {
+//             return sourceMember.Title;
+//         }
+//
+//         return null;
+//     }
+// }
