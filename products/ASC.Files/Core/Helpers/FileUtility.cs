@@ -33,15 +33,15 @@ public class FileUtilityConfiguration
     public readonly List<string> ExtsIndexing;
     public readonly List<string> ExtsImagePreviewed;
     public readonly List<string> ExtsMediaPreviewed;
-    public readonly List<string> ExtsWebPreviewed;
-    public readonly List<string> ExtsWebEdited;
-    public readonly List<string> ExtsWebEncrypt;
-    public readonly List<string> ExtsWebReviewed;
-    public readonly List<string> ExtsWebCustomFilterEditing;
-    public readonly List<string> ExtsWebRestrictedEditing;
-    public readonly List<string> ExtsWebCommented;
+    public readonly List<string> ExtsWebPreviewed = [];
+    public readonly List<string> ExtsWebEdited = [];
+    public readonly List<string> ExtsWebEncrypt = [];
+    public readonly List<string> ExtsWebReviewed = [];
+    public readonly List<string> ExtsWebCustomFilterEditing = [];
+    public readonly List<string> ExtsWebRestrictedEditing = [];
+    public readonly List<string> ExtsWebCommented = [];
     public readonly List<string> ExtsWebTemplate;
-    public readonly List<string> ExtsMustConvert;
+    public readonly List<string> ExtsMustConvert = [];
     public readonly string MasterFormExtension;
     public readonly List<LogoColor> LogoColors;
     private readonly string _forceSave;
@@ -51,14 +51,7 @@ public class FileUtilityConfiguration
     public FileUtilityConfiguration(IConfiguration configuration)
     {
         Formats = configuration.GetSection("FileFormats").Get<List<FileFormatConfig>>() ?? [];
-        ExtsMustConvert = [];
-        ExtsWebEdited = [];
-        ExtsWebPreviewed = [];
-        ExtsWebCommented = [];
-        ExtsWebReviewed = [];
-        ExtsWebEncrypt = [];
-        ExtsWebCustomFilterEditing = [];
-        
+
         foreach (var format in Formats)
         {
             if(format.Actions.Contains("auto-convert"))
@@ -95,9 +88,13 @@ public class FileUtilityConfiguration
             {
                 ExtsWebCustomFilterEditing.Add(format.Name);
             }
+            
+            if(format.Actions.Contains("fill"))
+            {
+                ExtsWebRestrictedEditing.Add(format.Name);
+            }
         }
         
-        ExtsWebRestrictedEditing = configuration.GetSection("files:docservice:formfilling-docs").Get<List<string>>() ?? [];
         ExtsWebTemplate = configuration.GetSection("files:docservice:template-docs").Get<List<string>>() ?? [];
         MasterFormExtension = configuration["files:docservice:internal-form"] ?? ".docxf";
         
