@@ -227,10 +227,10 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}/path</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<FileEntryDto>))]
+    [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [HttpGet("folder/{folderId}/path")]
-    public async IAsyncEnumerable<FileEntryDto> GetFolderPath(FolderIdRequestDto<T> inDto)
+    public async IAsyncEnumerable<FileEntryBaseDto> GetFolderPath(FolderIdRequestDto<T> inDto)
     {
         var breadCrumbs = await breadCrumbsManager.GetBreadCrumbsAsync(inDto.FolderId);
 
@@ -247,10 +247,10 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/{folderId}/subfolders</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<FileEntryDto>))]
+    [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [HttpGet("{folderId}/subfolders")]
-    public async IAsyncEnumerable<FileEntryDto> GetFolders(FolderIdRequestDto<T> inDto)
+    public async IAsyncEnumerable<FileEntryBaseDto> GetFolders(FolderIdRequestDto<T> inDto)
     {
         var folders = await fileStorageService.GetFoldersAsync(inDto.FolderId);
         foreach (var folder in folders)
@@ -266,10 +266,10 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/{folderId}/news</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<FileEntryDto>))]
+    [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [HttpGet("{folderId}/news")]
-    public async IAsyncEnumerable<FileEntryDto> GetNewFolderItems(FolderIdRequestDto<T> inDto)
+    public async IAsyncEnumerable<FileEntryBaseDto> GetNewFolderItems(FolderIdRequestDto<T> inDto)
     {
         var newItems = await fileStorageService.GetNewItemsAsync(inDto.FolderId);
 

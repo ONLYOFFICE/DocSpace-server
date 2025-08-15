@@ -201,9 +201,9 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/owner</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
-    [SwaggerResponse(200, "File entry information", typeof(IAsyncEnumerable<FileEntryDto>))]
+    [SwaggerResponse(200, "File entry information", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
     [HttpPost("owner")]
-    public async IAsyncEnumerable<FileEntryDto> ChangeFileOwner(ChangeOwnerRequestDto inDto)
+    public async IAsyncEnumerable<FileEntryBaseDto> ChangeFileOwner(ChangeOwnerRequestDto inDto)
     {
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);

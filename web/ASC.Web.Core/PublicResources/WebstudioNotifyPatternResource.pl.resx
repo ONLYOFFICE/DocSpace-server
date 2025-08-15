@@ -1925,4 +1925,52 @@ $TrulyYours</value>
   <data name="subject_user_role_changed" xml:space="preserve">
     <value>Twoja rola w pokoju DocSpace uległa zmianie</value>
   </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Przejdź do usług</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Przejdź do ustawień portfela</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Informujemy, że automatyczne odnowienie zakupionego planu nie mogło zostać zrealizowane.
+
+Uprzejmie prosimy o ręczne odnowienie aktualnego planu (lub zakupienie nowego).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Informujemy, że płatność za subskrypcję zostanie automatycznie pobrana z Twojego konta za 3 dni.
+
+Aby transakcja przebiegła bezproblemowo, upewnij się, że masz na nim wystarczające środki.
+
+Jeśli masz pytania lub potrzebujesz pomocy, skontaktuj się z naszym "zespołem wsparcia":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Informujemy, że automatyczne doładowanie salda portfela DocSpace nie powiodło się.
+
+Uprzejmie prosimy o ręczne sprawdzenie i aktualizację salda portfela.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Wymagane działanie: Nie udało się automatycznie odnowić planu w ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Nadchodząca płatność za subskrypcję ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Wymagane działanie: Nie udało się automatycznie zasilić portfela w ${LetterLogoText} DocSpace</value>
+  </data>
 </root>

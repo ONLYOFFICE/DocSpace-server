@@ -24,14 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Billing;
-
-using Polly;
-
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
 public class DocumentServiceLicense(ICache cache,
+    ResiliencePipelineProvider<string> resiliencePipelineProvider,
     CoreBaseSettings coreBaseSettings,
     FilesLinkUtility filesLinkUtility,
     IHttpClientFactory clientFactory)
@@ -79,11 +76,9 @@ public class DocumentServiceLicense(ICache cache,
 
     public async Task<LicenseValidationResult> ValidateLicense(License license)
     {
-        var retryPolicy = Policy
-            .HandleResult<LicenseValidationResult>(result => result == null)
-            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+        var pipeline = resiliencePipelineProvider.GetPipeline<LicenseValidationResult>(LicenseResiliencePipelineName);
 
-        var response = await retryPolicy.ExecuteAsync(async () =>
+        var response = await pipeline.ExecuteAsync(async (_) =>
         {
             var commandResponse = await GetDocumentServiceLicenseAsync(false);
 

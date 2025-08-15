@@ -113,18 +113,24 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
     {
         _logger.InformationActiveMQTryingConnect();
 
-        var policy = Policy.Handle<SocketException>()
-            .WaitAndRetryAsync(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
-            {
-                _logger.WarningActiveMQCouldNotConnect(time.TotalSeconds, ex);
-            }
-        );
+        var builder = new ResiliencePipelineBuilder();
 
-        await policy.ExecuteAsync(async () =>
+        var pipeline = builder.AddRetry(new RetryStrategyOptions
         {
-            _connection = await _connectionFactory
-                    .CreateConnectionAsync();
+            MaxRetryAttempts = retryCount,
+            Delay = TimeSpan.FromSeconds(1),
+            BackoffType = DelayBackoffType.Exponential,
+            ShouldHandle = new PredicateBuilder().Handle<SocketException>(),
+            OnRetry = args =>
+            {
+                _logger.WarningActiveMQCouldNotConnect(args.Duration.TotalSeconds, args.Outcome.Exception);
+                return ValueTask.CompletedTask;
+            }
+        }).Build();
 
+        await pipeline.ExecuteAsync(async (_) =>
+        {
+            _connection = await _connectionFactory.CreateConnectionAsync();
             await _connection.StartAsync();
         });
 
