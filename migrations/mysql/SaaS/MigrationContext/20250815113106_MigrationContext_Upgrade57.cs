@@ -1,0 +1,109 @@
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
+namespace ASC.Migrations.MySql.SaaS.Migrations
+{
+    /// <inheritdoc />
+    public partial class MigrationContext_Upgrade57 : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -10,
+                column: "features",
+                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2");
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -9,
+                column: "features",
+                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2");
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -7,
+                column: "features",
+                value: "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic,free_backup:2");
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -6,
+                column: "features",
+                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2");
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -2,
+                column: "features",
+                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2");
+
+            migrationBuilder.InsertData(
+                table: "tenants_quota",
+                columns: new[] { "tenant", "description", "features", "name", "price", "product_id", "wallet" },
+                values: new object[,]
+                {
+                    { -13, null, "aitools", "aitools", 5m, "10009", true },
+                    { -12, null, "backup", "backup", 12m, "10006", true }
+                });
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DeleteData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -13);
+
+            migrationBuilder.DeleteData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -12);
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -10,
+                column: "features",
+                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year");
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -9,
+                column: "features",
+                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic");
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -7,
+                column: "features",
+                value: "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic");
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -6,
+                column: "features",
+                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic");
+
+            migrationBuilder.UpdateData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -2,
+                column: "features",
+                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic");
+        }
+    }
+}

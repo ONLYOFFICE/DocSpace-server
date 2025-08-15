@@ -76,7 +76,7 @@ public static class DbQuotaExtension
                     TenantId = -2,
                     Name = "admin",
                     Description = "until 01.04.2024",
-                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2",
                     Price = 15,
                     ProductId = "1002",
                     Visible = false
@@ -116,7 +116,7 @@ public static class DbQuotaExtension
                     TenantId = -6,
                     Name = "subscription",
                     Description = null,
-                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2",
                     Price = 0,
                     ProductId = "1001",
                     Visible = false
@@ -126,7 +126,7 @@ public static class DbQuotaExtension
                     TenantId = -7,
                     Name = "nonprofit",
                     Description = null,
-                    Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic",
+                    Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic,free_backup:2",
                     Price = 0,
                     ProductId = "1007",
                     Visible = false
@@ -146,7 +146,7 @@ public static class DbQuotaExtension
                     TenantId = -9,
                     Name = "admin",
                     Description = "since 01.04.2024",
-                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2",
                     Price = 20,
                     ProductId = "1006",
                     Visible = true
@@ -156,7 +156,7 @@ public static class DbQuotaExtension
                     TenantId = -10,
                     Name = "adminyear",
                     Description = "since 10.02.2025",
-                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2",
                     Price = 220,
                     ProductId = "1009",
                     Visible = true
@@ -170,6 +170,28 @@ public static class DbQuotaExtension
                     Price = 0.14m,
                     ProductId = "1011",
                     Visible = true,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -12,
+                    Name = "backup",
+                    Description = null,
+                    Features = "backup",
+                    Price = 12,
+                    ProductId = "10006",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -13,
+                    Name = "aitools",
+                    Description = null,
+                    Features = "aitools",
+                    Price = 5,
+                    ProductId = "10009",
+                    Visible = false,
                     Wallet = true
                 }
                 );
