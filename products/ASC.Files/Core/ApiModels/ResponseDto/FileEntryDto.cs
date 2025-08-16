@@ -262,7 +262,7 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             CanShare = await fileSharingHelper.CanSetAccessAsync(entry),
             Security = entry.Security,
             OriginId = entry.OriginId,
-            OriginTitle = entry.OriginTitle,
+            OriginTitle = Equals(entry.OriginId, await _globalFolderHelper.GetFolderMyAsync<TId>()) ? FilesUCResource.MyFiles : entry.OriginTitle,
             OriginRoomId = entry.OriginRoomId,
             OriginRoomTitle = Equals(entry.OriginRoomId, await _globalFolderHelper.GetFolderMyAsync<TId>()) ? FilesUCResource.MyFiles : entry.OriginRoomTitle, 
             AutoDelete = permanentlyDeletedOn != default ? apiDateTimeHelper.Get(permanentlyDeletedOn) : null

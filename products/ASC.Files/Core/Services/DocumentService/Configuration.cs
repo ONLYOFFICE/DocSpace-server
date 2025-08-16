@@ -302,7 +302,12 @@ public class EditorConfiguration<T>(
     }
 
     public async Task<string> GetCallbackUrl(File<T> file)
-    {
+    {        
+        if (!ModeWrite)
+        {
+            return null;
+        }
+        
         var callbackUrl = documentServiceTrackerHelper.GetCallbackUrl(file.Id.ToString());
 
         if (file.ShareRecord is not { IsLink: true } || string.IsNullOrEmpty(file.ShareRecord.Options?.Password))
