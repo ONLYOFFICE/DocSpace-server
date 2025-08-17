@@ -110,11 +110,11 @@ internal abstract class BaseTagDao<T>(
         }
     }
 
-    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, params IEnumerable<TagType> tagType)
+    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, T entryId, params IEnumerable<TagType> tagType)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var fromDb = await filesDbContext.TagsByOwnerAsync(tenantId, owner, tagType).ToListAsync();
+        var fromDb = await filesDbContext.TagsByOwnerAsync(tenantId, owner, entryId.ToString(), tagType).ToListAsync();
         
         foreach (var e in fromDb)
         {

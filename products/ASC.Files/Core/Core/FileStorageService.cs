@@ -1320,34 +1320,28 @@ public class FileStorageService //: IFileStorageService
         }
 
         await entryStatusManager.SetFileStatusAsync(file);
-
-        if (file.RootFolderType == FolderType.USER
-            && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
+        await entryManager.SetOriginsForRecentFileAsync(file);
+        
+        var parent = await daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId);
+        
+        if (file.RootFolderType == FolderType.USER && 
+            !Equals(file.RootCreateBy, authContext.CurrentAccount.ID) && 
+            !await fileSecurity.CanReadAsync(parent))
         {
-            var folderDao = daoFactory.GetFolderDao<T>();
-            if (!await fileSecurity.CanReadAsync(await folderDao.GetFolderAsync(file.ParentId)))
-            {
-                file.FolderIdDisplay = await globalFolderHelper.GetFolderShareAsync<T>();
-            }
+            file.FolderIdDisplay = await globalFolderHelper.GetFolderShareAsync<T>();
         }
 
         var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
-        if (fileType == FileType.Pdf)
+        if (fileType == FileType.Pdf && parent?.FolderType == FolderType.FillingFormsRoom)
         {
-            var folderDao = daoFactory.GetFolderDao<T>();
-            var parent = await folderDao.GetFolderAsync(file.ParentId);
-
-            if (parent?.FolderType == FolderType.FillingFormsRoom)
+            var ace = await fileSharing.GetPureSharesAsync(parent, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+            if (ace is { Access: FileShare.FillForms })
             {
-                var ace = await fileSharing.GetPureSharesAsync(parent, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
-                if (ace is { Access: FileShare.FillForms })
+                var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
+                if (properties == null || !properties.FormFilling.StartFilling)
                 {
-                    var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
-                    if (properties == null || !properties.FormFilling.StartFilling)
-                    {
-                        return null;
-                    }
+                    return null;
                 }
             }
         }
@@ -4178,7 +4172,7 @@ public class FileStorageService //: IFileStorageService
         {
             await using (await distributedLockProvider.TryAcquireFairLockAsync($"pin_{authContext.CurrentAccount.ID}"))
             {
-                var count = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.Pin).CountAsync();
+                var count = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, default, TagType.Pin).CountAsync();
                 if (count >= fileUtilityConfiguration.MaxPinnedRooms)
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorrMessage_PinRoom);

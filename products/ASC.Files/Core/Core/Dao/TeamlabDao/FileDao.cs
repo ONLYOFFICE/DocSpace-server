@@ -96,10 +96,11 @@ internal class FileDao(
     public async Task<File<int>> GetFileAsync(int fileId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-
+        var userId = _authContext.CurrentAccount.ID;
+        
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var dbFile = await filesDbContext.DbFileQueryAsync(tenantId, fileId);
+        var dbFile = await filesDbContext.DbFileQueryAsync(tenantId, userId, fileId);
 
         return mapper.Map<DbFileQuery, File<int>>(dbFile);
     }
@@ -107,10 +108,11 @@ internal class FileDao(
     public async Task<File<int>> GetFileAsync(int fileId, int fileVersion)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-
+        var userId = _authContext.CurrentAccount.ID;
+        
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var dbFile = await filesDbContext.DbFileQueryByFileVersionAsync(tenantId, fileId, fileVersion);
+        var dbFile = await filesDbContext.DbFileQueryByFileVersionAsync(tenantId, userId, fileId, fileVersion);
 
         return mapper.Map<DbFileQuery, File<int>>(dbFile);
     }
@@ -131,10 +133,11 @@ internal class FileDao(
     public async Task<File<int>> GetFileStableAsync(int fileId, int fileVersion = -1)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-
+        var userId = _authContext.CurrentAccount.ID;
+        
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var dbFile = await filesDbContext.DbFileQueryFileStableAsync(tenantId, fileId, fileVersion);
+        var dbFile = await filesDbContext.DbFileQueryFileStableAsync(tenantId, userId, fileId, fileVersion);
 
         return mapper.Map<DbFileQuery, File<int>>(dbFile);
     }

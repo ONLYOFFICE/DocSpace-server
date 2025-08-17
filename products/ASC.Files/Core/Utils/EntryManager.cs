@@ -748,7 +748,7 @@ public class EntryManager(IDaoFactory daoFactory,
         string[] extension, bool searchInContent)
     {
         var tagDao = daoFactory.GetTagDao<T>();
-        var tags = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.Template);
+        var tags = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, default, TagType.Template);
 
         var fileIds = await tags.Where(tag => tag.EntryType == FileEntryType.File).Select(tag => (T)Convert.ChangeType(tag.EntryId, typeof(T))).ToArrayAsync();
 
@@ -804,7 +804,7 @@ public class EntryManager(IDaoFactory daoFactory,
     private async Task<(IEnumerable<FileEntry>, IEnumerable<FileEntry>)> GetFavoritesAsync(FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent)
     {
         var tagDao = daoFactory.GetTagDao<int>();
-        var tags = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.Favorite);
+        var tags = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, 0, TagType.Favorite);
 
         var fileIdsInt = new List<int>();
         var fileIdsString = new List<string>();
@@ -2361,6 +2361,39 @@ public class EntryManager(IDaoFactory daoFactory,
             .ToList());
     }
 
+    public async Task SetOriginsForRecentFileAsync<T>(File<T> file)
+    {
+        if (file == null)
+        {
+            return;
+        }
+        
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var tagDao = daoFactory.GetTagDao<T>();
+
+        var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, file.Id, TagType.Recent, TagType.RecentByLink).ToDictionaryAsync(k => k.EntryId, v => v);
+        if (tags.Any(r => r.Value.Type == TagType.RecentByLink))
+        {
+            return;
+        }
+        
+        var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
+        var room = parents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
+        var parentFolder = parents.LastOrDefault(f => !DocSpaceHelper.IsRoom(f.FolderType) && f.FolderType != FolderType.VirtualRooms);
+
+        if (room != null)
+        {
+            file.OriginRoomId = room.Id;
+            file.OriginRoomTitle = room.Title;
+        }
+
+        if (parentFolder != null)
+        {
+            file.OriginId = parentFolder.Id;
+            file.OriginTitle = parentFolder.Title;
+        }
+    }
+    
     private async Task SetOriginsAsync<T>(Folder<T> parent, List<FileEntry> entries)
     {
         if (parent.FolderType != FolderType.TRASH || entries.Count == 0)
