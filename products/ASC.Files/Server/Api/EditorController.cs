@@ -212,25 +212,9 @@ public abstract class EditorController<T>(
             result.EditorConfig.Embedded.ShareUrl = "";
             result.EditorConfig.Customization.Goback = await configuration.EditorConfig?.Customization.GetGoBack(inDto.EditorType, file);
         }
-
-        if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
-            && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
-        {
-            var linkId = await externalShare.GetLinkIdAsync();
-
-            if (linkId != Guid.Empty && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
-            {
-                await entryManager.MarkFileAsRecentByLink(file, linkId);
-            }
-            else
-            {
-                await entryManager.MarkAsRecent(file);
-            }
-        }
         
         if (formOpenSetup != null)
         {
-
             if (formOpenSetup.RootFolder.FolderType is FolderType.VirtualDataRoom)
             {
                 result.StartFilling = file.Security[FileSecurity.FilesSecurityActions.StartFilling];
