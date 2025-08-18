@@ -2880,7 +2880,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             return null;
         }
         
-        return shares.ToDictionary(r => r.ToStringFast(), r => isRoom && folder.FolderType == FolderType.FillingFormsRoom || r != FileShare.FillForms);
+        return shares.ToDictionary(r => r.ToStringFast(), r => parentRoomType == FolderType.FillingFormsRoom || r != FileShare.FillForms);
     }
     
     public async Task<int> GetLinksSettings<T>(FileEntry<T> fileEntry, SubjectType subjectType)
