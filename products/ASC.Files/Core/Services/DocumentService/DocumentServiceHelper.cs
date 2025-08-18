@@ -264,18 +264,14 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (await fileTracker.IsEditingAsync(file.Id))
         {
-            bool canCoAuthoring;
             if ((editPossible || reviewPossible || fillFormsPossible || commentPossible)
                 && tryCoAuthoring
-                && (!(canCoAuthoring = fileUtility.CanCoAuthoring(file.Title)) || await fileTracker.IsEditingAloneAsync(file.Id)))
+                && (await fileTracker.IsEditingAloneAsync(file.Id)))
             {
                 if (tryEdit)
                 {
                     var editingBy = (await fileTracker.GetEditingByAsync(file.Id)).FirstOrDefault();
-                    strError = string.Format(!canCoAuthoring 
-                                                 ? FilesCommonResource.ErrorMessage_EditingCoauth
-                                                 : FilesCommonResource.ErrorMessage_EditingMobile,
-                                             await global.GetUserNameAsync(editingBy, true));
+                    strError = string.Format(FilesCommonResource.ErrorMessage_EditingMobile, await global.GetUserNameAsync(editingBy, true));
                 }
                 
                 rightToEdit = editPossible = reviewPossible = fillFormsPossible = commentPossible = false;

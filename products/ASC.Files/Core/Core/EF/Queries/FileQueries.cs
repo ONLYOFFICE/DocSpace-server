@@ -290,12 +290,6 @@ public partial class FilesDbContext
     {
         return FileQueries.DeleteFilesPropertiesAsync(this, tenantId, entryId);
     }
-    
-    [PreCompileQuery([])]
-    public IAsyncEnumerable<FilesConverts> FilesConvertsAsync()
-    {
-        return FileQueries.FilesConvertsAsync(this);
-    }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
     public Task DeleteFormRoleMappingsAsync(int tenantId, int formId)
@@ -918,9 +912,6 @@ static file class FileQueries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.EntryId == entryId)
                     .ExecuteDelete());
-    
-    public static readonly Func<FilesDbContext, IAsyncEnumerable<FilesConverts>> FilesConvertsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx) => ctx.FilesConverts);
 
     public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteFormRoleMappingsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
