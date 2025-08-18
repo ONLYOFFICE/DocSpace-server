@@ -2636,8 +2636,22 @@ internal class FileDao(
         {
             query = location switch
             {
-                Location.Documents => query.Where(x => x.Tag.Type == TagType.Recent && x.OriginRoom.FolderType == FolderType.USER),
-                Location.Room => query.Where(x => x.Tag.Type == TagType.Recent && DocSpaceHelper.RoomTypes.Contains(x.OriginRoom.FolderType)),
+                Location.Documents => query.Where(x => x.Tag.Type == TagType.Recent && 
+                                                       filesDbContext.Folders
+                                                        .Where(f => f.TenantId == x.Entry.TenantId && f.FolderType == FolderType.USER)
+                                                        .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
+                                                        .Where(t => t.tree.FolderId == x.Entry.ParentId)
+                                                        .OrderByDescending(t => t.tree.Level)
+                                                        .Select(t =>  t.folder.Id)
+                                                        .Any()),
+                Location.Room => query.Where(x => x.Tag.Type == TagType.Recent && 
+                                 filesDbContext.Folders
+                                     .Where(f => f.TenantId == x.Entry.TenantId && (f.FolderType == FolderType.CustomRoom || f.FolderType == FolderType.EditingRoom || f.FolderType == FolderType.FillingFormsRoom || f.FolderType == FolderType.PublicRoom || f.FolderType == FolderType.VirtualDataRoom))
+                                     .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
+                                     .Where(t => t.tree.FolderId == x.Entry.ParentId)
+                                     .OrderByDescending(t => t.tree.Level)
+                                     .Select(t =>  t.folder.Id)
+                                     .Any()),
                 Location.Link => query.Where(x => x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow))),
                 _ => query.Where(x => x.Tag.Type == TagType.Recent || x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)))
             };
