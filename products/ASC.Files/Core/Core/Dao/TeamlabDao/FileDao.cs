@@ -2654,8 +2654,24 @@ internal class FileDao(
                              .OrderByDescending(t => t.tree.Level)
                              .Select(t =>  t.folder.Id)
                              .Any()),
-                Location.Link => query.Where(x => x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow))),
-                _ => query.Where(x => x.Tag.Type == TagType.Recent || x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)))
+                Location.Link => query.Where(x => 
+                    (x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)) &&
+                     !filesDbContext.Folders
+                         .Where(f => f.TenantId == x.Entry.TenantId && f.FolderType == FolderType.TRASH)
+                         .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
+                         .Where(t => t.tree.FolderId == x.Entry.ParentId)
+                         .OrderByDescending(t => t.tree.Level)
+                         .Select(t =>  t.folder.Id)
+                         .Any())),
+                _ => query.Where(x => 
+                    (x.Tag.Type == TagType.Recent || x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow))) &&
+                        !filesDbContext.Folders
+                        .Where(f => f.TenantId == x.Entry.TenantId && f.FolderType == FolderType.TRASH)
+                        .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
+                        .Where(t => t.tree.FolderId == x.Entry.ParentId)
+                        .OrderByDescending(t => t.tree.Level)
+                        .Select(t =>  t.folder.Id)
+                        .Any())
             };
         }
 
