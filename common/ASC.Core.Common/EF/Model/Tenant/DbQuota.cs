@@ -126,7 +126,7 @@ public static class DbQuotaExtension
                     TenantId = -7,
                     Name = "nonprofit",
                     Description = null,
-                    Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic,free_backup:2",
+                    Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic",
                     Price = 0,
                     ProductId = "1007",
                     Visible = false

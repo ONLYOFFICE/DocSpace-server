@@ -796,7 +796,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -7,
-                            Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic,free_backup:2",
+                            Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic",
                             Name = "nonprofit",
                             Price = 0m,
                             ProductId = "1007",

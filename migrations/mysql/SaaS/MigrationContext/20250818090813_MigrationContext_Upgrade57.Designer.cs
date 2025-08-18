@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20250815113106_MigrationContext_Upgrade57")]
+    [Migration("20250818090813_MigrationContext_Upgrade57")]
     partial class MigrationContext_Upgrade57
     {
         /// <inheritdoc />
@@ -799,7 +799,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -7,
-                            Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic,free_backup:2",
+                            Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic",
                             Name = "nonprofit",
                             Price = 0m,
                             ProductId = "1007",

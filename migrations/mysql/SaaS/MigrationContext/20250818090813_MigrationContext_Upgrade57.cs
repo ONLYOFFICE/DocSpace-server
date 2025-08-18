@@ -29,13 +29,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.UpdateData(
                 table: "tenants_quota",
                 keyColumn: "tenant",
-                keyValue: -7,
-                column: "features",
-                value: "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic,free_backup:2");
-
-            migrationBuilder.UpdateData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
                 keyValue: -6,
                 column: "features",
                 value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2");
@@ -83,13 +76,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 keyValue: -9,
                 column: "features",
                 value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic");
-
-            migrationBuilder.UpdateData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -7,
-                column: "features",
-                value: "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic");
 
             migrationBuilder.UpdateData(
                 table: "tenants_quota",
