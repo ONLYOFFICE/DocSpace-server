@@ -412,14 +412,25 @@ public class EditorConfiguration<T>(
 
         var parentIds = files.Select(r => r.ParentId).Distinct().ToList();
         var parentFolders = await folderDao.GetFoldersAsync(parentIds).ToListAsync();
+
+           
         
         foreach (var file in files)
-        {
+        { 
+            var externalMediaAccess = file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink };
+            var requestToken = "";
+            if (externalMediaAccess)
+            {
+                requestToken = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
+            }
+            
+            var webUrl = externalShare.GetUrlWithShare(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), requestToken);
+            
             yield return new RecentConfig
             {
                 Folder = parentFolders.FirstOrDefault(r => file.ParentId == r.Id)?.Title,
                 Title = file.Title,
-                Url = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
+                Url = baseCommonLinkUtility.GetFullAbsolutePath(webUrl)
             };
         }
     }
