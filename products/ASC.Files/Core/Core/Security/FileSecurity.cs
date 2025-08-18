@@ -987,7 +987,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
 
             if (folder.FolderType == FolderType.Knowledge && 
-                action is not (FilesSecurityActions.Read or FilesSecurityActions.MoveTo or FilesSecurityActions.CopyTo))
+                action is not (FilesSecurityActions.Read or FilesSecurityActions.MoveTo or FilesSecurityActions.CopyTo or FilesSecurityActions.Create))
             {
                 return false;
             }
