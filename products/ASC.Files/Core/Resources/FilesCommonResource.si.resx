@@ -117,13 +117,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="User" xml:space="preserve">
-    <value>පරිශ්‍රීලකයා</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>පරිශ්‍රීලකයා</value>
   </data>
   <data name="Date" xml:space="preserve">
     <value>දිනය</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>පරිශ්‍රීලකයා</value>
   </data>
 </root>

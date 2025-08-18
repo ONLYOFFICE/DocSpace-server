@@ -49,9 +49,39 @@ Then import the package:
 import {{{packageName}}}
 ```
 
-### Tests
+## Getting Started
 
-Execute `pytest` to run the tests.
+Please follow the [installation procedure](#installation--usage) and then run the following:
+
+```python
+{{#apiInfo}}{{#apis}}{{#-last}}{{#hasHttpSignatureMethods}}import datetime{{/hasHttpSignatureMethods}}{{/-last}}{{/apis}}{{/apiInfo}}
+import {{{packageName}}}
+from {{{packageName}}}.rest import ApiException
+from pprint import pprint
+{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}
+{{> python_doc_auth_partial}}
+
+# Enter a context with an instance of the API client
+{{#asyncio}}async {{/asyncio}}with {{{packageName}}}.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = {{{packageName}}}.{{{classname}}}(api_client)
+    {{#allParams}}
+    {{paramName}} = {{{example}}} # {{{dataType}}} | {{{description}}}{{^required}} (optional){{/required}}{{#defaultValue}} (default to {{{.}}}){{/defaultValue}}
+    {{/allParams}}
+
+    try:
+        {{#summary}}
+        # {{{.}}}
+        {{/summary}}
+        {{#returnType}}api_response = {{/returnType}}{{#asyncio}}await {{/asyncio}}api_instance.{{{operationId}}}({{#allParams}}{{#required}}{{paramName}}{{/required}}{{^required}}{{paramName}}={{paramName}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}})
+        {{#returnType}}
+        print("The response of {{classname}}->{{operationId}}:\n")
+        pprint(api_response)
+        {{/returnType}}
+    except ApiException as e:
+        print("Exception when calling {{classname}}->{{operationId}}: %s\n" % e)
+{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}
+```
 
 <a id="documentation-for-authorization"></a>
 ## Documentation For Authorization
@@ -95,9 +125,5 @@ Execute `pytest` to run the tests.
 {{/isOpenId}}
 
 {{/authMethods}}
-
-## Getting Started
-
-Please follow the [installation procedure](#installation--usage) and then run the following:
 
 {{> common_README }}

@@ -4,6 +4,7 @@ using ASC.Migrations.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    partial class MigrationContextModelSnapshot : ModelSnapshot
+    [Migration("20250727162541_MigrationContext_Upgrade57")]
+    partial class MigrationContext_Upgrade57
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2206,20 +2209,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("telegram_user_id");
 
-                    b.Property<string>("TelegramUsername")
-                        .HasColumnType("varchar(35)")
-                        .HasColumnName("telegram_username")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
                     b.HasKey("TenantId", "PortalUserId")
                         .HasName("PRIMARY");
 
                     b.HasIndex("TelegramUserId")
                         .HasDatabaseName("tgId");
-
-                    b.HasIndex("TelegramUsername")
-                        .HasDatabaseName("tgUsername");
 
                     b.ToTable("telegram_users", (string)null);
 
