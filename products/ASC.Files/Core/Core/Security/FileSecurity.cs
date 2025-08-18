@@ -2855,7 +2855,8 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public async Task<IDictionary<string, bool>> GetFolderAccesses<T>(Folder<T> folder, SubjectType subjectType)
     {
-        var room = DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
+        var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
+        var room = isRoom ? folder : null;
         
         var parentRoomType = folder.RootFolderType == FolderType.USER ? 
             FolderType.USER : 
@@ -2879,7 +2880,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             return null;
         }
         
-        return shares.ToDictionary(r => r.ToStringFast(), r => r != FileShare.FillForms);
+        return shares.ToDictionary(r => r.ToStringFast(), r => isRoom && folder.FolderType == FolderType.FillingFormsRoom || r != FileShare.FillForms);
     }
     
     public async Task<int> GetLinksSettings<T>(FileEntry<T> fileEntry, SubjectType subjectType)
