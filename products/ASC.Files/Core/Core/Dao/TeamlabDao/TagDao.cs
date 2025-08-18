@@ -50,7 +50,7 @@ internal abstract class BaseTagDao<T>(
         serviceProvider,
         distributedLockProvider), ITagDao<T>
 {
-    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, TagType tagType, IEnumerable<FileEntry<T>> fileEntries)
+    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, IEnumerable<TagType> tagType, IEnumerable<FileEntry<T>> fileEntries)
     {
         var mapping = daoFactory.GetMapping<T>();
         var filesId = new HashSet<string>();
@@ -89,7 +89,7 @@ internal abstract class BaseTagDao<T>(
         }
     }
 
-    public IAsyncEnumerable<Tag> GetTagsAsync(TagType tagType, IEnumerable<FileEntry<T>> fileEntries)
+    public IAsyncEnumerable<Tag> GetTagsAsync(IEnumerable<TagType> tagType, IEnumerable<FileEntry<T>> fileEntries)
     {
         return GetTagsAsync(Guid.Empty, tagType, fileEntries);
     }

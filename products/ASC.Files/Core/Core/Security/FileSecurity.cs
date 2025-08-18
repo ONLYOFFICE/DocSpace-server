@@ -2349,7 +2349,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tags = await tagDao.GetTagsAsync(TagType.Custom, entries).ToLookupAsync(f => (T)f.EntryId);
+        var tags = await tagDao.GetTagsAsync([TagType.Custom], entries).ToLookupAsync(f => (T)f.EntryId);
 
         foreach (var room in entries)
         {
@@ -2366,7 +2366,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.Pin, entries).ToDictionaryAsync(t => (T)t.EntryId);
+        var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Pin], entries).ToDictionaryAsync(t => (T)t.EntryId);
 
         foreach (var fileEntry in entries.Where(e => e.FileEntryType == FileEntryType.Folder))
         {

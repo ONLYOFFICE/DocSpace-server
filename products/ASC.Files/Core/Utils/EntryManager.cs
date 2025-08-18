@@ -169,7 +169,7 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsTask = tagDao.GetTagsAsync(TagType.Locked, files).ToDictionaryAsync(k => k.EntryId, v => v);
+        var tagsTask = tagDao.GetTagsAsync([TagType.Locked], files).ToDictionaryAsync(k => k.EntryId, v => v);
         var tagsNewTask = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, files).ToListAsync();
 
         var tags = await tagsTask;
@@ -181,7 +181,7 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
             .ToList();
 
         var customFilterTags = spreadsheets.Count != 0
-            ? await tagDao.GetTagsAsync(TagType.CustomFilter, spreadsheets).ToDictionaryAsync(k => k.EntryId, v => v)
+            ? await tagDao.GetTagsAsync([TagType.CustomFilter], spreadsheets).ToDictionaryAsync(k => k.EntryId, v => v)
             : [];
 
         foreach (var file in files)
@@ -229,7 +229,7 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsFavorite = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.Favorite, folders).ToListAsync();
+        var tagsFavorite = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Favorite], folders).ToListAsync();
 
         foreach (var folder in folders.Where(f => tagsFavorite.Exists(r => r.EntryId.Equals(f.Id))))
         {

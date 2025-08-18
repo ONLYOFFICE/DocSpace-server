@@ -1216,7 +1216,7 @@ public class FileMarker(
         var userId = authContext.CurrentAccount.ID;
         var linkIdString = linkId.ToString();
 
-        var tags = await tagDao.GetTagsAsync(userId, TagType.RecentByLink, [entry])
+        var tags = await tagDao.GetTagsAsync(userId, [TagType.RecentByLink, TagType.Recent], [entry])
             .ToDictionaryAsync(k => k.Name);
 
         if (tags.Count > 0)

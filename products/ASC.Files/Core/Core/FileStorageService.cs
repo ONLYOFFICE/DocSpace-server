@@ -3164,7 +3164,7 @@ public class FileStorageService //: IFileStorageService
                 await socketManager.CreateFileAsync(file);
             }
             var ids = shared.Select(s => s.Id).ToList();
-            await DeleteFromRecentAsync([], ids, true);
+            await DeleteFromRecentAsync([], ids);
             await fileDao.ReassignFilesAsync(toUser, ids);
         }
 
@@ -3530,7 +3530,7 @@ public class FileStorageService //: IFileStorageService
         await tagDao.RemoveTagsAsync(tags);
     }
 
-    public async Task DeleteFromRecentAsync<T>(List<T> foldersIds, List<T> filesIds, bool recentByLinks)
+    public async Task DeleteFromRecentAsync<T>(List<T> foldersIds, List<T> filesIds)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -3546,9 +3546,7 @@ public class FileStorageService //: IFileStorageService
             entries.AddRange(items);
         }
 
-        var tags = recentByLinks
-            ? await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.RecentByLink, entries).ToListAsync()
-            : entries.Select(f => Tag.Recent(authContext.CurrentAccount.ID, f));
+        var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Recent, TagType.RecentByLink], entries).ToListAsync();
 
         await tagDao.RemoveTagsAsync(tags);
 
