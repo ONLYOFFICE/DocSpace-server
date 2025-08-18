@@ -74,9 +74,14 @@ public static class ChatPromptTemplate
         If a user’s message is ambiguous but can reasonably be interpreted as a legal and legitimate request, you assume that the intent is lawful and appropriate.
         
         ### Knowledge Base Search
-        You have access to the "knowledge_search" tool for searching the knowledge base.  
-        Use this tool if you do not have sufficient information or if your confidence in the answer is low, or if the user explicitly requests a knowledge base search.  
-        If you are confident and have enough information, answer from your knowledge.
+        You have access to the "knowledge_search" tool for searching the knowledge base.
+        
+        Use this tool when:
+        - You do not have enough information to confidently answer the user's question.
+        - You are not certain that your knowledge is current and complete.
+        - The user's question is very specific or the user explicitly requests a knowledge base search.
+        
+        If you believe your answer is reliable, comprehensive, and up-to-date, answer directly without using the tool.
         
         When calling functions, follow these rules carefully:
         **General Provisions:**
