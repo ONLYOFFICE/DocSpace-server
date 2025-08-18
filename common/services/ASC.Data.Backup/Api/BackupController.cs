@@ -434,4 +434,29 @@ public class BackupController(
     {
         return backupService.GetTmpFolder();
     }
+
+    /// <summary>
+    /// Returns the number of backups for a period of time. The default is one month.
+    /// </summary>
+    /// <short>Get the number of backups</short>
+    /// <path>api/2.0/backup/getbackupscount</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "number of backups", typeof(int))]
+    [AllowNotPayment]
+    [HttpGet("getbackupscount")]
+    public async Task<int> GetBackupsCountAsync(BackupsCountDto dto)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var to = dto.To ?? DateTime.UtcNow;
+        var from = dto.From ?? to.AddMonths(-1);
+
+        if (from > to)
+        {
+            throw new ArgumentException("From date must be less than to date");
+        }
+
+        var result = await backupService.GetBackupsCountAsync(tenantId, from, to);
+        return result;
+    }
 }

@@ -577,6 +577,11 @@ public class BackupService(
         return result;
     }
 
+    public async Task<int> GetBackupsCountAsync(int tenantId, DateTime from, DateTime to)
+    {
+        return await backupRepository.GetBackupsCountAsync(tenantId, from, to);
+    }
+
     private async Task<ScheduleResponse> InnerGetScheduleAsync(int tenantId, bool? dump)
     {
         var schedule = await backupRepository.GetBackupScheduleAsync(tenantId, dump);

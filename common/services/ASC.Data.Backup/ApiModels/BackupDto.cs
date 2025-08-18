@@ -47,3 +47,22 @@ public class BackupDto
     /// </summary>
     public bool Dump { get; set; }
 }
+
+
+/// <summary>
+/// Parameters for calculating the number of backups.
+/// </summary>
+public class BackupsCountDto
+{
+    /// <summary>
+    /// The from date.
+    /// </summary>
+    [FromQuery(Name = "from")]
+    public DateTime? From { get; set; }
+
+    /// <summary>
+    /// The to date.
+    /// </summary>
+    [FromQuery(Name = "to")]
+    public DateTime? To { get; set; }
+}
