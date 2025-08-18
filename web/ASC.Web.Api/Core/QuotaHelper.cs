@@ -58,7 +58,7 @@ public class QuotaHelper(
         return await ToQuotaDto(quota, userType, getUsed, enabledWalletServices);
     }
 
-    private async Task<QuotaDto> ToQuotaDto(TenantQuota quota, EmployeeType employeeType, bool getUsed = false, string[] enabledWalletServices = null)
+    private async Task<QuotaDto> ToQuotaDto(TenantQuota quota, EmployeeType employeeType, bool getUsed = false, List<string> enabledWalletServices = null)
     {
         var features = await GetFeatures(quota, employeeType, getUsed, enabledWalletServices).ToListAsync();
 
@@ -98,7 +98,7 @@ public class QuotaHelper(
         return result;
     }
 
-    private async IAsyncEnumerable<TenantQuotaFeatureDto> GetFeatures(TenantQuota quota, EmployeeType employeeType, bool getUsed, string[] enabledWalletServices)
+    private async IAsyncEnumerable<TenantQuotaFeatureDto> GetFeatures(TenantQuota quota, EmployeeType employeeType, bool getUsed, List<string> enabledWalletServices)
     {
         var assembly = GetType().Assembly;
 

@@ -97,3 +97,19 @@ public class TopUpDepositRequestDto
     /// </summary>
     public string Currency { get; set; }
 }
+
+/// <summary>
+/// Tenant wallet service state request parameters
+/// </summary>
+public class WalletServiceStateRequestDto
+{
+    /// <summary>
+    /// Service name
+    /// </summary>
+    public string Service { get; set; }
+
+    /// <summary>
+    /// Service state
+    /// </summary>
+    public bool Enabled { get; set; }
+}

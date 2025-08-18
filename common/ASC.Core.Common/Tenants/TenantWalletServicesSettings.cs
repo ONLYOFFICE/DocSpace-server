@@ -26,18 +26,6 @@
 
 namespace ASC.Core.Tenants;
 
-/// <summary>
-/// Tenant wallet services settings
-/// </summary>
-public class TenantWalletServicesSettingsWrapper
-{
-    /// <summary>
-    /// Tenant wallet services settings
-    /// </summary>
-    public TenantWalletServicesSettings Settings { get; set; }
-}
-
-
 [Scope]
 [Serializable]
 public class TenantWalletServicesSettings : ISettings<TenantWalletServicesSettings>
@@ -45,7 +33,7 @@ public class TenantWalletServicesSettings : ISettings<TenantWalletServicesSettin
     /// <summary>
     /// Enabled services
     /// </summary>
-    public string[] EnabledServices { get; set; }
+    public List<string> EnabledServices { get; set; }
 
     [JsonIgnore]
     public Guid ID
