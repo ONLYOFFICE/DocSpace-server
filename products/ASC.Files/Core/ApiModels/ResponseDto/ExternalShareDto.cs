@@ -92,4 +92,9 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     /// Specifies whether the user is authenticated or not.
     /// </summary>
     public bool IsAuthenticated { get; set; }
+    
+    /// <summary>
+    /// The room ID of the external data.
+    /// </summary>
+    public string RoomId { get; set; }
 }

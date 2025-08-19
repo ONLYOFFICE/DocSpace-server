@@ -386,7 +386,7 @@ public class ValidationInfo
     /// <summary>
     /// Indicates whether the entity represents a room.
     /// </summary>
-    public bool? IsRoom { get; set; }
+    public bool? IsRoom { get; set; } //TODO:rename
 
     /// <summary>
     /// The access rights type of the external data.
@@ -412,6 +412,11 @@ public class ValidationInfo
     /// Specifies whether the user is authenticated or not.
     /// </summary>
     public bool IsAuthenticated { get; set; }
+    
+    /// <summary>
+    /// The room ID of the external data.
+    /// </summary>
+    public string RoomId { get; set; }
 }
 
 public record DownloadSession
