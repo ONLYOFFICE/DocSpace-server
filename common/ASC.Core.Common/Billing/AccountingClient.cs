@@ -266,6 +266,11 @@ public class AccountingClient
 
             if (!response.IsSuccessStatusCode)
             {
+                if (response.StatusCode == HttpStatusCode.PaymentRequired)
+                {
+                    throw new AccountingPaymentRequiredException();
+                }
+
                 throw new Exception($"Accounting request failed with status code {response.StatusCode} {responseString}");
             }
 
@@ -282,6 +287,10 @@ public class AccountingClient
             var result = JsonSerializer.Deserialize<T>(responseString, _deserializationOptions);
 
             return result;
+        }
+        catch (AccountingPaymentRequiredException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -561,3 +570,5 @@ public class AccountingException : Exception
 }
 
 public class AccountingNotConfiguredException(string message = "Accounting service is not configured") : AccountingException(message);
+
+public class AccountingPaymentRequiredException(string message = "Payment required") : AccountingException(message);
