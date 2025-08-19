@@ -261,6 +261,10 @@ public class BackupController(
             return await backupService.GetBackupProgressAsync(inDto.Dump);
 
         }
+        catch (AccountingPaymentRequiredException)
+        {
+            throw new BillingException(Resource.ErrorPaymentRequired);
+        }
         finally
         {
             if (lockHandle != null)
