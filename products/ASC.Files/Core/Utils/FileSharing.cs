@@ -175,11 +175,11 @@ public class FileSharingAceHelper(
             
             if (existedShare != null)
             {
-                if (existedShare.Options?.Internal != w.FileShareOptions.Internal && !await fileSecurity.CanEditInternalAsync(entry))
+                if (existedShare.Options?.Internal != w.FileShareOptions?.Internal && !await fileSecurity.CanEditInternalAsync(entry))
                 {
                     continue;
                 }
-                if (existedShare.Options.ExpirationDate != w.FileShareOptions.ExpirationDate && !await fileSecurity.CanEditExpirationAsync(entry) && (folder?.FolderType != FolderType.PublicRoom || w.SubjectType != SubjectType.PrimaryExternalLink))
+                if (existedShare.Options?.ExpirationDate != w.FileShareOptions?.ExpirationDate && !await fileSecurity.CanEditExpirationAsync(entry) && (folder?.FolderType != FolderType.PublicRoom || w.SubjectType != SubjectType.PrimaryExternalLink))
                 {
                     continue;
                 }
