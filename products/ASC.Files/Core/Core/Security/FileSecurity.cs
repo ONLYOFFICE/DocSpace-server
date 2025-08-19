@@ -1013,12 +1013,12 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
-            if (folder != null && !(isRoom && folder.Shared))
+            if (folder != null && !(isRoom && folder.FullShared))
             {
                 return false;
             }
 
-            if (file != null && !(file.Shared && fileUtility.CanWebView(file.Title)))
+            if (file != null && !(file.FullShared && fileUtility.CanWebView(file.Title)))
             {
                 return false;
             }
@@ -1953,7 +1953,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access == FileShare.RoomManager && ((isRoom && e.Shared) || file is { Shared: true }))
+                        if (e.Access == FileShare.RoomManager && ((isRoom && e.FullShared) || file is { FullShared: true }))
                         {
                             return true;
                         }

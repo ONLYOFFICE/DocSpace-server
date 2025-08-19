@@ -117,6 +117,9 @@ public abstract class FileEntry : ICloneable
     /// </summary>
     public bool ParentShared { get; set; }
 
+    [JsonIgnore]
+    public bool FullShared { get => Shared || ParentShared; }
+    
     /// <summary>
     /// The provider ID.
     /// </summary>
