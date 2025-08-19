@@ -54,6 +54,8 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbFilesFormRoleMapping> FilesFormRoleMapping { get; set; }
     public DbSet<DbChat> Chats { get; set; }
     public DbSet<DbChatMessage> ChatMessages { get; set; }
+    
+    public DbSet<DbFileVectorization> FileVectorization { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -83,6 +85,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddUserRelation()
             .AddDbChats()
             .AddDbChatsMessages()
+            .AddDbFileVectorization()
             .AddDbFunctions();
     }
 }
