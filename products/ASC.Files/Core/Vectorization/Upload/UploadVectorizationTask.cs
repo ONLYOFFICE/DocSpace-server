@@ -60,6 +60,8 @@ public class UploadVectorizationTask : VectorizationTask<UploadVectorizationTask
             yield break;
         }
         
+        await fileDao.SetVectorizationStatusAsync(file.Id, VectorizationStatus.InProgress);
+        
         yield return file;
     }
 

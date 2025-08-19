@@ -126,6 +126,9 @@ public abstract class VectorizationTask<T>
                 {
                     await VectorizeFileAsync(totalFiles, currentFileIndex, room.Id, file, fileProcessor, splitterSettings, 
                         settings, embeddingGenerator, collection);
+                    
+                    await fileDao.SetVectorizationStatusAsync(file.Id, VectorizationStatus.Completed);
+                    
                     currentFileIndex++;
                     notify = true;
                 }

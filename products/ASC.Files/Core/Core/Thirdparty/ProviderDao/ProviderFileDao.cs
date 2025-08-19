@@ -422,6 +422,19 @@ internal class ProviderFileDao(
         return await PerformCrossDaoFileCopyAsync(fileId, toFolderId, false);
     }
 
+    public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId, VectorizationStatus vectorizationStatus)
+    {
+        var file = await GetFileAsync(fileId);
+        file.VectorizationStatus = vectorizationStatus;
+        
+        var fromSelector = _selectorFactory.GetSelector(fileId);
+
+        return await _crossDao.PerformCrossDaoFileCopyAsync(
+            file, fromSelector.GetFileDao(fileId), fromSelector.ConvertId,
+            toFolderId, _serviceProvider.GetService<IFileDao<int>>(), r => r,
+            false);
+    }
+
     public async Task<File<string>> CopyFileAsync(string fileId, string toFolderId)
     {
         var selector = _selectorFactory.GetSelector(fileId);
@@ -607,6 +620,13 @@ internal class ProviderFileDao(
         var selector = _selectorFactory.GetSelector(parentFolderId);
         var fileDao = selector.GetFileDao(parentFolderId);
         await fileDao.InitCustomOrder(fileIds, parentFolderId);
+    }
+
+    public Task SetVectorizationStatusAsync(string fileId, VectorizationStatus status)
+    {
+        var selector = _selectorFactory.GetSelector(fileId);
+        var fileDao = selector.GetFileDao(fileId);
+        return fileDao.SetVectorizationStatusAsync(selector.ConvertId(fileId), status);
     }
 
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)

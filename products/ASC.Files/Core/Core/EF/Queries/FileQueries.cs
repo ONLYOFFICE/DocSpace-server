@@ -347,7 +347,12 @@ public partial class FilesDbContext
     {
         return FileQueries.UpdateDbFilesCategoryForcesaveAsync(this, tenantId, fileId, fileVersion, category, forcesave);
     }
-
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, VectorizationStatus.Completed])]
+    public Task<int> UpdateVectorizationStatusAsync(int tenantId, int fileId, VectorizationStatus status)
+    {
+        return FileQueries.UpdateVectorizationStatusAsync(this, tenantId, fileId, status, DateTime.UtcNow);
+    }
 }
 
 static file class FileQueries
@@ -1028,4 +1033,14 @@ static file class FileQueries
                     .ExecuteUpdate(f => f
                         .SetProperty(p => p.Category, category)
                         .SetProperty(p => p.Forcesave, forcesave)));
+    
+    public static readonly Func<FilesDbContext, int, int, VectorizationStatus, DateTime, Task<int>> UpdateVectorizationStatusAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int fileId, VectorizationStatus status, DateTime date) =>
+                ctx.FileVectorization
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.FileId == fileId)
+                    .ExecuteUpdate(f => f
+                        .SetProperty(x => x.Status, status)
+                        .SetProperty(x => x.UpdatedOn, date)));
 }

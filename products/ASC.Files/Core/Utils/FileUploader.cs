@@ -252,15 +252,23 @@ public class FileUploader(
         file.Title = fileName;
         file.ContentLength = contentLength;
         file.CreateOn = createOn;
+        
+        var requiredVectorization = false;
 
         var dao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
         
         var folder = await folderDao.GetFolderAsync(folderId);
-        if (folder is { FolderType: FolderType.Knowledge } 
-            && !vectorizationSettings.SupportedFormats.Contains(FileUtility.GetFileExtension(fileName)))
+        
+        if (folder is { FolderType: FolderType.Knowledge })
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+            if (!vectorizationSettings.SupportedFormats.Contains(FileUtility.GetFileExtension(fileName)))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+            }
+
+            file.VectorizationStatus = VectorizationStatus.Scheduled;
+            requiredVectorization = true;
         }
         
         var uploadSession = await dao.CreateUploadSessionAsync(file, contentLength);
@@ -273,6 +281,7 @@ public class FileUploader(
         uploadSession.CultureName = CultureInfo.CurrentUICulture.Name;
         uploadSession.Encrypted = encrypted;
         uploadSession.KeepVersion = keepVersion;
+        uploadSession.RequiredVectorization = requiredVectorization;
         
         await chunkedUploadSessionHolder.StoreSessionAsync(uploadSession);
 

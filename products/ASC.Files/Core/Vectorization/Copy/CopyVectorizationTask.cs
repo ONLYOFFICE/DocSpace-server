@@ -99,7 +99,7 @@ public class CopyVectorizationTask : VectorizationTask<CopyVectorizationTaskData
                     continue;
                 }
 
-                newFile = await fileDao.CopyFileAsync(file.Id, Data.ParentId);
+                newFile = await fileDao.CopyFileAsync(file.Id, Data.ParentId, VectorizationStatus.InProgress);
             }
             catch (Exception e)
             {
