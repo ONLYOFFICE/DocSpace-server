@@ -40,7 +40,7 @@ public class CountFreeBackupChecker(
 {
     public override string GetExceptionMessage(long size)
     {
-        return string.Format(Resource.TariffsFeature_freebackup_exception, size);
+        return string.Format(Resource.TariffsFeature_free_backup_exception, size);
     }
 
     public override async Task CheckAddAsync(int tenantId, int newValue)

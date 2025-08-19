@@ -2014,6 +2014,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Payment required.
+        /// </summary>
+        public static string ErrorPaymentRequired {
+            get {
+                return ResourceManager.GetString("ErrorPaymentRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Request limit is exceeded.
         /// </summary>
         public static string ErrorRequestLimitExceeded {
@@ -2995,7 +3004,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tracking user logins &amp; action.
+        ///   Looks up a localized string similar to Tracking logins &amp; actions.
         /// </summary>
         public static string TariffsFeature_audit {
             get {
@@ -3049,11 +3058,20 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 2 free backups per month.
+        /// </summary>
+        public static string TariffsFeature_free_backup {
+            get {
+                return ResourceManager.GetString("TariffsFeature_free_backup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The number of free backups should not exceed {0} within a month.
         /// </summary>
-        public static string TariffsFeature_freebackup_exception {
+        public static string TariffsFeature_free_backup_exception {
             get {
-                return ResourceManager.GetString("TariffsFeature_freebackup_exception", resourceCulture);
+                return ResourceManager.GetString("TariffsFeature_free_backup_exception", resourceCulture);
             }
         }
         
@@ -3076,7 +3094,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Automatic backup &amp; recovery.
+        ///   Looks up a localized string similar to Data recovery.
         /// </summary>
         public static string TariffsFeature_restore {
             get {
@@ -3220,7 +3238,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unlimited number of users.
+        ///   Looks up a localized string similar to Unlimited number of users and guests.
         /// </summary>
         public static string TariffsFeature_users {
             get {
