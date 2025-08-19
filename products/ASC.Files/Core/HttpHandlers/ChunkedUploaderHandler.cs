@@ -198,8 +198,8 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, session.File);
 
                     var vectorizationTaskId = string.Empty;
-
-                    await socketManager.CreateFileAsync(session.File);
+                    var notify = true;
+                    
                     if (session.File.Version <= 1)
                     {
                         var folderDao = daoFactory.GetFolderDao<T>();
@@ -228,9 +228,15 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                 {
                                     var task = await vectorizationTaskPublisher.PublishAsync(id, parentId);
                                     vectorizationTaskId = VectorizationTaskIdHelper.MakeTaskId(task.Id, task.Type);
+                                    notify = false;
                                 }
                             }
                         }
+                    }
+
+                    if (notify)
+                    {
+                        await socketManager.CreateFileAsync(session.File);
                     }
                     
                     await WriteSuccess(context, await ToResponseObject(session.File, vectorizationTaskId), (int)HttpStatusCode.Created);
