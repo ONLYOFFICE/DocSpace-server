@@ -101,8 +101,8 @@ public sealed class BackupSchedulerService(
                         }
                         catch (TenantQuotaException)
                         {
-                            var settings = await settingsManager.LoadAsync<TenantWalletServicesSettings>();
-                            if (settings.EnabledServices == null || !settings.EnabledServices.Contains(BackupService.BackupQuotaName))
+                            var backupServiceEnabled = await backupService.IsBackupServiceEnabledAsync(schedule.TenantId);
+                            if (!backupServiceEnabled)
                             {
                                 throw;
                             }

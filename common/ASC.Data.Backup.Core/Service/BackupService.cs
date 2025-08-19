@@ -28,6 +28,7 @@ using System.Security;
 using System.Text.Json;
 
 using ASC.Common.Web;
+using ASC.Core.Common.Settings;
 using ASC.Files.Core.Security;
 
 namespace ASC.Data.Backup.Services;
@@ -42,6 +43,7 @@ public class BackupService(
         ITariffService tariffService,
         TenantManager tenantManager,
         UserManager userManager,
+        SettingsManager settingsManager,
         MessageService messageService,
         CoreBaseSettings coreBaseSettings,
         AuthContext authContext,
@@ -53,8 +55,7 @@ public class BackupService(
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
     private const int BackupCustomerSessionDuration = 86400; // 60 * 60 * 24;
-
-    public const string BackupQuotaName = "backup";
+    private const string BackupQuotaName = "backup";
 
     public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null, int billingSessionId = 0, DateTime billingSessionExpire = default)
     {
@@ -580,6 +581,12 @@ public class BackupService(
     public async Task<int> GetBackupsCountAsync(int tenantId, DateTime from, DateTime to)
     {
         return await backupRepository.GetBackupsCountAsync(tenantId, from, to);
+    }
+
+    public async Task<bool> IsBackupServiceEnabledAsync(int tenantId)
+    {
+        var settings = await settingsManager.LoadAsync<TenantWalletServicesSettings>(tenantId);
+        return settings.EnabledServices != null && settings.EnabledServices.Contains(BackupQuotaName);
     }
 
     private async Task<ScheduleResponse> InnerGetScheduleAsync(int tenantId, bool? dump)

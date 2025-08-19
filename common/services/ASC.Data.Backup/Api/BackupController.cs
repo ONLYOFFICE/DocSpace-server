@@ -28,7 +28,6 @@ using ASC.Api.Core.Convention;
 using ASC.Common.Threading.DistributedLock.Abstractions;
 using ASC.Core.Billing;
 using ASC.Core.Common;
-using ASC.Core.Common.Settings;
 using ASC.Core.Tenants;
 using ASC.Data.Backup.Core.Quota;
 using ASC.Data.Backup.Services;
@@ -56,7 +55,6 @@ public class BackupController(
     CommonLinkUtility commonLinkUtility,
     CoreSettings coreSettings,
     BackupService backupService,
-    SettingsManager settingsManager,
     IDistributedLockProvider distributedLockProvider,
     CountFreeBackupChecker freeBackupsChecker)
     : ControllerBase
@@ -227,8 +225,8 @@ public class BackupController(
             }
             catch (TenantQuotaException)
             {
-                var settings = await settingsManager.LoadAsync<TenantWalletServicesSettings>();
-                if (settings.EnabledServices == null || !settings.EnabledServices.Contains(BackupService.BackupQuotaName))
+                var backupServiceEnabled = await backupService.IsBackupServiceEnabledAsync(tenantId);
+                if (!backupServiceEnabled)
                 {
                     throw;
                 }
@@ -445,7 +443,7 @@ public class BackupController(
     /// <short>Get the number of backups</short>
     /// <path>api/2.0/backup/getbackupscount</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "number of backups", typeof(int))]
+    [SwaggerResponse(200, "Number of backups", typeof(int))]
     [AllowNotPayment]
     [HttpGet("getbackupscount")]
     public async Task<int> GetBackupsCountAsync(BackupsCountDto dto)
@@ -462,5 +460,23 @@ public class BackupController(
 
         var result = await backupService.GetBackupsCountAsync(tenantId, from, to);
         return result;
+    }
+
+    /// <summary>
+    /// Returns the backup service state.
+    /// </summary>
+    /// <short>Get the backup service state</short>
+    /// <path>api/2.0/backup/getservicestate</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Backup service state", typeof(BackupServiceStateDto))]
+    [AllowNotPayment]
+    [HttpGet("getservicestate")]
+    public async Task<BackupServiceStateDto> GetBackupsServiceStateAsync()
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var backupServiceEnabled = await backupService.IsBackupServiceEnabledAsync(tenantId);
+
+        return new BackupServiceStateDto { Enabled = backupServiceEnabled };
     }
 }

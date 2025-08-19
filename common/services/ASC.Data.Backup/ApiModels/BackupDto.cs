@@ -66,3 +66,14 @@ public class BackupsCountDto
     [FromQuery(Name = "to")]
     public DateTime? To { get; set; }
 }
+
+/// <summary>
+/// Backup service state.
+/// </summary>
+public class BackupServiceStateDto
+{
+    /// <summary>
+    /// Specifies if the backup service is enabled or not.
+    /// </summary>
+    public bool Enabled { get; set; }
+}
