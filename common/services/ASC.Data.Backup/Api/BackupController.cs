@@ -228,7 +228,7 @@ public class BackupController(
             catch (TenantQuotaException)
             {
                 var settings = await settingsManager.LoadAsync<TenantWalletServicesSettings>();
-                if (!settings.EnabledServices.Contains(BackupService.BackupQuotaName))
+                if (settings.EnabledServices == null || !settings.EnabledServices.Contains(BackupService.BackupQuotaName))
                 {
                     throw;
                 }
