@@ -152,6 +152,14 @@ public class QuotaHelper(
 
                 await GetStat<long>();
             }
+            else if (feature is CountFreeBackupFeature countFreeBackup)
+            {
+                result.Value = coreBaseSettings.Standalone ? -1 : countFreeBackup.Value;
+                result.Type = "count";
+                result.Title = string.Format(result.Title, result.Value);
+
+                await GetStat<int>();
+            }
             else if (feature is TenantQuotaFeatureCount count)
             {
                 result.Value = count.Value == int.MaxValue ? -1 : count.Value;

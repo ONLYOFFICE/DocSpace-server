@@ -1210,6 +1210,6 @@
     <value>Payment required</value>
   </data>
   <data name="TariffsFeature_free_backup" xml:space="preserve">
-    <value>2 free backups per month</value>
+    <value>{0} free backups per month</value>
   </data>
 </root>

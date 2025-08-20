@@ -3058,7 +3058,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 2 free backups per month.
+        ///   Looks up a localized string similar to {0} free backups per month.
         /// </summary>
         public static string TariffsFeature_free_backup {
             get {
