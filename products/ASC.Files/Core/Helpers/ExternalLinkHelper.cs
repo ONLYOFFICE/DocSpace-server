@@ -207,7 +207,7 @@ public class ExternalLinkHelper(
         FileEntry<T> room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(entry.Id).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
         if (info.IsAuthenticated)
         {
-            info.RoomId = (await daoFactory.GetSecurityDao<T>().GetSharesAsync(room, [securityContext.CurrentAccount.ID])).Select(r => r.EntryId).FirstOrDefault()?.ToString();
+            info.IsRoomMember = (await daoFactory.GetSecurityDao<T>().GetSharesAsync(room, [securityContext.CurrentAccount.ID])).Select(r => r.EntryId).Any();
         }
 
         return entry;

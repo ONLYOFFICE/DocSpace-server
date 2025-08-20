@@ -416,7 +416,7 @@ public class ValidationInfo
     /// <summary>
     /// The room ID of the external data.
     /// </summary>
-    public string RoomId { get; set; }
+    public bool IsRoomMember { get; set; }
 }
 
 public record DownloadSession
