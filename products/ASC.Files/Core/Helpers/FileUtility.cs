@@ -412,8 +412,8 @@ public class FileUtility(
         foreach (var inputFormat in fileUtilityConfiguration.Formats)
         {
             foreach (var output in inputFormat.Convert)
-            {
-                var input = inputFormat.Name.ToLower();
+            {            
+                var input = $".{inputFormat.Name.ToLower().TrimStart('.')}";
                 
                 if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(output))
                 {
