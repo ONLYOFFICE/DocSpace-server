@@ -1161,7 +1161,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
             }
         }
-        if (file == null || (file != null && !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory)) || (file is { IsForm: true } && e.RootFolderType != FolderType.VirtualRooms))
+        if (file == null || !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory) || (file.IsForm && e.RootFolderType != FolderType.VirtualRooms))
         {
             switch (action)
             {
@@ -1169,6 +1169,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 case FilesSecurityActions.StopFilling:
                 case FilesSecurityActions.StartFilling:
                 case FilesSecurityActions.FillingStatus:
+                case FilesSecurityActions.EditAccess:
                     return false;
             }
         }
