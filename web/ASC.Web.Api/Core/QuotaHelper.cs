@@ -171,8 +171,6 @@ public class QuotaHelper(
             {
                 result.Value = enabledWalletServices != null && enabledWalletServices.Contains(walletFlag.Name);
                 result.Type = "flag";
-
-                availableFeature = true;
             }
             else if (feature is TenantQuotaFeatureFlag flag)
             {
