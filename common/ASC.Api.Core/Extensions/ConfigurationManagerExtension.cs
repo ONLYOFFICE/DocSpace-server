@@ -128,16 +128,6 @@ public class FileFormatConfig
     }
 
     /// <summary>
-    /// Checks if the format can be converted to a specific format
-    /// </summary>
-    /// <param name="targetFormat">The target format to check</param>
-    /// <returns>True if conversion is supported, false otherwise</returns>
-    public bool CanConvertTo(string targetFormat)
-    {
-        return Convert.Contains(targetFormat, StringComparer.OrdinalIgnoreCase);
-    }
-
-    /// <summary>
     /// Checks if the format matches a specific MIME type
     /// </summary>
     /// <param name="mimeType">The MIME type to check</param>
