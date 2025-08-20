@@ -366,6 +366,11 @@ public class FileStorageService //: IFileStorageService
         var newTask = fileMarker.GetRootFoldersIdMarkedAsNewAsync(parentId);
         var breadCrumbs = await breadCrumbsTask;
 
+        if (breadCrumbs.FirstOrDefault() is Folder<T> { FolderType: FolderType.VirtualRooms } && searchArea == SearchArea.RecentByLinks)
+        {
+            breadCrumbs = breadCrumbs.Skip(1).ToList();
+        }
+        
         var prevVisible = breadCrumbs.ElementAtOrDefault(breadCrumbs.Count - 2);
         if (prevVisible != null && !DocSpaceHelper.IsRoom(parent.FolderType) && prevVisible.FileEntryType == FileEntryType.Folder)
         {
