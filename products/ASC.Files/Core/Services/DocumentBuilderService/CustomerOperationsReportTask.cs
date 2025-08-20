@@ -142,7 +142,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         {
             await writer.WriteAsync(scriptParts[0]);
 
-            var partialRecords = GetCustomerOperationsReportDataAsync(tariffService, tenantUtil, displayUserSettingsHelper, tenant.Id, utcStartDate, utcEndDate, taskData.Credit, taskData.Withdrawal);
+            var partialRecords = GetCustomerOperationsReportDataAsync(tariffService, tenantUtil, displayUserSettingsHelper, tenant.Id, utcStartDate, utcEndDate, taskData.ParticipantName, taskData.Credit, taskData.Withdrawal);
 
             if (partialRecords != null)
             {
@@ -159,14 +159,14 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return (scriptFilePath, tempFileName, outputFileName);
     }
 
-    private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(TariffService tariffService, TenantUtil tenantUtil, DisplayUserSettingsHelper displayUserSettingsHelper, int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal)
+    private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(TariffService tariffService, TenantUtil tenantUtil, DisplayUserSettingsHelper displayUserSettingsHelper, int tenantId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? withdrawal)
     {
         var offset = 0;
         var limit = 1000;
 
         while (true)
         {
-            var report = await tariffService.GetCustomerOperationsAsync(tenantId, utcStartDate, utcEndDate, credit, withdrawal, offset, limit);
+            var report = await tariffService.GetCustomerOperationsAsync(tenantId, utcStartDate, utcEndDate, participantName, credit, withdrawal, offset, limit);
 
             if (report?.Collection == null)
             {
@@ -174,14 +174,14 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 break;
             }
 
-            var participantNames = await report.GetParticipantNamesAsync(displayUserSettingsHelper);
+            var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper);
 
             foreach (var operation in report.Collection)
             {
                 operation.Description = GetServiceDesc(operation.Service);
                 operation.Details = string.Empty;
                 operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
-                operation.ParticipantName = operation.ParticipantName != null && participantNames.TryGetValue(operation.ParticipantName, out var value) ? value : operation.ParticipantName;
+                operation.ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value) ? value : operation.ParticipantName;
 
                 if (string.IsNullOrEmpty(operation.Service))
                 {
@@ -211,7 +211,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 new(record.Date.ToString("G", CultureInfo.InvariantCulture), dateFormat),
                 new(record.Description, "@"),
                 new(record.Details, "@"),
-                new(record.ParticipantName, "@"),
+                new(record.ParticipantDisplayName, "@"),
                 new(record.Quantity.ToString(), "General"),
                 new(record.ServiceUnit, "@"),
                 new(record.Credit.ToString(), "0.0000000000"),
@@ -238,4 +238,4 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
     record PropertyValue(string Value, string Format);
 }
 
-public record CustomerOperationsReportTaskData(IDictionary<string, string> Headers, DateTime? StartDate, DateTime? EndDate, bool? Credit, bool? Withdrawal);
+public record CustomerOperationsReportTaskData(IDictionary<string, string> Headers, DateTime? StartDate, DateTime? EndDate, string ParticipantName, bool? Credit, bool? Withdrawal);

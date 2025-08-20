@@ -100,13 +100,18 @@ public class AccountingClient
         _ = await RequestAsync<string>(HttpMethod.Post, "/operation/provided", data: data);
     }
 
-    public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal, int? offset, int? limit)
+    public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? withdrawal, int? offset, int? limit)
     {
         var queryParams = new NameValueCollection
         {
             { "startDate", utcStartDate.ToString("o") },
             { "endDate", utcEndDate.ToString("o") }
         };
+
+        if (!string.IsNullOrEmpty(participantName))
+        {
+            queryParams.Add("participantName", participantName.Trim());
+        }
 
         if (credit.HasValue)
         {
@@ -351,25 +356,25 @@ public class Report
     /// </summary>
     public int CurrentPage { get; set; }
 
-    public async Task<Dictionary<string, string>> GetParticipantNamesAsync(DisplayUserSettingsHelper displayUserSettingsHelper)
+    public async Task<Dictionary<string, string>> GetParticipantDisplayNamesAsync(DisplayUserSettingsHelper displayUserSettingsHelper)
     {
-        var participantNames = new Dictionary<string, string>();
+        var participantDisplayNames = new Dictionary<string, string>();
 
         foreach (var operation in Collection)
         {
-            if (string.IsNullOrEmpty(operation.ParticipantName) || participantNames.ContainsKey(operation.ParticipantName))
+            if (string.IsNullOrEmpty(operation.ParticipantName) || participantDisplayNames.ContainsKey(operation.ParticipantName))
             {
                 continue;
             }
 
             if (Guid.TryParse(operation.ParticipantName, out var userId))
             {
-                var participantName = await displayUserSettingsHelper.GetFullUserNameAsync(userId);
-                participantNames.Add(operation.ParticipantName, participantName);
+                var participantDisplayName = await displayUserSettingsHelper.GetFullUserNameAsync(userId);
+                participantDisplayNames.Add(operation.ParticipantName, participantDisplayName);
             }
         }
 
-        return participantNames;
+        return participantDisplayNames;
     }
 }
 
@@ -415,9 +420,13 @@ public class Operation
     /// </summary>
     public decimal Withdrawal { get; set; }
     /// <summary>
-    /// Name of the participant.
+    /// Original name of the participant.
     /// </summary>
     public string ParticipantName { get; set; }
+    /// <summary>
+    /// Display name of the participant.
+    /// </summary>
+    public string ParticipantDisplayName { get; set; }
 }
 
 /// <summary>

@@ -86,6 +86,12 @@ public class CustomerOperationsRequestDto
     public DateTime EndDate { get; set; }
 
     /// <summary>
+    /// Participant name
+    /// </summary>
+    [FromQuery(Name = "participantName")]
+    public string ParticipantName { get; set; }
+
+    /// <summary>
     /// Include credit operations (true by default)
     /// </summary>
     [FromQuery(Name = "credit")]
@@ -125,6 +131,11 @@ public class CustomerOperationsReportRequestDto
     /// End date
     /// </summary>
     public DateTime? EndDate { get; set; }
+
+    /// <summary>
+    /// Participant name
+    /// </summary>
+    public string ParticipantName { get; set; }
 
     /// <summary>
     /// Include credit operations

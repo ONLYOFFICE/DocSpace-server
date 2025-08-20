@@ -39,6 +39,7 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
         string baseUri,
         DateTime? startDate = null,
         DateTime? endDate = null,
+        string participantName = null,
         bool? credit = null,
         bool? withdrawal = null,
         IDictionary<string, string> headers = null,
@@ -48,6 +49,7 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
         BaseUri = baseUri;
         StartDate = startDate;
         EndDate = endDate;
+        ParticipantName = participantName;
         Credit = credit;
         Withdrawal = withdrawal;
         Headers = headers;
@@ -64,14 +66,17 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
     public DateTime? EndDate { get; set; }
 
     [ProtoMember(4)]
-    public bool? Credit { get; set; }
+    public string ParticipantName { get; set; }
 
     [ProtoMember(5)]
-    public bool? Withdrawal { get; set; }
+    public bool? Credit { get; set; }
 
     [ProtoMember(6)]
-    public IDictionary<string, string> Headers { get; set; }
+    public bool? Withdrawal { get; set; }
 
     [ProtoMember(7)]
+    public IDictionary<string, string> Headers { get; set; }
+
+    [ProtoMember(8)]
     public bool Terminate { get; set; }
 }

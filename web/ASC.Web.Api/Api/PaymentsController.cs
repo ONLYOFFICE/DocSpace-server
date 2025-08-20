@@ -812,11 +812,11 @@ public class PaymentController(
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
-        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
+        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.ParticipantName, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
 
-        var participantNames = await report.GetParticipantNamesAsync(displayUserSettingsHelper);
+        var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper);
 
-        return report == null ? null : new ReportDto(report, apiDateTimeHelper, participantNames);
+        return report == null ? null : new ReportDto(report, apiDateTimeHelper, participantDisplayNames);
     }
 
     /// <summary>
@@ -860,7 +860,7 @@ public class PaymentController(
 
         var headers = MessageSettings.GetHttpHeaders(Request)?.ToDictionary(x => x.Key, x => x.Value.ToString()) ?? [];
 
-        var evt = new CustomerOperationsReportIntegrationEvent(userId, tenantId, baseUri, inDto.StartDate, inDto.EndDate, inDto.Credit, inDto.Withdrawal, headers, false);
+        var evt = new CustomerOperationsReportIntegrationEvent(userId, tenantId, baseUri, inDto.StartDate, inDto.EndDate, inDto.ParticipantName, inDto.Credit, inDto.Withdrawal, headers, false);
 
         await eventBus.PublishAsync(evt);
 
