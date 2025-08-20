@@ -139,12 +139,13 @@ public class FolderContentDtoHelper(
                 }
             }
 
-            var foldersTask = GetFoldersDto(folders).ToListAsync();
-            var filesTask = GetFilesDto(files).ToListAsync();
+            var foldersTask = GetFoldersDto(folders, contextFolder: folderItems.FolderInfo).ToListAsync();
+            var filesTask = GetFilesDto(files, contextFolder: folderItems.FolderInfo).ToListAsync();
             result.Files = await filesTask;
             result.Folders = await foldersTask;
         }
-
+        
+        
         var currentTask = GetFolderDto(folderItems.FolderInfo);
         var isEnableBadges = badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
@@ -171,11 +172,11 @@ public class FolderContentDtoHelper(
             }
         }
 
-        async IAsyncEnumerable<FileEntryBaseDto> GetFilesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null)
+        async IAsyncEnumerable<FileEntryBaseDto> GetFilesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)
         {
             foreach (var r in fileEntries)
             {
-                yield return await GetFileDto(r, entriesOrder);
+                yield return await GetFileDto(r, entriesOrder, contextFolder);
             }
         }
 
@@ -189,11 +190,11 @@ public class FolderContentDtoHelper(
             };
         }
 
-        async IAsyncEnumerable<FileEntryBaseDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder = null)
+        async IAsyncEnumerable<FileEntryBaseDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder = null, IFolder contextFolder = null)
         {
             foreach (var r in folderEntries)
             {
-                yield return await GetFolderDto(r, entriesOrder);
+                yield return await GetFolderDto(r, entriesOrder, contextFolder);
             }
         }
         

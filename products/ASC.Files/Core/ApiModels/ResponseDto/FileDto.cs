@@ -209,25 +209,26 @@ public class FileDto<T> : FileEntryDto<T>
 
 [Scope]
 public class FileDtoHelper(
+    IHttpContextAccessor httpContextAccessor,
     ApiDateTimeHelper apiDateTimeHelper,
-        EmployeeDtoHelper employeeWrapperHelper,
-        AuthContext authContext,
-        IDaoFactory daoFactory,
-        FileSecurity fileSecurity,
-        GlobalFolderHelper globalFolderHelper,
-        CommonLinkUtility commonLinkUtility,
-        FilesLinkUtility filesLinkUtility,
-        FileUtility fileUtility,
-        FileSharingHelper fileSharingHelper,
-        BadgesSettingsHelper badgesSettingsHelper,
-        FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime,
-        ExternalShare externalShare,
-        BreadCrumbsManager breadCrumbsManager,
-        FileChecker fileChecker,
-        SecurityContext securityContext,
-        UserManager userManager,
-        IUrlShortener urlShortener)
+    EmployeeDtoHelper employeeWrapperHelper,
+    AuthContext authContext,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    GlobalFolderHelper globalFolderHelper,
+    CommonLinkUtility commonLinkUtility,
+    FilesLinkUtility filesLinkUtility,
+    FileUtility fileUtility,
+    FileSharingHelper fileSharingHelper,
+    BadgesSettingsHelper badgesSettingsHelper,
+    FilesSettingsHelper filesSettingsHelper,
+    FileDateTime fileDateTime,
+    ExternalShare externalShare,
+    BreadCrumbsManager breadCrumbsManager,
+    FileChecker fileChecker,
+    SecurityContext securityContext,
+    UserManager userManager,
+    IUrlShortener urlShortener)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
@@ -246,6 +247,39 @@ public class FileDtoHelper(
         
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableExternalRights = _fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
+
+        if (contextFolder == null)
+        {
+            var referer = httpContextAccessor.HttpContext?.Request.Headers.Referer.FirstOrDefault();
+            if (referer != null)
+            {
+                var uri = new Uri(referer);
+                var query = HttpUtility.ParseQueryString(uri.Query);
+                var folderId = query["folder"];
+                contextFolder = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync((T)Convert.ChangeType(folderId, typeof(T)));
+            }
+        }
+
+        if (contextFolder is { FolderType: FolderType.Recent })
+        {
+            var forbiddenActions = new List<FileSecurity.FilesSecurityActions>
+            {
+                FileSecurity.FilesSecurityActions.FillForms,
+                FileSecurity.FilesSecurityActions.Edit,
+                FileSecurity.FilesSecurityActions.SubmitToFormGallery,
+                FileSecurity.FilesSecurityActions.CreateRoomFrom,
+                FileSecurity.FilesSecurityActions.Duplicate,
+                FileSecurity.FilesSecurityActions.Delete,
+                FileSecurity.FilesSecurityActions.Lock
+            };
+
+            foreach (var action in forbiddenActions)
+            {
+                result.Security[action] = false;   
+            }
+
+            result.ViewAccessibility[Accessibility.CanConvert] = false;
+        }
         
         return result;
     }
@@ -297,7 +331,7 @@ public class FileDtoHelper(
 
             if (currentRoom is { FolderType: FolderType.FillingFormsRoom } && properties != null && properties.FormFilling.StartFilling)
             {
-                    result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+                result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
             }
 
             if (currentRoom.Security == null)
