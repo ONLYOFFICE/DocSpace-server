@@ -1144,13 +1144,10 @@
     <value>Currency</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Date and time</value>
+    <value>Date</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Quantity</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Service name</value>
   </data>
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Unit of Measurement</value>
@@ -1160,9 +1157,6 @@
   </data>
   <data name="AccountingCustomerOperationCredit" xml:space="preserve">
     <value>Credit</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Withdrawal</value>
   </data>
   <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
     <value>Additional disk storage</value>
@@ -1176,9 +1170,6 @@
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>The group could not be found</value>
   </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Description</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Disk space</value>
   </data>
@@ -1187,5 +1178,17 @@
   </data>
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Transaction history</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debit</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Type</value>
   </data>
 </root>

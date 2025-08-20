@@ -1088,22 +1088,16 @@
     <value>Moneda</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Fecha y hora</value>
+    <value>Fecha</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Cantidad</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Nombre del servicio</value>
   </data>
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Unidad de medida</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Informe sobre las operaciones del cliente ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Retirada</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>El grupo no se ha podido encontrar</value>

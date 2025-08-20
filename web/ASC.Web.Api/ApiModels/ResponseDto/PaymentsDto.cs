@@ -56,7 +56,7 @@ public class ReportDto
     /// </summary>
     public int CurrentPage { get; set; }
 
-    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper)
+    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantNames)
     {
         Offset = report.Offset;
         Limit = report.Limit;
@@ -70,7 +70,7 @@ public class ReportDto
         {
             foreach (var operation in report.Collection)
             {
-                Collection.Add(new OperationDto(operation, apiDateTimeHelper));
+                Collection.Add(new OperationDto(operation, apiDateTimeHelper, participantNames));
             }
         }
     }
@@ -94,6 +94,10 @@ public class OperationDto
     /// </summary>
     public string Description { get; set; }
     /// <summary>
+    /// Brief details of the operation.
+    /// </summary>
+    public string Details { get; set; }
+    /// <summary>
     /// Unit of the service.
     /// </summary>
     public string ServiceUnit { get; set; }
@@ -113,17 +117,23 @@ public class OperationDto
     /// Withdrawal amount of the operation.
     /// </summary>
     public decimal Withdrawal { get; set; }
+    /// <summary>
+    /// Name of the participant.
+    /// </summary>
+    public string ParticipantName { get; set; }
 
-    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper)
+    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantNames)
     {
         Date = apiDateTimeHelper.Get(operation.Date);
         Service = operation.Service;
         Description = GetServiceDesc(operation.Service);
+        Details = string.Empty;
         ServiceUnit = operation.ServiceUnit;
         Quantity = operation.Quantity;
         Currency = operation.Currency;
         Credit = operation.Credit;
         Withdrawal = operation.Withdrawal;
+        ParticipantName = operation.ParticipantName != null && participantNames.TryGetValue(operation.ParticipantName, out var value) ? value : operation.ParticipantName;
     }
 
     public static string GetServiceDesc(string serviceName)

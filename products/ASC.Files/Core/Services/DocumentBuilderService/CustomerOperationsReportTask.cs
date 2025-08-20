@@ -95,6 +95,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         var tariffService = serviceProvider.GetService<TariffService>();
         var userManager = serviceProvider.GetService<UserManager>();
         var tenantUtil = serviceProvider.GetService<TenantUtil>();
+        var displayUserSettingsHelper = serviceProvider.GetService<DisplayUserSettingsHelper>();
         var tempPath = serviceProvider.GetService<TempPath>();
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -116,13 +117,14 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
         var keys = new[] {
             Resource.AccountingCustomerOperationDate,
-            Resource.AccountingCustomerOperationDescription,
-            Resource.AccountingCustomerOperationService,
-            Resource.AccountingCustomerOperationServiceUnit,
+            Resource.AccountingCustomerOperationType,
+            Resource.AccountingCustomerOperationDetails,
+            Resource.AccountingCustomerOperationContact,
             Resource.AccountingCustomerOperationQuantity,
-            Resource.AccountingCustomerOperationCurrency,
+            Resource.AccountingCustomerOperationServiceUnit,
             Resource.AccountingCustomerOperationCredit,
-            Resource.AccountingCustomerOperationWithdrawal
+            Resource.AccountingCustomerOperationDebit,
+            Resource.AccountingCustomerOperationCurrency
         };
 
         var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
@@ -140,7 +142,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         {
             await writer.WriteAsync(scriptParts[0]);
 
-            var partialRecords = GetCustomerOperationsReportDataAsync(tariffService, tenantUtil, tenant.Id, utcStartDate, utcEndDate, taskData.Credit, taskData.Withdrawal);
+            var partialRecords = GetCustomerOperationsReportDataAsync(tariffService, tenantUtil, displayUserSettingsHelper, tenant.Id, utcStartDate, utcEndDate, taskData.Credit, taskData.Withdrawal);
 
             if (partialRecords != null)
             {
@@ -157,7 +159,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return (scriptFilePath, tempFileName, outputFileName);
     }
 
-    private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(TariffService tariffService, TenantUtil tenantUtil, int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal)
+    private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(TariffService tariffService, TenantUtil tenantUtil, DisplayUserSettingsHelper displayUserSettingsHelper, int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal)
     {
         var offset = 0;
         var limit = 1000;
@@ -172,10 +174,14 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 break;
             }
 
+            var participantNames = await report.GetParticipantNamesAsync(displayUserSettingsHelper);
+
             foreach (var operation in report.Collection)
             {
                 operation.Description = GetServiceDesc(operation.Service);
+                operation.Details = string.Empty;
                 operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
+                operation.ParticipantName = operation.ParticipantName != null && participantNames.TryGetValue(operation.ParticipantName, out var value) ? value : operation.ParticipantName;
 
                 if (string.IsNullOrEmpty(operation.Service))
                 {
@@ -204,12 +210,13 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             {
                 new(record.Date.ToString("G", CultureInfo.InvariantCulture), dateFormat),
                 new(record.Description, "@"),
-                new(record.Service, "@"),
-                new(record.ServiceUnit, "@"),
+                new(record.Details, "@"),
+                new(record.ParticipantName, "@"),
                 new(record.Quantity.ToString(), "General"),
-                new(record.Currency, "@"),
+                new(record.ServiceUnit, "@"),
                 new(record.Credit.ToString(), "0.0000000000"),
-                new(record.Withdrawal.ToString(), "0.0000000000")
+                new(record.Withdrawal.ToString(), "0.0000000000"),
+                new(record.Currency, "@"),
             };
 
             _ = sb.AppendLine(JsonSerializer.Serialize(properties, jsonSerializerOptions) + ",");

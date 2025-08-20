@@ -26,6 +26,8 @@
 
 using System.Collections.Specialized;
 
+using ASC.Web.Core.Users;
+
 namespace ASC.Core.Billing;
 
 [Singleton]
@@ -348,6 +350,27 @@ public class Report
     /// Current page number of the report.
     /// </summary>
     public int CurrentPage { get; set; }
+
+    public async Task<Dictionary<string, string>> GetParticipantNamesAsync(DisplayUserSettingsHelper displayUserSettingsHelper)
+    {
+        var participantNames = new Dictionary<string, string>();
+
+        foreach (var operation in Collection)
+        {
+            if (string.IsNullOrEmpty(operation.ParticipantName) || participantNames.ContainsKey(operation.ParticipantName))
+            {
+                continue;
+            }
+
+            if (Guid.TryParse(operation.ParticipantName, out var userId))
+            {
+                var participantName = await displayUserSettingsHelper.GetFullUserNameAsync(userId);
+                participantNames.Add(operation.ParticipantName, participantName);
+            }
+        }
+
+        return participantNames;
+    }
 }
 
 /// <summary>
@@ -368,6 +391,10 @@ public class Operation
     /// </summary>
     public string Description { get; set; }
     /// <summary>
+    /// Brief details of the operation.
+    /// </summary>
+    public string Details { get; set; }
+    /// <summary>
     /// Unit of the service.
     /// </summary>
     public string ServiceUnit { get; set; }
@@ -387,6 +414,10 @@ public class Operation
     /// Withdrawal amount of the operation.
     /// </summary>
     public decimal Withdrawal { get; set; }
+    /// <summary>
+    /// Name of the participant.
+    /// </summary>
+    public string ParticipantName { get; set; }
 }
 
 /// <summary>

@@ -27,7 +27,6 @@
 using ASC.Files.Core.ApiModels.ResponseDto;
 using ASC.Files.Core.IntegrationEvents.Events;
 using ASC.Files.Core.Services.DocumentBuilderService;
-using ASC.Files.Core.Utils;
 
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -58,6 +57,7 @@ public class PaymentController(
     TenantUtil tenantUtil,
     ApiDateTimeHelper apiDateTimeHelper,
     EmployeeDtoHelper employeeWrapperHelper,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
     IEventBus eventBus,
     CommonLinkUtility commonLinkUtility,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
@@ -814,7 +814,9 @@ public class PaymentController(
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
         var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
 
-        return report == null ? null : new ReportDto(report, apiDateTimeHelper);
+        var participantNames = await report.GetParticipantNamesAsync(displayUserSettingsHelper);
+
+        return report == null ? null : new ReportDto(report, apiDateTimeHelper, participantNames);
     }
 
     /// <summary>

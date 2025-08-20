@@ -1088,16 +1088,10 @@
     <value>Валута</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Дава и час</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Описание</value>
+    <value>Дата</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Количество</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Име на услуга</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Дисково пространство</value>
@@ -1110,9 +1104,6 @@
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Отчет за потребителски операции ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Теглене</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>Групата не може да бъде открита</value>

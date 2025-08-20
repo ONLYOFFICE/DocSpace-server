@@ -61,6 +61,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Contact.
+        /// </summary>
+        public static string AccountingCustomerOperationContact {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationContact", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Credit.
         /// </summary>
         public static string AccountingCustomerOperationCredit {
@@ -79,7 +88,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Date and time.
+        ///   Looks up a localized string similar to Date.
         /// </summary>
         public static string AccountingCustomerOperationDate {
             get {
@@ -88,11 +97,20 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Description.
+        ///   Looks up a localized string similar to Debit.
         /// </summary>
-        public static string AccountingCustomerOperationDescription {
+        public static string AccountingCustomerOperationDebit {
             get {
-                return ResourceManager.GetString("AccountingCustomerOperationDescription", resourceCulture);
+                return ResourceManager.GetString("AccountingCustomerOperationDebit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Details.
+        /// </summary>
+        public static string AccountingCustomerOperationDetails {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationDetails", resourceCulture);
             }
         }
         
@@ -102,15 +120,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationQuantity {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationQuantity", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Service name.
-        /// </summary>
-        public static string AccountingCustomerOperationService {
-            get {
-                return ResourceManager.GetString("AccountingCustomerOperationService", resourceCulture);
             }
         }
         
@@ -160,11 +169,11 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Withdrawal.
+        ///   Looks up a localized string similar to Type.
         /// </summary>
-        public static string AccountingCustomerOperationWithdrawal {
+        public static string AccountingCustomerOperationType {
             get {
-                return ResourceManager.GetString("AccountingCustomerOperationWithdrawal", resourceCulture);
+                return ResourceManager.GetString("AccountingCustomerOperationType", resourceCulture);
             }
         }
         
