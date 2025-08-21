@@ -256,7 +256,10 @@ public class FileDtoHelper(
                 var uri = new Uri(referer);
                 var query = HttpUtility.ParseQueryString(uri.Query);
                 var folderId = query["folder"];
-                contextFolder = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync((T)Convert.ChangeType(folderId, typeof(T)));
+                if (!string.IsNullOrEmpty(folderId))
+                {
+                    contextFolder = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync((T)Convert.ChangeType(folderId, typeof(T)));
+                }
             }
         }
 
