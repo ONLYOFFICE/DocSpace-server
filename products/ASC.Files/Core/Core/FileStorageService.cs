@@ -366,7 +366,8 @@ public class FileStorageService //: IFileStorageService
         var newTask = fileMarker.GetRootFoldersIdMarkedAsNewAsync(parentId);
         var breadCrumbs = await breadCrumbsTask;
 
-        if (breadCrumbs.FirstOrDefault() is Folder<T> { FolderType: FolderType.VirtualRooms } && searchArea == SearchArea.RecentByLinks)
+        var aces = await fileSharing.GetSharedInfoAsync(parentRoom);
+        if (breadCrumbs.FirstOrDefault() is Folder<T> { FolderType: FolderType.VirtualRooms } && !aces.Exists(u => u.Id == authContext.CurrentAccount.ID))
         {
             breadCrumbs = breadCrumbs.Skip(1).ToList();
         }
