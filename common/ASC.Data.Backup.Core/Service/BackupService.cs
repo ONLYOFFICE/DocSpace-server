@@ -645,11 +645,6 @@ public class BackupService(
         {
             throw new BillingException(Resource.ErrorNotAllowedOption);
         }
-
-        if (!coreBaseSettings.Standalone && (!SetupInfo.IsVisibleSettings("Restore") || !quota.AutoBackupRestore))
-        {
-            throw new BillingException(Resource.ErrorNotAllowedOption);
-        }
     }
 
     private async Task<int> GetBackupServiceAccountId()
