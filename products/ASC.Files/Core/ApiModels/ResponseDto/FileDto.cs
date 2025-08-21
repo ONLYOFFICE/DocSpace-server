@@ -286,6 +286,8 @@ public class FileDtoHelper(
             }
 
             result.ViewAccessibility[Accessibility.CanConvert] = false;
+
+            result.Order = "";
         }
         
         return result;
