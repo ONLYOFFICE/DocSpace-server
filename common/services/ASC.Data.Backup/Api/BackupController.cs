@@ -209,15 +209,14 @@ public class BackupController(
             storageParams.TryAdd("subdir", "backup");
         }
 
+        var tenantId = tenantManager.GetCurrentTenantId();
+
         IDistributedLockHandle lockHandle = null;
+        Session billingSession = null;
 
         try
         {
-            var tenantId = tenantManager.GetCurrentTenantId();
-
             lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetFreeBackupsCountCheckKey(tenantId));
-
-            Session billingSession = null;
 
             try
             {
@@ -262,6 +261,15 @@ public class BackupController(
         catch (AccountingPaymentRequiredException)
         {
             throw new BillingException(Resource.ErrorPaymentRequired);
+        }
+        catch (Exception)
+        {
+            if (billingSession != null)
+            {
+                await backupService.CloseCustomerSessionForBackupAsync(tenantId, billingSession.SessionId);
+            }
+
+            throw;
         }
         finally
         {
