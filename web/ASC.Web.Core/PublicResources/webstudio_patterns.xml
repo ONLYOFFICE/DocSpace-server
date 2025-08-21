@@ -242,6 +242,12 @@ $activity.Key
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_set_password|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
+  <!-- password_changed -->
+  <pattern id="password_changed">
+    <subject resource="|subject_password_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_password_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
   <!-- change_phone -->
   <pattern id="change_phone">
     <subject resource="|subject_change_phone|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
@@ -722,6 +728,18 @@ $activity.Key
   <pattern id="user_role_changed">
     <subject resource="|subject_user_role_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_user_role_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- top up wallet error -->
+  <pattern id="top_up_wallet_error">
+    <subject resource="|subject_top_up_wallet_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_top_up_wallet_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- renew subscription rror -->
+  <pattern id="renew_subscription_error">
+    <subject resource="|subject_renew_subscription_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_renew_subscription_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
 </patterns>

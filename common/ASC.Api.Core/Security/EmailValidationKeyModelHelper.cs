@@ -42,6 +42,7 @@ public class EmailValidationKeyModelHelper(
     AuditEventsRepository auditEventsRepository,
     LoginEventsRepository loginEventsRepository,
     TenantUtil tenantUtil,
+    InstanceCrypto instanceCrypto,
     CookiesManager cookiesManager,
     SecurityContext securityContext,
     TenantManager tenantManager)
@@ -73,6 +74,8 @@ public class EmailValidationKeyModelHelper(
 
         request.TryGetValue("first", out var first);
 
+        request.TryGetValue("encemail", out var encEmail);
+
         return new EmailValidationKeyModel
         {
             Email = _email,
@@ -80,13 +83,16 @@ public class EmailValidationKeyModelHelper(
             Key = key,
             Type = cType,
             UiD = userId,
-            First = first
+            First = first,
+            EncEmail = encEmail
         };
     }
 
-    public async Task<ValidationResult> ValidateAsync(EmailValidationKeyModel inDto)
+    public async Task<(ValidationResult, string)> ValidateAsync(EmailValidationKeyModel inDto)
     {
-        var (key, emplType, email, uiD, type, first) = inDto;
+        var (key, emplType, email, uiD, type, first, encEmail) = inDto;
+
+        email = string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(encEmail) ? DecryptEmail(encEmail) : email;
 
         ValidationResult checkKeyResult;
         UserInfo userInfo;
@@ -194,7 +200,7 @@ public class EmailValidationKeyModelHelper(
                 userInfo = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
                 if (userInfo == null || Equals(userInfo, Constants.LostUser) || userInfo.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && authContext.CurrentAccount.ID != uiD || userInfo.Email != email)
                 {
-                    return ValidationResult.Invalid;
+                    return (ValidationResult.Invalid, null);
                 }
 
                 checkKeyResult = provider.ValidateEmailKey(email + type + uiD, key, provider.ValidEmailKeyInterval);
@@ -206,17 +212,21 @@ public class EmailValidationKeyModelHelper(
 
             case ConfirmType.PhoneActivation:
             case ConfirmType.PhoneAuth:
-            case ConfirmType.TfaActivation:
-            case ConfirmType.TfaAuth:
                 checkKeyResult = provider.ValidateEmailKey(email + type + first, key, provider.ValidAuthKeyInterval);
                 break;
+
+            case ConfirmType.TfaActivation:
+            case ConfirmType.TfaAuth:
+                checkKeyResult = provider.ValidateEmailKey(uiD?.ToString() + type + first, key, provider.ValidAuthKeyInterval);
+                break;
+
             case ConfirmType.Auth:
                 var validInterval = DateTime.UtcNow.Add(-provider.ValidAuthKeyInterval);
                 var authLinkActivatedEvent = (await loginEventsRepository.GetByFilterAsync(action: MessageAction.AuthLinkActivated, fromDate: validInterval))
                     .FirstOrDefault(x=> x.Description.Contains(key));
                 if (authLinkActivatedEvent != null)
                 {
-                    return ValidationResult.Invalid;
+                    return (ValidationResult.Invalid, null);
                 }
 
                 checkKeyResult = provider.ValidateEmailKey(email + type + first, key, provider.ValidAuthKeyInterval);
@@ -268,7 +278,7 @@ public class EmailValidationKeyModelHelper(
                 break;
         }
 
-        return checkKeyResult;
+        return (checkKeyResult, checkKeyResult == ValidationResult.Ok ? email : null);
 
         async Task<bool> CheckOwnerRights(string email)
         {
@@ -277,7 +287,12 @@ public class EmailValidationKeyModelHelper(
             return ownerId.Equals(user.Id);
         }
     }
-    
+
+    public string DecryptEmail(string encryptedEmail)
+    {
+        return instanceCrypto.Decrypt(encryptedEmail.Base64FromUrlSafe());
+    }
+
     private static Dictionary<string, StringValues> ParseQuery(string queryString)
     {
         var result = ParseNullableQuery(queryString);

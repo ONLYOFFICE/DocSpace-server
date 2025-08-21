@@ -991,13 +991,16 @@
     <value>Customer operations report downloaded</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
-    <value>Customer wallet topped up</value>
+    <value>Customer wallet topped up: {0}</value>
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>Customer wallet top up settings updated</value>
   </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
-    <value>Customer subscription updated</value>
+    <value>Customer subscription updated: {0}</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Promotional banners visibility settings changed</value>
   </data>
   <data name="LocationCol" xml:space="preserve">
     <value>Location</value>

@@ -59,6 +59,7 @@ public static class Actions
     public static readonly INotifyAction ActivateEmail = new NotifyAction("activate_email", "activate_email");
     public static readonly INotifyAction EmailChangeV115 = new NotifyAction("change_email_v115", "change_email_v115");
     public static readonly INotifyAction PasswordChangeV115 = new NotifyAction("change_password_v115", "change_password_v115");
+    public static readonly INotifyAction PasswordChanged = new NotifyAction("password_changed", "password_changed");
     public static readonly INotifyAction PasswordSet = new NotifyAction("set_password", "set_password");
     public static readonly INotifyAction PhoneChange = new NotifyAction("change_phone", "change_phone");
     public static readonly INotifyAction TfaChange = new NotifyAction("change_tfa", "change_tfa");
@@ -158,4 +159,7 @@ public static class Actions
 
     public static readonly INotifyAction UserTypeChanged = new NotifyAction("user_type_changed");
     public static readonly INotifyAction UserRoleChanged = new NotifyAction("user_role_changed");
+
+    public static readonly INotifyAction TopUpWalletError = new NotifyAction("top_up_wallet_error");
+    public static readonly INotifyAction RenewSubscriptionError = new NotifyAction("renew_subscription_error");
 }

@@ -75,6 +75,12 @@ public class Tariff
     [ProtoMember(7)]
     public List<Quota> Quotas { get; set; }
 
+    /// <summary>
+    /// The list of overdue tariff quotas.
+    /// </summary>
+    [ProtoMember(7)]
+    public List<Quota> OverdueQuotas { get; set; }
+
     public override int GetHashCode()
     {
         return DueDate.GetHashCode();
@@ -131,6 +137,18 @@ public class Quota : IEquatable<Quota>
     [ProtoMember(5)]
     public int? NextQuantity { get; set; }
 
+    /// <summary>
+    /// The quota state.
+    /// </summary>
+    [ProtoMember(6)]
+    public QuotaState? State
+    {
+        get
+        {
+            return DueDate.HasValue ? DueDate.Value < DateTime.UtcNow ? QuotaState.Overdue : QuotaState.Active : null;
+        }
+    }
+
     public Quota()
     {
     }
@@ -154,4 +172,16 @@ public class Quota : IEquatable<Quota>
     {
         return other != null && other.Id == Id && other.Quantity == Quantity && other.Wallet == Wallet && other.DueDate == DueDate && other.NextQuantity == NextQuantity;
     }
+}
+
+/// <summary>
+/// The quota state.
+/// </summary>
+public enum QuotaState
+{
+    [SwaggerEnum("Active")]
+    Active,
+
+    [SwaggerEnum("Overdue")]
+    Overdue
 }

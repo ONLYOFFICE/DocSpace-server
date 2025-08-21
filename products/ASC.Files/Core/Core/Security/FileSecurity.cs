@@ -145,31 +145,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     { SubjectType.Group, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.FillForms, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.FillForms, FileShare.None] }
                 }.ToFrozenDictionary()
-            },
-            {
-                FolderType.AiRoom, new Dictionary<SubjectType, HashSet<FileShare>>
-                {
-                    {
-                        SubjectType.User, [
-                            FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.Review,
-                            FileShare.Comment, FileShare.Read, FileShare.None
-                        ]
-                    },
-                    {
-                        SubjectType.Group, [
-                            FileShare.ContentCreator, FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None
-                        ]
-                    },
-                    {
-                        SubjectType.InvitationLink, [
-                            FileShare.ContentCreator, FileShare.Editing, FileShare.Review,
-                            FileShare.Comment, FileShare.Read, FileShare.None
-                        ]
-                    },
-                    { SubjectType.ExternalLink, [FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None] },
-                    { SubjectType.PrimaryExternalLink, [FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None] }
-                }.ToFrozenDictionary()
-            },
+            }
         }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<EmployeeType, HashSet<FileShare>> AvailableUserAccesses = new Dictionary<EmployeeType, HashSet<FileShare>>
@@ -833,7 +809,6 @@ public class FileSecurity(IDaoFactory daoFactory,
             FolderType.EditingRoom => FileShare.ContentCreator,
             FolderType.PublicRoom => FileShare.ContentCreator,
             FolderType.VirtualDataRoom => FileShare.ContentCreator,
-            FolderType.AiRoom => FileShare.ContentCreator,
             _ => FileShare.None
         };
     }
@@ -1699,11 +1674,19 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
+                        if (e.Access is FileShare.RoomManager)
                         {
                             return true;
                         }
+                        
+                        if (e.Access is FileShare.ContentCreator)
+                        {
+                            var tagDao = daoFactory.GetTagDao<T>();
+                            var tagLocked = await tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
 
+                            return tagLocked == null || tagLocked.Owner == authContext.CurrentAccount.ID;
+                        }
+                        
                         break;
                 }
 
@@ -2137,15 +2120,16 @@ public class FileSecurity(IDaoFactory daoFactory,
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
-        var roomsEntries = storageFilter == StorageFilter.ThirdParty 
-            ? [] 
-            : await folderDao.GetRoomsAsync(rootFoldersIds, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, 
-                subjectEntries, quotaFilter).ToListAsync();
+        var roomsEntries = storageFilter == StorageFilter.ThirdParty ? 
+            [] : 
+            await folderDao.GetRoomsAsync(rootFoldersIds, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries, quotaFilter)
+                .ToListAsync();
 
         var thirdPartyRoomsEntries = storageFilter == StorageFilter.Internal ?
-            []
-            : await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, 
-                subjectEntries).ToListAsync();
+            [] : 
+            await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries)
+                .Distinct()
+                .ToListAsync();
 
         entries.AddRange(roomsEntries.Select(x => SetRecord(x, internalRecords)));
         entries.AddRange(thirdPartyRoomsEntries.Select(x => SetRecord(x, thirdPartyRecords)));
@@ -2293,13 +2277,16 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         var rooms = storageFilter == StorageFilter.ThirdParty
             ? []
-            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider,
-                subjectFilter, subjectEntries, rootFoldersIds).Where(r => Filter(r, internalRecords)).ToListAsync();
+            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries, rootFoldersIds)
+                .Where(r => Filter(r, internalRecords))
+                .ToListAsync();
 
         var thirdPartyRooms = storageFilter == StorageFilter.Internal
             ? []
-            : await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, thirdPartyRecords.Keys, filterTypes, tagNames, subjectId, search, withoutTags,
-                excludeSubject, provider, subjectFilter, subjectEntries).Where(r => Filter(r, thirdPartyRecords)).ToListAsync();
+            : await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, thirdPartyRecords.Keys, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries)
+                .Where(r => Filter(r, thirdPartyRecords))
+                .Distinct()
+                .ToListAsync();
 
         if (withSubfolders && (filterTypes == null || !filterTypes.Contains(FilterType.FoldersOnly)))
         {

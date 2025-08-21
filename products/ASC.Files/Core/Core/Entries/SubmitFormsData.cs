@@ -103,7 +103,7 @@ public class DbFormsItemDataSearch : SubmitFormsData, ISearchItem
     /// <summary>
     /// The form index name.
     /// </summary>
-    [OpenSearch.Client.Ignore] 
+    [Ignore] 
     public string IndexName => "forms_data";
 
     public Expression<Func<ISearchItem, object[]>> GetSearchContentFields(SearchSettingsHelper searchSettings)

@@ -16,14 +16,14 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Box.V2.Core" Version="5.8.0" />
-    <PackageReference Include="DocuSign.eSign.dll" Version="8.0.2" />
+    <PackageReference Include="DocuSign.eSign.dll" Version="8.3.0" />
     <PackageReference Include="Dropbox.Api" Version="7.0.0" />
-    <PackageReference Include="Google.Apis.Drive.v3" Version="1.69.0.3703" />
-    <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="5.0.0" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.70.0.3834" />
+    <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="6.0.0" />
     <PackageReference Include="Microsoft.OneDriveSDK" Version="2.1.0" />
     <PackageReference Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
     <PackageReference Include="SharpZipLib" Version="2.4.3" />
-    <PackageReference Include="WebDav.Client" Version="2.8.0" />
+    <PackageReference Include="WebDav.Client" Version="2.9.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />

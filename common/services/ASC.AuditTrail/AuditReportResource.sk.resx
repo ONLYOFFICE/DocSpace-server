@@ -913,4 +913,19 @@
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>Súbor: {0}. Vlastný filter povolený</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Odkaz na autorizáciu bol aktivovaný</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Bola vykonaná operácia zákazníka</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Bola stiahnutá správa o operáciách zákazníka</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Predplatné zákazníka bolo aktualizované: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Peňaženka zákazníka bola dobitá: {0}</value>
+  </data>
 </root>

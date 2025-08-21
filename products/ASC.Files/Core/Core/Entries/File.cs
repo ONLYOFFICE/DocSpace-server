@@ -154,7 +154,8 @@ public class File<T> : FileEntry<T>
                     return FilterType.MediaOnly;
                 case FileType.Pdf:
                     return this.IsForm ? FilterType.PdfForm : FilterType.Pdf;
-                   
+                case FileType.Diagram:
+                    return FilterType.DiagramsOnly;
             }
 
             return FilterType.None;

@@ -28,6 +28,7 @@ namespace ASC.Files.Core.Helpers;
 
 [Scope]
 public class DocumentServiceLicense(ICache cache,
+    ResiliencePipelineProvider<string> resiliencePipelineProvider,
     CoreBaseSettings coreBaseSettings,
     FilesLinkUtility filesLinkUtility,
     IHttpClientFactory clientFactory)
@@ -73,24 +74,22 @@ public class DocumentServiceLicense(ICache cache,
         return commandResponse;
     }
 
-    public async Task<(bool, string)> ValidateLicense(License license)
+    public async Task<LicenseValidationResult> ValidateLicense(License license)
     {
-        var attempt = 0;
+        var pipeline = resiliencePipelineProvider.GetPipeline<LicenseValidationResult>(LicenseResiliencePipelineName);
 
-        while (attempt <= 3)
+        var response = await pipeline.ExecuteAsync(async (_) =>
         {
-            await Task.Delay((int)(Math.Pow(2, attempt) * 1000));
-
             var commandResponse = await GetDocumentServiceLicenseAsync(false);
 
             if (commandResponse == null)
             {
-                return (true, null);
+                return new LicenseValidationResult(true, null);
             }
 
             if (commandResponse.Error != ErrorTypes.NoError)
             {
-                return (false, commandResponse.ErrorString);
+                return new LicenseValidationResult(false, commandResponse.ErrorString);
             }
 
             if (commandResponse.License.ResourceKey == license.ResourceKey ||
@@ -98,21 +97,19 @@ public class DocumentServiceLicense(ICache cache,
             {
                 if (commandResponse.Server == null)
                 {
-                    return (false, "Server is null");
+                    return new LicenseValidationResult(false, "Server is null");
                 }
 
                 return commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.Success ||
                     commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.SuccessLimit
-                    ? (true, null)
-                    : (false, $"ResultType is {commandResponse.Server.ResultType}");
+                    ? new LicenseValidationResult(true, null)
+                    : new LicenseValidationResult(false, $"ResultType is {commandResponse.Server.ResultType}");
             }
-            else
-            {
-                attempt += 1;
-            }
-        }
 
-        return (false,  $"{attempt} failed attempts");
+            return null;
+        });
+
+        return response ?? new LicenseValidationResult(false, "Failure after several attempts");
     }
 
     public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync()

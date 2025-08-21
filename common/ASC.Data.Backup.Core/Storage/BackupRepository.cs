@@ -27,8 +27,7 @@
 namespace ASC.Data.Backup.Storage;
 
 [Scope]
-public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory, CreatorDbContext creatorDbContext)
-    : IBackupRepository
+public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory, CreatorDbContext creatorDbContext) : IBackupRepository
 {
     public async Task SaveBackupRecordAsync(BackupRecord backupRecord)
     {
@@ -104,10 +103,10 @@ public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory
         await backupContext.SaveChangesAsync();
     }
 
-    public async Task DeleteBackupScheduleAsync(int tenantId)
+    public async Task DeleteBackupScheduleAsync(int tenantId, string storageBasePath = null)
     {
         await using var backupContext = await dbContextFactory.CreateDbContextAsync();
-        await Queries.DeleteSchedulesAsync(backupContext, tenantId);
+        await Queries.DeleteSchedulesAsync(backupContext, tenantId, storageBasePath);
     }
 
     public async Task<List<BackupSchedule>> GetBackupSchedulesAsync()
@@ -170,11 +169,12 @@ static file class Queries
                     
                     .Where(b => b.TenantId == tenantId));
 
-    public static readonly Func<BackupsContext, int, Task<int>> DeleteSchedulesAsync =
+    public static readonly Func<BackupsContext, int, string, Task<int>> DeleteSchedulesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (BackupsContext ctx, int tenantId) =>
+            (BackupsContext ctx, int tenantId, string storageBasePath) =>
                 ctx.Schedules
                     .Where(s => s.TenantId == tenantId)
+                    .Where(r => string.IsNullOrEmpty(storageBasePath) || r.StorageBasePath.StartsWith(storageBasePath))
                     .ExecuteDelete());
 
     public static readonly Func<BackupsContext, IAsyncEnumerable<BackupSchedule>> BackupSchedulesAsync =

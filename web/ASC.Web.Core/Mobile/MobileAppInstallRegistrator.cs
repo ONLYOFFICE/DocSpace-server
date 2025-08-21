@@ -31,6 +31,12 @@ public class MobileAppInstallRegistrator(IDbContextFactory<CustomDbContext> dbCo
 {
     public async Task RegisterInstallAsync(string userEmail, MobileAppType appType)
     {
+        var isRegistered = await IsInstallRegisteredAsync(userEmail, appType);
+        if (isRegistered)
+        {
+            return;
+        }
+
         var mai = new MobileAppInstall
         {
             AppType = (int)appType,

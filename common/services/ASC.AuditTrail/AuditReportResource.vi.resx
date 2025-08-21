@@ -913,4 +913,31 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook đã được cập nhật: {0}</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Liên kết ủy quyền đã được kích hoạt</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Hoạt động của khách hàng đã được thực hiện</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Đã tải báo cáo hoạt động khách hàng xuống</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Đã cập nhật gói đăng ký của khách hàng: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Ví của khách hang đã được nạp tiền: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Đã cập nhật cài đặt nạp tiền vào ví của khách hàng</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Xác thực LDAP đã bị vô hiệu hóa</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Xác thực LDAP được bật</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Đồng bộ hóa LDAP đã hoàn tất</value>
+  </data>
 </root>

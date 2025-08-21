@@ -84,4 +84,33 @@ public class UsersWithRoomSharedRequestDto<T>
     /// </summary>
     [FromQuery(Name = "employeeTypes")]
     public IEnumerable<EmployeeType> EmployeeTypes { get; set; } = new List<EmployeeType>();
+    
+    /// <summary>
+    /// The maximum number of users to be retrieved in the request.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The zero-based index of the first record to retrieve in a paged query.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+    
+    /// <summary>
+    /// The character or string used to separate multiple filter values in a filtering query.
+    /// </summary>
+    /// <remarks>
+    /// This property defines the delimiter applied when multiple filter criteria are provided.
+    /// It allows the request to parse and handle multiple filtering values effectively.
+    /// </remarks>
+    [FromQuery(Name = "filterSeparator")]
+    public string FilterSeparator { get; set; }
+
+    /// <summary>
+    /// The filter text value used for searching or filtering user results.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

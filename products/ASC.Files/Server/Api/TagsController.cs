@@ -53,8 +53,9 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "New file information", typeof(FileDto<string>))]
     [HttpPost("file/{fileId}/recent")]
-    public async Task<FileDto<T>> AddToRecentAsync(FileIdRequestDto<T> inDto)
+    public async Task<FileDto<T>> AddFileToRecent(FileIdRequestDto<T> inDto)
     {
         var file = await fileStorageService.GetFileAsync(inDto.FileId, -1).NotFoundIfNull("File not found");
 
@@ -73,7 +74,7 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     [SwaggerResponse(200, "Boolean value: true - the file is favorite, false - the file is not favorite", typeof(bool))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpGet("favorites/{fileId}")]
-    public async Task<bool> ToggleFileFavoriteAsync(ToggleFileFavoriteRequestDto<T> inDto)
+    public async Task<bool> ToggleFileFavorite(ToggleFileFavoriteRequestDto<T> inDto)
     {
         return await fileStorageService.ToggleFileFavoriteAsync(inDto.FileId, inDto.Favorite);
     }
@@ -94,7 +95,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPost("favorites")]
-    public async Task<bool> AddFavoritesAsync(BaseBatchRequestDto inDto)
+    public async Task<bool> AddFavorites(BaseBatchRequestDto inDto)
     {
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
@@ -113,7 +114,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPost("templates")]
-    public async Task<bool> AddTemplatesAsync(TemplatesRequestDto inDto)
+    public async Task<bool> AddTemplates(TemplatesRequestDto inDto)
     {
         await fileStorageService.AddToTemplatesAsync(inDto.FileIds);
 
@@ -130,9 +131,9 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("favorites")]
     [Consumes("application/json")]
-    public async Task<bool> DeleteFavoritesFromBodyAsync([FromBody] BaseBatchRequestDto inDto)
+    public async Task<bool> DeleteFavoritesFromBody([FromBody] BaseBatchRequestDto inDto)
     {
-        return await DeleteFavoritesAsync(inDto);
+        return await DeleteFavorites(inDto);
     }
 
     /// <summary>
@@ -144,9 +145,9 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("favorites")]
-    public async Task<bool> DeleteFavoritesFromQueryAsync([FromQuery][ModelBinder(BinderType = typeof(BaseBatchModelBinder))] BaseBatchRequestDto inDto)
+    public async Task<bool> DeleteFavoritesFromQuery([FromQuery][ModelBinder(BinderType = typeof(BaseBatchModelBinder))] BaseBatchRequestDto inDto)
     {
-        return await DeleteFavoritesAsync(inDto);
+        return await DeleteFavorites(inDto);
     }
 
     /// <summary>
@@ -157,7 +158,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("templates")]
-    public async Task<bool> DeleteTemplatesAsync(DeleteTemplateFilesRequestDto inDto)
+    public async Task<bool> DeleteTemplates(DeleteTemplateFilesRequestDto inDto)
     {
         await fileStorageService.DeleteTemplatesAsync(inDto.FileIds);
 
@@ -172,7 +173,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     [Tags("Files / Files")]
     [SwaggerResponse(200, "No content", typeof(NoContentResult))]
     [HttpDelete("recent")]
-    public async Task<NoContentResult> DeleteRecentAsync(BaseBatchRequestDto inDto)
+    public async Task<NoContentResult> DeleteRecent(BaseBatchRequestDto inDto)
     {
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, _) = FileOperationsManager.GetIds(inDto.FileIds);
@@ -185,7 +186,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
         return NoContent();
     }
 
-    private async Task<bool> DeleteFavoritesAsync(BaseBatchRequestDto inDto)
+    private async Task<bool> DeleteFavorites(BaseBatchRequestDto inDto)
     {
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);

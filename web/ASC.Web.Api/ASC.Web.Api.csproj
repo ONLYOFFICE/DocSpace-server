@@ -13,6 +13,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>none</DebugType>
@@ -40,6 +41,7 @@
       <EmbeddedResource Include="img\room.svg" />
       <EmbeddedResource Include="img\sso.svg" />
       <EmbeddedResource Include="img\thirdparty.svg" />
+      <EmbeddedResource Include="img\total_size_wallet.svg" />
       <EmbeddedResource Include="img\total_size.svg" />
       <EmbeddedResource Include="img\users.svg" />
       <EmbeddedResource Include="img\customization.svg" />
@@ -153,5 +155,10 @@
     <EmbeddedResource Update="Core\AuditResource.ro.resx">
       <DependentUpon>AuditResource.resx</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\.dockerignore">
+      <Link>.dockerignore</Link>
+    </Content>
   </ItemGroup>
 </Project>

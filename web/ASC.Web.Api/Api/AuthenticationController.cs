@@ -62,7 +62,6 @@ public class AuthenticationController(
     TimeZoneConverter timeZoneConverter,
     SmsKeyStorage smsKeyStorage,
     CommonLinkUtility commonLinkUtility,
-    ApiContext apiContext,
     AuthContext authContext,
     CookieStorage cookieStorage,
     QuotaSocketManager quotaSocketManager,
@@ -183,7 +182,7 @@ public class AuthenticationController(
     [SwaggerResponse(429, "Too many login attempts. Please try again later")]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost]
-    public async Task<AuthenticationTokenDto> AuthenticateMeAsync(AuthRequestsDto inDto)
+    public async Task<AuthenticationTokenDto> AuthenticateMe(AuthRequestsDto inDto)
     {
         var wrapper = await GetUserAsync(inDto);
         var viaEmail = wrapper.ViaEmail;
@@ -228,7 +227,7 @@ public class AuthenticationController(
             
             if (tfaExpired || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
             {
-                var (urlActivation, keyActivation) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, ConfirmType.TfaActivation);
+                var (urlActivation, keyActivation) = commonLinkUtility.GetConfirmationUrlAndKey(user.Id, ConfirmType.TfaActivation);
                 await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyActivation, true, $"_{ConfirmType.TfaActivation}");
                 return new AuthenticationTokenDto
                 {
@@ -238,7 +237,7 @@ public class AuthenticationController(
                 };
             }
 
-            var (urlAuth, keyAuth) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, ConfirmType.TfaAuth);
+            var (urlAuth, keyAuth) = commonLinkUtility.GetConfirmationUrlAndKey(user.Id, ConfirmType.TfaAuth);
             await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyAuth, true, $"_{ConfirmType.TfaAuth}");
             return new AuthenticationTokenDto
             {
@@ -296,7 +295,7 @@ public class AuthenticationController(
     [SwaggerResponse(200, "Ok", typeof(string))]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost("logout")]
-    public async Task<string> LogoutAsync()
+    public async Task<string> Logout()
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
         var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
@@ -354,10 +353,15 @@ public class AuthenticationController(
 
         if (inDto.Type != ConfirmType.LinkInvite)
         {
-            return new ConfirmDto { Result = await emailValidationKeyModelHelper.ValidateAsync(inDto)};
+            var (validationResult, validationEmail) = await emailValidationKeyModelHelper.ValidateAsync(inDto);
+            return new ConfirmDto { Result = validationResult, Email = validationEmail };
         }
 
-        var result = await invitationService.ConfirmAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.RoomId, inDto.UiD);
+        var email = string.IsNullOrEmpty(inDto.Email) && !string.IsNullOrEmpty(inDto.EncEmail)
+            ? emailValidationKeyModelHelper.DecryptEmail(inDto.EncEmail)
+            : inDto.Email;
+
+        var result = await invitationService.ConfirmAsync(inDto.Key, email, inDto.EmplType ?? default, inDto.RoomId, inDto.UiD);
 
         return mapper.Map<Validation, ConfirmDto>(result);
     }
@@ -375,9 +379,9 @@ public class AuthenticationController(
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PhoneActivation")]
     [HttpPost("setphone")]
-    public async Task<AuthenticationTokenDto> SaveMobilePhoneAsync(MobileRequestsDto inDto)
+    public async Task<AuthenticationTokenDto> SaveMobilePhone(MobileRequestsDto inDto)
     {
-        await apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         inDto.MobilePhone = await smsManager.SaveMobilePhoneAsync(user, inDto.MobilePhone);
         messageService.Send(MessageAction.UserUpdatedMobileNumber, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper), inDto.MobilePhone);
@@ -404,7 +408,7 @@ public class AuthenticationController(
     [SwaggerResponse(429, "Too many login attempts. Please try again later")]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost("sendsms")]
-    public async Task<AuthenticationTokenDto> SendSmsCodeAsync(AuthRequestsDto inDto)
+    public async Task<AuthenticationTokenDto> SendSmsCode(AuthRequestsDto inDto)
     {
         var user = (await GetUserAsync(inDto)).UserInfo;
         await smsManager.PutAuthCodeAsync(user, true);
@@ -432,8 +436,8 @@ public class AuthenticationController(
             if (inDto.ConfirmData != null)
             {
                 var email = inDto.ConfirmData.Email;
-                    
-                var checkKeyResult = await emailValidationKeyModelHelper.ValidateAsync(new EmailValidationKeyModel { Key = inDto.ConfirmData.Key, Email = email, Type = ConfirmType.Auth, First = inDto.ConfirmData.First.ToString() });
+
+                var (checkKeyResult, _) = await emailValidationKeyModelHelper.ValidateAsync(new EmailValidationKeyModel { Key = inDto.ConfirmData.Key, Email = email, Type = ConfirmType.Auth, First = inDto.ConfirmData.First.ToString() });
 
                 if (checkKeyResult == ValidationResult.Ok)
                 {

@@ -94,7 +94,8 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.DevToolsAccessSettingsChanged,
                     MessageAction.WebhookUpdated,
                     MessageAction.ApiKeyUpdated,
-                    MessageAction.CustomerWalletToppedUp, MessageAction.CustomerWalletTopUpSettingsUpdated, MessageAction.CustomerSubscriptionUpdated
+                    MessageAction.CustomerWalletToppedUp, MessageAction.CustomerWalletTopUpSettingsUpdated, MessageAction.CustomerSubscriptionUpdated,
+                    MessageAction.BannerSettingsChanged
                 ]
             },
             {

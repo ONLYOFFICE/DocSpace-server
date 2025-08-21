@@ -27,7 +27,6 @@
 extern alias ASCWebApi;
 extern alias ASCPeople;
 extern alias ASCFilesService;
-using ASC.Files.Tests.Factory;
 
 namespace ASC.Files.Tests;
 

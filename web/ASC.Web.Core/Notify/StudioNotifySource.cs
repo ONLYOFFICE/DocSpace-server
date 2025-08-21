@@ -63,6 +63,7 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.EmailChangeV115,
                 Actions.PasswordChangeV115,
                 Actions.PasswordSet,
+                Actions.PasswordChanged,
                 Actions.PhoneChange,
                 Actions.TfaChange,
                 Actions.MigrationPortalStart,
@@ -158,7 +159,10 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.DeveloperAdminPaymentWarningGracePeriodExpiration,
 
                 Actions.UserTypeChanged,
-                Actions.UserRoleChanged
+                Actions.UserRoleChanged,
+
+                Actions.TopUpWalletError,
+                Actions.RenewSubscriptionError
             );
     }
 

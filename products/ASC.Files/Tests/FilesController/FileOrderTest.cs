@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.Factory;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -43,7 +41,7 @@ public class FileOrderTest(
         await _filesClient.Authenticate(Initializer.Owner);
         
         // Create a test room and multiple files
-        var virtualRoom = await CreateVirtualRoom("ordering_test_folder",Initializer.Owner);
+        var virtualRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
         var file1 = await CreateFile("file1.docx", virtualRoom.Id);
         var file2 = await CreateFile("file2.docx", virtualRoom.Id);
         var file3 = await CreateFile("file3.docx", virtualRoom.Id);
@@ -59,14 +57,14 @@ public class FileOrderTest(
         var orderRequest = new OrdersRequestDtoInteger(orderItems);
         
         // Act
-        var result = (await _filesFilesApi.SetFilesOrderAsync(orderRequest, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.SetFilesOrderAsync(orderRequest, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
         result.Should().HaveCount(3);
         
         // Verify folder content to ensure ordering is applied
-        var folderContent = (await _filesFoldersApi.GetFolderByFolderIdAsync(virtualRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var folderContent = (await _foldersApi.GetFolderByFolderIdAsync(virtualRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Files should be ordered according to our specification
         // The first file in the list should be file2 (order 1)
@@ -81,21 +79,20 @@ public class FileOrderTest(
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
-        
-        var file = await CreateFile("file_to_order.docx", FolderType.USER, Initializer.Owner);
+        var virtualRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+        var file = await CreateFile("file_to_order.docx", virtualRoom.Id);
         var newOrder = 10; // Arbitrary order number
         
         // Act
         var orderParams = new OrderRequestDto(newOrder);
-        var result = (await _filesFilesApi.SetOrderFileAsync(file.Id, orderParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.SetFileOrderAsync(file.Id, orderParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
         result.Id.Should().Be(file.Id);
         
         // Get folder content to verify order
-        var userFolderId = await GetUserFolderIdAsync(Initializer.Owner);
-        var folderContent = (await _filesFoldersApi.GetFolderByFolderIdAsync(userFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var folderContent = (await _foldersApi.GetFolderByFolderIdAsync(virtualRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Find our file in the folder content
         var updatedFile = folderContent.Files.FirstOrDefault(f => f.Title == file.Title);
@@ -112,7 +109,7 @@ public class FileOrderTest(
         await _filesClient.Authenticate(Initializer.Owner);
         
         // Create a test folder with mixed content (files and subfolders)
-        var virtualRoom = await CreateVirtualRoom("ordering_test_folder",Initializer.Owner);
+        var virtualRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
         var subfolder1 = await CreateFolder("subfolder1", virtualRoom.Id);
         var file1 = await CreateFile("file1.docx", virtualRoom.Id);
         var subfolder2 = await CreateFolder("subfolder2", virtualRoom.Id);
@@ -130,14 +127,14 @@ public class FileOrderTest(
         var orderRequest = new OrdersRequestDtoInteger(orderItems);
         
         // Act
-        var result = (await _filesFilesApi.SetFilesOrderAsync(orderRequest, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.SetFilesOrderAsync(orderRequest, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
         result.Should().HaveCount(4);
         
         // Verify folder content to ensure ordering is applied
-        var folderContent = (await _filesFoldersApi.GetFolderByFolderIdAsync(virtualRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var folderContent = (await _foldersApi.GetFolderByFolderIdAsync(virtualRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Check file ordering
         folderContent.Files.Should().HaveCount(2);
@@ -156,8 +153,10 @@ public class FileOrderTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
+        var virtualRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+        
         // Create a valid file
-        var validFile = await CreateFile("valid_file.docx", FolderType.USER, Initializer.Owner);
+        var validFile = await CreateFile("valid_file.docx", virtualRoom.Id);
         
         // Create order items with one valid and one invalid ID
         var orderItems = new List<OrdersItemRequestDtoInteger>
@@ -170,7 +169,7 @@ public class FileOrderTest(
         
         // Act & Assert
         await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesFilesApi.SetFilesOrderAsync(
+            async () => await _filesApi.SetFilesOrderAsync(
                 orderRequest, 
                 TestContext.Current.CancellationToken));
     }

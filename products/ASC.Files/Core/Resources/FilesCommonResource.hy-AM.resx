@@ -123,14 +123,8 @@
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Մեկնաբանություն</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Համագործակցող</value>
-  </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Պատվերով զտիչ</value>
-  </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Խմբագրիչ</value>
   </data>
   <data name="AceStatusEnum_FillForms" xml:space="preserve">
     <value>Ձևաթղթերի լրացում</value>
@@ -230,9 +224,6 @@
   </data>
   <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Փաստաթղթերի ծառայությունում սխալ է տեղի ունեցել</value>
-  </data>
-  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
-    <value>Ֆայլը բացվում է խմբագրման համար՝{0}. Ներկայումս համատեղ խմբագրման գործառույթը չի աջակցվում այս ֆայլի ձևաչափի համար.</value>
   </data>
   <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>Ֆայլը բաց է բջջային հավելվածում խմբագրելու համար{0}</value>
@@ -369,14 +360,8 @@
   <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
     <value>Այս մատակարարն արդեն միացված է սենյակին</value>
   </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>Դուք բավարար թույլտվություն չունեք արխիվացնելու սենյակը</value>
-  </data>
   <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
     <value>Դուք այս պանակում պատճենելու թույլտվություն չունեք</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Դուք սենյակը խմբագրելու թույլտվություն չունեք</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
     <value>Դուք այս պանակ տեղափոխվելու թույլտվություն չունեք</value>
@@ -430,30 +415,6 @@
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Ստեղծեք և խմբագրեք ձեր սեփական փաստաթղթերը, ինչպես նաև համօգտագործվող փաստաթղթերը՝ համապատասխան մուտքի իրավունքով|Տրամադրեք այլ օգտատերերին կարդալու/խմբագրելու հնարավորություն փաստաթղթեր և թղթապանակներ|Կցել Dropbox-ը, Box-ը և այլ հաշիվները «Փաստաթղթեր» բաժնում</value>
   </data>
-  <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>Համագործակցող</value>
-  </data>
-  <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Մեկնաբան</value>
-  </data>
-  <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>DocSpace ադմինիստրատոր</value>
-  </data>
-  <data name="RoleEnum_Editing" xml:space="preserve">
-    <value>Խմբագիր</value>
-  </data>
-  <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>Ձևի լցոնիչ</value>
-  </data>
-  <data name="RoleEnum_Read" xml:space="preserve">
-    <value>Դիտող</value>
-  </data>
-  <data name="RoleEnum_Review" xml:space="preserve">
-    <value>Վերանայող</value>
-  </data>
-  <data name="RoleEnum_User" xml:space="preserve">
-    <value>Օգտատեր</value>
-  </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Անուն</value>
   </data>
@@ -463,17 +424,53 @@
   <data name="UnlockComment" xml:space="preserve">
     <value>Ֆայլն ապակողպված է</value>
   </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Համօգտագործվող հղում</value>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Խմբագրիչ</value>
   </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Հրավերի հղում</value>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Դուք սենյակը խմբագրելու թույլտվություն չունեք</value>
+  </data>
+  <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
+    <value>DocSpace ադմինիստրատոր</value>
+  </data>
+  <data name="RoleEnum_Editing" xml:space="preserve">
+    <value>Խմբագիր</value>
+  </data>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>Օգտատեր</value>
+  </data>
+  <data name="RoleEnum_Read" xml:space="preserve">
+    <value>Դիտող</value>
+  </data>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>Մեկնաբան</value>
+  </data>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>Ձևի լցոնիչ</value>
+  </data>
+  <data name="RoleEnum_Review" xml:space="preserve">
+    <value>Վերանայող</value>
+  </data>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>Համագործակցող</value>
+  </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Համագործակցող</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>Դուք բավարար թույլտվություն չունեք արխիվացնելու սենյակը</value>
   </data>
   <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
     <value>Հղումների առավելագույն քանակը չի կարող գերազանցել {0}-ը</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Դուք չափազանց շատ անգամներ եք փորձել մուտքագրել ձեր գաղտնաբառը: Խնդրում ենք փորձեք մի փոքր ուշ</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Հրավերի հղում</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Համօգտագործվող հղում</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Հեղինակ</value>
@@ -489,9 +486,6 @@
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Արտահանման հեղինակ</value>
-  </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Թղթապանակ</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Ինդեքս</value>
@@ -517,11 +511,26 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Տեսակ</value>
   </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Թղթապանակ</value>
+  </data>
   <data name="Date" xml:space="preserve">
     <value>Ամսաթիվ</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Օգտատեր</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Հղում դեպի ձև</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Բացել ֆայլը</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Ֆայլը չի կարող վերբեռնվել այս սենյակ: Խնդրում ենք փորձել վերբեռնել {0} PDF ձևը:</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Հղում լրացնելու համար</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
     <value>Մի քանի ֆայլ տեղափոխելը Ձևաթղթերի լրացման սենյակ չի աջակցվում: Միանգամից տեղափոխեք մեկ {0} PDF ձև:</value>
@@ -532,23 +541,11 @@
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
     <value>Ֆայլը չի կարող տեղափոխվել այս սենյակ: Խնդրում ենք փորձել տեղափոխել {0} PDF ձևը:</value>
   </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Ֆայլը չի կարող վերբեռնվել այս սենյակ: Խնդրում ենք փորձել վերբեռնել {0} PDF ձևը:</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Հղում լրացնելու համար</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Հղում դեպի ձև</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Ձևի համարը</value>
   </data>
   <data name="ExternalUser" xml:space="preserve">
     <value>Արտաքին օգտատեր</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Բովանդակության ստեղծող</value>
   </data>
   <data name="AceStatusEnum_RoomManager" xml:space="preserve">
     <value>Սենյակի մենեջեր</value>
@@ -556,11 +553,11 @@
   <data name="RoleEnum_RoomManager" xml:space="preserve">
     <value>Սենյակի մենեջեր</value>
   </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
     <value>Բովանդակության ստեղծող</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Բացել ֆայլը</value>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Բովանդակության ստեղծող</value>
   </data>
   <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
     <value>Այլի ընթացիկ տարբերակը հնարավոր չէ ջնջել</value>
@@ -570,5 +567,11 @@
   </data>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Սկսել լրացնելը</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Սենյակի Ադմինիստրատոր</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Հյուր</value>
   </data>
 </root>

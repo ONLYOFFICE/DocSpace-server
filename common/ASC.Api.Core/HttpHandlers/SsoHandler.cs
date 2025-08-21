@@ -192,7 +192,7 @@ public class SsoHandlerService
                     }
                     else
                     {
-                        _log.DebugUserAlreadyAuthenticated(context.User.Identity);
+                        _log.DebugUserAlreadyAuthenticated(authenticatedUserInfo.Id, authenticatedUserInfo.ToString());
                     }
                 }
                 try

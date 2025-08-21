@@ -46,7 +46,7 @@ public class MessageFactory(
                 UserId = authContext.CurrentAccount.ID,
                 Page = MessageSettings.GetReferer(request),
                 Action = action,
-                Description = description,
+                Description = description?.Select(s => s ?? "").ToArray(),
                 Target = target,
                 UaHeader = MessageSettings.GetUAHeader(request),
                 References = references
@@ -70,7 +70,7 @@ public class MessageFactory(
                 TenantId = tenantManager.GetCurrentTenantId(),
                 UserId = authContext.CurrentAccount.ID,
                 Action = action,
-                Description = description,
+                Description = description?.Select(s => s ?? "").ToArray(),
                 Target = target,
                 References = references
             };

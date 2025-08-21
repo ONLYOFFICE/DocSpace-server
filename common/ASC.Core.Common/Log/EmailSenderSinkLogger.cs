@@ -28,8 +28,5 @@ namespace ASC.Core.Common.Log;
 internal static partial class EmailSenderSinkLogger
 {
     [LoggerMessage(LogLevel.Error, "Error creating reply to tag for: {value}")]
-    public static partial void ErrorCreatingTag(this ILogger logger, object value, Exception exception);
-
-    [LoggerMessage(LogLevel.Error, "Error creating AutoSubmitted tag for: : {value}")]
-    public static partial void ErrorCreatingAutoSubmitted(this ILogger logger, object value, Exception exception);
+    public static partial void ErrorCreatingTag(this ILogger logger, string value, Exception exception);
 }

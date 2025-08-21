@@ -34,8 +34,7 @@ public static class DocSpaceHelper
         FolderType.EditingRoom,
         FolderType.FillingFormsRoom,
         FolderType.PublicRoom,
-        FolderType.VirtualDataRoom,
-        FolderType.AiRoom
+        FolderType.VirtualDataRoom
     ];
     
     public static bool IsRoom(FolderType folderType)
@@ -69,7 +68,6 @@ public static class DocSpaceHelper
             FolderType.CustomRoom => RoomType.CustomRoom,
             FolderType.PublicRoom => RoomType.PublicRoom,
             FolderType.VirtualDataRoom => RoomType.VirtualDataRoom,
-            FolderType.AiRoom => RoomType.AiRoom,
             _ => null
         };
     }
@@ -83,7 +81,6 @@ public static class DocSpaceHelper
             RoomType.CustomRoom => FolderType.CustomRoom,
             RoomType.PublicRoom => FolderType.PublicRoom,
             RoomType.VirtualDataRoom => FolderType.VirtualDataRoom,
-            RoomType.AiRoom => FolderType.AiRoom,
             _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, null)
         };
     }
@@ -118,7 +115,6 @@ public static class DocSpaceHelper
             FilterType.CustomRooms => FolderType.CustomRoom,
             FilterType.PublicRooms => FolderType.PublicRoom,
             FilterType.VirtualDataRooms => FolderType.VirtualDataRoom,
-            FilterType.AiRooms => FolderType.AiRoom,
             _ => null
         };
     }

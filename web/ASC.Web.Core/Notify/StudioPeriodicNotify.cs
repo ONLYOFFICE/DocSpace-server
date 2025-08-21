@@ -343,7 +343,9 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                         if (nowDate >= startDateToRemoveUnusedPortals && nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
                         {
-                            _log.InformationStartRemovingUnusedFreeTenant(tenant.Id);
+                            var tenantDomain = tenant.GetTenantDomain(coreSettings);
+
+                            _log.InformationStartRemovingUnusedFreeTenant(tenant.Id, tenantDomain);
 
                             await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
                             await identityClient.DeleteTenantClientsAsync(false);
@@ -351,7 +353,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
                             {
-                                await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
+                                await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
                             }
                             await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                         }
@@ -380,7 +382,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     #region grace period activation
 
-                    else if (dueDateIsNotMax && dueDate == nowDate)
+                    else if (dueDateIsNotMax && dueDate.AddDays(1) == nowDate && delayDueDateIsNotMax)
                     {
                         action = Actions.SaasOwnerPaymentWarningGracePeriodActivation;
                         toowner = true;
@@ -435,13 +437,17 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     }
                     else if (tariff.State == TariffState.NotPaid && dueDateIsNotMax && dueDate.AddMonths(6).AddDays(7) <= nowDate)
                     {
+                        var tenantDomain = tenant.GetTenantDomain(coreSettings);
+
+                        _log.InformationStartRemovingUnusedPaidTenant(tenant.Id, tenantDomain);
+
                         await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
                         await identityClient.DeleteTenantClientsAsync(false);
                         await tenantManager.RemoveTenantAsync(tenant, true);
 
                         if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
                         {
-                            await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
+                            await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
                         }
                         await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                     }
@@ -463,7 +469,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                 if (topayer)
                 {
-                    var payer = await userManager.GetUserByEmailAsync(tariff.CustomerId);
+                    var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+                    var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
 
                     if (payer.Id != Constants.LostUser.Id && !users.Any(u => u.Id == payer.Id))
                     {
@@ -524,7 +531,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
             }
             catch (Exception err)
             {
-                _log.ErrorSendSaasLettersAsync(err);
+                _log.ErrorSendSaasLettersAsync(tenant.Id, err);
             }
         }
 

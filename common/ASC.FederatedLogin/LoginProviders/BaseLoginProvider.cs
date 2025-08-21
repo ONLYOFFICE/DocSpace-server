@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.FederatedLogin.LoginProviders;
 
 /// <summary>
@@ -31,18 +33,43 @@ namespace ASC.FederatedLogin.LoginProviders;
 /// </summary>
 public enum LoginProvider
 {
+    [SwaggerEnum("Facebook")]
     Facebook,
+
+    [SwaggerEnum("Google")]
     Google,
+
+    [SwaggerEnum("Dropbox")]
     Dropbox,
+
+    [SwaggerEnum("Docusign")]
     Docusign,
+
+    [SwaggerEnum("Box")]
     Box,
+
+    [SwaggerEnum("OneDrive")]
     OneDrive,
+
+    [SwaggerEnum("GosUslugi")]
     GosUslugi,
+
+    [SwaggerEnum("LinkedIn")]
     LinkedIn,
+
+    [SwaggerEnum("MailRu")]
     MailRu,
+
+    [SwaggerEnum("VK")]
     VK,
+
+    [SwaggerEnum("Wordpress")]
     Wordpress,
+
+    [SwaggerEnum("Yahoo")]
     Yahoo,
+
+    [SwaggerEnum("Yandex")]
     Yandex
 }
 

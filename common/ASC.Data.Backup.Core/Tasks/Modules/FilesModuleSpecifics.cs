@@ -275,7 +275,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
                 }
                 catch (Exception err)
                 {
-                    logger.ErrorCanNotPrepareValue(value, err);
+                    logger.ErrorCanNotPrepareValue(value as string, err);
                     value = null;
                 }
                 return true;

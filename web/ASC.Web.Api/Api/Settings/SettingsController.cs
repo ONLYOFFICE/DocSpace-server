@@ -26,48 +26,47 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public partial class SettingsController(MessageService messageService,
-        ApiContext apiContext,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantExtra tenantExtra,
-        AuthContext authContext,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        WebItemManagerSecurity webItemManagerSecurity,
-        TenantInfoSettingsHelper tenantInfoSettingsHelper,
-        CoreSettings coreSettings,
-        CoreBaseSettings coreBaseSettings,
-        CommonLinkUtility commonLinkUtility,
-        IConfiguration configuration,
-        SetupInfo setupInfo,
-        ExternalResourceSettings externalResourceSettings,
-        ExternalResourceSettingsHelper externalResourceSettingsHelper,
-        GeolocationHelper geolocationHelper,
-        ConsumerFactory consumerFactory,
-        TimeZoneConverter timeZoneConverter,
-        CustomNamingPeople customNamingPeople,
-        IFusionCache fusionCache,
-        ProviderManager providerManager,
-        FirstTimeTenantSettings firstTimeTenantSettings,
-        TelegramHelper telegramHelper,
-        PasswordHasher passwordHasher,
-        IHttpContextAccessor httpContextAccessor,
-        DnsSettings dnsSettings,
-        CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
-        UserInvitationLimitHelper userInvitationLimitHelper,
-        QuotaUsageManager quotaUsageManager,
-        TenantDomainValidator tenantDomainValidator,
-        TenantLogoManager tenantLogoManager,
-        ExternalShare externalShare,
-        IMapper mapper,
-        UserFormatter userFormatter,
-        IDistributedLockProvider distributedLockProvider,
-        UsersQuotaSyncOperation usersQuotaSyncOperation,
-        CustomQuota customQuota,
-        QuotaSocketManager quotaSocketManager)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public partial class SettingsController(
+    MessageService messageService,
+    SecurityContext securityContext,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantExtra tenantExtra,
+    AuthContext authContext,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    WebItemManagerSecurity webItemManagerSecurity,
+    TenantInfoSettingsHelper tenantInfoSettingsHelper,
+    CoreSettings coreSettings,
+    CoreBaseSettings coreBaseSettings,
+    CommonLinkUtility commonLinkUtility,
+    IConfiguration configuration,
+    SetupInfo setupInfo,
+    ExternalResourceSettings externalResourceSettings,
+    ExternalResourceSettingsHelper externalResourceSettingsHelper,
+    GeolocationHelper geolocationHelper,
+    ConsumerFactory consumerFactory,
+    TimeZoneConverter timeZoneConverter,
+    CustomNamingPeople customNamingPeople,
+    IFusionCache fusionCache,
+    ProviderManager providerManager,
+    FirstTimeTenantSettings firstTimeTenantSettings,
+    TelegramHelper telegramHelper,
+    PasswordHasher passwordHasher,
+    DnsSettings dnsSettings,
+    CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
+    UserInvitationLimitHelper userInvitationLimitHelper,
+    TenantDomainValidator tenantDomainValidator,
+    TenantLogoManager tenantLogoManager,
+    ExternalShare externalShare,
+    IMapper mapper,
+    UserFormatter userFormatter,
+    IDistributedLockProvider distributedLockProvider,
+    UsersQuotaSyncOperation usersQuotaSyncOperation,
+    CustomQuota customQuota,
+    QuotaSocketManager quotaSocketManager)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     [GeneratedRegex("^[a-z0-9]([a-z0-9-.]){1,253}[a-z0-9]$")]
     private static partial Regex EmailDomainRegex();
@@ -84,7 +83,7 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(200, "Settings", typeof(SettingsDto))]
     [HttpGet("")]
     [AllowNotPayment, AllowSuspended, AllowAnonymous]
-    public async Task<SettingsDto> GetSettingsAsync(PortalSettingsrequestDto inDto)
+    public async Task<SettingsDto> GetPortalSettings(PortalSettingsRequestDto inDto)
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
         var tenantCookieSettings = await settingsManager.LoadAsync<TenantCookieSettings>();
@@ -140,6 +139,7 @@ public partial class SettingsController(MessageService messageService,
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
             settings.LimitedAccessSpace = (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace;
             settings.LimitedAccessDevToolsForUsers = (await settingsManager.LoadAsync<TenantDevToolsAccessSettings>()).LimitedAccessForUsers;
+            settings.DisplayBanners = coreBaseSettings.Standalone ? !(await settingsManager.LoadAsync<TenantBannerSettings>()).Hidden : true;
 
             settings.Firebase = new FirebaseDto
             {
@@ -226,7 +226,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Message about the result of saving the mail domain settings", typeof(string))]
     [HttpPost("maildomainsettings")]
-    public async Task<string> SaveMailDomainSettingsAsync(MailDomainSettingsRequestsDto inDto)
+    public async Task<string> SaveMailDomainSettings(MailDomainSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -262,22 +262,7 @@ public partial class SettingsController(MessageService messageService,
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
-
-    /// <summary>
-    /// Returns the quota used space for the portal.
-    /// </summary>
-    /// <short>
-    /// Get the space usage
-    /// </short>
-    /// <path>api/2.0/settings/quota</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Space usage and limits for upload", typeof(QuotaUsageDto))]
-    [HttpGet("quota")]
-    public async Task<QuotaUsageDto> GetQuotaUsed()
-    {
-        return await quotaUsageManager.Get();
-    }
+    
 
     /// <summary>
     /// Saves the user quota settings specified in the request to the current portal.
@@ -291,7 +276,7 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(200, "Message about the result of saving the user quota settings", typeof(TenantUserQuotaSettings))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("userquotasettings")]
-    public async Task<TenantUserQuotaSettings> SaveUserQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
+    public async Task<TenantUserQuotaSettings> SaveUserQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
         await DemandStatisticPermissionAsync();
 
@@ -368,7 +353,7 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(200, "Tenant room quota settings", typeof(TenantRoomQuotaSettings))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("roomquotasettings")]
-    public async Task<TenantRoomQuotaSettings> SaveRoomQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
+    public async Task<TenantRoomQuotaSettings> SaveRoomQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
         await DemandStatisticPermissionAsync();
 
@@ -426,9 +411,9 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(200, "Deep link configuration updated", typeof(TenantDeepLinkSettings))]
     [SwaggerResponse(400, "Invalid deep link configuration")]
     [HttpPost("deeplink")]
-    public async Task<TenantDeepLinkSettings> SaveConfigureDeepLinkAsync(DeepLinkConfigurationRequestsDto inDto)
+    public async Task<TenantDeepLinkSettings> ConfigureDeepLink(DeepLinkConfigurationRequestsDto inDto)
     {
-        await DemandStatisticPermissionAsync();
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         if (!Enum.IsDefined(typeof(DeepLinkHandlingMode), inDto.DeepLinkSettings.HandlingMode))
         {
             throw new ArgumentException(nameof(inDto.DeepLinkSettings.HandlingMode));
@@ -452,7 +437,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Ok", typeof(TenantDeepLinkSettings))]
     [HttpGet("deeplink")]
-    public async Task<TenantDeepLinkSettings> GettDeepLinkSettings()
+    public async Task<TenantDeepLinkSettings> GetDeepLinkSettings()
     {
         var result = await settingsManager.LoadAsync<TenantDeepLinkSettings>(HttpContext.GetIfModifiedSince());
         
@@ -471,7 +456,7 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [SwaggerResponse(405, "Not available")]
     [HttpPut("tenantquotasettings")]
-    public async Task<TenantQuotaSettings> SetTenantQuotaSettingsAsync(TenantQuotaSettingsRequestsDto inDto)
+    public async Task<TenantQuotaSettings> SetTenantQuotaSettings(TenantQuotaSettingsRequestsDto inDto)
     {
         await DemandStatisticPermissionAsync();
 
@@ -541,9 +526,9 @@ public partial class SettingsController(MessageService messageService,
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard,Administrators")]
     [HttpGet("timezones")]
     [AllowNotPayment]
-    public async Task<List<TimezonesRequestsDto>> GetTimeZonesAsyncAsync()
+    public async Task<List<TimezonesRequestsDto>> GetTimeZones()
     {
-        await ApiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         var timeZones = TimeZoneInfo.GetSystemTimeZones().ToList();
 
         if (timeZones.All(tz => tz.Id != "UTC"))
@@ -575,7 +560,7 @@ public partial class SettingsController(MessageService messageService,
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
     [HttpGet("machine")]
     [AllowNotPayment]
-    public object GetMachineName()
+    public object GetPortalHostname()
     {
         return Request.Host.Value;
     }
@@ -591,7 +576,7 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [SwaggerResponse(405, "Method not allowed")]
     [HttpPut("dns")]
-    public async Task<string> SaveDnsSettingsAsync(DnsSettingsRequestsDto inDto)
+    public async Task<string> SaveDnsSettings(DnsSettingsRequestsDto inDto)
     {
         return await dnsSettings.SaveDnsSettingsAsync(inDto.DnsName, inDto.Enable);
     }
@@ -606,7 +591,7 @@ public partial class SettingsController(MessageService messageService,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
     [HttpGet("recalculatequota")]
-    public async Task RecalculateQuotaAsync()
+    public async Task RecalculateQuota()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -624,7 +609,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Boolean value: true - quota recalculation process is enabled, false - quota recalculation process is disabled", typeof(bool))]
     [HttpGet("checkrecalculatequota")]
-    public async Task<bool> CheckRecalculateQuotaAsync()
+    public async Task<bool> CheckRecalculateQuota()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -642,7 +627,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Portal logo image URL", typeof(string))]
     [HttpGet("logo")]
-    public async Task<string> GetLogoAsync()
+    public async Task<string> GetPortalLogo()
     {        
         var result = await settingsManager.LoadAsync<TenantInfoSettings>(HttpContext.GetIfModifiedSince());
         
@@ -661,9 +646,9 @@ public partial class SettingsController(MessageService messageService,
     [AllowNotPayment]
     [HttpPut("wizard/complete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
-    public async Task<WizardSettings> CompleteWizardAsync(WizardRequestsDto inDto)
+    public async Task<WizardSettings> CompleteWizard(WizardRequestsDto inDto)
     {
-        await ApiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -679,7 +664,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(405, "Not available")]
     [HttpPut("welcome/close")]
-    public async Task CloseWelcomePopupAsync()
+    public async Task CloseWelcomePopup()
     {
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
@@ -704,7 +689,7 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(200, "Settings of the portal themes", typeof(CustomColorThemesSettingsDto))]
     [AllowAnonymous, AllowNotPayment, AllowSuspended]
     [HttpGet("colortheme")]
-    public async Task<CustomColorThemesSettingsDto> GetColorThemeAsync()
+    public async Task<CustomColorThemesSettingsDto> GetPortalColorTheme()
     {
         var settings = await settingsManager.LoadAsync<CustomColorThemesSettings>(HttpContext.GetIfModifiedSince());
         
@@ -719,7 +704,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Portal theme settings", typeof(CustomColorThemesSettingsDto))]
     [HttpPut("colortheme")]
-    public async Task<CustomColorThemesSettingsDto> SaveColorThemeAsync(CustomColorThemesSettingsRequestsDto inDto)
+    public async Task<CustomColorThemesSettingsDto> SavePortalColorTheme(CustomColorThemesSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var settings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
@@ -791,7 +776,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Portal theme settings: custom color theme settings, selected or not, limit", typeof(CustomColorThemesSettingsDto))]
     [HttpDelete("colortheme")]
-    public async Task<CustomColorThemesSettingsDto> DeleteColorThemeAsync(DeleteColorThemeRequestDto inDto)
+    public async Task<CustomColorThemesSettingsDto> DeletePortalColorTheme(DeleteColorThemeRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -824,7 +809,7 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(405, "Not available")]
     [HttpPut("closeadminhelper")]
-    public async Task CloseAdminHelperAsync()
+    public async Task CloseAdminHelper()
     {
         if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || coreBaseSettings.CustomMode || !coreBaseSettings.Standalone)
         {
@@ -845,7 +830,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Message about saving settings successfully", typeof(object))]
     [HttpPut("timeandlanguage")]
-    public async Task<string> TimaAndLanguageAsync(TimeZoneRequestDto inDto)
+    public async Task<string> SetTimaAndLanguage(TimeZoneRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -893,7 +878,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Message about saving settings successfully", typeof(object))]
     [HttpPut("defaultpage")]
-    public async Task<string> SaveDefaultPageSettingAsync(DefaultProductRequestDto inDto)
+    public async Task<string> SaveDefaultPageSetting(DefaultProductRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -912,7 +897,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Updated email activation settings", typeof(EmailActivationSettings))]
     [HttpPut("emailactivation")]
-    public async Task<EmailActivationSettings> UpdateEmailActivationSettingsAsync(EmailActivationSettings inDto)
+    public async Task<EmailActivationSettings> UpdateEmailActivationSettings(EmailActivationSettings inDto)
     {
         await settingsManager.SaveForCurrentUserAsync(inDto);
         return inDto;
@@ -1070,7 +1055,7 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(200, "Payment settings: sales email, feedback and support URL, link to pay for a portal, Standalone or not, current license, maximum quota quantity", typeof(PaymentSettingsDto))]
     [AllowNotPayment]
     [HttpGet("payment")]
-    public async Task<PaymentSettingsDto> PaymentSettingsAsync()
+    public async Task<PaymentSettingsDto> GetPaymentSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync();
@@ -1100,7 +1085,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Telegram")]
     [SwaggerResponse(200, "Telegram link", typeof(object))]
     [HttpGet("telegramlink")]
-    public async Task<string> TelegramLink()
+    public async Task<string> GetTelegramLink()
     {
         var tenant = tenantManager.GetCurrentTenant();
         var currentLink = telegramHelper.CurrentRegistrationLink(authContext.CurrentAccount.ID, tenant.Id);
@@ -1123,7 +1108,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Telegram")]
     [SwaggerResponse(200, "Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation", typeof(TelegramHelper.RegStatus))]
     [HttpGet("telegramisconnected")]
-    public async Task<TelegramHelper.RegStatus> TelegramIsConnectedAsync()
+    public async Task<TelegramHelper.RegStatus> GetTelegramIsConnected()
     {
         var tenant = tenantManager.GetCurrentTenant();
         return await telegramHelper.UserIsConnectedAsync(authContext.CurrentAccount.ID, tenant.Id);
@@ -1137,7 +1122,7 @@ public partial class SettingsController(MessageService messageService,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Telegram")]
     [HttpDelete("telegramdisconnect")]
-    public async Task TelegramDisconnectAsync()
+    public async Task TelegramDisconnect()
     {
         var tenant = tenantManager.GetCurrentTenant();
         await telegramHelper.DisconnectAsync(authContext.CurrentAccount.ID, tenant.Id);
@@ -1153,7 +1138,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Access to DevTools")]
     [SwaggerResponse(200, "Developer Tools access settings", typeof(TenantDevToolsAccessSettings))]
     [HttpGet("devtoolsaccess")]
-    public async Task<TenantDevToolsAccessSettings> GetTenantAccessDevToolsSettingsAsync()
+    public async Task<TenantDevToolsAccessSettings> GetTenantAccessDevToolsSettings()
     {
         return await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
     }
@@ -1168,7 +1153,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Security / Access to DevTools")]
     [SwaggerResponse(200, "Developer Tools access settings", typeof(TenantDevToolsAccessSettings))]
     [HttpPost("devtoolsaccess")]
-    public async Task<TenantDevToolsAccessSettings> SetTenantDevToolsAccessSettingsAsync(TenantDevToolsAccessSettingsDto inDto)
+    public async Task<TenantDevToolsAccessSettings> SetTenantDevToolsAccessSettings(TenantDevToolsAccessSettingsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -1177,6 +1162,49 @@ public partial class SettingsController(MessageService messageService,
         await settingsManager.SaveAsync(settings);
 
         messageService.Send(MessageAction.DevToolsAccessSettingsChanged);
+
+        return settings;
+    }
+
+    /// <summary>
+    /// Returns the promotional banners visibility settings settings for the portal.
+    /// </summary>
+    /// <short>
+    /// Get the promotional banners visibility settings
+    /// </short>
+    /// <path>api/2.0/settings/banner</path>
+    [Tags("Settings / Banners visibility")]
+    [SwaggerResponse(200, "Promotional banners visibility settings", typeof(TenantBannerSettings))]
+    [HttpGet("banner")]
+    public async Task<TenantBannerSettings> GetTenantBannerSettings()
+    {
+        return await settingsManager.LoadAsync<TenantBannerSettings>();
+    }
+
+    /// <summary>
+    /// Sets the promotional banners visibility settings settings for the portal.
+    /// </summary>
+    /// <short>
+    /// Set the promotional banners visibility settings
+    /// </short>
+    /// <path>api/2.0/settings/banner</path>
+    [Tags("Security / Banners visibility")]
+    [SwaggerResponse(200, "Promotional banners visibility settings", typeof(TenantBannerSettings))]
+    [HttpPost("banner")]
+    public async Task<TenantBannerSettings> SetTenantBannerSettings(TenantBannerSettingsDto inDto)
+    {
+        if (!tenantExtra.Enterprise)
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var settings = new TenantBannerSettings { Hidden = inDto.Hidden };
+
+        await settingsManager.SaveAsync(settings);
+
+        messageService.Send(MessageAction.BannerSettingsChanged);
 
         return settings;
     }
@@ -1202,7 +1230,7 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(200, "portal user invitation settings", typeof(TenantUserInvitationSettingsDto))]
     [HttpGet("invitationsettings")]
     [AllowAnonymous]
-    public async Task<TenantUserInvitationSettingsDto> GetTenantUserInvitationSettingsAsync()
+    public async Task<TenantUserInvitationSettingsDto> GetTenantUserInvitationSettings()
     {
         var settings = await settingsManager.LoadAsync<TenantUserInvitationSettings>(HttpContext.GetIfModifiedSince());
 
@@ -1220,7 +1248,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Updated user invitation settings", typeof(TenantUserInvitationSettingsDto))]
     [HttpPut("invitationsettings")]
-    public async Task<TenantUserInvitationSettingsDto> UpdateLoginSettingsAsync(TenantUserInvitationSettingsRequestDto inDto)
+    public async Task<TenantUserInvitationSettingsDto> UpdateInvitationSettings(TenantUserInvitationSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

@@ -55,7 +55,7 @@ try
     logger.Info("Configuring web host ({applicationContext})...", AppName);
 
     builder.Host.ConfigureDefault();
-
+    
     if (builder.Configuration.GetValue<bool>("openTelemetry:enable"))
     {
         builder.ConfigureOpenTelemetry();

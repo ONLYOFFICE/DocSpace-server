@@ -195,7 +195,9 @@ public class WebPluginManager(
 
         var urlTemplate = await GetPluginUrlTemplateAsync(storage);
 
-        webPlugin.Url = string.Format(urlTemplate, webPlugin.Name);
+        var hash = string.IsNullOrEmpty(webPlugin.Version) ? string.Empty : $"?hash={webPlugin.Version}";
+
+        webPlugin.Url = string.Format(urlTemplate, webPlugin.Name) + hash;
 
         webPlugin = await UpdateWebPluginAsync(tenantId, webPlugin, true, null);
 
@@ -356,7 +358,9 @@ public class WebPluginManager(
 
                 webPlugin.System = system;
 
-                webPlugin.Url = string.Format(urlTemplate, webPlugin.Name);
+                var hash = string.IsNullOrEmpty(webPlugin.Version) ? string.Empty : $"?hash={webPlugin.Version}";
+
+                webPlugin.Url = string.Format(urlTemplate, webPlugin.Name) + hash;
 
                 webPlugins.Add(webPlugin);
             }
