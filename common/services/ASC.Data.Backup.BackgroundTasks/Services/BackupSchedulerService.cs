@@ -41,7 +41,6 @@ public sealed class BackupSchedulerService(
     ILogger<BackupSchedulerService> logger,
     IServiceScopeFactory scopeFactory,
     BackupConfigurationService backupConfigurationService,
-    CoreBaseSettings coreBaseSettings,
     IEventBus eventBus)
      : ActivePassiveBackgroundService<BackupSchedulerService>(logger, scopeFactory)
 {
