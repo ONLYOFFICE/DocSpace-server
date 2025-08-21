@@ -182,17 +182,6 @@ public static class DbQuotaExtension
                     ProductId = "10006",
                     Visible = false,
                     Wallet = true
-                },
-                new DbQuota
-                {
-                    TenantId = -13,
-                    Name = "aitools",
-                    Description = null,
-                    Features = "aitools",
-                    Price = 5,
-                    ProductId = "10009",
-                    Visible = false,
-                    Wallet = true
                 }
                 );
         return modelBuilder;

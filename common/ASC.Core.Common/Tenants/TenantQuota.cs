@@ -399,17 +399,6 @@ public class TenantQuota : IMapFrom<DbQuota>
         set => _backup.Value = value;
     }
 
-    private readonly WalletFeatureFlag _aiTools;
-
-    /// <summary>
-    /// Specifies if the AI tools anabled as a wallet service or not.
-    /// </summary>
-    public bool AITools
-    {
-        get => _aiTools.Value;
-        set => _aiTools.Value = value;
-    }
-
     public TenantQuota()
     {
         _featuresList = [];
@@ -440,7 +429,6 @@ public class TenantQuota : IMapFrom<DbQuota>
         _yearFeature = new TenantQuotaFeatureFlag(this) { Name = "year", EmployeeType = EmployeeType.DocSpaceAdmin };
         _countFreeBackup = new CountFreeBackupFeature(this) { Order = 6, EmployeeType = EmployeeType.DocSpaceAdmin };
         _backup = new WalletFeatureFlag(this) { Name = "backup", EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiTools = new WalletFeatureFlag(this) { Name = "aitools", EmployeeType = EmployeeType.DocSpaceAdmin };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -469,8 +457,7 @@ public class TenantQuota : IMapFrom<DbQuota>
             _statisticFeature,
             _yearFeature,
             _countFreeBackup,
-            _backup,
-            _aiTools
+            _backup
         };
     }
 

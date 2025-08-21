@@ -2995,24 +2995,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI tools.
-        /// </summary>
-        public static string TariffsFeature_aitools_wallet {
-            get {
-                return ResourceManager.GetString("TariffsFeature_aitools_wallet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Add funds to your wallet to unlock AI features..
-        /// </summary>
-        public static string TariffsFeature_aitools_wallet_price_count {
-            get {
-                return ResourceManager.GetString("TariffsFeature_aitools_wallet_price_count", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Tracking logins &amp; actions.
         /// </summary>
         public static string TariffsFeature_audit {
