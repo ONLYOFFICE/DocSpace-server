@@ -273,7 +273,11 @@ public class FileDtoHelper(
                 FileSecurity.FilesSecurityActions.CreateRoomFrom,
                 FileSecurity.FilesSecurityActions.Duplicate,
                 FileSecurity.FilesSecurityActions.Delete,
-                FileSecurity.FilesSecurityActions.Lock
+                FileSecurity.FilesSecurityActions.Lock,
+                FileSecurity.FilesSecurityActions.CustomFilter,
+                FileSecurity.FilesSecurityActions.Embed,
+                FileSecurity.FilesSecurityActions.StartFilling,
+                FileSecurity.FilesSecurityActions.StopFilling,
             };
 
             foreach (var action in forbiddenActions)
