@@ -1012,12 +1012,6 @@ public class PaymentController(
             return null;
         }
 
-        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id, false);
-        if (balance == null)
-        {
-            return null;
-        }
-
         await DemandPayerAsync(customerInfo);
 
         var settings = await settingsManager.LoadAsync<TenantWalletServicesSettings>();
