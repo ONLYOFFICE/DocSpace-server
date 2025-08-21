@@ -223,6 +223,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Automatic top up.
+        /// </summary>
+        public static string AutoTopUp {
+            get {
+                return ResourceManager.GetString("AutoTopUp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to By SMS.
         /// </summary>
         public static string ButtonSmsEnable {

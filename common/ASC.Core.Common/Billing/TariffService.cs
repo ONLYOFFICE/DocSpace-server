@@ -1118,7 +1118,7 @@ public class TariffService(
         return customerInfo;
     }
 
-    public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, bool waitForChanges = false)
+    public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, bool waitForChanges = false)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
 
@@ -1134,7 +1134,7 @@ public class TariffService(
 
         try
         {
-            result = await billingClient.TopUpDepositAsync(portalId, amount, currency);
+            result = await billingClient.TopUpDepositAsync(portalId, amount, currency, customerParticipantName);
         }
         catch (Exception error)
         {

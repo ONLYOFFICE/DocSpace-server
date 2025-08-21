@@ -1212,4 +1212,7 @@
   <data name="TariffsFeature_free_backup" xml:space="preserve">
     <value>{0} free backups per month</value>
   </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Automatic top up</value>
+  </data>
 </root>
