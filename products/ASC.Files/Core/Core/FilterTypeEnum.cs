@@ -81,10 +81,13 @@ public enum FilterType
 
     [SwaggerEnum("Pdf")]
     [EnumMember] Pdf = 22,
+
     [SwaggerEnum("Pdf form")]
     [EnumMember] PdfForm = 23,
+
+    [SwaggerEnum("Virtual data rooms")]
     [EnumMember] VirtualDataRooms = 24,
-    
-    [SwaggerEnum("AI rooms")]
-    [EnumMember] AiRooms = 25
+
+    [SwaggerEnum("Diagrams only")]
+    [EnumMember] DiagramsOnly = 25
 }

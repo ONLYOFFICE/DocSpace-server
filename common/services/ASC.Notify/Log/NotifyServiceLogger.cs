@@ -37,5 +37,5 @@ internal static partial class NotifyServiceLogger
     public static partial void ErrorSendNotifyMessage(this ILogger logger, Exception exception); 
     
     [LoggerMessage(LogLevel.Debug, "Start scheduler {notifyInfo} ({notifyMethodIndo})")]
-    public static partial void DebugStartScheduler(this ILogger logger, string notifyInfo, MethodInfo notifyMethodIndo);
+    public static partial void DebugStartScheduler(this ILogger logger, string notifyInfo, string notifyMethodIndo);
 }

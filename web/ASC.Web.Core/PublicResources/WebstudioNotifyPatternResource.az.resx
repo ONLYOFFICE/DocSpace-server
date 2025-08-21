@@ -200,7 +200,9 @@ ${LetterLogoText} portalına daxil olmaq üçün istifadə etdiyiniz autentifika
 
 Portala giriş səhifəsinə keçmək və autentifikasiya proqramını konfiqurasiya etmək üçün bu linkə klikləyin:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1. "${__VirtualRootPath}":"${__VirtualRootPath}" portalının sahibinin dəyişdirilməsi
@@ -1320,17 +1322,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Salam, $UserName!
-
-Nəzərə alın ki, ${LetterLogoText} DocSpace abunəliyiniz üç gün ərzində başa çatacaq. Bundan sonra, $PaymentDelay gündəlik güzəşt müddəti aktivləşdiriləcək.
-
-Biznes abunəliyiniz üçün ödəniş etməyi və ${LetterLogoText} DocSpace-in bütün üstünlüklərindən istifadə etməyə davam etməyi tövsiyə edirik.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Salam, $UserName!
 
@@ -1462,9 +1453,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_opensource_admin_activation_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace-ə xoş gəlmisiniz!</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace abunəliyiniz bitmək üzrədir</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>${LetterLogoText} DocSpace-niz üçün güzəşt müddəti aktivləşdirilib</value>
@@ -1936,5 +1924,53 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;${LetterLogoText} DocSpace-dən istifadə etməyə davam etmək istəyirsinizsə, onu daxil edin və hər hansı bir əməliyyat yerinə yetirin.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Xidmətlərə keçin</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Pul kisəsi parametrlərinə keçin</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Salam $UserName!
+
+Aldığınız xidmət planının avtomatik yenilənmədiyini bildirmək üçün sizinlə əlaqə saxlayırıq.
+
+Sizdən cari xidmət planınızı əl ilə yeniləmənizi (və ya yenisini almanızı) xahiş edirik.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Salam $UserName!
+
+Abunəlik ödənişinizin 3 gün ərzində avtomatik olaraq hesabınızdan silinəcəyini bildirmək üçün sizinlə əlaqə saxlayırıq.
+
+Rahat bir əməliyyat üçün ödəniş üsulunuzda kifayət qədər vəsaitin olduğundan əmin olun.
+
+Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, "dəstək komandamızla":"${__SupportLink}" əlaqə saxlayın.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Salam $UserName!
+
+DocSpace Pul kisəsi balansının avtomatik doldurulmasının uğursuz olduğunu bildirmək üçün sizə müraciət edirik.
+
+Sizdən pul kisəsi balansınızı əl ilə yoxlamağı və yeniləmənizi xahiş edirik.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Tələb olunan əməliyyat: ${LetterLogoText} DocSpace-də xidmət planını avtomatik yeniləmək mümkün olmadı</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace üçün növbəti abunəlik ödənişi</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Tələb olunan əməliyyat: ${LetterLogoText} DocSpace-də avtomatik olaraq Pul kisəsi balansını artırmaq mümkün olmadı</value>
   </data>
 </root>

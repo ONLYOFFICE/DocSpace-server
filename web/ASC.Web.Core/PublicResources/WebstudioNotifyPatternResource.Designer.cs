@@ -376,6 +376,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Go to Services.
+        /// </summary>
+        public static string ButtonGoToServices {
+            get {
+                return ResourceManager.GetString("ButtonGoToServices", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Go to Wallet settings.
+        /// </summary>
+        public static string ButtonGoToWalletSettings {
+            get {
+                return ResourceManager.GetString("ButtonGoToWalletSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invite Right Now.
         /// </summary>
         public static string ButtonInviteRightNow {
@@ -408,6 +426,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string ButtonLeaveFeedback {
             get {
                 return ResourceManager.GetString("ButtonLeaveFeedback", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open DocSpace.
+        /// </summary>
+        public static string ButtonOpenDocSpace {
+            get {
+                return ResourceManager.GetString("ButtonOpenDocSpace", resourceCulture);
             }
         }
         
@@ -635,7 +662,9 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Please click the button below to go to the portal login page and configure the authenticator application:
         ///
-        ///$OrangeButton.
+        ///$OrangeButton
+        ///
+        ///&amp;nbsp;.
         /// </summary>
         public static string pattern_change_tfa {
             get {
@@ -1286,6 +1315,28 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to h1.Password changed successfully
+        ///
+        ///Your password for the account *$UserName*, *$UserEmail* was successfully changed on *$Date* in DocSpace: &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
+        ///
+        ///IP: *$IP*
+        ///Device: *$Device*
+        ///#if($Location != &quot;&quot;)
+        ///Location: *$Location*
+        ///#end
+        ///Browser: *$Browser*
+        ///
+        ///If this action was made by you — no further steps are required. If this change looks suspicious or was not authorized by you, please reset your password immediately and disable access to DocSpace for this device.
+        ///
+        ///$ [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_password_changed {
+            get {
+                return ResourceManager.GetString("pattern_password_changed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1.Deactivation of the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal
         ///
         ///Dear $OwnerName,
@@ -1502,6 +1553,23 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_remove_user_data_failed {
             get {
                 return ResourceManager.GetString("pattern_remove_user_data_failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///We’re reaching out to inform you that the automatic renewal of your purchased service plan couldn’t be completed.
+        ///
+        ///We kindly ask you to manually renew your current service plan (or purchase a new one).
+        ///
+        ///$OrangeButton
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_renew_subscription_error {
+            get {
+                return ResourceManager.GetString("pattern_renew_subscription_error", resourceCulture);
             }
         }
         
@@ -1788,11 +1856,11 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Please take into consideration that your ${LetterLogoText} DocSpace subscription expires in three days. After that, the grace period of $PaymentDelay days will be activated.
+        ///We’re reaching out to inform you that your subscription payment will be automatically debited from your account in 3 days.
         ///
-        ///We recommend paying your Business subscription now and continue to use all the benefits of your ${LetterLogoText} DocSpace.
+        ///To ensure a smooth transaction, please confirm that sufficient funds are available in your payment method.
         ///
-        ///$OrangeButton
+        ///If you have any questions or need assistance, feel free to reach out to our &quot;support team&quot;:&quot;${__SupportLink}&quot;.
         ///
         ///$TrulyYours.
         /// </summary>
@@ -2053,6 +2121,23 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_storage_encryption_success {
             get {
                 return ResourceManager.GetString("pattern_storage_encryption_success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///We’re reaching out to inform you that the automatic top-up of the DocSpace Wallet balance was unsuccessful.
+        ///
+        ///We kindly ask you to manually check and update your wallet balance.
+        ///
+        ///$OrangeButton
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_top_up_wallet_error {
+            get {
+                return ResourceManager.GetString("pattern_top_up_wallet_error", resourceCulture);
             }
         }
         
@@ -2569,6 +2654,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your password was changed successfully.
+        /// </summary>
+        public static string subject_password_changed {
+            get {
+                return ResourceManager.GetString("subject_password_changed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Deactivation of the ${__VirtualRootHost} portal.
         /// </summary>
         public static string subject_portal_deactivate {
@@ -2664,6 +2758,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_remove_user_data_failed {
             get {
                 return ResourceManager.GetString("subject_remove_user_data_failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Action required: Unable to auto-renew the service plan in your ${LetterLogoText} DocSpace.
+        /// </summary>
+        public static string subject_renew_subscription_error {
+            get {
+                return ResourceManager.GetString("subject_renew_subscription_error", resourceCulture);
             }
         }
         
@@ -2821,7 +2924,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace subscription is about to expire.
+        ///   Looks up a localized string similar to Upcoming subscription payment for your ${LetterLogoText} DocSpace.
         /// </summary>
         public static string subject_saas_owner_payment_warning_grace_period_before_activation {
             get {
@@ -2979,6 +3082,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_storage_encryption_success {
             get {
                 return ResourceManager.GetString("subject_storage_encryption_success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Action required: Unable to auto top up the Wallet balance in your ${LetterLogoText} DocSpace.
+        /// </summary>
+        public static string subject_top_up_wallet_error {
+            get {
+                return ResourceManager.GetString("subject_top_up_wallet_error", resourceCulture);
             }
         }
         

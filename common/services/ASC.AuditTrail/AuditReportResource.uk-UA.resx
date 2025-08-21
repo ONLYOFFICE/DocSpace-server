@@ -913,4 +913,31 @@
   <data name="ApiKeyUpdated" xml:space="preserve">
     <value>Оновлено ключ API користувача: {0}</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Авторизаційне посилання активовано</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Клієнтську операцію виконано</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Звіт про клієнтські операції завантажено</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Підписку клієнта оновлено: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Гаманець клієнта поповнено: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Параметри поповнення гаманця клієнта оновлено</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Автентифікація LDAP вимкнена</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Автентифікація LDAP увімкнена</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Синхронізацію LDAP завершено</value>
+  </data>
 </root>

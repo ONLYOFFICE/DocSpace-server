@@ -1,0 +1,190 @@
+# {{packageName}}
+
+The ONLYOFFICE DocSpace SDK for C# is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace API by offering ready-to-use methods and models.
+
+{{#infoUrl}}
+For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
+{{/infoUrl}}
+
+<a id="installation"></a>
+## Installation
+
+To get started, install the package from NuGet
+
+```
+dotnet add package {{packageName}}
+```
+
+<a id="usage"></a>
+## Usage
+
+To use the API client with a HTTP proxy, set up a `System.Net.WebProxy` as follows:
+```csharp
+Configuration c = new Configuration();
+System.Net.WebProxy webProxy = new System.Net.WebProxy("http://myProxyUrl:80/");
+webProxy.Credentials = System.Net.CredentialCache.DefaultCredentials;
+c.Proxy = webProxy;
+```
+{{#useHttpClient}}
+
+### Connections
+Each API class (specifically the API client within it) will create an instance of HttpClient. This instance is used throughout the class lifecycle and is disposed of when the Dispose method is called.
+
+To better manage connections, it is common practice to reuse the HttpClient and HttpClientHandler (see [here](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net) for details). To use your own HttpClient instance, just pass it to the API class constructor:
+
+```csharp
+HttpClientHandler yourHandler = new HttpClientHandler();
+HttpClient yourHttpClient = new HttpClient(yourHandler);
+var api = new RoomsApi(yourHttpClient, yourHandler);
+```
+
+If you want to use an HttpClient but do not have access to its handler (for example, when using IHttpClientFactory in the ASP.NET Core DI context), you can create and configure your HttpClient instance separately and then pass it to the API class constructor:
+
+```csharp
+HttpClient yourHttpClient = new HttpClient();
+var api = new RoomsApi(yourHttpClient);
+```
+If you want to use an HttpClient but do not have access to its handler (for example, when using IHttpClientFactory in the ASP.NET Core DI context), you can create and configure your HttpClient instance separately and then pass it to the API class constructor:
+
+Here is an example of DI setup in a sample web project:
+
+```csharp
+services.AddHttpClient<RoomsApi>(httpClient =>
+   new RoomsApi(httpClient));
+```
+
+{{/useHttpClient}}
+
+<a id="getting-started"></a>
+## Getting Started
+
+```csharp
+{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}
+Configuration config = new Configuration();
+config.BasePath = "https://your-docspace.onlyoffice.com";
+{{#hasAuthMethods}}
+{{#authMethods}}
+{{#isBasicBearer}}
+// Configure Bearer token for authorization: {{{name}}}
+config.AccessToken = "YOUR_BEARER_TOKEN";
+{{/isBasicBearer}}
+{{/authMethods}}
+
+{{/hasAuthMethods}}
+{{#useHttpClient}}
+// create instances of HttpClient, HttpClientHandler to be reused later with different Api classes
+HttpClient httpClient = new HttpClient();
+HttpClientHandler httpClientHandler = new HttpClientHandler();
+var apiInstance = new {{classname}}(httpClient, config, httpClientHandler);
+{{/useHttpClient}}
+{{^useHttpClient}}
+var apiInstance = new {{classname}}(config);
+{{/useHttpClient}}
+{{#allParams}}
+{{#isPrimitiveType}}
+var {{paramName}} = {{{example}}};  // {{{dataType}}} | {{{description}}}{{^required}} (optional) {{/required}}{{#defaultValue}} (default to {{{.}}}){{/defaultValue}}
+{{/isPrimitiveType}}
+{{^isPrimitiveType}}
+var {{paramName}} = new {{{dataType}}}(); // {{{dataType}}} | {{{description}}}{{^required}} (optional) {{/required}}{{#defaultValue}} (default to {{{.}}}){{/defaultValue}}
+{{/isPrimitiveType}}
+{{/allParams}}
+
+try
+{
+    {{#summary}}
+    // {{{.}}}
+    {{/summary}}
+    {{#returnType}}{{{.}}} result = {{/returnType}}apiInstance.{{{operationId}}}({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}});{{#returnType}}
+    Debug.WriteLine(result);{{/returnType}}
+}
+catch (ApiException e)
+{
+    Debug.Print("Exception when calling {{classname}}.{{operationId}}: " + e.Message );
+    Debug.Print("Status Code: "+ e.ErrorCode);
+    Debug.Print(e.StackTrace);
+}
+{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}
+```
+
+<a id="documentation-for-authorization"></a>
+## Documentation for Authorization
+
+{{^authMethods}}Endpoints do not require authorization.{{/authMethods}}
+{{#hasAuthMethods}}Authentication schemes defined for the API:{{/hasAuthMethods}}
+{{#authMethods}}
+<a id="{{name}}"></a>
+### {{name}}
+
+{{#isApiKey}}- **Type**: API key
+- **API key parameter name**: {{keyParamName}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}{{#isKeyInCookie}}Cookie{{/isKeyInCookie}}
+{{/isApiKey}}
+{{#isBasicBasic}}- **Type**: HTTP basic authentication
+{{/isBasicBasic}}
+{{#isBasicBearer}}- **Type**: Bearer Authentication
+{{/isBasicBearer}}
+{{#isHttpSignature}}- **Type**: HTTP signature authentication
+{{/isHttpSignature}}
+{{#isOAuth}}- **Type**: OAuth
+- **Flow**: {{flow}}
+- **Authorization URL**: {{x-authorizationUrl}}
+- **Token Url**: {{x-tokenUrl}}
+- **Scopes**: {{^scopes}}N/A{{/scopes}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOAuth}}
+{{#isOpenId}}
+- **Type**: OpenId Connect
+- **OpenId Connect URL**: {{x-openIdConnectUrl}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOpenId}}
+
+{{/authMethods}}
+
+<a id="documentation-for-api-endpoints"></a>
+## Documentation for API Endpoints
+
+All URIs are relative to *https://your-docspace.onlyoffice.com*
+
+### API Endoints tables:
+
+{{#customApis}}
+<details>
+  <summary>{{folder}}</summary>
+
+  <table>
+    <tbody>
+      <tr>
+        <th>Method</th>
+        <th>HTTP request</th>
+        <th>Description</th>
+      </tr>
+      {{#apis}}<tr>
+        <td colspan="3" style="text-align: center;"><strong>{{x-classname}}</strong></td>
+      </tr>
+      {{#operations.operation}}
+      <tr>
+        <td><a href="{{apiDocPath}}{{classname}}.md#{{operationIdLowerCase}}"><strong>{{operationId}}</strong></a></td>
+        <td><strong>{{httpMethod}}</strong> {{path}}</td>
+        <td>{{summary}}</td>
+      </tr>
+      {{/operations.operation}}
+    {{/apis}}</tbody>
+  </table>
+
+</details>
+{{/customApis}}
+
+## Documentation for Models
+
+<details><summary>Models list</summary>
+
+{{#modelPackage}}
+{{#models}}{{#model}} - [{{{modelPackage}}}.{{{classname}}}]({{modelDocPath}}{{{classname}}}.md)
+{{/model}}{{/models}}
+{{/modelPackage}}
+{{^modelPackage}}
+No model defined in this package
+{{/modelPackage}}
+</details>

@@ -58,7 +58,10 @@ import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
  * Configuration class for setting up the OAuth2 Authorization Server.
@@ -171,14 +174,45 @@ public class AuthorizationServerConfiguration {
                       request.getRequestDispatcher(formConfiguration.getLogin());
                   dispatcher.forward(request, response);
                 },
-                new AntPathRequestMatcher(formConfiguration.getLogin())));
+                PathPatternRequestMatcher.withDefaults().matcher(formConfiguration.getLogin())));
     http.addFilterBefore(rateLimiterFilter, ChannelProcessingFilter.class);
     http.addFilterBefore(authenticationFilter, LogoutFilter.class);
 
-    http.cors(AbstractHttpConfigurer::disable);
+    http.cors(c -> c.configurationSource(corsConfigurationSource()));
     http.csrf(AbstractHttpConfigurer::disable);
 
     return http.build();
+  }
+
+  /**
+   * Creates and configures a CORS (Cross-Origin Resource Sharing) configuration source. This
+   * configuration should be acceptable since we fully rely on signatures
+   *
+   * <p>This method sets up a permissive CORS configuration that allows:
+   *
+   * <ul>
+   *   <li>All origins ({@code "*"}) to access the endpoints
+   *   <li>All HTTP methods ({@code "*"}) including GET, POST, PUT, DELETE, etc.
+   *   <li>All headers ({@code "*"}) in cross-origin requests
+   *   <li>Preflight request caching for 1 hour (3600 seconds)
+   * </ul>
+   *
+   * <p>The configuration is applied to all URL patterns ({@code "/**"}) within the application.
+   *
+   * @return a {@link CorsConfigurationSource} that provides CORS configuration for all endpoints
+   * @see CorsConfiguration
+   * @see UrlBasedCorsConfigurationSource
+   */
+  CorsConfigurationSource corsConfigurationSource() {
+    var configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(List.of("*"));
+    configuration.setAllowedMethods(List.of("*"));
+    configuration.setAllowedHeaders(List.of("*"));
+    configuration.setMaxAge(3600L);
+
+    var source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
   }
 
   /**

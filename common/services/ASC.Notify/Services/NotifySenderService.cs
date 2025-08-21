@@ -55,9 +55,17 @@ public class NotifySenderService(
 
         foreach (var pair in _notifyServiceCfg.Schedulers.Where(r => r.MethodInfo != null))
         {
-            logger.DebugStartScheduler(pair.Name, pair.MethodInfo);
+            logger.DebugStartScheduler(pair.Name, FormatMethodSignature(pair.MethodInfo));
             pair.MethodInfo.Invoke(null, null);
         }
+    }
+
+    private static string FormatMethodSignature(MethodInfo method)
+    {
+        var parameters = method.GetParameters() ?? [];
+        var paramList = string.Join(", ", parameters.Select(p => $"{p.ParameterType.Name} {p.Name}"));
+
+        return $"{method.DeclaringType?.FullName}.{method.Name}({paramList})";
     }
 
     private async Task ThreadManagerWorkAsync(CancellationToken stoppingToken)

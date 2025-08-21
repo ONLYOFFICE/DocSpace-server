@@ -40,9 +40,9 @@ public class Startup : BaseStartup
 
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        var services = builder.Services;
         await base.ConfigureServices(builder);
 
+        var services = builder.Services;
         if (!_configuration.GetValue<bool>("disableLdapNotifyService"))
         {
             services.AddHostedService<LdapNotifyService>();

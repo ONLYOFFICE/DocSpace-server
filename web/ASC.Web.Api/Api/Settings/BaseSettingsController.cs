@@ -34,17 +34,15 @@ namespace ASC.Web.Api.Controllers.Settings;
 [DefaultRoute]
 [ApiController]
 [ControllerName("settings")]
-public class BaseSettingsController(ApiContext apiContext, IFusionCache fusionCache, WebItemManager webItemManager, IHttpContextAccessor httpContextAccessor) : ControllerBase
+public class BaseSettingsController(IFusionCache fusionCache, WebItemManager webItemManager) : ControllerBase
 {
     //private const int ONE_THREAD = 1;
 
     //private static readonly DistributedTaskQueue quotaTasks = new DistributedTaskQueue("quotaOperations", ONE_THREAD);
     //private static DistributedTaskQueue LDAPTasks { get; } = new DistributedTaskQueue("ldapOperations");
     //private static DistributedTaskQueue SMTPTasks { get; } = new DistributedTaskQueue("smtpOperations");
-
-    internal readonly ApiContext ApiContext = apiContext;
+    
     internal readonly WebItemManager WebItemManager = webItemManager;
-    protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
     private readonly int _maxCount = 10;
     private readonly int _expirationMinutes = 2;
 

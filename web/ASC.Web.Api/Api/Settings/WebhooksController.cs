@@ -29,24 +29,23 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace ASC.Web.Api.Controllers.Settings;
 
 [WebhookDisable]
-public class WebhooksController(ApiContext context,
-        ApiContext apiContext,
-        AuthContext authContext,
-        WebItemManager webItemManager,
-        IFusionCache fusionCache,
-        DbWorker dbWorker,
-        TenantManager tenantManager,
-        UserManager userManager,
-        IHttpContextAccessor httpContextAccessor,
-        IMapper mapper,
-        IWebhookPublisher webhookPublisher,
-        MessageService messageService,
-        SettingsManager settingsManager,
-        PasswordSettingsManager passwordSettingsManager,
-        IHttpClientFactory clientFactory,
-        IConfiguration configuration,
-        WebhooksConfigDtoHelper webhooksConfigDtoHelper)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class WebhooksController(
+    ApiContext context,
+    AuthContext authContext,
+    WebItemManager webItemManager,
+    IFusionCache fusionCache,
+    DbWorker dbWorker,
+    TenantManager tenantManager,
+    UserManager userManager,
+    IMapper mapper,
+    IWebhookPublisher webhookPublisher,
+    MessageService messageService,
+    SettingsManager settingsManager,
+    PasswordSettingsManager passwordSettingsManager,
+    IHttpClientFactory clientFactory,
+    IConfiguration configuration,
+    WebhooksConfigDtoHelper webhooksConfigDtoHelper)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Returns a list of the tenant webhooks.
@@ -226,7 +225,7 @@ public class WebhooksController(ApiContext context,
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Logs of the webhook activities", typeof(IAsyncEnumerable<WebhooksLogDto>))]
     [HttpGet("webhooks/log")]
-    public async IAsyncEnumerable<WebhooksLogDto> GetJournal(WebhookLogsRequestDto inDto)
+    public async IAsyncEnumerable<WebhooksLogDto> GetWebhooksLogs(WebhookLogsRequestDto inDto)
     {
         if (!await CheckAdminPermissionsAsync())
         {
@@ -234,11 +233,8 @@ public class WebhooksController(ApiContext context,
         }
 
         context.SetTotalCount(await dbWorker.GetTotalByQuery(inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, inDto.UserId, inDto.Trigger));
-
-        var startIndex = Convert.ToInt32(context.StartIndex);
-        var count = Convert.ToInt32(context.Count);
-
-        await foreach (var j in dbWorker.ReadJournal(startIndex, count, inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, inDto.UserId, inDto.Trigger))
+        
+        await foreach (var j in dbWorker.ReadJournal(inDto.StartIndex, inDto.Count, inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, inDto.UserId, inDto.Trigger))
         {
             j.Log.Config = j.Config;
             yield return mapper.Map<DbWebhooksLog, WebhooksLogDto>(j.Log);
@@ -333,7 +329,7 @@ public class WebhooksController(ApiContext context,
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "List of triggers for a webhook", typeof(Dictionary<string, int>))]
     [HttpGet("webhook/triggers")]
-    public Dictionary<string, int> Triggers()
+    public Dictionary<string, int> GetWebhookTriggers()
     {
         return Enum.GetValues<WebhookTrigger>().ToDictionary(item => item.ToCustomString(), item => (int)item);
     }

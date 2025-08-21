@@ -93,6 +93,21 @@ public class ExternalLinkHelper(
 
         if (status == Status.RequiredPassword)
         {
+            if (isAuth)
+            {
+               var canReadWithoutPassword = entry switch
+                {
+                    Folder<int> entryInt => DocSpaceHelper.IsRoom(entryInt.FolderType) && await fileSecurity.CanReadAsync(entryInt),
+                    Folder<string> entryString => DocSpaceHelper.IsRoom(entryString.FolderType) && await fileSecurity.CanReadAsync(entryString),
+                    _ => false
+                };
+
+                if (canReadWithoutPassword)
+                {
+                    result.Status = Status.Ok;
+                }
+            }
+            
             return result;
         }
         

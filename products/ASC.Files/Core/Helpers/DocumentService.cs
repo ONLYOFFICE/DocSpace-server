@@ -24,11 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Polly;
-using Polly.Contrib.WaitAndRetry;
-using Polly.Extensions.Http;
-using Polly.Timeout;
-
 namespace ASC.Files.Core.Helpers;
 
 /// <summary>
@@ -42,6 +37,16 @@ public static class DocumentService
     /// The custom SSL verification client.
     /// </summary>
     public const string CustomSslVerificationClient = "CustomSSLVerificationClient";
+
+    /// <summary>
+    /// The document service resilience pipeline name.
+    /// </summary>
+    public const string ResiliencePipelineName = "DocumentServiceResiliencePipeline";
+
+    /// <summary>
+    /// The document service license resilience pipeline name.
+    /// </summary>
+    public const string LicenseResiliencePipelineName = "DocumentServiceLicenseResiliencePipeline";
 
     /// <summary>
     /// Gets the HTTP client name.
@@ -1042,38 +1047,60 @@ public static class DocumentServiceHttpClientExtension
     public static void AddDocumentServiceHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
         var httpClientTimeout = Convert.ToInt32(configuration["files:docservice:timeout"] ?? "100000");
-        var policyTimeout = httpClientTimeout / 1000;
+        var policyTimeout = TimeSpan.FromSeconds(httpClientTimeout / 1000);
         var retryCount = Convert.ToInt32(configuration["files:docservice:try"] ?? "6");
-        var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: retryCount);
+        var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: retryCount).ToArray();
+
+        var retryOptions = new RetryStrategyOptions<HttpResponseMessage>
+        {
+            MaxRetryAttempts = retryCount,
+
+            ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                            .Handle<HttpRequestException>()
+                            .Handle<TaskCanceledException>()
+                            .Handle<TimeoutRejectedException>()
+                            .HandleResult(response => !response.IsSuccessStatusCode),
+
+            DelayGenerator = (args) =>
+            {
+                return ValueTask.FromResult<TimeSpan?>(delay[args.AttemptNumber]);
+            }
+        };
+
+        var customHttpMessageHandler = new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+        };
 
         services.AddHttpClient(GetHttpClientName(sslVerification: true))
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                .AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(policyTimeout))
-                .AddPolicyHandler((_, _) => HttpPolicyExtensions.HandleTransientHttpError()
-                                                                .Or<TimeoutRejectedException>()
-                                                                .WaitAndRetryAsync(delay));
+                .AddResilienceHandler(ResiliencePipelineName, builder =>
+                {
+                    builder.AddTimeout(policyTimeout);
+                    builder.AddRetry(retryOptions);
+                });
 
         services.AddHttpClient(GetHttpClientName(sslVerification: false))
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                .ConfigurePrimaryHttpMessageHandler(_ =>
+                .ConfigurePrimaryHttpMessageHandler(_ => customHttpMessageHandler)
+                .AddResilienceHandler(ResiliencePipelineName, builder =>
                 {
-                    return new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-                    };
-                })
-                .AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(policyTimeout))
-                .AddPolicyHandler((_, _) => HttpPolicyExtensions.HandleTransientHttpError()
-                                                                .Or<TimeoutRejectedException>()
-                                                                .WaitAndRetryAsync(delay));
+                    builder.AddTimeout(policyTimeout);
+                    builder.AddRetry(retryOptions);
+                });
 
         services.AddHttpClient(CustomSslVerificationClient)
-                .ConfigurePrimaryHttpMessageHandler(_ =>
-                {
-                    return new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-                    };
-                });
+                .ConfigurePrimaryHttpMessageHandler(_ => customHttpMessageHandler);
+
+        services.AddResiliencePipeline<string, LicenseValidationResult>(LicenseResiliencePipelineName, pipelineBuilder =>
+        {
+            pipelineBuilder.AddRetry(new RetryStrategyOptions<LicenseValidationResult>()
+            {
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Exponential,
+                ShouldHandle = new PredicateBuilder<LicenseValidationResult>().HandleResult(result => result == null)
+            });
+        });
     }
 }

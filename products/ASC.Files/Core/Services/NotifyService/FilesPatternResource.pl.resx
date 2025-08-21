@@ -159,7 +159,9 @@ Nowy formularz "$DocumentTitle":"$DocumentURL" został wypełniony w pokoju "Roo
 
 Wypełniający formularz: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Wypełniono formularz $Message
@@ -168,7 +170,9 @@ Formularz "$DocumentTitle":"$DocumentURL" w pokoju "$RoomTitle":"$RoomURL" zosta
 
 Menedżer: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>Powiadomienie DocSpace. Formularz został wypełniony</value>

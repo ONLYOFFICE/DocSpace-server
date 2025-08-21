@@ -155,6 +155,9 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
                     return fileType is FileType.Audio or FileType.Video;
                 });
                 break;
+            case FilterType.DiagramsOnly:
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Diagram);
+                break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
                 {
@@ -245,6 +248,9 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
                     return fileType is FileType.Audio or FileType.Video;
                 });
+                break;
+            case FilterType.DiagramsOnly:
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Diagram);
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
@@ -832,6 +838,10 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     public Task DeleteFormRolesAsync(string formId)
     {
         return Task.CompletedTask;
+    }
+    public Task<int> UpdateCategoryAsync(string fileId, int fileVersion, int category, ForcesaveType forcesave)
+    {
+        return Task.FromResult(0);
     }
 }
 

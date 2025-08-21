@@ -868,17 +868,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Witaj, $UserName!
-
-Przypominamy, że Twoja subskrypcja ${LetterLogoText} DocSpace wygaśnie za trzy dni. Po tym czasie zostanie aktywowany okres prolongaty o długości $PaymentDelay dni.
-
-Zachęcamy do opłacenia swojego planu Biznes już teraz, aby kontynuować korzystanie ze wszystkich zalet oferowanych przez Twoje konto ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Witaj, $UserName!
 
@@ -953,9 +942,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Witaj w ${LetterLogoText} DocSpace!</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Twoja subskrypcja ${LetterLogoText} DocSpace wkrótce wygaśnie</value>
   </data>
   <data name="subject_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Witaj w ${LetterLogoText} DocSpace!</value>
@@ -1148,7 +1134,9 @@ Konfiguracja aplikacji uwierzytelniającej, której używasz do logowania w port
 
 Kliknij poniższy przycisk, aby przejść do strony logowania portalu i skonfigurować aplikację uwierzytelniającą:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Poznaj plan Biznes &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
@@ -1936,5 +1924,53 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
     <value>Twoja rola w pokoju DocSpace uległa zmianie</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Przejdź do usług</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Przejdź do ustawień portfela</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Informujemy, że automatyczne odnowienie zakupionego planu nie mogło zostać zrealizowane.
+
+Uprzejmie prosimy o ręczne odnowienie aktualnego planu (lub zakupienie nowego).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Informujemy, że płatność za subskrypcję zostanie automatycznie pobrana z Twojego konta za 3 dni.
+
+Aby transakcja przebiegła bezproblemowo, upewnij się, że masz na nim wystarczające środki.
+
+Jeśli masz pytania lub potrzebujesz pomocy, skontaktuj się z naszym "zespołem wsparcia":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Informujemy, że automatyczne doładowanie salda portfela DocSpace nie powiodło się.
+
+Uprzejmie prosimy o ręczne sprawdzenie i aktualizację salda portfela.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Wymagane działanie: Nie udało się automatycznie odnowić planu w ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Nadchodząca płatność za subskrypcję ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Wymagane działanie: Nie udało się automatycznie zasilić portfela w ${LetterLogoText} DocSpace</value>
   </data>
 </root>

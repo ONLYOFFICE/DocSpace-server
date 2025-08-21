@@ -451,17 +451,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>$UserName님, 안녕하세요!
-
-고객님의 ${LetterLogoText} DocSpace 구독이 3일 내에 만료될 예정임을 알려드립니다. 그 후에는 $PaymentDelay일의 유예 기간이 시작됩니다.
-
-지금 비즈니스 구독료를 지불하시고 ${LetterLogoText} DocSpace의 모든 혜택을 계속 누리시기 바랍니다.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
 
@@ -578,9 +567,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
     <value>${__VirtualRootHost}에 초대받으셨</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>고객님의 ${LetterLogoText} DocSpace 구독이 곧 만료됩니다</value>
   </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>고객님의 ${LetterLogoText} DocSpace가 삭제될 예정입니다</value>
@@ -958,7 +944,9 @@ ${LetterLogoText} 포털에 입장하는 데 사용하는 인증 앱의 구성�
 
 아래 버튼을 클릭하여 포털 로그인 페이지로 이동하고 인증 애플리케이션을 구성하세요.
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 포털 소유자 변경
@@ -1996,5 +1984,51 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
     <value>DocSpace 룸에서 고객님의 역할이 변경되었습니다</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>서비스로 이동하기</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>지갑 설정으로 이동하기</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>$UserName님, 안녕하세요!
+
+구매하신 서비스 플랜의 자동 갱신이 완료되지 않았음을 알려드립니다.
+
+현재 이용 중인 서비스 플랜을 수동으로 갱신해 주시기 바랍니다. (아니면 새로운 플랜을 구매해 주세요.)
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>$UserName님, 안녕하세요!
+
+고객님의 구독료가 3일 후 계좌에서 자동으로 출금될 예정임을 알려드립니다.
+
+원활하게 진행될 수 있도록 결제 수단의 잔액이 충분한지 확인해 주시기 바랍니다.
+
+궁금한 점이 있거나 도움이 필요한 경우 언제든지 "지원 팀":"${__SupportLink}" 으로 연락주세요.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>$UserName님, 안녕하세요!
+
+DocSpace 지갑 잔액 자동 충전이 실패했음을 알려드립니다.
+
+지갑 잔액을 직접 확인 및 업데이트해 주시기 바랍니다.
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>조치가 필요합니다: 고객님의 ${LetterLogoText} DocSpace에서 서비스 플랜을 자동으로 갱신할 수 없습니다</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>고객님의 ${LetterLogoText} DocSpace에 대한 구독 결제가 예정되어 있습니다</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>조치가 필요합니다: 고객님의 ${LetterLogoText} DocSpace에서 지갑 잔액을 자동으로 충전할 수 없습니다</value>
   </data>
 </root>

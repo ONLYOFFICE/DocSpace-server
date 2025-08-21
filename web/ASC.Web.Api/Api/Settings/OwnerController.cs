@@ -33,7 +33,6 @@ public class OwnerController(
     MessageService messageService,
     CommonLinkUtility commonLinkUtility,
     StudioNotifyService studioNotifyService,
-    ApiContext apiContext,
     UserManager userManager,
     TenantManager tenantManager,
     AuthContext authContext,
@@ -41,10 +40,9 @@ public class OwnerController(
     WebItemManager webItemManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IFusionCache fusionCache,
-    IHttpContextAccessor httpContextAccessor,
     IUrlShortener urlShortener,
     UserManagerWrapper userManagerWrapper)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Sends the instructions to change the DocSpace owner.
@@ -55,15 +53,21 @@ public class OwnerController(
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
     [SwaggerResponse(200, "Message about changing the portal owner", typeof(OwnerChangeInstructionsDto))]
+    [SwaggerResponse(400, "Owner's email is not activated")]
     [SwaggerResponse(403, "Collaborator can not be an owner")]
     [HttpPost("")]
-    public async Task<OwnerChangeInstructionsDto> SendOwnerChangeInstructionsAsync(OwnerIdSettingsRequestDto inDto)
+    public async Task<OwnerChangeInstructionsDto> SendOwnerChangeInstructions(OwnerIdSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var curTenant = tenantManager.GetCurrentTenant();
         var owner = await userManager.GetUsersAsync(curTenant.OwnerId);
         var newOwner = await userManager.GetUsersAsync(inDto.OwnerId);
+
+        if (owner.ActivationStatus != EmployeeActivationStatus.Activated)
+        {
+            throw new ArgumentException("Owner's email is not activated");
+        }
 
         if (await userManager.IsGuestAsync(newOwner))
         {
@@ -99,7 +103,7 @@ public class OwnerController(
     [SwaggerResponse(409, "")]
     [HttpPut("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalOwnerChange")]
-    public async Task OwnerAsync(OwnerIdSettingsRequestDto inDto)
+    public async Task UpdatePortalOwner(OwnerIdSettingsRequestDto inDto)
     {
         var newOwner = Constants.LostUser;
         try

@@ -49,6 +49,10 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 status = HttpStatusCode.NotFound;
                 message = e.Message;
                 break;
+            case FileNotFoundException e:
+                status = HttpStatusCode.NotFound;
+                message = e.Message;
+                break;
             case ArgumentException e:
                 status = HttpStatusCode.BadRequest;
                 message = e.Message;
@@ -71,7 +75,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 status = HttpStatusCode.Forbidden;
                 break;
             case TenantQuotaException:
-            case BillingNotFoundException:
+            case BillingException:
                 status = HttpStatusCode.PaymentRequired;
                 break;
             case CustomHttpException httpException:

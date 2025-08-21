@@ -115,30 +115,27 @@ public class HistoryApiHelper(
     AuditInterpreter interpreter,
     IMapper mapper)
 {
-    public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId, ApiDateTime fromDate, ApiDateTime toDate)
+    public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId, ApiDateTime fromDate, ApiDateTime toDate, int offset, int count)
     {
-        var events = GetEntryEventsAsync(fileId, FileEntryType.File, fromDate, toDate);
+        var events = GetEntryEventsAsync(fileId, FileEntryType.File, fromDate, toDate, offset, count);
         return ToHistoryAsync(events);
     }
 
-    public IAsyncEnumerable<HistoryDto> GetFolderHistoryAsync(int folderId, ApiDateTime fromDate, ApiDateTime toDate)
+    public IAsyncEnumerable<HistoryDto> GetFolderHistoryAsync(int folderId, ApiDateTime fromDate, ApiDateTime toDate, int offset, int count)
     {
-        var events = GetEntryEventsAsync(folderId, FileEntryType.Folder, fromDate, toDate);
+        var events = GetEntryEventsAsync(folderId, FileEntryType.Folder, fromDate, toDate, offset, count);
         return ToHistoryAsync(events);
     }
 
     public async Task<IEnumerable<AuditEvent>> GetFolderEventsAsync(int folderId)
     {
-        var events = GetEntryEventsAsync(folderId, FileEntryType.Folder, null, null, false);
+        var events = GetEntryEventsAsync(folderId, FileEntryType.Folder, null, null, 0, 0, false);
 
         return await ToEventsAsync(events).ToListAsync();
     }
 
-    private async IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> GetEntryEventsAsync(int entryId, FileEntryType entryType, ApiDateTime fromDate, ApiDateTime toDate, bool setCount = true)
+    private async IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> GetEntryEventsAsync(int entryId, FileEntryType entryType, ApiDateTime fromDate, ApiDateTime toDate, int offset, int count, bool setCount = true)
     {
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-        
         var fromDateUtc = fromDate != null 
             ? tenantUtil.DateTimeToUtc(fromDate) 
             : (DateTime?)null;

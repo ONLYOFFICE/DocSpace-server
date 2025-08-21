@@ -200,7 +200,9 @@ La configuración de la aplicación de autenticación que se utiliza para entrar
 
 Por favor, haga clic en el botón de abajo para ir a la página de inicio de sesión del portal y configurar la aplicación de autenticación:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Cambio de Propietario de Portal "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1298,17 +1300,6 @@ $OrangeButton
  
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>¡Hola, $UserName!
-
-Por favor, tenga en cuenta que su suscripción a ${LetterLogoText} DocSpace expira en tres días. Después de eso, el período de gracia de $PaymentDelay días se activará.
-
-Recomendamos que pague su suscripción Business ahora para poder seguir usando todas las ventajas de su ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>¡Hola, $UserName!
 
@@ -1431,9 +1422,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>El periodo de gracia para su ${LetterLogoText} DocSpace está activado</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Su suscripción a ${LetterLogoText} DocSpace está a punto de expirar</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>El periodo de gracia para su ${LetterLogoText} DocSpace ha expirado</value>
@@ -1936,5 +1924,31 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Su tipo de usuario de DocSpace ha cambiado</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>¡Hola, $UserName!
+
+Le informamos que el pago de su suscripción se cobrará automáticamente de su cuenta en 3 días.
+
+Para garantizar una transacción sin problemas, por favor confirme que dispone de fondos suficientes en su método de pago.
+
+Si tiene alguna pregunta o necesita ayuda, no dude en ponerse en contacto con nuestro "equipo de soporte":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Próximo pago de suscripción para su ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Acción requerida: No se puede renovar automáticamente el plan de servicio en su ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Acción requerida: No se puede recargar automáticamente el saldo del Monedero en su ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Ir a Servicios</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Ir a la configuración del Monedero</value>
   </data>
 </root>

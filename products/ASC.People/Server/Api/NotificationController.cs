@@ -50,7 +50,7 @@ public class NotificationController : ApiControllerBase
     [SwaggerResponse(501, "Not Implemented")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [HttpPost("phone")]
-    public Task<string> SendNotificationToChangeAsync(UpdateMemberSimpleRequestDto inDto)
+    public Task<string> SendNotificationToChange(UpdateMemberSimpleRequestDto inDto)
     {
         throw new NotImplementedException();
         // var user = await userManager.GetUsersAsync(string.IsNullOrEmpty(inDto.UserId)

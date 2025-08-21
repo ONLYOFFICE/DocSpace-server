@@ -365,14 +365,19 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
         if (!fileData.Key.Equals(docKey))
         {
-            if (fileData.ForceSaveType != TrackerData.ForceSaveInitiator.UserSubmit ||
-                !documentServiceHelper.IsDocSubmitKey(docKey, fileData.Key))
+            var fileType = FileUtility.GetFileTypeByExtention("." + fileData.Filetype);
+
+            if (fileType != FileType.Pdf || !documentServiceHelper.IsDocSubmitKey(docKey, fileData.Key))
             {
                 logger.ErrorDocServiceSavingFile(fileId.ToString(), docKey, fileData.Key);
 
                 await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.Url), fileData.Filetype);
 
                 return new TrackResponse { Message = "Expected key " + docKey };
+            }
+            if (fileData.ForceSaveType != TrackerData.ForceSaveInitiator.UserSubmit)
+            {
+                return new TrackResponse();
             }
         }
 

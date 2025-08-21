@@ -45,7 +45,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("thirdparty")]
-    public async Task<bool> ChangeAccessToThirdpartyAsync(SettingsRequestDto inDto)
+    public async Task<bool> ChangeAccessToThirdparty(SettingsRequestDto inDto)
     {        
         await filesSettingsHelper.SetEnableThirdParty(inDto.Set);
 
@@ -154,7 +154,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("settings/external")]
-    public async Task<bool> ExternalShareAsync(DisplayRequestDto inDto)
+    public async Task<bool> ExternalShare(DisplayRequestDto inDto)
     {
         return await filesSettingsHelper.ChangeExternalShareSettingsAsync(inDto.Set);
     }
@@ -167,7 +167,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("settings/externalsocialmedia")]
-    public async Task<bool> ExternalShareSocialMediaAsync(DisplayRequestDto inDto)
+    public async Task<bool> ExternalShareSocialMedia(DisplayRequestDto inDto)
     {
         return await filesSettingsHelper.ChangeExternalShareSocialMediaSettingsAsync(inDto.Set);
     }
@@ -289,7 +289,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("storeoriginal")]
-    public async Task<bool> StoreOriginalAsync(SettingsRequestDto inDto)
+    public async Task<bool> StoreOriginal(SettingsRequestDto inDto)
     {
         await filesSettingsHelper.SetStoreOriginalFiles(inDto.Set);
         return await filesSettingsHelper.GetStoreOriginalFiles();
@@ -303,7 +303,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("keepnewfilename")]
-    public async Task<bool> KeepNewFileNameAsync(SettingsRequestDto inDto)
+    public async Task<bool> KeepNewFileName(SettingsRequestDto inDto)
     {
         return await filesSettingsHelper.SetKeepNewFileName(inDto.Set);
     }
@@ -329,7 +329,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("updateifexist")]
-    public Task<bool> UpdateIfExistAsync(SettingsRequestDto inDto)
+    public Task<bool> UpdateFileIfExist(SettingsRequestDto inDto)
     {
         return Task.FromResult(false);
     }
@@ -384,7 +384,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("settings/openeditorinsametab")]
-    public async Task<bool> SetOpenEditorInSameTabAsync(SettingsRequestDto inDto)
+    public async Task<bool> SetOpenEditorInSameTab(SettingsRequestDto inDto)
     {
         await filesSettingsHelper.SetOpenEditorInSameTabAsync(inDto.Set);
         return await filesSettingsHelper.GetOpenEditorInSameTabAsync();

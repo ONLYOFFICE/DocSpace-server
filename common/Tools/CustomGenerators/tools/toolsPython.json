@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "7.13.0"
+  },
+  "generatorName": "my-python",
+  "inputSpec": "./tools/api-docs.json",
+  "outputDir": "python-sdk",
+  "additionalProperties": {
+    "packageName": "docspace_api_sdk",
+    "packageVersion": "3.5.0-preview.1",
+    "licenseName": "Apache-2.0",
+    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-python",
+    "excludeTests": true
+  }
+}

@@ -920,17 +920,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Dobrý deň, $UserName!
-
-Prosím, vezmite do úvahy, že Vaše predplatné ${LetterLogoText} DocSpace vyprší o tri dni. Potom sa aktivuje odkladná lehota $PaymentDelay dní.
-
-Odporúčame vám zaplatiť predplatné Business teraz a naďalej využívať všetky výhody vášho priestoru ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Dobrý deň, $UserName!
 
@@ -1104,9 +1093,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Dodatočná lehota pre váš ${LetterLogoText} DocSpace bola aktivovaná</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Vaše predplatné ${LetterLogoText} DocSpace čoskoro vyprší</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Dodatočná lehota pre vaše predplatné ${LetterLogoText} DocSpace vypršala</value>
@@ -1470,7 +1456,9 @@ Konfigurácia aplikácie autentifikátora, ktorú používate na vstup do portá
 
 Kliknite na tlačidlo nižšie, aby ste prešli na stránku prihlásenia do portálu a nakonfigurovali aplikáciu autentifikátora:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_saas_video_guides_v1" xml:space="preserve">
     <value>Zvládnite ${LetterLogoText} DocSpace s videonávodmi</value>
@@ -1937,5 +1925,11 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ak chcete pokračovať v používaní svojho ${LetterLogoText} DocSpace, stačí sa do neho prihlásiť a vykonať akúkoľvek operáciu.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Prejsť na Služby</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Prejsť na Nastavenia peňaženky</value>
   </data>
 </root>

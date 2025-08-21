@@ -1081,4 +1081,49 @@
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>O URL do webhook não está disponível. O pedido HEAD não está a responder ao estado 200 http.</value>
   </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Armazenamento utilizado:</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Crédito</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Moeda</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Data e hora</value>
+  </data>
+  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
+    <value>Descrição</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Quantidade</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Nome do serviço</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Espaço em disco</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Recarga de saldo</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Unidade de Medida</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Relatório de operações do cliente ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
+    <value>Retirada</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>O grupo não foi encontrado</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Armazenamento adicional em disco</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Ajuste o armazenamento para a quantidade exata que necessita.</value>
+  </data>
 </root>

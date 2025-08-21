@@ -27,15 +27,14 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("customnavigation")]
-public class CustomNavigationController(MessageService messageService,
-        ApiContext apiContext,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        StorageHelper storageHelper,
-        IFusionCache fusionCache,
-        IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class CustomNavigationController(
+    MessageService messageService,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    StorageHelper storageHelper,
+    IFusionCache fusionCache)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Returns a list of the custom navigation items.
@@ -46,7 +45,7 @@ public class CustomNavigationController(MessageService messageService,
     [Tags("Settings / Custom Navigation")]
     [SwaggerResponse(200, "List of the custom navigation items", typeof(List<CustomNavigationItem>))]
     [HttpGet("getall")]
-    public async Task<List<CustomNavigationItem>> GetCustomNavigationItemsAsync()
+    public async Task<List<CustomNavigationItem>> GetCustomNavigationItems()
     {
         return (await settingsManager.LoadAsync<CustomNavigationSettings>()).Items;
     }
@@ -72,7 +71,7 @@ public class CustomNavigationController(MessageService messageService,
     [Tags("Settings / Custom Navigation")]
     [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]
     [HttpGet("get/{id:guid}")]
-    public async Task<CustomNavigationItem> GetCustomNavigationItemAsync(IdRequestDto<Guid> inDto)
+    public async Task<CustomNavigationItem> GetCustomNavigationItem(IdRequestDto<Guid> inDto)
     {
         return (await settingsManager.LoadAsync<CustomNavigationSettings>()).Items.Find(item => item.Id == inDto.Id);
     }
@@ -143,6 +142,7 @@ public class CustomNavigationController(MessageService messageService,
     /// <short>Delete a custom navigation item</short>
     /// <path>api/2.0/settings/customnavigation/delete/{id}</path>
     [Tags("Settings / Custom Navigation")]
+    [SwaggerResponse(200, "Ok")]
     [HttpDelete("delete/{id:guid}")]
     public async Task DeleteCustomNavigationItem(IdRequestDto<Guid> inDto)
     {

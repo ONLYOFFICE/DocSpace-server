@@ -399,9 +399,6 @@
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Грејс период за ваш ${LetterLogoText} DocSpace активиран</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Ваша ${LetterLogoText} DocSpace претплата ускоро истиче</value>
-  </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Грејс период за ваш ${LetterLogoText} DocSpace је истекао</value>
   </data>
@@ -569,7 +566,9 @@ $OrangeButton
 
 Кликните на дугме испод да бисте отишли на страницу за пријаву на портал и конфигурисали апликацију за аутентификацију:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Промена "${__VirtualRootPath}":"${__VirtualRootPath}" власника портала
@@ -1238,17 +1237,6 @@ $TrulyYours</value>
 Узмите у обзир да је грејс период од $PaymentDelay дана за ваш ${LetterLogoText} DocSpace активиран.
 
 Обавезно платите своју Пословну претплату пре истека грејс периода. Тако ц́ете моц́и даље да користите све предности вашег ${LetterLogoText} DocSpace-а.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Здраво, $UserName!
-
-Имајте у виду да ваша ${LetterLogoText} DocSpace претплата истиче за три дана. Након тога, грејс период од $PaymentDelay дана ц́е бити активиран.
-
-Препоручујемо да сада платите своју Пословну претплату и наставите да користите све предности свог ${LetterLogoText} DocSpace-а.
 
 $OrangeButton
 
@@ -1993,5 +1981,53 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Ваш тип корисника у DocSpace -у је промењен</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Обавештавамо вас да ће уплата за вашу претплату бити аутоматски наплаћена са вашег рачуна за 3 дана.
+
+Како би трансакција протекла без проблема, молимо вас да проверите да ли на одабраној платној методи имате довољно средстава.
+
+Уколико имате било каква питања или вам је потребна помоћ, слободно контактирајте наш "тим за подршку":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Предстојећа уплата претплате за ваш ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Потребна акција: Није могућеautomatski обновити план услуге у вашем ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Потребна акција: Није могуће automatski допунити стање новчаника у вашем ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Иди на услуге</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Иди на подешавање новчаника</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Обавештавамо вас да автоматска обнова ваше купљене услуге није успешно извршена.
+
+Љубазно вас молимо да ручно обновите тренутни план услуге (или купите нови).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Обавештавамо вас да автоматска допуна стања у вашем DocSpace новчанику није успела.
+
+Љубазно вас молимо да ручно проверите и ажурирате стање у новчанику.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>
