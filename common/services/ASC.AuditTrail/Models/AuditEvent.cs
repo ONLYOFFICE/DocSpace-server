@@ -35,12 +35,12 @@ public class AuditEvent : BaseEvent, IMapFrom<AuditEventQuery>
 
     [Event("ActionTypeCol", 30)]
     public string ActionTypeText { get; set; }
-
-    [Event("LocationCol", 32)]
     public string Location { get; set; }
 
     [Event("TargetIdCol", 34)]
     public MessageTarget Target { get; set; }
+    
+    [Event("LocationCol", 32)]
     public string Context { get; set; }
 
     public override void Mapping(Profile profile)
