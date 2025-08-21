@@ -129,7 +129,7 @@ public class HistoryApiHelper(
 
     public async Task<IEnumerable<AuditEvent>> GetFolderEventsAsync(int folderId)
     {
-        var events = GetEntryEventsAsync(folderId, FileEntryType.Folder, null, null, 0, 0, false);
+        var events = GetEntryEventsAsync(folderId, FileEntryType.Folder, null, null, 0, int.MaxValue, false);
 
         return await ToEventsAsync(events).ToListAsync();
     }
