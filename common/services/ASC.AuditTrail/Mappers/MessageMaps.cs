@@ -96,18 +96,6 @@ public class MessageMaps
         }
     }
 
-    public string GetProductText()
-    {
-        try
-        {
-            return AuditReportResource.ResourceManager.GetString(ProductType + "Product");
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
     public string GetLocationText()
     {
         try
