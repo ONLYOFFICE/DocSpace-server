@@ -24,6 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AuditTrail;
+using ASC.AuditTrail.Models;
+using ASC.AuditTrail.Models.Mappings;
+using ASC.Core.Common;
+using ASC.Files.Core.Utils;
+
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -38,7 +44,12 @@ public class FoldersControllerInternal(
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
     HistoryApiHelper historyApiHelper,
-    FormFillingReportCreator formFillingReportCreator)
+    FormFillingReportCreator formFillingReportCreator,
+    CsvFileHelper csvFileHelper,
+    CsvFileUploader csvFileUploader,
+    TenantManager tenantManager,
+    CoreBaseSettings coreBaseSettings
+    )
     : FoldersController<int>(
         breadCrumbsManager,
         folderContentDtoHelper,
@@ -66,6 +77,36 @@ public class FoldersControllerInternal(
     public IAsyncEnumerable<HistoryDto> GetFolderHistory(HistoryFolderRequestDto inDto)
     {
         return historyApiHelper.GetFolderHistoryAsync(inDto.FolderId, inDto.FromDate, inDto.ToDate, inDto.StartIndex, inDto.Count);
+    }
+
+    /// <summary>
+    /// Generates the activity history of a folder.
+    /// </summary>
+    /// <short>
+    /// Generates folder history
+    /// </short>
+    /// <path>api/2.0/files/folder/{folderId}/log/report</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "URL to the report file", typeof(string))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(404, "The required folder was not found")]
+    [HttpPost("folder/{folderId:int}/log/report")]
+    public async Task<string> CreateReportFolderHistoryAsync(int folderId)
+    {
+        if (!coreBaseSettings.Standalone
+            && (!SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast())
+        || !(await tenantManager.GetCurrentTenantQuotaAsync()).Audit))
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+
+        var history = await historyApiHelper.GetFolderEventsAsync(folderId);
+
+        await using var stream = csvFileHelper.CreateFile(history, new BaseEventMap<AuditEvent>());
+        var reportName = string.Format(AuditReportResource.AuditTrailReportName + ".csv", "room", folderId);
+        var result = await csvFileUploader.UploadFile(stream, reportName);
+
+        return result;
     }
 
     /// <summary>
