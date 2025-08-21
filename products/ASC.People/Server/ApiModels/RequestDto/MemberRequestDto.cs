@@ -61,6 +61,11 @@ public class MemberBaseRequestDto
     [EmailAddress]
     [StringLength(255)]
     public string Email { get; set; }
+
+    /// <summary>
+    /// The user encrypted email address.
+    /// </summary>
+    public string EncEmail { get; init; }
 }
 
 /// <summary>

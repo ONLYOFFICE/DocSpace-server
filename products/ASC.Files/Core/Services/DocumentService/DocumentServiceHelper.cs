@@ -454,7 +454,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public bool IsDocSubmitKey(string docKey, string key)
     {
-        var submitKey = Encoding.UTF8.GetString(Convert.FromBase64String(FixBase64String(key)));
+        var submitKey = Encoding.UTF8.GetString(Convert.FromBase64String(key.Base64FromUrlSafe()));
 
         var keySplit = submitKey.Split(Convert.ToChar("_"), 3);
 
@@ -463,21 +463,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             return true;
         }
         return false;
-    }
-    
-    static string FixBase64String(string input)
-    {
-        // Convert from URL-safe Base64 to standard Base64
-        var fixedInput = input.Replace('-', '+').Replace('_', '/');
-    
-        // Add padding if necessary
-        switch (fixedInput.Length % 4)
-        {
-            case 2: fixedInput += "=="; break;
-            case 3: fixedInput += "="; break;
-        }
-    
-        return fixedInput;
     }
 
     public async Task CheckUsersForDropAsync<T>(File<T> file)
