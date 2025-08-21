@@ -1173,6 +1173,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
             }
         }
+
+        if (file != null && action == FilesSecurityActions.EditAccess && parentFolders.Any(r => r.FolderType is FolderType.InProcessFormFolder or FolderType.ReadyFormFolder))
+        {
+            return false;
+        }
         
         switch (e.RootFolderType)
         {
