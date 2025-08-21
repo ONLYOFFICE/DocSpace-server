@@ -35,7 +35,6 @@ public class AuditEvent : BaseEvent, IMapFrom<AuditEventQuery>
 
     [Event("ActionTypeCol", 30)]
     public string ActionTypeText { get; set; }
-    public string Location { get; set; }
 
     [Event("TargetIdCol", 34)]
     public MessageTarget Target { get; set; }
