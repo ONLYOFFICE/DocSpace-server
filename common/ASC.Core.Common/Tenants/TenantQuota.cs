@@ -322,15 +322,15 @@ public class TenantQuota : IMapFrom<DbQuota>
         set => _customFeature.Value = value;
     }
 
-    private readonly TenantQuotaFeatureFlag _autoBackupRestoreFeature;
+    private readonly TenantQuotaFeatureFlag _restoreFeature;
 
     /// <summary>
-    /// Specifies if the automatic backup option is enabled or not.
+    /// Specifies if the restore is enabled or not.
     /// </summary>
-    public bool AutoBackupRestore
+    public bool Restore
     {
-        get => _autoBackupRestoreFeature.Value;
-        set => _autoBackupRestoreFeature.Value = value;
+        get => _restoreFeature.Value;
+        set => _restoreFeature.Value = value;
     }
 
     private readonly TenantQuotaFeatureFlag _oauthFeature;
@@ -432,7 +432,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         _customizationFeature = new TenantQuotaFeatureFlag(this) { Name = "customization", Order = 3, EmployeeType = EmployeeType.DocSpaceAdmin };
         _lifetimeFeature = new TenantQuotaFeatureFlag(this) { Name = "lifetime", Standalone = true };
         _customFeature = new TenantQuotaFeatureFlag(this) { Name = "custom", Visible = false };
-        _autoBackupRestoreFeature = new TenantQuotaFeatureFlag(this) { Name = "restore", Order = 7, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _restoreFeature = new TenantQuotaFeatureFlag(this) { Name = "restore", Order = 7, EmployeeType = EmployeeType.DocSpaceAdmin };
         _oauthFeature = new TenantQuotaFeatureFlag(this) { Name = "oauth" };
         _contentSearchFeature = new TenantQuotaFeatureFlag(this) { Name = "contentsearch", Visible = false };
         _thirdPartyFeature = new TenantQuotaFeatureFlag(this) { Name = "thirdparty", Order = 9, EmployeeType = EmployeeType.DocSpaceAdmin };
@@ -462,7 +462,7 @@ public class TenantQuota : IMapFrom<DbQuota>
             _customizationFeature,
             _lifetimeFeature,
             _customFeature,
-            _autoBackupRestoreFeature,
+            _restoreFeature,
             _oauthFeature,
             _contentSearchFeature,
             _thirdPartyFeature,

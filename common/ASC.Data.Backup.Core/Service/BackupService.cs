@@ -368,11 +368,6 @@ public class BackupService(
         await DemandPermissionsBackupAsync();
         await DemandPermissionsAutoBackupAsync();
 
-        if (!SetupInfo.IsVisibleSettings("AutoBackup"))
-        {
-            throw new InvalidOperationException(Resource.ErrorNotAllowedOption);
-        }
-
         if (!coreBaseSettings.Standalone && dump)
         {
             throw new ArgumentException("backup can not start as dump");
@@ -630,7 +625,20 @@ public class BackupService(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (!SetupInfo.IsVisibleSettings("AutoBackup") || !(await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId())).AutoBackupRestore)
+        if (!SetupInfo.IsVisibleSettings("AutoBackup"))
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+
+        if (coreBaseSettings.Standalone)
+        {
+            return;
+        }
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var quota = await tenantManager.GetTenantQuotaAsync(tenantId);
+
+        if (quota.CountFreeBackup == 0 && !await IsBackupServiceEnabledAsync(tenantId))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption);
         }
@@ -641,7 +649,7 @@ public class BackupService(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var quota = await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId());
-        if (!SetupInfo.IsVisibleSettings("Restore") || (!coreBaseSettings.Standalone && !quota.AutoBackupRestore))
+        if (!SetupInfo.IsVisibleSettings("Restore") || (!coreBaseSettings.Standalone && !quota.Restore))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption);
         }

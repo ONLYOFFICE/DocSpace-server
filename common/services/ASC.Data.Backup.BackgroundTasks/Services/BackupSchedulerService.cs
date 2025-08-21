@@ -85,63 +85,60 @@ public sealed class BackupSchedulerService(
             {
                 tenantManager.SetCurrentTenant(new Tenant(schedule.TenantId, String.Empty));
 
-                if (coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(schedule.TenantId)).AutoBackupRestore)
+                var tariff = await tariffService.GetTariffAsync(schedule.TenantId);
+
+                if (tariff.State < TariffState.Delay)
                 {
-                    var tariff = await tariffService.GetTariffAsync(schedule.TenantId);
+                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetFreeBackupsCountCheckKey(schedule.TenantId), cancellationToken: stoppingToken);
 
-                    if (tariff.State < TariffState.Delay)
+                    Session billingSession = null;
+
+                    try
                     {
-                        lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetFreeBackupsCountCheckKey(schedule.TenantId), cancellationToken: stoppingToken);
-
-                        Session billingSession = null;
-
-                        try
+                        await freeBackupsChecker.CheckAppend();
+                    }
+                    catch (TenantQuotaException)
+                    {
+                        var backupServiceEnabled = await backupService.IsBackupServiceEnabledAsync(schedule.TenantId);
+                        if (!backupServiceEnabled)
                         {
-                            await freeBackupsChecker.CheckAppend();
-                        }
-                        catch (TenantQuotaException)
-                        {
-                            var backupServiceEnabled = await backupService.IsBackupServiceEnabledAsync(schedule.TenantId);
-                            if (!backupServiceEnabled)
-                            {
-                                throw;
-                            }
-
-                            billingSession = await backupService.OpenCustomerSessionForBackupAsync(schedule.TenantId, false);
-                            if (billingSession == null)
-                            {
-                                throw new BillingException(Resource.ErrorNotAllowedOption);
-                            }
+                            throw;
                         }
 
-                        schedule.LastBackupTime = DateTime.UtcNow;
-
-                        await backupRepository.SaveBackupScheduleAsync(schedule);
-
-                        logger.DebugStartScheduledBackup(schedule.TenantId, schedule.StorageType, schedule.StorageBasePath);
-                        var param = JsonSerializer.Deserialize<Dictionary<string, string>>(schedule.StorageParams);
-                        await _eventBus.PublishAsync(new BackupRequestIntegrationEvent(
-                                                 tenantId: schedule.Dump ? int.Parse(param["tenantId"]) : schedule.TenantId,
-                                                 storageBasePath: schedule.StorageBasePath,
-                                                 storageParams: param,
-                                                 storageType: schedule.StorageType,
-                                                 createBy: Constants.CoreSystem.ID,
-                                                 isScheduled: true,
-                                                 dump: schedule.Dump,
-                                                 backupsStored: schedule.BackupsStored,
-                                                 billingSessionId: billingSession?.SessionId ?? 0,
-                                                 billingSessionExpire: billingSession?.Expire ?? default
-                                          ));
+                        billingSession = await backupService.OpenCustomerSessionForBackupAsync(schedule.TenantId, false);
+                        if (billingSession == null)
+                        {
+                            throw new BillingException(Resource.ErrorNotAllowedOption);
+                        }
                     }
-                    else
-                    {
-                        logger.DebugNotPaid(schedule.TenantId);
-                    }
+
+                    schedule.LastBackupTime = DateTime.UtcNow;
+
+                    await backupRepository.SaveBackupScheduleAsync(schedule);
+
+                    logger.DebugStartScheduledBackup(schedule.TenantId, schedule.StorageType, schedule.StorageBasePath);
+                    var param = JsonSerializer.Deserialize<Dictionary<string, string>>(schedule.StorageParams);
+                    await _eventBus.PublishAsync(new BackupRequestIntegrationEvent(
+                                                tenantId: schedule.Dump ? int.Parse(param["tenantId"]) : schedule.TenantId,
+                                                storageBasePath: schedule.StorageBasePath,
+                                                storageParams: param,
+                                                storageType: schedule.StorageType,
+                                                createBy: Constants.CoreSystem.ID,
+                                                isScheduled: true,
+                                                dump: schedule.Dump,
+                                                backupsStored: schedule.BackupsStored,
+                                                billingSessionId: billingSession?.SessionId ?? 0,
+                                                billingSessionExpire: billingSession?.Expire ?? default
+                                        ));
                 }
                 else
                 {
-                    logger.DebugHaveNotAccess(schedule.TenantId);
+                    logger.DebugNotPaid(schedule.TenantId);
                 }
+            }
+            catch (Exception ex) when (ex is TenantQuotaException || ex is AccountingPaymentRequiredException || ex is BillingException)
+            {
+                logger.DebugHaveNotAccess(schedule.TenantId, ex.Message);
             }
             catch (Exception error)
             {
