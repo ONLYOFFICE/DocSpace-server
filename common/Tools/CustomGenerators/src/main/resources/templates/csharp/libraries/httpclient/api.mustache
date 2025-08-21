@@ -3,15 +3,13 @@
 using {{packageName}}.Client;
 {{#hasImport}}using {{packageName}}.{{modelPackage}};
 {{/hasImport}}
-
-namespace {{packageName}}.{{apiPackage}}
+{{#operations}}
+namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
 {
-    {{#operations}}
-
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    {{>visibility}} interface {{interfacePrefix}}{{classname}}Sync : IApiAccessor
+    {{>visibility}} interface {{interfacePrefix}}{{x-classname}}Sync : IApiAccessor
     {
         #region Synchronous Operations
         {{#operation}}
@@ -54,7 +52,7 @@ namespace {{packageName}}.{{apiPackage}}
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    {{>visibility}} interface {{interfacePrefix}}{{classname}}Async : IApiAccessor
+    {{>visibility}} interface {{interfacePrefix}}{{x-classname}}Async : IApiAccessor
     {
         #region Asynchronous Operations
         {{#operation}}
@@ -101,7 +99,7 @@ namespace {{packageName}}.{{apiPackage}}
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    {{>visibility}} interface {{interfacePrefix}}{{classname}} : {{interfacePrefix}}{{classname}}Sync{{#supportsAsync}}, {{interfacePrefix}}{{classname}}Async{{/supportsAsync}}
+    {{>visibility}} interface {{interfacePrefix}}{{x-classname}} : {{interfacePrefix}}{{x-classname}}Sync{{#supportsAsync}}, {{interfacePrefix}}{{x-classname}}Async{{/supportsAsync}}
     {
 
     }
@@ -109,29 +107,29 @@ namespace {{packageName}}.{{apiPackage}}
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    {{>visibility}} class {{classname}} : IDisposable, {{interfacePrefix}}{{classname}}
+    {{>visibility}} class {{x-classname}} : IDisposable, {{interfacePrefix}}{{x-classname}}
     {
         private ExceptionFactory _exceptionFactory = (_, _) => null;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="{{classname}}"/> class.
+        /// Initializes a new instance of the <see cref="{{x-classname}}"/> class.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <returns></returns>
-        public {{classname}}() : this((string)null)
+        public {{x-classname}}() : this((string)null)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="{{classname}}"/> class.
+        /// Initializes a new instance of the <see cref="{{x-classname}}"/> class.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <param name="basePath">The target service's base path in URL format.</param>
         /// <exception cref="ArgumentException"></exception>
         /// <returns></returns>
-        public {{classname}}(string basePath)
+        public {{x-classname}}(string basePath)
         {
             Configuration = {{packageName}}.Client.Configuration.MergeConfigurations(
                 GlobalConfiguration.Instance,
@@ -146,14 +144,14 @@ namespace {{packageName}}.{{apiPackage}}
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="{{classname}}"/> class using a Configuration object.
+        /// Initializes a new instance of the <see cref="{{x-classname}}"/> class using a Configuration object.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <param name="configuration">An instance of Configuration.</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <returns></returns>
-        public {{classname}}(Configuration configuration)
+        public {{x-classname}}(Configuration configuration)
         {
             ArgumentNullException.ThrowIfNull(configuration);
 
@@ -170,7 +168,7 @@ namespace {{packageName}}.{{apiPackage}}
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="{{classname}}"/> class.
+        /// Initializes a new instance of the <see cref="{{x-classname}}"/> class.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="handler">An optional instance of HttpClientHandler that is used by HttpClient.</param>
@@ -180,12 +178,12 @@ namespace {{packageName}}.{{apiPackage}}
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public {{classname}}(HttpClient client, HttpClientHandler handler = null) : this(client, (string)null, handler)
+        public {{x-classname}}(HttpClient client, HttpClientHandler handler = null) : this(client, (string)null, handler)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="{{classname}}"/> class.
+        /// Initializes a new instance of the <see cref="{{x-classname}}"/> class.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="basePath">The target service's base path in URL format.</param>
@@ -197,7 +195,7 @@ namespace {{packageName}}.{{apiPackage}}
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public {{classname}}(HttpClient client, string basePath, HttpClientHandler handler = null)
+        public {{x-classname}}(HttpClient client, string basePath, HttpClientHandler handler = null)
         {
             ArgumentNullException.ThrowIfNull(client);
 
@@ -214,7 +212,7 @@ namespace {{packageName}}.{{apiPackage}}
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="{{classname}}"/> class using a Configuration object.
+        /// Initializes a new instance of the <see cref="{{x-classname}}"/> class using a Configuration object.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="configuration">An instance of Configuration.</param>
@@ -225,7 +223,7 @@ namespace {{packageName}}.{{apiPackage}}
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public {{classname}}(HttpClient client, Configuration configuration, HttpClientHandler handler = null)
+        public {{x-classname}}(HttpClient client, Configuration configuration, HttpClientHandler handler = null)
         {
             ArgumentNullException.ThrowIfNull(configuration);
             ArgumentNullException.ThrowIfNull(client);
@@ -243,14 +241,14 @@ namespace {{packageName}}.{{apiPackage}}
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="{{classname}}"/> class
+        /// Initializes a new instance of the <see cref="{{x-classname}}"/> class
         /// using a Configuration object and client instance.
         /// </summary>
         /// <param name="client">The client interface for synchronous API access.</param>{{#supportsAsync}}
         /// <param name="asyncClient">The client interface for asynchronous API access.</param>{{/supportsAsync}}
         /// <param name="configuration">The configuration object.</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public {{classname}}(ISynchronousClient client, {{#supportsAsync}}IAsynchronousClient asyncClient, {{/supportsAsync}}IReadableConfiguration configuration)
+        public {{x-classname}}(ISynchronousClient client, {{#supportsAsync}}IAsynchronousClient asyncClient, {{/supportsAsync}}IReadableConfiguration configuration)
         {
             ArgumentNullException.ThrowIfNull(client);
             {{#supportsAsync}}
@@ -366,7 +364,7 @@ namespace {{packageName}}.{{apiPackage}}
             {{^vendorExtensions.x-csharp-value-type}}
             // verify the required parameter '{{paramName}}' is set
             if ({{paramName}} == null)
-                throw new ApiException(400, "Missing required parameter '{{paramName}}' when calling {{classname}}->{{operationId}}");
+                throw new ApiException(400, "Missing required parameter '{{paramName}}' when calling {{x-classname}}->{{operationId}}");
 
             {{/vendorExtensions.x-csharp-value-type}}
             {{/required}}
@@ -593,7 +591,7 @@ namespace {{packageName}}.{{apiPackage}}
             {{^vendorExtensions.x-csharp-value-type}}
             // verify the required parameter '{{paramName}}' is set
             if ({{paramName}} == null)
-                throw new ApiException(400, "Missing required parameter '{{paramName}}' when calling {{classname}}->{{operationId}}");
+                throw new ApiException(400, "Missing required parameter '{{paramName}}' when calling {{x-classname}}->{{operationId}}");
 
             {{/vendorExtensions.x-csharp-value-type}}
             {{/required}}

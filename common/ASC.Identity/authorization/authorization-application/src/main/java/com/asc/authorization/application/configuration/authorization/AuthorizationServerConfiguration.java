@@ -58,7 +58,7 @@ import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -174,7 +174,7 @@ public class AuthorizationServerConfiguration {
                       request.getRequestDispatcher(formConfiguration.getLogin());
                   dispatcher.forward(request, response);
                 },
-                new AntPathRequestMatcher(formConfiguration.getLogin())));
+                PathPatternRequestMatcher.withDefaults().matcher(formConfiguration.getLogin())));
     http.addFilterBefore(rateLimiterFilter, ChannelProcessingFilter.class);
     http.addFilterBefore(authenticationFilter, LogoutFilter.class);
 

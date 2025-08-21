@@ -26,11 +26,11 @@ import type { {{classname}} } from '../../{{tsModelPackage}}';
 {{/withSeparateModelsAndApi}}
 {{#operations}}
 /**
- * {{classname}} - axios parameter creator{{#description}}
+ * {{x-classname}} - axios parameter creator{{#description}}
  * {{&description}}{{/description}}
  * @export
  */
-export const {{classname}}AxiosParamCreator = function (configuration?: Configuration) {
+export const {{x-classname}}AxiosParamCreator = function (configuration?: Configuration) {
     return {
     {{#operation}}
         /**
@@ -243,12 +243,12 @@ export const {{classname}}AxiosParamCreator = function (configuration?: Configur
 };
 
 /**
- * {{classname}} - functional programming interface{{#description}}
+ * {{x-classname}} - functional programming interface{{#description}}
  * {{{.}}}{{/description}}
  * @export
  */
-export const {{classname}}Fp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = {{classname}}AxiosParamCreator(configuration)
+export const {{x-classname}}Fp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = {{x-classname}}AxiosParamCreator(configuration)
     return {
     {{#operation}}
         /**
@@ -268,7 +268,7 @@ export const {{classname}}Fp = function(configuration?: Configuration) {
         async {{nickname}}({{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{#isNullable}} | null{{/isNullable}}{{/isEnum}}, {{/allParams}}options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{{{returnType}}}{{^returnType}}void{{/returnType}}>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.{{nickname}}({{#allParams}}{{paramName}}, {{/allParams}}options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['{{classname}}.{{nickname}}']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['{{x-classname}}.{{nickname}}']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     {{/operation}}
@@ -276,12 +276,12 @@ export const {{classname}}Fp = function(configuration?: Configuration) {
 };
 
 /**
- * {{classname}} - factory interface{{#description}}
+ * {{x-classname}} - factory interface{{#description}}
  * {{&description}}{{/description}}
  * @export
  */
-export const {{classname}}Factory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = {{classname}}Fp(configuration)
+export const {{x-classname}}Factory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = {{x-classname}}Fp(configuration)
     return {
     {{#operation}}
         /**
@@ -291,7 +291,7 @@ export const {{classname}}Factory = function (configuration?: Configuration, bas
          {{/summary}}
         {{#useSingleRequestParameter}}
          {{#allParams.0}}
-         * @param {{=<% %>=}}{<%& classname %><%& operationIdCamelCase %>Request}<%={{ }}=%> requestParameters Request parameters.
+         * @param {{=<% %>=}}{<%& x-classname %><%& operationIdCamelCase %>Request}<%={{ }}=%> requestParameters Request parameters.
          {{/allParams.0}}
         {{/useSingleRequestParameter}}
         {{^useSingleRequestParameter}}
@@ -306,7 +306,7 @@ export const {{classname}}Factory = function (configuration?: Configuration, bas
          * @throws {RequiredError}
          */
         {{#useSingleRequestParameter}}
-        {{nickname}}({{#allParams.0}}requestParameters: {{classname}}{{operationIdCamelCase}}Request{{^hasRequiredParams}} = {}{{/hasRequiredParams}}, {{/allParams.0}}options?: RawAxiosRequestConfig): AxiosPromise<{{{returnType}}}{{^returnType}}void{{/returnType}}> {
+        {{nickname}}({{#allParams.0}}requestParameters: {{x-classname}}{{operationIdCamelCase}}Request{{^hasRequiredParams}} = {}{{/hasRequiredParams}}, {{/allParams.0}}options?: RawAxiosRequestConfig): AxiosPromise<{{{returnType}}}{{^returnType}}void{{/returnType}}> {
             return localVarFp.{{nickname}}({{#allParams.0}}{{#allParams}}requestParameters.{{paramName}}, {{/allParams}}{{/allParams.0}}options).then((request) => request(axios, basePath));
         },
         {{/useSingleRequestParameter}}
@@ -321,12 +321,12 @@ export const {{classname}}Factory = function (configuration?: Configuration, bas
 
 {{#withInterfaces}}
 /**
- * {{classname}} - interface{{#description}}
+ * {{x-classname}} - interface{{#description}}
  * {{&description}}{{/description}}
  * @export
- * @interface {{classname}}
+ * @interface {{x-classname}}
  */
-export interface {{classname}}Interface {
+export interface {{x-classname}}Interface {
 {{#operation}}
     /**
      * {{&notes}}
@@ -348,10 +348,10 @@ export interface {{classname}}Interface {
      * REST API Reference for {{operationId}} operation
      * @see {{vendorExtensions.x-seealsoUrl}}
      * @throws {RequiredError}
-     * @memberof {{classname}}Interface
+     * @memberof {{x-classname}}Interface
      */
     {{#useSingleRequestParameter}}
-    {{nickname}}({{#allParams.0}}requestParameters{{^hasRequiredParams}}?{{/hasRequiredParams}}: {{classname}}{{operationIdCamelCase}}Request, {{/allParams.0}}options?: RawAxiosRequestConfig): AxiosPromise<{{{returnType}}}{{^returnType}}void{{/returnType}}>;
+    {{nickname}}({{#allParams.0}}requestParameters{{^hasRequiredParams}}?{{/hasRequiredParams}}: {{x-classname}}{{operationIdCamelCase}}Request, {{/allParams.0}}options?: RawAxiosRequestConfig): AxiosPromise<{{{returnType}}}{{^returnType}}void{{/returnType}}>;
     {{/useSingleRequestParameter}}
     {{^useSingleRequestParameter}}
     {{nickname}}({{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{#isNullable}} | null{{/isNullable}}{{/isEnum}}, {{/allParams}}options?: RawAxiosRequestConfig): AxiosPromise<{{{returnType}}}{{^returnType}}void{{/returnType}}>;
@@ -365,16 +365,16 @@ export interface {{classname}}Interface {
 {{#operation}}
 {{#allParams.0}}
 /**
- * Request parameters for {{nickname}} operation in {{classname}}.
+ * Request parameters for {{nickname}} operation in {{x-classname}}.
  * @export
- * @interface {{classname}}{{operationIdCamelCase}}Request
+ * @interface {{x-classname}}{{operationIdCamelCase}}Request
  */
-export interface {{classname}}{{operationIdCamelCase}}Request {
+export interface {{x-classname}}{{operationIdCamelCase}}Request {
     {{#allParams}}
     /**
      * {{description}}
      * @type {{=<% %>=}}{<%&dataType%>}<%={{ }}=%>
-     * @memberof {{classname}}{{operationIdCamelCase}}
+     * @memberof {{x-classname}}{{operationIdCamelCase}}
      */
     readonly {{paramName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{#isNullable}} | null{{/isNullable}}{{/isEnum}}
     {{^-last}}
@@ -387,17 +387,17 @@ export interface {{classname}}{{operationIdCamelCase}}Request {
 {{/operation}}
 {{/useSingleRequestParameter}}
 /**
- * {{classname}} - object-oriented interface{{#description}}
+ * {{x-classname}} - object-oriented interface{{#description}}
  * {{{.}}}{{/description}}
  * @export
- * @class {{classname}}
+ * @class {{x-classname}}
  * @extends {BaseAPI}
  */
 {{#withInterfaces}}
-export class {{classname}} extends BaseAPI implements {{classname}}Interface {
+export class {{x-classname}} extends BaseAPI implements {{x-classname}}Interface {
 {{/withInterfaces}}
 {{^withInterfaces}}
-export class {{classname}} extends BaseAPI {
+export class {{x-classname}} extends BaseAPI {
 {{/withInterfaces}}
     {{#operation}}
     /**
@@ -418,16 +418,16 @@ export class {{classname}} extends BaseAPI {
      * @param {*} [options] Override http request option.{{#isDeprecated}}
      * @deprecated{{/isDeprecated}}
      * @throws {RequiredError}
-     * @memberof {{classname}}
+     * @memberof {{x-classname}}
      */
     {{#useSingleRequestParameter}}
-    public {{nickname}}({{#allParams.0}}requestParameters: {{classname}}{{operationIdCamelCase}}Request{{^hasRequiredParams}} = {}{{/hasRequiredParams}}, {{/allParams.0}}options?: RawAxiosRequestConfig) {
-        return {{classname}}Fp(this.configuration).{{nickname}}({{#allParams.0}}{{#allParams}}requestParameters.{{paramName}}, {{/allParams}}{{/allParams.0}}options).then((request) => request(this.axios, this.basePath));
+    public {{nickname}}({{#allParams.0}}requestParameters: {{x-classname}}{{operationIdCamelCase}}Request{{^hasRequiredParams}} = {}{{/hasRequiredParams}}, {{/allParams.0}}options?: RawAxiosRequestConfig) {
+        return {{x-classname}}Fp(this.configuration).{{nickname}}({{#allParams.0}}{{#allParams}}requestParameters.{{paramName}}, {{/allParams}}{{/allParams.0}}options).then((request) => request(this.axios, this.basePath));
     }
     {{/useSingleRequestParameter}}
     {{^useSingleRequestParameter}}
     public {{nickname}}({{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{#isNullable}} | null{{/isNullable}}{{/isEnum}}, {{/allParams}}options?: RawAxiosRequestConfig) {
-        return {{classname}}Fp(this.configuration).{{nickname}}({{#allParams}}{{paramName}}, {{/allParams}}options).then((request) => request(this.axios, this.basePath));
+        return {{x-classname}}Fp(this.configuration).{{nickname}}({{#allParams}}{{paramName}}, {{/allParams}}options).then((request) => request(this.axios, this.basePath));
     }
     {{/useSingleRequestParameter}}
     {{^-last}}

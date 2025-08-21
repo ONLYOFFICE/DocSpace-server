@@ -4,6 +4,7 @@ using ASC.Migrations.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    partial class MigrationContextModelSnapshot : ModelSnapshot
+    [Migration("20250727162541_MigrationContext_Upgrade57")]
+    partial class MigrationContext_Upgrade57
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -747,7 +750,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -2,
                             Description = "until 01.04.2024",
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic",
                             Name = "admin",
                             Price = 15m,
                             ProductId = "1002",
@@ -786,7 +789,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -6,
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic",
                             Name = "subscription",
                             Price = 0m,
                             ProductId = "1001",
@@ -816,7 +819,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -9,
                             Description = "since 01.04.2024",
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic",
                             Name = "admin",
                             Price = 20m,
                             ProductId = "1006",
@@ -827,7 +830,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -10,
                             Description = "since 10.02.2025",
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year",
                             Name = "adminyear",
                             Price = 220m,
                             ProductId = "1009",
@@ -842,26 +845,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Price = 0.14m,
                             ProductId = "1011",
                             Visible = true,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -12,
-                            Features = "backup",
-                            Name = "backup",
-                            Price = 12m,
-                            ProductId = "10006",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -13,
-                            Features = "aitools",
-                            Name = "aitools",
-                            Price = 5m,
-                            ProductId = "10009",
-                            Visible = false,
                             Wallet = true
                         });
                 });
