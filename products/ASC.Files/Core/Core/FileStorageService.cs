@@ -3558,7 +3558,8 @@ public class FileStorageService //: IFileStorageService
         {
             switch (e)
             {
-                case File<T> file:
+                case File<T> file:        
+                    file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
                     tasks.Add(socketManager.RemoveFileFromRecentAsync(file, users));
                     break;
                 case Folder<T> folder:
