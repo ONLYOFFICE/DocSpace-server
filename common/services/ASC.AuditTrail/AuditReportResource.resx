@@ -195,9 +195,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Overwriting Settings Updated</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Documents</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Settings</value>
   </data>
@@ -468,9 +465,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Move</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Others</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Owner Changed: {0}</value>
   </data>
@@ -488,9 +482,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Password Strength Settings Updated</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>People</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platform</value>
@@ -551,9 +542,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Session Started</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Settings</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO Disabled</value>
@@ -1001,5 +989,8 @@
   </data>
   <data name="BannerSettingsChanged" xml:space="preserve">
     <value>Promotional banners visibility settings changed</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Location</value>
   </data>
 </root>

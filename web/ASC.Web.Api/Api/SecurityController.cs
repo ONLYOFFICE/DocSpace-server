@@ -42,18 +42,18 @@ namespace ASC.Web.Api.Controllers;
 [ControllerName("security")]
 public class SecurityController(
     PermissionContext permissionContext,
-    TenantManager tenantManager,
-    MessageService messageService,
-    LoginEventsRepository loginEventsRepository,
-    AuditEventsRepository auditEventsRepository,
-    CsvFileHelper csvFileHelper,
-    CsvFileUploader csvFileUploader,
-    SettingsManager settingsManager,
-    AuditActionMapper auditActionMapper,
-    CoreBaseSettings coreBaseSettings,
-    CspSettingsHelper cspSettingsHelper, 
-    ApiDateTimeHelper apiDateTimeHelper,
-    IdentityClient identityClient)
+        TenantManager tenantManager,
+        MessageService messageService,
+        LoginEventsRepository loginEventsRepository,
+        AuditEventsRepository auditEventsRepository,
+        CsvFileHelper csvFileHelper,
+        CsvFileUploader csvFileUploader,
+        SettingsManager settingsManager,
+        AuditActionMapper auditActionMapper,
+        CoreBaseSettings coreBaseSettings,
+        CspSettingsHelper cspSettingsHelper, 
+        ApiDateTimeHelper apiDateTimeHelper,
+        IdentityClient identityClient)
     : ControllerBase
 {
     /// <summary>
@@ -157,7 +157,7 @@ public class SecurityController(
 
         await DemandAuditPermissionAsync();
 
-        return (await auditEventsRepository.GetByFilterAsync(inDto.UserId, inDto.ProductType, inDto.ModuleType, inDto.ActionType, inDto.Action, inDto.EntryType, inDto.Target, inDto.From, inDto.To, inDto.StartIndex, inDto.Count)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
+        return (await auditEventsRepository.GetByFilterAsync(inDto.UserId, inDto.LocationType, inDto.ActionType, inDto.Action, inDto.EntryType, inDto.Target, inDto.From, inDto.To, inDto.StartIndex, inDto.Count)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -179,7 +179,7 @@ public class SecurityController(
             Actions = MessageActionExtensions.GetNames(),
             ActionTypes = ActionTypeExtensions.GetNames(),
             ProductTypes = ProductTypeExtensions.GetNames(),
-            ModuleTypes = ModuleTypeExtensions.GetNames(),
+            ModuleTypes = LocationTypeExtensions.GetNames(),
             EntryTypes = EntryTypeExtensions.GetNames()
         };
     }
@@ -204,10 +204,10 @@ public class SecurityController(
             {
                 ProductType = r.Product.ToStringFast(),
                 Modules = r.Mappers
-                .Where(m => !inDto.ModuleType.HasValue || m.Module == inDto.ModuleType.Value)
+                .Where(m => !inDto.LocationType.HasValue || m.Location == inDto.LocationType.Value)
                 .Select(x => new
                 {
-                    ModuleType = x.Module.ToStringFast(),
+                    ModuleType = x.Location.ToStringFast(),
                     Actions = x.Actions.Select(a => new
                     {
                         MessageAction = a.Key.ToString(),

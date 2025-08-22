@@ -207,9 +207,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Podešavanja prepisivanja ažurirana</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Dokumenti</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Podešavanja</value>
   </data>
@@ -483,9 +480,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Pomeri</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Drugi</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Vlasnik promenjen: {0}</value>
   </data>
@@ -503,9 +497,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Podešavanja jačine lozinke ažurirana</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Ljudi</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platforma</value>
@@ -620,9 +611,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesija započeta</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Podešavanja</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO onemogućen</value>
