@@ -154,8 +154,7 @@ internal class EventTypeConverter(
             }
 
             result.ActionTypeText = actionMapper.GetActionTypeText(map);
-            result.Product = actionMapper.GetProductText(map);
-            result.Module = actionMapper.GetModuleText(map);
+            result.Context = actionMapper.GetLocationText(map);
         }
         
         result.Date = tenantUtil.DateTimeFromUtc(result.Date);
@@ -176,14 +175,15 @@ internal class EventTypeConverter(
             {
                 var notificationInfo = JsonSerializer.Deserialize<EventDescription<JsonElement>>(rawNotificationInfo);
 
-                result.Context = result.Action == (int)MessageAction.RoomRenamed ? notificationInfo.RoomOldTitle :
+                var newContext = result.Action == (int)MessageAction.RoomRenamed ? 
+                    notificationInfo.RoomOldTitle :
                     !string.IsNullOrEmpty(notificationInfo.RoomTitle) ? notificationInfo.RoomTitle : notificationInfo.RootFolderTitle;
-            }
-        }
 
-        if (string.IsNullOrEmpty(result.Context))
-        {
-            result.Context = result.Module;
+                if (newContext != null)
+                {
+                    result.Context = newContext;
+                }
+            }
         }
 
         return result;

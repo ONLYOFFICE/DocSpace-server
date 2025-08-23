@@ -24,30 +24,98 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModels.ResponseDto;
+namespace ASC.AuditTrail.Types;
 
 /// <summary>
-/// The confirmation parameters.
+/// The module type.
 /// </summary>
-public class ConfirmDto : IMapFrom<Validation>
+[EnumExtensions]
+public enum LocationType
 {
-    /// <summary>
-    /// The confirmation result.
-    /// </summary>
-    public ValidationResult Result { get; set; }
+    [SwaggerEnum("None")]
+    None,
 
-    /// <summary>
-    /// The confirmation room ID.
-    /// </summary>
-    public string RoomId { get; set; }
+    [SwaggerEnum("Files")]
+    Files,
 
-    /// <summary>
-    /// The confirmation title.
-    /// </summary>
-    public string Title { get; set; }
+    [SwaggerEnum("Folders")]
+    Folders,
 
-    /// <summary>
-    /// The confirmation email.
-    /// </summary>
-    public string Email { get; set; }
+    [SwaggerEnum("Documents settings")]
+    DocumentsSettings,
+
+    [SwaggerEnum("Companies")]
+    Companies,
+
+    [SwaggerEnum("Persons")]
+    Persons,
+
+    [SwaggerEnum("Contacts")]
+    Contacts,
+
+    [SwaggerEnum("Crm tasks")]
+    CrmTasks,
+
+    [SwaggerEnum("Opportunities")]
+    Opportunities,
+
+    [SwaggerEnum("Invoices")]
+    Invoices,
+
+    [SwaggerEnum("Cases")]
+    Cases,
+
+    [SwaggerEnum("Common crm settings")]
+    CommonCrmSettings,
+
+    [SwaggerEnum("Contacts settings")]
+    ContactsSettings,
+
+    [SwaggerEnum("Contact types")]
+    ContactTypes,
+
+    [SwaggerEnum("Invoice settings")]
+    InvoiceSettings,
+
+    [SwaggerEnum("Other crm settings")]
+    OtherCrmSettings,
+
+    [SwaggerEnum("Users")]
+    Users,
+
+    [SwaggerEnum("Groups")]
+    Groups,
+
+    [SwaggerEnum("Projects")]
+    Projects,
+
+    [SwaggerEnum("Milestones")]
+    Milestones,
+
+    [SwaggerEnum("Tasks")]
+    Tasks,
+
+    [SwaggerEnum("Discussions")]
+    Discussions,
+
+    [SwaggerEnum("Time tracking")]
+    TimeTracking,
+
+    [SwaggerEnum("Reports")]
+    Reports,
+
+    [SwaggerEnum("Projects settings")]
+    ProjectsSettings,
+
+    [SwaggerEnum("General")]
+    General,
+
+    [SwaggerEnum("Products")]
+    Products,
+
+    [SwaggerEnum("Rooms")]
+    Rooms,
+    
+    [SwaggerEnum("OAuth")]
+    OAuth
 }
