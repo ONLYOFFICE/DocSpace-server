@@ -366,12 +366,15 @@ public class FileStorageService //: IFileStorageService
         var newTask = fileMarker.GetRootFoldersIdMarkedAsNewAsync(parentId);
         var breadCrumbs = await breadCrumbsTask;
 
-        var aces = await fileSharing.GetSharedInfoAsync(parentRoom);
-        if (breadCrumbs.FirstOrDefault() is Folder<T> { FolderType: FolderType.VirtualRooms } && !aces.Exists(u => u.Id == authContext.CurrentAccount.ID))
+        if (parentRoom != null)
         {
-            breadCrumbs = breadCrumbs.Skip(1).ToList();
+            var aces = await fileSharing.GetSharedInfoAsync(parentRoom);
+            if (breadCrumbs.FirstOrDefault() is Folder<T> { FolderType: FolderType.VirtualRooms } && !aces.Exists(u => u.Id == authContext.CurrentAccount.ID))
+            {
+                breadCrumbs = breadCrumbs.Skip(1).ToList();
+            }
         }
-        
+
         var prevVisible = breadCrumbs.ElementAtOrDefault(breadCrumbs.Count - 2);
         if (prevVisible != null && !DocSpaceHelper.IsRoom(parent.FolderType) && prevVisible.FileEntryType == FileEntryType.Folder)
         {
