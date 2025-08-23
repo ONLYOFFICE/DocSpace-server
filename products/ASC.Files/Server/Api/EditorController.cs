@@ -37,12 +37,10 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        ExternalShare externalShare,
-        AuthContext authContext,
         ConfigurationConverter<int> configurationConverter,
         SecurityContext securityContext,
         IHttpContextAccessor httpContextAccessor)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, httpContextAccessor);
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, configurationConverter, securityContext, httpContextAccessor);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -52,12 +50,10 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        ExternalShare externalShare,
-        AuthContext authContext,
         ConfigurationConverter<string> configurationConverter,
         SecurityContext securityContext,
         IHttpContextAccessor httpContextAccessor)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, httpContextAccessor);
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, configurationConverter, securityContext, httpContextAccessor);
 
 public abstract class EditorController<T>(
     FileStorageService fileStorageService,
@@ -67,8 +63,6 @@ public abstract class EditorController<T>(
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        ExternalShare externalShare,
-        AuthContext authContext,
         ConfigurationConverter<T> configurationConverter,
         SecurityContext securityContext,
         IHttpContextAccessor httpContextAccessor)
