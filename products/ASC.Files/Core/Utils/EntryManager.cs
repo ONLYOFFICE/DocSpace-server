@@ -1922,16 +1922,10 @@ public class EntryManager(IDaoFactory daoFactory,
     public async Task MarkFileAsRecentByLink<T>(File<T> file, Guid linkId)
     {
         var marked = await fileMarker.MarkAsRecentByLink(file, linkId);
-        switch (marked)
+        if (marked != MarkResult.NotMarked)
         {
-            case MarkResult.Marked:
-                file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
-                await socketManager.AddFileToRecentAsync(file, [authContext.CurrentAccount.ID]);
-                break;
-            case MarkResult.MarkExists:
-                file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
-                await socketManager.UpdateFileRecentAsync(file, [authContext.CurrentAccount.ID]);
-                break;
+            file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
+            await socketManager.AddFileToRecentAsync(file, [authContext.CurrentAccount.ID]);
         }
     }
 
