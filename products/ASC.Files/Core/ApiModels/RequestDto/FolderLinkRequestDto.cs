@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The room link parameters.
+/// The folder link parameters.
 /// </summary>
-public class RoomLinkRequest
+public class FolderLinkRequest
 {
     /// <summary>
-    /// The room link ID.
+    /// The folder link ID.
     /// </summary>
     public Guid LinkId { get; set; }
 
@@ -47,20 +47,10 @@ public class RoomLinkRequest
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
-    /// The link scope, whether it is internal or not.
-    /// </summary>
-    public bool Internal { get; set; }
-    
-    /// <summary>
     /// The link name.
     /// </summary>
     [StringLength(255)]
     public string Title { get; set; }
-
-    /// <summary>
-    /// The link type.
-    /// </summary>
-    public LinkType LinkType { get; set; }
 
     /// <summary>
     /// The link password.
@@ -72,22 +62,32 @@ public class RoomLinkRequest
     /// Specifies if downloading the file from the link is disabled or not.
     /// </summary>
     public bool DenyDownload { get; set; }
+    
+    /// <summary>
+    /// The link scope, whether it is internal or not.
+    /// </summary>
+    public bool Internal { get; set; }
+    
+    /// <summary>
+    /// Specifies whether the folder link is primary or not.
+    /// </summary>
+    public bool Primary { get; set; }
 }
 
 /// <summary>
-/// The generic room link request parameters.
+/// The generic folder link request parameters.
 /// </summary>
-public class RoomLinkRequestDto<T>
+public class FolderLinkRequestDto<T>
 {
     /// <summary>
-    /// The room ID.
+    /// The folder ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The room link parameters.
+    /// The folder link parameters.
     /// </summary>
     [FromBody]
-    public RoomLinkRequest RoomLink { get; set; }
+    public FolderLinkRequest FolderLink { get; set; }
 }

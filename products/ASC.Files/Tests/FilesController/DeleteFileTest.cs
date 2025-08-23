@@ -62,7 +62,7 @@ public class DeleteFileTest(
     [Fact]
     public async Task DeleteFile_FolderMy_Owner_ReturnsOk()
     {
-        var createdFile = await CreateFile("test.docx", FolderType.USER, Initializer.Owner);
+        var createdFile = await CreateFileInMy("test.docx", Initializer.Owner);
         
         var fileToDelete = (await _filesApi.DeleteFileAsync(createdFile.Id, new Delete { Immediately = true }, TestContext.Current.CancellationToken)).Response;
         

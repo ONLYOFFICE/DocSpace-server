@@ -45,6 +45,7 @@ public class FoldersControllerInternal(
     FileShareDtoHelper fileShareDtoHelper,
     HistoryApiHelper historyApiHelper,
     FormFillingReportCreator formFillingReportCreator,
+    ApiContext apiContext,
     CsvFileHelper csvFileHelper,
     CsvFileUploader csvFileUploader,
     TenantManager tenantManager,
@@ -59,7 +60,8 @@ public class FoldersControllerInternal(
         folderDtoHelper,
         fileDtoHelper,
         permissionContext,
-        fileShareDtoHelper)
+        fileShareDtoHelper,
+        apiContext)
 {
     /// <summary>
     /// Returns the activity history of a folder with a specified identifier.
@@ -135,7 +137,8 @@ public class FoldersControllerThirdparty(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
-    FileShareDtoHelper fileShareDtoHelper)
+    FileShareDtoHelper fileShareDtoHelper,
+    ApiContext apiContext)
     : FoldersController<string>(breadCrumbsManager,
         folderContentDtoHelper,
         fileStorageService,
@@ -144,7 +147,8 @@ public class FoldersControllerThirdparty(
         folderDtoHelper,
         fileDtoHelper,
         permissionContext,
-        fileShareDtoHelper);
+        fileShareDtoHelper,
+        apiContext);
 
 public abstract class FoldersController<T>(
     BreadCrumbsManager breadCrumbsManager,
@@ -155,7 +159,8 @@ public abstract class FoldersController<T>(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
-    FileShareDtoHelper fileShareDtoHelper)
+    FileShareDtoHelper fileShareDtoHelper,
+    ApiContext apiContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -348,6 +353,30 @@ public abstract class FoldersController<T>(
     }
 
     /// <summary>
+    /// Creates a primary external link by the identifier specified in the request.
+    /// </summary>
+    /// <short>Create primary external link</short>
+    /// <path>api/2.0/files/folder/{id}/link</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Folders security information", typeof(FileShareDto))]
+    [SwaggerResponse(404, "Not Found")]
+    [HttpPost("folder/{id}/link")]
+    public async Task<FileShareDto> CreateFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
+    {
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(
+            inDto.Id, 
+            FileEntryType.Folder, 
+            inDto.FolderLink.Access, 
+            expirationDate: inDto.FolderLink.ExpirationDate, 
+            requiredAuth: inDto.FolderLink.Internal, 
+            allowUnlimitedDate: true,
+            denyDownload: inDto.FolderLink.DenyDownload, 
+            password: inDto.FolderLink.Password);
+        
+        return await fileShareDtoHelper.Get(linkAce);
+    }
+    
+    /// <summary>
     /// Returns the primary external link by the identifier specified in the request.
     /// </summary>
     /// <short>Get primary external link</short>
@@ -360,9 +389,93 @@ public abstract class FoldersController<T>(
     [HttpGet("folder/{id}/link")]
     public async Task<FileShareDto> GetFolderPrimaryExternalLink(FolderPrimaryIdRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.Folder);
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.Folder, allowUnlimitedDate: true);
 
         return await fileShareDtoHelper.Get(linkAce);
+    }
+    
+    /// <summary>
+    /// Sets the folder external link with the ID specified in the request.
+    /// </summary>
+    /// <short>Set the folder external link</short>
+    /// <path>api/2.0/files/folder/{id}/links</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Folder information", typeof(FileShareDto))]
+    [HttpPut("folder/{id}/links")]
+    public async Task<FileShareDto> SetFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
+    {
+        var linkAce = await fileStorageService.SetExternalLinkAsync(
+            inDto.Id,
+            FileEntryType.Folder,
+            inDto.FolderLink.LinkId,
+            inDto.FolderLink.Title,
+            inDto.FolderLink.Access,
+            inDto.FolderLink.ExpirationDate,
+            inDto.FolderLink.Password?.Trim(),
+            inDto.FolderLink.DenyDownload,
+            inDto.FolderLink.Internal,
+            inDto.FolderLink.Primary);
+
+        if (linkAce == null)
+        {
+            return null;
+        }
+        
+        var result =  await fileShareDtoHelper.Get(linkAce);
+
+        if (inDto.FolderLink.LinkId != Guid.Empty && linkAce.Id != inDto.FolderLink.LinkId && result.SharedTo is FileShareLink link)
+        {
+            link.RequestToken = null;
+        }
+        
+        return result;
+    }
+    
+    /// <summary>
+    /// Returns the links of the folder with the ID specified in the request.
+    /// </summary>
+    /// <short>Get the folder links</short>
+    /// <path>api/2.0/files/folder/{id}/links</path>
+    /// <collection>list</collection>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Folder security information", typeof(IAsyncEnumerable<FileShareDto>))]
+    [HttpGet("folder/{id}/links")]
+    public async IAsyncEnumerable<FileShareDto> GetFolderLinks(GetFolderLinksRequestDto<T> inDto)
+    {
+        var counter = 0;
+
+        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.ExternalLink, null, 0, 100))
+        {
+            counter++;
+
+            yield return await fileShareDtoHelper.Get(ace);
+        }
+
+        apiContext.SetCount(counter);
+    }
+    
+    /// <summary>
+    /// Returns the access rights of a folder with the ID specified in the request.
+    /// </summary>
+    /// <short>Get the folder access rights</short>
+    /// <path>api/2.0/files/folder/{id}/share</path>
+    /// <collection>list</collection>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Security information of folder files", typeof(IAsyncEnumerable<FileShareDto>))]
+    [HttpGet("folder/{id}/share")]
+    public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfo(FolderSecurityInfoRequestDto<T> inDto)
+    {
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
+        var text = inDto.Text;
+
+        var totalCountTask = await fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.Link, text);
+        apiContext.SetCount(Math.Min(totalCountTask - offset, count)).SetTotalCount(totalCountTask);
+
+        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.Link, text, offset, count))
+        {
+            yield return await fileShareDtoHelper.Get(ace);
+        }
     }
 }
 
