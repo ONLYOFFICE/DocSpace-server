@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,36 +24,35 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Tests.FilesController;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
-[Collection("Test Collection")]
-public class FileOperationsTest(
-    FilesApiFactory filesFactory, 
-    WepApiFactory apiFactory, 
-    PeopleFactory peopleFactory,
-    FilesServiceFactory filesServiceProgram) 
-    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+/// <summary>
+/// The folder security request parameters.
+/// </summary>
+public class FolderSecurityInfoRequestDto<T>
 {
+    /// <summary>
+    /// The folder ID.
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public required T Id { get; set; }
 
-    
+    /// <summary>
+    /// The number of items to be retrieved or processed.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
 
-    
-    [Fact]
-    public async Task GetPresignedUri_ValidFile_ReturnsDownloadUrl()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        
-        var file = await CreateFileInMy("file_for_download.docx", Initializer.Owner);
-        
-        // Act
-        var downloadUrl = (await _filesApi.GetPresignedUriAsync(file.Id, TestContext.Current.CancellationToken)).Response;
-        
-        // Assert
-        downloadUrl.Should().NotBeNull();
-        downloadUrl.Should().StartWith("http");
-        downloadUrl.Should().Contain("file");
-    }
-    
+    /// <summary>
+    /// The starting index of the items to retrieve in a paginated request.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 
+    /// <summary>
+    /// The text filter value used for filtering room security information.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

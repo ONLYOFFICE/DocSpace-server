@@ -103,9 +103,6 @@
   <data name="DnsSettingsUpdated" xml:space="preserve">
     <value>Οι Ρυθμίσεις DNS Ενημερώθηκαν</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Έγγραφα</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Ρυθμίσεις</value>
   </data>
@@ -271,17 +268,11 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Μετακίνηση</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Άλλα</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Αλλαγή Κατόχου: {0}</value>
   </data>
   <data name="PageCol" xml:space="preserve">
     <value>Σελίδα</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Άνθρωποι</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Πλατφόρμα</value>
@@ -318,9 +309,6 @@
   </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Αποστολή</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Ρυθμίσεις</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Το SSO Απενεργοποιήθηκε</value>

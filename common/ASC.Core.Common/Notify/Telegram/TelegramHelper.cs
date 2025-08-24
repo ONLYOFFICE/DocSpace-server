@@ -114,7 +114,7 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
 
         var buf = id.Concat(d).ToArray();
 
-        return Base64UrlEncoder.Encode(SHA256.HashData(buf));
+        return Convert.ToBase64String(SHA256.HashData(buf)).Base64ToUrlSafe();
     }
 
     private string GetLink(string token)

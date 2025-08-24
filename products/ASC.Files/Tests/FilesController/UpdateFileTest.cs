@@ -52,7 +52,7 @@ public class UpdateFileTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var createdFile = await CreateFile("file_to_rename.docx", FolderType.USER, Initializer.Owner);
+        var createdFile = await CreateFileInMy("file_to_rename.docx", Initializer.Owner);
         var newTitle = "renamed_file.docx";
         
         // Act
@@ -72,7 +72,7 @@ public class UpdateFileTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var createdFile = await CreateFile("file_to_rename.docx", FolderType.USER, Initializer.Owner);
+        var createdFile = await CreateFileInMy("file_to_rename.docx", Initializer.Owner);
         var longFileName = new string('a', 166) + ".docx"; // 166 characters + 5 for extension = 171 characters
         var updateParams = new UpdateFile { Title = longFileName };
         
@@ -92,7 +92,7 @@ public class UpdateFileTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var createdFile = await CreateFile("file_to_lock.docx", FolderType.USER, Initializer.Owner);
+        var createdFile = await CreateFileInMy("file_to_lock.docx", Initializer.Owner);
         
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -281,7 +281,7 @@ public class UpdateFileTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var file = await CreateFile("file_with_comment.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_with_comment.docx", Initializer.Owner);
         var newComment = "This is a test comment";
         
         // Act
