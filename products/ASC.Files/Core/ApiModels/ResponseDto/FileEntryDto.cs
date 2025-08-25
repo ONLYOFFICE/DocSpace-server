@@ -286,10 +286,16 @@ public class FileEntryDtoHelper(
         }
 
         var canSetAccess = await fileSharingHelper.CanSetAccessAsync(entry);
+        if (entry is Folder<TId> { FolderType: FolderType.EditingRoom or FolderType.VirtualDataRoom })
+        {
+            canSetAccess = false;
+        }
+        
         Dictionary<SubjectType, int> shareSettings = null;
-
+        
         if (canSetAccess)
         {
+            
             var primaryCount = await _fileSecurity.GetLinksSettings(entry, SubjectType.PrimaryExternalLink);
             var additionalCount = await _fileSecurity.GetLinksSettings(entry, SubjectType.ExternalLink);
 
