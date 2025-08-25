@@ -104,7 +104,7 @@ public sealed class BackupSchedulerService(
                             throw;
                         }
 
-                        billingSession = await backupService.OpenCustomerSessionForBackupAsync(schedule.TenantId, false);
+                        billingSession = await backupService.OpenCustomerSessionForBackupAsync(schedule.TenantId);
                         if (billingSession == null)
                         {
                             throw new BillingException(Resource.ErrorNotAllowedOption);

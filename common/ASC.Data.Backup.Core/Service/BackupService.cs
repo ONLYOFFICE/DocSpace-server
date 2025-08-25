@@ -42,7 +42,6 @@ public class BackupService(
         TenantExtra tenantExtra,
         ITariffService tariffService,
         TenantManager tenantManager,
-        UserManager userManager,
         SettingsManager settingsManager,
         MessageService messageService,
         CoreBaseSettings coreBaseSettings,
@@ -481,7 +480,7 @@ public class BackupService(
         return schedule;
     }
 
-    public async Task<Session> OpenCustomerSessionForBackupAsync(int tenantId, bool checkPayer = true)
+    public async Task<Session> OpenCustomerSessionForBackupAsync(int tenantId)
     {
         if (!tariffService.IsConfigured())
         {
@@ -492,15 +491,6 @@ public class BackupService(
         if (customerInfo == null)
         {
             return null;
-        }
-
-        if (checkPayer)
-        {
-            var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
-            if (authContext.CurrentAccount.ID != payer.Id)
-            {
-                throw new SecurityException($"payerEmail {customerInfo?.Email}, payerId {payer.Id}, currentId {authContext.CurrentAccount.ID}");
-            }
         }
 
         var serviceAccount = await GetBackupServiceAccountId();
