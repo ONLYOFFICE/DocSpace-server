@@ -1109,11 +1109,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     return false;
                 }
-
-                if (action == FilesSecurityActions.EditAccess && folder.FolderType is FolderType.EditingRoom or FolderType.VirtualDataRoom)
-                {
-                    return _linkCountRoomSettingsAccesses.TryGetValue(folder.FolderType, out var accesses) && (accesses.TryGetValue(SubjectType.ExternalLink, out _) || accesses.TryGetValue(SubjectType.PrimaryExternalLink, out _));
-                }
                 
                 if (!isGuest)
                 {
