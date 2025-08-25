@@ -108,33 +108,6 @@ public class BreadCrumbsManager(
                 
             breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
         }
-        else
-        {
-            switch (firstVisible.FolderType)
-            {
-                case FolderType.DEFAULT:
-                    if (!firstVisible.ProviderEntry)
-                    {
-                        rootId = await globalFolderHelper.FolderShareAsync;
-                    }
-                    else
-                    {
-                        rootId = firstVisible.RootFolderType switch
-                        {
-                            FolderType.USER => authContext.CurrentAccount.ID == firstVisible.RootCreateBy
-                                ? await globalFolderHelper.FolderMyAsync
-                                : await globalFolderHelper.FolderShareAsync,
-                            FolderType.COMMON => await globalFolderHelper.FolderCommonAsync,
-                            _ => rootId
-                        };
-                    }
-                    break;
-
-                case FolderType.BUNCH:
-                    rootId = await globalFolderHelper.FolderProjectsAsync;
-                    break;
-            }
-        }
 
         var folderDaoInt = daoFactory.GetFolderDao<int>();
 
@@ -360,7 +333,7 @@ public class EntryManager(IDaoFactory daoFactory,
         Location? location = null)
     {
         int total;
-        var withShared = false;
+        var withShared = true;
 
         if (parent == null)
         {
@@ -385,11 +358,6 @@ public class EntryManager(IDaoFactory daoFactory,
         if (parent.FolderType == FolderType.TRASH)
         {
             withSubfolders = false;
-        }
-
-        if (parent.RootFolderType is FolderType.USER)
-        {
-            withShared = true;
         }
 
         var (foldersFilterType, foldersSearchText) = applyFilterOption != ApplyFilterOption.Files ? (filterType, searchText) : (FilterType.None, string.Empty);
@@ -523,15 +491,6 @@ public class EntryManager(IDaoFactory daoFactory,
                 
                 var foldersTask = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders,
                     excludeSubject, from, count, roomId, containingMyFiles, parent.FolderType);
-
-                if (parent.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
-                {
-                    foldersTask = foldersTask.Select(x =>
-                    {
-                        x.Shared = parent.Shared;
-                        return x;
-                    });
-                }
                 
                 var folders = await foldersTask.ToListAsync();
 
@@ -552,17 +511,9 @@ public class EntryManager(IDaoFactory daoFactory,
                 var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
                 
                 var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
-                excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType, formsItemDto, applyFormStepFilter: room is { FolderType: FolderType.VirtualDataRoom } && parent.ShareRecord is { Share: FileShare.FillForms });
-
-                if (parent.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
-                {
-                    filesTask = filesTask.Select(x =>
-                    {
-                        x.Shared = parent.Shared;
-                        return x;
-                    });
-                }
-
+                excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType, formsItemDto, 
+                applyFormStepFilter: room is { FolderType: FolderType.VirtualDataRoom } && parent.ShareRecord is { Share: FileShare.FillForms });
+                
                 var files = await filesTask.ToListAsync();
 
                 if (parent.FolderType == FolderType.FillingFormsRoom && securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))

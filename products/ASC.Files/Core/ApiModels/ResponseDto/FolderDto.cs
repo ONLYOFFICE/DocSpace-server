@@ -182,9 +182,11 @@ public class FolderDtoHelper(
     ExternalShare externalShare,
     FileSecurityCommon fileSecurityCommon,
     SecurityContext securityContext,
-    UserManager userManager)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory)
-    {
+    UserManager userManager,
+    IUrlShortener urlShortener
+    )
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
+{
 
     public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null)
     {
@@ -260,7 +262,7 @@ public class FolderDtoHelper(
                                            !canRead;
 
                 result.Expired = folder.ShareRecord.Options?.IsExpired;
-                result.RequestToken = await externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
+                result.RequestToken = await _externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
             }
         }
 
@@ -280,7 +282,12 @@ public class FolderDtoHelper(
         }
 
         result.Lifetime = mapper.Map<RoomDataLifetime, RoomDataLifetimeDto>(folder.SettingsLifetime);
-        
+
+        if (result.CanShare)
+        {
+            result.AvailableExternalRights = await _fileSecurity.GetFolderAccesses(folder, SubjectType.ExternalLink);
+        }
+
         return result;
     }
     

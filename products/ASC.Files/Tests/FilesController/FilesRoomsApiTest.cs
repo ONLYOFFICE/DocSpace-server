@@ -292,41 +292,6 @@ public class FilesRoomsApiTest(
     // }
     
     [Fact]
-    public async Task SetLink_RoomExternalAccess_LinkCreated()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        
-        // Create a room
-        var roomTitle = "Public Room " + Guid.NewGuid().ToString()[..8];
-        var room = (await _roomsApi.CreateRoomAsync(
-            new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.CustomRoom), 
-            TestContext.Current.CancellationToken)).Response;
-            
-        // Act
-        var linkRequest = new RoomLinkRequest
-        {
-            Access = FileShare.Read,
-            LinkType = LinkType.External
-        };
-        
-        var link = (await _roomsApi.SetRoomLinkAsync(room.Id, linkRequest, TestContext.Current.CancellationToken)).Response;
-        
-        // Assert
-        link.Should().NotBeNull();
-        link.Access.Should().Be(FileShare.Read);
-        
-        // Verify link exists in room links
-        var roomLinks = (await _roomsApi.GetRoomLinksAsync(
-            room.Id,
-            type: LinkType.External,
-            cancellationToken: TestContext.Current.CancellationToken)).Response;
-            
-        roomLinks.Should().NotBeEmpty();
-        roomLinks.Should().Contain(l => l.Access == FileShare.Read);
-    }
-    
-    [Fact]
     public async Task IsPublic_ChecksRoomStatus()
     {
         // Arrange

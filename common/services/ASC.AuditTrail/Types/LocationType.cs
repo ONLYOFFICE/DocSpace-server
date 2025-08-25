@@ -24,70 +24,98 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+namespace ASC.AuditTrail.Types;
 
 /// <summary>
-/// The room link parameters.
+/// The module type.
 /// </summary>
-public class RoomLinkRequest
+[EnumExtensions]
+public enum LocationType
 {
-    /// <summary>
-    /// The room link ID.
-    /// </summary>
-    public Guid LinkId { get; set; }
+    [SwaggerEnum("None")]
+    None,
 
-    /// <summary>
-    /// The link sharing rights.
-    /// </summary>
-    public FileShare Access { get; set; }
+    [SwaggerEnum("Files")]
+    Files,
 
-    /// <summary>
-    /// The link expiration date.
-    /// </summary>
-    public ApiDateTime ExpirationDate { get; set; }
+    [SwaggerEnum("Folders")]
+    Folders,
 
-    /// <summary>
-    /// The link scope, whether it is internal or not.
-    /// </summary>
-    public bool Internal { get; set; }
+    [SwaggerEnum("Documents settings")]
+    DocumentsSettings,
+
+    [SwaggerEnum("Companies")]
+    Companies,
+
+    [SwaggerEnum("Persons")]
+    Persons,
+
+    [SwaggerEnum("Contacts")]
+    Contacts,
+
+    [SwaggerEnum("Crm tasks")]
+    CrmTasks,
+
+    [SwaggerEnum("Opportunities")]
+    Opportunities,
+
+    [SwaggerEnum("Invoices")]
+    Invoices,
+
+    [SwaggerEnum("Cases")]
+    Cases,
+
+    [SwaggerEnum("Common crm settings")]
+    CommonCrmSettings,
+
+    [SwaggerEnum("Contacts settings")]
+    ContactsSettings,
+
+    [SwaggerEnum("Contact types")]
+    ContactTypes,
+
+    [SwaggerEnum("Invoice settings")]
+    InvoiceSettings,
+
+    [SwaggerEnum("Other crm settings")]
+    OtherCrmSettings,
+
+    [SwaggerEnum("Users")]
+    Users,
+
+    [SwaggerEnum("Groups")]
+    Groups,
+
+    [SwaggerEnum("Projects")]
+    Projects,
+
+    [SwaggerEnum("Milestones")]
+    Milestones,
+
+    [SwaggerEnum("Tasks")]
+    Tasks,
+
+    [SwaggerEnum("Discussions")]
+    Discussions,
+
+    [SwaggerEnum("Time tracking")]
+    TimeTracking,
+
+    [SwaggerEnum("Reports")]
+    Reports,
+
+    [SwaggerEnum("Projects settings")]
+    ProjectsSettings,
+
+    [SwaggerEnum("General")]
+    General,
+
+    [SwaggerEnum("Products")]
+    Products,
+
+    [SwaggerEnum("Rooms")]
+    Rooms,
     
-    /// <summary>
-    /// The link name.
-    /// </summary>
-    [StringLength(255)]
-    public string Title { get; set; }
-
-    /// <summary>
-    /// The link type.
-    /// </summary>
-    public LinkType LinkType { get; set; }
-
-    /// <summary>
-    /// The link password.
-    /// </summary>
-    [StringLength(255)]
-    public string Password { get; set; }
-
-    /// <summary>
-    /// Specifies if downloading the file from the link is disabled or not.
-    /// </summary>
-    public bool DenyDownload { get; set; }
-}
-
-/// <summary>
-/// The generic room link request parameters.
-/// </summary>
-public class RoomLinkRequestDto<T>
-{
-    /// <summary>
-    /// The room ID.
-    /// </summary>
-    [FromRoute(Name = "id")]
-    public required T Id { get; set; }
-
-    /// <summary>
-    /// The room link parameters.
-    /// </summary>
-    [FromBody]
-    public RoomLinkRequest RoomLink { get; set; }
+    [SwaggerEnum("OAuth")]
+    OAuth
 }

@@ -369,15 +369,12 @@ static file class FileQueries
                         Shared = ctx.Security.Any(x => 
                             x.TenantId == r.TenantId && 
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                            ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File) ||
-                             (x.EntryType == FileEntryType.Folder && 
-                              x.EntryId == ctx.Tree
-                                  .Where(t => t.FolderId == r.ParentId)
-                                  .OrderByDescending(t => t.Level)
-                                  .Select(t => t.ParentId)
-                                  .Skip(1)
-                                  .FirstOrDefault()
-                                  .ToString()))),
+                            x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
+                        ParentShared = ctx.Security.Any(x => 
+                            x.TenantId == r.TenantId && 
+                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                            x.EntryType == FileEntryType.Folder && 
+                            ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                         Order = (
                             from f in ctx.FileOrder
                             where (
@@ -421,15 +418,12 @@ static file class FileQueries
                         Shared = ctx.Security.Any(x => 
                             x.TenantId == r.TenantId && 
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                            ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File) ||
-                             (x.EntryType == FileEntryType.Folder && 
-                              x.EntryId == ctx.Tree
-                                  .Where(t => t.FolderId == r.ParentId)
-                                  .OrderByDescending(t => t.Level)
-                                  .Select(t => t.ParentId)
-                                  .Skip(1)
-                                  .FirstOrDefault()
-                                  .ToString()))),
+                            x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
+                        ParentShared = ctx.Security.Any(x => 
+                            x.TenantId == r.TenantId && 
+                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                            x.EntryType == FileEntryType.Folder && 
+                            ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                         LastOpened = ctx.AuditEvents
                             .OrderByDescending(a => a.Date)
                             .Where(a => a.Target == fileId.ToString() && a.UserId == userId && a.Action == (int)MessageAction.FileOpenedForChange && r.TenantId == tenantId)

@@ -84,12 +84,6 @@ public class FileDto<T> : FileEntryDto<T>
     public string WebUrl { get; set; }
 
     /// <summary>
-    /// The short Web URL.
-    /// </summary>
-    [Url]
-    public string ShortWebUrl { get; set; }
-
-    /// <summary>
     /// The file type.
     /// </summary>
     public FileType FileType { get; set; }
@@ -187,11 +181,6 @@ public class FileDto<T> : FileEntryDto<T>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
     /// <summary>
-    /// The available external rights of the file.
-    /// </summary>
-    public IDictionary<string, bool> AvailableExternalRights { get; set; }
-
-    /// <summary>
     /// The time when the file was last opened.
     /// </summary>
     public ApiDateTime LastOpened { get; set; }
@@ -229,7 +218,7 @@ public class FileDtoHelper(
     SecurityContext securityContext,
     UserManager userManager,
     IUrlShortener urlShortener)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory) 
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
@@ -246,7 +235,11 @@ public class FileDtoHelper(
         }
         
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
-        result.AvailableExternalRights = _fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
+
+        if (result.CanShare)
+        {
+            result.AvailableExternalRights = await _fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
+        }
 
         if (contextFolder == null)
         {
@@ -419,7 +412,7 @@ public class FileDtoHelper(
                     }
                     try
                     {
-                        result.ShortWebUrl = await urlShortener.GetShortenLinkAsync(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id)));
+                        result.ShortWebUrl = await _urlShortener.GetShortenLinkAsync(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id)));
                     }
                     catch (Exception)
                     {
@@ -484,18 +477,18 @@ public class FileDtoHelper(
             
             if (externalMediaAccess)
             {
-                result.RequestToken = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
+                result.RequestToken = await _externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
             }
             
-            result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
-            result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
+            result.ViewUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
+            result.WebUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
             result.ThumbnailStatus = file.ThumbnailStatus;
             
             var cacheKey = Math.Abs(result.Updated.GetHashCode());
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
-                result.ThumbnailUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) + $"&hash={cacheKey}", result.RequestToken);
+                result.ThumbnailUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) + $"&hash={cacheKey}", result.RequestToken);
             }
         }
         catch (Exception)

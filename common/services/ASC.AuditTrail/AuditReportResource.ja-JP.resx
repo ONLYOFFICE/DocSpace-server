@@ -136,9 +136,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>上書きの設定は更新されました</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>文書</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>設定</value>
   </data>
@@ -406,9 +403,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>移動</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>他の</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>所有者が変更されました：{0}</value>
   </data>
@@ -426,9 +420,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>パスワード強度設定が更新です</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>人達</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>プラットフォーム</value>
@@ -489,9 +480,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>セションは開始です</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>設定</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSOは無効です</value>
