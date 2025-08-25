@@ -1033,11 +1033,6 @@ public class FileSecurity(IDaoFactory daoFactory,
 
             if (folder.FolderType == FolderType.Recent)
             {
-                if (isGuest)
-                {
-                    return false;
-                }
-
                 return action == FilesSecurityActions.Read;
             }
 
