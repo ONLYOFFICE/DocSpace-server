@@ -271,6 +271,7 @@ public class FileDtoHelper(
                 FileSecurity.FilesSecurityActions.Embed,
                 FileSecurity.FilesSecurityActions.StartFilling,
                 FileSecurity.FilesSecurityActions.StopFilling,
+                FileSecurity.FilesSecurityActions.CopySharedLink
             };
 
             foreach (var action in forbiddenActions)
@@ -278,6 +279,7 @@ public class FileDtoHelper(
                 result.Security[action] = false;   
             }
 
+            result.CanShare = false;
             result.ViewAccessibility[Accessibility.CanConvert] = false;
 
             result.Order = "";
