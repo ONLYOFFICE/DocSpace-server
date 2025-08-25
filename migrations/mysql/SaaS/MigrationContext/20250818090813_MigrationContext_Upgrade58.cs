@@ -17,28 +17,28 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 keyColumn: "tenant",
                 keyValue: -10,
                 column: "features",
-                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2");
+                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed");
 
             migrationBuilder.UpdateData(
                 table: "tenants_quota",
                 keyColumn: "tenant",
                 keyValue: -9,
                 column: "features",
-                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2");
+                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed");
 
             migrationBuilder.UpdateData(
                 table: "tenants_quota",
                 keyColumn: "tenant",
                 keyValue: -6,
                 column: "features",
-                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2");
+                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2:fixed");
 
             migrationBuilder.UpdateData(
                 table: "tenants_quota",
                 keyColumn: "tenant",
                 keyValue: -2,
                 column: "features",
-                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2");
+                value: "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2:fixed");
 
             migrationBuilder.InsertData(
                 table: "tenants_quota",
