@@ -45,4 +45,9 @@ public class ConfirmDto : IMapFrom<Validation>
     /// The confirmation title.
     /// </summary>
     public string Title { get; set; }
+
+    /// <summary>
+    /// The confirmation email.
+    /// </summary>
+    public string Email { get; set; }
 }

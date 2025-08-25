@@ -29,5 +29,5 @@ namespace ASC.AuditTrail.Mappers;
 public interface IProductActionMapper
 {
     ProductType Product { get; }
-    List<IModuleActionMapper> Mappers { get; }
+    List<ILocationActionMapper> Mappers { get; }
 }

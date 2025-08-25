@@ -47,6 +47,11 @@ public class RoomLinkRequest
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
+    /// The link scope, whether it is internal or not.
+    /// </summary>
+    public bool Internal { get; set; }
+    
+    /// <summary>
     /// The link name.
     /// </summary>
     [StringLength(255)]

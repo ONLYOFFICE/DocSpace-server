@@ -62,6 +62,17 @@ public abstract class FileEntryBaseDto
     public bool Shared { get; set; }
 
     /// <summary>
+    /// Indicates whether the parent entity is shared.
+    /// </summary>
+    public bool ParentShared { get; set; }
+
+    /// <summary>
+    /// The short Web URL.
+    /// </summary>
+    [Url]
+    public string ShortWebUrl { get; set; }
+
+    /// <summary>
     /// The creation date and time of the file entry.
     /// </summary>
     public ApiDateTime Created { get; set; }
@@ -132,6 +143,7 @@ public abstract class FileEntryBaseDto
         Title = entry.Title;
         Access = entry.Access;
         Shared = entry.Shared;
+        ParentShared = entry.ParentShared;
         RootFolderType = entry.RootFolderType;
         ParentRoomType = entry.ParentRoomType;
         ProviderItem = entry.ProviderEntry.NullIfDefault();
@@ -185,10 +197,21 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// </summary>
     public bool CanShare { get; set; }
 
+
+    /// <summary>
+    /// A dictionary representing the sharing settings for the file entry.
+    /// </summary>
+    public IDictionary<SubjectType, int> ShareSettings { get; set; }
+
     /// <summary>
     /// The actions that can be perforrmed with the file entry.
     /// </summary>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
+
+    /// <summary>
+    /// The available external rights of the file entry.
+    /// </summary>
+    public IDictionary<string, bool> AvailableExternalRights { get; set; }
 
     /// <summary>
     /// The request token of the file entry.
@@ -206,7 +229,8 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
 }
 
 [Scope]
-public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
+public class FileEntryDtoHelper(
+    ApiDateTimeHelper apiDateTimeHelper,
     EmployeeDtoHelper employeeWrapperHelper,
     FileSharingHelper fileSharingHelper,
     FileSecurity fileSecurity,
@@ -215,11 +239,15 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
     FileDateTime fileDateTime,
     SecurityContext securityContext,
     UserManager userManager,
-    IDaoFactory daoFactory)
+    IDaoFactory daoFactory,
+    ExternalShare externalShare,
+    IUrlShortener urlShortener)
 {
     protected readonly FileSecurity _fileSecurity = fileSecurity;
     protected readonly GlobalFolderHelper _globalFolderHelper = globalFolderHelper;
     protected readonly IDaoFactory _daoFactory = daoFactory;
+    protected readonly ExternalShare _externalShare = externalShare;
+    protected readonly IUrlShortener _urlShortener = urlShortener;
 
     protected async Task<T> GetAsync<T, TId>(FileEntry<TId> entry) where T : FileEntryDto<TId>, new()
     {
@@ -242,13 +270,54 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 _ => entry.RootId
             };
         }
-        
+
+        var shortWebUrl = "";
+
+        if (entry.FullShared)
+        {
+            var linkId = await _externalShare.GetLinkIdAsync();
+            var securityDao = _daoFactory.GetSecurityDao<int>();
+            var record = await securityDao.GetSharesAsync([linkId]).FirstOrDefaultAsync();
+            if (record != null)
+            {
+                var linkData = await _externalShare.GetLinkDataAsync(entry, record.Subject);
+                shortWebUrl = await _urlShortener.GetShortenLinkAsync(linkData.Url);
+            }
+        }
+
+        var canSetAccess = await fileSharingHelper.CanSetAccessAsync(entry);
+        Dictionary<SubjectType, int> shareSettings = null;
+
+        if (canSetAccess)
+        {
+            var primaryCount = await _fileSecurity.GetLinksSettings(entry, SubjectType.PrimaryExternalLink);
+            var additionalCount = await _fileSecurity.GetLinksSettings(entry, SubjectType.ExternalLink);
+
+            if (primaryCount > 0)
+            {
+                shareSettings = new Dictionary<SubjectType, int> 
+                {
+                    {
+                        SubjectType.PrimaryExternalLink, primaryCount
+                    } 
+                };
+            }
+
+            if (additionalCount > 0)
+            {                
+                shareSettings ??= new Dictionary<SubjectType, int>();
+                shareSettings.Add(SubjectType.ExternalLink, additionalCount);
+            }
+        }
+
         return new T
         {
             Id = entry.Id,
             Title = entry.Title,
             Access = entry.Access,
             Shared = entry.Shared,
+            ParentShared = entry.ParentShared,
+            ShortWebUrl = shortWebUrl,
             Created = apiDateTimeHelper.Get(entry.CreateOn),
             CreatedBy = await employeeWrapperHelper.GetAsync(entry.CreateBy),
             Updated = apiDateTimeHelper.Get(entry.ModifiedOn),
@@ -259,7 +328,8 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             ProviderItem = entry.ProviderEntry.NullIfDefault(),
             ProviderKey = entry.ProviderKey,
             ProviderId = entry.ProviderId.NullIfDefault(),
-            CanShare = await fileSharingHelper.CanSetAccessAsync(entry),
+            CanShare = canSetAccess,
+            ShareSettings = shareSettings,
             Security = entry.Security,
             OriginId = entry.OriginId,
             OriginTitle = entry.OriginTitle,
@@ -272,7 +342,7 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
     private async ValueTask<DateTime> GetDeletedPermanentlyOn<T>(FileEntry<T> entry)
     {
         var isGuest = await userManager.IsGuestAsync(securityContext.CurrentAccount.ID);
-        if (isGuest) 
+        if (isGuest)
         {
             var myId = await _globalFolderHelper.GetFolderMyAsync<int>();
 
