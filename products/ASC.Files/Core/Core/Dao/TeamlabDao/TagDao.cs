@@ -114,7 +114,7 @@ internal abstract class BaseTagDao<T>(
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var fromDb = await filesDbContext.TagsByOwnerAsync(tenantId, owner, entryId.ToString(), tagType).ToListAsync();
+        var fromDb = await filesDbContext.TagsByOwnerAsync(tenantId, owner, Equals(entryId, default(T)) ? null : entryId.ToString(), tagType).ToListAsync();
         
         foreach (var e in fromDb)
         {
