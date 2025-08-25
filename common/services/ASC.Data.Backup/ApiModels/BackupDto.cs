@@ -65,6 +65,12 @@ public class BackupsCountDto
     /// </summary>
     [FromQuery(Name = "to")]
     public DateTime? To { get; set; }
+
+    /// <summary>
+    /// Specifies if the backups are paid or not.
+    /// </summary>
+    [FromQuery(Name = "paid")]
+    public bool Paid { get; set; }
 }
 
 /// <summary>

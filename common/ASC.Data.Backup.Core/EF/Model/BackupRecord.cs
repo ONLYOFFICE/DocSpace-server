@@ -44,6 +44,7 @@ public class BackupRecord : BaseEntity
     public DateTime ExpiresOn { get; set; }
     public string StorageParams { get; set; }
     public bool Removed { get; set; }
+    public bool Paid { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -155,6 +156,11 @@ public static class BackupRecordExtension
                 .HasColumnName("removed")
                 .HasColumnType("tinyint(1)")
                 .IsRequired();
+
+            entity.Property(e => e.Paid)
+                .HasColumnName("paid")
+                .HasColumnType("tinyint(1)")
+                .IsRequired();
         });
     }
     public static void PgSqlAddBackupRecord(this ModelBuilder modelBuilder)
@@ -235,6 +241,11 @@ public static class BackupRecordExtension
 
             entity.Property(e => e.Removed)
                 .HasColumnName("removed")
+                .IsRequired()
+                .HasColumnType("boolean");
+
+            entity.Property(e => e.Paid)
+                .HasColumnName("paid")
                 .IsRequired()
                 .HasColumnType("boolean");
         });

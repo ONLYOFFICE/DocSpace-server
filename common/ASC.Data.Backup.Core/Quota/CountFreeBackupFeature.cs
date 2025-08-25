@@ -69,7 +69,7 @@ public class CountFreeBackupStatistic(IServiceProvider serviceProvider) : ITenan
         var tenantId = tenantManager.GetCurrentTenantId();
         var to = DateTime.UtcNow;
         var from = to.AddMonths(-1);
-        var result = await backupRepository.GetBackupsCountAsync(tenantId, from, to);
+        var result = await backupRepository.GetBackupsCountAsync(tenantId, false, from, to);
         return result;
     }
 }

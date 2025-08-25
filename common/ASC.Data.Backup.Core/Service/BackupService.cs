@@ -572,9 +572,9 @@ public class BackupService(
         return result;
     }
 
-    public async Task<int> GetBackupsCountAsync(int tenantId, DateTime from, DateTime to)
+    public async Task<int> GetBackupsCountAsync(int tenantId, bool paid, DateTime from, DateTime to)
     {
-        return await backupRepository.GetBackupsCountAsync(tenantId, from, to);
+        return await backupRepository.GetBackupsCountAsync(tenantId, paid, from, to);
     }
 
     public async Task<bool> IsBackupServiceEnabledAsync(int tenantId)

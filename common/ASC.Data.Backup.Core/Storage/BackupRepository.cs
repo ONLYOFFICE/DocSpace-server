@@ -128,10 +128,10 @@ public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory
         }
     }
 
-    public async Task<int> GetBackupsCountAsync(int tenantId, DateTime from, DateTime to)
+    public async Task<int> GetBackupsCountAsync(int tenantId, bool paid, DateTime from, DateTime to)
     {
         await using var backupContext = await dbContextFactory.CreateDbContextAsync();
-        return await Queries.GetBackupsCount(backupContext, tenantId, from, to);
+        return await Queries.GetBackupsCount(backupContext, tenantId, paid, from, to);
     }
 }
 
@@ -205,8 +205,8 @@ static file class Queries
                 ctx.Schedules
                     .SingleOrDefault(s => s.TenantId == tenantId));
 
-    public static readonly Func<BackupsContext, int, DateTime, DateTime, Task<int>> GetBackupsCount =
+    public static readonly Func<BackupsContext, int, bool, DateTime, DateTime, Task<int>> GetBackupsCount =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (BackupsContext ctx, int tenantId, DateTime from, DateTime to) =>
-                ctx.Backups.Count(b => b.TenantId == tenantId && b.CreatedOn >= from && b.CreatedOn <= to));
+            (BackupsContext ctx, int tenantId, bool paid, DateTime from, DateTime to) =>
+                ctx.Backups.Count(b => b.TenantId == tenantId && b.Paid == paid && b.CreatedOn >= from && b.CreatedOn <= to));
 }

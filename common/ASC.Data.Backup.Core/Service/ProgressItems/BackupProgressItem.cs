@@ -189,7 +189,8 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
                     ExpiresOn = _storageType == BackupStorageType.DataStore ? DateTime.UtcNow.AddDays(1) : DateTime.MinValue,
                     StorageParams = JsonSerializer.Serialize(_storageParams),
                     Hash = hash,
-                    Removed = false
+                    Removed = false,
+                    Paid = _billingSessionId > 0
                 });
 
             Percentage = 100;

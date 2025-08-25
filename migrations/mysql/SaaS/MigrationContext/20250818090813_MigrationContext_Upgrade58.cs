@@ -12,6 +12,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<bool>(
+                name: "paid",
+                table: "backup_backup",
+                type: "tinyint(1)",
+                nullable: false,
+                defaultValue: false);
+
             migrationBuilder.UpdateData(
                 table: "tenants_quota",
                 keyColumn: "tenant",
@@ -52,6 +59,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "paid",
+                table: "backup_backup");
+
             migrationBuilder.DeleteData(
                 table: "tenants_quota",
                 keyColumn: "tenant",

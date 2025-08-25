@@ -466,7 +466,7 @@ public class BackupController(
             throw new ArgumentException("From date must be less than to date");
         }
 
-        var result = await backupService.GetBackupsCountAsync(tenantId, from, to);
+        var result = await backupService.GetBackupsCountAsync(tenantId, dto.Paid, from, to);
         return result;
     }
 

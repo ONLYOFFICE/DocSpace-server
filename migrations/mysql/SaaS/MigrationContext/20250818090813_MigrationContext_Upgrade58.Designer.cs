@@ -6194,6 +6194,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<bool>("Paid")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("paid");
+
                     b.Property<bool>("Removed")
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("removed");
