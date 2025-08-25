@@ -1194,24 +1194,13 @@ public class FileMarker(
     
     public async Task<MarkResult> MarkAsRecentByLink<T>(FileEntry<T> entry, Guid linkId)
     {
-        if (entry is File<T>)
+        switch (entry)
         {
-            if (entry.RootFolderType is not FolderType.USER)
-            {
+            case File<T> when entry.RootFolderType is not FolderType.USER:
+            case Folder<T> folder when !DocSpaceHelper.IsRoom(folder.FolderType):
                 return MarkResult.NotMarked;
-            }
-
-            if (await globalFolder.GetFolderMyAsync(daoFactory) == 0)
-            {
-                return MarkResult.NotMarked;
-            }
         }
 
-        if (entry is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType))
-        {
-            return MarkResult.NotMarked;
-        }
-        
         var tagDao = daoFactory.GetTagDao<T>();
         var userId = authContext.CurrentAccount.ID;
         var linkIdString = linkId.ToString();
