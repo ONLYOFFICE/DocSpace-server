@@ -510,6 +510,36 @@ public class PaymentController(
     }
 
     /// <summary>
+    /// Returns the wallet services.
+    /// </summary>
+    /// <short>
+    /// Get wallet service
+    /// </short>
+    /// <path>api/2.0/portal/payment/walletservice</path>
+    /// <collection>list</collection>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Wallet service", typeof(QuotaDto))]
+    [HttpGet("walletservice")]
+    public async Task<QuotaDto> GetWalletService(GetWalletServiceRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var quotaList = await quotaService.GetTenantQuotasAsync();
+        var quota = quotaList.FirstOrDefault(q => q.Wallet && q.TenantId == (int)inDto.Service);
+        if (quota == null)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        return await tariffHelper.ToQuotaDtoAsync(quota, false);
+    }
+
+    /// <summary>
     /// Returns the payment information about the current portal quota.
     /// </summary>
     /// <short>
@@ -963,10 +993,10 @@ public class PaymentController(
     /// </short>
     /// <path>api/2.0/portal/payment/servicessettings</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The wallet services settings", typeof(TenantWalletServicesSettings))]
+    [SwaggerResponse(200, "The wallet services settings", typeof(TenantWalletServiceSettings))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("servicessettings")]
-    public async Task<TenantWalletServicesSettings> GetTenantWalletServicesSettings()
+    public async Task<TenantWalletServiceSettings> GetTenantWalletServiceSettings()
     {
         if (!tariffService.IsConfigured())
         {
@@ -975,7 +1005,7 @@ public class PaymentController(
 
         await DemandAdminAsync();
 
-        var settings = await settingsManager.LoadAsync<TenantWalletServicesSettings>();
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>();
 
         return settings;
     }
@@ -988,23 +1018,19 @@ public class PaymentController(
     /// </short>
     /// <path>api/2.0/portal/payment/servicestate</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The wallet services settings", typeof(TenantWalletServicesSettings))]
+    [SwaggerResponse(200, "The wallet service settings", typeof(TenantWalletServiceSettings))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("servicestate")]
-    public async Task<TenantWalletServicesSettings> ChangeTenantWalletServiceState(WalletServiceStateRequestDto inDto)
+    public async Task<TenantWalletServiceSettings> ChangeTenantWalletServiceState(ChangeWalletServiceStateRequestDto inDto)
     {
-        if (string.IsNullOrEmpty(inDto?.Service) || !tariffService.IsConfigured())
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (!tariffService.IsConfigured())
         {
             return null;
         }
 
         var tenant = tenantManager.GetCurrentTenant();
-
-        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
-        if (!quotaList.Any(q => q.Name == inDto.Service))
-        {
-            return null;
-        }
 
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo == null)
@@ -1014,7 +1040,7 @@ public class PaymentController(
 
         await DemandPayerAsync(customerInfo);
 
-        var settings = await settingsManager.LoadAsync<TenantWalletServicesSettings>();
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>();
 
         settings.EnabledServices ??= [];
 

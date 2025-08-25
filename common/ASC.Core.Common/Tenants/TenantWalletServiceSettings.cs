@@ -28,12 +28,12 @@ namespace ASC.Core.Tenants;
 
 [Scope]
 [Serializable]
-public class TenantWalletServicesSettings : ISettings<TenantWalletServicesSettings>
+public class TenantWalletServiceSettings : ISettings<TenantWalletServiceSettings>
 {
     /// <summary>
     /// Enabled services
     /// </summary>
-    public List<string> EnabledServices { get; set; }
+    public List<TenantWalletService> EnabledServices { get; set; }
 
     [JsonIgnore]
     public Guid ID
@@ -41,9 +41,9 @@ public class TenantWalletServicesSettings : ISettings<TenantWalletServicesSettin
         get { return new Guid("{1285F7B0-9927-4911-9DA1-4F5D1F90FE73}"); }
     }
 
-    public TenantWalletServicesSettings GetDefault()
+    public TenantWalletServiceSettings GetDefault()
     {
-        return new TenantWalletServicesSettings();
+        return new TenantWalletServiceSettings();
     }
 
     public DateTime LastModified { get; set; }

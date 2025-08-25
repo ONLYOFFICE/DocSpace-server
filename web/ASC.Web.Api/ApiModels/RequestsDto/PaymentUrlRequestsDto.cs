@@ -99,14 +99,28 @@ public class TopUpDepositRequestDto
 }
 
 /// <summary>
-/// Tenant wallet service state request parameters
+/// The request parameters for getting wallet service.
 /// </summary>
-public class WalletServiceStateRequestDto
+public class GetWalletServiceRequestDto
 {
     /// <summary>
-    /// Service name
+    /// Wallet service
     /// </summary>
-    public string Service { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [FromQuery(Name = "service")]
+    public required TenantWalletService Service { get; set; }
+}
+
+/// <summary>
+/// Tenant wallet service state request parameters
+/// </summary>
+public class ChangeWalletServiceStateRequestDto
+{
+    /// <summary>
+    /// Wallet service
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TenantWalletService Service { get; set; }
 
     /// <summary>
     /// Service state

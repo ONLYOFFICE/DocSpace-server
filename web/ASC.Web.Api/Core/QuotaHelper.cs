@@ -41,7 +41,7 @@ public class QuotaHelper(
     {
         var quotaList = await tenantManager.GetTenantQuotasAsync(all, wallet);
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
-        var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServicesSettings>()).EnabledServices;
+        var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;
 
         foreach (var quota in quotaList)
         {
@@ -53,12 +53,20 @@ public class QuotaHelper(
     {
         var quota = await tenantManager.GetCurrentTenantQuotaAsync(refresh);
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
-        var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServicesSettings>()).EnabledServices;
+        var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;
 
         return await ToQuotaDto(quota, userType, getUsed, enabledWalletServices);
     }
 
-    private async Task<QuotaDto> ToQuotaDto(TenantQuota quota, EmployeeType employeeType, bool getUsed = false, List<string> enabledWalletServices = null)
+    public async Task<QuotaDto> ToQuotaDtoAsync(TenantQuota quota, bool getUsed = true)
+    {
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;
+
+        return await ToQuotaDto(quota, userType, getUsed, enabledWalletServices);
+    }
+
+    private async Task<QuotaDto> ToQuotaDto(TenantQuota quota, EmployeeType employeeType, bool getUsed = false, List<TenantWalletService> enabledWalletServices = null)
     {
         var features = await GetFeatures(quota, employeeType, getUsed, enabledWalletServices).ToListAsync();
 
@@ -98,7 +106,7 @@ public class QuotaHelper(
         return result;
     }
 
-    private async IAsyncEnumerable<TenantQuotaFeatureDto> GetFeatures(TenantQuota quota, EmployeeType employeeType, bool getUsed, List<string> enabledWalletServices)
+    private async IAsyncEnumerable<TenantQuotaFeatureDto> GetFeatures(TenantQuota quota, EmployeeType employeeType, bool getUsed, List<TenantWalletService> enabledWalletServices)
     {
         var assembly = GetType().Assembly;
 
@@ -169,8 +177,10 @@ public class QuotaHelper(
             }
             else if (feature is WalletFeatureFlag walletFlag)
             {
-                result.Value = enabledWalletServices != null && enabledWalletServices.Contains(walletFlag.Name);
                 result.Type = "flag";
+                result.Value = enabledWalletServices != null
+                    && TenantWalletServiceExtensions.TryParse(walletFlag.Name, true, out var service)
+                    && enabledWalletServices.Contains(service);
             }
             else if (feature is TenantQuotaFeatureFlag flag)
             {

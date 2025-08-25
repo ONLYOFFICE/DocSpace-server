@@ -55,7 +55,6 @@ public class BackupService(
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
     private const int BackupCustomerSessionDuration = 86400; // 60 * 60 * 24;
-    private const string BackupQuotaName = "backup";
 
     public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null, int billingSessionId = 0, DateTime billingSessionExpire = default)
     {
@@ -580,8 +579,8 @@ public class BackupService(
 
     public async Task<bool> IsBackupServiceEnabledAsync(int tenantId)
     {
-        var settings = await settingsManager.LoadAsync<TenantWalletServicesSettings>(tenantId);
-        return settings.EnabledServices != null && settings.EnabledServices.Contains(BackupQuotaName);
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
+        return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.Backup);
     }
 
     private async Task<ScheduleResponse> InnerGetScheduleAsync(int tenantId, bool? dump)
@@ -659,7 +658,7 @@ public class BackupService(
     {
         var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
 
-        var backupQuota = quotaList.FirstOrDefault(x => x.Name == BackupQuotaName);
+        var backupQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.Backup);
 
         return backupQuota == null ? throw new ItemNotFoundException("Backup quota not found") : int.Parse(backupQuota.ProductId);
     }
