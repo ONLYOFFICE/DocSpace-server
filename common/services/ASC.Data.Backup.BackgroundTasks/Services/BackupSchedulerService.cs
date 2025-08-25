@@ -135,7 +135,10 @@ public sealed class BackupSchedulerService(
                     logger.DebugNotPaid(schedule.TenantId);
                 }
             }
-            catch (Exception ex) when (ex is TenantQuotaException || ex is AccountingPaymentRequiredException || ex is BillingException)
+            catch (Exception ex) when (ex is TenantQuotaException
+                || ex is AccountingPaymentRequiredException
+                || ex is AccountingCustomerNotFoundException
+                || ex is BillingException)
             {
                 logger.DebugHaveNotAccess(schedule.TenantId, ex.Message);
             }

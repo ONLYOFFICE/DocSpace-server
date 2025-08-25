@@ -271,6 +271,11 @@ public class AccountingClient
                     throw new AccountingPaymentRequiredException();
                 }
 
+                if (response.StatusCode == HttpStatusCode.BadRequest && Regex.IsMatch(responseString, @"Customer account '.*?' not found"))
+                {
+                    throw new AccountingCustomerNotFoundException();
+                }
+
                 throw new Exception($"Accounting request failed with status code {response.StatusCode} {responseString}");
             }
 
@@ -289,6 +294,10 @@ public class AccountingClient
             return result;
         }
         catch (AccountingPaymentRequiredException)
+        {
+            throw;
+        }
+        catch (AccountingCustomerNotFoundException)
         {
             throw;
         }
@@ -572,3 +581,5 @@ public class AccountingException : Exception
 public class AccountingNotConfiguredException(string message = "Accounting service is not configured") : AccountingException(message);
 
 public class AccountingPaymentRequiredException(string message = "Payment required") : AccountingException(message);
+
+public class AccountingCustomerNotFoundException(string message = "Customer not found") : AccountingException(message);
