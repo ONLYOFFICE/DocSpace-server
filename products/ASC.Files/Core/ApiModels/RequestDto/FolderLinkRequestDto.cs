@@ -24,71 +24,70 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModels.RequestsDto;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for filtering and retrieving audit event records.
+/// The folder link parameters.
 /// </summary>
-public class AuditEventRequestDto
+public class FolderLinkRequest
 {
     /// <summary>
-    /// The ID of the user who triggered the audit event.
+    /// The folder link ID.
     /// </summary>
-    [FromQuery(Name = "userId")]
-    public Guid UserId { get; set; }
+    public Guid LinkId { get; set; }
 
     /// <summary>
-    /// The location where the audit event occurred.
+    /// The link sharing rights.
     /// </summary>
-    [FromQuery(Name = "moduleType")]
-    public LocationType LocationType { get; set; }
+    public FileShare Access { get; set; }
 
     /// <summary>
-    /// The type of action performed in the audit event (e.g., Create, Update, Delete).
+    /// The link expiration date.
     /// </summary>
-    [FromQuery(Name = "actionType")]
-    public ActionType ActionType { get; set; }
+    public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
-    /// The specific action that occurred within the audit event.
+    /// The link name.
     /// </summary>
-    [FromQuery(Name = "action")]
-    public MessageAction Action { get; set; }
+    [StringLength(255)]
+    public string Title { get; set; }
 
     /// <summary>
-    /// The type of audit entry (e.g., Folder, User, File).
+    /// The link password.
     /// </summary>
-    [FromQuery(Name = "entryType")]
-    public EntryType EntryType { get; set; }
+    [StringLength(255)]
+    public string Password { get; set; }
 
     /// <summary>
-    /// The target object affected by the audit event (e.g., document ID, user account).
+    /// Specifies if downloading the file from the link is disabled or not.
     /// </summary>
-    [FromQuery(Name = "target")]
-    public string Target {  get; set; }
+    public bool DenyDownload { get; set; }
+    
+    /// <summary>
+    /// The link scope, whether it is internal or not.
+    /// </summary>
+    public bool Internal { get; set; }
+    
+    /// <summary>
+    /// Specifies whether the folder link is primary or not.
+    /// </summary>
+    public bool Primary { get; set; }
+}
+
+/// <summary>
+/// The generic folder link request parameters.
+/// </summary>
+public class FolderLinkRequestDto<T>
+{
+    /// <summary>
+    /// The folder ID.
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public required T Id { get; set; }
 
     /// <summary>
-    /// The starting date and time for filtering audit events.
+    /// The folder link parameters.
     /// </summary>
-    [FromQuery(Name = "from")]
-    public ApiDateTime From { get; set; }
-
-    /// <summary>
-    /// The ending date and time for filtering audit events.
-    /// </summary>
-    [FromQuery(Name = "to")]
-    public ApiDateTime To { get; set; }
-
-    /// <summary>
-    /// The maximum number of audit event records to retrieve.
-    /// </summary>
-    [FromQuery(Name = "count")]
-    [Range(1, ApiContext.MaxCount)]
-    public int Count { get; set; } = ApiContext.DefaultCount;
-
-    /// <summary>
-    /// The index of the first audit event record to retrieve in a paged query.
-    /// </summary>
-    [FromQuery(Name = "startIndex")]
-    public int StartIndex { get; set; }
+    [FromBody]
+    public FolderLinkRequest FolderLink { get; set; }
 }

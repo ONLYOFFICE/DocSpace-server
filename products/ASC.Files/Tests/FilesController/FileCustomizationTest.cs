@@ -40,7 +40,7 @@ public class FileCustomizationTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var file = await CreateFile("file_for_custom_filter.xlsx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_for_custom_filter.xlsx",  Initializer.Owner);
         
         // Act
         var customFilterParams = new CustomFilterParameters(enabled: true);

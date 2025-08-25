@@ -186,6 +186,7 @@ public class InvitationService(
 
         if (validation.Result is EmailValidationKeyProvider.ValidationResult.Ok)
         {
+            validation.Email = email;
             return validation;
         }
 
@@ -199,16 +200,18 @@ public class InvitationService(
     {
         if (confirmType is ConfirmType.EmpInvite)
         {
+            var (validationResult, _) = await validationHelper.ValidateAsync(new EmailValidationKeyModel
+            {
+                Key = key,
+                Email = email,
+                Type = ConfirmType.EmpInvite,
+                EmplType = employeeType,
+                UiD = userId
+            });
+
             return new InvitationLinkData
             {
-                Result = await validationHelper.ValidateAsync(new EmailValidationKeyModel
-                {
-                    Key = key,
-                    Email = email,
-                    Type = ConfirmType.EmpInvite,
-                    EmplType = employeeType,
-                    UiD = userId
-                }),
+                Result = validationResult,
                 ConfirmType = confirmType,
                 EmployeeType = employeeType,
                 LinkType = InvitationLinkType.Individual
@@ -345,6 +348,7 @@ public class Validation
     public EmailValidationKeyProvider.ValidationResult Result { get; set; }
     public string RoomId { get; set; }
     public string Title { get; set; }
+    public string Email { get; set; }
 }
 
 public class InvitationLinkData

@@ -57,7 +57,7 @@ public class CreateFileTest(
     [MemberData(nameof(Data))]
     public async Task CreateFile_FolderMy_Owner_ReturnsOk(string fileName)
     {
-        var createdFile = await CreateFile(fileName, FolderType.USER, Initializer.Owner);
+        var createdFile = await CreateFileInMy(fileName, Initializer.Owner);
         
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
@@ -74,7 +74,7 @@ public class CreateFileTest(
     {
         var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
         
-        var createdFile = await CreateFile(fileName, FolderType.USER, roomAdmin);
+        var createdFile = await CreateFileInMy(fileName, roomAdmin);
         
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
@@ -91,7 +91,7 @@ public class CreateFileTest(
     {
         var user = await Initializer.InviteContact(EmployeeType.User);
         
-        var createdFile = await CreateFile(fileName, FolderType.USER, user);
+        var createdFile = await CreateFileInMy(fileName, user);
 
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
