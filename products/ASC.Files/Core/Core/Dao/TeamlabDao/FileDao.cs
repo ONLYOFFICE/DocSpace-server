@@ -2251,9 +2251,28 @@ internal class FileDao(
                         where f.TenantId == r.TenantId
                         select f
                     ).FirstOrDefault(),
-                Shared = filesDbContext.Security.Any(s => 
-                    s.TenantId == r.TenantId && s.EntryId == r.Id.ToString() && s.EntryType == FileEntryType.File && 
-                    (s.SubjectType == SubjectType.PrimaryExternalLink || s.SubjectType == SubjectType.ExternalLink))
+                Shared = filesDbContext.Security.Any(x => 
+                    x.TenantId == r.TenantId && 
+                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
+                ParentShared = filesDbContext.Security.Any(x => 
+                    x.TenantId == r.TenantId && 
+                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                    x.EntryType == FileEntryType.Folder && 
+                    filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
+                Order = (
+                    from f in filesDbContext.FileOrder
+                    where (
+                        from rs in filesDbContext.RoomSettings 
+                        where rs.TenantId == f.TenantId && rs.RoomId ==
+                            (from t in filesDbContext.Tree
+                                where t.FolderId == r.ParentId
+                                orderby t.Level descending
+                                select t.ParentId
+                            ).Skip(1).FirstOrDefault()
+                        select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
+                    select f.Order
+                ).FirstOrDefault()
             });
     }
     
@@ -2655,6 +2674,7 @@ public class DbFileQuery
     public DbFile File { get; init; }
     public DbFolder Root { get; set; }
     public bool Shared { get; set; }
+    public bool ParentShared { get; set; }
     public int Order { get; set; }
     public DbFilesSecurity SharedRecord { get; set; }
     public DateTime? LastOpened { get; set; }

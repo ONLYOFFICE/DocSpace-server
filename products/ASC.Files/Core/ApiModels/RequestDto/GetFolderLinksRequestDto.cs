@@ -24,36 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Tests.FilesController;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
-[Collection("Test Collection")]
-public class FileOperationsTest(
-    FilesApiFactory filesFactory, 
-    WepApiFactory apiFactory, 
-    PeopleFactory peopleFactory,
-    FilesServiceFactory filesServiceProgram) 
-    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+/// <summary>
+/// The request parameters for getting the folder links.
+/// </summary>
+public class GetFolderLinksRequestDto<T>
 {
-
-    
-
-    
-    [Fact]
-    public async Task GetPresignedUri_ValidFile_ReturnsDownloadUrl()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        
-        var file = await CreateFileInMy("file_for_download.docx", Initializer.Owner);
-        
-        // Act
-        var downloadUrl = (await _filesApi.GetPresignedUriAsync(file.Id, TestContext.Current.CancellationToken)).Response;
-        
-        // Assert
-        downloadUrl.Should().NotBeNull();
-        downloadUrl.Should().StartWith("http");
-        downloadUrl.Should().Contain("file");
-    }
-    
-
+    /// <summary>
+    /// The folder ID.
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public required T Id { get; set; }
 }

@@ -299,7 +299,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [HttpGet("share/{key}")]
     public async Task<ExternalShareDto> GetExternalShareData(ExternalShareDataRequestDto inDto)
     {
-        var validationInfo = await externalLinkHelper.ValidateAsync(inDto.Key, fileId: inDto.FileId);
+        var validationInfo = await externalLinkHelper.ValidateAsync(inDto.Key, fileId: inDto.FileId, folderId: inDto.FolderId);
 
         return mapper.Map<ValidationInfo, ExternalShareDto>(validationInfo);
     }

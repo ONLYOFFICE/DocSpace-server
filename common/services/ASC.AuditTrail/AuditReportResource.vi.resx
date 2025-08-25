@@ -127,9 +127,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Đã cập nhật Thiết lập Ghi đè</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Tài liệu</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Cài đặt</value>
   </data>
@@ -376,9 +373,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Di chuyển</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Khác</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Đã thay đổi người sở hữu: {0}</value>
   </data>
@@ -396,9 +390,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Đã cập nhật Thiết lập Độ mạnh Mật khẩu</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Nhân sự</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Nền tảng</value>
@@ -453,9 +444,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Bắt đầu phiên làm việc</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Cài đặt</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Đã tắt SSO</value>

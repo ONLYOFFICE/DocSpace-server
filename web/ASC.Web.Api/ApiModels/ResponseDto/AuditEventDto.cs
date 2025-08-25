@@ -102,9 +102,9 @@ public class AuditEventDto
     public ProductType Product { get; set; }
 
     /// <summary>
-    /// The module within the product where the audit event occurred.
+    /// The location where the audit event occurred.
     /// </summary>
-    public ModuleType Module { get; set; }
+    public LocationType Location { get; set; }
 
     /// <summary>
     /// The list of target objects affected by the audit event (e.g., document ID, user account).
@@ -140,7 +140,7 @@ public class AuditEventDto
 
         ActionType = maps.ActionType;
         Product = maps.ProductType;
-        Module = maps.ModuleType;
+        Location = maps.LocationType;
 
         var list = new List<EntryType>(2);
 

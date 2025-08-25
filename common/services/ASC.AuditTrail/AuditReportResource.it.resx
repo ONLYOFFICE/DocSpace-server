@@ -136,9 +136,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Impostazioni di sovrascrittura aggiornate</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Documenti</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Impostazioni</value>
   </data>
@@ -409,9 +406,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Sposta</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Altri</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Proprietario cambiato: {0}</value>
   </data>
@@ -429,9 +423,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Impostazioni di livello di sicurezza della password aggiornate</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Persone</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Piattaforma</value>
@@ -492,9 +483,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sessione iniziata</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Impostazioni</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Accesso singolo (SSO) disabilitato</value>

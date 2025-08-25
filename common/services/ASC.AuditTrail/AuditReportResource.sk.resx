@@ -127,9 +127,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Prepisovanie aktualizovaných nastavení</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Dokumenty</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Nastavenia</value>
   </data>
@@ -376,9 +373,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Premiestniť</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Ostatní</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Vlastník zmenený: {0}</value>
   </data>
@@ -396,9 +390,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Nastavenie sily hesla bolo aktualizované</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Ľudia</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platforma</value>
@@ -453,9 +444,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Relácia začala</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Nastavenia</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO deaktivované</value>
