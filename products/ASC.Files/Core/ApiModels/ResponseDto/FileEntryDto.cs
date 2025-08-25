@@ -309,7 +309,7 @@ public class FileEntryDtoHelper(
                 shareSettings.Add(SubjectType.ExternalLink, additionalCount);
             }
         }
-
+        
         return new T
         {
             Id = entry.Id,
@@ -332,9 +332,9 @@ public class FileEntryDtoHelper(
             ShareSettings = shareSettings,
             Security = entry.Security,
             OriginId = entry.OriginId,
-            OriginTitle = Equals(entry.OriginId, await _globalFolderHelper.GetFolderMyAsync<TId>()) ? FilesUCResource.MyFiles : entry.OriginTitle,
+            OriginTitle = entry.OriginTitle,
             OriginRoomId = entry.OriginRoomId,
-            OriginRoomTitle = Equals(entry.OriginRoomId, await _globalFolderHelper.GetFolderMyAsync<TId>()) ? FilesUCResource.MyFiles : entry.OriginRoomTitle, 
+            OriginRoomTitle = entry.OriginRoomTitle, 
             AutoDelete = permanentlyDeletedOn != default ? apiDateTimeHelper.Get(permanentlyDeletedOn) : null
         };
     }

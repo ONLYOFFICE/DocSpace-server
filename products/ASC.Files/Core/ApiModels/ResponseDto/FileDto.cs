@@ -283,6 +283,18 @@ public class FileDtoHelper(
             result.ViewAccessibility[Accessibility.CanConvert] = false;
 
             result.Order = "";
+
+            var myId = await _globalFolderHelper.GetFolderMyAsync<T>();
+            result.OriginTitle = Equals(result.OriginId, myId) ? FilesUCResource.MyFiles : result.OriginTitle;
+            
+            if (Equals(result.OriginRoomId, myId))
+            {
+                result.OriginRoomTitle = FilesUCResource.MyFiles;
+            }
+            else if(Equals(result.OriginRoomId,  await _globalFolderHelper.FolderArchiveAsync))
+            {
+                result.OriginRoomTitle = result.OriginTitle;
+            }
         }
         
         return result;
