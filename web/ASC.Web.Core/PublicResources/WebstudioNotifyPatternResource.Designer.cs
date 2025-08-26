@@ -61,7 +61,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; created a new document: &lt;a href={1}&gt;{2}&lt;/a&gt; in the room: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; created a new document: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; in the room: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;.
         /// </summary>
         public static string ActionFileCreated {
             get {
@@ -70,7 +70,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; edited the document: &lt;a href={1}&gt;{2}&lt;/a&gt; in the room: &lt;a href={3}&gt;{4}&lt;/a&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; edited the document: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; in the room: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;.
         /// </summary>
         public static string ActionFileEdited {
             get {
@@ -79,7 +79,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; uploaded a new document: &lt;a href={1}&gt;{2}&lt;/a&gt; in the room: &lt;a href={3}&gt;{4}&lt;/a&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; uploaded a new document: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; in the room: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;.
         /// </summary>
         public static string ActionFileUploaded {
             get {
@@ -88,7 +88,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; added a new comment to the document version: &lt;a href={1}&gt;{2}&lt;/a&gt; in the room: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; added a new comment to the document version: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; in the room: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;.
         /// </summary>
         public static string ActionNewComment {
             get {
@@ -97,7 +97,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; moved the room: &lt;a href={1}&gt;{2}&lt;/a&gt; to archive - &lt;b&gt;{3}&lt;/b&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; moved the room: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; to archive - &lt;b&gt;{3}&lt;/b&gt;.
         /// </summary>
         public static string ActionRoomArchived {
             get {
@@ -106,7 +106,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; created a new room: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; created a new room: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;.
         /// </summary>
         public static string ActionRoomCreated {
             get {
@@ -124,7 +124,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; renamed the room: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; renamed the room: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;.
         /// </summary>
         public static string ActionRoomRenamed {
             get {
@@ -133,7 +133,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was assigned the role of &lt;b&gt;{1}&lt;/b&gt; in the room: &lt;a href={2}&gt;{3}&lt;/a&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was assigned the role of &lt;b&gt;{1}&lt;/b&gt; in the room: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;.
         /// </summary>
         public static string ActionRoomUpdateAccessForUser {
             get {
@@ -142,7 +142,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was added to the room: &lt;a href={1}&gt;{2}&lt;/a&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was added to the room: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;.
         /// </summary>
         public static string ActionUserAddedToRoom {
             get {
@@ -160,7 +160,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was removed from the room: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was removed from the room: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;.
         /// </summary>
         public static string ActionUserRemovedFromRoom {
             get {
