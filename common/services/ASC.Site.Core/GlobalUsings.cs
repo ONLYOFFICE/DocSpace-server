@@ -29,7 +29,6 @@ global using System.Reflection;
 global using System.Text;
 global using System.Text.Json.Serialization;
 global using System.Threading.Channels;
-global using System.Web.Http.Filters;
 
 global using ASC.Api.Core;
 global using ASC.Api.Core.Auth;
