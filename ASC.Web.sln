@@ -93,8 +93,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.Migrations.Core", "comm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.Migrations.PostgreSql.SaaS", "migrations\postgre\SaaS\ASC.Migrations.PostgreSql.SaaS.csproj", "{1A086922-36A5-4E1D-9CC7-96232126DFB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.Site.Core", "common\services\ASC.Site.Core\ASC.Site.Core.csproj", "{1E3A9D57-745C-F0A7-E122-435D11058614}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -261,10 +259,6 @@ Global
 		{1A086922-36A5-4E1D-9CC7-96232126DFB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A086922-36A5-4E1D-9CC7-96232126DFB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A086922-36A5-4E1D-9CC7-96232126DFB7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1E3A9D57-745C-F0A7-E122-435D11058614}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1E3A9D57-745C-F0A7-E122-435D11058614}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1E3A9D57-745C-F0A7-E122-435D11058614}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1E3A9D57-745C-F0A7-E122-435D11058614}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
