@@ -38,7 +38,7 @@ public class AddMcpServerRequestBody
     public required string Name { get; init; }
     
     [MaxLength(255)]
-    public string? Description { get; init; }
+    public required string Description { get; init; }
     
     [Url]
     public required string Endpoint { get; init; }

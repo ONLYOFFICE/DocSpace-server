@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,10 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.FederatedLogin.LoginProviders;
+
 namespace ASC.AI.Core.MCP.Data;
 
-public enum ConnectionStatus
+public class McpExecutionOptions
 {
-    Enabled,
-    Disabled
+    public required string Name { get; init; }
+    public required string Endpoint { get; init; }
+    public Dictionary<string, string>? Headers { get; init; }
+    public ServerType ServerType { get; init; }
+    public ConnectionType ConnectionType { get; init; }
+    public OauthProvider? OauthProvider { get; init; }
+    public McpServerSettings? Settings { get; init; }
 }

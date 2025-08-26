@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,27 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.MCP.Data;
+namespace ASC.AI.Models.RequestDto;
 
-public class CustomMcpOptionsBuilder(Guid id, string name, string endpoint, Dictionary<string, string>? headers) : IMcpServerOptionsBuilder
+public class SetServerStatusRequestDto
 {
-    private McpServerOptions? _options;
+    [FromRoute]
+    public Guid Id { get; set; }
     
-    public McpServerOptions Build(IServiceProvider serviceProvider)
-    {
-        if (_options != null)
-        {
-            return _options;
-        }
-        
-        _options = new McpServerOptions
-        {
-            Id = id,
-            Name = name,
-            Endpoint = new Uri(endpoint),
-            Headers = headers
-        };
-        
-        return _options;
-    }
+    [FromBody]
+    public required SetServerStatusRequestBody Body { get; set; }
+}
+
+public class SetServerStatusRequestBody
+{
+    public bool Enabled { get; set; }
 }

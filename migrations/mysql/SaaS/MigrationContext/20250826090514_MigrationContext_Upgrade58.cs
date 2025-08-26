@@ -6,25 +6,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     /// <inheritdoc />
-    public partial class MigrationContext_Upgrade59 : Migration
+    public partial class MigrationContext_Upgrade58 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "files_file_vectorization",
+                name: "ai_mcp_server_states",
                 columns: table => new
                 {
                     tenant_id = table.Column<int>(type: "int", nullable: false),
-                    file_id = table.Column<int>(type: "int", nullable: false),
-                    status = table.Column<int>(type: "int", nullable: false),
-                    updated_on = table.Column<DateTime>(type: "datetime", nullable: false)
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    enabled = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.file_id });
+                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.id });
                     table.ForeignKey(
-                        name: "FK_files_file_vectorization_tenants_tenants_tenant_id",
+                        name: "FK_ai_mcp_server_states_tenants_tenants_tenant_id",
                         column: x => x.tenant_id,
                         principalTable: "tenants_tenants",
                         principalColumn: "id",
@@ -32,18 +32,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8")
                 .Annotation("Relational:Collation", "utf8_general_ci");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_file_id",
-                table: "files_file_vectorization",
-                column: "file_id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "files_file_vectorization");
+                name: "ai_mcp_server_states");
         }
     }
 }

@@ -130,8 +130,11 @@ public class MigrationContext : DbContext
     public DbSet<DbChatMessage> ChatMessages { get; set; }
     public DbSet<DbAiProvider> AiProviders { get; set; }
     
-    public DbSet<DbMcpServerOptions> McpServers { get; set; }
-    public DbSet<DbRoomMcpServer> RoomServers { get; set; }
+    public DbSet<DbMcpServer> McpServers { get; set; }
+    public DbSet<DbMcpServerState> McpServerStates { get; set; }
+    public DbSet<DbMcpServerSettings> McpServerSettings { get; set; }
+    public DbSet<DbRoomMcpServer> McpRoomServers { get; set; }
+    
     public DbSet<DbFileVectorization> FileVectorization { get; set; }
 
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
@@ -210,10 +213,11 @@ public class MigrationContext : DbContext
             .AddUserRelation()
             .AddDbChats()
             .AddDbChatsMessages()
-            .AddAiProviders()
-            .AddMcpServers()
-            .AddRoomMcpServers()
-            .AddMcpSettings()
+            .AddDbAiProviders()
+            .AddDbMcpServers()
+            .AddDbMcpServerStates()
+            .AddDbMcpServerSettings()
+            .AddDbRoomMcpServers()
             .AddDbFileVectorization()
             .AddDbFunctions();
     }

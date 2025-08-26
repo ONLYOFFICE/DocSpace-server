@@ -24,31 +24,43 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Configuration;
+using ASC.FederatedLogin.LoginProviders;
+
 namespace ASC.AI.Core.MCP.Data;
 
 [Singleton]
-public class ConfigMcpSource
+public class SystemMcpConfig
 {
-    public readonly IReadOnlyList<McpServer> Servers = [];
+    public readonly IReadOnlyDictionary<Guid, SystemMcpServer> Servers = new Dictionary<Guid, SystemMcpServer>().AsReadOnly();
     
-    private readonly FrozenDictionary<string, Guid> _mcpNameIdMap =
-        new Dictionary<string, Guid>
+    private readonly FrozenDictionary<string, StaticServerInfo> _staticInfos =
+        new Dictionary<string, StaticServerInfo>
         {
-            {"onlyoffice-docspace", new Guid("883da87d-5ae0-49fd-8cb9-2cb82181667e")}
+            {"onlyoffice-docspace", new StaticServerInfo
+            {
+                Id = new Guid("883da87d-5ae0-49fd-8cb9-2cb82181667e"),
+                ServerType = ServerType.DocSpace,
+                ConnectionType = ConnectionType.Direct
+            }},
+            {"github", new StaticServerInfo
+            {
+                Id = new Guid("b55705b3-035f-442e-9983-0ea5bb4daa57"),
+                ServerType = ServerType.Github,
+                ConnectionType = ConnectionType.OAuth,
+                LoginProviderSelector = x => x.Get<GithubLoginProvider>()
+            }}
         }.ToFrozenDictionary();
     
-    private readonly Dictionary<Guid, IMcpServerOptionsBuilder> _builders = [];
-    
-    public ConfigMcpSource(IConfiguration configuration)
+    public SystemMcpConfig(IConfiguration configuration)
     {
-        var settings = configuration.GetSection("ai:mcp").Get<List<SseMcpSettings>>();
+        var settings = configuration.GetSection("ai:mcp").Get<List<McpConfig>>();
         if (settings == null)
         {
             return;
         }
 
-        var builders = new Dictionary<Guid, IMcpServerOptionsBuilder>();
-        var servers = new List<McpServer>();
+        var servers = new Dictionary<Guid, SystemMcpServer>();
 
         foreach (var item in settings)
         {
@@ -56,42 +68,34 @@ public class ConfigMcpSource
             {
                 continue;
             }
-            
-            IMcpServerOptionsBuilder builder;
-            
-            if (_mcpNameIdMap.ContainsKey(item.Name))
+
+            if (!_staticInfos.TryGetValue(item.Name, out var staticInfo))
             {
-                builder = new DocSpaceMcpOptionsBuilder(item.Id, item.Name, item.Endpoint);
-                servers.Add(new McpServer
-                {
-                    Id = item.Id,
-                    Name = item.Name,
-                    Description = "DocSpace MCP server",
-                    ServerType = ServerType.DocSpace,
-                    Enabled = true
-                });
-            }
-            else
-            {
-                builder = new CustomMcpOptionsBuilder(item.Id, item.Name, item.Endpoint, item.Headers);
-                servers.Add(new McpServer
-                {
-                    Id = item.Id,
-                    Name = item.Name,
-                    ServerType = ServerType.Custom,
-                    Enabled = true
-                });
+                continue;
             }
             
-            builders.Add(item.Id, builder);
+            var server = new SystemMcpServer
+            {
+                Id = item.Id,
+                Name = item.Name,
+                Type = staticInfo.ServerType,
+                Headers = item.Headers,
+                Endpoint = item.Endpoint,
+                ConnectionType = staticInfo.ConnectionType,
+                LoginProviderSelector = staticInfo.LoginProviderSelector
+            };
+            
+            servers.Add(server.Id, server);
         }
 
-        _builders = builders;
         Servers = servers;
     }
 
-    public IMcpServerOptionsBuilder? GetServerOptionsBuilder(Guid serverId)
+    private class StaticServerInfo
     {
-        return _builders.GetValueOrDefault(serverId);
+        public Guid Id { get; init; }
+        public ServerType ServerType { get; init; }
+        public ConnectionType ConnectionType { get; init; }
+        public Func<ConsumerFactory, OauthProvider>? LoginProviderSelector { get; init; }
     }
 }

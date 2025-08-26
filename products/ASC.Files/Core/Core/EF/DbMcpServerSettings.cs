@@ -28,13 +28,14 @@ using User = ASC.Core.Common.EF.User;
 
 namespace ASC.Files.Core.EF;
 
-public class McpSettings : BaseEntity
+public class DbMcpServerSettings : BaseEntity
 { 
     public int TenantId { get; set; }
     public Guid ServerId { get; set; }
     public int RoomId { get; set; }
     public Guid UserId { get; set; }
-    public Tools Tools { get; set; }
+    public string OauthCredential { get; set; }
+    public ToolsConfiguration ToolsConfiguration { get; set; }
     
     public DbTenant Tenant { get; set; }
     public DbFolder Room { get; set; }
@@ -46,27 +47,27 @@ public class McpSettings : BaseEntity
     }
 }
 
-public class Tools
+public class ToolsConfiguration
 {
     public required HashSet<string> Excluded { get; set; }
 }
 
 public static class DbMcpToolsSettingsExtensions 
 {
-    public static ModelBuilderWrapper AddMcpSettings(this ModelBuilderWrapper modelBuilder)
+    public static ModelBuilderWrapper AddDbMcpServerSettings(this ModelBuilderWrapper modelBuilder)
     {
-        modelBuilder.Entity<McpSettings>().Navigation(e => e.Tenant).AutoInclude(false);
-        modelBuilder.Entity<McpSettings>().Navigation(e => e.Room).AutoInclude(false);
-        modelBuilder.Entity<McpSettings>().Navigation(e => e.User).AutoInclude(false);
+        modelBuilder.Entity<DbMcpServerSettings>().Navigation(e => e.Tenant).AutoInclude(false);
+        modelBuilder.Entity<DbMcpServerSettings>().Navigation(e => e.Room).AutoInclude(false);
+        modelBuilder.Entity<DbMcpServerSettings>().Navigation(e => e.User).AutoInclude(false);
         
         return modelBuilder.Add(MySqlAddMcpToolsSettings, Provider.MySql);
     }
 
     private static void MySqlAddMcpToolsSettings(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<McpSettings>(entity =>
+        modelBuilder.Entity<DbMcpServerSettings>(entity =>
         {
-            entity.ToTable("ai_mcp_settings")
+            entity.ToTable("ai_mcp_server_settings")
                 .HasCharSet("utf8");
             
             entity.HasKey(e => new { e.TenantId, e.RoomId, e.UserId, e.ServerId } )
@@ -90,7 +91,13 @@ public static class DbMcpToolsSettingsExtensions
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
             
-            entity.Property(e => e.Tools)
+            entity.Property(e => e.OauthCredential)
+                .HasColumnName("oauth_credential")
+                .HasColumnType("text")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.ToolsConfiguration)
                 .HasColumnName("tool_config")
                 .HasColumnType("json")
                 .HasCharSet("utf8")

@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Core.Database.Models;
 
-public class DbMcpServerOptions : BaseEntity
+public class DbMcpServer : BaseEntity
 {
     public int TenantId { get; set; }
     public Guid Id { get; set; }
@@ -38,8 +38,7 @@ public class DbMcpServerOptions : BaseEntity
     public string? Description { get; set; }
     public required string Endpoint { get; set; }
     public string? Headers { get; set; }
-    
-    public bool Enabled { get; set; }
+    public ConnectionType ConnectionType { get; set; }
 
     public DbTenant Tenant { get; set; } = null!;
 
@@ -48,16 +47,16 @@ public class DbMcpServerOptions : BaseEntity
         return [Id];
     }
 
-    public async Task<McpServerOptions> ToMcpServerOptions(InstanceCrypto crypto)
+    public async Task<McpServer> ToMcpServerAsync(InstanceCrypto crypto)
     {
-        var options = new McpServerOptions
+        var options = new McpServer
         {
             Id = Id, 
             TenantId = TenantId, 
             Name = Name,
             Description = Description,
-            Endpoint = new Uri(Endpoint),
-            Enabled = Enabled,
+            Endpoint = Endpoint,
+            ConnectionType = ConnectionType
         };
 
         if (Headers == null)
@@ -74,15 +73,15 @@ public class DbMcpServerOptions : BaseEntity
 
 public static class DbMcpServerOptionsExtensions
 {
-    public static ModelBuilderWrapper AddMcpServers(this ModelBuilderWrapper modelBuilder)
+    public static ModelBuilderWrapper AddDbMcpServers(this ModelBuilderWrapper modelBuilder)
     {
-        modelBuilder.Entity<DbMcpServerOptions>().Navigation(e => e.Tenant).AutoInclude(false);
+        modelBuilder.Entity<DbMcpServer>().Navigation(e => e.Tenant).AutoInclude(false);
         return modelBuilder.Add(MySqlAddMcpServerOptions, ASC.Core.Common.EF.Provider.MySql);
     }
 
     private static void MySqlAddMcpServerOptions(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbMcpServerOptions>(entity =>
+        modelBuilder.Entity<DbMcpServer>(entity =>
         {
             entity.ToTable("ai_mcp_servers")
                 .HasCharSet("utf8")
@@ -126,9 +125,9 @@ public static class DbMcpServerOptionsExtensions
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
-            
-            entity.Property(e => e.Enabled)
-                .HasColumnName("enabled");
+
+            entity.Property(e => e.ConnectionType)
+                .HasColumnName("connection_type");
         });
     }
 }

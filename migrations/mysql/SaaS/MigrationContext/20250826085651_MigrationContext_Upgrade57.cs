@@ -83,6 +83,45 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .Annotation("Relational:Collation", "utf8_general_ci");
 
             migrationBuilder.CreateTable(
+                name: "ai_mcp_server_settings",
+                columns: table => new
+                {
+                    tenant_id = table.Column<int>(type: "int", nullable: false),
+                    server_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    room_id = table.Column<int>(type: "int", nullable: false),
+                    user_id = table.Column<string>(type: "varchar(36)", nullable: false, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    oauth_credential = table.Column<string>(type: "text", nullable: true, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    tool_config = table.Column<string>(type: "json", nullable: true, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.room_id, x.user_id, x.server_id });
+                    table.ForeignKey(
+                        name: "FK_ai_mcp_server_settings_core_user_user_id",
+                        column: x => x.user_id,
+                        principalTable: "core_user",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ai_mcp_server_settings_files_folder_room_id",
+                        column: x => x.room_id,
+                        principalTable: "files_folder",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ai_mcp_server_settings_tenants_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants_tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8");
+
+            migrationBuilder.CreateTable(
                 name: "ai_mcp_servers",
                 columns: table => new
                 {
@@ -91,10 +130,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     tenant_id = table.Column<int>(type: "int", nullable: false),
                     name = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
+                    description = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true, collation: "utf8_general_ci")
+                        .Annotation("MySql:CharSet", "utf8"),
                     endpoint = table.Column<string>(type: "text", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
                     headers = table.Column<string>(type: "text", nullable: true, collation: "utf8_general_ci")
-                        .Annotation("MySql:CharSet", "utf8")
+                        .Annotation("MySql:CharSet", "utf8"),
+                    connection_type = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -108,43 +150,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8")
                 .Annotation("Relational:Collation", "utf8_general_ci");
-
-            migrationBuilder.CreateTable(
-                name: "ai_mcp_settings",
-                columns: table => new
-                {
-                    tenant_id = table.Column<int>(type: "int", nullable: false),
-                    server_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
-                        .Annotation("MySql:CharSet", "utf8"),
-                    room_id = table.Column<int>(type: "int", nullable: false),
-                    user_id = table.Column<string>(type: "varchar(36)", nullable: false, collation: "utf8_general_ci")
-                        .Annotation("MySql:CharSet", "utf8"),
-                    tool_config = table.Column<string>(type: "json", nullable: true, collation: "utf8_general_ci")
-                        .Annotation("MySql:CharSet", "utf8")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.room_id, x.user_id, x.server_id });
-                    table.ForeignKey(
-                        name: "FK_ai_mcp_settings_core_user_user_id",
-                        column: x => x.user_id,
-                        principalTable: "core_user",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ai_mcp_settings_files_folder_room_id",
-                        column: x => x.room_id,
-                        principalTable: "files_folder",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ai_mcp_settings_tenants_tenants_tenant_id",
-                        column: x => x.tenant_id,
-                        principalTable: "tenants_tenants",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8");
 
             migrationBuilder.CreateTable(
                 name: "ai_providers",
@@ -174,6 +179,28 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8");
+
+            migrationBuilder.CreateTable(
+                name: "files_file_vectorization",
+                columns: table => new
+                {
+                    tenant_id = table.Column<int>(type: "int", nullable: false),
+                    file_id = table.Column<int>(type: "int", nullable: false),
+                    status = table.Column<int>(type: "int", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => new { x.tenant_id, x.file_id });
+                    table.ForeignKey(
+                        name: "FK_files_file_vectorization_tenants_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants_tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8")
+                .Annotation("Relational:Collation", "utf8_general_ci");
 
             migrationBuilder.CreateTable(
                 name: "ai_chats_messages",
@@ -226,24 +253,29 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 column: "room_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ai_mcp_server_settings_room_id",
+                table: "ai_mcp_server_settings",
+                column: "room_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ai_mcp_server_settings_user_id",
+                table: "ai_mcp_server_settings",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_tenant_id_id",
                 table: "ai_mcp_servers",
                 columns: new[] { "tenant_id", "id" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ai_mcp_settings_room_id",
-                table: "ai_mcp_settings",
-                column: "room_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ai_mcp_settings_user_id",
-                table: "ai_mcp_settings",
-                column: "user_id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_tenant_id_id",
                 table: "ai_providers",
                 columns: new[] { "tenant_id", "id" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_file_id",
+                table: "files_file_vectorization",
+                column: "file_id");
         }
 
         /// <inheritdoc />
@@ -256,13 +288,16 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "ai_mcp_rooms_servers");
 
             migrationBuilder.DropTable(
+                name: "ai_mcp_server_settings");
+
+            migrationBuilder.DropTable(
                 name: "ai_mcp_servers");
 
             migrationBuilder.DropTable(
-                name: "ai_mcp_settings");
+                name: "ai_providers");
 
             migrationBuilder.DropTable(
-                name: "ai_providers");
+                name: "files_file_vectorization");
 
             migrationBuilder.DropTable(
                 name: "ai_chats");

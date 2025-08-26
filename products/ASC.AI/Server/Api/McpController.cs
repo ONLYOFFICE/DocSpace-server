@@ -35,18 +35,26 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     [HttpPost("servers")]
     public async Task<McpServerOptionsDto> AddServerAsync(AddServerRequestDto inDto)
     {
-        var server = await mcpService.AddServerAsync(inDto.Body.Endpoint, inDto.Body.Name, inDto.Body.Headers, inDto.Body.Description);
+        var server = await mcpService.AddCustomServerAsync(inDto.Body.Endpoint, inDto.Body.Name, inDto.Body.Description, inDto.Body.Headers);
         
-        return mapper.Map<McpServerOptions, McpServerOptionsDto>(server);
+        return mapper.Map<McpServer, McpServerOptionsDto>(server);
     }
     
     [HttpPut("servers/{id}")]
     public async Task<McpServerOptionsDto> UpdateServerAsync(UpdateServerRequestDto inDto)
     {
-        var server = await mcpService.UpdateServerAsync(inDto.Id, inDto.Body.Endpoint, inDto.Body.Name, 
+        var server = await mcpService.UpdateCustomServerAsync(inDto.Id, inDto.Body.Endpoint, inDto.Body.Name, 
             inDto.Body.Headers, inDto.Body.Description, inDto.Body.Enabled);
         
-        return mapper.Map<McpServerOptions, McpServerOptionsDto>(server);
+        return mapper.Map<McpServer, McpServerOptionsDto>(server);
+    }
+    
+    [HttpPut("servers/{id}/status")]
+    public async Task<McpServerOptionsDto> SetServerStatusAsync(SetServerStatusRequestDto inDto)
+    {
+        var server = await mcpService.SetServerStateAsync(inDto.Id, inDto.Body.Enabled);
+        
+        return mapper.Map<McpServer, McpServerOptionsDto>(server);
     }
     
     [HttpDelete("servers")]
@@ -58,9 +66,9 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     }
     
     [HttpGet("servers")]
-    public async Task<List<McpServerDto>> GetServersAsync(GetServersRequestDto inDto)
+    public async Task<List<McpServerDto>> GetServersAsync(PaginatedRequestDto inDto)
     {
-        var (servers, count) = await mcpService.GetServersAsync(inDto.Status, inDto.StartIndex, inDto.Count);
+        var (servers, count) = await mcpService.GetServersAsync(inDto.StartIndex, inDto.Count);
         
         apiContext.SetCount(servers.Count).SetTotalCount(count);
         
@@ -68,11 +76,9 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     }
     
     [HttpPost("rooms/{roomId}/servers")]
-    public async Task<McpRoomDto> AddRoomServersAsync(AddRoomServersRequestDto inDto)
+    public async Task AddRoomServersAsync(AddRoomServersRequestDto inDto)
     {
-        var servers = await mcpService.AddServersToRoomAsync(inDto.RoomId, inDto.Body.Servers);
-        
-        return mapper.Map<McpServerOptions, McpRoomDto>(servers.First());
+        await mcpService.AddServersToRoomAsync(inDto.RoomId, inDto.Body.Servers);
     }
 
     [HttpGet("rooms/{roomId}/servers")]
@@ -80,7 +86,7 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     {
         var servers = await mcpService.GetServersAsync(inDto.RoomId);
         
-        return mapper.Map<List<McpServerOptions>, List<McpRoomDto>>(servers);
+        return mapper.Map<List<McpRoomServerInfo>, List<McpRoomDto>>(servers);
     }
 
     [HttpDelete("rooms/{roomId}/servers")]
@@ -93,7 +99,7 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     [HttpPut("rooms/{roomId}/servers/{serverId}/tools")]
     public async Task<List<McpToolDto>> SetToolsAsync(SetMcpToolsRequestDto inDto)
     {
-        var tools = await mcpService.SetToolsSettingsAsync(inDto.RoomId, inDto.ServerId, 
+        var tools = await mcpService.SetToolsAsync(inDto.RoomId, inDto.ServerId, 
             inDto.Body.DisabledTools);
         return tools.Select(x => new McpToolDto
         {

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,52 +26,50 @@
 
 namespace ASC.AI.Core.Database.Models;
 
-public class DbRoomMcpServer : BaseEntity
+public class DbMcpServerState : BaseEntity
 {
-    public int TenantId { get; init; }
-    public int RoomId { get; init; }
-    public Guid ServerId { get; init; }
+    public int TenantId { get; set; }
+    public Guid ServerId { get; set; }
+    public bool Enabled { get; set; }
     
-    public DbFolder Room { get; init; } = null!;
-    public DbTenant Tenant { get; init; } = null!;
-
+    public DbTenant Tenant { get; set; } = null!;
+    
     public override object[] GetKeys()
     {
-        return [TenantId, RoomId, ServerId];
+        return [TenantId, ServerId];
     }
 }
 
-public static class DbMcpRoomMapExtensions
+public static class DbMcpServerStateExtensions
 {
-    public static ModelBuilderWrapper AddDbRoomMcpServers(this ModelBuilderWrapper modelBuilder)
+    public static ModelBuilderWrapper AddDbMcpServerStates(this ModelBuilderWrapper modelBuilder)
     {
-        modelBuilder.Entity<DbRoomMcpServer>().Navigation(e => e.Tenant).AutoInclude(false);
-        modelBuilder.Entity<DbRoomMcpServer>().Navigation(e => e.Room).AutoInclude(false);
-        return modelBuilder.Add(MySqlAddMcpRoomMap, ASC.Core.Common.EF.Provider.MySql);
+        modelBuilder.Entity<DbMcpServerState>().Navigation(e => e.Tenant).AutoInclude(false);
+        return modelBuilder.Add(MySqlAddMcpServerStates, ASC.Core.Common.EF.Provider.MySql);
     }
 
-    private static void MySqlAddMcpRoomMap(ModelBuilder builder)
+    private static void MySqlAddMcpServerStates(ModelBuilder modelBuilder)
     {
-        builder.Entity<DbRoomMcpServer>(entity =>
+        modelBuilder.Entity<DbMcpServerState>(entity =>
         {
-            entity.ToTable("ai_mcp_room_servers")
+            entity.ToTable("ai_mcp_server_states")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
-            
-            entity.HasKey(e => new { e.TenantId, e.RoomId, e.ServerId } )
+
+            entity.HasKey(e => new { e.TenantId, e.ServerId })
                 .HasName("PRIMARY");
             
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id");
-            
-            entity.Property(e => e.RoomId)
-                .HasColumnName("room_id");
-            
+
             entity.Property(e => e.ServerId)
-                .HasColumnName("server_id")
+                .HasColumnName("id")
                 .HasColumnType("char(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.Enabled)
+                .HasColumnName("enabled");
         });
     }
 }

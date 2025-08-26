@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,10 +24,41 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.ResponseDto;
+using ASC.FederatedLogin.Helpers;
 
-public class McpRoomDto : IMapFrom<McpRoomServerInfo>
+namespace ASC.AI.Core.MCP.Builder;
+
+[Scope]
+public class HttpTransportFactory(
+    CommonLinkUtility commonLinkUtility, 
+    CookiesManager cookiesManager,
+    IHttpClientFactory clientFactory,
+    IHttpMessageHandlerFactory messageHandlerFactory,
+    OAuth20TokenHelper tokenHelper)
 {
-    public Guid Id { get; init; }
-    public required string Name { get; init; } 
+    public async Task<SseClientTransport> CreateAsync(McpExecutionOptions executionOptions)
+    {
+        if (executionOptions.ServerType is ServerType.DocSpace)
+        {
+            var docspaceBuilder = new DocSpaceTransportBuilder(cookiesManager, commonLinkUtility, clientFactory);
+            return await docspaceBuilder.BuildAsync(executionOptions);
+        }
+
+        if (executionOptions.ConnectionType is ConnectionType.OAuth)
+        {
+            var oauthGenericBuilder = new OauthGenericTransportBuilder(tokenHelper, messageHandlerFactory);
+            return await oauthGenericBuilder.BuildAsync(executionOptions);
+        }
+
+        var options = new SseClientTransportOptions
+        {
+            Name = executionOptions.Name,
+            Endpoint = new Uri(executionOptions.Endpoint),
+            AdditionalHeaders = executionOptions.Headers,
+            TransportMode = HttpTransportMode.AutoDetect,
+            ConnectionTimeout = TimeSpan.FromSeconds(5)
+        };
+
+        return new SseClientTransport(options, clientFactory.CreateClient());
+    }
 }

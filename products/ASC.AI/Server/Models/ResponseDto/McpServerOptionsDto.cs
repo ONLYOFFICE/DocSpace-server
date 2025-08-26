@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class McpServerOptionsDto : IMapFrom<McpServerOptions>
+public class McpServerOptionsDto : IMapFrom<McpServer>
 {
     public Guid Id { get; init; }
     public required string Name { get; init; }
@@ -36,7 +36,7 @@ public class McpServerOptionsDto : IMapFrom<McpServerOptions>
     
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<McpServerOptions, McpServerOptionsDto>()
+        profile.CreateMap<McpServer, McpServerOptionsDto>()
             .ForMember(dest => dest.Endpoint, opt => 
                 opt.MapFrom(src => src.Endpoint.ToString()));
     }

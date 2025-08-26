@@ -51,7 +51,7 @@ public class DbAiProvider : BaseEntity
 
 public static class ModelsProviderExtension
 {
-    public static ModelBuilderWrapper AddAiProviders(this ModelBuilderWrapper modelBuilder)
+    public static ModelBuilderWrapper AddDbAiProviders(this ModelBuilderWrapper modelBuilder)
     {
         modelBuilder.Entity<DbAiProvider>().Navigation(e => e.Tenant).AutoInclude(false);
         modelBuilder.Add(AddMySqlModelsProviders, ASC.Core.Common.EF.Provider.MySql);

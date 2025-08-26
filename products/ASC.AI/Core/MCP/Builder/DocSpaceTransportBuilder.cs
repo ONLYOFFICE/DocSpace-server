@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,9 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.RequestDto;
+namespace ASC.AI.Core.MCP.Builder;
 
-public class GetServersRequestDto : PaginatedRequestDto
+public class DocSpaceTransportBuilder(
+    CookiesManager cookiesManager, 
+    CommonLinkUtility commonLinkUtility,
+    IHttpClientFactory httpClientFactory) : ITransportBuilder
 {
-    public ConnectionStatus? Status { get; init; }
+    public ValueTask<SseClientTransport> BuildAsync(McpExecutionOptions executionOptions)
+    {
+        var options = new SseClientTransportOptions
+        {
+            Name = executionOptions.Name,
+            Endpoint = new Uri(executionOptions.Endpoint),
+            AdditionalHeaders = new Dictionary<string, string>
+            {
+                {"Referer", commonLinkUtility.GetFullAbsolutePath(string.Empty).TrimEnd('/') + "/"}, 
+                {"Authorization", cookiesManager.GetCookies(CookiesType.AuthKey)}
+            }
+        };
+        
+        var transport = new SseClientTransport(options, httpClientFactory.CreateClient());
+        return ValueTask.FromResult(transport);
+    }
 }

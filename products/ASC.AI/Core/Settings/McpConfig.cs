@@ -24,27 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.MCP.Data;
+namespace ASC.AI.Core.Settings;
 
-public class DocSpaceMcpOptionsBuilder(Guid id, string name, string endpoint) : IMcpServerOptionsBuilder
+public class McpConfig
 {
-    public McpServerOptions Build(IServiceProvider serviceProvider)
-    {
-        var commonLinkUtility = serviceProvider.GetRequiredService<CommonLinkUtility>();
-        var cookieManager = serviceProvider.GetRequiredService<CookiesManager>();
-
-        var options = new McpServerOptions
-        {
-            Id = id,
-            Name = name,
-            Endpoint = new Uri(endpoint),
-            Headers = new Dictionary<string, string>
-            {
-                {"Referer", commonLinkUtility.GetFullAbsolutePath(string.Empty).TrimEnd('/') + "/"}, 
-                {"Authorization", cookieManager.GetCookies(CookiesType.AuthKey)}
-            }
-        };
-
-        return options;
-    }
+    public Guid Id { get; init; }
+    public required string Name { get; init; }
+    public string? Endpoint { get; init; }
+    public Dictionary<string, string>? Headers { get; init; }
 }

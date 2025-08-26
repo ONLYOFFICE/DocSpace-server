@@ -24,25 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.FederatedLogin;
+
 namespace ASC.AI.Core.MCP.Data;
 
 [Scope]
-public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCrypto crypto)
+public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCrypto crypto, IMapper mapper)
 {
-    public async Task<McpServerOptions> AddServerAsync(int tenantId, string endpoint, string name, Dictionary<string, string>? headers,
-        string? description)
+    public async Task<McpServer> AddServerAsync(
+        int tenantId, 
+        string endpoint, 
+        string name, 
+        Dictionary<string, string>? headers,
+        string description)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
         
-        var server = new DbMcpServerOptions
+        var server = new DbMcpServer
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
             Name = name,
             Endpoint = endpoint,
-            Description = description,
-            Enabled = true
+            Description = description
         };
 
         if (headers is { Count: > 0 })
@@ -51,58 +56,112 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
             server.Headers = await crypto.EncryptAsync(headersJson);
         }
 
+        var state = new DbMcpServerState
+        {
+            TenantId = tenantId,
+            ServerId = server.Id,
+            Enabled = true
+        };
+
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
+            var transaction = await context.Database.BeginTransactionAsync();
+            
             await context.McpServers.AddAsync(server);
+            await context.McpServerStates.AddAsync(state);
+            
             await context.SaveChangesAsync();
+            await transaction.CommitAsync();
         });
 
-        return new McpServerOptions
+        return new McpServer
         {
             Id = server.Id,
             TenantId = server.TenantId,
             Name = server.Name,
-            Endpoint = new Uri(server.Endpoint),
-            Headers = headers
+            Description = server.Description,
+            Endpoint = server.Endpoint,
+            Headers = headers,
+            Enabled = true
         };
     }
     
-    public async Task<McpServerOptions?> GetServerAsync(int tenantId, Guid id)
+    public async Task<McpServer?> GetServerAsync(int tenantId, Guid id)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
         var server = await dbContext.GetServerAsync(tenantId, id);
-
         if (server == null)
         {
             return null;
         }
 
-        return await server.ToMcpServerOptions(crypto);
+        return await server.ToMcpServerAsync(crypto);
     }
     
-    public async Task<List<McpServerOptions>> GetServersAsync(int tenantId, List<Guid> ids)
+    public async Task<List<McpServer>> GetServersAsync(int tenantId, List<Guid> ids)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         return await dbContext.GetServersAsync(tenantId, ids)
-            .SelectAwait(async x => await x.ToMcpServerOptions(crypto))
+            .SelectAwait(async x => await x.ToMcpServerAsync(crypto))
             .ToListAsync();
     }
 
-    public async IAsyncEnumerable<McpServerOptions> GetServersAsync(int tenantId, ConnectionStatus? status, int offset, int count)
+    public async IAsyncEnumerable<McpServer> GetServersAsync(int tenantId, int offset, int count)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
         var query = dbContext.McpServers.Where(x => x.TenantId == tenantId);
-        if (status.HasValue)
-        {
-            query = query.Where(x => x.Enabled == (status == ConnectionStatus.Enabled));
-        }
         
         await foreach (var server in query.Skip(offset).Take(count).ToAsyncEnumerable())
         {
-            yield return await server.ToMcpServerOptions(crypto);
+            yield return await server.ToMcpServerAsync(crypto);
         }
+    }
+
+    public async IAsyncEnumerable<McpServerState> GetServersStatesAsync(int tenantId, IEnumerable<Guid> serversIds)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        var query = dbContext.McpServerStates
+            .Where(x => x.TenantId == tenantId && serversIds.Contains(x.ServerId));
+
+        await foreach (var state in query.ToAsyncEnumerable())
+        {
+            yield return mapper.Map<DbMcpServerState, McpServerState>(state);
+        }
+    }
+
+    public async IAsyncEnumerable<McpServerStateUnion> GetStateServersAsync(int tenantId, int offset, int count)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        var query = dbContext.McpServerStates
+            .Where(x => x.TenantId == tenantId && x.Enabled)
+            .GroupJoin(
+                dbContext.McpServers,
+                state => state.ServerId,
+                server => server.Id,
+                (state, servers) => new { state, servers })
+            .SelectMany(
+                x => x.servers.DefaultIfEmpty(),
+                (x, server) => new McpServerStateUnion
+                {
+                    State = x.state,
+                    Server = server
+                });
+        
+        await foreach (var server in query.Skip(offset).Take(count).ToAsyncEnumerable())
+        {
+            yield return server;
+        }
+    }
+
+    public class McpServerStateUnion
+    {
+        public required DbMcpServerState State { get; init; }
+        public DbMcpServer? Server { get; init; }
     }
     
     public async Task<int> GetServersCountAsync(int tenantId)
@@ -111,7 +170,37 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
         return await dbContext.GetServersCountAsync(tenantId);
     }
 
-    public async Task<McpServerOptions?> UpdateServerAsync(McpServerOptions options)
+    public async Task SetServerStateAsync(int tenantId, Guid id, bool enabled)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+            var transaction = await context.Database.BeginTransactionAsync();
+            
+            var state = new DbMcpServerState
+            {
+                TenantId = tenantId,
+                ServerId = id,
+                Enabled = enabled
+            };
+
+            await context.McpServerStates.AddOrUpdateAsync(state);
+
+            if (!enabled)
+            {
+                await context.DeleteSettingsAsync(tenantId, [id]);
+                await context.DeleteRoomServersAsync(tenantId, [id]);
+            }
+            
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        });
+    }
+
+    public async Task<McpServer> UpdateServerAsync(McpServer options)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -119,16 +208,15 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
         var server = await dbContext.GetServerAsync(options.TenantId, options.Id);
         if (server == null)
         {
-            return null;
+            return options;
         }
         
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
-            var transaction = await context.Database.BeginTransactionAsync();
             
             server.Name = options.Name;
-            server.Endpoint = options.Endpoint.ToString();
+            server.Endpoint = options.Endpoint;
             server.Description = options.Description;
         
             if (options.Headers is { Count: > 0 })
@@ -141,18 +229,8 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
                 server.Headers = null;
             }
             
-            if (server.Enabled != options.Enabled && !options.Enabled)
-            {
-                server.Enabled = options.Enabled;
-                
-                await context.DeleteSettingsAsync(options.TenantId, [options.Id]);
-                await context.DeleteRoomServersAsync(options.TenantId, [options.Id]);
-            }
-            
             context.McpServers.Update(server);
             await context.SaveChangesAsync();
-            
-            await transaction.CommitAsync();
         });
 
         return options;
@@ -169,8 +247,9 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
             var transaction = await context.Database.BeginTransactionAsync();
             
             await context.DeleteServersAsync(tenantId, ids);
-            await context.DeleteSettingsAsync(tenantId, ids);
             await context.DeleteRoomServersAsync(tenantId, ids);
+            await context.DeleteSettingsAsync(tenantId, ids);
+            await context.DeleteServersStatesAsync(tenantId, ids);
             
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -210,9 +289,13 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
         
         var options = result.Options == null 
             ? null 
-            : await result.Options.ToMcpServerOptions(crypto);
+            : await result.Options.ToMcpServerAsync(crypto);
         
-        return new McpRoomServer { Id = result.ServerId, Options = options };
+        var settings = result.Settings == null ?
+            null :
+            await result.Settings.ToMcpServerSettingsAsync(crypto);
+        
+        return new McpRoomServer { Id = result.ServerId, Server = options, Settings = settings };
     }
     
     public async IAsyncEnumerable<McpRoomServer> GetRoomServersAsync(int tenantId, int roomId)
@@ -220,22 +303,19 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         await foreach (var item in dbContext.GetRoomServersAsync(tenantId, roomId))
         {
-            if (item.Options == null)
-            {
-                yield return new McpRoomServer
-                {
-                    Id = item.ServerId, 
-                    Options = null
-                };
+            var roomServer = new McpRoomServer { Id = item.ServerId };
+            
+            if (item.Options != null)
+            { 
+                roomServer.Server = await item.Options.ToMcpServerAsync(crypto);
             }
-            else
-            {
-                yield return new McpRoomServer
-                {
-                    Id = item.ServerId, 
-                    Options = await item.Options.ToMcpServerOptions(crypto)
-                };
+
+            if (item.Settings != null)
+            { 
+                roomServer.Settings = await item.Settings.ToMcpServerSettingsAsync(crypto);
             }
+            
+            yield return roomServer;
         }
     }
     
@@ -259,64 +339,74 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
         });
     }
 
-    public async Task<McpSettings> SetToolsSettingsAsync(int tenantId, int roomId, Guid userId, Guid serverId, HashSet<string> disabledTools)
+    public async Task<McpServerSettings> SaveSettingsAsync(
+        int tenantId, 
+        int roomId, 
+        Guid userId, 
+        Guid serverId, 
+        McpServerSettings mcpServerSettings)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
         
-        var settings = await dbContext.McpSettings.FindAsync(tenantId, roomId, userId, serverId);
-
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
+            
+            var dbSettings = new DbMcpServerSettings
+            {
+                TenantId = tenantId, 
+                RoomId = roomId,
+                UserId = userId,
+                ServerId = serverId,
+                ToolsConfiguration = mcpServerSettings.ToolsConfiguration
+            };
 
-            if (settings == null)
+            if (mcpServerSettings.OauthCredential != null)
             {
-                settings = new McpSettings
-                {
-                    TenantId = tenantId,
-                    RoomId = roomId,
-                    UserId = userId,
-                    ServerId = serverId,
-                    Tools = new Tools { Excluded = disabledTools },
-                };
-                
-                await context.McpSettings.AddAsync(settings);
+                dbSettings.OauthCredential = await crypto.EncryptAsync(mcpServerSettings.OauthCredential.ToJson());
             }
-            else if (disabledTools.Count > 0)
-            {
-                settings.Tools = new Tools { Excluded = disabledTools };
-                context.McpSettings.Update(settings);
-            }
-            else
-            {
-                await context.McpSettings.Where(x => 
-                        x.TenantId == tenantId && 
-                        x.RoomId == roomId && 
-                        x.UserId == userId && 
-                        x.ServerId == serverId)
-                    .ExecuteDeleteAsync();
-                
-                settings.Tools = new Tools { Excluded = [] };
-            }
-
+            
+            await context.RoomMcpServerSettings.AddOrUpdateAsync(dbSettings);
             await context.SaveChangesAsync();
         });
+        
+        return mcpServerSettings;
+    }
 
-        return settings!;
-    }
-    
-    public async Task<IReadOnlyDictionary<Guid, McpSettings>> GetToolsSettings(int tenantId, int roomId, Guid userId, 
-        IEnumerable<Guid> serversIds)
+    public async Task<McpServerSettings?> GetServerSettingsAsync(int tenantId, int roomId, Guid userId, Guid serverId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        return await dbContext.GetToolsSettings(tenantId, roomId, userId, serversIds)
-            .ToDictionaryAsync(x => x.ServerId, x => x);
+        var dbSettings = await dbContext.RoomMcpServerSettings.Where(x =>
+                x.TenantId == tenantId &&
+                x.RoomId == roomId &&
+                x.UserId == userId &&
+                x.ServerId == serverId)
+            .Include(dbMcpSettings => dbMcpSettings.ToolsConfiguration)
+            .FirstOrDefaultAsync();
+
+        if (dbSettings == null)
+        {
+            return null;
+        }
+
+        return await dbSettings.ToMcpServerSettingsAsync(crypto);
     }
-    
-    public async Task<McpSettings?> GetToolsSettings(int tenantId, int roomId, Guid userId, Guid serverId)
+
+    public async IAsyncEnumerable<McpServerSettings> GetServersSettings(int tenantId, int roomId, Guid userId, IEnumerable<Guid> serversIds)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        return await dbContext.GetToolsSettings(tenantId, roomId, userId, [serverId]).FirstOrDefaultAsync();
+        var query = dbContext.RoomMcpServerSettings
+            .Where(x => 
+                x.TenantId == tenantId &&
+                x.RoomId == roomId &&
+                x.UserId == userId && 
+                serversIds.Contains(x.ServerId))
+            .Include(dbMcpSettings => dbMcpSettings.ToolsConfiguration);
+
+        await foreach (var dbSettings in query.AsAsyncEnumerable())
+        {
+            yield return await dbSettings.ToMcpServerSettingsAsync(crypto);
+        }
     }
 }

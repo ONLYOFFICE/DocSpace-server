@@ -29,10 +29,12 @@ namespace ASC.AI.Core.MCP.Data;
 public class McpServer
 {
     public Guid Id { get; init; }
-    public string? Endpoint { get; init; }
-    public IDictionary<string, string>? Headers { get; init; }
-    public required string Name { get; init; }
-    public string? Description { get; init; }
-    public bool Enabled { get; init; }
-    public ServerType ServerType { get; init; }
+    public int TenantId { get; init; }
+    public required string Name { get; set; }
+    public string? Description { get; set; }
+    public required string Endpoint { get; set; }
+    public Dictionary<string, string>? Headers { get; set; }
+    public ServerType Type { get; init; }
+    public ConnectionType ConnectionType { get; init; }
+    public bool Enabled { get; set; }
 }

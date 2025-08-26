@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,22 +26,8 @@
 
 namespace ASC.AI.Core.MCP.Data;
 
-public class McpServerOptions
+public enum ConnectionType
 {
-    public Guid Id { get; init; }
-    public int TenantId { get; init; }
-    public required string Name { get; set; }
-    public string? Description { get; set; }
-    public required Uri Endpoint { get; set; }
-    public Dictionary<string, string>? Headers { get; set; }
-    public bool Enabled { get; set; }
-    
-    public SseClientTransportOptions ToTransportOptions(TimeSpan? connectionTimeout = null) => new()
-    {
-        Name = Name,
-        Endpoint = Endpoint,
-        AdditionalHeaders = Headers,
-        TransportMode = HttpTransportMode.AutoDetect,
-        ConnectionTimeout = connectionTimeout ?? TimeSpan.FromSeconds(15)
-    };
+    Direct,
+    OAuth
 }

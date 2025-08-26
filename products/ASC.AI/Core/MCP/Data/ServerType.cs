@@ -29,5 +29,6 @@ namespace ASC.AI.Core.MCP.Data;
 public enum ServerType
 {
     Custom,
-    DocSpace
+    DocSpace,
+    Github
 }

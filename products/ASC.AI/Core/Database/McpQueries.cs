@@ -29,7 +29,7 @@ namespace ASC.AI.Core.Database;
 public partial class AiDbContext
 {
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
-    public Task<DbMcpServerOptions?> GetServerAsync(int tenantId, Guid id)
+    public Task<DbMcpServer?> GetServerAsync(int tenantId, Guid id)
     {
         return McpQueries.GetServerAsync(this, tenantId, id);
     }
@@ -41,7 +41,7 @@ public partial class AiDbContext
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
-    public IAsyncEnumerable<DbMcpServerOptions> GetServersAsync(int tenantId, IEnumerable<Guid> ids)
+    public IAsyncEnumerable<DbMcpServer> GetServersAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return McpQueries.GetServersByIdsAsync(this, tenantId, ids);
     }
@@ -93,11 +93,17 @@ public partial class AiDbContext
     {
         return McpQueries.DeleteRoomServersByRoomAsync(this, tenantId, roomId, ids);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public Task<int> DeleteServersStatesAsync(int tenantId, IEnumerable<Guid> ids)
+    {
+        return McpQueries.DeleteServersStatesAsync(this, tenantId, ids);
+    }
 }
 
 static file class McpQueries
 {
-    public static readonly Func<AiDbContext, int, Guid, Task<DbMcpServerOptions?>> GetServerAsync =
+    public static readonly Func<AiDbContext, int, Guid, Task<DbMcpServer?>> GetServerAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, Guid id) =>
             ctx.McpServers.FirstOrDefault(x => x.TenantId == tenantId && x.Id == id));
 
@@ -109,11 +115,12 @@ static file class McpQueries
                     new RoomServerQueryResult
                     {
                         ServerId = x.ServerId,
-                        Options = ctx.McpServers.FirstOrDefault(y => y.TenantId == tenantId && y.Id == x.ServerId)
+                        Options = ctx.McpServers.FirstOrDefault(y => y.TenantId == tenantId && y.Id == x.ServerId),
+                        Settings = ctx.RoomMcpServerSettings.FirstOrDefault(y => y.TenantId == tenantId && y.ServerId == x.ServerId)
                     })
                 .FirstOrDefault());
     
-    public static readonly Func<AiDbContext, int, IEnumerable<Guid>, IAsyncEnumerable<DbMcpServerOptions>> GetServersByIdsAsync =
+    public static readonly Func<AiDbContext, int, IEnumerable<Guid>, IAsyncEnumerable<DbMcpServer>> GetServersByIdsAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
             ctx.McpServers.Where(x => x.TenantId == tenantId && ids.Contains(x.Id)));
 
@@ -137,11 +144,20 @@ static file class McpQueries
                 .SelectMany(
                     x => x.servers.DefaultIfEmpty(),
                     (x, s) => new { x.map, server = s })
+                .GroupJoin(
+                    ctx.RoomMcpServerSettings,
+                    x => new { tenantId = x.map.TenantId, roomId = x.map.RoomId, id = x.map.ServerId },
+                    s => new { tenantId = s.TenantId, roomId = s.RoomId, id = s.ServerId },
+                    (x, group) => new { x.map, x.server, settings = group })
+                .SelectMany(
+                    x => x.settings.DefaultIfEmpty(),
+                    (x, s) => new { x.map, x.server, settings = s })
                 .Select(x => 
                     new RoomServerQueryResult 
                     { 
                         ServerId = x.map.ServerId, 
-                        Options = x.server 
+                        Options = x.server,
+                        Settings = x.settings
                     }));
     
     public static readonly Func<AiDbContext, int, IEnumerable<Guid>, Task<int>> DeleteServersAsync =
@@ -152,13 +168,13 @@ static file class McpQueries
     
     public static readonly Func<AiDbContext, int, IEnumerable<Guid>, Task<int>> DeleteSettingsAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, IEnumerable<Guid> id) =>
-            ctx.McpSettings
+            ctx.RoomMcpServerSettings
                 .Where(x => x.TenantId == tenantId && id.Contains(x.ServerId))
                 .ExecuteDelete());
     
     public static readonly Func<AiDbContext, int, int, IEnumerable<Guid>, Task<int>> DeleteSettingsByRoomAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int roomId, IEnumerable<Guid> id) =>
-            ctx.McpSettings
+            ctx.RoomMcpServerSettings
                 .Where(x => x.TenantId == tenantId && x.RoomId == roomId && id.Contains(x.ServerId))
                 .ExecuteDelete());
     
@@ -174,10 +190,17 @@ static file class McpQueries
             ctx.RoomMcpServers
                 .Where(x => x.TenantId == tenantId && x.RoomId == roomId && ids.Contains(x.ServerId))
                 .ExecuteDelete());
+    
+    public static readonly Func<AiDbContext, int, IEnumerable<Guid>, Task<int>> DeleteServersStatesAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, IEnumerable<Guid> id) =>
+            ctx.McpServerStates
+                .Where(x => x.TenantId == tenantId && id.Contains(x.ServerId))
+                .ExecuteDelete());
 }
 
 public class RoomServerQueryResult
 {
     public Guid ServerId { get; init; }
-    public DbMcpServerOptions? Options { get; init; }
+    public DbMcpServer? Options { get; init; }
+    public DbMcpServerSettings? Settings { get; init; }
 }

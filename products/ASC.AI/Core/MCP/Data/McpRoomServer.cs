@@ -29,5 +29,6 @@ namespace ASC.AI.Core.MCP.Data;
 public class McpRoomServer
 {
     public Guid Id { get; init; }
-    public McpServerOptions? Options { get; init; }
+    public McpServer? Server { get; set; }
+    public McpServerSettings? Settings { get; set; }
 }
