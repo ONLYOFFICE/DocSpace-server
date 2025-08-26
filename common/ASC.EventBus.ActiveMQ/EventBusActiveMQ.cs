@@ -112,11 +112,11 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             await _persistentConnection.TryConnectAsync();
         }
 
-        Policy.Handle<SocketException>()
-            .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
-            {
-                _logger.WarningCouldNotPublishEvent(@event.Id, time.TotalSeconds, ex);
-            });
+        //Policy.Handle<SocketException>()
+        //    .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+        //    {
+        //        _logger.WarningCouldNotPublishEvent(@event.Id, time.TotalSeconds, ex);
+        //    });
 
         using var session = await _persistentConnection.CreateSessionAsync(AcknowledgementMode.ClientAcknowledge);
         var destination = await session.GetQueueAsync(_queueName);

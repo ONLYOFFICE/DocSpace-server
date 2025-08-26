@@ -8,9 +8,10 @@
   "inputSpec": "./tools/api-docs.json",
   "outputDir": "python-sdk",
   "additionalProperties": {
-    "packageName": "docspace-api-sdk",
-    "packageVersion": "3.2.1-preview.1",
+    "packageName": "docspace_api_sdk",
+    "packageVersion": "3.5.0-preview.1",
     "licenseName": "Apache-2.0",
-    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-python"
+    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-python",
+    "excludeTests": true
   }
 }

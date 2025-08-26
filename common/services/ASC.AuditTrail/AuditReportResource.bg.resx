@@ -133,9 +133,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Настройки за презаписване Актуализирани</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Документи</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Настройки</value>
   </data>
@@ -394,9 +391,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Ход</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Други</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Собственикът е променен: {0}</value>
   </data>
@@ -414,9 +408,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Настройки за сила на паролата Актуализирани</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Хора</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Платформа</value>
@@ -471,9 +462,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Започна сесия</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Настройки</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO инвалиди</value>

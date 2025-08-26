@@ -42,7 +42,7 @@ public class AuditActionMapper(ILogger<AuditActionMapper> logger)
     {
         if (action == null)
         {
-            logger.ErrorThereIsNoActionText(action);
+            logger.ErrorThereIsNoActionText(action.ActionTextResourceName);
 
             return string.Empty;
         }
@@ -113,18 +113,11 @@ public class AuditActionMapper(ILogger<AuditActionMapper> logger)
                    : action.GetActionTypeText();
     }
 
-    public string GetProductText(MessageMaps action)
+    public string GetLocationText(MessageMaps action)
     {
         return action == null
                    ? string.Empty
-                   : action.GetProductText();
-    }
-
-    public string GetModuleText(MessageMaps action)
-    {
-        return action == null
-                   ? string.Empty
-                   : action.GetModuleText();
+                   : action.GetLocationText();
     }
 
     private string ToLimitedText(string text)

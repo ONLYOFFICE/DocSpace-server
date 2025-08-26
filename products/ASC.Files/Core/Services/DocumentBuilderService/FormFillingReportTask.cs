@@ -142,13 +142,16 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
                         url = ""
                     });
                     var formsDataFile = await fileDao.GetFileAsync(formFillingRes.Id);
-                    var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
-                    t.Add(new
+                    if (formsDataFile != null)
                     {
-                        format = "@",
-                        value = FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture),
-                        url = resultUrl
-                    });
+                        var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
+                        t.Add(new
+                        {
+                            format = "@",
+                            value = FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture),
+                            url = resultUrl
+                        });
+                    }
                     values.Add(t);
                 }
             }

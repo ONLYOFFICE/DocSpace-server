@@ -41,7 +41,7 @@ public class FormFilesTest(
         await _filesClient.Authenticate(Initializer.Owner);
 
         // Create a regular PDF file (not a form)
-        var regularPdfFile = await CreateFile("regular.pdf", FolderType.USER, Initializer.Owner);
+        var regularPdfFile = await CreateFileInMy("regular.pdf", Initializer.Owner);
 
         // Act
         var isFormResult = (await _filesApi.IsFormPDFAsync(regularPdfFile.Id, TestContext.Current.CancellationToken)).Response;
@@ -59,7 +59,7 @@ public class FormFilesTest(
 
         // Note: Creating a proper form file for testing might require specific setup
         // For this test, we'll use a regular file but handle the expected response appropriately
-        var file = await CreateFile("test_form.pdf", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("test_form.pdf", Initializer.Owner);
 
         // Act & Assert
         try
@@ -85,7 +85,7 @@ public class FormFilesTest(
 
         // Note: Creating a proper form draft for testing might require specific setup
         // For this test, we'll use a regular file but handle the expected response appropriately
-        var file = await CreateFile("form_draft.pdf", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("form_draft.pdf", Initializer.Owner);
 
         // Act & Assert
         try
@@ -112,7 +112,7 @@ public class FormFilesTest(
 
         // Create a test form file
         // Note: Creating a proper form file for testing might require specific setup
-        var file = await CreateFile("manage_form.pdf", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("manage_form.pdf", Initializer.Owner);
 
         // Act & Assert
         try

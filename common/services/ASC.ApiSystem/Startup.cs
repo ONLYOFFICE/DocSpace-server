@@ -149,8 +149,10 @@ public class Startup
         services.AddScoped<AuthHandler>();
         services.AddScoped<ApiSystemAuthHandler>();
         services.AddScoped<ApiSystemBasicAuthHandler>();
-        
-        
+
+        services.AddBillingHttpClient();
+        services.AddAccountingHttpClient();
+
         services
             .AddAuthentication()
             .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })

@@ -290,12 +290,6 @@ public partial class FilesDbContext
     {
         return FileQueries.DeleteFilesPropertiesAsync(this, tenantId, entryId);
     }
-    
-    [PreCompileQuery([])]
-    public IAsyncEnumerable<FilesConverts> FilesConvertsAsync()
-    {
-        return FileQueries.FilesConvertsAsync(this);
-    }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
     public Task DeleteFormRoleMappingsAsync(int tenantId, int formId)
@@ -375,15 +369,12 @@ static file class FileQueries
                         Shared = ctx.Security.Any(x => 
                             x.TenantId == r.TenantId && 
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                            ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File) ||
-                             (x.EntryType == FileEntryType.Folder && 
-                              x.EntryId == ctx.Tree
-                                  .Where(t => t.FolderId == r.ParentId)
-                                  .OrderByDescending(t => t.Level)
-                                  .Select(t => t.ParentId)
-                                  .Skip(1)
-                                  .FirstOrDefault()
-                                  .ToString()))),
+                            x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
+                        ParentShared = ctx.Security.Any(x => 
+                            x.TenantId == r.TenantId && 
+                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                            x.EntryType == FileEntryType.Folder && 
+                            ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                         Order = (
                             from f in ctx.FileOrder
                             where (
@@ -423,15 +414,12 @@ static file class FileQueries
                         Shared = ctx.Security.Any(x => 
                             x.TenantId == r.TenantId && 
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                            ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File) ||
-                             (x.EntryType == FileEntryType.Folder && 
-                              x.EntryId == ctx.Tree
-                                  .Where(t => t.FolderId == r.ParentId)
-                                  .OrderByDescending(t => t.Level)
-                                  .Select(t => t.ParentId)
-                                  .Skip(1)
-                                  .FirstOrDefault()
-                                  .ToString())))
+                            x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
+                        ParentShared = ctx.Security.Any(x => 
+                            x.TenantId == r.TenantId && 
+                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                            x.EntryType == FileEntryType.Folder && 
+                            ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId))
                     })
                     .SingleOrDefault());
 
@@ -443,7 +431,6 @@ static file class FileQueries
                     .Where(r => r.Id == fileId && r.Forcesave == ForcesaveType.None)
                     .Where(r => fileVersion < 0 || r.Version <= fileVersion)
                     .OrderByDescending(r => r.Version)
-
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -918,9 +905,6 @@ static file class FileQueries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.EntryId == entryId)
                     .ExecuteDelete());
-    
-    public static readonly Func<FilesDbContext, IAsyncEnumerable<FilesConverts>> FilesConvertsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx) => ctx.FilesConverts);
 
     public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteFormRoleMappingsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

@@ -28,7 +28,7 @@ namespace ASC.AuditTrail.Mappers;
 
 internal class PeopleActionMapper : IProductActionMapper
 {
-    public List<IModuleActionMapper> Mappers { get; } =
+    public List<ILocationActionMapper> Mappers { get; } =
     [
         new UsersActionMapper(),
         new GroupsActionMapper()
@@ -37,16 +37,16 @@ internal class PeopleActionMapper : IProductActionMapper
     public ProductType Product => ProductType.People;
 }
 
-internal class UsersActionMapper : IModuleActionMapper
+internal class UsersActionMapper : ILocationActionMapper
 {
-    public ModuleType Module { get; }
+    public LocationType Location { get; }
     public IDictionary<MessageAction, MessageMaps> Actions { get; }
 
     public UsersActionMapper()
     {
-        Module = ModuleType.Users;
+        Location = LocationType.Users;
 
-        Actions = new MessageMapsDictionary(ProductType.People, Module)
+        Actions = new MessageMapsDictionary(ProductType.People, Location)
         {
             {
                 EntryType.User,
@@ -84,24 +84,24 @@ internal class UsersActionMapper : IModuleActionMapper
                 ActionType.Send, [MessageAction.UserSentActivationInstructions, MessageAction.UserSentDeleteInstructions, MessageAction.SentInviteInstructions]
             },
             { MessageAction.UserUpdatedPassword, ActionType.Update },
-            { MessageAction.UserSentEmailChangeInstructions, new MessageMaps("UserSentEmailInstructions", ActionType.Send, ProductType.People, Module, EntryType.User) },
-            { MessageAction.UserSentPasswordChangeInstructions, new MessageMaps("UserSentPasswordInstructions", ActionType.Send, ProductType.People, Module, EntryType.User) },
-            { MessageAction.UserConnectedTfaApp, new MessageMaps("UserTfaGenerateCodes", ActionType.Link, ProductType.People, Module, EntryType.User) },
-            { MessageAction.UserDisconnectedTfaApp, new MessageMaps("UserTfaDisconnected", ActionType.Delete, ProductType.People, Module, EntryType.User) }
+            { MessageAction.UserSentEmailChangeInstructions, new MessageMaps("UserSentEmailInstructions", ActionType.Send, ProductType.People, Location, EntryType.User) },
+            { MessageAction.UserSentPasswordChangeInstructions, new MessageMaps("UserSentPasswordInstructions", ActionType.Send, ProductType.People, Location, EntryType.User) },
+            { MessageAction.UserConnectedTfaApp, new MessageMaps("UserTfaGenerateCodes", ActionType.Link, ProductType.People, Location, EntryType.User) },
+            { MessageAction.UserDisconnectedTfaApp, new MessageMaps("UserTfaDisconnected", ActionType.Delete, ProductType.People, Location, EntryType.User) }
         };
     }
 }
 
-internal class GroupsActionMapper : IModuleActionMapper
+internal class GroupsActionMapper : ILocationActionMapper
 {
-    public ModuleType Module { get; }
+    public LocationType Location { get; }
     public IDictionary<MessageAction, MessageMaps> Actions { get; }
 
     public GroupsActionMapper()
     {
-        Module = ModuleType.Groups;
+        Location = LocationType.Groups;
 
-        Actions = new MessageMapsDictionary(ProductType.People, Module)
+        Actions = new MessageMapsDictionary(ProductType.People, Location)
         {
             {
                 EntryType.Group, new Dictionary<ActionType, MessageAction>

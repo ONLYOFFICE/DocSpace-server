@@ -27,8 +27,8 @@
 namespace ASC.Api.Core.Log;
 internal static partial class SsoHandlerLogger
 {
-    [LoggerMessage(LogLevel.Debug, "User {identity} already authenticated")]
-    public static partial void DebugUserAlreadyAuthenticated(this ILogger<SsoHandlerService> logger, IIdentity identity);
+    [LoggerMessage(LogLevel.Debug, "User already authenticated, userId={id}, userName={name}")]
+    public static partial void DebugUserAlreadyAuthenticated(this ILogger<SsoHandlerService> logger, Guid id, string name);
 
     [LoggerMessage(LogLevel.Debug, "Adding or updating user in database, userId={id}")]
     public static partial void DebugAddingOrUpdatingUser(this ILogger<SsoHandlerService> logger, Guid id);

@@ -57,6 +57,12 @@ public class MyJavaScriptCodegen extends JavascriptClientCodegen {
         supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
             f.getDestinationFilename().equals(".openapi-generator-ignore")
         );
+
+        if(Boolean.TRUE.equals(additionalProperties.get("excludeTests")))
+        {
+            modelTestTemplateFiles.clear();
+            apiTestTemplateFiles.clear();
+        }
     }
 
     @Override

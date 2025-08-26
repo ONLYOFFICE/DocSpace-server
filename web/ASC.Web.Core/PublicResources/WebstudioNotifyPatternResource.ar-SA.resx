@@ -118,40 +118,40 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; قام بانشاء مستند جديد: &lt;a href={1}&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بانشاء مستند جديد: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; قام بتعديل المستند: &lt;a href={1}&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بتعديل المستند: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; قام برفع مستند جديد: &lt;a href={1}&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام برفع مستند جديد: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; قام بإضافة تعليق جديد إلى نسخة المستند: &lt;a href={1}&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بإضافة تعليق جديد إلى نسخة المستند: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; قام بنقل الغرفة: &lt;a href={1}&gt;{2}&lt;/a&gt; إلى الأرشيف - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بنقل الغرفة: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; إلى الأرشيف - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; قام بإنشاء غرفة جديدة: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بإنشاء غرفة جديدة: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; قام بحذف الغرفة: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; أعاد تسمية الغرفة: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; أعاد تسمية الغرفة: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; تم تعيينه كـ &lt;b&gt;{1}&lt;/b&gt; iفي الغرفة: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; تم تعيينه كـ &lt;b&gt;{1}&lt;/b&gt; iفي الغرفة: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; تم إضافته للغرفة : &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; تم إضافته للغرفة : &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>تم إضافة مستخدم DocSpace جديد: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; تم إزالته من الغرفة: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; تم إزالته من الغرفة: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUsersUpdatedType" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; قام بتغير مستوى وصول المستخدمين &lt;b&gt;{1}&lt;/b&gt; to &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -2043,7 +2043,7 @@ $TrulyYours</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>مرحبًا!
 
-تم تعيين دور جديد لكم في غرفة "DocSpace "${RoomTitle}":"${RoomUrl}، والدور هو: ${UserRole}.
+تم تعيين دور جديد لكم في غرفة DocSpace "${RoomTitle}":"${RoomUrl}"، والدور هو: ${UserRole}.
 
 يمكنكم معرفة المزيد حول الأدوار والصلاحيات في الغرف من خلال "مركز المساعدة":"${HelpCenterUrl}".
 
@@ -2052,7 +2052,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>مرحبًا!
 
-تم تعيين نوع مستخدم جديد لكم في "DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}، والنوع هو: ${UserType}.
+تم تعيين نوع مستخدم جديد لكم في DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}"، والنوع هو: ${UserType}.
 
 يمكنكم معرفة المزيد حول أنواع المستخدمين والصلاحيات من خلال "مركز المساعدة":"${HelpCenterUrl}".
 

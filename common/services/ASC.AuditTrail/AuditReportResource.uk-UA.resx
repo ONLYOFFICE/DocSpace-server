@@ -124,9 +124,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Налаштування перезапису оновлено</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Документи</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Налаштування</value>
   </data>
@@ -373,9 +370,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Переміщення</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Інші</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Власник змінився: {0}</value>
   </data>
@@ -393,9 +387,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Налаштування надійності паролів оновлено</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Користувачі</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Платформа</value>
@@ -447,9 +438,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Сесія розпочалася</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Налаштування</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO вимкнено</value>

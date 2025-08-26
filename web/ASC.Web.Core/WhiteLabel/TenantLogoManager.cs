@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Core.Files;
+
 namespace ASC.Web.Core.WhiteLabel;
 
 [Scope]
@@ -90,26 +92,30 @@ public class TenantLogoManager(
         /***/
     }
 
-    public async Task<string> GetLogoDocsEditorAsync(bool dark)
+    public async Task<string> GetLogoDocsEditorAsync(FileType fileType, bool dark)
     {
         var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, false);
+
         if (WhiteLabelEnabled)
         {
-            return await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.DocsEditor, dark);
+            return await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, dark);
         }
-        return await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.DocsEditor, dark);
+        return await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, dark);
     }
 
-    public async Task<string> GetLogoDocsEditorEmbedAsync(bool dark)
+    public async Task<string> GetLogoDocsEditorEmbedAsync(FileType fileType, bool dark)
     {
         var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, true);
+
         if (WhiteLabelEnabled)
         {
-            return await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.DocsEditorEmbed, dark);
+            return await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, dark);
         }
-        return await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.DocsEditorEmbed, dark);
+        return await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, dark);
     }
 
 
