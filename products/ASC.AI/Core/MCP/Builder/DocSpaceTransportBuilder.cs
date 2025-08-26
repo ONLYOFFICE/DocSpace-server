@@ -31,12 +31,12 @@ public class DocSpaceTransportBuilder(
     CommonLinkUtility commonLinkUtility,
     IHttpClientFactory httpClientFactory) : ITransportBuilder
 {
-    public ValueTask<SseClientTransport> BuildAsync(McpExecutionOptions executionOptions)
+    public ValueTask<SseClientTransport> BuildAsync(McpServerConnection connection)
     {
         var options = new SseClientTransportOptions
         {
-            Name = executionOptions.Name,
-            Endpoint = new Uri(executionOptions.Endpoint),
+            Name = connection.Name,
+            Endpoint = new Uri(connection.Endpoint),
             AdditionalHeaders = new Dictionary<string, string>
             {
                 {"Referer", commonLinkUtility.GetFullAbsolutePath(string.Empty).TrimEnd('/') + "/"}, 

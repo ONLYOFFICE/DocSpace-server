@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class McpRoomDto : IMapFrom<McpRoomServerInfo>
+public class McpRoomDto : IMapFrom<McpServerStatus>
 {
     public Guid Id { get; init; }
     public required string Name { get; init; } 

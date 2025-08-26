@@ -25,9 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.AI.Core.MCP.Auth;
-using ASC.Core.Common.Configuration;
 using ASC.FederatedLogin.Helpers;
-using ASC.FederatedLogin.LoginProviders;
 
 namespace ASC.AI.Core.MCP.Builder;
 
@@ -35,21 +33,21 @@ public class OauthGenericTransportBuilder(
     OAuth20TokenHelper tokenHelper,
     IHttpMessageHandlerFactory httpMessageHandlerFactory) : ITransportBuilder
 {
-    public ValueTask<SseClientTransport> BuildAsync(McpExecutionOptions executionOptions)
+    public ValueTask<SseClientTransport> BuildAsync(McpServerConnection connection)
     {
-        ArgumentNullException.ThrowIfNull(executionOptions);
-        ArgumentNullException.ThrowIfNull(executionOptions.Settings);
-        ArgumentNullException.ThrowIfNull(executionOptions.Settings.OauthCredential);
-        ArgumentException.ThrowIfNullOrEmpty(executionOptions.OauthProvider?.AccessTokenUrl);
+        ArgumentNullException.ThrowIfNull(connection);
+        ArgumentNullException.ThrowIfNull(connection.Settings);
+        ArgumentNullException.ThrowIfNull(connection.Settings.OauthCredential);
+        ArgumentException.ThrowIfNullOrEmpty(connection.OauthProvider?.AccessTokenUrl);
         
         var oauthHandler = new OauthMessageHandler(
             httpMessageHandlerFactory.CreateHandler(), 
-            executionOptions.Settings.OauthCredential,
+            connection.Settings.OauthCredential,
             _ =>
             {
                 var token = tokenHelper.RefreshToken(
-                    executionOptions.OauthProvider.AccessTokenUrl, 
-                    executionOptions.Settings.OauthCredential);
+                    connection.OauthProvider.AccessTokenUrl, 
+                    connection.Settings.OauthCredential);
 
                 return Task.FromResult(token);
             });
@@ -58,8 +56,8 @@ public class OauthGenericTransportBuilder(
 
         var transportOptions = new SseClientTransportOptions
         {
-            Name = executionOptions.Name, 
-            Endpoint = new Uri(executionOptions.Endpoint), 
+            Name = connection.Name, 
+            Endpoint = new Uri(connection.Endpoint), 
             TransportMode = HttpTransportMode.AutoDetect
         };
         

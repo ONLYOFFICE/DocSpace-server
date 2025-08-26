@@ -37,5 +37,5 @@ public class AddRoomServersRequestDto
 
 public class AddRoomServersRequestBody
 {
-    public required List<Guid> Servers { get; init; }
+    public required HashSet<Guid> Servers { get; init; }
 }

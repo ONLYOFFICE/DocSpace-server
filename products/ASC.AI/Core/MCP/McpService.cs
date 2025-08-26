@@ -27,7 +27,6 @@
 using System.Web;
 
 using ASC.AI.Core.MCP.Builder;
-using ASC.Core.Common.Configuration;
 
 namespace ASC.AI.Core.MCP;
 
@@ -39,11 +38,9 @@ public class McpService(
     IFolderDao<int> folderDao,
     FileSecurity fileSecurity,
     IHttpClientFactory httpClientFactory,
-    SystemMcpConfig systemMcpConfig,
     ILogger<McpService> logger,
     UserManager userManager,
     IDistributedLockProvider distributedLockProvider,
-    ConsumerFactory consumerFactory,
     HttpTransportFactory httpTransportFactory)
 {
     private const int MaxMcpServersByRoom = 5;
@@ -130,7 +127,7 @@ public class McpService(
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var server = await GetServerInternalAsync(tenantId, serverId);
+        var server = await mcpDao.GetServerAsync(tenantId, serverId);
         if (server == null)
         {
             throw new ItemNotFoundException("MCP Server not found");
@@ -142,55 +139,19 @@ public class McpService(
         return server;
     }
     
-    public async Task<(List<McpServer> servers, int totalCount)> GetServersAsync(int offset, int count)
+    public async Task<(List<McpServer> servers, int totalCount)> GetAllServersAsync(int offset, int count)
     {
         await ThrowIfNotAccessAsync();
         
         var tenantId = tenantManager.GetCurrentTenantId();
-        var servers = new List<McpServer>();
-
-        var systemServers = new List<SystemMcpServer>();
-
-        systemServers.AddRange(systemMcpConfig.Servers.Values.Skip(offset).Take(count));
-        offset = Math.Max(0, offset - systemMcpConfig.Servers.Count);
-        count = Math.Max(0, count - systemServers.Count);
-
-        if (systemServers.Count > 0)
-        {
-            var states = await mcpDao.GetServersStatesAsync(
-                    tenantId, 
-                    systemServers.Select(x => x.Id)
-                    ).ToDictionaryAsync(x => x.ServerId);
-
-            foreach (var systemServer in systemServers)
-            {
-                var server = new McpServer
-                {
-                    Id = systemServer.Id,
-                    Name = systemServer.Name,
-                    Description = systemServer.Description,
-                    Endpoint = systemServer.Endpoint,
-                    Headers = systemServer.Headers,
-                    Type = systemServer.Type,
-                    ConnectionType = systemServer.ConnectionType,
-                    Enabled = states.TryGetValue(systemServer.Id, out var state) && state.Enabled
-                };
-                
-                servers.Add(server);
-            }
-        }
         
-        var totalTask = mcpDao.GetServersCountAsync(tenantId);
+        return await mcpDao.GetServersAsync1(tenantId, offset, count);
+    }
 
-        if (count > 0)
-        {
-            var dbServers = await mcpDao.GetServersAsync(tenantId, offset, count).ToListAsync();
-            servers.AddRange(dbServers);
-        }
-        
-        var totalCount = await totalTask;
-        
-        return (servers, totalCount + systemMcpConfig.Servers.Count);
+    public async Task<(List<McpServer> servers, int totalCount)> GetActiveServerAsync(int offset, int count)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        return await mcpDao.GetActiveServersAsync(tenantId, offset, count);
     }
 
     public async Task DeleteServersAsync(List<Guid> ids)
@@ -200,7 +161,7 @@ public class McpService(
         await mcpDao.DeleteServersAsync(tenantManager.GetCurrentTenantId(), ids);
     }
     
-    public async Task AddServersToRoomAsync(int roomId, List<Guid> ids)
+    public async Task AddServersToRoomAsync(int roomId, HashSet<Guid> ids)
     {
         var room = await GetRoomAsync(roomId);
 
@@ -208,47 +169,26 @@ public class McpService(
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-
-        var idsToAdd = new List<Guid>();
-
+        
         var tenantId = tenantManager.GetCurrentTenantId();
-
-        var systemServersIds = systemMcpConfig.Servers
-            .Where(x => ids.Contains(x.Key))
-            .Select(x => x.Key)
-            .ToList();
-
-        if (systemServersIds.Count > 0)
-        {
-            var states = await mcpDao.GetServersStatesAsync(tenantId, systemServersIds)
-                .ToDictionaryAsync(x => x.ServerId);
-
-            foreach (var systemServer in systemServersIds)
-            {
-                if (states.TryGetValue(systemServer, out var state) && state.Enabled)
-                {
-                    idsToAdd.Add(systemServer);
-                }
-            }
-        }
-
-        var dbServers = await mcpDao.GetServersAsync(tenantId, ids);
-        idsToAdd.AddRange(dbServers.Where(x => x.Enabled).Select(x => x.Id));
-
-        if (ids.Count == 0)
-        {
-            throw new ItemNotFoundException("MCP Servers not found");
-        }
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync($"mcp_room_{roomId}"))
         {
-            var currentServersCount = await mcpDao.GetRoomServersCountAsync(tenantId, roomId);
-            if (currentServersCount + idsToAdd.Count > MaxMcpServersByRoom)
+            var servers = await mcpDao.GetServersAsync(tenantId, ids);
+            if (servers.Count == 0)
+            {
+                return;
+            }
+        
+            var serversToAdd = servers.Where(x => x.Enabled).Select(x => x.Id).ToList();
+        
+            var currentServersCount = await mcpDao.GetServersConnectionsCountAsync(tenantId, roomId);
+            if (currentServersCount + serversToAdd.Count > MaxMcpServersByRoom)
             {
                 throw new ArgumentOutOfRangeException($"Maximum number of servers per room is {MaxMcpServersByRoom}");
             }
             
-            await mcpDao.AddRoomServersAsync(tenantId, roomId, idsToAdd);
+            await mcpDao.AddServersConnectionsAsync(tenantId, roomId, serversToAdd);
         }
     }
     
@@ -263,11 +203,11 @@ public class McpService(
         
         await using (await distributedLockProvider.TryAcquireFairLockAsync($"mcp_room_{roomId}"))
         {
-            await mcpDao.DeleteServersFromRoomAsync(tenantManager.GetCurrentTenantId(), roomId, ids);
+            await mcpDao.DeleteServersConnectionsAsync(tenantManager.GetCurrentTenantId(), roomId, ids);
         }
     }
 
-    public async Task<List<McpRoomServerInfo>> GetServersAsync(int roomId)
+    public async Task<List<McpServerStatus>> GetServersStatusesAsync(int roomId)
     {
         var room = await GetRoomAsync(roomId);
         
@@ -277,62 +217,43 @@ public class McpService(
         }
         
         var tenantId = tenantManager.GetCurrentTenantId();
-        var servers = new List<McpRoomServerInfo>();
+        var statuses = new List<McpServerStatus>();
         
-        var roomServers = await mcpDao.GetRoomServersAsync(tenantId, roomId).ToListAsync();
+        var roomServers = await mcpDao.GetServerConnectionAsync(tenantId, roomId).ToListAsync();
         foreach (var roomServer in roomServers)
         {
-            if (roomServer.Server == null)
+            var serverStatus = new McpServerStatus
             {
-                var systemServer = systemMcpConfig.Servers.GetValueOrDefault(roomServer.Id);
-                if (systemServer == null)
-                {
-                    continue;
-                }
-
-                var server = new McpRoomServerInfo
-                {
-                    Id = systemServer.Id,
-                    Name = systemServer.Name,
-                    ServerType = systemServer.Type,
-                    Connected = systemServer.ConnectionType == ConnectionType.Direct || roomServer.Settings?.OauthCredential != null
-                };
-
-                if (systemServer.ConnectionType is ConnectionType.OAuth)
-                {
-                    var provider = systemServer.LoginProviderSelector?.Invoke(consumerFactory);
-                    if (provider != null)
-                    {
-                        var builder = new UriBuilder(provider.CodeUrl);
-                        
-                        var queryString = HttpUtility.ParseQueryString(string.Empty);
-                        queryString.Add("client_id", provider.ClientID);
-                        queryString.Add("redirect_uri", provider.RedirectUri);
-                        queryString.Add("response_type", "code");
-                        
-                        builder.Query = queryString.ToString();
-                        
-                        server.AuthorizationEndpoint = builder.ToString();
-                    }
-                }
-                
-                servers.Add(server);
-            }
-            else
+                Id = roomServer.Id,
+                Name = roomServer.Name,
+                ServerType = roomServer.ServerType,
+                Connected = roomServer.ConnectionType is ConnectionType.Direct ||
+                            roomServer.Settings?.OauthCredential != null
+            };
+            
+            if (roomServer.ConnectionType is ConnectionType.OAuth)
             {
-                var server = new McpRoomServerInfo
+                if (roomServer.OauthProvider != null)
                 {
-                    Id = roomServer.Id, 
-                    Name = roomServer.Server.Name,
-                    Connected = true,
-                    ServerType = roomServer.Server.Type
-                };
-                
-                servers.Add(server);
+                    var provider = roomServer.OauthProvider;
+                    
+                    var builder = new UriBuilder(provider.CodeUrl);
+                        
+                    var queryString = HttpUtility.ParseQueryString(string.Empty);
+                    queryString.Add("client_id", provider.ClientID);
+                    queryString.Add("redirect_uri", provider.RedirectUri);
+                    queryString.Add("response_type", "code");
+                        
+                    builder.Query = queryString.ToString();
+                        
+                    serverStatus.AuthorizationEndpoint = builder.ToString();
+                }
             }
+            
+            statuses.Add(serverStatus);
         }
 
-        return servers;
+        return statuses;
     }
 
     public async Task<IReadOnlyDictionary<string, bool>> GetToolsAsync(int roomId, Guid serverId)
@@ -344,13 +265,13 @@ public class McpService(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
         
-        var executionOptions = await GetExecutionOptions(roomId, serverId);
-        if (executionOptions == null)
+        var connection = await mcpDao.GetMcpConnectionAsync(tenantManager.GetCurrentTenantId(), roomId, serverId);
+        if (connection == null)
         {
             throw new ItemNotFoundException("Mcp server not found");
         }
 
-        return await GetToolsAsync(executionOptions);
+        return await GetToolsAsync(connection);
     }
     
     public async Task<IReadOnlyDictionary<string, bool>> SetToolsAsync(int roomId, Guid serverId, List<string> disabledTools)
@@ -362,13 +283,15 @@ public class McpService(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
         
-        var executionOptions = await GetExecutionOptions(roomId, serverId);
-        if (executionOptions == null)
+        var tenantId = tenantManager.GetCurrentTenantId();
+        
+        var connection = await mcpDao.GetMcpConnectionAsync(tenantId, roomId, serverId);
+        if (connection == null)
         {
             throw new ItemNotFoundException("Mcp server not found");
         }
 
-        var settings = executionOptions.Settings;
+        var settings = connection.Settings;
         
         var excludedTools = disabledTools.Where(x => !string.IsNullOrEmpty(x)).ToHashSet();
         
@@ -397,10 +320,9 @@ public class McpService(
             }
         }
         
-        await mcpDao.SaveSettingsAsync(
-            tenantManager.GetCurrentTenantId(), roomId, authContext.CurrentAccount.ID, serverId, settings);
+        await mcpDao.SaveSettingsAsync(tenantId, roomId, authContext.CurrentAccount.ID, serverId, settings);
         
-        return await GetToolsAsync(executionOptions);
+        return await GetToolsAsync(connection);
     }
     
     public async Task<ToolHolder> GetToolsAsync(int roomId)
@@ -412,44 +334,11 @@ public class McpService(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
         
-        var executionOptions = new List<McpExecutionOptions>();
-        
         var tenantId = tenantManager.GetCurrentTenantId();
-        
-        await foreach (var roomServer in mcpDao.GetRoomServersAsync(tenantId, roomId))
-        {
-            if (roomServer.Server != null)
-            {
-                executionOptions.Add(new McpExecutionOptions
-                {
-                    Name = roomServer.Server.Name,
-                    Endpoint = roomServer.Server.Endpoint,
-                    Headers = roomServer.Server.Headers,
-                    ServerType = roomServer.Server.Type,
-                    ConnectionType = roomServer.Server.ConnectionType,
-                    Settings = roomServer.Settings
-                });
-            }
 
-            var systemServer = systemMcpConfig.Servers.GetValueOrDefault(roomServer.Id);
-            if (systemServer == null)
-            {
-                continue;
-            }
-            
-            executionOptions.Add(new McpExecutionOptions
-            {
-                Name = systemServer.Name,
-                Endpoint = systemServer.Endpoint,
-                Headers = systemServer.Headers,
-                ServerType = systemServer.Type,
-                ConnectionType = systemServer.ConnectionType,
-                OauthProvider = systemServer.LoginProviderSelector?.Invoke(consumerFactory),
-                Settings = roomServer.Settings
-            });
-        }
+        var connections = mcpDao.GetServerConnectionAsync(tenantId, roomId);
         
-        var tasks = executionOptions.Select(ConnectAsync);
+        var tasks = await connections.Select(ConnectAsync).ToListAsync();
         
         var holder = new ToolHolder();
         
@@ -467,88 +356,28 @@ public class McpService(
         return holder;
     }
     
-    private async Task<IReadOnlyDictionary<string, bool>> GetToolsAsync(McpExecutionOptions executionOptions)
+    private async Task<IReadOnlyDictionary<string, bool>> GetToolsAsync(McpServerConnection connection)
     {
-        var transport = await httpTransportFactory.CreateAsync(executionOptions);
+        var transport = await httpTransportFactory.CreateAsync(connection);
 
         await using var mcpClient = await McpClientFactory.CreateAsync(transport);
         
         var tools = await mcpClient.ListToolsAsync();
         
-        if (executionOptions.Settings?.ToolsConfiguration == null)
+        if (connection.Settings?.ToolsConfiguration == null)
         {
             return tools.ToDictionary(t => t.Name, _ => true);
         }
             
-        var excludedTools = executionOptions.Settings.ToolsConfiguration.Excluded;
+        var excludedTools = connection.Settings.ToolsConfiguration.Excluded;
         
         return tools.ToDictionary(t => t.Name, t => !excludedTools.Contains(t.Name));
-    }
-    
-    private async Task<McpExecutionOptions?> GetExecutionOptions(int roomId, Guid serverId)
-    {
-        var roomServer = await mcpDao.GetRoomServerAsync(tenantManager.GetCurrentTenantId(), roomId, serverId);
-        if (roomServer == null)
-        {
-            throw new ItemNotFoundException("MCP Server not found");
-        }
-        
-        if (roomServer.Server != null)
-        {
-            return new McpExecutionOptions
-            {
-                Name = roomServer.Server.Name,
-                Endpoint = roomServer.Server.Endpoint,
-                Headers = roomServer.Server.Headers,
-                ServerType = roomServer.Server.Type,
-                ConnectionType = roomServer.Server.ConnectionType,
-                Settings = roomServer.Settings
-            };
-        }
-
-        var systemServer = systemMcpConfig.Servers.GetValueOrDefault(roomServer.Id);
-        if (systemServer == null)
-        {
-            return null;
-        }
-
-        return new McpExecutionOptions
-        {
-            Name = systemServer.Name,
-            Endpoint = systemServer.Endpoint,
-            Headers = systemServer.Headers,
-            ServerType = systemServer.Type,
-            ConnectionType = systemServer.ConnectionType,
-            OauthProvider = systemServer.LoginProviderSelector?.Invoke(consumerFactory),
-            Settings = roomServer.Settings
-        };
     }
     
     private async Task<Folder<int>> GetRoomAsync(int roomId)
     {
         var room = await folderDao.GetFolderAsync(roomId);
         return room ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
-    }
-    
-    private async Task<McpServer?> GetServerInternalAsync(int tenantId, Guid id)
-    {
-        if (systemMcpConfig.Servers.TryGetValue(id, out var systemServer))
-        {
-            return new McpServer
-            {
-                Id = systemServer.Id,
-                Name = systemServer.Name,
-                Description = systemServer.Description,
-                Endpoint = systemServer.Endpoint,
-                Headers = systemServer.Headers,
-                Type = systemServer.Type,
-                ConnectionType = systemServer.ConnectionType,
-                Enabled = true
-            };
-        }
-        
-        var server = await mcpDao.GetServerAsync(tenantId, id);
-        return server;
     }
     
     private async Task ThrowIfNotAccessAsync()
@@ -573,9 +402,9 @@ public class McpService(
         }
     }
     
-    private async Task<McpContainer?> ConnectAsync(McpExecutionOptions executionOptions)
+    private async Task<McpContainer?> ConnectAsync(McpServerConnection connection)
     {
-        var transport = await httpTransportFactory.CreateAsync(executionOptions);
+        var transport = await httpTransportFactory.CreateAsync(connection);
         
         try
         {
@@ -583,12 +412,12 @@ public class McpService(
 
             var tools = await mcpClient.ListToolsAsync();
 
-            if (executionOptions.Settings?.ToolsConfiguration == null)
+            if (connection.Settings?.ToolsConfiguration == null)
             {
                 return new McpContainer(mcpClient, tools);
             }
             
-            var excludedTools = executionOptions.Settings.ToolsConfiguration.Excluded;
+            var excludedTools = connection.Settings.ToolsConfiguration.Excluded;
             return new McpContainer(mcpClient, tools.Where(x => !excludedTools.Contains(x.Name)).ToList());
         }
         catch (Exception e)

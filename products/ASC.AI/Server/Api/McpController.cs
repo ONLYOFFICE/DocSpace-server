@@ -68,7 +68,7 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     [HttpGet("servers")]
     public async Task<List<McpServerDto>> GetServersAsync(PaginatedRequestDto inDto)
     {
-        var (servers, count) = await mcpService.GetServersAsync(inDto.StartIndex, inDto.Count);
+        var (servers, count) = await mcpService.GetAllServersAsync(inDto.StartIndex, inDto.Count);
         
         apiContext.SetCount(servers.Count).SetTotalCount(count);
         
@@ -84,9 +84,9 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     [HttpGet("rooms/{roomId}/servers")]
     public async Task<List<McpRoomDto>> GetRoomServersAsync(GetRoomServersRequestDto inDto)
     {
-        var servers = await mcpService.GetServersAsync(inDto.RoomId);
+        var servers = await mcpService.GetServersStatusesAsync(inDto.RoomId);
         
-        return mapper.Map<List<McpRoomServerInfo>, List<McpRoomDto>>(servers);
+        return mapper.Map<List<McpServerStatus>, List<McpRoomDto>>(servers);
     }
 
     [HttpDelete("rooms/{roomId}/servers")]

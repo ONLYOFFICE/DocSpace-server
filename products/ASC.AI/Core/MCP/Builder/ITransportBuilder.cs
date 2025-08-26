@@ -28,5 +28,5 @@ namespace ASC.AI.Core.MCP.Builder;
 
 public interface ITransportBuilder
 {
-    public ValueTask<SseClientTransport> BuildAsync(McpExecutionOptions executionOptions);
+    public ValueTask<SseClientTransport> BuildAsync(McpServerConnection connection);
 }

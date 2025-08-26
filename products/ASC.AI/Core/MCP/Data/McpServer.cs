@@ -36,5 +36,33 @@ public class McpServer
     public Dictionary<string, string>? Headers { get; set; }
     public ServerType Type { get; init; }
     public ConnectionType ConnectionType { get; init; }
+    public bool System { get; init; }
     public bool Enabled { get; set; }
+}
+
+public static class McpServerExtensions
+{
+    public static async Task<McpServer> ToMcpServerAsync(this DbMcpServerUnit dbMcpUnit, InstanceCrypto crypto)
+    {
+        var server = new McpServer
+        {
+            Id = dbMcpUnit.Server.Id, 
+            TenantId = dbMcpUnit.Server.TenantId, 
+            Name = dbMcpUnit.Server.Name,
+            Description = dbMcpUnit.Server.Description,
+            Endpoint = dbMcpUnit.Server.Endpoint,
+            ConnectionType = dbMcpUnit.Server.ConnectionType,
+            Enabled = dbMcpUnit.State?.Enabled ?? false
+        };
+
+        if (dbMcpUnit.Server.Headers == null)
+        {
+            return server;
+        }
+
+        var headersJson = await crypto.DecryptAsync(dbMcpUnit.Server.Headers);
+        server.Headers = JsonSerializer.Deserialize<Dictionary<string, string>>(headersJson);
+
+        return server;
+    }
 }

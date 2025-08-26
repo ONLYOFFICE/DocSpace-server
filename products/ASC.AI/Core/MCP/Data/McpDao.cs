@@ -24,12 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.FederatedLogin;
+using ASC.Core.Common.Configuration;
 
 namespace ASC.AI.Core.MCP.Data;
 
 [Scope]
-public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCrypto crypto, IMapper mapper)
+public class McpDao(
+    IDbContextFactory<AiDbContext> dbContextFactory,
+    SystemMcpConfig systemMcpConfig,
+    InstanceCrypto crypto,
+    ConsumerFactory consumerFactory,
+    IMapper mapper)
 {
     public async Task<McpServer> AddServerAsync(
         int tenantId, 
@@ -91,6 +96,13 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
+        if (systemMcpConfig.Servers.TryGetValue(id, out var systemServer))
+        {
+            var state = await dbContext.GetServerStateAsync(tenantId, id);
+            
+            return systemServer.ToMcpServer(tenantId, state);
+        }
+        
         var server = await dbContext.GetServerAsync(tenantId, id);
         if (server == null)
         {
@@ -100,30 +112,150 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
         return await server.ToMcpServerAsync(crypto);
     }
     
-    public async Task<List<McpServer>> GetServersAsync(int tenantId, List<Guid> ids)
+    public async Task<List<McpServer>> GetServersAsync(int tenantId, HashSet<Guid> ids)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        return await dbContext.GetServersAsync(tenantId, ids)
+        var servers = new List<McpServer>();
+
+        var foundedSystemServers = systemMcpConfig.Servers.Values
+            .Where(x => ids.Contains(x.Id))
+            .ToList();
+        
+        if (foundedSystemServers.Count > 0)
+        {
+            var states = await dbContext.GetServersStatesAsync(
+                    tenantId, 
+                    foundedSystemServers.Select(x => x.Id))
+                .ToDictionaryAsync(x => x.ServerId);
+
+            var systemServers =
+                foundedSystemServers.Select(x => x.ToMcpServer(tenantId, states.GetValueOrDefault(x.Id)));
+            
+            servers.AddRange(systemServers);
+        }
+
+        var dbServers = await dbContext.GetServersAsync(tenantId, ids)
             .SelectAwait(async x => await x.ToMcpServerAsync(crypto))
             .ToListAsync();
+        
+        servers.AddRange(dbServers);
+        
+        return servers;
     }
-
-    public async IAsyncEnumerable<McpServer> GetServersAsync(int tenantId, int offset, int count)
+    
+    public async Task<(List<McpServer> servers, int total)> GetActiveServersAsync(int tenantId, int offset, int count)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
-        var query = dbContext.McpServers.Where(x => x.TenantId == tenantId);
+        var servers = new List<McpServer>();
+        var systemServers = new List<McpServer>();
         
-        await foreach (var server in query.Skip(offset).Take(count).ToAsyncEnumerable())
+        if (systemMcpConfig.Servers.Count > 0)
         {
-            yield return await server.ToMcpServerAsync(crypto);
-        }
-    }
+            var states = await GetServersStatesAsync(
+                dbContext,
+                tenantId,
+                systemMcpConfig.Servers.Keys
+            ).ToDictionaryAsync(x => x.ServerId);
+            
+            foreach (var systemServer in systemMcpConfig.Servers.Values)
+            {
+                if (!states.TryGetValue(systemServer.Id, out var state) || !state.Enabled)
+                {
+                    continue;
+                }
 
-    public async IAsyncEnumerable<McpServerState> GetServersStatesAsync(int tenantId, IEnumerable<Guid> serversIds)
+                var server = new McpServer
+                {
+                    Id = systemServer.Id,
+                    Name = systemServer.Name,
+                    Description = systemServer.Description,
+                    Endpoint = systemServer.Endpoint,
+                    Headers = systemServer.Headers,
+                    Type = systemServer.Type,
+                    ConnectionType = systemServer.ConnectionType,
+                    Enabled = true
+                };
+                    
+                systemServers.Add(server);
+            }
+        }
+        
+        servers.AddRange(systemServers.Skip(offset).Take(count));
+        
+        offset = Math.Max(0, offset - systemServers.Count);
+        count = Math.Max(0, count - servers.Count);
+        
+        if (count > 0)
+        {
+            var dbServers = await dbContext.GetActiveServersAsync(tenantId, offset, count)
+                .SelectAwait(async x => await x.ToMcpServerAsync(crypto))
+                .ToListAsync();
+            
+            servers.AddRange(dbServers);
+        }
+        
+        var dbTotalCount = await dbContext.GetActiveServersTotalCountAsync(tenantId);
+        var total = dbTotalCount + systemServers.Count;
+        
+        return (servers, total);
+    }
+    
+    public async Task<(List<McpServer> servers, int total)> GetServersAsync1(int tenantId, int offset, int count)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
+        var servers = new List<McpServer>();
+
+        var systemServers = new List<SystemMcpServer>();
+
+        systemServers.AddRange(systemMcpConfig.Servers.Values.Skip(offset).Take(count));
+        offset = Math.Max(0, offset - systemMcpConfig.Servers.Count);
+        count = Math.Max(0, count - systemServers.Count);
+
+        if (systemServers.Count > 0)
+        {
+            var states = await GetServersStatesAsync(
+                dbContext,
+                tenantId, 
+                systemServers.Select(x => x.Id)
+            ).ToDictionaryAsync(x => x.ServerId);
+
+            foreach (var systemServer in systemServers)
+            {
+                var server = new McpServer
+                {
+                    Id = systemServer.Id,
+                    Name = systemServer.Name,
+                    Description = systemServer.Description,
+                    Endpoint = systemServer.Endpoint,
+                    Headers = systemServer.Headers,
+                    Type = systemServer.Type,
+                    ConnectionType = systemServer.ConnectionType,
+                    Enabled = states.TryGetValue(systemServer.Id, out var state) && state.Enabled
+                };
+                
+                servers.Add(server);
+            }
+        }
+        
+        if (count > 0)
+        {
+            var dbServers = await dbContext.GetServersAsync(tenantId, offset, count)
+                .SelectAwait(async x => await x.ToMcpServerAsync(crypto))
+                .ToListAsync();
+            
+            servers.AddRange(dbServers);
+        }
+        
+        var dbTotalCount = await dbContext.GetServersCountAsync(tenantId);
+        var total = dbTotalCount + systemMcpConfig.Servers.Count;
+        
+        return (servers, total);
+    }
+
+    public async IAsyncEnumerable<McpServerState> GetServersStatesAsync(AiDbContext dbContext, int tenantId, IEnumerable<Guid> serversIds)
+    {
         var query = dbContext.McpServerStates
             .Where(x => x.TenantId == tenantId && serversIds.Contains(x.ServerId));
 
@@ -131,43 +263,6 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
         {
             yield return mapper.Map<DbMcpServerState, McpServerState>(state);
         }
-    }
-
-    public async IAsyncEnumerable<McpServerStateUnion> GetStateServersAsync(int tenantId, int offset, int count)
-    {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        
-        var query = dbContext.McpServerStates
-            .Where(x => x.TenantId == tenantId && x.Enabled)
-            .GroupJoin(
-                dbContext.McpServers,
-                state => state.ServerId,
-                server => server.Id,
-                (state, servers) => new { state, servers })
-            .SelectMany(
-                x => x.servers.DefaultIfEmpty(),
-                (x, server) => new McpServerStateUnion
-                {
-                    State = x.state,
-                    Server = server
-                });
-        
-        await foreach (var server in query.Skip(offset).Take(count).ToAsyncEnumerable())
-        {
-            yield return server;
-        }
-    }
-
-    public class McpServerStateUnion
-    {
-        public required DbMcpServerState State { get; init; }
-        public DbMcpServer? Server { get; init; }
-    }
-    
-    public async Task<int> GetServersCountAsync(int tenantId)
-    {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        return await dbContext.GetServersCountAsync(tenantId);
     }
 
     public async Task SetServerStateAsync(int tenantId, Guid id, bool enabled)
@@ -256,7 +351,7 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
         });
     }
     
-    public async Task AddRoomServersAsync(int tenantId, int roomId, IEnumerable<Guid> ids)
+    public async Task AddServersConnectionsAsync(int tenantId, int roomId, IEnumerable<Guid> ids)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -277,55 +372,55 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
         });
     }
 
-    public async Task<McpRoomServer?> GetRoomServerAsync(int tenantId, int roomId, Guid serverId)
+    public async Task<McpServerConnection?> GetMcpConnectionAsync(int tenantId, int roomId, Guid serverId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
-        var result = await dbContext.GetRoomServerAsync(tenantId, roomId, serverId);
-        if (result == null)
+        var item = await dbContext.GetRoomServerAsync(tenantId, roomId, serverId);
+        if (item == null)
         {
             return null;
         }
-        
-        var options = result.Options == null 
-            ? null 
-            : await result.Options.ToMcpServerAsync(crypto);
-        
-        var settings = result.Settings == null ?
-            null :
-            await result.Settings.ToMcpServerSettingsAsync(crypto);
-        
-        return new McpRoomServer { Id = result.ServerId, Server = options, Settings = settings };
+
+        if (item.Server == null)
+        {
+            if (!systemMcpConfig.Servers.TryGetValue(item.ServerId, out var systemServer))
+            {
+                return null;
+            }
+                
+            item.SystemServer = systemServer;
+        }
+            
+        return await item.ToMcpRoomServerAsync(tenantId, crypto, consumerFactory);
     }
     
-    public async IAsyncEnumerable<McpRoomServer> GetRoomServersAsync(int tenantId, int roomId)
+    public async IAsyncEnumerable<McpServerConnection> GetServerConnectionAsync(int tenantId, int roomId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         await foreach (var item in dbContext.GetRoomServersAsync(tenantId, roomId))
         {
-            var roomServer = new McpRoomServer { Id = item.ServerId };
-            
-            if (item.Options != null)
-            { 
-                roomServer.Server = await item.Options.ToMcpServerAsync(crypto);
-            }
-
-            if (item.Settings != null)
-            { 
-                roomServer.Settings = await item.Settings.ToMcpServerSettingsAsync(crypto);
+            if (item.Server == null)
+            {
+                if (!systemMcpConfig.Servers.TryGetValue(item.ServerId, out var systemServer))
+                {
+                    continue;
+                }
+                
+                item.SystemServer = systemServer;
             }
             
-            yield return roomServer;
+            yield return await item.ToMcpRoomServerAsync(tenantId, crypto, consumerFactory);
         }
     }
     
-    public async Task<int> GetRoomServersCountAsync(int tenantId, int roomId)
+    public async Task<int> GetServersConnectionsCountAsync(int tenantId, int roomId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         return await dbContext.GetRoomServersCountAsync(tenantId, roomId);
     }
     
-    public async Task DeleteServersFromRoomAsync(int tenantId, int roomId, List<Guid> serversIds)
+    public async Task DeleteServersConnectionsAsync(int tenantId, int roomId, List<Guid> serversIds)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -391,22 +486,5 @@ public class McpDao(IDbContextFactory<AiDbContext> dbContextFactory, InstanceCry
         }
 
         return await dbSettings.ToMcpServerSettingsAsync(crypto);
-    }
-
-    public async IAsyncEnumerable<McpServerSettings> GetServersSettings(int tenantId, int roomId, Guid userId, IEnumerable<Guid> serversIds)
-    {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var query = dbContext.RoomMcpServerSettings
-            .Where(x => 
-                x.TenantId == tenantId &&
-                x.RoomId == roomId &&
-                x.UserId == userId && 
-                serversIds.Contains(x.ServerId))
-            .Include(dbMcpSettings => dbMcpSettings.ToolsConfiguration);
-
-        await foreach (var dbSettings in query.AsAsyncEnumerable())
-        {
-            yield return await dbSettings.ToMcpServerSettingsAsync(crypto);
-        }
     }
 }

@@ -24,17 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.FederatedLogin.LoginProviders;
-
 namespace ASC.AI.Core.MCP.Data;
 
-public class McpExecutionOptions
+public class McpServerStatus
 {
+    public Guid Id { get; init; }
     public required string Name { get; init; }
-    public required string Endpoint { get; init; }
-    public Dictionary<string, string>? Headers { get; init; }
     public ServerType ServerType { get; init; }
-    public ConnectionType ConnectionType { get; init; }
-    public OauthProvider? OauthProvider { get; init; }
-    public McpServerSettings? Settings { get; init; }
+    public bool Connected { get; set; }
+    public string? AuthorizationEndpoint { get; set; }
 }

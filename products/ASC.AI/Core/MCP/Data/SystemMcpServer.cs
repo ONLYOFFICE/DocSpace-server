@@ -32,7 +32,6 @@ namespace ASC.AI.Core.MCP.Data;
 public class SystemMcpServer
 {
     public Guid Id { get; init; }
-    public int TenantId { get; init; }
     public required string Name { get; set; }
     public string? Description { get; set; }
     public required string Endpoint { get; set; }
@@ -40,4 +39,24 @@ public class SystemMcpServer
     public ServerType Type { get; init; }
     public ConnectionType ConnectionType { get; init; }
     public Func<ConsumerFactory, OauthProvider>? LoginProviderSelector { get; init; }
+}
+
+public static class SystemMcpServerExtensions 
+{
+    public static McpServer ToMcpServer(this SystemMcpServer systemMcpServer, int tenantId, DbMcpServerState? state)
+    {
+        return new McpServer
+        {
+            Id = systemMcpServer.Id,
+            TenantId = tenantId,
+            Name = systemMcpServer.Name,
+            Description = systemMcpServer.Description,
+            Endpoint = systemMcpServer.Endpoint,
+            Headers = systemMcpServer.Headers,
+            Type = systemMcpServer.Type,
+            ConnectionType = systemMcpServer.ConnectionType,
+            System = true,
+            Enabled = state?.Enabled ?? false
+        };
+    }
 }

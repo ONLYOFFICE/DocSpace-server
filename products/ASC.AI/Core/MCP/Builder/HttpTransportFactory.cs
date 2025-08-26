@@ -36,25 +36,25 @@ public class HttpTransportFactory(
     IHttpMessageHandlerFactory messageHandlerFactory,
     OAuth20TokenHelper tokenHelper)
 {
-    public async Task<SseClientTransport> CreateAsync(McpExecutionOptions executionOptions)
+    public async Task<SseClientTransport> CreateAsync(McpServerConnection connection)
     {
-        if (executionOptions.ServerType is ServerType.DocSpace)
+        if (connection.ServerType is ServerType.DocSpace)
         {
             var docspaceBuilder = new DocSpaceTransportBuilder(cookiesManager, commonLinkUtility, clientFactory);
-            return await docspaceBuilder.BuildAsync(executionOptions);
+            return await docspaceBuilder.BuildAsync(connection);
         }
 
-        if (executionOptions.ConnectionType is ConnectionType.OAuth)
+        if (connection.ConnectionType is ConnectionType.OAuth)
         {
             var oauthGenericBuilder = new OauthGenericTransportBuilder(tokenHelper, messageHandlerFactory);
-            return await oauthGenericBuilder.BuildAsync(executionOptions);
+            return await oauthGenericBuilder.BuildAsync(connection);
         }
 
         var options = new SseClientTransportOptions
         {
-            Name = executionOptions.Name,
-            Endpoint = new Uri(executionOptions.Endpoint),
-            AdditionalHeaders = executionOptions.Headers,
+            Name = connection.Name,
+            Endpoint = new Uri(connection.Endpoint),
+            AdditionalHeaders = connection.Headers,
             TransportMode = HttpTransportMode.AutoDetect,
             ConnectionTimeout = TimeSpan.FromSeconds(5)
         };
