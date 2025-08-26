@@ -34,6 +34,7 @@ using ASC.Core.Common.Settings;
 using ASC.Core.Tenants;
 using ASC.Core.Users;
 using ASC.MessagingSystem.Core;
+using ASC.Web.Core.PublicResources;
 using ASC.Web.Studio.Core.Notify;
 
 using Microsoft.EntityFrameworkCore;
@@ -147,7 +148,7 @@ public class TopUpWalletService(
             var truncated = Math.Truncate(subAccount.Amount * 100) / 100; // Truncate to 2 decimal places
             var amount = settings.UpToBalance - truncated;
 
-            var result = await tariffService.TopUpDepositAsync(data.TenantId, amount, settings.Currency, true);
+            var result = await tariffService.TopUpDepositAsync(data.TenantId, amount, settings.Currency, Resource.AutoTopUp, true);
 
             if (result)
             {

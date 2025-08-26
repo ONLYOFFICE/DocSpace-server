@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,18 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.Extension;
+namespace ASC.Data.Backup.Services;
 
-public static class ConfigurationManagerExtension
+[Singleton]
+public class BackupConfigurationService(IConfiguration configuration)
 {
-    public static ConfigurationManager AddBackupConfiguration(
-    this ConfigurationManager config,
-    IHostEnvironment env)
-    {
-        config.AddJsonFile("notify.json", optional: false, reloadOnChange: true)
-              .AddJsonFile($"notify.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
-              .AddJsonFile("backup.json", optional: false, reloadOnChange: true);
+    private readonly BackupSettings _configurationSettings = configuration.GetSection("backup").Get<BackupSettings>();
 
-        return config;
-    }
+    public BackupSettings Settings => _configurationSettings;
 }

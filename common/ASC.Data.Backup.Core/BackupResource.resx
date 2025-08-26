@@ -135,4 +135,7 @@
   <data name="RestoreException" xml:space="preserve">
     <value>Something went wrong while restoring the backup. Please try restoring it again or contact support.</value>
   </data>
+  <data name="ScheduledBackup" xml:space="preserve">
+    <value>Scheduled backup</value>
+  </data>
 </root>

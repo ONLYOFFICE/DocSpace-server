@@ -47,4 +47,9 @@ public static class LockKeyHelper
     {
         return $"users_in_room_count_check_{tenantId}";
     }
+
+    public static string GetFreeBackupsCountCheckKey(int tenantId)
+    {
+        return $"free_backups_count_check_{tenantId}";
+    }
 }
