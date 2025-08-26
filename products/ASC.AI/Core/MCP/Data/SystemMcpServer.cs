@@ -53,7 +53,7 @@ public static class SystemMcpServerExtensions
             Description = systemMcpServer.Description,
             Endpoint = systemMcpServer.Endpoint,
             Headers = systemMcpServer.Headers,
-            Type = systemMcpServer.Type,
+            ServerType = systemMcpServer.Type,
             ConnectionType = systemMcpServer.ConnectionType,
             System = true,
             Enabled = state?.Enabled ?? false

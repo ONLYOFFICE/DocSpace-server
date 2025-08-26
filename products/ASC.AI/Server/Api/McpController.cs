@@ -33,28 +33,29 @@ namespace ASC.AI.Api;
 public class McpController(McpService mcpService, IMapper mapper, ApiContext apiContext) : ControllerBase
 {
     [HttpPost("servers")]
-    public async Task<McpServerOptionsDto> AddServerAsync(AddServerRequestDto inDto)
+    public async Task<McpServerDto> AddServerAsync(AddServerRequestDto inDto)
     {
-        var server = await mcpService.AddCustomServerAsync(inDto.Body.Endpoint, inDto.Body.Name, inDto.Body.Description, inDto.Body.Headers);
+        var server = await mcpService.AddCustomServerAsync(
+            inDto.Body.Endpoint, inDto.Body.Name, inDto.Body.Description, inDto.Body.Headers);
         
-        return mapper.Map<McpServer, McpServerOptionsDto>(server);
+        return mapper.Map<McpServer, McpServerDto>(server);
     }
     
     [HttpPut("servers/{id}")]
-    public async Task<McpServerOptionsDto> UpdateServerAsync(UpdateServerRequestDto inDto)
+    public async Task<McpServerDto> UpdateServerAsync(UpdateServerRequestDto inDto)
     {
         var server = await mcpService.UpdateCustomServerAsync(inDto.Id, inDto.Body.Endpoint, inDto.Body.Name, 
             inDto.Body.Headers, inDto.Body.Description, inDto.Body.Enabled);
         
-        return mapper.Map<McpServer, McpServerOptionsDto>(server);
+        return mapper.Map<McpServer, McpServerDto>(server);
     }
     
     [HttpPut("servers/{id}/status")]
-    public async Task<McpServerOptionsDto> SetServerStatusAsync(SetServerStatusRequestDto inDto)
+    public async Task<McpServerDto> SetServerStatusAsync(SetServerStatusRequestDto inDto)
     {
         var server = await mcpService.SetServerStateAsync(inDto.Id, inDto.Body.Enabled);
         
-        return mapper.Map<McpServer, McpServerOptionsDto>(server);
+        return mapper.Map<McpServer, McpServerDto>(server);
     }
     
     [HttpDelete("servers")]
@@ -74,6 +75,16 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
         
         return mapper.Map<List<McpServer>, List<McpServerDto>>(servers);
     }
+
+    [HttpGet("servers/available")]
+    public async Task<List<McpServerShortDto>> GetAvailableServersAsync(PaginatedRequestDto inDto)
+    {
+        var (servers, count) = await mcpService.GetActiveServerAsync(inDto.StartIndex, inDto.Count);
+        
+        apiContext.SetCount(servers.Count).SetTotalCount(count);
+        
+        return mapper.Map<List<McpServer>, List<McpServerShortDto>>(servers);
+    }
     
     [HttpPost("rooms/{roomId}/servers")]
     public async Task AddRoomServersAsync(AddRoomServersRequestDto inDto)
@@ -82,17 +93,18 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     }
 
     [HttpGet("rooms/{roomId}/servers")]
-    public async Task<List<McpRoomDto>> GetRoomServersAsync(GetRoomServersRequestDto inDto)
+    public async Task<List<McpServerStatusDto>> GetRoomServersAsync(GetRoomServersRequestDto inDto)
     {
         var servers = await mcpService.GetServersStatusesAsync(inDto.RoomId);
         
-        return mapper.Map<List<McpServerStatus>, List<McpRoomDto>>(servers);
+        return mapper.Map<List<McpServerStatus>, List<McpServerStatusDto>>(servers);
     }
 
     [HttpDelete("rooms/{roomId}/servers")]
     public async Task<NoContentResult> DeleteRoomServersAsync(DeleteRoomServersRequestDto inDto)
     {
         await mcpService.DeleteServersFromRoomAsync(inDto.RoomId, inDto.Body.Servers);
+        
         return NoContent();
     }
 
@@ -101,21 +113,15 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     {
         var tools = await mcpService.SetToolsAsync(inDto.RoomId, inDto.ServerId, 
             inDto.Body.DisabledTools);
-        return tools.Select(x => new McpToolDto
-        {
-            Name = x.Key,
-            Enabled = x.Value
-        }).ToList();
+        
+        return tools.Select(x => new McpToolDto { Name = x.Key, Enabled = x.Value }).ToList();
     }
 
     [HttpGet("rooms/{roomId}/servers/{serverId}/tools")]
     public async Task<List<McpToolDto>> GetToolsAsync(GetMcpToolsRequestDto inDto)
     {
         var tools = await mcpService.GetToolsAsync(inDto.RoomId, inDto.ServerId);
-        return tools.Select(x => new McpToolDto
-        {
-            Name = x.Key,
-            Enabled = x.Value
-        }).ToList();
+        
+        return tools.Select(x => new McpToolDto { Name = x.Key, Enabled = x.Value }).ToList();
     }
 }

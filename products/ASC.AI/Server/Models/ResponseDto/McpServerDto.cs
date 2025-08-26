@@ -29,10 +29,10 @@ namespace ASC.AI.Models.ResponseDto;
 public class McpServerDto : IMapFrom<McpServer>
 {
     public Guid Id { get; init; }
-    public required string Name { get; init; }
+    public string? Name { get; init; }
     public string? Description { get; init; }
-    public bool Enabled { get; init; }
-    public ServerType ServerType { get; init; }
     public string? Endpoint { get; init; }
+    public ServerType ServerType { get; init; }
     public IDictionary<string, string>? Headers { get; init; }
+    public bool Enabled { get; init; }
 }

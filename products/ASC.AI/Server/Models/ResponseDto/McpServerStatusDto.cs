@@ -24,45 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.MCP.Data;
+namespace ASC.AI.Models.ResponseDto;
 
-public class McpServer
+public class McpServerStatusDto : IMapFrom<McpServerStatus>
 {
     public Guid Id { get; init; }
-    public int TenantId { get; init; }
-    public required string Name { get; set; }
-    public string? Description { get; set; }
-    public required string Endpoint { get; set; }
-    public Dictionary<string, string>? Headers { get; set; }
+    public required string Name { get; init; }
     public ServerType ServerType { get; init; }
-    public ConnectionType ConnectionType { get; init; }
-    public bool System { get; init; }
-    public bool Enabled { get; set; }
-}
-
-public static class McpServerExtensions
-{
-    public static async Task<McpServer> ToMcpServerAsync(this DbMcpServerUnit dbMcpUnit, InstanceCrypto crypto)
-    {
-        var server = new McpServer
-        {
-            Id = dbMcpUnit.Server.Id, 
-            TenantId = dbMcpUnit.Server.TenantId, 
-            Name = dbMcpUnit.Server.Name,
-            Description = dbMcpUnit.Server.Description,
-            Endpoint = dbMcpUnit.Server.Endpoint,
-            ConnectionType = dbMcpUnit.Server.ConnectionType,
-            Enabled = dbMcpUnit.State?.Enabled ?? false
-        };
-
-        if (dbMcpUnit.Server.Headers == null)
-        {
-            return server;
-        }
-
-        var headersJson = await crypto.DecryptAsync(dbMcpUnit.Server.Headers);
-        server.Headers = JsonSerializer.Deserialize<Dictionary<string, string>>(headersJson);
-
-        return server;
-    }
+    public bool Connected { get; init; }
+    public string? AuthorizationEndpoint { get; init; }
 }

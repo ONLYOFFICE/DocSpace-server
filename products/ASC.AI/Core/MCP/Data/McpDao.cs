@@ -172,7 +172,7 @@ public class McpDao(
                     Description = systemServer.Description,
                     Endpoint = systemServer.Endpoint,
                     Headers = systemServer.Headers,
-                    Type = systemServer.Type,
+                    ServerType = systemServer.Type,
                     ConnectionType = systemServer.ConnectionType,
                     Enabled = true
                 };
@@ -230,7 +230,7 @@ public class McpDao(
                     Description = systemServer.Description,
                     Endpoint = systemServer.Endpoint,
                     Headers = systemServer.Headers,
-                    Type = systemServer.Type,
+                    ServerType = systemServer.Type,
                     ConnectionType = systemServer.ConnectionType,
                     Enabled = states.TryGetValue(systemServer.Id, out var state) && state.Enabled
                 };

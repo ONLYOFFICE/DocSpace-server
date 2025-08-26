@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,8 +26,9 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class McpRoomDto : IMapFrom<McpServerStatus>
+public class McpServerShortDto : IMapFrom<McpServer>
 {
     public Guid Id { get; init; }
-    public required string Name { get; init; } 
+    public string? Name { get; init; }
+    public ServerType ServerType { get; init; }
 }
