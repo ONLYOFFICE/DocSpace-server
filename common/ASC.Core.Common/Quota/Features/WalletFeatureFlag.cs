@@ -24,18 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.Extension;
+namespace ASC.Core.Common.Quota.Features;
 
-public static class ConfigurationManagerExtension
+public class WalletFeatureFlag(TenantQuota tenantQuota) : TenantQuotaFeatureFlag(tenantQuota)
 {
-    public static ConfigurationManager AddBackupConfiguration(
-    this ConfigurationManager config,
-    IHostEnvironment env)
-    {
-        config.AddJsonFile("notify.json", optional: false, reloadOnChange: true)
-              .AddJsonFile($"notify.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
-              .AddJsonFile("backup.json", optional: false, reloadOnChange: true);
+    public override bool Paid { get => true; }
 
-        return config;
-    }
 }

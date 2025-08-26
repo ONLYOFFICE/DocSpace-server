@@ -113,5 +113,14 @@ namespace ASC.Data.Backup.Core {
                 return ResourceManager.GetString("RestoreException", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Scheduled backup.
+        /// </summary>
+        internal static string ScheduledBackup {
+            get {
+                return ResourceManager.GetString("ScheduledBackup", resourceCulture);
+            }
+        }
     }
 }

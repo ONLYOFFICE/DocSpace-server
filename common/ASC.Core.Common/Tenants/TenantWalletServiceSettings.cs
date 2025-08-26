@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,18 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.Extension;
+namespace ASC.Core.Tenants;
 
-public static class ConfigurationManagerExtension
+[Scope]
+[Serializable]
+public class TenantWalletServiceSettings : ISettings<TenantWalletServiceSettings>
 {
-    public static ConfigurationManager AddBackupConfiguration(
-    this ConfigurationManager config,
-    IHostEnvironment env)
-    {
-        config.AddJsonFile("notify.json", optional: false, reloadOnChange: true)
-              .AddJsonFile($"notify.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
-              .AddJsonFile("backup.json", optional: false, reloadOnChange: true);
+    /// <summary>
+    /// Enabled services
+    /// </summary>
+    public List<TenantWalletService> EnabledServices { get; set; }
 
-        return config;
+    [JsonIgnore]
+    public Guid ID
+    {
+        get { return new Guid("{1285F7B0-9927-4911-9DA1-4F5D1F90FE73}"); }
     }
+
+    public TenantWalletServiceSettings GetDefault()
+    {
+        return new TenantWalletServiceSettings();
+    }
+
+    public DateTime LastModified { get; set; }
 }
