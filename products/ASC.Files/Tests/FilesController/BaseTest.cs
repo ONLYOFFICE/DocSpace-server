@@ -215,7 +215,7 @@ public class BaseTest(
             initialLinkParams.ExpirationDate = new ApiDateTime { UtcTime = expirationDate.Value };
         }
         
-        var initialLink = (await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
+        var initialLink = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
         var fileShareLink = DeserializeSharedToLink(initialLink);
         
         return (fileShareLink.RequestToken, file.Id);
