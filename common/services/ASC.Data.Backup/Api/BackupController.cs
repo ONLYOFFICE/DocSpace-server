@@ -458,7 +458,7 @@ public class BackupController(
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var to = dto.To ?? DateTime.UtcNow;
+        var to = dto.To ?? DateTime.UtcNow.AddSeconds(1);
         var from = dto.From ?? to.AddMonths(-1);
 
         if (from > to)
