@@ -1191,4 +1191,10 @@
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Type</value>
   </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
 </root>

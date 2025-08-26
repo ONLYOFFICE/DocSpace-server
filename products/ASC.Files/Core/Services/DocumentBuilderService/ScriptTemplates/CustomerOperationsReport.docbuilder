@@ -59,6 +59,7 @@ function prepareData(startColIndex, startRowIndex) {
                 value: inputData.values[i][j].value,
                 url: inputData.values[i][j].url,
                 fontSize: (defaultFontSize + 1),
+                halign: inputData.values[i][j].halign,
                 valign: "center",
                 format: inputData.values[i][j].format
             });

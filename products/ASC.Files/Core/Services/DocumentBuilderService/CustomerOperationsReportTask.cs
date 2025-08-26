@@ -127,7 +127,10 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             Resource.AccountingCustomerOperationCurrency
         };
 
-        var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        var options = new JsonSerializerOptions {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
 
         script = script
             .Replace("${sheetName}", Resource.AccountingCustomerOperationsReportSheetName)
@@ -178,10 +181,15 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
             foreach (var operation in report.Collection)
             {
-                operation.Description = GetServiceDesc(operation.Service);
+                var (description, unitOfMeasurement) = GetServiceDescAndUOM(operation.Service);
+
+                operation.Description = description;
                 operation.Details = string.Empty;
+                operation.ServiceUnit = unitOfMeasurement;
                 operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
-                operation.ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value) ? value : operation.ParticipantName;
+                operation.ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
+                    ? value
+                    : operation.ParticipantName;
 
                 if (string.IsNullOrEmpty(operation.Service))
                 {
@@ -212,11 +220,11 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 new(record.Description, "@"),
                 new(record.Details, "@"),
                 new(record.ParticipantDisplayName, "@"),
-                new(record.Quantity.ToString(), "General"),
+                new(record.Quantity.ToString(), "General", "right"),
                 new(record.ServiceUnit, "@"),
-                new(record.Credit.ToString(), "0.0000000000"),
-                new(record.Withdrawal.ToString(), "0.0000000000"),
-                new(record.Currency, "@"),
+                new(record.Credit.ToString(), "0.0000000000", "right"),
+                new(record.Withdrawal.ToString(), "0.0000000000", "right"),
+                new(record.Currency, "@")
             };
 
             _ = sb.AppendLine(JsonSerializer.Serialize(properties, jsonSerializerOptions) + ",");
@@ -225,17 +233,24 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return sb.ToString();
     }
 
-    private static string GetServiceDesc(string serviceName)
+    private static (string, string) GetServiceDescAndUOM(string serviceName)
     {
+        // for testing purposes
         if (serviceName != null && serviceName.StartsWith("disk-storage"))
         {
             serviceName = "disk-storage";
         }
 
-        return Resource.ResourceManager.GetString("AccountingCustomerOperationServiceDesc_" + (serviceName ?? "top-up"));
+        if (string.IsNullOrEmpty(serviceName))
+        {
+            serviceName = "top-up";
+        }
+
+        return (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}"),
+            Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"));
     }
 
-    record PropertyValue(string Value, string Format);
+    record PropertyValue(string Value, string Format, string Halign = null);
 }
 
 public record CustomerOperationsReportTaskData(IDictionary<string, string> Headers, DateTime? StartDate, DateTime? EndDate, string ParticipantName, bool? Credit, bool? Withdrawal);

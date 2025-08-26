@@ -128,20 +128,24 @@ public class OperationDto
 
     public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)
     {
+        var (description, unitOfMeasurement) = GetServiceDescAndUOM(operation.Service);
+
         Date = apiDateTimeHelper.Get(operation.Date);
         Service = operation.Service;
-        Description = GetServiceDesc(operation.Service);
+        Description = description;
         Details = string.Empty;
-        ServiceUnit = operation.ServiceUnit;
+        ServiceUnit = unitOfMeasurement;
         Quantity = operation.Quantity;
         Currency = operation.Currency;
         Credit = operation.Credit;
         Withdrawal = operation.Withdrawal;
         ParticipantName = operation.ParticipantName;
-        ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value) ? value : operation.ParticipantName;
+        ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
+            ? value
+            : operation.ParticipantName;
     }
 
-    public static string GetServiceDesc(string serviceName)
+    private static (string, string) GetServiceDescAndUOM(string serviceName)
     {
         // for testing purposes
         if (serviceName != null && serviceName.StartsWith("disk-storage"))
@@ -149,7 +153,13 @@ public class OperationDto
             serviceName = "disk-storage";
         }
 
-        return Resource.ResourceManager.GetString("AccountingCustomerOperationServiceDesc_" + (serviceName ?? "top-up"));
+        if (string.IsNullOrEmpty(serviceName))
+        {
+            serviceName = "top-up";
+        }
+
+        return (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}"),
+            Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"));
     }
 }
 

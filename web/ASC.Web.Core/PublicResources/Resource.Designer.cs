@@ -151,6 +151,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Backup.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_backup {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_backup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GB.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_disk_storage {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_disk-storage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Customer operations report ({0}-{1}).
         /// </summary>
         public static string AccountingCustomerOperationsReportName {
