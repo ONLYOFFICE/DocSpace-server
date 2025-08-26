@@ -796,13 +796,13 @@ Questo link è valido 7 giorni dalla ricezione di questo messaggio.</value>
     <value>&lt;b&gt;{0}&lt;/b&gt; ha eliminato la stanza: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt;  è stato aggiunto alla stanza: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt;  è stato aggiunto alla stanza: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ha spostato la stanza: &lt;a href={1}&gt;{2}&lt;/a&gt; to archive - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha spostato la stanza: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; to archive - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; è stato assegnato il ruolo di &lt;b&gt;{1}&lt;/b&gt; nella stanza: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; è stato assegnato il ruolo di &lt;b&gt;{1}&lt;/b&gt; nella stanza: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Aggiunto nuovo utente di DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -1190,25 +1190,25 @@ $TrulyYours</value>
     <value>Vai alla sezione Pagamenti</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ha creato un nuovo documento: &lt;a href={1}&gt;{2}&lt;/a&gt; nella stanza: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha creato un nuovo documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; nella stanza: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ha modificato il documento: &lt;a href={1}&gt;{2}&lt;/a&gt; nella stanza: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha modificato il documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; nella stanza: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ha caricato un nuovo documento: &lt;a href={1}&gt;{2}&lt;/a&gt; nella stanza: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha caricato un nuovo documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; nella stanza: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ha aggiunto un nuovo commento alla versione del documento: &lt;a href={1}&gt;{2}&lt;/a&gt; nella stanza: &lt;a href={3}&gt;{4}&lt; /a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha aggiunto un nuovo commento alla versione del documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; nella stanza: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt; /a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ha rinominato la stanza: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b &gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha rinominato la stanza: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b &gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; è stato rimosso dalla stanza: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; è stato rimosso dalla stanza: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ha creato una nuova stanza: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha creato una nuova stanza: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Vuoi cambiare l'e-mail del tuo account ${LetterLogoText}?

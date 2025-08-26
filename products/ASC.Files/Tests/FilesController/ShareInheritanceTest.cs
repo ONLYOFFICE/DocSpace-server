@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using LinkType = DocSpace.Sdk.Model.LinkType;
+using LinkType =  DocSpace.API.SDK.Model.LinkType;
 
 namespace ASC.Files.Tests.FilesController;
 
@@ -710,7 +710,7 @@ public class ShareInheritanceTest(
         // Act - Set the link with FileShare.None
         var updateRequest = new FileLinkRequest(
             linkId: originalSharedTo.Id, 
-            varInternal: true);
+            @internal: true);
 
         var updatedLink = (await _filesApi.SetFileExternalLinkAsync(file.Id, updateRequest, TestContext.Current.CancellationToken)).Response;
         var updatedSharedTo = DeserializeSharedToLink(updatedLink);
@@ -788,8 +788,8 @@ public class ShareInheritanceTest(
         var originalFileSharedTo = DeserializeSharedToLink(primaryFileLink);
 
         // Act - Set the link with FileShare.None
-        var updateFolderRequest = new FolderLinkRequest(linkId: originalFolderSharedTo.Id, varInternal: false, access: primaryFolderLink.Access);
-        var updateFileRequest = new FileLinkRequest(linkId: originalFileSharedTo.Id, varInternal: false, access: primaryFolderLink.Access);
+        var updateFolderRequest = new FolderLinkRequest(linkId: originalFolderSharedTo.Id, @internal: false, access: primaryFolderLink.Access);
+        var updateFileRequest = new FileLinkRequest(linkId: originalFileSharedTo.Id, @internal: false, access: primaryFolderLink.Access);
 
         var updatedFolderLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, updateFolderRequest, TestContext.Current.CancellationToken)).Response;
         var updatedFolderSharedTo = DeserializeSharedToLink(updatedFolderLink);

@@ -195,7 +195,7 @@ public class ShareFileTest(
             linkId: sharedTo.Id,
             access: FileShare.Editing,
             expirationDate: new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1)},
-            varInternal: true,
+            @internal: true,
             denyDownload: true,
             password: "testpassword"
         );
