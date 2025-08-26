@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Billing;
+
 namespace ASC.Site.Core;
 
 public class Startup
@@ -120,6 +122,9 @@ public class Startup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddScoped<AuthHandler>();
+
+        services.AddBillingHttpClient();
+        services.AddAccountingHttpClient();
 
         services
             .AddAuthentication()
