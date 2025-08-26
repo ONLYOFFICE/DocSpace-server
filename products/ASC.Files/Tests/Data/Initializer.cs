@@ -128,7 +128,7 @@ public static class Initializer
         }
         
         await filesFactory.HttpClient.Authenticate(Owner);
-        _ = await filesFactory.FilesFoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
+        _ = await filesFactory.FoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         if (!_initialized)
         {
