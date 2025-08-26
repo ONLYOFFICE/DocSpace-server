@@ -2043,7 +2043,7 @@ $TrulyYours</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>مرحبًا!
 
-تم تعيين دور جديد لكم في غرفة "DocSpace "${RoomTitle}":"${RoomUrl}، والدور هو: ${UserRole}.
+تم تعيين دور جديد لكم في غرفة DocSpace "${RoomTitle}":"${RoomUrl}"، والدور هو: ${UserRole}.
 
 يمكنكم معرفة المزيد حول الأدوار والصلاحيات في الغرف من خلال "مركز المساعدة":"${HelpCenterUrl}".
 
@@ -2052,7 +2052,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>مرحبًا!
 
-تم تعيين نوع مستخدم جديد لكم في "DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}، والنوع هو: ${UserType}.
+تم تعيين نوع مستخدم جديد لكم في DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}"، والنوع هو: ${UserType}.
 
 يمكنكم معرفة المزيد حول أنواع المستخدمين والصلاحيات من خلال "مركز المساعدة":"${HelpCenterUrl}".
 
