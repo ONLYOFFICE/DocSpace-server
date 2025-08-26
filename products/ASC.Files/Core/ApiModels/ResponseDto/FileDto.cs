@@ -271,7 +271,9 @@ public class FileDtoHelper(
                 FileSecurity.FilesSecurityActions.Embed,
                 FileSecurity.FilesSecurityActions.StartFilling,
                 FileSecurity.FilesSecurityActions.StopFilling,
-                FileSecurity.FilesSecurityActions.CopySharedLink
+                FileSecurity.FilesSecurityActions.CopySharedLink,
+                FileSecurity.FilesSecurityActions.CopyLink,
+                FileSecurity.FilesSecurityActions.FillingStatus
             };
 
             foreach (var action in forbiddenActions)
