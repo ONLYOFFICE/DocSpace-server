@@ -136,9 +136,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Einstellungen vom Überschreiben wurden aktualisiert</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Dokumente</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Einstellungen</value>
   </data>
@@ -409,9 +406,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Verschieben</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Sonstiges</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Besitzer geändert: {0}</value>
   </data>
@@ -429,9 +423,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Einstellungen der Kennwortstärke sind aktualisiert</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Personen</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Plattform</value>
@@ -492,9 +483,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sitzung gestartet</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Einstellungen</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO deaktiviert</value>
@@ -924,5 +912,20 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP-Synchronisierung abgeschlossen</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Kundenvorgang ausgeführt</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Kundenvorgangsbericht heruntergeladen</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Kundenabonnement aktualisiert: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Kunden-Wallet aufgeladen: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Einstellungen für Kunden-Wallet-Aufladung aktualisiert</value>
   </data>
 </root>

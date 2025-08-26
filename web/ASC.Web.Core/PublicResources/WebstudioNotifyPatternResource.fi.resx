@@ -153,37 +153,37 @@ $TrulyYours</value>
     <value>Uusi käyttäjä lisätty ${LetterLogoText} portaaliin</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; uusi dokumentti luotu: &lt;a href={1}&gt;{2}&lt;/a&gt; huoneessa: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; uusi dokumentti luotu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; huoneessa: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; uusi kommentti lisätty dokumentin versioon: &lt;a href={1}&gt;{2}&lt;/a&gt; huoneessa: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; uusi kommentti lisätty dokumentin versioon: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; huoneessa: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; uusi dokumentti ladattu: &lt;a href={1}&gt;{2}&lt;/a&gt; huoneessa: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; uusi dokumentti ladattu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; huoneessa: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; huone nimetty uudelleen: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; huone nimetty uudelleen: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; uusi huone luotu: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; uusi huone luotu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; poistettu huoneesta: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; poistettu huoneesta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; muokkasi dokumenttia: &lt;a href={1}&gt;{2}&lt;/a&gt; huoneessa: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; muokkasi dokumenttia: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; huoneessa: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; huone poistettu: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; lisättiin huoneeseen: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; lisättiin huoneeseen: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; siirrettiin huoneeseen: &lt;a href={1}&gt;{2}&lt;/a&gt; to arkisto - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; siirrettiin huoneeseen: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; to arkisto - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; määrättiin rooliin &lt;b&gt;{1}&lt;/b&gt; huoneessa: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; määrättiin rooliin &lt;b&gt;{1}&lt;/b&gt; huoneessa: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Uusi DocSpace käyttäjä lisätty: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -949,7 +949,9 @@ ${LetterLogoText}-portaaliin kirjautumiseen käyttämäsi todennussovelluksen as
 
 Ole hyvä ja klikkaa alla olevaa painiketta mennäksesi portaalin sisäänkirjautumissivulle ja määritä todennussovellus:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1. Portaalin "${__VirtualRootPath}":"${__VirtualRootPath}" omistajan muutos
@@ -1923,5 +1925,33 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
     <value>Roolisi Docspace-huoneessa on muuttunut</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Mene Palveluihin</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Mene Lompakon asetuksiin</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Hei, $UserName!
+
+Otamme sinuun yhteyttä ilmoittaaksemme, että ostamasi palvelupaketin automaattista uusimista ei voitu suorittaa.
+
+Pyydämme sinua ystävällisesti uusimaan nykyisen palvelupakettisi manuaalisesti (tai ostamaan uuden).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Hei, $UserName!
+
+Haluamme ilmoittaa, että tilausmaksusi veloitetaan automaattisesti tililtäsi 3 päivän kuluttua.
+
+Varmistaaksesi sujuvan maksutapahtuman, varmista, että maksutavallasi on riittävästi katetta.
+
+Jos sinulla on kysyttävää tai tarvitse apua, ota rohkeasti yhteyttä "tukitiimiimme":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
 </root>

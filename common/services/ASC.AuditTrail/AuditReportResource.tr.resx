@@ -124,9 +124,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Üstüne Yazma Ayarları Güncellendi</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Dökümanlar</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Ayarlar</value>
   </data>
@@ -373,9 +370,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Taşı</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Diğerleri</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Sahip Değiştirildi: {0}</value>
   </data>
@@ -393,9 +387,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Şifre Gücü Ayarları Güncellendi</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>İnsanlar</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platform</value>
@@ -450,9 +441,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Seans Başlatıldı</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Ayarlar</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO Devre Dışı Bırakıldı</value>
@@ -912,5 +900,32 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook güncellendi: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Yetkilendirme bağlantısı etkinleştirildi</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Müşteri işlemi gerçekleştirildi</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Müşteri işlemleri raporu indirildi</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Müşteri aboneliği güncellendi: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Müşteri cüzdanına para yüklendi: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Müşteri cüzdanına para yükleme ayarları güncellendi</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP kimlik doğrulaması devre dışı bırakıldı</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP kimlik doğrulaması etkinleştirildi</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP senkronizasyonu tamamlandı</value>
   </data>
 </root>

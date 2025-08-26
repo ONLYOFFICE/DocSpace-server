@@ -510,37 +510,37 @@ $TrulyYours</value>
     <value>新用户添加到${LetterLogoText}门户</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 已创建新的文档： &lt;a href={1}&gt;{2}&lt;/a&gt; ，房间： &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 已创建新的文档： &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; ，房间： &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 已添加新的评论，文档: &lt;a href={1}&gt;{2}&lt;/a&gt; ，房间： &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 已添加新的评论，文档: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; ，房间： &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 已上传新的文档： &lt;a href={1}&gt;{2}&lt;/a&gt; ，房间： &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 已上传新的文档： &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; ，房间： &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 已重新命名房间： &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 已重新命名房间： &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 已创建新的房间： &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 已创建新的房间： &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 已被移出房间： &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 已被移出房间： &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 已编辑文档：&lt;a href={1}&gt;{2}&lt;/a&gt; in the room: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 已编辑文档：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; in the room: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; 已删除房间： &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt;  已被加入房间：&lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt;  已被加入房间：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 把房间： &lt;a href={1}&gt;{2}&lt;/a&gt; 已移动至存档 - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 把房间： &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 已移动至存档 - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 被任命为 &lt;b&gt;{1}&lt;/b&gt; ，房间： &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 被任命为 &lt;b&gt;{1}&lt;/b&gt; ，房间： &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>新增协作空间的用户： &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -1007,7 +1007,9 @@ $OrangeButton
 
 请点击下方的按钮前往门户登录页面并配置身份验证器应用程序：
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. 加入 &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;协作空间
@@ -1959,5 +1961,39 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>您的 ${LetterLogoText} 协作空间即将支付的订阅费用</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>前往服务</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>前往钱包设置</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>您好，$UserName!
+
+温馨提示，您已购买的服务计划未能自动续订。
+
+请您手动续订当前服务计划（或购买新计划）。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>您好，$UserName!
+
+温馨提示，协作空间钱包自动充值未成功。
+
+请及时处理您的钱包余额。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>需要操作：无法自动续订您的${LetterLogoText}协作空间中的服务套餐</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>需要操作：无法自动为您的${LetterLogoText}协作空间中的钱包余额充值</value>
   </data>
 </root>

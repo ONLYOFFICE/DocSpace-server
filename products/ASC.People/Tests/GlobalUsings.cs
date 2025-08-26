@@ -13,9 +13,9 @@ global using ASC.Migrations.Core;
 global using Bogus;
 global using Bogus.DataSets;
 
-global using Docspace.Api;
-global using Docspace.Client;
-global using Docspace.Model;
+global using DocSpace.API.SDK.Api;
+global using DocSpace.API.SDK.Client;
+global using DocSpace.API.SDK.Model;
 
 global using DotNet.Testcontainers.Builders;
 global using DotNet.Testcontainers.Containers;

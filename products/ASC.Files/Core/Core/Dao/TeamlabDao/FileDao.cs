@@ -243,6 +243,7 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
+            case FilterType.DiagramsOnly:
                 query = query.Where(r => r.Category == (int)filterType);
                 break;
             case FilterType.ByExtension:
@@ -1070,10 +1071,16 @@ internal class FileDao(
                 
                 if (trashId.Equals(toFolderId))
                 {
+                    await q.ExecuteUpdateAsync(f => f
+                        .SetProperty(p => p.ParentId, toFolderId)
+                        .SetProperty(p => p.ModifiedBy, _authContext.CurrentAccount.ID)
+                        .SetProperty(p => p.ModifiedOn, DateTime.UtcNow));
+
                     await DeleteCustomOrder(filesDbContext, fileId);
                 }
                 else
                 {
+                    await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
                     await SetCustomOrder(filesDbContext, fileId, toFolderId);
                 }
 
@@ -1711,6 +1718,7 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
+            case FilterType.DiagramsOnly:
             case FilterType.PdfForm:
             case FilterType.Pdf:
                 q = q.Where(r => r.Category == (int)filterType);
@@ -1881,7 +1889,11 @@ internal class FileDao(
             {
                 SortedByType.Author => orderBy.IsAsc ? q.OrderBy(r => r.Entry.CreateBy) : q.OrderByDescending(r => r.Entry.CreateBy),
                 SortedByType.Size => orderBy.IsAsc ? q.OrderBy(r => r.Entry.ContentLength) : q.OrderByDescending(r => r.Entry.ContentLength),
-                SortedByType.AZ => orderBy.IsAsc ? q.OrderBy(r => r.Entry.Title) : q.OrderByDescending(r => r.Entry.Title),
+                SortedByType.AZ => orderBy.IsAsc 
+                    ? q.OrderBy(r => Convert.ToInt32(DbFunctionsExtension.SubstringIndex(r.Entry.Title, '.', 1)))
+                        .ThenBy(r => r.Entry.Title)
+                    : q.OrderByDescending(r => Convert.ToInt32(DbFunctionsExtension.SubstringIndex(r.Entry.Title, '.', 1)))
+                        .ThenByDescending(r => r.Entry.Title),
                 SortedByType.DateAndTime => orderBy.IsAsc ? q.OrderBy(r => r.Entry.ModifiedOn) : q.OrderByDescending(r => r.Entry.ModifiedOn),
                 SortedByType.DateAndTimeCreation => orderBy.IsAsc ? q.OrderBy(r => r.Entry.CreateOn) : q.OrderByDescending(r => r.Entry.CreateOn),
                 SortedByType.Type => orderBy.IsAsc
@@ -2086,6 +2098,7 @@ internal class FileDao(
                 case FilterType.SpreadsheetsOnly:
                 case FilterType.ArchiveOnly:
                 case FilterType.MediaOnly:
+                case FilterType.DiagramsOnly:
                     result.Where(r => r.Category, (int)filterType);
                     break;
             }
@@ -2238,9 +2251,28 @@ internal class FileDao(
                         where f.TenantId == r.TenantId
                         select f
                     ).FirstOrDefault(),
-                Shared = filesDbContext.Security.Any(s => 
-                    s.TenantId == r.TenantId && s.EntryId == r.Id.ToString() && s.EntryType == FileEntryType.File && 
-                    (s.SubjectType == SubjectType.PrimaryExternalLink || s.SubjectType == SubjectType.ExternalLink))
+                Shared = filesDbContext.Security.Any(x => 
+                    x.TenantId == r.TenantId && 
+                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
+                ParentShared = filesDbContext.Security.Any(x => 
+                    x.TenantId == r.TenantId && 
+                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                    x.EntryType == FileEntryType.Folder && 
+                    filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
+                Order = (
+                    from f in filesDbContext.FileOrder
+                    where (
+                        from rs in filesDbContext.RoomSettings 
+                        where rs.TenantId == f.TenantId && rs.RoomId ==
+                            (from t in filesDbContext.Tree
+                                where t.FolderId == r.ParentId
+                                orderby t.Level descending
+                                select t.ParentId
+                            ).Skip(1).FirstOrDefault()
+                        select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
+                    select f.Order
+                ).FirstOrDefault()
             });
     }
     
@@ -2401,7 +2433,11 @@ internal class FileDao(
             {
                 SortedByType.Author => orderBy.IsAsc ? q.OrderBy(r => r.CreateBy) : q.OrderByDescending(r => r.CreateBy),
                 SortedByType.Size => orderBy.IsAsc ? q.OrderBy(r => r.ContentLength) : q.OrderByDescending(r => r.ContentLength),
-                SortedByType.AZ => orderBy.IsAsc ? q.OrderBy(r => r.Title) : q.OrderByDescending(r => r.Title),
+                SortedByType.AZ => orderBy.IsAsc 
+                    ? q.OrderBy(r => Convert.ToInt32(DbFunctionsExtension.SubstringIndex(r.Title, '.', 1)))
+                        .ThenBy(r => r.Title)
+                    : q.OrderByDescending(r => Convert.ToInt32(DbFunctionsExtension.SubstringIndex(r.Title, '.', 1)))
+                        .ThenByDescending(r => r.Title),
                 SortedByType.DateAndTime => orderBy.IsAsc ? q.OrderBy(r => r.ModifiedOn) : q.OrderByDescending(r => r.ModifiedOn),
                 SortedByType.DateAndTimeCreation => orderBy.IsAsc ? q.OrderBy(r => r.CreateOn) : q.OrderByDescending(r => r.CreateOn),
                 SortedByType.Type => orderBy.IsAsc
@@ -2435,6 +2471,7 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
+            case FilterType.DiagramsOnly:
             case FilterType.PdfForm:
             case FilterType.Pdf:
                 q = q.Where(r => r.Category == (int)filterType);
@@ -2541,6 +2578,7 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
+            case FilterType.DiagramsOnly:
             case FilterType.Pdf:
             case FilterType.PdfForm:
                 q = q.Where(r => r.Entry.Category == (int)filterType);
@@ -2636,6 +2674,7 @@ public class DbFileQuery
     public DbFile File { get; init; }
     public DbFolder Root { get; set; }
     public bool Shared { get; set; }
+    public bool ParentShared { get; set; }
     public int Order { get; set; }
     public DbFilesSecurity SharedRecord { get; set; }
     public DateTime? LastOpened { get; set; }

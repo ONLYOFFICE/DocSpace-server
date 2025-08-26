@@ -92,14 +92,15 @@ public class RestoreProgressItem : BaseBackupProgressItem
         Tenant tenant = null;
         var tempFile = "";
         var socketTenant = TenantId;
+        await using var scope = _serviceScopeProvider.CreateAsyncScope();
+        _socketManager = scope.ServiceProvider.GetService<SocketManager>();
+        
         try
         {
-            await using var scope = _serviceScopeProvider.CreateAsyncScope();
-
             _tenantManager = scope.ServiceProvider.GetService<TenantManager>();
             _backupStorageFactory = scope.ServiceProvider.GetService<BackupStorageFactory>();
             _backupRepository = scope.ServiceProvider.GetService<BackupRepository>();
-            _socketManager = scope.ServiceProvider.GetService<SocketManager>();
+
 
             tenant = await _tenantManager.GetTenantAsync(TenantId);
             _tenantManager.SetCurrentTenant(tenant);

@@ -127,9 +127,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>更新配置文件覆盖</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>文档</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>设置</value>
   </data>
@@ -388,9 +385,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>移动</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>其他人</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>所有者已更改：{0}</value>
   </data>
@@ -408,9 +402,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>密码强度设置已更新</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>成员</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>平台</value>
@@ -465,9 +456,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>会话已开始</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>设置</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO已禁用</value>
@@ -924,5 +912,20 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP 同步已完成</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>客户操作已执行</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>客户操作报告已下载</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>客户订阅已更新: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>客户钱包已充值: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>客户钱包充值设置已更新</value>
   </data>
 </root>

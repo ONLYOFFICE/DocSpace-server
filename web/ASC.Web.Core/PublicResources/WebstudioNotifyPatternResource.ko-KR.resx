@@ -488,37 +488,37 @@ $TrulyYours</value>
     <value>수락</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 &lt;a href={3}&gt;{4}&lt;/a&gt; 방에 새로운 &lt;a href={1}&gt;{2}&lt;/a&gt; 문서를 생성했습니다 - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; 방에 새로운 &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 문서를 생성했습니다 - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 &lt;a href={3}&gt;{4}&lt;/a&gt; 방에서 &lt;a href={1}&gt;{2}&lt;/a&gt; 문서를 편집했습니다</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; 방에서 &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 문서를 편집했습니다</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 &lt;a href={3}&gt;{4}&lt;/a&gt; 방에 새로운 &lt;a href={1}&gt;{2}&lt;/a&gt; 문서를 업로드했습니다</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; 방에 새로운 &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 문서를 업로드했습니다</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 &lt;a href={3}&gt;{4}&lt;/a&gt; 방에서 &lt;a href={1}&gt;{2}&lt;/a&gt; 문서 버전에 새로운 주석을 추가했습니다 - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; 방에서 &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 문서 버전에 새로운 주석을 추가했습니다 - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 방을 이동했습니다: &lt;a href={1}&gt;{2}&lt;/a&gt; 아카이브 목적 - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 방을 이동했습니다: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 아카이브 목적 - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 새로운 방을 생성했습니다: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 새로운 방을 생성했습니다: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; 님이 방에서 제거되었습니다: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 방의 이름을 변경했습니다: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 방의 이름을 변경했습니다: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 방에서 &lt;b&gt;{1}&lt;/b&gt; 역할을 할당 받았습니다: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 방에서 &lt;b&gt;{1}&lt;/b&gt; 역할을 할당 받았습니다: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 방에 추가되었습니다: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 방에 추가되었습니다: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 방에서 제거되었습니다: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 님이 방에서 제거되었습니다: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUsersUpdatedType" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; 님이 사용자 액세스 수준을 변경했습니다: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -944,7 +944,9 @@ ${LetterLogoText} 포털에 입장하는 데 사용하는 인증 앱의 구성�
 
 아래 버튼을 클릭하여 포털 로그인 페이지로 이동하고 인증 애플리케이션을 구성하세요.
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 포털 소유자 변경
@@ -1982,5 +1984,51 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
     <value>DocSpace 룸에서 고객님의 역할이 변경되었습니다</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>서비스로 이동하기</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>지갑 설정으로 이동하기</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>$UserName님, 안녕하세요!
+
+구매하신 서비스 플랜의 자동 갱신이 완료되지 않았음을 알려드립니다.
+
+현재 이용 중인 서비스 플랜을 수동으로 갱신해 주시기 바랍니다. (아니면 새로운 플랜을 구매해 주세요.)
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>$UserName님, 안녕하세요!
+
+고객님의 구독료가 3일 후 계좌에서 자동으로 출금될 예정임을 알려드립니다.
+
+원활하게 진행될 수 있도록 결제 수단의 잔액이 충분한지 확인해 주시기 바랍니다.
+
+궁금한 점이 있거나 도움이 필요한 경우 언제든지 "지원 팀":"${__SupportLink}" 으로 연락주세요.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>$UserName님, 안녕하세요!
+
+DocSpace 지갑 잔액 자동 충전이 실패했음을 알려드립니다.
+
+지갑 잔액을 직접 확인 및 업데이트해 주시기 바랍니다.
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>조치가 필요합니다: 고객님의 ${LetterLogoText} DocSpace에서 서비스 플랜을 자동으로 갱신할 수 없습니다</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>고객님의 ${LetterLogoText} DocSpace에 대한 구독 결제가 예정되어 있습니다</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>조치가 필요합니다: 고객님의 ${LetterLogoText} DocSpace에서 지갑 잔액을 자동으로 충전할 수 없습니다</value>
   </data>
 </root>

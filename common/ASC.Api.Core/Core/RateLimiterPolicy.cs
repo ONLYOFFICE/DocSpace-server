@@ -30,6 +30,7 @@ public static class RateLimiterPolicy
 {
     public const string SensitiveApi = "sensitive_api";
     public const string EmailInvitationApi = "email_invitation_api";
+    public const string PaymentsApi = "payments_api";
 }
 
 public class LooppedRedisFixedWindowRateLimiter<T>(T partitionKey, RedisFixedWindowRateLimiterOptions options, int loopCount)

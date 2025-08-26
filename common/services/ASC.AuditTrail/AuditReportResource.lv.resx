@@ -130,9 +130,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Atjaunināti pārrakstīšanas uzstādījumi</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Dokumenti</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Iestatījumi</value>
   </data>
@@ -379,9 +376,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Pārvietot</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Citi</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Mainīts īpašnieks: {0}</value>
   </data>
@@ -399,9 +393,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Paroles drošuma uzstādījumi atjaunināti</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Personas</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platforma</value>
@@ -456,9 +447,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesija uzsākta</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Iestatījumi</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO atspējots</value>
@@ -912,5 +900,32 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Tīmekļa aizķere atjaunināta: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Autorizācijas saite ir aktivizēta</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Klienta darbība veikta</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Klienta darbību ziņojums lejupielādēts</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Klienta abonements atjaunināts: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Klienta maks papildināts: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Klienta maka papildināšanas iestatījumi atjaunināti</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP autentifikācija ir atspējota</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP autentifikācija ir iespējota</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP sinhronizācija pabeigta</value>
   </data>
 </root>

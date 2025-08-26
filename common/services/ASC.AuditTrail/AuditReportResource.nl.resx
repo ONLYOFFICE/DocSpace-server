@@ -124,9 +124,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Overschrijf instellingen geactualiseerd</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Documenten</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Instellingen</value>
   </data>
@@ -373,9 +370,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Verplaatsen</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Anderen</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Eigenaar Veranderd: {0}</value>
   </data>
@@ -393,9 +387,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Wachtwoordsterkte Instellingen Geüpdatet</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Personen</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platform</value>
@@ -447,9 +438,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sessie Gestart</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Instellingen</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO Uitgeschakeld</value>
@@ -912,5 +900,32 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook bijgewerkt: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>De autorisatielink is geactiveerd</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Klantenhandeling uitgevoerd</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Klantactiviteitenverslag gedownload</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Klantabonnement bijgewerkt: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Klant wallet opgeladen: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Instellingen voor het opladen van klant wallet bijgewerkt</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP-authenticatie uitgeschakeld</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP-authenticatie ingeschakeld</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP-synchronisatie voltooid</value>
   </data>
 </root>

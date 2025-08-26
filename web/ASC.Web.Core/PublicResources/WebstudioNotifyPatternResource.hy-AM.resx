@@ -118,40 +118,40 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ստեղծել է նոր փաստաթուղթ՝ &lt;a href={1}&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ստեղծել է նոր փաստաթուղթ՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; խմբագրել է փաստաթուղթը՝ &lt;a href={1}&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; խմբագրել է փաստաթուղթը՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ավելացրել է նոր մեկնաբանություն փաստաթղթի տարբերակում՝ &lt;a href={1}&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ավելացրել է նոր մեկնաբանություն փաստաթղթի տարբերակում՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; վերբեռնել է նոր փաստաթուղթ՝ &lt;a href={1}&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; վերբեռնել է նոր փաստաթուղթ՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; տեղափոխեց սենյակը՝ &lt;a href={1}&gt;{2}&lt;/a&gt; արխիվացնելու համար - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; տեղափոխեց սենյակը՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; արխիվացնելու համար - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ստեղծել է նոր սենյակ՝ &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ստեղծել է նոր սենյակ՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; սենյակը՝ &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; վերանվանեց սենյակը՝ &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; վերանվանեց սենյակը՝ &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; նշանակվել է &lt;b&gt;{1}&lt;/b&gt; սենյակում՝ &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; նշանակվել է &lt;b&gt;{1}&lt;/b&gt; սենյակում՝ &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ավելացվել է սենյակ՝ &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ավելացվել է սենյակ՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>DocSpace-ի նոր օգտատեր է ավելացվել՝ &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; հեռացվել է սենյակից՝ &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; հեռացվել է սենյակից՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUsersUpdatedType" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; փոխել է օգտատերերի մուտքի մակարդակը &lt;b&gt;{1}&lt;/b&gt; դեպի &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -525,7 +525,9 @@ Authenticator հավելվածի կազմաձևումը, որն օգտագործ
 
 Խնդրում ենք սեղմել ստորև բերված կոճակը՝ պորտալի մուտքի էջ գնալու և իսկորոշիչի հավելվածը կարգավորելու համար.
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Ցանկանու՞մ եք փոխել ձեր ${LetterLogoText} հաշվի գաղտնաբառը: Հաստատելու համար սեղմեք ստորև բերված կոճակը:
@@ -1996,5 +1998,39 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Ձեր ${LetterLogoText} DocSpace-ի բաժանորդագրության առաջիկա վճարումը</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Անցնել՝ ծառայություններ</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Անցնել դրամապանակի կարգավորումներ</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Ողջույն, $UserName!
+
+Կապվում ենք ձեզ հետ՝ տեղեկացնելու, որ ձեր գնած ծառայությունների փաթեթի ավտոմատ երկարաձգումը չի կարող ավարտվել։
+
+Խնդրում ենք երկարաձգել ձեր ներկայիս ծառայությունների փաթեթը (կամ գնել նորը)։
+
+$OrangeButton
+ 
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Ողջույն, $UserName!
+
+Տեղեկացնում ենք, որ DocSpace Wallet-ի մնացորդի ավտոմատ լիցքավորումը չի հաջողվել։ 
+
+Խնդրում ենք ստուգել և թարմացնել ձեր դրամապանակի մնացորդը։
+
+$OrangeButton
+ 
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Պահանջվող գործողություն՝ հնարավոր չէ ավտոմատ կերպով երկարաձգել սպասարկման սակագինը ձեր ${LetterLogoText} DocSpace-ում։</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Պահանջվող գործողություն՝ հնարավոր չէ ավտոմատ կերպով լիցքավորել դրամապանակի մնացորդը ձեր ${LetterLogoText} DocSpace-ում։</value>
   </data>
 </root>

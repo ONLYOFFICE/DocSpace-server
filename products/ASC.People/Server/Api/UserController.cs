@@ -529,19 +529,23 @@ public class UserController(
         var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) && viewer.Id != user.Id)
         {
-            throw new Exception(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
-        
-        if (!string.IsNullOrEmpty(inDto.MemberBase.Email))
+
+        var email = string.IsNullOrEmpty(inDto.MemberBase.Email) && !string.IsNullOrEmpty(inDto.MemberBase.EncEmail)
+            ? emailValidationKeyModelHelper.DecryptEmail(inDto.MemberBase.EncEmail)
+            : inDto.MemberBase.Email;
+
+        if (!string.IsNullOrEmpty(email))
         {
-            var email = (inDto.MemberBase.Email ?? "").Trim();
+            email = email.Trim();
 
             if (!email.TestEmailRegex())
             {
-                throw new Exception(Resource.ErrorNotCorrectEmail);
+                throw new ArgumentException(Resource.ErrorNotCorrectEmail);
             }
             
-            var address = new MailAddress(inDto.MemberBase.Email);
+            var address = new MailAddress(email);
             if (!string.Equals(address.Address, user.Email, StringComparison.OrdinalIgnoreCase))
             {
                 user.Email = address.Address.ToLowerInvariant();
@@ -565,11 +569,29 @@ public class UserController(
 
         if (!string.IsNullOrEmpty(inDto.MemberBase.PasswordHash))
         {
-            await securityContext.SetUserPasswordHashAsync(inDto.UserId, inDto.MemberBase.PasswordHash);
-            messageService.Send(MessageAction.UserUpdatedPassword);
+            try
+            {
+                await securityContext.SetUserPasswordHashAsync(inDto.UserId, inDto.MemberBase.PasswordHash);
 
-            await cookiesManager.ResetUserCookieAsync(inDto.UserId, false);
-            messageService.Send(MessageAction.CookieSettingsUpdated);
+                var messageTarget = MessageTarget.Create(inDto.UserId);
+                messageService.Send(MessageAction.UserUpdatedPassword, messageTarget);
+
+                var passwordChangeEvent = (await auditEventsRepository.GetByFilterAsync(
+                    userId: securityContext.CurrentAccount.ID,
+                    action: MessageAction.UserUpdatedPassword,
+                    target: messageTarget.ToString(),
+                    limit: 1))
+                    .FirstOrDefault();
+
+                await studioNotifyService.SendUserPasswordChangedAsync(user, passwordChangeEvent);
+
+                await cookiesManager.ResetUserCookieAsync(inDto.UserId, false);
+                messageService.Send(MessageAction.CookieSettingsUpdated);
+            }
+            catch (SecurityContext.PasswordException ex)
+            {
+                throw new ArgumentException(ex.Message);
+            }
         }
 
         return await employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(inDto.UserId.ToString()));
@@ -760,24 +782,19 @@ public class UserController(
         {
             throw new ItemNotFoundException("User not found");
         }
-
-        var targetUserType = await _userManager.GetUserTypeAsync(targetUser);
-
-        if (targetUserType is not EmployeeType.Guest)
-        {
-            throw new SecurityException(Resource.ErrorAccessDenied);
-        }
-
+        
         var currentUserId = authContext.CurrentAccount.ID;
         var currentUser = await _userManager.GetUsersAsync(currentUserId);
+        var targetUserType = await _userManager.GetUserTypeAsync(targetUser);
 
-        if (!await _userManager.CanUserViewAnotherUserAsync(currentUser, targetUser))
+        if (targetUserType is not EmployeeType.Guest || 
+            await _userManager.GetUserTypeAsync(currentUser) is EmployeeType.Guest || 
+            !await _userManager.CanUserViewAnotherUserAsync(currentUser, targetUser))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var link = commonLinkUtility.GetConfirmationEmailUrl(targetUser.Email, ConfirmType.GuestShareLink,
-                $"{currentUserId}{inDto.UserId}", currentUserId);
+        var link = commonLinkUtility.GetConfirmationEmailUrl(targetUser.Email, ConfirmType.GuestShareLink, $"{currentUserId}{inDto.UserId}", currentUserId);
 
         return await urlShortener.GetShortenLinkAsync(link);
     }
@@ -1326,10 +1343,11 @@ public class UserController(
                     continue;
                 }
 
-                var link = commonLinkUtility.GetInvitationLink(user.Email, type, authContext.CurrentAccount.ID, user.GetCulture()?.Name);
+                var culture = user.GetCulture()?.Name;
+                var link = commonLinkUtility.GetInvitationLink(user.Email, type, authContext.CurrentAccount.ID, culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
                 messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
-                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink);
+                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, culture);
             }
             else
             {
@@ -1502,7 +1520,7 @@ public class UserController(
         var viewerIsAdmin = await _userManager.IsDocSpaceAdminAsync(viewer);
         var user = await _userManager.GetUsersAsync(userid);
 
-        if (_userManager.IsSystemUser(user.Id) || user.Status == EmployeeStatus.Terminated)
+        if (_userManager.IsSystemUser(user.Id) || user.Status == EmployeeStatus.Terminated || user.Status ==  EmployeeStatus.Pending)
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }
@@ -2280,7 +2298,7 @@ public class UserController(
             var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
             var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
             _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, [user.Id]);
-
+            await socketManager.UpdateUserAsync(user);
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
 

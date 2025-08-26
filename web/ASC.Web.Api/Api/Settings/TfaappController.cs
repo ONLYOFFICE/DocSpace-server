@@ -158,7 +158,7 @@ public class TfaappController(
                 ? ConfirmType.TfaActivation
                 : ConfirmType.TfaAuth;
 
-            var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, confirmType);
+            var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Id, confirmType);
             await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{confirmType}");
             return url;
         }
@@ -178,7 +178,7 @@ public class TfaappController(
     public async Task<bool> UpdateTfaSettings(TfaRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
+        
         var result = false;
 
         MessageAction action;
@@ -269,13 +269,20 @@ public class TfaappController(
     /// <summary>
     /// Returns the confirmation email URL for updating TFA settings.
     /// </summary>
-    /// <short>Get confirmation email for updating TFA settings</short>
+    /// <short>Get a confirmation email for updating TFA settings</short>
     /// <path>api/2.0/settings/tfaappwithlink</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "Confirmation email URL", typeof(string))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(405, "SMS settings are not available/TFA application settings are not available")]
     [HttpPut("tfaappwithlink")]
     public async Task<string> UpdateTfaSettingsLink(TfaRequestsDto inDto)
     {
+        if (inDto.Id == tenantManager.GetCurrentTenant().OwnerId && inDto.Id != authContext.CurrentAccount.ID)
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
+        }
+        
         if (await UpdateTfaSettings(inDto))
         {
             return await GetTfaConfirmUrl();
@@ -405,7 +412,7 @@ public class TfaappController(
             throw new Exception(Resource.TfaAppNotAvailable);
         }
 
-        if (await userManager.IsOutsiderAsync(user))
+        if (await userManager.IsOutsiderAsync(user) || user.Status == EmployeeStatus.Terminated)
         {
             throw new NotSupportedException("Not available.");
         }
@@ -417,7 +424,7 @@ public class TfaappController(
         await cookiesManager.ResetUserCookieAsync(user.Id);
         if (isMe)
         {
-            var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, ConfirmType.TfaActivation);
+            var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Id, ConfirmType.TfaActivation);
             await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{ConfirmType.TfaActivation}");
             return url;
         }

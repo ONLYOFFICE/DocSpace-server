@@ -1081,4 +1081,49 @@
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>Webhook URL’si uygun değil. HEAD isteği, bir 200 HTTP yanıtı durumu değil.</value>
   </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Kredi</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Para birimi</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Tarih ve saat</value>
+  </data>
+  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
+    <value>Açıklama</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Miktar</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Hizmet adı</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Disk alanı</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Bakiye yükleme</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Ölçü birimi</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Müşteri işlem raporu ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
+    <value>Para çekme</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Grup bulunamadı</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Ek disk depolama alanı</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Depolamayı tam olarak ihtiyaç duyduğunuz miktara ayarlayın.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Kullanılan depolama alanı:</value>
+  </data>
 </root>

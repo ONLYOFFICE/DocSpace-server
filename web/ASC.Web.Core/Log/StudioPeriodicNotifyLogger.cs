@@ -27,8 +27,8 @@
 namespace ASC.Web.Core.Log;
 internal static partial class StudioPeriodicNotifyLogger
 {
-    [LoggerMessage(LogLevel.Error, "SendSaasLettersAsync")]
-    public static partial void ErrorSendSaasLettersAsync(this ILogger logger, Exception exception);
+    [LoggerMessage(LogLevel.Error, "SendSaasLettersAsync {tenantId}")]
+    public static partial void ErrorSendSaasLettersAsync(this ILogger logger, int tenantId, Exception exception);
 
     [LoggerMessage(LogLevel.Error, "SendEnterpriseLetters")]
     public static partial void ErrorSendEnterpriseLetters(this ILogger logger, Exception exception);

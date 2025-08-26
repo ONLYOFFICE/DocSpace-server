@@ -114,7 +114,7 @@ public class RoomContentRequestDto
     /// The order in which the results are sorted.
     /// </summary>
     [FromQuery(Name = "sortOrder")]
-    public ASC.Api.Core.Core.SortOrder SortOrder { get; set; }
+    public SortOrder SortOrder { get; set; }
 
     /// <summary>
     /// The text filter value used to refine search or query operations.

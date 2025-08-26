@@ -136,9 +136,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Обновлены настройки перезаписи файлов</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Документы</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Настройки</value>
   </data>
@@ -409,9 +406,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Перемещение</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Прочее</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Изменен владелец: {0}</value>
   </data>
@@ -429,9 +423,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Обновлены настройки надежности пароля</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Люди</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Платформа</value>
@@ -492,9 +483,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Сеанс начат</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Настройки</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Выключена возможность SSO</value>
@@ -924,5 +912,20 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>Синхронизация LDAP выполнена</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Операция клиента выполнена</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Отчет об операциях клиента загружен</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Подписка клиента обновлена: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Кошелек клиента пополнен: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Настройки пополнения кошелька клиента обновлены</value>
   </data>
 </root>

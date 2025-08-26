@@ -159,7 +159,9 @@ Un nouveau formulaire "$DocumentTitle":"$DocumentURL" est rempli dans la salle "
  
 L'expéditeur du formulaire : "$FromUserName":"$FromUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Vous avez rempli le formulaire $Message
@@ -168,7 +170,9 @@ Vous avez rempli le formulaire "$DocumentTitle":"$DocumentURL" dans la salle "$R
  
 Responsable : "$ToUserName":"$ToUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>Notification DocSpace. Le formulaire est rempli</value>

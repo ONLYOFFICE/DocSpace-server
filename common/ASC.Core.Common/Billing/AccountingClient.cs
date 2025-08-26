@@ -26,8 +26,6 @@
 
 using System.Collections.Specialized;
 
-using Polly.Extensions.Http;
-
 namespace ASC.Core.Billing;
 
 [Singleton]
@@ -39,6 +37,8 @@ public class AccountingClient
     private readonly IHttpClientFactory _httpClientFactory;
 
     internal const string HttpClientName = "accountingHttpClient";
+    internal const string ResiliencePipelineName = "accountingResiliencePipeline";
+    internal const string BalanceResiliencePipelineName = "balanceResiliencePipeline";
 
     private readonly JsonSerializerOptions _deserializationOptions = new()
     {
@@ -223,39 +223,218 @@ public class AccountingClient
     }
 }
 
-
+/// <summary>
+/// The payment method status.
+/// </summary>
 public enum PaymentMethodStatus
 {
+    [SwaggerEnum("None")]
     None,
+    [SwaggerEnum("Set")]
     Set,
+    [SwaggerEnum("Expired")]
     Expired
 }
 
-public record CustomerInfo(string PortalId, PaymentMethodStatus PaymentMethodStatus, string Email);
+/// <summary>
+/// The customer information.
+/// </summary>
+public class CustomerInfo
+{
+    /// <summary>
+    /// The portal ID.
+    /// </summary>
+    public string PortalId { get; init; }
 
-public record Balance(int AccountNumber, List<SubAccount> SubAccounts);
+    /// <summary>
+    /// The customer's payment method.
+    /// </summary>
+    public PaymentMethodStatus PaymentMethodStatus { get; init; }
 
-public record SubAccount(string Currency, decimal Amount);
+    /// <summary>
+    /// The email address of the customer.
+    /// </summary>
+    public string Email { get; init; }
 
-public record Session(int SessionId, decimal ReservedAmount, string Currency);
+    public bool IsDefault()
+    {
+        return PortalId == null && PaymentMethodStatus == PaymentMethodStatus.None && Email == null;
+    }
+}
 
-public record Report(List<Operation> Collection, int Offset, int Limit, int TotalQuantity, int TotalPage, int CurrentPage);
+/// <summary>
+/// Represents a balance with an account number and a list of sub-accounts.
+/// </summary>
+public class Balance
+{
+    /// <summary>
+    /// The account number.
+    /// </summary>
+    public int AccountNumber { get; init; }
+    /// <summary>
+    /// A list of sub-accounts.
+    /// </summary>
+    public List<SubAccount> SubAccounts { get; init; }
 
-public record Operation(DateTime Date, string Service, string ServiceUnit, int Quantity, string Currency, decimal Credit, decimal Withdrawal);
+    public bool IsDefault()
+    {
+        return AccountNumber == 0 && SubAccounts == null;
+    }
+}
 
-public record Currency(int Id, string Code);
+/// <summary>
+/// Represents a sub-account with a specific currency and amount.
+/// </summary>
+public class SubAccount
+{
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the sub-account.
+    /// </summary>
+    public string Currency { get; init; }
+    /// <summary>
+    /// The amount of the sub-account.
+    /// </summary>
+    public decimal Amount { get; init; }
+}
+
+/// <summary>
+/// Represents a session with reserved amount and currency.
+/// </summary>
+public class Session
+{
+    /// <summary>
+    /// Unique identifier of the session.
+    /// </summary>
+    public int SessionId { get; init; }
+
+    /// <summary>
+    /// Amount reserved for the session.
+    /// </summary>
+    public decimal ReservedAmount { get; init; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the reserved amount.
+    /// </summary>
+    public string Currency { get; init; }
+}
 
 
-public static class AccountingHttplClientExtension
+/// <summary>
+/// Represents a report containing a collection of operations.
+/// </summary>
+public class Report
+{
+    /// <summary>
+    /// Collection of operations.
+    /// </summary>
+    public List<Operation> Collection { get; set; }
+    /// <summary>
+    /// Offset of the report data.
+    /// </summary>
+    public int Offset { get; set; }
+    /// <summary>
+    /// Limit of the report data.
+    /// </summary>
+    public int Limit { get; set; }
+    /// <summary>
+    /// Total quantity of operations in the report.
+    /// </summary>
+    public int TotalQuantity { get; set; }
+    /// <summary>
+    /// Total number of pages in the report.
+    /// </summary>
+    public int TotalPage { get; set; }
+    /// <summary>
+    /// Current page number of the report.
+    /// </summary>
+    public int CurrentPage { get; set; }
+}
+
+/// <summary>
+/// Represents an operation.
+/// </summary>
+public class Operation
+{
+    /// <summary>
+    /// Date of the operation.
+    /// </summary>
+    public DateTime Date { get; set; }
+    /// <summary>
+    /// Service related to the operation.
+    /// </summary>
+    public string Service { get; set; }
+    /// <summary>
+    /// Brief description of the operation.
+    /// </summary>
+    public string Description { get; set; }
+    /// <summary>
+    /// Unit of the service.
+    /// </summary>
+    public string ServiceUnit { get; set; }
+    /// <summary>
+    /// Quantity of the service used.
+    /// </summary>
+    public int Quantity { get; set; }
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the operation.
+    /// </summary>
+    public string Currency { get; set; }
+    /// <summary>
+    /// Credit amount of the operation.
+    /// </summary>
+    public decimal Credit { get; set; }
+    /// <summary>
+    /// Withdrawal amount of the operation.
+    /// </summary>
+    public decimal Withdrawal { get; set; }
+}
+
+/// <summary>
+/// Represents a currency.
+/// </summary>
+public class Currency
+{
+    /// <summary>
+    /// Unique identifier of the currency.
+    /// </summary>
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol.
+    /// </summary>
+    public string Code { get; init; }
+}
+
+public static class AccountingHttpClientExtension
 {
     public static void AddAccountingHttpClient(this IServiceCollection services)
     {
         services.AddHttpClient(AccountingClient.HttpClientName)
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .AddPolicyHandler((_, _) => HttpPolicyExtensions.HandleTransientHttpError()
-                .OrResult(x => !x.IsSuccessStatusCode)
-                .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+            .AddResilienceHandler(AccountingClient.ResiliencePipelineName, builder =>
+            {
+                builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+                {
+                    MaxRetryAttempts = 2,
+                    Delay = TimeSpan.FromSeconds(1),
+                    BackoffType = DelayBackoffType.Exponential,
+                    ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                        .Handle<HttpRequestException>()
+                        .Handle<TaskCanceledException>()
+                        .HandleResult(response => !response.IsSuccessStatusCode),
+                });
+            });
 
+        services.AddResiliencePipeline<string, bool>(AccountingClient.BalanceResiliencePipelineName, pipelineBuilder =>
+        {
+            pipelineBuilder.AddRetry(new RetryStrategyOptions<bool>()
+            {
+                MaxRetryAttempts = 15,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Constant,
+                ShouldHandle = new PredicateBuilder<bool>().HandleResult(result => result == false)
+            });
+        });
     }
 }
 

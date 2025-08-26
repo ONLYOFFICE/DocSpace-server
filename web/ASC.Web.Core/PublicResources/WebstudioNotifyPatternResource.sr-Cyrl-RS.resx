@@ -118,40 +118,40 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; је направио нови документ: &lt;a href={1}&gt;{2}&lt;/а&gt; у соби: &lt;a href={3}&gt;{4}&lt;/а&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; је направио нови документ: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/а&gt; у соби: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/а&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; је изменио/ла документ: &lt;a href={1}&gt;{2}&lt;/а&gt; у соби: &lt;a href={3}&gt;{4}&lt;/а&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; је изменио/ла документ: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/а&gt; у соби: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/а&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; је отпремио нови документ: &lt;a href={1}&gt;{2}&lt;/а&gt; у соби: &lt;a href={3}&gt;{4}&lt;/а&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; је отпремио нови документ: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/а&gt; у соби: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/а&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; је додао нови коментар у верзију документа: &lt;a href={1}&gt;{2}&lt;/а&gt; у соби: &lt;a href={3}&gt;{4}&lt;/а&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; је додао нови коментар у верзију документа: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/а&gt; у соби: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/а&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; је преместио/ла собу: &lt;a href={1}&gt;{2}&lt;/а&gt; у архиву - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; је преместио/ла собу: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/а&gt; у архиву - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; је направио/ла нову собу: &lt;a href={1}&gt;{2}&lt;/а&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; је направио/ла нову собу: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/а&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; је избрисао/ла собу: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; је преименовао собу: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/а&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; је преименовао собу: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/а&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; је додељена улога &lt;b&gt;{1}&lt;/b&gt; у соби: &lt;a href={2}&gt;{3}&lt;/а&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; је додељена улога &lt;b&gt;{1}&lt;/b&gt; у соби: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/а&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; је додат у собу: &lt;a href={1}&gt;{2}&lt;/а&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; је додат у собу: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/а&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Додат је нови DocSpace корисник: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; је уклоњен из собе: &lt;a href={1}&gt;{2}&lt;/а&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; је уклоњен из собе: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/а&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUsersUpdatedType" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; је променио ниво приступа корисника &lt;b&gt;{1}&lt;/b&gt; у &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -566,7 +566,9 @@ $OrangeButton
 
 Кликните на дугме испод да бисте отишли на страницу за пријаву на портал и конфигурисали апликацију за аутентификацију:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Промена "${__VirtualRootPath}":"${__VirtualRootPath}" власника портала
@@ -1993,5 +1995,39 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Предстојећа уплата претплате за ваш ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Потребна акција: Није могућеautomatski обновити план услуге у вашем ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Потребна акција: Није могуће automatski допунити стање новчаника у вашем ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Иди на услуге</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Иди на подешавање новчаника</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Обавештавамо вас да автоматска обнова ваше купљене услуге није успешно извршена.
+
+Љубазно вас молимо да ручно обновите тренутни план услуге (или купите нови).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Обавештавамо вас да автоматска допуна стања у вашем DocSpace новчанику није успела.
+
+Љубазно вас молимо да ручно проверите и ажурирате стање у новчанику.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

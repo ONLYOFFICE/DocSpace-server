@@ -163,7 +163,9 @@ $OrangeButton
 
 Моля, кликнете върху бутона по-долу, за да отидете на страницата за вход в портала и да конфигурирате приложението за удостоверяване:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Промяна на собственика на портала "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -535,37 +537,37 @@ $TrulyYours</value>
     <value>${LetterLogoText}. ${__VirtualRootHost} архивът на портала е създаден</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; създаде нов документ: &lt;a href={1}&gt;{2}&lt;/a&gt; в стаята: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; създаде нов документ: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в стаята: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; добави нов коментар към версията на документа: &lt;a href={1}&gt;{2}&lt;/a&gt; в стаята: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; добави нов коментар към версията на документа: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в стаята: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; качи нов документ: &lt;a href={1}&gt;{2}&lt;/a&gt; в стаята: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; качи нов документ: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в стаята: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; преименува стаята: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; преименува стаята: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; създаде нова стая: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; създаде нова стая: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; беше премахнат от стаята: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; беше премахнат от стаята: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; редактира документа: &lt;a href={1}&gt;{2}&lt;/a&gt; в стаята: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; редактира документа: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в стаята: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; изтри стаята: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; беше добавен към стаята: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; беше добавен към стаята: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; премести стаята: &lt;a href={1}&gt;{2}&lt;/a&gt; в архива - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; премести стаята: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в архива - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; получи ролята на &lt;b&gt;{1}&lt;/b&gt; в стаята: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; получи ролята на &lt;b&gt;{1}&lt;/b&gt; в стаята: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Добавен е нов потребител на DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -1918,5 +1920,53 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ако искате да продължите да използвате своя ${LetterLogoText} DocSpace, просто влезте и предприемете някакво действие.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Отидете в Услуги</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Отидете в Настройки на портфейл</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Свързваме се с вас, за да ви информираме, че автоматичното подновяване на закупения от вас план за обслужване не можа да бъде завършено.
+
+Учтиво ви молим да подновите ръчно текущия си план за обслужване (или да закупите нов).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Свързваме се с вас, за да ви информираме, че плащането за абонамент ще бъде автоматично дебитирано от сметката ви след 3 дни.
+
+За да осигурите безпроблемна трансакция, моля, потвърдете, че имате достатъчно налични средства в метода си на плащане.
+
+Ако имате въпроси или се нуждаете от помощ, не се колебайте да се свържете с нашия "екип за поддръжка":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Свързваме се с вас, за да ви информираме, че автоматичното попълване на баланса на портфейла на DocSpace не беше успешно.
+
+Молим ви ръчно да проверите и актуализирате баланса на портфейла си.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Изисква се действие: Не може да се поднови автоматично планът за обслужване във вашия ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Предстоящо плащане за абонамент за вашия ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Изисква се действие: Не може да се зареди автоматично балансът на портфейла във вашия ${LetterLogoText} DocSpace</value>
   </data>
 </root>

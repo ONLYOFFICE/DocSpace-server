@@ -195,9 +195,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Setări de suprascriere actualizate</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Documente</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Setări</value>
   </data>
@@ -465,9 +462,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Mutare</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Alte</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Schimbare proprietar: {0}</value>
   </data>
@@ -485,9 +479,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Setări Nivel de complexitate parolă au fost actualizate</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Persoane</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platforma</value>
@@ -578,9 +569,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesiunea a început</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Setări</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Conectarea unică dezactivată</value>
@@ -983,5 +971,20 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>Sincronizarea LDAP s-a încheiat</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Operațiunea efectuată de client</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Raportul privind operaţiunile de client a fost descărcat</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Abonamentrul clientului a fost actualizat: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Portofelul clientului a fost alimentat: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Setările de alimentare a portofelului de client au fost actualizate</value>
   </data>
 </root>

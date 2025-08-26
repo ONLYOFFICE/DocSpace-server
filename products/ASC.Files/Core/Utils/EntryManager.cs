@@ -108,33 +108,6 @@ public class BreadCrumbsManager(
                 
             breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
         }
-        else
-        {
-            switch (firstVisible.FolderType)
-            {
-                case FolderType.DEFAULT:
-                    if (!firstVisible.ProviderEntry)
-                    {
-                        rootId = await globalFolderHelper.FolderShareAsync;
-                    }
-                    else
-                    {
-                        rootId = firstVisible.RootFolderType switch
-                        {
-                            FolderType.USER => authContext.CurrentAccount.ID == firstVisible.RootCreateBy
-                                ? await globalFolderHelper.FolderMyAsync
-                                : await globalFolderHelper.FolderShareAsync,
-                            FolderType.COMMON => await globalFolderHelper.FolderCommonAsync,
-                            _ => rootId
-                        };
-                    }
-                    break;
-
-                case FolderType.BUNCH:
-                    rootId = await globalFolderHelper.FolderProjectsAsync;
-                    break;
-            }
-        }
 
         var folderDaoInt = daoFactory.GetFolderDao<int>();
 
@@ -359,7 +332,7 @@ public class EntryManager(IDaoFactory daoFactory,
         FormsItemDto formsItemDto = null)
     {
         int total;
-        var withShared = false;
+        var withShared = true;
 
         if (parent == null)
         {
@@ -384,11 +357,6 @@ public class EntryManager(IDaoFactory daoFactory,
         if (parent.FolderType == FolderType.TRASH)
         {
             withSubfolders = false;
-        }
-
-        if (parent.RootFolderType is FolderType.USER)
-        {
-            withShared = true;
         }
 
         var (foldersFilterType, foldersSearchText) = applyFilterOption != ApplyFilterOption.Files ? (filterType, searchText) : (FilterType.None, string.Empty);
@@ -532,15 +500,6 @@ public class EntryManager(IDaoFactory daoFactory,
                 
                 var foldersTask = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders,
                     excludeSubject, from, count, roomId, containingMyFiles, parent.FolderType);
-
-                if (parent.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
-                {
-                    foldersTask = foldersTask.Select(x =>
-                    {
-                        x.Shared = parent.Shared;
-                        return x;
-                    });
-                }
                 
                 var folders = await foldersTask.ToListAsync();
 
@@ -561,17 +520,9 @@ public class EntryManager(IDaoFactory daoFactory,
                 var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
                 
                 var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
-                excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType, formsItemDto);
-
-                if (parent.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
-                {
-                    filesTask = filesTask.Select(x =>
-                    {
-                        x.Shared = parent.Shared;
-                        return x;
-                    });
-                }
-
+                excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType, formsItemDto, 
+                applyFormStepFilter: room is { FolderType: FolderType.VirtualDataRoom } && parent.ShareRecord is { Share: FileShare.FillForms });
+                
                 var files = await filesTask.ToListAsync();
 
                 if (parent.FolderType == FolderType.FillingFormsRoom && securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
@@ -980,6 +931,7 @@ public class EntryManager(IDaoFactory daoFactory,
             case FilterType.ArchiveOnly:
             case FilterType.FilesOnly:
             case FilterType.MediaOnly:
+            case FilterType.DiagramsOnly:
             case FilterType.Pdf:
             case FilterType.PdfForm:
                 where = f => f.FileEntryType == FileEntryType.File && (((File<T>)f).FilterType == filter || filter == FilterType.FilesOnly);
@@ -1315,7 +1267,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
                 var resultFolder = await folderDao.GetFolderAsync(properties.FormFilling.ToFolderId);
 
-                if (Equals(properties.FormFilling.ResultsFileID, default(T)))
+                if (Equals(properties.FormFilling.ResultsFolderId, default(T)))
                 {
                     var initFormFillingProperties = await InitFormFillingProperties(folderIfNew.Id, sourceTitle, sourceFile.Id, inProcessFormFolderId, readyFormFolderId, folderIfNew.CreateBy, properties, fileDao, folderDao);
                     linkedFile.ParentId = initFormFillingProperties.FormFilling.ToFolderId;
@@ -1439,17 +1391,17 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (checkRight && await lockerManager.FileLockedForMeAsync(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (checkRight && forceSave is null or ForcesaveType.None && await fileTracker.IsEditingAsync(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
         }
 
         if (file.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         var currentExt = file.ConvertedExtension;
@@ -1587,7 +1539,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if(file.IsForm && file.IsCompletedForm && fileForceSave != ForcesaveType.None)
             {
-                await fileDao.UpdateCategoryAsync(file.Id, file.Version, (int)FilterType.Pdf, ForcesaveType.None);
+                await fileDao.UpdateCategoryAsync(file.Id, file.Version, (int)FilterType.PdfForm, ForcesaveType.None);
                 return file;
             }
 
@@ -2109,8 +2061,6 @@ public class EntryManager(IDaoFactory daoFactory,
         properties.FormFilling.ResultsFolderId = resultsFolderId;
         properties.FormFilling.StartFilling = true;
 
-        properties.FormFilling.ResultsFileID = await CreateFillResultsFile(resultsFolderId, createBy, sourceTitle, fileDao);
-
         await fileDao.SaveProperties(sourceFileId, properties);
 
         return properties;
@@ -2164,7 +2114,7 @@ public class EntryManager(IDaoFactory daoFactory,
             pdfFile.Title = $"{origProperties.FormFilling.ResultFormNumber} - {sourceTitle} ({tenantUtil.DateTimeNow():dd-MM-yyyy H-mm}){ext}";
             pdfFile.ParentId = origProperties.FormFilling.ResultsFolderId;
             pdfFile.Comment = string.IsNullOrEmpty(comment) ? null : comment;
-            pdfFile.Category = (int)FilterType.Pdf;
+            pdfFile.Category = (int)FilterType.PdfForm;
             pdfFile.IsCompletedForm = true;
 
             File<T> result;
@@ -2319,6 +2269,14 @@ public class EntryManager(IDaoFactory daoFactory,
         var currentStep = GetCurrentFillingStep(allRoles);
         if (currentStep != -1)
         {
+            var properties = await fileDao.GetProperties(form.Id);
+            var formFilling = properties?.FormFilling;
+            var isFillingStoped = formFilling?.FillingStopedDate != null && !DateTime.MinValue.Equals(formFilling?.FillingStopedDate);
+            if (isFillingStoped)
+            {
+                throw new InvalidOperationException(Resource.ErrorNotAllowedOption);
+            }
+
             var myRole = GetCurrentUserRole(allRoles, securityContext.CurrentAccount.ID);
             if (myRole != null && currentStep == myRole.Sequence)
             {

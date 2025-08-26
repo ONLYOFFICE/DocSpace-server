@@ -83,7 +83,7 @@ module.exports = (socket, next) => {
     const getUser = () => {
       return request({
         method: "get",
-        url: "/people/@self?fields=id,userName,displayName",
+        url: "/people/@self?fields=id,userName,displayName,isAdmin,isOwner",
         headers,
         basePath,
       });

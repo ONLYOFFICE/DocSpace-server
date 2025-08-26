@@ -40,8 +40,9 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         ExternalShare externalShare,
         AuthContext authContext,
         ConfigurationConverter<int> configurationConverter,
-        SecurityContext securityContext)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext);
+        SecurityContext securityContext,
+        IHttpContextAccessor httpContextAccessor)
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, httpContextAccessor);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -54,10 +55,12 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         ExternalShare externalShare,
         AuthContext authContext,
         ConfigurationConverter<string> configurationConverter,
-        SecurityContext securityContext)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext);
+        SecurityContext securityContext,
+        IHttpContextAccessor httpContextAccessor)
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, httpContextAccessor);
 
-public abstract class EditorController<T>(FileStorageService fileStorageService,
+public abstract class EditorController<T>(
+    FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
         SettingsManager settingsManager,
@@ -67,7 +70,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         ExternalShare externalShare,
         AuthContext authContext,
         ConfigurationConverter<T> configurationConverter,
-        SecurityContext securityContext)
+        SecurityContext securityContext,
+        IHttpContextAccessor httpContextAccessor)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
 
@@ -78,12 +82,14 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Saved file parameters", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "Saved file parameters", typeof(FileDto<string>))]
     [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("{fileId}/saveediting")]
     public async Task<FileDto<T>> SaveEditingFileFromForm(SaveEditingRequestDto<T> inDto)
     {
-        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(inDto.FileId, inDto.FileExtension, inDto.DownloadUri, inDto.File?.OpenReadStream(), inDto.Forcesave));
+        var stream = inDto.File?.OpenReadStream() ?? httpContextAccessor.HttpContext?.Request.Body;
+        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(inDto.FileId, inDto.FileExtension, inDto.DownloadUri, stream, inDto.Forcesave));
     }
 
     /// <summary>
@@ -109,6 +115,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "File information", typeof(FileDto<string>))]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("{fileId}/startfilling")]
     public async Task<FileDto<T>> StartFillingFile(StartFillingRequestDto<T> inDto)
@@ -142,6 +149,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Configuration parameters", typeof(ConfigurationDto<int>))]
+    [SwaggerResponse(200, "Configuration parameters", typeof(ConfigurationDto<string>))]
     [SwaggerResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]
     [AllowNotPayment]
@@ -160,7 +168,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 FolderType.FillingFormsRoom => await documentServiceHelper.GetFormOpenSetupForFillingRoomAsync(file, rootFolder, inDto.EditorType, inDto.Edit, entryManager),
                 FolderType.FormFillingFolderInProgress => documentServiceHelper.GetFormOpenSetupForFolderInProgress(file, inDto.EditorType),
                 FolderType.FormFillingFolderDone => documentServiceHelper.GetFormOpenSetupForFolderDone<T>(inDto.EditorType),
-                FolderType.VirtualDataRoom => await documentServiceHelper.GetFormOpenSetupForVirtualDataRoomAsync(file, inDto.EditorType),
+                FolderType.VirtualDataRoom => await documentServiceHelper.GetFormOpenSetupForVirtualDataRoomAsync(file, rootFolder, inDto.EditorType),
                 FolderType.USER => await documentServiceHelper.GetFormOpenSetupForUserFolderAsync(file, inDto.EditorType, inDto.Edit, inDto.Fill),
                 _ => new FormOpenSetup<T>
                 {
@@ -174,7 +182,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         var docParams = await documentServiceHelper.GetParamsAsync(
             formOpenSetup is { Draft: not null } ? formOpenSetup.Draft : file, 
             lastVersion,
-            formOpenSetup?.CanEdit ?? !file.IsCompletedForm,
+            await documentServiceHelper.CheckCustomQuota(rootFolder) && (formOpenSetup?.CanEdit ?? !file.IsCompletedForm),
             !inDto.View, 
             true, formOpenSetup == null || formOpenSetup.CanFill,
             formOpenSetup?.EditorType ?? inDto.EditorType,
@@ -197,6 +205,13 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         }
 
         var result = await configurationConverter.Convert(configuration, file);
+
+        if (formOpenSetup != null && formOpenSetup.DisableEmbeddedConfig && result.EditorConfig.Embedded != null)
+        {
+            result.EditorConfig.Embedded.EmbedUrl = "";
+            result.EditorConfig.Embedded.ShareUrl = "";
+            result.EditorConfig.Customization.Goback = await configuration.EditorConfig?.Customization.GetGoBack(inDto.EditorType, file);
+        }
 
         if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
             && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
@@ -221,6 +236,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 result.StartFilling = file.Security[FileSecurity.FilesSecurityActions.StartFilling];
                 result.StartFillingMode = StartFillingMode.StartFilling;
                 result.Document.ReferenceData.RoomId = formOpenSetup.RootFolder.Id.ToString();
+                result.Document.ReferenceData.CanEditRoom = formOpenSetup.CanEditRoom;
 
                 result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = FilesCommonResource.StartFillingModeEnum_StartFilling };
                 if (!string.IsNullOrEmpty(formOpenSetup.RoleName))
@@ -443,6 +459,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     public async Task<DocServiceUrlDto> GetDocServiceUrl(DocServiceUrlRequestDto inDto)
     {
         var url = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl);
+        var preloadUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServicePreloadUrl);
 
         var dsVersion = "";
 
@@ -455,6 +472,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         {
             Version = dsVersion,
             DocServiceUrlApi = url,
+            DocServicePreloadUrl = preloadUrl,
             DocServiceUrl = filesLinkUtility.GetDocServiceUrl(),
             DocServiceUrlInternal =filesLinkUtility.GetDocServiceUrlInternal(),
             DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),

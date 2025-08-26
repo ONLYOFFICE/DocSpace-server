@@ -201,7 +201,9 @@ $OrangeButton
 
 Пожалуйста, нажмите кнопку ниже, чтобы перейти на страницу входа на портал и настроить приложение для аутентификации:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Смена владельца портала "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -810,37 +812,37 @@ $OrangeButton
 Эта ссылка действительна только 7 дней.</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; создал(а) новый документ: &lt;a href={1}&gt;{2}&lt;/a&gt; в комнате: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; создал(а) новый документ: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в комнате: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; добавил(а) новый комментарий к версии документа: &lt;a href={1}&gt;{2}&lt;/a&gt; в комнате: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; добавил(а) новый комментарий к версии документа: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в комнате: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; загрузил(а) новый документ: &lt;a href={1}&gt;{2}&lt;/a&gt; в комнату: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; загрузил(а) новый документ: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в комнату: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; переименовал(а) комнату: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; переименовал(а) комнату: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; создал(а) новую комнату: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; создал(а) новую комнату: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; удален(а) из комнаты: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; удален(а) из комнаты: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; отредактировал(а) документ: &lt;a href={1}&gt;{2}&lt;/a&gt; в комнате: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; отредактировал(а) документ: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в комнате: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; удалил(а) комнату: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; добавлен(а) в комнату: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; добавлен(а) в комнату: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; переместил(а) комнату: &lt;a href={1}&gt;{2}&lt;/a&gt; в архив - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; переместил(а) комнату: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в архив - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>Пользователю &lt;b&gt;{0}&lt;/b&gt; присвоена роль &lt;b&gt;{1}&lt;/b&gt; в комнате: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>Пользователю &lt;b&gt;{0}&lt;/b&gt; присвоена роль &lt;b&gt;{1}&lt;/b&gt; в комнате: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Добавлен новый пользователь DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -1937,5 +1939,39 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Предстоящий платеж за подписку на ваш ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Перейти к Сервисам</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Перейти к настройкам кошелька</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Сообщаем вам, что автоматическое продление приобретенного вами тарифного плана не может быть завершено.
+
+Просим вручную продлить ваш текущий тарифный план (или приобрести новый).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Сообщаем вам, что не удалось произвести автоматическое пополнение кошелька DocSpace.
+
+Просим вручную проверить и обновить баланс вашего кошелька.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Необходимое действие: невозможно автоматически продлить тарифный план в вашем ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Необходимое действие: Невозможно автоматически пополнить баланс кошелька в вашем ${LetterLogoText} DocSpace</value>
   </data>
 </root>

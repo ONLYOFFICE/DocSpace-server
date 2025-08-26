@@ -25,21 +25,18 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCFiles;
+using DocSpace.API.SDK.Api.Files;
+using DocSpace.API.SDK.Api.Rooms;
 
 namespace ASC.Files.Tests.Factory;
 
 public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetime
 {
-    class FakePass { public string Password { get; set; } }
-    
-    private static readonly Faker<FakePass> _fakerPassword = new Faker<FakePass>()
-        .RuleFor(x => x.Password, f => f.Internet.Password(10, 12, true, true, true));
-    
     private readonly MySqlContainer _mySqlContainer;
     private readonly PostgreSqlContainer _postgresSqlContainer;
     private readonly RedisContainer _redisContainer;
     private readonly RabbitMqContainer _rabbitMqContainer;
-    private readonly IContainer _openSearchContainer;
+    private readonly OpenSearchContainer _openSearchContainer;
     private readonly CustomProviderInfo _providerInfo;
     private DbConnection _dbconnection = null!;
     private Respawner _respawner = null!;
@@ -47,13 +44,15 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     private readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings" ];
     
     public HttpClient HttpClient { get; private set;} = null!;
-    public FilesFoldersApi FilesFoldersApi { get; private set;} = null!;
-    public FilesFilesApi FilesFilesApi { get; private set;} = null!;
-    public FilesOperationsApi FilesOperationsApi { get; private set;} = null!;
-    public FilesRoomsApi FilesRoomsApi { get; private set;} = null!;
-    public FilesSettingsApi FilesSettingsApi { get; private set;} = null!;
-    public FilesQuotaApi  FilesQuotaApi { get; private set;} = null!;
-    public SettingsQuotaApi  SettingsQuotaApi { get; private set;} = null!;
+    public FoldersApi FoldersApi { get; private set;} = null!;
+    public FilesApi FilesApi { get; private set;} = null!;
+    public OperationsApi OperationsApi { get; private set;} = null!;
+    public RoomsApi RoomsApi { get; private set;} = null!;
+    public SettingsApi SettingsApi { get; private set;} = null!;
+    public QuotaApi  QuotaApi { get; private set;} = null!;
+    public SharingApi  SharingApi { get; private set;} = null!;
+    
+    public DocSpace.API.SDK.Api.Settings.QuotaApi  SettingsQuotaApi { get; private set;} = null!;
     
     public FilesApiFactory()
     {        
@@ -103,13 +102,9 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             Tag = "2.18.0"
         };
         
-        _openSearchContainer = new ContainerBuilder()
+        _openSearchContainer = new OpenSearchBuilder()
             .WithImage($"{openSearchContainer.Image}:{openSearchContainer.Tag}")
-            .WithPortBinding(9200, true)
-            .WithEnvironment("OPENSEARCH_INITIAL_ADMIN_PASSWORD", _fakerPassword.Generate().Password)
-            .WithEnvironment("discovery.type", "single-node")
-            .WithEnvironment("plugins.security.disabled", "true")
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(9200)))
+            .WithSecurityEnabled(false)
             .Build();
 
         var mysqlContainer = containers.FirstOrDefault(r => r.Name == "mysql") ?? new Container
@@ -172,13 +167,14 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
 
         HttpClient = CreateClient();
         var configuration = new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') };
-        FilesFoldersApi = new FilesFoldersApi(HttpClient, configuration);
-        FilesFilesApi = new FilesFilesApi(HttpClient, configuration);
-        FilesOperationsApi = new FilesOperationsApi(HttpClient, configuration);
-        FilesRoomsApi = new FilesRoomsApi(HttpClient, configuration);
-        FilesSettingsApi = new FilesSettingsApi(HttpClient, configuration);
-        FilesQuotaApi = new FilesQuotaApi(HttpClient, configuration);
-        SettingsQuotaApi = new SettingsQuotaApi(HttpClient, configuration);
+        FoldersApi = new FoldersApi(HttpClient, configuration);
+        FilesApi = new FilesApi(HttpClient, configuration);
+        OperationsApi = new OperationsApi(HttpClient, configuration);
+        RoomsApi = new RoomsApi(HttpClient, configuration);
+        SettingsApi = new SettingsApi(HttpClient, configuration);
+        QuotaApi = new QuotaApi(HttpClient, configuration);
+        SharingApi = new SharingApi(HttpClient, configuration);
+        SettingsQuotaApi = new DocSpace.API.SDK.Api.Settings.QuotaApi(HttpClient, configuration);
         
         var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();
         tablesToIgnore.AddRange(_tablesToBackup.Select(r=> new Table(MakeCopyTableName(r))));

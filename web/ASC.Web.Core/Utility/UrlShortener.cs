@@ -125,14 +125,18 @@ public class ShortUrl
             _length = 15;
         }
     }
-    public string GenerateRandomKey()
+    public string GenerateRandomKey(int customLength = 0, string alphabet = null)
     {
         var rand = new Random();
         var result = new StringBuilder();
-        for (var i = 0; i < _length; i++)
+        var length = customLength == 0 ? _length : customLength;
+        alphabet ??= _alphabet;
+        var @base = alphabet.Length;
+        
+        for (var i = 0; i < length; i++)
         {
-            var x = rand.Next(0, _base);
-            result.Append(_alphabet.ElementAt(x));
+            var x = rand.Next(0, @base);
+            result.Append(alphabet.ElementAt(x));
         }
         return result.ToString();
     }
