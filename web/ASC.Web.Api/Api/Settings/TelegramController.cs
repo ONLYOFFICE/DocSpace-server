@@ -63,7 +63,7 @@ public class TelegramController(
     [HttpGet("telegram/link")]
     public async Task<string> LinkTelegram()
     {
-        var currentLink = telegramHelper.CurrentRegistrationLink(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId());
+        var currentLink = await telegramHelper.CurrentRegistrationLink(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId());
 
         return string.IsNullOrWhiteSpace(currentLink)
             ? await telegramHelper.RegisterUserAsync(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())

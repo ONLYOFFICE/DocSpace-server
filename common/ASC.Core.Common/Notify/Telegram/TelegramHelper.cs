@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.IdentityModel.Tokens;
-
 namespace ASC.Core.Common.Notify;
 
 [Scope]
@@ -35,6 +33,7 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
     IHttpClientFactory httpClientFactory,
     ILogger<TelegramHelper> logger)
 {
+
     /// <summary>
     /// The registration Telegram status.
     /// </summary>
@@ -50,7 +49,8 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
     {
         var token = GenerateToken(userId);
 
-        await telegramServiceClient.RegisterUserAsync(userId.ToString(), tenantId, token);
+        var tgProvider = (ITelegramLoginProvider)consumerFactory.GetByKey("telegram");
+        await telegramServiceClient.RegisterUserAsync(userId.ToString(), tenantId, tgProvider.TelegramAuthTokenLifespan, token);
 
         return GetLink(token);
     }
@@ -81,9 +81,9 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
             : (RegStatus.linked, tgUser.TelegramUsername);
     }
 
-    public string CurrentRegistrationLink(Guid userId, int tenantId)
+    public async Task<string> CurrentRegistrationLink(Guid userId, int tenantId)
     {
-        var token = GetCurrentToken(userId, tenantId);
+        var token = await GetCurrentToken(userId, tenantId);
         return string.IsNullOrEmpty(token) ? string.Empty : GetLink(token);
     }
 
@@ -102,9 +102,9 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
         return GetCurrentToken(userId, tenantId) != null;
     }
 
-    private string GetCurrentToken(Guid userId, int tenantId)
+    private async Task<string> GetCurrentToken(Guid userId, int tenantId)
     {
-        return telegramServiceClient.RegistrationToken(userId.ToString(), tenantId);
+        return await telegramServiceClient.RegistrationToken(userId.ToString(), tenantId);
     }
 
     private string GenerateToken(Guid userId)

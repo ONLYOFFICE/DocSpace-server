@@ -43,13 +43,12 @@ public class UserCommands(TelegramDao telegramDao, IDistributedCache distributed
 
     private async Task InternalStartCommandAsync(string token)
     {
-
         var user = await distributedCache.GetStringAsync(token);
 
         if (user != null)
         {
             await distributedCache.RemoveAsync(token);
-            await distributedCache.RemoveAsync(user);
+            await distributedCache.RemoveAsync($"tg-token:{user}");
             
             var split = user.Split(':');
 
