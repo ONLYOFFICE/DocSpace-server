@@ -46,7 +46,6 @@ public abstract class FileActionInterpreterBase : ActionInterpreter
                 Accessibility.WebCustomFilterEditing => fileUtility.CanWebCustomFilterEditing(fileName),
                 Accessibility.WebRestrictedEditing => fileUtility.CanWebRestrictedEditing(fileName),
                 Accessibility.WebComment => fileUtility.CanWebComment(fileName),
-                Accessibility.CoAuhtoring => fileUtility.CanCoAuthoring(fileName),
                 Accessibility.MustConvert => fileUtility.MustConvert(fileName),
                 _ => false
             };

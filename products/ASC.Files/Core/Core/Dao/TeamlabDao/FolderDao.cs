@@ -185,7 +185,7 @@ internal class FolderDao(
             q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
         }
 
-        await foreach (var e in (FromQueryWithShared(filesDbContext, q)).AsAsyncEnumerable())
+        await foreach (var e in (FromQuery(filesDbContext, q)).AsAsyncEnumerable())
         {
             yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
         }
@@ -229,7 +229,7 @@ internal class FolderDao(
             q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
         }
 
-        await foreach (var e in (FromQueryWithShared(filesDbContext, q)).AsAsyncEnumerable())
+        await foreach (var e in (FromQuery(filesDbContext, q)).AsAsyncEnumerable())
         {
             yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
         }
@@ -1532,41 +1532,8 @@ internal class FolderDao(
 
         return q;
     }
-
-    protected IQueryable<DbFolderQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<DbFolder> dbFiles)
-    {
-        return dbFiles
-            .Select(r => new DbFolderQuery
-            {
-                Folder = r,
-                Root = (from f in filesDbContext.Folders
-                        where f.Id ==
-                        (from t in filesDbContext.Tree
-                         where t.FolderId == r.ParentId
-                         orderby t.Level descending
-                         select t.ParentId
-                         ).FirstOrDefault()
-                        where f.TenantId == r.TenantId
-                        select f
-                          ).FirstOrDefault(),
-                Order = (
-                        from f in filesDbContext.FileOrder
-                         where (
-                             from rs in filesDbContext.RoomSettings 
-                             where rs.TenantId == f.TenantId && rs.RoomId ==
-                                   (from t in filesDbContext.Tree
-                                       where t.FolderId == r.ParentId
-                                       orderby t.Level descending
-                                       select t.ParentId
-                                   ).Skip(1).FirstOrDefault()
-                             select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
-                         select f.Order
-                                ).FirstOrDefault(),
-                Settings = filesDbContext.RoomSettings.Where(x => x.TenantId == r.TenantId && x.RoomId == r.Id).Distinct().FirstOrDefault()
-            });
-    }
-
-    private IQueryable<DbFolderQuery> FromQueryWithShared(FilesDbContext filesDbContext, IQueryable<DbFolder> dbFiles)
+    
+    private IQueryable<DbFolderQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<DbFolder> dbFiles)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -1584,9 +1551,15 @@ internal class FolderDao(
                         where f.TenantId == r.TenantId
                         select f
                     ).FirstOrDefault(),
-                Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom || r.FolderType == FolderType.FillingFormsRoom) &&
-                         filesDbContext.Security.Any(s =>
-                             s.TenantId == tenantId && s.EntryId == r.Id.ToString() && s.EntryType == FileEntryType.Folder && s.SubjectType == SubjectType.PrimaryExternalLink),
+                Shared = filesDbContext.Security.Any(x => 
+                    x.TenantId == r.TenantId && 
+                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                    ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder))),
+                ParentShared = filesDbContext.Security.Any(x => 
+                    x.TenantId == r.TenantId && 
+                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                    x.EntryType == FileEntryType.Folder && 
+                    filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                 Order = (
                     from f in filesDbContext.FileOrder
                     where (
@@ -1966,6 +1939,7 @@ public class DbFolderQuery
     public DbFolder Root { get; set; }
     public DbRoomSettings Settings { get; set; }
     public bool Shared { get; set; }
+    public bool ParentShared { get; set; }
     public int Order { get; set; }
 }
 

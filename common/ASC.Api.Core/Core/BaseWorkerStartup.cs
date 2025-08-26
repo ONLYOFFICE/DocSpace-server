@@ -31,17 +31,17 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
     protected IConfiguration Configuration { get; } = configuration;
     protected IHostEnvironment HostEnvironment { get; } = hostEnvironment;
     protected DIHelper DIHelper { get; } = new();
-    
+
     private bool OpenTelemetryEnabled { get; } = configuration.GetValue<bool>("openTelemetry:enable");
     
     public virtual async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        var services = builder.Services;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             AppContext.SetSwitch("System.Net.Security.UseManagedNtlm", true);
         }
         
+        var services = builder.Services;
         services.AddHttpContextAccessor();
         services.AddCustomHealthCheck(Configuration);
         
@@ -104,6 +104,9 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
         services.AddTransient<DistributedTaskProgress>();
+
+        services.AddBillingHttpClient();
+        services.AddAccountingHttpClient();
     }
 
     protected IEnumerable<Assembly> GetAutoMapperProfileAssemblies()

@@ -1,9 +1,6 @@
-# {{projectName}}
+# {{packageName}}
 
 The ONLYOFFICE DocSpace SDK for JavaScript is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace TypeScript API by offering ready-to-use methods and models.
-
-- API version: {{appVersion}}
-- Package version: {{projectVersion}}
 
 {{#infoUrl}}
 For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
@@ -15,12 +12,12 @@ For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
 
 #### npm
 
-To publish the library as an [npm](https://www.npmjs.com/) package, please follow the instructions ["here"](https://docs.npmjs.com/getting-started/publishing-npm-packages).
+To publish the library as an [npm](https://www.npmjs.com/) package, please follow the instructions [here](https://docs.npmjs.com/getting-started/publishing-npm-packages).
 
 To install the package, run:
 
 ```shell
-npm install {{{projectName}}} --save
+npm install {{{packageName}}} --save
 ```
 
 Finally, build the module:
@@ -47,7 +44,7 @@ npm install
 npm link
 ```
 
-4. Switch to the directory you want to use your {{{projectName}}} from.
+4. Switch to the directory you want to use your {{{packageName}}} from.
 
 5. To use the link defined in your project, run:
 
@@ -63,10 +60,10 @@ npm run build
 
 #### Git
 
-If the library is hosted in a Git repository (e.g., https://github.com/{{gitUserId}}{{^gitUserId}}YOUR_USERNAME{{/gitUserId}}/{{gitRepoId}}{{^gitRepoId}}{{projectName}}{{/gitRepoId}}), you can install it directly:
+If the library is hosted in a Git repository (e.g., {{repositoryUrl}}), you can install it directly:
 
 ```shell
-    npm install {{gitUserId}}{{^gitUserId}}YOUR_USERNAME{{/gitUserId}}/{{gitRepoId}}{{^gitRepoId}}{{projectName}}{{/gitRepoId}} --save
+    npm install git+{{repositoryUrl}}.git
 ```
 
 ### Using browser
@@ -106,12 +103,54 @@ module: {
 }
 ```
 
+## Documentation for Authorization
+
+{{^authMethods}}Endpoints do not require authorization.{{/authMethods}}
+{{#hasAuthMethods}}Authentication schemes defined for the API:{{/hasAuthMethods}}
+{{#authMethods}}
+### {{name}}
+
+{{#isApiKey}}
+
+- **Type**: API key
+- **API key parameter name**: {{keyParamName}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}{{#isKeyInCookie}}Cookie{{/isKeyInCookie}}
+{{/isApiKey}}
+{{#isBasic}}
+{{#isBasicBasic}}
+- **Type**: HTTP basic authentication
+{{/isBasicBasic}}
+{{#isBasicBearer}}
+- **Type**: Bearer authentication{{#bearerFormat}} ({{{.}}}){{/bearerFormat}}
+{{/isBasicBearer}}
+{{#isHttpSignature}}
+- **Type**: HTTP signature authentication
+{{/isHttpSignature}}
+{{/isBasic}}
+{{#isOAuth}}
+- **Type**: OAuth
+- **Flow**: {{flow}}
+- **Authorization URL**: {{x-authorizationUrl}}
+- **Token Url**: {{x-tokenUrl}}
+- **Scopes**: {{^scopes}}N/A{{/scopes}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOAuth}}
+{{#isOpenId}}
+- **Type**: OpenId Connect
+- **OpenId Connect URL**: {{x-openIdConnectUrl}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOpenId}}
+
+{{/authMethods}}
+
 ## Getting Started
 
 Please follow the [installation](#installation) instruction and execute the following JS code:
 
 ```javascript
-var {{{moduleName}}} = require('{{{projectName}}}');
+var {{{moduleName}}} = require('{{{packageName}}}');
 {{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}
 {{#hasAuthMethods}}
 var defaultClient = {{{moduleName}}}.ApiClient.instance;
@@ -182,56 +221,20 @@ api.{{{operationId}}}({{#requiredParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *{{basePath}}*
+All URIs are relative to *https://your-docspace.onlyoffice.com*
+
+<details><summary>API Endoints table</summary>
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 {{#apiInfo}}{{#apis}}{{#operations}}{{#operation}}*{{moduleName}}.{{classname}}* | [**{{operationId}}**]({{apiDocPath}}{{classname}}.md#{{operationId}}) | **{{httpMethod}}** {{path}} | {{summary}}
 {{/operation}}{{/operations}}{{/apis}}{{/apiInfo}}
+</details>
 
 ## Documentation for Models
 
+<details><summary>Models list</summary>
+
 {{#models}}{{#model}} - [{{moduleName}}.{{classname}}]({{modelDocPath}}{{classname}}.md)
 {{/model}}{{/models}}
-
-## Documentation for Authorization
-
-{{^authMethods}}Endpoints do not require authorization.{{/authMethods}}
-{{#hasAuthMethods}}Authentication schemes defined for the API:{{/hasAuthMethods}}
-{{#authMethods}}
-### {{name}}
-
-{{#isApiKey}}
-
-- **Type**: API key
-- **API key parameter name**: {{keyParamName}}
-- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}{{#isKeyInCookie}}Cookie{{/isKeyInCookie}}
-{{/isApiKey}}
-{{#isBasic}}
-{{#isBasicBasic}}
-- **Type**: HTTP basic authentication
-{{/isBasicBasic}}
-{{#isBasicBearer}}
-- **Type**: Bearer authentication{{#bearerFormat}} ({{{.}}}){{/bearerFormat}}
-{{/isBasicBearer}}
-{{#isHttpSignature}}
-- **Type**: HTTP signature authentication
-{{/isHttpSignature}}
-{{/isBasic}}
-{{#isOAuth}}
-- **Type**: OAuth
-- **Flow**: {{flow}}
-- **Authorization URL**: {{x-authorizationUrl}}
-- **Token Url**: {{x-tokenUrl}}
-- **Scopes**: {{^scopes}}N/A{{/scopes}}
-{{#scopes}}  - {{scope}}: {{description}}
-{{/scopes}}
-{{/isOAuth}}
-{{#isOpenId}}
-- **Type**: OpenId Connect
-- **OpenId Connect URL**: {{x-openIdConnectUrl}}
-{{#scopes}}  - {{scope}}: {{description}}
-{{/scopes}}
-{{/isOpenId}}
-
-{{/authMethods}}
+</details>

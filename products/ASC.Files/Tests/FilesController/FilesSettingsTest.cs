@@ -28,9 +28,9 @@ namespace ASC.Files.Tests.FilesController;
 
 public class FilesSettingsTest(
     FilesApiFactory filesFactory,
-    WebApplicationFactory<WebApiProgram> apiFactory,
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram)
+    WepApiFactory apiFactory,
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram)
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
     [Fact]

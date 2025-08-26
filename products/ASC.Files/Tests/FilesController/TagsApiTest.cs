@@ -29,9 +29,9 @@ namespace ASC.Files.Tests.FilesController;
 [Collection("Test Collection")]
 public class TagsApiTest(
     FilesApiFactory filesFactory, 
-    WebApplicationFactory<WebApiProgram> apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    WepApiFactory apiFactory, 
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
     [Fact]
@@ -152,5 +152,84 @@ public class TagsApiTest(
         // Verify tag is gone
         var tagsAfterDelete = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         tagsAfterDelete.Should().NotContain(t => t.ToString() == tagName);
+    }
+    
+    [Fact]
+    public async Task AddTags_SingleAndMultipleTags_TagsAddedToRoom()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        // Create a test room
+        var roomTitle = "Room for Tags Test " + Guid.NewGuid().ToString()[..8];
+        var room = (await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.CustomRoom), 
+            TestContext.Current.CancellationToken)).Response;
+        
+        // Create first tag
+        var tagName1 = "TestTag1-" + Guid.NewGuid().ToString()[..5];
+        var createTagRequest1 = new CreateTagRequestDto(tagName1);
+        var tag1 = (await _roomsApi.CreateRoomTagAsync(createTagRequest1, TestContext.Current.CancellationToken)).Response;
+        
+        // Create a second tag
+        var tagName2 = "TestTag2-" + Guid.NewGuid().ToString()[..5];
+        var createTagRequest2 = new CreateTagRequestDto(tagName2);
+        var tag2 = (await _roomsApi.CreateRoomTagAsync(createTagRequest2, TestContext.Current.CancellationToken)).Response;
+        
+        // Part 1: Test adding a single tag to a room
+        // Act
+        var addSingleTagRequest = new BatchTagsRequestDto
+        {
+            Names = [tag1.ToString()!]
+        };
+        
+        var roomWithSingleTag = (await _roomsApi.AddRoomTagsAsync(room.Id, addSingleTagRequest, TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        roomWithSingleTag.Should().NotBeNull();
+        roomWithSingleTag.Tags.Should().NotBeNull();
+        roomWithSingleTag.Tags.Should().Contain(t => t.ToString() == tagName1);
+        
+        // Part 2: Test adding multiple tags to a room
+        // Act
+        var addMultipleTagsRequest = new BatchTagsRequestDto
+        {
+            Names = [tag2.ToString()!]
+        };
+        
+        var roomWithMultipleTags = (await _roomsApi.AddRoomTagsAsync(room.Id, addMultipleTagsRequest, TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        roomWithMultipleTags.Should().NotBeNull();
+        roomWithMultipleTags.Tags.Should().NotBeNull();
+        roomWithMultipleTags.Tags.Should().Contain(t => t.ToString() == tagName1); // First tag still present
+        roomWithMultipleTags.Tags.Should().Contain(t => t.ToString() == tagName2); // Second tag added
+        
+        // Part 3: Test adding a batch of multiple tags at once
+        // Create a third tag
+        var tagName3 = "TestTag3-" + Guid.NewGuid().ToString()[..5];
+        var createTagRequest3 = new CreateTagRequestDto(tagName3);
+        var tag3 = (await _roomsApi.CreateRoomTagAsync(createTagRequest3, TestContext.Current.CancellationToken)).Response;
+        
+        // Create a fourth tag
+        var tagName4 = "TestTag4-" + Guid.NewGuid().ToString()[..5];
+        var createTagRequest4 = new CreateTagRequestDto(tagName4);
+        var tag4 = (await _roomsApi.CreateRoomTagAsync(createTagRequest4, TestContext.Current.CancellationToken)).Response;
+        
+        // Act - add two tags at once
+        var addBatchTagsRequest = new BatchTagsRequestDto
+        {
+            Names = [tag3.ToString()!, tag4.ToString()!]
+        };
+        
+        var roomWithBatchTags = (await _roomsApi.AddRoomTagsAsync(room.Id, addBatchTagsRequest, TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        roomWithBatchTags.Should().NotBeNull();
+        roomWithBatchTags.Tags.Should().NotBeNull();
+        roomWithBatchTags.Tags.Should().Contain(t => t.ToString() == tagName1); // First tag still present
+        roomWithBatchTags.Tags.Should().Contain(t => t.ToString() == tagName2); // Second tag still present
+        roomWithBatchTags.Tags.Should().Contain(t => t.ToString() == tagName3); // Third tag added
+        roomWithBatchTags.Tags.Should().Contain(t => t.ToString() == tagName4); // Fourth tag added
     }
 }

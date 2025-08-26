@@ -228,6 +228,7 @@ public class WhitelabelController(
 
             var result = new WhiteLabelItemDto
             {
+                Type = logoType,
                 Name = logoType.ToStringFast(),
                 Size = TenantWhiteLabelSettings.GetSize(logoType)
             };
@@ -547,6 +548,12 @@ public class WhitelabelController(
         if (wrapper.Settings.Site.TestUrlPunyCode())
         {
             throw new ArgumentException("site");
+        }
+
+        var quota = await tenantManager.GetCurrentTenantQuotaAsync();
+        if (!quota.Branding)
+        {
+            wrapper.Settings.HideAbout = false;
         }
 
         wrapper.Settings.IsLicensor = false;

@@ -280,6 +280,7 @@ public abstract class VirtualRoomsController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<FolderDto<T>> GetRoomInfo(RoomIdRequestDto<T> inDto)
@@ -296,6 +297,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Updated room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Updated room information", typeof(FolderDto<string>))]
     [HttpPut("{id}")]
     public async Task<FolderDto<T>> UpdateRoom(UpdateRoomRequestDto<T> inDto)
     {
@@ -545,8 +547,16 @@ public abstract class VirtualRoomsController<T>(
         var linkAce = inDto.RoomLink.LinkType switch
         {
             LinkType.Invitation => await _fileStorageService.SetInvitationLinkAsync(inDto.Id, inDto.RoomLink.LinkId, inDto.RoomLink.Title, inDto.RoomLink.Access),
-            LinkType.External => await _fileStorageService.SetExternalLinkAsync(inDto.Id, FileEntryType.Folder, inDto.RoomLink.LinkId, inDto.RoomLink.Title,
-                inDto.RoomLink.Access, inDto.RoomLink.ExpirationDate, inDto.RoomLink.Password?.Trim(), inDto.RoomLink.DenyDownload),
+            LinkType.External => await _fileStorageService.SetExternalLinkAsync(
+                inDto.Id, 
+                FileEntryType.Folder, 
+                inDto.RoomLink.LinkId, 
+                inDto.RoomLink.Title,
+                inDto.RoomLink.Access, 
+                inDto.RoomLink.ExpirationDate, 
+                inDto.RoomLink.Password?.Trim(), 
+                inDto.RoomLink.DenyDownload,
+                inDto.RoomLink.Internal),
             _ => throw new InvalidOperationException()
         };
 
@@ -635,6 +645,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [SwaggerResponse(403, "You don't have permission to edit the room")]
     [HttpDelete("{id}/tags")]
     public async Task<FolderDto<T>> DeleteRoomTags(BatchTagsRequestDto<T> inDto)
@@ -652,6 +663,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [SwaggerResponse(404, "The required room was not found")]
     [HttpPost("{id}/logo")]
     public async Task<FolderDto<T>> CreateRoomLogo(LogoRequest<T> inDto)
@@ -670,6 +682,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/cover</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room cover", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room cover", typeof(FolderDto<string>))]
     [SwaggerResponse(403, "You don't have permission to change cover")]
     [SwaggerResponse(404, "The required room was not found")]
     [HttpPost("{id}/cover")]
@@ -706,6 +719,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [HttpDelete("{id}/logo")]
     public async Task<FolderDto<T>> DeleteRoomLogo(RoomIdRequestDto<T> inDto)
     {
@@ -723,6 +737,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/pin</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [HttpPut("{id}/pin")]
     public async Task<FolderDto<T>> PinRoom(RoomIdRequestDto<T> inDto)
     {
@@ -738,6 +753,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/unpin</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [HttpPut("{id}/unpin")]
     public async Task<FolderDto<T>> UnpinRoom(RoomIdRequestDto<T> inDto)
     {
@@ -752,6 +768,7 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Resend the room invitations</short>
     /// <path>api/2.0/files/rooms/{id}/resend</path>
     [Tags("Rooms")]
+    [SwaggerResponse(200, "Ok")]
     [HttpPost("{id}/resend")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task ResendEmailInvitations(UserInvitationRequestDto<T> inDto)
@@ -766,6 +783,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/reorder</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [HttpPut("{id}/reorder")]
     public async Task<FolderDto<T>> ReorderRoom(RoomIdRequestDto<T> inDto)
     {
@@ -782,24 +800,24 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/news</path>
     /// <collection>list</collection>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "List of file entry information", typeof(List<NewItemsDto<FileEntryDto>>))]
+    [SwaggerResponse(200, "List of file entry information", typeof(List<NewItemsDto<FileEntryBaseDto>>))]
     [HttpGet("{id}/news")]
-    public async Task<List<NewItemsDto<FileEntryDto>>> GetNewRoomItems(RoomIdRequestDto<T> inDto)
+    public async Task<List<NewItemsDto<FileEntryBaseDto>>> GetNewRoomItems(RoomIdRequestDto<T> inDto)
     {
         var newItems = await _fileStorageService.GetNewRoomFilesAsync(inDto.Id);
-        var result = new List<NewItemsDto<FileEntryDto>>();
+        var result = new List<NewItemsDto<FileEntryBaseDto>>();
 
         foreach (var (date, entries) in newItems)
         {
             var apiDateTime = apiDateTimeHelper.Get(date);
-            var items = new List<FileEntryDto>();
+            var items = new List<FileEntryBaseDto>();
 
             foreach (var en in entries)
             {
                 items.Add(await GetFileEntryWrapperAsync(en));
             }
 
-            result.Add(new NewItemsDto<FileEntryDto> { Date = apiDateTime, Items = items });
+            result.Add(new NewItemsDto<FileEntryBaseDto> { Date = apiDateTime, Items = items });
         }
 
         return result;

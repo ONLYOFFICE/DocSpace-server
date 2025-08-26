@@ -28,7 +28,7 @@ namespace ASC.AuditTrail.Mappers;
 
 internal class DocumentsActionMapper : IProductActionMapper
 {
-    public List<IModuleActionMapper> Mappers { get; } =
+    public List<ILocationActionMapper> Mappers { get; } =
     [
         new FilesActionMapper(),
         new FoldersActionMapper(),
@@ -38,15 +38,15 @@ internal class DocumentsActionMapper : IProductActionMapper
 
     public ProductType Product => ProductType.Documents;
 }
-internal class FilesActionMapper : IModuleActionMapper
+internal class FilesActionMapper : ILocationActionMapper
 {
-    public ModuleType Module { get; }
+    public LocationType Location { get; }
     public IDictionary<MessageAction, MessageMaps> Actions { get; }
 
     public FilesActionMapper()
     {
-        Module = ModuleType.Files;
-        Actions = new MessageMapsDictionary(ProductType.Documents, Module)
+        Location = LocationType.Files;
+        Actions = new MessageMapsDictionary(ProductType.Documents, Location)
         {
             {
                 EntryType.File, new Dictionary<ActionType, MessageAction[]>
@@ -90,20 +90,20 @@ internal class FilesActionMapper : IModuleActionMapper
             }
         };
 
-        Actions.Add(MessageAction.DocumentSignComplete, new MessageMaps("FilesDocumentSigned", ActionType.Send, ProductType.Documents, Module, EntryType.File));
-        Actions.Add(MessageAction.DocumentSendToSign, new MessageMaps("FilesRequestSign", ActionType.Send, ProductType.Documents, Module, EntryType.File));
+        Actions.Add(MessageAction.DocumentSignComplete, new MessageMaps("FilesDocumentSigned", ActionType.Send, ProductType.Documents, Location, EntryType.File));
+        Actions.Add(MessageAction.DocumentSendToSign, new MessageMaps("FilesRequestSign", ActionType.Send, ProductType.Documents, Location, EntryType.File));
     }
 }
 
-internal class FoldersActionMapper : IModuleActionMapper
+internal class FoldersActionMapper : ILocationActionMapper
 {
-    public ModuleType Module { get; }
+    public LocationType Location { get; }
     public IDictionary<MessageAction, MessageMaps> Actions { get; }
 
     public FoldersActionMapper()
     {
-        Module = ModuleType.Folders;
-        Actions = new MessageMapsDictionary(ProductType.Documents, Module)
+        Location = LocationType.Folders;
+        Actions = new MessageMapsDictionary(ProductType.Documents, Location)
         {
             {
                 EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
@@ -132,15 +132,15 @@ internal class FoldersActionMapper : IModuleActionMapper
     }
 }
 
-internal class RoomsActionMapper : IModuleActionMapper
+internal class RoomsActionMapper : ILocationActionMapper
 {
-    public ModuleType Module { get; }
+    public LocationType Location { get; }
     public IDictionary<MessageAction, MessageMaps> Actions { get; }
 
     public RoomsActionMapper()
     {
-        Module = ModuleType.Rooms;
-        Actions = new MessageMapsDictionary(ProductType.Documents, Module)
+        Location = LocationType.Rooms;
+        Actions = new MessageMapsDictionary(ProductType.Documents, Location)
         {
             {
                 EntryType.Room, new Dictionary<ActionType, MessageAction[]>
@@ -194,15 +194,15 @@ internal class RoomsActionMapper : IModuleActionMapper
     }
 }
 
-internal class SettingsActionMapper : IModuleActionMapper
+internal class SettingsActionMapper : ILocationActionMapper
 {
-    public ModuleType Module { get; }
+    public LocationType Location { get; }
     public IDictionary<MessageAction, MessageMaps> Actions { get; }
 
     public SettingsActionMapper()
     {
-        Module = ModuleType.DocumentsSettings;
-        Actions = new MessageMapsDictionary(ProductType.Documents, Module)
+        Location = LocationType.DocumentsSettings;
+        Actions = new MessageMapsDictionary(ProductType.Documents, Location)
         {
             {
                 EntryType.Folder, new Dictionary<ActionType, MessageAction>

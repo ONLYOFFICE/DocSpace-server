@@ -1,6 +1,5 @@
 {{>partial_header}}
 
-using {{packageName}}.Api;
 using {{packageName}}.Client;
 using {{packageName}}.Model;
 
@@ -10,14 +9,14 @@ public class Program
     {
         var config = new Configuration
         {
-            BasePath = "http://localhost:8092"
+            BasePath = "https://your-docspace.onlyoffice.com"
         };
         var authSettings = new AuthRequestsDto
         {
             UserName = "example@onlyoffice.com",
             Password = "11111111"
         };
-        var apiInstance = new AuthenticationApi(config);
+        var apiInstance = new {{packageName}}.Api.Authentication.AuthenticationApi(config);
 
         try
         {
@@ -26,14 +25,15 @@ public class Program
             var token = authMe.Response.Token;
             config.DefaultHeaders["Authorization"] = $"Bearer {token}";
 
-            var folderInstance = new FilesFoldersApi(config);
+            var folderInstance = new DocSpace.API.SDK.Api.Files.FoldersApi(config);
             var getFolderMy = await folderInstance.GetMyFolderAsync();
 
             var folderMyId = getFolderMy.Response.Current.Id;
+
             var folderSettings = new CreateFolder("Folder"){};
             var createFolder = await folderInstance.CreateFolderAsync(folderMyId, folderSettings);
             var createdFolderId = createFolder.Response.Id;
-            Console.WriteLine(createFolder.Response.Id);
+            Console.WriteLine(createdFolderId);
 
             var getFolderInfo = await folderInstance.GetFolderByFolderIdAsync(createdFolderId);
 
@@ -55,7 +55,15 @@ public class Program
             var deleteFolder = await folderInstance.DeleteFolderAsync(createdFolderId, deleteRequestSettings);
             Console.WriteLine(deleteFolder.StatusCode);
 
-            var backupInstance = new BackupApi(config);
+            var roomInstance = new {{packageName}}.Api.Rooms.RoomsApi(config);
+
+            var sort = SortedByType.DateAndTime;
+
+            var getRoom = await roomInstance.GetRoomsFolderAsync(null, null, 0, null, null, null, null, null, null, null, 100, null, sort.ToString(), SortOrder.Descending, null, "current.security,folders.id");
+
+            Console.WriteLine(getRoom.Response);
+
+            var backupInstance = new {{packageName}}.Api.Backup.BackupApi(config);
 
             var startBackupSettings = new BackupDto
             {

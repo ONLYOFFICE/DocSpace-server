@@ -64,6 +64,7 @@ public class CommonLinkUtility(
         CoreSettings coreSettings,
         TenantManager tenantManager,
         UserManager userManager,
+        InstanceCrypto instanceCrypto,
         EmailValidationKeyProvider emailValidationKeyProvider,
         ILoggerProvider options,
         ExternalResourceSettingsHelper externalResourceSettingsHelper)
@@ -200,12 +201,12 @@ public class CommonLinkUtility(
         return link;
     }
     
-    public (string, string) GetConfirmationUrlAndKey(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    public (string, string) GetConfirmationUrlAndKey(Guid userId, ConfirmType confirmType, object postfix = null)
     {
-        var url = GetFullAbsolutePath($"confirm/{confirmType}?{GetTokenWithoutKey(email, confirmType, userId)}");
+        var url = GetFullAbsolutePath($"confirm/{confirmType}?{GetTokenWithoutKey(userId, confirmType)}");
 
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var key = emailValidationKeyProvider.GetEmailKey(email + confirmType + (postfix ?? ""), tenantId);
+        var key = emailValidationKeyProvider.GetEmailKey(userId.ToString() + confirmType + (postfix ?? ""), tenantId);
         return (url, key);
     }
 
@@ -234,21 +235,9 @@ public class CommonLinkUtility(
         return $"confirm/{confirmType}?type={confirmType}&key={key}&uid={userId}";
     }
 
-    private string GetTokenWithoutKey(string email, ConfirmType confirmType, Guid userId = default)
+    private string GetTokenWithoutKey(Guid userId, ConfirmType confirmType)
     {
-        var link = $"type={confirmType}";
-
-        if (!string.IsNullOrEmpty(email))
-        {
-            link += $"&email={HttpUtility.UrlEncode(email)}";
-        }
-
-        if (userId != Guid.Empty)
-        {
-            link += $"&uid={userId}";
-        }
-
-        return link;
+        return $"type={confirmType}&uid={userId}";
     }
 
     public string GetToken(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
@@ -259,7 +248,8 @@ public class CommonLinkUtility(
 
         if (!string.IsNullOrEmpty(email))
         {
-            link += $"&email={HttpUtility.UrlEncode(email)}";
+            var encryptedEmail = instanceCrypto.Encrypt(email).Base64ToUrlSafe();
+            link += $"&encemail={HttpUtility.UrlEncode(encryptedEmail)}";
         }
 
         if (userId != Guid.Empty)

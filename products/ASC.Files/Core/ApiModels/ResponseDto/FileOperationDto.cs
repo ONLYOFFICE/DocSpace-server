@@ -74,12 +74,12 @@ public class FileOperationDto
     /// <summary>
     /// The list of files of the file operation.
     /// </summary>
-    public List<FileEntryDto> Files { get; set; }
+    public List<FileEntryBaseDto> Files { get; set; }
 
     /// <summary>
     /// The list of folders of the file operation.
     /// </summary>
-    public List<FileEntryDto> Folders { get; set; }
+    public List<FileEntryBaseDto> Folders { get; set; }
 }
 
 [Scope]
@@ -180,7 +180,7 @@ public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
 
         return result;
 
-        async IAsyncEnumerable<FileEntryDto> GetFoldersAsync<T>(IEnumerable<T> folders)
+        async IAsyncEnumerable<FileEntryBaseDto> GetFoldersAsync<T>(IEnumerable<T> folders)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
 
@@ -190,7 +190,7 @@ public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
             }
         }
 
-        async IAsyncEnumerable<FileEntryDto> GetFilesAsync<T>(IEnumerable<T> files)
+        async IAsyncEnumerable<FileEntryBaseDto> GetFilesAsync<T>(IEnumerable<T> files)
         {
             var fileDao = daoFactory.GetFileDao<T>();
 

@@ -559,12 +559,12 @@ public class CustomizationConfigConverter<T>(
 
         var result = new CustomizationConfigDto
         {
-            About = source.About,
+            About = await source.IsAboutPageVisible(),
             Customer = coreBaseSettings.Standalone ? await customerConfigConverter.Convert(source.Customer) : null,
             Feedback = await source.GetFeedback(),
             Forcesave = source.GetForceSave(file),
             Goback = await source.GetGoBack(configuration.EditorType, file),
-            Logo = await configConverter.Convert(configuration),
+            Logo = await configConverter.Convert(configuration, file),
             MentionShare = await source.GetMentionShare(file),
             Review = source.GetReview(configuration.EditorConfig.ModeWrite),
             SubmitForm = await source.GetSubmitForm(file),
@@ -579,7 +579,7 @@ public class CustomizationConfigConverter<T>(
 [Scope(GenericArguments = [typeof(string)])]
 public class LogoConfigConverter<T>
 {
-    public async Task<LogoConfigDto> Convert(Configuration<T> configuration)
+    public async Task<LogoConfigDto> Convert(Configuration<T> configuration, File<T> file)
     {
         var source = configuration.EditorConfig?.Customization?.Logo;
         
@@ -588,12 +588,14 @@ public class LogoConfigConverter<T>
             return null;
         }
 
+        var fileType = FileUtility.GetFileTypeByFileName(file.Title);
+
         var result = new LogoConfigDto
         {
-            Image = await source.GetImage(configuration.EditorType),
-            ImageDark = await source.GetImageDark(),
-            ImageLight = await source.GetImageLight(),
-            ImageEmbedded = await source.GetImageEmbedded(configuration.EditorType),
+            Image = await source.GetImage(fileType, configuration.EditorType),
+            ImageDark = await source.GetImageDark(fileType),
+            ImageLight = await source.GetImageLight(fileType),
+            ImageEmbedded = await source.GetImageEmbedded(fileType, configuration.EditorType),
             Url = source.Url,
             Visible = source.GetVisible(configuration.EditorType)
         };

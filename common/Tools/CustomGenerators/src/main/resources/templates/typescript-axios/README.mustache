@@ -1,29 +1,10 @@
-## {{npmName}}@{{npmVersion}}
+# {{packageName}}
 
 The ONLYOFFICE DocSpace SDK for TypeScript is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace API by offering ready-to-use methods and models.
-
-- API version: {{appVersion}}
-- SDK version: {{packageVersion}}
 
 {{#infoUrl}}
 For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
 {{/infoUrl}}
-
-This SDK utilizes axios for HTTP communication. The resulting Node module can be used in various environments:
-
-* [Node.js](https://nodejs.org/en)
-* [Webpack](https://webpack.js.org/)
-* [Browserify](https://browserify.org/)
-
-#### Language levels
-* ES5 - you must have a Promises/A+ library installed
-* ES6
-
-#### Module systems
-* CommonJS
-* ES6 module system
-
-This SDK can be used in both TypeScript and JavaScript projects. In TypeScript, definitions are automatically resolved via `package.json`. ([Reference](https://www.typescriptlang.org/docs/handbook/declaration-files/consumption.html))
 
 ### Building
 
@@ -34,14 +15,6 @@ npm install
 npm run build
 ```
 
-### Publishing
-
-To publish the package to the npm registry:
-
-```bash
-npm publish
-```
-
 ### Consuming
 
 To use the SDK in your project, navigate to the root folder of your consuming project and run one of the following commands:
@@ -49,13 +22,54 @@ To use the SDK in your project, navigate to the root folder of your consuming pr
 #### From published package (recommended)
 
 ```bash
-npm install {{npmName}}@{{npmVersion}} --save
+npm install {{packageName}} --save
 ```
 
 #### From local build (not recommended)
 
 ```bash
 npm install PATH_TO_GENERATED_PACKAGE --save
+```
+
+## Getting Started
+
+Please follow the [building](#building) instruction and execute the following TS code:
+
+```typescript
+{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}
+import { Configuration, {{{classname}}} } from '{{{packageName}}}';
+
+const config = new Configuration ({
+    basePath: "https://your-docspace.onlyoffice.com",
+    {{#authMethods}}
+    {{#isBasic}}
+    {{#isBasicBearer}}
+    accessToken: "YOUR ACCESS TOKEN",
+    {{/isBasicBearer}}
+    {{/isBasic}}
+    {{/authMethods}}
+});
+
+const apiInstance = new {{{classname}}}(config);
+
+{{#hasParams}}
+{{#requiredParams}}const {{{paramName}}}: {{{dataType}}} = {{{example}}}; // {{{description}}}
+{{/requiredParams}}
+{{#optionalParams}}const opts: any = {
+{{#-first}}  {{/-first}}'{{{paramName}}}': {{{example}}}{{^-last}},{{/-last}} // {{{description}}}
+{{#-last}}};{{/-last}}
+{{/optionalParams}}
+{{/hasParams}}
+try {
+    const result = await apiInstance.{{{operationId}}}(
+      {{#hasParams}}{{#requiredParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{/requiredParams}}{{#optionalParams}}{{#-last}}{{#hasRequiredParams}}, {{/hasRequiredParams}}opts{{/-last}}{{/optionalParams}}{{/hasParams}}
+    );
+    console.log('API called successfully. Returned data: ', result.data);
+  } catch (error) {
+    console.error(error);
+}
+
+{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}
 ```
 
 <a id="documentation-for-authorization"></a>
@@ -99,20 +113,45 @@ npm install PATH_TO_GENERATED_PACKAGE --save
 {{/scopes}}
 {{/isOpenId}}
 
-
 {{/authMethods}}
 
 ### Documentation for API Endpoints
 
-All URIs are relative to *{{{basePath}}}*
+All URIs are relative to *https://your-docspace.onlyoffice.com*
 
-Class | Method | HTTP request | Description
------------- | ------------- | ------------- | -------------
-{{#apiInfo}}{{#apis}}{{#operations}}{{#operation}}*{{classname}}* | [**{{operationId}}**]({{apiDocPath}}{{classname}}.md#{{operationIdLowerCase}}) | **{{httpMethod}}** {{path}} | {{summary}}
-{{/operation}}{{/operations}}{{/apis}}{{/apiInfo}}
+### API Endoints tables:
+
+{{#customApis}}
+<details>
+  <summary>{{folder}}</summary>
+
+  <table>
+    <tbody>
+      <tr>
+        <th>Method</th>
+        <th>HTTP request</th>
+        <th>Description</th>
+      </tr>
+      {{#apis}}<tr>
+        <td colspan="3" style="text-align: center;"><strong>{{x-classname}}</strong></td>
+      </tr>
+      {{#operations.operation}}
+      <tr>
+        <td><a href="{{apiDocPath}}{{classname}}.md#{{operationIdLowerCase}}"><strong>{{operationId}}</strong></a></td>
+        <td><strong>{{httpMethod}}</strong> {{path}}</td>
+        <td>{{summary}}</td>
+      </tr>
+      {{/operations.operation}}
+    {{/apis}}</tbody>
+  </table>
+
+</details>
+{{/customApis}}
 
 ### Documentation For Models
 
+<details><summary>Models list</summary>
+
 {{#models}}{{#model}} - [{{{classname}}}]({{modelDocPath}}{{{classname}}}.md)
 {{/model}}{{/models}}
-
+</details>
