@@ -1951,4 +1951,26 @@ $TrulyYours</value>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Ir a la configuración del Monedero</value>
   </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>¡Hola, $UserName!
+
+Nos ponemos en contacto con usted para informarle de que la renovación automática de su plan de servicio no se ha podido realizar.
+
+Le rogamos que renueve manualmente su plan de servicio actual (o que adquiera uno nuevo).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>¡Hola, $UserName!
+
+Nos ponemos en contacto con usted para informarle de que la recarga automática del saldo de su monedero en DocSpace no se ha realizado correctamente.
+
+Le rogamos que compruebe y actualice manualmente el saldo de su monedero.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>
