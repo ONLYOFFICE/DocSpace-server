@@ -137,21 +137,25 @@ public class McpService(
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var server = await mcpDao.GetServerAsync(tenantId, serverId);
-        if (server == null)
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId)))
         {
-            throw new ItemNotFoundException("MCP Server not found");
-        }
+            var server = await mcpDao.GetServerAsync(tenantId, serverId);
+            if (server == null)
+            {
+                throw new ItemNotFoundException("MCP Server not found");
+            }
 
-        if (server.Internal)
-        {
-            throw new InvalidOperationException("Internal server cannot be disabled");
-        }
+            if (server.Internal)
+            {
+                throw new InvalidOperationException("Internal server cannot be disabled");
+            }
         
-        await mcpDao.SetServerStateAsync(tenantId, serverId, enabled);
-        server.Enabled = enabled;
+            await mcpDao.SetServerStateAsync(tenantId, serverId, enabled);
+        
+            server.Enabled = enabled;
 
-        return server;
+            return server;
+        }
     }
     
     public async Task<(List<McpServer> servers, int totalCount)> GetAllServersAsync(int offset, int count)
@@ -182,7 +186,7 @@ public class McpService(
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        await using (await distributedLockProvider.TryAcquireFairLockAsync($"mcp_room_{roomId}"))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId)))
         {
             var servers = await mcpDao.GetServersAsync(tenantId, ids);
             if (servers.Count > 0)
@@ -206,9 +210,11 @@ public class McpService(
     {
         await ThrowIfNotAccessEditRoomAsync(roomId);
         
-        await using (await distributedLockProvider.TryAcquireFairLockAsync($"mcp_room_{roomId}"))
+        var tenantId = tenantManager.GetCurrentTenantId();
+        
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId)))
         {
-            await mcpDao.DeleteServersConnectionsAsync(tenantManager.GetCurrentTenantId(), roomId, ids);
+            await mcpDao.DeleteServersConnectionsAsync(tenantId, roomId, ids);
         }
     }
 
@@ -480,5 +486,10 @@ public class McpService(
     {
         public IMcpClient Client { get; } = client;
         public IEnumerable<AITool> Tools { get; } = tools;
+    }
+
+    private string GetLockKey(int tenantId)
+    {
+        return $"mcp_{tenantId}";
     }
 }
