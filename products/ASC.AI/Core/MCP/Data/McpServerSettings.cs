@@ -41,9 +41,9 @@ public static class DbMcpServerSettingsExtensions
         InstanceCrypto crypto)
     {
         var settings = new McpServerSettings();
-        if (dbMcpServerSettings.OauthCredential != null)
+        if (dbMcpServerSettings.OauthCredentials != null)
         {
-            var oauthCredential = await crypto.DecryptAsync(dbMcpServerSettings.OauthCredential);
+            var oauthCredential = await crypto.DecryptAsync(dbMcpServerSettings.OauthCredentials);
             settings.OauthCredentials = OAuth20Token.FromJson(oauthCredential);
         }
         

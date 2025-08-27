@@ -34,7 +34,7 @@ public class DbMcpServerSettings : BaseEntity
     public Guid ServerId { get; set; }
     public int RoomId { get; set; }
     public Guid UserId { get; set; }
-    public string OauthCredential { get; set; }
+    public string OauthCredentials { get; set; }
     public ToolsConfiguration ToolsConfiguration { get; set; }
     
     public DbTenant Tenant { get; set; }
@@ -91,8 +91,8 @@ public static class DbMcpToolsSettingsExtensions
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
             
-            entity.Property(e => e.OauthCredential)
-                .HasColumnName("oauth_credential")
+            entity.Property(e => e.OauthCredentials)
+                .HasColumnName("oauth_credentials")
                 .HasColumnType("text")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");

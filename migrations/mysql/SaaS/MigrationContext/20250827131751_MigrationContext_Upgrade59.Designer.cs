@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20250826092718_MigrationContext_Upgrade59")]
+    [Migration("20250827131751_MigrationContext_Upgrade59")]
     partial class MigrationContext_Upgrade59
     {
         /// <inheritdoc />
@@ -7462,9 +7462,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<string>("OauthCredential")
+                    b.Property<string>("OauthCredentials")
                         .HasColumnType("text")
-                        .HasColumnName("oauth_credential")
+                        .HasColumnName("oauth_credentials")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 

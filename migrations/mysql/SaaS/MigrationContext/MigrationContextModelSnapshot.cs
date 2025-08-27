@@ -7459,9 +7459,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<string>("OauthCredential")
+                    b.Property<string>("OauthCredentials")
                         .HasColumnType("text")
-                        .HasColumnName("oauth_credential")
+                        .HasColumnName("oauth_credentials")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 

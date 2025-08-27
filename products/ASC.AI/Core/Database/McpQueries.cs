@@ -295,7 +295,7 @@ static file class McpQueries
             ctx.RoomMcpServerSettings
                 .Where(x => x.TenantId == tenantId && x.RoomId == roomId && x.UserId == userId && x.ServerId == serverId)
                 .ExecuteUpdate(x => 
-                    x.SetProperty(y => y.OauthCredential, token)));
+                    x.SetProperty(y => y.OauthCredentials, token)));
 }
 
 public class DbRoomServerUnit

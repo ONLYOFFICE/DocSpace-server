@@ -445,7 +445,7 @@ public class McpDao(
 
             if (mcpServerSettings.OauthCredentials != null)
             {
-                dbSettings.OauthCredential = await crypto.EncryptAsync(mcpServerSettings.OauthCredentials.ToJson());
+                dbSettings.OauthCredentials = await crypto.EncryptAsync(mcpServerSettings.OauthCredentials.ToJson());
             }
             
             await context.RoomMcpServerSettings.AddOrUpdateAsync(dbSettings);
