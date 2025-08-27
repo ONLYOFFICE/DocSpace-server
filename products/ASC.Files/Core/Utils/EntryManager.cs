@@ -142,7 +142,7 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsTask = tagDao.GetTagsAsync([TagType.Locked], files).ToDictionaryAsync(k => k.EntryId, v => v);
+        var tagsTask = tagDao.GetTagsAsync([TagType.Locked, TagType.Favorite], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync());
         var tagsNewTask = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, files).ToListAsync();
 
         var tags = await tagsTask;
@@ -159,13 +159,24 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         foreach (var file in files)
         {
-            if (tags.TryGetValue(file.Id, out var lockedTag))
+            var fileTags = await tags.GetValueOrDefault(file.Id);
+
+            if (fileTags != null)
             {
-                var lockedBy = lockedTag.Owner;
-                file.Locked = lockedBy != Guid.Empty;
-                file.LockedBy = lockedBy != Guid.Empty && lockedBy != authContext.CurrentAccount.ID
-                    ? await global.GetUserNameAsync(lockedBy)
-                    : null;
+                if (fileTags.Any(r => r.Type == TagType.Favorite))
+                {
+                    file.IsFavorite = true;
+                }
+
+                var lockedTag = fileTags.FirstOrDefault(r => r.Type == TagType.Locked);
+                if (lockedTag != null)
+                {
+                    var lockedBy = lockedTag.Owner;
+                    file.Locked = lockedBy != Guid.Empty;
+                    file.LockedBy = lockedBy != Guid.Empty && lockedBy != authContext.CurrentAccount.ID
+                        ? await global.GetUserNameAsync(lockedBy)
+                        : null;
+                }
             }
 
             if (tagsNew.Exists(r => r.EntryId.Equals(file.Id)))

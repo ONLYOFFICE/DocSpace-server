@@ -447,6 +447,7 @@ public class FileDtoHelper(
         result.PureContentLength = file.ContentLength.NullIfDefault();
         result.Comment = file.Comment;
         result.Encrypted = file.Encrypted.NullIfDefault();
+        result.IsFavorite = file.IsFavorite.NullIfDefault();
         result.Locked = file.Locked.NullIfDefault();
         result.LockedBy = file.LockedBy;
         result.Access = file.Access;

@@ -53,12 +53,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// Specifies if the folder can be shared or not.
     /// </summary>
     public bool? IsShareable { get; set; }
-
-    /// <summary>
-    /// Specifies if the folder is favorite or not.
-    /// </summary>
-    public bool? IsFavorite { get; set; }
-
+    
     /// <summary>
     /// The new element index in the folder.
     /// </summary>

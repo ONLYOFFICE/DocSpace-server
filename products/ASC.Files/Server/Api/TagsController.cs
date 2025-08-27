@@ -68,7 +68,6 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Change the file favorite status</short>
     /// <path>api/2.0/files/favorites/{fileId}</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Boolean value: true - the file is favorite, false - the file is not favorite", typeof(bool))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
@@ -89,7 +88,6 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Add favorite files and folders</short>
     /// <path>api/2.0/files/favorites</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
@@ -125,7 +123,6 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Delete favorite files and folders (using body parameters)</short>
     /// <path>api/2.0/files/favorites</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("favorites")]
@@ -140,7 +137,6 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Delete favorite files and folders (using query parameters)</short>
     /// <path>api/2.0/files/favorites</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("favorites")]
