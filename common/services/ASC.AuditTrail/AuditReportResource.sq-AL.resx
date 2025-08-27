@@ -984,4 +984,22 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook u perditësua: {0}</value>
   </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Cilësimet e dukshmërisë së banerëve promovues janë ndryshuar</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Operacioni i kryer nga klienti</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Raporti i operacioneve të klientit u shkarkua</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Abonimi i klientit është përditësua: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Portofoli i klientit u rimbush: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e rimbushjes së portofolit të klientit u përditësuan</value>
+  </data>
 </root>
