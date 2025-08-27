@@ -107,7 +107,7 @@ public class ModelBuilderWrapper
 
                             if (list[1] is SqlConstantExpression val)
                             {
-                                res.Add(new SqlConstantExpression(Expression.Constant($"$.{val.Value}"), val.TypeMapping));
+                                res.Add(new SqlConstantExpression($"$.{val.Value}", val.TypeMapping));
                             }
                         }
 
@@ -133,7 +133,7 @@ public class ModelBuilderWrapper
 
                             if (list[1] is SqlConstantExpression val)
                             {
-                                res.Add(new SqlConstantExpression(Expression.Constant($"{val.Value}"), val.TypeMapping));
+                                res.Add(new SqlConstantExpression($"{val.Value}", val.TypeMapping));
                             }
                         }
 
@@ -169,11 +169,11 @@ public class ModelBuilderWrapper
                     
                     if (strValue != null && strValue.StartsWith('[') && strValue.EndsWith(']'))
                     {
-                        result.Add(new SqlConstantExpression(Expression.Constant($"${strValue}"), value.TypeMapping));
+                        result.Add(new SqlConstantExpression($"${strValue}", value.TypeMapping));
                     }
                     else
                     {
-                        result.Add(new SqlConstantExpression(Expression.Constant($"$.{strValue}"), value.TypeMapping));
+                        result.Add(new SqlConstantExpression($"$.{strValue}", value.TypeMapping));
                     }
                 }
                 else
