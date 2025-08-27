@@ -42,7 +42,9 @@ public class MessagesRepository(
         MessageAction.SendJoinInvite,
         MessageAction.RoomRemoveUser,
         MessageAction.PortalRenamed,
-        MessageAction.RoomCreated
+        MessageAction.RoomCreated,
+        MessageAction.FileOpenedForChange,
+        MessageAction.FormOpenedForFilling
     ];
 
     public async Task<int> AddAsync(EventMessage message)

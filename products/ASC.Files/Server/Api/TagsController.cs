@@ -50,7 +50,6 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Add a file to the "Recent" section</short>
     /// <path>api/2.0/files/file/{fileId}/recent</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [SwaggerResponse(200, "New file information", typeof(FileDto<string>))]
@@ -178,8 +177,8 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, _) = FileOperationsManager.GetIds(inDto.FileIds);
         
-        var t1 = fileStorageService.DeleteFromRecentAsync(folderIntIds, fileIntIds, true);
-        var t2 = fileStorageService.DeleteFromRecentAsync(folderStringIds, [], true);
+        var t1 = fileStorageService.DeleteFromRecentAsync(folderIntIds, fileIntIds);
+        var t2 = fileStorageService.DeleteFromRecentAsync(folderStringIds, []);
         
         await Task.WhenAll(t1, t2);
         

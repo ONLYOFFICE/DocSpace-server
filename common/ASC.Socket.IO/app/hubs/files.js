@@ -332,16 +332,16 @@ module.exports = (io) => {
     }
   }
 
-  function deleteFile({ id, room, userIds } = {}) {
+  function deleteFile({ id, room, data, userIds } = {}) {
     logger.info(`delete file ${id} in room ${room}`);
 
     if(userIds)
     {
-      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "file"));
+      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "file", data));
     }
     else
     {
-      modifyFolder(room, "delete", id, "file");
+      modifyFolder(room, "delete", id, "file", data);
     }
   }
 
