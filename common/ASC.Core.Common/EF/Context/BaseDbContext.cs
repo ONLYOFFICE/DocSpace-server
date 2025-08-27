@@ -41,22 +41,7 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
 {
     public void OptionsAction(IServiceProvider sp, DbContextOptionsBuilder optionsBuilder)
     {
-        var configurationFromBuilder = sp.GetRequiredService<IConfiguration>();
-        
-        var providersInfo = configurationFromBuilder.GetSection("options").Get<Options>();
-        if (providersInfo != null)
-        {
-            var configurationInfo = !string.IsNullOrEmpty(configurationFromBuilder["standalone"]) ? ConfigurationInfo.Standalone : ConfigurationInfo.SaaS;
-            foreach (var info in providersInfo.Providers)
-            {
-                configurationFromBuilder["testAssembly"] = $"ASC.Migrations.{info.Provider}.{configurationInfo}";
-                configurationFromBuilder["ConnectionStrings:default:name"] = "default";
-                configurationFromBuilder["ConnectionStrings:default:connectionString"] = info.ConnectionString;
-                configurationFromBuilder["ConnectionStrings:default:providerName"] = info.ProviderFullName;
-            }
-        }
-
-        var configuration = new ConfigurationExtension(configurationFromBuilder);
+        var configuration = new ConfigurationExtension(sp.GetRequiredService<IConfiguration>());
         var migrateAssembly = configuration["testAssembly"];
         var connectionString = configuration.GetConnectionStrings(nameConnectionString, region);
         var loggerFactory = sp.GetRequiredService<EFLoggerFactory>();
