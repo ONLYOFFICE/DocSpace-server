@@ -31,7 +31,9 @@ global using ASC.AI.Core.Chat.Extensions;
 global using ASC.AI.Core.Chat.History;
 global using ASC.AI.Core.Knowledge;
 global using ASC.AI.Core.MCP;
+global using ASC.AI.Core.MCP.Auth;
 global using ASC.AI.Core.MCP.Data;
+global using ASC.AI.Core.MCP.Transport;
 global using ASC.AI.Core.Provider;
 global using ASC.AI.Core.Provider.Data;
 global using ASC.AI.Core.Provider.Model;
@@ -46,6 +48,7 @@ global using ASC.Common.Web;
 
 global using ASC.Core;
 global using ASC.Core.Billing;
+global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.EF.Model.Chat;
@@ -60,6 +63,9 @@ global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Text;
 global using ASC.Files.Core.Vectorization.Data;
 global using ASC.Files.Core.Vectorization.Embedding;
+
+global using ASC.FederatedLogin;
+global using ASC.FederatedLogin.Helpers;
 
 global using ASC.Security.Cryptography;
 
@@ -98,3 +104,4 @@ global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Threading.Channels;
+global using System.Web;

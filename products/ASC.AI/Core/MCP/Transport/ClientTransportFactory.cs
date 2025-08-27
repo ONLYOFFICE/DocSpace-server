@@ -24,9 +24,41 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.MCP.Builder;
+namespace ASC.AI.Core.MCP.Transport;
 
-public interface ITransportBuilder
+[Scope]
+public class ClientTransportFactory(
+    McpDao mcpDao,
+    AuthContext authContext,
+    CommonLinkUtility commonLinkUtility,
+    CookiesManager cookiesManager,
+    IHttpClientFactory clientFactory,
+    IHttpMessageHandlerFactory messageHandlerFactory,
+    OAuth20TokenHelper tokenHelper)
 {
-    public ValueTask<SseClientTransport> BuildAsync(McpServerConnection connection);
+    public async Task<SseClientTransport> CreateAsync(McpServerConnection connection)
+    {
+        if (connection.ServerType is ServerType.DocSpace)
+        {
+            var docspaceBuilder = new DocSpaceTransportBuilder(cookiesManager, commonLinkUtility, clientFactory);
+            return await docspaceBuilder.BuildAsync(connection);
+        }
+
+        if (connection.ConnectionType is ConnectionType.OAuth)
+        {
+            var oauthGenericBuilder = new OauthGenericTransportBuilder(tokenHelper, mcpDao, authContext, messageHandlerFactory);
+            return await oauthGenericBuilder.BuildAsync(connection);
+        }
+
+        var options = new SseClientTransportOptions
+        {
+            Name = connection.Name,
+            Endpoint = new Uri(connection.Endpoint),
+            AdditionalHeaders = connection.Headers,
+            TransportMode = HttpTransportMode.AutoDetect,
+            ConnectionTimeout = TimeSpan.FromSeconds(5)
+        };
+
+        return new SseClientTransport(options, clientFactory.CreateClient());
+    }
 }

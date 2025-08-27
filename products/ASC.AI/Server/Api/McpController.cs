@@ -79,7 +79,7 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     [HttpGet("servers/available")]
     public async Task<List<McpServerShortDto>> GetAvailableServersAsync(PaginatedRequestDto inDto)
     {
-        var (servers, count) = await mcpService.GetActiveServerAsync(inDto.StartIndex, inDto.Count);
+        var (servers, count) = await mcpService.GetActiveServersAsync(inDto.StartIndex, inDto.Count);
         
         apiContext.SetCount(servers.Count).SetTotalCount(count);
         

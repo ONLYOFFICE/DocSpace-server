@@ -24,49 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.MCP.Auth;
-using ASC.FederatedLogin.Helpers;
+namespace ASC.AI.Core.MCP.Transport;
 
-namespace ASC.AI.Core.MCP.Builder;
-
-public class OauthGenericTransportBuilder(
-    OAuth20TokenHelper oauthTokenHelper,
-    McpDao mcpDao,
-    AuthContext authContext,
-    IHttpMessageHandlerFactory httpMessageHandlerFactory) : ITransportBuilder
+public class DocSpaceTransportBuilder(
+    CookiesManager cookiesManager, 
+    CommonLinkUtility commonLinkUtility,
+    IHttpClientFactory httpClientFactory) : ITransportBuilder
 {
     public ValueTask<SseClientTransport> BuildAsync(McpServerConnection connection)
     {
-        ArgumentNullException.ThrowIfNull(connection);
-        ArgumentNullException.ThrowIfNull(connection.Settings);
-        ArgumentNullException.ThrowIfNull(connection.Settings.OauthCredentials);
-        ArgumentException.ThrowIfNullOrEmpty(connection.OauthProvider?.AccessTokenUrl);
-
-        var context = new OauthContext
+        var options = new SseClientTransportOptions
         {
-            TenantId = connection.TenantId,
-            RoomId = connection.RoomId,
-            UserId = authContext.CurrentAccount.ID,
-            ServerId = connection.ServerId,
-            OauthProvider = connection.OauthProvider,
-            Token = connection.Settings.OauthCredentials
+            Name = connection.Name,
+            Endpoint = new Uri(connection.Endpoint),
+            AdditionalHeaders = new Dictionary<string, string>
+            {
+                {"Referer", commonLinkUtility.GetFullAbsolutePath(string.Empty).TrimEnd('/') + "/"}, 
+                {"Authorization", cookiesManager.GetCookies(CookiesType.AuthKey)}
+            }
         };
         
-        var oauthHandler = new OauthMessageHandler(
-            httpMessageHandlerFactory.CreateHandler(),
-            mcpDao,
-            context,
-            oauthTokenHelper);
-        
-        var client = new HttpClient(oauthHandler);
-
-        var transportOptions = new SseClientTransportOptions
-        {
-            Name = connection.Name, 
-            Endpoint = new Uri(connection.Endpoint), 
-            TransportMode = HttpTransportMode.AutoDetect
-        };
-        
-        return ValueTask.FromResult(new SseClientTransport(transportOptions, client));
+        var transport = new SseClientTransport(options, httpClientFactory.CreateClient());
+        return ValueTask.FromResult(transport);
     }
 }

@@ -24,11 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Web;
-
-using ASC.AI.Core.MCP.Builder;
-using ASC.FederatedLogin.Helpers;
-
 namespace ASC.AI.Core.MCP;
 
 [Scope]
@@ -163,7 +158,7 @@ public class McpService(
         return await mcpDao.GetServersAsync1(tenantId, offset, count);
     }
 
-    public async Task<(List<McpServer> servers, int totalCount)> GetActiveServerAsync(int offset, int count)
+    public async Task<(List<McpServer> servers, int totalCount)> GetActiveServersAsync(int offset, int count)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         return await mcpDao.GetActiveServersAsync(tenantId, offset, count);
@@ -178,13 +173,8 @@ public class McpService(
     
     public async Task AddServersToRoomAsync(int roomId, HashSet<Guid> ids)
     {
-        var room = await GetRoomAsync(roomId);
+        await ThrowIfNotAccessEditRoomAsync(roomId);
 
-        if (!await fileSecurity.CanEditRoomAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-        
         var tenantId = tenantManager.GetCurrentTenantId();
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync($"mcp_room_{roomId}"))
@@ -206,15 +196,10 @@ public class McpService(
             await mcpDao.AddServersConnectionsAsync(tenantId, roomId, serversToAdd);
         }
     }
-    
+
     public async Task DeleteServersFromRoomAsync(int roomId, List<Guid> ids)
     {
-        var room = await GetRoomAsync(roomId);
-
-        if (!await fileSecurity.CanEditRoomAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
+        await ThrowIfNotAccessEditRoomAsync(roomId);
         
         await using (await distributedLockProvider.TryAcquireFairLockAsync($"mcp_room_{roomId}"))
         {
@@ -224,13 +209,8 @@ public class McpService(
 
     public async Task<List<McpServerStatus>> GetServersStatusesAsync(int roomId)
     {
-        var room = await GetRoomAsync(roomId);
-        
-        if (!await fileSecurity.CanUseChatsAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-        
+        await ThrowIfNotAccessUseMcpAsync(roomId);
+
         var tenantId = tenantManager.GetCurrentTenantId();
         var statuses = new List<McpServerStatus>();
         
@@ -273,12 +253,7 @@ public class McpService(
 
     public async Task ConnectServerAsync(int roomId, Guid serverId, string code)
     {
-        var room = await GetRoomAsync(roomId);
-        
-        if (!await fileSecurity.CanUseChatsAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
+        await ThrowIfNotAccessUseMcpAsync(roomId);
         
         var tenantId = tenantManager.GetCurrentTenantId();
         
@@ -323,12 +298,7 @@ public class McpService(
 
     public async Task DisconnectServerAsync(int roomId, Guid serverId)
     {
-        var room = await GetRoomAsync(roomId);
-        
-        if (!await fileSecurity.CanUseChatsAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
+        await ThrowIfNotAccessUseMcpAsync(roomId);
         
         var tenantId = tenantManager.GetCurrentTenantId();
         
@@ -350,12 +320,7 @@ public class McpService(
 
     public async Task<IReadOnlyDictionary<string, bool>> GetToolsAsync(int roomId, Guid serverId)
     {
-        var room = await GetRoomAsync(roomId);
-
-        if (!await fileSecurity.CanUseChatsAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
+        await ThrowIfNotAccessUseMcpAsync(roomId);
         
         var connection = await mcpDao.GetMcpConnectionAsync(tenantManager.GetCurrentTenantId(), roomId, serverId);
         if (connection == null)
@@ -368,12 +333,7 @@ public class McpService(
     
     public async Task<IReadOnlyDictionary<string, bool>> SetToolsAsync(int roomId, Guid serverId, List<string> disabledTools)
     {
-        var room = await GetRoomAsync(roomId);
-
-        if (!await fileSecurity.CanUseChatsAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
+        await ThrowIfNotAccessUseMcpAsync(roomId);
         
         var tenantId = tenantManager.GetCurrentTenantId();
         
@@ -419,12 +379,7 @@ public class McpService(
     
     public async Task<ToolHolder> GetToolsAsync(int roomId)
     {
-        var room = await GetRoomAsync(roomId);
-        
-        if (!await fileSecurity.CanUseChatsAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
+        await ThrowIfNotAccessUseMcpAsync(roomId);
         
         var tenantId = tenantManager.GetCurrentTenantId();
 
@@ -478,6 +433,26 @@ public class McpService(
         if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException("Access denied");
+        }
+    }
+    
+    private async Task ThrowIfNotAccessEditRoomAsync(int roomId)
+    {
+        var room = await GetRoomAsync(roomId);
+
+        if (!await fileSecurity.CanEditRoomAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+    }
+    
+    private async Task ThrowIfNotAccessUseMcpAsync(int roomId)
+    {
+        var room = await GetRoomAsync(roomId);
+
+        if (!await fileSecurity.CanUseChatsAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
     }
     

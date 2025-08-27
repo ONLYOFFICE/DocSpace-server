@@ -24,27 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.MCP.Builder;
+namespace ASC.AI.Core.MCP.Transport;
 
-public class DocSpaceTransportBuilder(
-    CookiesManager cookiesManager, 
-    CommonLinkUtility commonLinkUtility,
-    IHttpClientFactory httpClientFactory) : ITransportBuilder
+public interface ITransportBuilder
 {
-    public ValueTask<SseClientTransport> BuildAsync(McpServerConnection connection)
-    {
-        var options = new SseClientTransportOptions
-        {
-            Name = connection.Name,
-            Endpoint = new Uri(connection.Endpoint),
-            AdditionalHeaders = new Dictionary<string, string>
-            {
-                {"Referer", commonLinkUtility.GetFullAbsolutePath(string.Empty).TrimEnd('/') + "/"}, 
-                {"Authorization", cookiesManager.GetCookies(CookiesType.AuthKey)}
-            }
-        };
-        
-        var transport = new SseClientTransport(options, httpClientFactory.CreateClient());
-        return ValueTask.FromResult(transport);
-    }
+    public ValueTask<SseClientTransport> BuildAsync(McpServerConnection connection);
 }

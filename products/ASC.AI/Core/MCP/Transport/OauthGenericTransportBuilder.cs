@@ -24,43 +24,46 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.FederatedLogin.Helpers;
+namespace ASC.AI.Core.MCP.Transport;
 
-namespace ASC.AI.Core.MCP.Builder;
-
-[Scope]
-public class ClientTransportFactory(
+public class OauthGenericTransportBuilder(
+    OAuth20TokenHelper oauthTokenHelper,
     McpDao mcpDao,
     AuthContext authContext,
-    CommonLinkUtility commonLinkUtility,
-    CookiesManager cookiesManager,
-    IHttpClientFactory clientFactory,
-    IHttpMessageHandlerFactory messageHandlerFactory,
-    OAuth20TokenHelper tokenHelper)
+    IHttpMessageHandlerFactory httpMessageHandlerFactory) : ITransportBuilder
 {
-    public async Task<SseClientTransport> CreateAsync(McpServerConnection connection)
+    public ValueTask<SseClientTransport> BuildAsync(McpServerConnection connection)
     {
-        if (connection.ServerType is ServerType.DocSpace)
-        {
-            var docspaceBuilder = new DocSpaceTransportBuilder(cookiesManager, commonLinkUtility, clientFactory);
-            return await docspaceBuilder.BuildAsync(connection);
-        }
+        ArgumentNullException.ThrowIfNull(connection);
+        ArgumentNullException.ThrowIfNull(connection.Settings);
+        ArgumentNullException.ThrowIfNull(connection.Settings.OauthCredentials);
+        ArgumentException.ThrowIfNullOrEmpty(connection.OauthProvider?.AccessTokenUrl);
 
-        if (connection.ConnectionType is ConnectionType.OAuth)
+        var context = new OauthContext
         {
-            var oauthGenericBuilder = new OauthGenericTransportBuilder(tokenHelper, mcpDao, authContext, messageHandlerFactory);
-            return await oauthGenericBuilder.BuildAsync(connection);
-        }
-
-        var options = new SseClientTransportOptions
-        {
-            Name = connection.Name,
-            Endpoint = new Uri(connection.Endpoint),
-            AdditionalHeaders = connection.Headers,
-            TransportMode = HttpTransportMode.AutoDetect,
-            ConnectionTimeout = TimeSpan.FromSeconds(5)
+            TenantId = connection.TenantId,
+            RoomId = connection.RoomId,
+            UserId = authContext.CurrentAccount.ID,
+            ServerId = connection.ServerId,
+            OauthProvider = connection.OauthProvider,
+            Token = connection.Settings.OauthCredentials
         };
+        
+        var oauthHandler = new OauthMessageHandler(
+            httpMessageHandlerFactory.CreateHandler(),
+            mcpDao,
+            context,
+            oauthTokenHelper);
+        
+        var client = new HttpClient(oauthHandler);
 
-        return new SseClientTransport(options, clientFactory.CreateClient());
+        var transportOptions = new SseClientTransportOptions
+        {
+            Name = connection.Name, 
+            Endpoint = new Uri(connection.Endpoint), 
+            TransportMode = HttpTransportMode.AutoDetect
+        };
+        
+        return ValueTask.FromResult(new SseClientTransport(transportOptions, client));
     }
 }
