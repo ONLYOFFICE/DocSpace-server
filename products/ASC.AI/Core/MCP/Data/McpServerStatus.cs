@@ -34,3 +34,37 @@ public class McpServerStatus
     public bool Connected { get; set; }
     public string? AuthorizationEndpoint { get; set; }
 }
+
+public static class McpServerStatusExtensions
+{
+    public static McpServerStatus ToMcpServerStatus(this McpServerConnection connection)
+    {
+        var serverStatus = new McpServerStatus
+        {
+            Id = connection.ServerId,
+            Name = connection.Name,
+            ServerType = connection.ServerType,
+            Connected = connection.Connected
+        };
+
+        if (connection.ConnectionType is not ConnectionType.OAuth || connection.OauthProvider == null)
+        {
+            return serverStatus;
+        }
+
+        var provider = connection.OauthProvider;
+                    
+        var builder = new UriBuilder(provider.CodeUrl);
+                        
+        var queryString = HttpUtility.ParseQueryString(string.Empty);
+        queryString.Add("client_id", provider.ClientID);
+        queryString.Add("redirect_uri", provider.RedirectUri);
+        queryString.Add("response_type", "code");
+                        
+        builder.Query = queryString.ToString();
+                        
+        serverStatus.AuthorizationEndpoint = builder.ToString();
+
+        return serverStatus;
+    }
+}

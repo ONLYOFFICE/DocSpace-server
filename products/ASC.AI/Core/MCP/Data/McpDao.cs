@@ -152,8 +152,7 @@ public class McpDao(
         
         if (systemMcpConfig.Servers.Count > 0)
         {
-            var states = await GetServersStatesAsync(
-                dbContext,
+            var states = await dbContext.GetServersStatesAsync(
                 tenantId,
                 systemMcpConfig.Servers.Keys
             ).ToDictionaryAsync(x => x.ServerId);
@@ -201,7 +200,7 @@ public class McpDao(
         return (servers, total);
     }
     
-    public async Task<(List<McpServer> servers, int total)> GetServersAsync1(int tenantId, int offset, int count)
+    public async Task<(List<McpServer> servers, int total)> GetServersAsync(int tenantId, int offset, int count)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
@@ -215,8 +214,7 @@ public class McpDao(
 
         if (systemServers.Count > 0)
         {
-            var states = await GetServersStatesAsync(
-                dbContext,
+            var states = await dbContext.GetServersStatesAsync(
                 tenantId, 
                 systemServers.Select(x => x.Id)
             ).ToDictionaryAsync(x => x.ServerId);
@@ -252,17 +250,6 @@ public class McpDao(
         var total = dbTotalCount + systemMcpConfig.Servers.Count;
         
         return (servers, total);
-    }
-
-    public async IAsyncEnumerable<McpServerState> GetServersStatesAsync(AiDbContext dbContext, int tenantId, IEnumerable<Guid> serversIds)
-    {
-        var query = dbContext.McpServerStates
-            .Where(x => x.TenantId == tenantId && serversIds.Contains(x.ServerId));
-
-        await foreach (var state in query.ToAsyncEnumerable())
-        {
-            yield return mapper.Map<DbMcpServerState, McpServerState>(state);
-        }
     }
 
     public async Task SetServerStateAsync(int tenantId, Guid id, bool enabled)
@@ -434,11 +421,10 @@ public class McpDao(
         });
     }
 
-    public async Task<McpServerSettings> SaveSettingsAsync(
-        int tenantId, 
-        int roomId, 
-        Guid userId, 
-        Guid serverId, 
+    public async Task SaveSettingsAsync(int tenantId,
+        int roomId,
+        Guid userId,
+        Guid serverId,
         McpServerSettings mcpServerSettings)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -465,8 +451,6 @@ public class McpDao(
             await context.RoomMcpServerSettings.AddOrUpdateAsync(dbSettings);
             await context.SaveChangesAsync();
         });
-        
-        return mcpServerSettings;
     }
 
     public async Task UpdateOauthCredentialsAsync(int tenantId, int roomId, Guid userId, Guid serverId, OAuth20Token token)
@@ -483,24 +467,5 @@ public class McpDao(
             
             await context.UpdateOauthCredentials(tenantId, roomId, userId, serverId, encryptedToken);
         });
-    }
-
-    public async Task<McpServerSettings?> GetServerSettingsAsync(int tenantId, int roomId, Guid userId, Guid serverId)
-    {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var dbSettings = await dbContext.RoomMcpServerSettings.Where(x =>
-                x.TenantId == tenantId &&
-                x.RoomId == roomId &&
-                x.UserId == userId &&
-                x.ServerId == serverId)
-            .Include(dbMcpSettings => dbMcpSettings.ToolsConfiguration)
-            .FirstOrDefaultAsync();
-
-        if (dbSettings == null)
-        {
-            return null;
-        }
-
-        return await dbSettings.ToMcpServerSettingsAsync(crypto);
     }
 }

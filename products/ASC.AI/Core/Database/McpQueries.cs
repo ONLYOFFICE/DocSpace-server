@@ -285,8 +285,7 @@ static file class McpQueries
             ctx.McpServerStates
                 .FirstOrDefault(x => x.TenantId == tenantId && x.ServerId == id));
 
-    public static readonly Func<AiDbContext, int, IEnumerable<Guid>, IAsyncEnumerable<DbMcpServerState>>
-        GetServersStatesAsync =
+    public static readonly Func<AiDbContext, int, IEnumerable<Guid>, IAsyncEnumerable<DbMcpServerState>> GetServersStatesAsync =
             EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, IEnumerable<Guid> id) =>
                 ctx.McpServerStates
                     .Where(x => x.TenantId == tenantId && id.Contains(x.ServerId)));

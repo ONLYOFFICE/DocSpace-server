@@ -155,7 +155,7 @@ public class McpService(
         
         var tenantId = tenantManager.GetCurrentTenantId();
         
-        return await mcpDao.GetServersAsync1(tenantId, offset, count);
+        return await mcpDao.GetServersAsync(tenantId, offset, count);
     }
 
     public async Task<(List<McpServer> servers, int totalCount)> GetActiveServersAsync(int offset, int count)
@@ -171,7 +171,7 @@ public class McpService(
         await mcpDao.DeleteServersAsync(tenantManager.GetCurrentTenantId(), ids);
     }
     
-    public async Task AddServersToRoomAsync(int roomId, HashSet<Guid> ids)
+    public async Task<List<McpServerStatus>> AddServersToRoomAsync(int roomId, HashSet<Guid> ids)
     {
         await ThrowIfNotAccessEditRoomAsync(roomId);
 
@@ -180,21 +180,21 @@ public class McpService(
         await using (await distributedLockProvider.TryAcquireFairLockAsync($"mcp_room_{roomId}"))
         {
             var servers = await mcpDao.GetServersAsync(tenantId, ids);
-            if (servers.Count == 0)
+            if (servers.Count > 0)
             {
-                return;
-            }
+                var serversToAdd = servers.Where(x => x.Enabled).Select(x => x.Id).ToList();
         
-            var serversToAdd = servers.Where(x => x.Enabled).Select(x => x.Id).ToList();
-        
-            var currentServersCount = await mcpDao.GetServersConnectionsCountAsync(tenantId, roomId);
-            if (currentServersCount + serversToAdd.Count > MaxMcpServersByRoom)
-            {
-                throw new ArgumentOutOfRangeException($"Maximum number of servers per room is {MaxMcpServersByRoom}");
-            }
+                var currentServersCount = await mcpDao.GetServersConnectionsCountAsync(tenantId, roomId);
+                if (currentServersCount + serversToAdd.Count > MaxMcpServersByRoom)
+                {
+                    throw new ArgumentOutOfRangeException($"Maximum number of servers per room is {MaxMcpServersByRoom}");
+                }
             
-            await mcpDao.AddServersConnectionsAsync(tenantId, roomId, serversToAdd);
+                await mcpDao.AddServersConnectionsAsync(tenantId, roomId, serversToAdd);
+            }
         }
+        
+        return await GetServerStatusesAsync(roomId, tenantId);
     }
 
     public async Task DeleteServersFromRoomAsync(int roomId, List<Guid> ids)
@@ -212,46 +212,18 @@ public class McpService(
         await ThrowIfNotAccessUseMcpAsync(roomId);
 
         var tenantId = tenantManager.GetCurrentTenantId();
-        var statuses = new List<McpServerStatus>();
-        
-        var connections = await mcpDao.GetServerConnectionAsync(tenantId, roomId).ToListAsync();
-        foreach (var connection in connections)
-        {
-            var serverStatus = new McpServerStatus
-            {
-                Id = connection.ServerId,
-                Name = connection.Name,
-                ServerType = connection.ServerType,
-                Connected = connection.ConnectionType is ConnectionType.Direct ||
-                            connection.Settings?.OauthCredentials != null
-            };
-            
-            if (connection.ConnectionType is ConnectionType.OAuth)
-            {
-                if (connection.OauthProvider != null)
-                {
-                    var provider = connection.OauthProvider;
-                    
-                    var builder = new UriBuilder(provider.CodeUrl);
-                        
-                    var queryString = HttpUtility.ParseQueryString(string.Empty);
-                    queryString.Add("client_id", provider.ClientID);
-                    queryString.Add("redirect_uri", provider.RedirectUri);
-                    queryString.Add("response_type", "code");
-                        
-                    builder.Query = queryString.ToString();
-                        
-                    serverStatus.AuthorizationEndpoint = builder.ToString();
-                }
-            }
-            
-            statuses.Add(serverStatus);
-        }
 
-        return statuses;
+        return await GetServerStatusesAsync(roomId, tenantId);
     }
 
-    public async Task ConnectServerAsync(int roomId, Guid serverId, string code)
+    private async Task<List<McpServerStatus>> GetServerStatusesAsync(int roomId, int tenantId)
+    {
+        var connections = await mcpDao.GetServerConnectionAsync(tenantId, roomId).ToListAsync();
+
+        return connections.Select(connection => connection.ToMcpServerStatus()).ToList();
+    }
+
+    public async Task<McpServerStatus> ConnectServerAsync(int roomId, Guid serverId, string code)
     {
         await ThrowIfNotAccessUseMcpAsync(roomId);
         
@@ -294,9 +266,11 @@ public class McpService(
         }
 
         await mcpDao.SaveSettingsAsync(tenantId, roomId, authContext.CurrentAccount.ID, serverId, connection.Settings);
+        
+        return connection.ToMcpServerStatus();
     }
 
-    public async Task DisconnectServerAsync(int roomId, Guid serverId)
+    public async Task<McpServerStatus> DisconnectServerAsync(int roomId, Guid serverId)
     {
         await ThrowIfNotAccessUseMcpAsync(roomId);
         
@@ -310,12 +284,14 @@ public class McpService(
 
         if (connection.Settings?.OauthCredentials == null)
         {
-            return;
+            return connection.ToMcpServerStatus();
         }
         
         connection.Settings.OauthCredentials = null;
         
         await mcpDao.SaveSettingsAsync(tenantId, roomId, authContext.CurrentAccount.ID, serverId, connection.Settings);
+        
+        return connection.ToMcpServerStatus();
     }
 
     public async Task<IReadOnlyDictionary<string, bool>> GetToolsAsync(int roomId, Guid serverId)

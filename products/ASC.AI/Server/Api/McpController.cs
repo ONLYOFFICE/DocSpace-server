@@ -87,17 +87,19 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     }
     
     [HttpPost("rooms/{roomId}/servers")]
-    public async Task AddRoomServersAsync(AddRoomServersRequestDto inDto)
+    public async Task<List<McpServerStatusDto>> AddRoomServersAsync(AddRoomServersRequestDto inDto)
     {
-        await mcpService.AddServersToRoomAsync(inDto.RoomId, inDto.Body.Servers);
+        var statuses = await mcpService.AddServersToRoomAsync(inDto.RoomId, inDto.Body.Servers);
+        
+        return mapper.Map<List<McpServerStatus>, List<McpServerStatusDto>>(statuses);
     }
 
     [HttpGet("rooms/{roomId}/servers")]
     public async Task<List<McpServerStatusDto>> GetRoomServersAsync(GetRoomServersRequestDto inDto)
     {
-        var servers = await mcpService.GetServersStatusesAsync(inDto.RoomId);
+        var statuses = await mcpService.GetServersStatusesAsync(inDto.RoomId);
         
-        return mapper.Map<List<McpServerStatus>, List<McpServerStatusDto>>(servers);
+        return mapper.Map<List<McpServerStatus>, List<McpServerStatusDto>>(statuses);
     }
 
     [HttpDelete("rooms/{roomId}/servers")]
@@ -126,14 +128,18 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     }
 
     [HttpPost("rooms/{roomId}/servers/{serverId}/connect")]
-    public async Task ConnectServerAsync(ConnectServerRequestDto inDto)
+    public async Task<McpServerStatusDto> ConnectServerAsync(ConnectServerRequestDto inDto)
     {
-        await mcpService.ConnectServerAsync(inDto.RoomId, inDto.ServerId, inDto.Body.Code);
+        var status = await mcpService.ConnectServerAsync(inDto.RoomId, inDto.ServerId, inDto.Body.Code);
+        
+        return mapper.Map<McpServerStatus, McpServerStatusDto>(status);
     }
     
     [HttpPost("rooms/{roomId}/servers/{serverId}/disconnect")]
-    public async Task DisconnectServerAsync(DisconnectServerRequestDto inDto)
+    public async Task<McpServerStatusDto> DisconnectServerAsync(DisconnectServerRequestDto inDto)
     {
-        await mcpService.DisconnectServerAsync(inDto.RoomId, inDto.ServerId);
+        var status = await mcpService.DisconnectServerAsync(inDto.RoomId, inDto.ServerId);
+        
+        return mapper.Map<McpServerStatus, McpServerStatusDto>(status);
     }
 }
