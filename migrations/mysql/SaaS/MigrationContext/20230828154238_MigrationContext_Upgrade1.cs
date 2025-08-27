@@ -23,9 +23,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "tenants_partners");
-
             migrationBuilder.UpdateData(
                 table: "tenants_quota",
                 keyColumn: "tenant",
