@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Common.Configuration;
+using ASC.FederatedLogin;
 
 namespace ASC.AI.Core.MCP.Data;
 
@@ -394,7 +395,7 @@ public class McpDao(
             item.SystemServer = systemServer;
         }
             
-        return await item.ToMcpRoomServerAsync(tenantId, crypto, consumerFactory);
+        return await item.ToMcpRoomServerAsync(crypto, consumerFactory);
     }
     
     public async IAsyncEnumerable<McpServerConnection> GetServerConnectionAsync(int tenantId, int roomId)
@@ -412,7 +413,7 @@ public class McpDao(
                 item.SystemServer = systemServer;
             }
             
-            yield return await item.ToMcpRoomServerAsync(tenantId, crypto, consumerFactory);
+            yield return await item.ToMcpRoomServerAsync(crypto, consumerFactory);
         }
     }
     
@@ -459,9 +460,9 @@ public class McpDao(
                 ToolsConfiguration = mcpServerSettings.ToolsConfiguration
             };
 
-            if (mcpServerSettings.OauthCredential != null)
+            if (mcpServerSettings.OauthCredentials != null)
             {
-                dbSettings.OauthCredential = await crypto.EncryptAsync(mcpServerSettings.OauthCredential.ToJson());
+                dbSettings.OauthCredential = await crypto.EncryptAsync(mcpServerSettings.OauthCredentials.ToJson());
             }
             
             await context.RoomMcpServerSettings.AddOrUpdateAsync(dbSettings);
@@ -469,6 +470,22 @@ public class McpDao(
         });
         
         return mcpServerSettings;
+    }
+
+    public async Task UpdateOauthCredentialsAsync(int tenantId, int roomId, Guid userId, Guid serverId, OAuth20Token token)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+            
+            var tokenJson = token.ToJson();
+            var encryptedToken = await crypto.EncryptAsync(tokenJson);
+            
+            await context.UpdateOauthCredentials(tenantId, roomId, userId, serverId, encryptedToken);
+        });
     }
 
     public async Task<McpServerSettings?> GetServerSettingsAsync(int tenantId, int roomId, Guid userId, Guid serverId)

@@ -30,7 +30,7 @@ namespace ASC.AI.Core.MCP.Data;
 
 public class McpServerSettings
 {
-    public OAuth20Token? OauthCredential { get; set; }
+    public OAuth20Token? OauthCredentials { get; set; }
     public ToolsConfiguration? ToolsConfiguration { get; set; }
 }
 
@@ -44,7 +44,7 @@ public static class DbMcpServerSettingsExtensions
         if (dbMcpServerSettings.OauthCredential != null)
         {
             var oauthCredential = await crypto.DecryptAsync(dbMcpServerSettings.OauthCredential);
-            settings.OauthCredential = OAuth20Token.FromJson(oauthCredential);
+            settings.OauthCredentials = OAuth20Token.FromJson(oauthCredential);
         }
         
         settings.ToolsConfiguration = dbMcpServerSettings.ToolsConfiguration;

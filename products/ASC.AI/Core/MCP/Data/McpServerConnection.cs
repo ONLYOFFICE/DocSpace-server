@@ -31,8 +31,9 @@ namespace ASC.AI.Core.MCP.Data;
 
 public class McpServerConnection
 {
-    public Guid Id { get; init; }
+    public Guid ServerId { get; init; }
     public int TenantId { get; init; }
+    public int RoomId { get; init; }
     public required string Name { get; set; }
     public string? Description { get; set; }
     public required string Endpoint { get; set; }
@@ -42,14 +43,13 @@ public class McpServerConnection
     public bool System { get; init; }
     public OauthProvider? OauthProvider { get; init; }
     public McpServerSettings? Settings { get; set; }
-    public bool Connected => ConnectionType is ConnectionType.Direct || Settings?.OauthCredential != null;
+    public bool Connected => ConnectionType is ConnectionType.Direct || Settings?.OauthCredentials != null;
 }
 
 public static class McpRoomServerExtensions
 {
     public static async Task<McpServerConnection> ToMcpRoomServerAsync(
-        this DbRoomServerUnit item, 
-        int tenantId, 
+        this DbRoomServerUnit item,
         InstanceCrypto crypto, 
         ConsumerFactory consumerFactory)
     {
@@ -59,8 +59,9 @@ public static class McpRoomServerExtensions
         {
             serverConnection = new McpServerConnection
             {
-                Id = item.Server.Id,
-                TenantId = item.Server.TenantId,
+                ServerId = item.Server.Id,
+                TenantId = item.TenantId,
+                RoomId = item.RoomId,
                 Name = item.Server.Name,
                 Description = item.Server.Description,
                 Endpoint = item.Server.Endpoint,
@@ -79,8 +80,9 @@ public static class McpRoomServerExtensions
         {
             serverConnection = new McpServerConnection
             {
-                Id = item.ServerId,
-                TenantId = tenantId,
+                ServerId = item.ServerId,
+                TenantId = item.TenantId,
+                RoomId = item.RoomId,
                 Name = item.SystemServer.Name,
                 Description = item.SystemServer.Description,
                 Endpoint = item.SystemServer.Endpoint,

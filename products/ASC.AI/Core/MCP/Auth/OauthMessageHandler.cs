@@ -27,38 +27,53 @@
 using System.Net;
 
 using ASC.FederatedLogin;
+using ASC.FederatedLogin.Helpers;
+using ASC.FederatedLogin.LoginProviders;
 
 namespace ASC.AI.Core.MCP.Auth;
 
-public delegate Task<OAuth20Token> RefreshTokenDelegate(CancellationToken cancellationToken);
+public class OauthContext
+{
+    public int TenantId { get; init; }
+    public int RoomId { get; init; }
+    public Guid UserId { get; init; }
+    public Guid ServerId { get; init; }
+    public required OauthProvider OauthProvider { get; init; }
+    public required OAuth20Token Token { get; set; }
+}
 
 public class OauthMessageHandler : DelegatingHandler
 {
-    private readonly RefreshTokenDelegate _refreshTokenDelegate;
-    private OAuth20Token _token;
+    private readonly OauthContext _context;
+    private readonly McpDao _mcpDao;
+    private readonly OAuth20TokenHelper _oAuth20TokenHelper;
     
-    public OauthMessageHandler(HttpMessageHandler innerHandler, OAuth20Token token, RefreshTokenDelegate refreshTokenDelegate)
+    public OauthMessageHandler(
+        HttpMessageHandler innerHandler,
+        McpDao mcpDao,
+        OauthContext context,
+        OAuth20TokenHelper oAuth20TokenHelper)
     {
         InnerHandler = innerHandler;
-        _token = token;
-        _refreshTokenDelegate = refreshTokenDelegate;
+        _context = context;
+        _mcpDao = mcpDao;
+        _oAuth20TokenHelper = oAuth20TokenHelper;
     }
     
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token.AccessToken);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _context.Token.AccessToken);
         
         var response = await base.SendAsync(request, cancellationToken);
-        if (response.StatusCode != HttpStatusCode.Unauthorized)
+        
+        if (response.StatusCode != HttpStatusCode.Unauthorized || !await TryRefreshTokenAsync())
         {
             return response;
         }
 
-        _token = await _refreshTokenDelegate(cancellationToken);
-            
         var clonedRequest = await CloneRequestAsync(request);
         
-        clonedRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token.AccessToken);
+        clonedRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _context.Token.AccessToken);
         
         return await base.SendAsync(clonedRequest, cancellationToken);
     }
@@ -89,5 +104,25 @@ public class OauthMessageHandler : DelegatingHandler
         }
 
         return clonedRequest;
+    }
+
+    private async Task<bool> TryRefreshTokenAsync()
+    {
+        if (string.IsNullOrEmpty(_context.Token.RefreshToken))
+        {
+            return false;
+        }
+        
+        var token = _oAuth20TokenHelper.RefreshToken(_context.OauthProvider.AccessTokenUrl, _context.Token);
+
+        if (token == null)
+        {
+            return false;
+        }
+
+        await _mcpDao.UpdateOauthCredentialsAsync(_context.TenantId, _context.RoomId, _context.UserId, _context.ServerId, token);
+        _context.Token = token;
+        
+        return true;
     }
 }

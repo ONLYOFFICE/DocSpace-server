@@ -30,27 +30,33 @@ using ASC.FederatedLogin.Helpers;
 namespace ASC.AI.Core.MCP.Builder;
 
 public class OauthGenericTransportBuilder(
-    OAuth20TokenHelper tokenHelper,
+    OAuth20TokenHelper oauthTokenHelper,
+    McpDao mcpDao,
+    AuthContext authContext,
     IHttpMessageHandlerFactory httpMessageHandlerFactory) : ITransportBuilder
 {
     public ValueTask<SseClientTransport> BuildAsync(McpServerConnection connection)
     {
         ArgumentNullException.ThrowIfNull(connection);
         ArgumentNullException.ThrowIfNull(connection.Settings);
-        ArgumentNullException.ThrowIfNull(connection.Settings.OauthCredential);
+        ArgumentNullException.ThrowIfNull(connection.Settings.OauthCredentials);
         ArgumentException.ThrowIfNullOrEmpty(connection.OauthProvider?.AccessTokenUrl);
+
+        var context = new OauthContext
+        {
+            TenantId = connection.TenantId,
+            RoomId = connection.RoomId,
+            UserId = authContext.CurrentAccount.ID,
+            ServerId = connection.ServerId,
+            OauthProvider = connection.OauthProvider,
+            Token = connection.Settings.OauthCredentials
+        };
         
         var oauthHandler = new OauthMessageHandler(
-            httpMessageHandlerFactory.CreateHandler(), 
-            connection.Settings.OauthCredential,
-            _ =>
-            {
-                var token = tokenHelper.RefreshToken(
-                    connection.OauthProvider.AccessTokenUrl, 
-                    connection.Settings.OauthCredential);
-
-                return Task.FromResult(token);
-            });
+            httpMessageHandlerFactory.CreateHandler(),
+            mcpDao,
+            context,
+            oauthTokenHelper);
         
         var client = new HttpClient(oauthHandler);
 

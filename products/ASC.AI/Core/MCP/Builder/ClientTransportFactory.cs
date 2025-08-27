@@ -30,7 +30,9 @@ namespace ASC.AI.Core.MCP.Builder;
 
 [Scope]
 public class ClientTransportFactory(
-    CommonLinkUtility commonLinkUtility, 
+    McpDao mcpDao,
+    AuthContext authContext,
+    CommonLinkUtility commonLinkUtility,
     CookiesManager cookiesManager,
     IHttpClientFactory clientFactory,
     IHttpMessageHandlerFactory messageHandlerFactory,
@@ -46,7 +48,7 @@ public class ClientTransportFactory(
 
         if (connection.ConnectionType is ConnectionType.OAuth)
         {
-            var oauthGenericBuilder = new OauthGenericTransportBuilder(tokenHelper, messageHandlerFactory);
+            var oauthGenericBuilder = new OauthGenericTransportBuilder(tokenHelper, mcpDao, authContext, messageHandlerFactory);
             return await oauthGenericBuilder.BuildAsync(connection);
         }
 

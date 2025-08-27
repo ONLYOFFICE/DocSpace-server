@@ -239,11 +239,11 @@ public class McpService(
         {
             var serverStatus = new McpServerStatus
             {
-                Id = connection.Id,
+                Id = connection.ServerId,
                 Name = connection.Name,
                 ServerType = connection.ServerType,
                 Connected = connection.ConnectionType is ConnectionType.Direct ||
-                            connection.Settings?.OauthCredential != null
+                            connection.Settings?.OauthCredentials != null
             };
             
             if (connection.ConnectionType is ConnectionType.OAuth)
@@ -298,12 +298,12 @@ public class McpService(
         {
             connection.Settings = new McpServerSettings
             {
-                OauthCredential = token
+                OauthCredentials = token
             };
         }
         else
         {
-            connection.Settings.OauthCredential = token;
+            connection.Settings.OauthCredentials = token;
         }
 
         var transport = await clientTransportFactory.CreateAsync(connection);
@@ -338,12 +338,12 @@ public class McpService(
             throw new ItemNotFoundException("Mcp server not found");
         }
 
-        if (connection.Settings?.OauthCredential == null)
+        if (connection.Settings?.OauthCredentials == null)
         {
             return;
         }
         
-        connection.Settings.OauthCredential = null;
+        connection.Settings.OauthCredentials = null;
         
         await mcpDao.SaveSettingsAsync(tenantId, roomId, authContext.CurrentAccount.ID, serverId, connection.Settings);
     }
