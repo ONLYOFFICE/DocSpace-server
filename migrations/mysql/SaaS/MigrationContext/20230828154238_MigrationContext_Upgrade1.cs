@@ -26,26 +26,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.DropTable(
                 name: "tenants_partners");
 
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -7);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -6);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -5);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -4);
-
             migrationBuilder.UpdateData(
                 table: "tenants_quota",
                 keyColumn: "tenant",
