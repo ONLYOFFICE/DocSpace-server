@@ -34,12 +34,12 @@ public class FolderContentDto<T>
     /// <summary>
     /// The list of files in the folder.
     /// </summary>
-    public List<FileEntryDto> Files { get; set; }
+    public List<FileEntryBaseDto> Files { get; set; }
 
     /// <summary>
     /// The list of folders in the folder. 
     /// </summary>
-    public List<FileEntryDto> Folders { get; set; }
+    public List<FileEntryBaseDto> Folders { get; set; }
 
     /// <summary>
     /// The current folder information.
@@ -87,11 +87,11 @@ public class FolderContentDtoHelper(
     AuthContext authContext,
     BreadCrumbsManager breadCrumbsManager)
 {
-    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null)
+    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null)
     {
         var types = filterType.HasValue ? new[] { filterType.Value } : null;
 
-        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, text, extension, searchArea ?? SearchArea.Active, formsItemDto, sortByFilter, sortOrder, startIndex, limit);
+        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, text, extension, searchArea ?? SearchArea.Active, formsItemDto, location, sortByFilter, sortOrder, startIndex, limit);
 
         return folderContentWrapper.NotFoundIfNull();
     }
@@ -139,12 +139,13 @@ public class FolderContentDtoHelper(
                 }
             }
 
-            var foldersTask = GetFoldersDto(folders).ToListAsync();
-            var filesTask = GetFilesDto(files).ToListAsync();
+            var foldersTask = GetFoldersDto(folders, contextFolder: folderItems.FolderInfo).ToListAsync();
+            var filesTask = GetFilesDto(files, contextFolder: folderItems.FolderInfo).ToListAsync();
             result.Files = await filesTask;
             result.Folders = await foldersTask;
         }
-
+        
+        
         var currentTask = GetFolderDto(folderItems.FolderInfo);
         var isEnableBadges = badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
@@ -161,7 +162,7 @@ public class FolderContentDtoHelper(
 
         return result;
 
-        async IAsyncEnumerable<FileEntryDto> GetEntriesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)
+        async IAsyncEnumerable<FileEntryBaseDto> GetEntriesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)
         {
             foreach (var e in fileEntries)
             {
@@ -176,15 +177,15 @@ public class FolderContentDtoHelper(
             }
         }
 
-        async IAsyncEnumerable<FileEntryDto> GetFilesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null)
+        async IAsyncEnumerable<FileEntryBaseDto> GetFilesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)
         {
             foreach (var r in fileEntries)
             {
-                yield return await GetFileDto(r, entriesOrder);
+                yield return await GetFileDto(r, entriesOrder, contextFolder);
             }
         }
 
-        async Task<FileEntryDto> GetFileDto(FileEntry fileEntry, string entriesOrder = null, IFolder contextFolder = null)
+        async Task<FileEntryBaseDto> GetFileDto(FileEntry fileEntry, string entriesOrder = null, IFolder contextFolder = null)
         {
             return fileEntry switch
             {
@@ -194,15 +195,15 @@ public class FolderContentDtoHelper(
             };
         }
 
-        async IAsyncEnumerable<FileEntryDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder = null)
+        async IAsyncEnumerable<FileEntryBaseDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder = null, IFolder contextFolder = null)
         {
             foreach (var r in folderEntries)
             {
-                yield return await GetFolderDto(r, entriesOrder);
+                yield return await GetFolderDto(r, entriesOrder, contextFolder);
             }
         }
         
-        async Task<FileEntryDto> GetFolderDto(FileEntry folderEntry, string entriesOrder = null, IFolder contextFolder = null)
+        async Task<FileEntryBaseDto> GetFolderDto(FileEntry folderEntry, string entriesOrder = null, IFolder contextFolder = null)
         {
             switch (folderEntry)
             {
@@ -241,6 +242,7 @@ public class FolderContentDtoHelper(
         string[] extension, 
         SearchArea searchArea, 
         FormsItemDto formsItemDto,
+        Location? location,
         string sortByFilter,
         SortOrder sortOrder,
         int startIndex,
@@ -268,7 +270,8 @@ public class FolderContentDtoHelper(
             roomId: roomId, 
             applyFilterOption: applyFilterOption, 
             searchArea: searchArea, 
-            formsItemDto: formsItemDto);
+            formsItemDto: formsItemDto,
+            location: location);
 
         return await GetAsync(folderId, items, startIndex);
     }

@@ -96,7 +96,6 @@ public class MigrationContext : DbContext
     public DbSet<DbFilesThirdpartyApp> ThirdpartyApp { get; set; }
     public DbSet<DbFilesLink> FilesLink { get; set; }
     public DbSet<DbFilesProperties> FilesProperties { get; set; }
-    public DbSet<FilesConverts> FilesConverts { get; set; }
     public DbSet<DbFileOrder> FileOrder { get; set; }
     public DbSet<DbRoomSettings> RoomSettings { get; set; }
     public DbSet<ShortLink> ShortLink { get; set; }
@@ -184,7 +183,6 @@ public class MigrationContext : DbContext
             .AddDbDbFilesThirdpartyApp()
             .AddDbFilesLink()
             .AddDbFilesProperties()
-            .AddFilesConverts()
             .AddInstanceRegistration()
             .AddAuditEvent()
             .AddLoginEvents()

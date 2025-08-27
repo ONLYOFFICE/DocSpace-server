@@ -78,6 +78,54 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
     [JsonPropertyName("DefaultLogoAboutPage")]
     public bool IsDefaultLogoAboutPage { get; set; }
 
+    public string LogoSpreadsheetEditorExt { get; set; }
+    public string DarkLogoSpreadsheetEditorExt { get; set; }
+
+    [JsonPropertyName("DefaultLogoSpreadsheetEditor")]
+    public bool IsDefaultLogoSpreadsheetEditor { get; set; }
+
+    public string LogoSpreadsheetEditorEmbedExt { get; set; }
+    public string DarkLogoSpreadsheetEditorEmbedExt { get; set; }
+
+    [JsonPropertyName("DefaultLogoSpreadsheetEditorEmbed")]
+    public bool IsDefaultLogoSpreadsheetEditorEmbed { get; set; }
+
+    public string LogoPresentationEditorExt { get; set; }
+    public string DarkLogoPresentationEditorExt { get; set; }
+
+    [JsonPropertyName("DefaultLogoPresentationEditor")]
+    public bool IsDefaultLogoPresentationEditor { get; set; }
+
+    public string LogoPresentationEditorEmbedExt { get; set; }
+    public string DarkLogoPresentationEditorEmbedExt { get; set; }
+
+    [JsonPropertyName("DefaultLogoPresentationEditorEmbed")]
+    public bool IsDefaultLogoPresentationEditorEmbed { get; set; }
+
+    public string LogoPdfEditorExt { get; set; }
+    public string DarkLogoPdfEditorExt { get; set; }
+
+    [JsonPropertyName("DefaultLogoPdfEditor")]
+    public bool IsDefaultLogoPdfEditor { get; set; }
+
+    public string LogoPdfEditorEmbedExt { get; set; }
+    public string DarkLogoPdfEditorEmbedExt { get; set; }
+
+    [JsonPropertyName("DefaultLogoPdfEditorEmbed")]
+    public bool IsDefaultLogoPdfEditorEmbed { get; set; }
+
+    public string LogoDiagramEditorExt { get; set; }
+    public string DarkLogoDiagramEditorExt { get; set; }
+
+    [JsonPropertyName("DefaultLogoDiagramEditor")]
+    public bool IsDefaultLogoDiagramEditor { get; set; }
+
+    public string LogoDiagramEditorEmbedExt { get; set; }
+    public string DarkLogoDiagramEditorEmbedExt { get; set; }
+
+    [JsonPropertyName("DefaultLogoDiagramEditorEmbed")]
+    public bool IsDefaultLogoDiagramEditorEmbed { get; set; }
+
     public string LogoText { get; set; }
 
     public async Task<string> GetLogoTextAsync(SettingsManager settingsManager)
@@ -119,6 +167,15 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
     public static readonly IMagickGeometry LogoLeftMenuSize = new MagickGeometry(56, 56);
     public static readonly IMagickGeometry LogoAboutPageSize = new MagickGeometry(442, 48);
     public static readonly IMagickGeometry LogoNotificationSize = new MagickGeometry(386, 44);
+    public static readonly IMagickGeometry LogoSpreadsheetEditorSize = new MagickGeometry(172, 40);
+    public static readonly IMagickGeometry LogoSpreadsheetEditorEmbedSize = new MagickGeometry(172, 40);
+    public static readonly IMagickGeometry LogoPresentationEditorSize = new MagickGeometry(172, 40);
+    public static readonly IMagickGeometry LogoPresentationEditorEmbedSize = new MagickGeometry(172, 40);
+    public static readonly IMagickGeometry LogoPdfEditorSize = new MagickGeometry(172, 40);
+    public static readonly IMagickGeometry LogoPdfEditorEmbedSize = new MagickGeometry(172, 40);
+    public static readonly IMagickGeometry LogoDiagramEditorSize = new MagickGeometry(172, 40);
+    public static readonly IMagickGeometry LogoDiagramEditorEmbedSize = new MagickGeometry(172, 40);
+
     public static IMagickGeometry GetSize(WhiteLabelLogoType type)
     {
         return type switch
@@ -130,6 +187,14 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             WhiteLabelLogoType.DocsEditorEmbed => LogoDocsEditorEmbedSize,
             WhiteLabelLogoType.LeftMenu => LogoLeftMenuSize,
             WhiteLabelLogoType.AboutPage => LogoAboutPageSize,
+            WhiteLabelLogoType.SpreadsheetEditor => LogoSpreadsheetEditorSize,
+            WhiteLabelLogoType.SpreadsheetEditorEmbed => LogoSpreadsheetEditorEmbedSize,
+            WhiteLabelLogoType.PresentationEditor => LogoPresentationEditorSize,
+            WhiteLabelLogoType.PresentationEditorEmbed => LogoPresentationEditorEmbedSize,
+            WhiteLabelLogoType.PdfEditor => LogoPdfEditorSize,
+            WhiteLabelLogoType.PdfEditorEmbed => LogoPdfEditorEmbedSize,
+            WhiteLabelLogoType.DiagramEditor => LogoDiagramEditorSize,
+            WhiteLabelLogoType.DiagramEditorEmbed => LogoDiagramEditorEmbedSize,
             _ => new MagickGeometry()
         };
     }
@@ -163,6 +228,30 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             LogoAboutPageExt = null,
             DarkLogoAboutPageExt = null,
 
+            LogoSpreadsheetEditorExt = null,
+            DarkLogoSpreadsheetEditorExt = null,
+
+            LogoSpreadsheetEditorEmbedExt = null,
+            DarkLogoSpreadsheetEditorEmbedExt = null,
+
+            LogoPresentationEditorExt = null,
+            DarkLogoPresentationEditorExt = null,
+
+            LogoPresentationEditorEmbedExt = null,
+            DarkLogoPresentationEditorEmbedExt = null,
+
+            LogoPdfEditorExt = null,
+            DarkLogoPdfEditorExt = null,
+
+            LogoPdfEditorEmbedExt = null,
+            DarkLogoPdfEditorEmbedExt = null,
+
+            LogoDiagramEditorExt = null,
+            DarkLogoDiagramEditorExt = null,
+
+            LogoDiagramEditorEmbedExt = null,
+            DarkLogoDiagramEditorEmbedExt = null,
+
             IsDefaultLogoLightSmall = true,
             IsDefaultLogoDark = true,
             IsDefaultLogoFavicon = true,
@@ -170,6 +259,14 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             IsDefaultLogoDocsEditorEmbed = true,
             IsDefaultLogoLeftMenu = true,
             IsDefaultLogoAboutPage = true,
+            IsDefaultLogoSpreadsheetEditor = true,
+            IsDefaultLogoSpreadsheetEditorEmbed = true,
+            IsDefaultLogoPresentationEditor = true,
+            IsDefaultLogoPresentationEditorEmbed = true,
+            IsDefaultLogoPdfEditor = true,
+            IsDefaultLogoPdfEditorEmbed = true,
+            IsDefaultLogoDiagramEditor = true,
+            IsDefaultLogoDiagramEditorEmbed = true,
 
             LogoText = null
         };
@@ -196,7 +293,15 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             && IsDefaultLogoDocsEditor
             && IsDefaultLogoDocsEditorEmbed
             && IsDefaultLogoLeftMenu
-            && IsDefaultLogoAboutPage;
+            && IsDefaultLogoAboutPage
+            && IsDefaultLogoSpreadsheetEditor
+            && IsDefaultLogoSpreadsheetEditorEmbed
+            && IsDefaultLogoPresentationEditor
+            && IsDefaultLogoPresentationEditorEmbed
+            && IsDefaultLogoPdfEditor
+            && IsDefaultLogoPdfEditorEmbed
+            && IsDefaultLogoDiagramEditor
+            && IsDefaultLogoDiagramEditorEmbed;
     }
 
     public bool GetIsDefault(WhiteLabelLogoType type)
@@ -211,6 +316,14 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             WhiteLabelLogoType.LeftMenu => IsDefaultLogoLeftMenu,
             WhiteLabelLogoType.AboutPage => IsDefaultLogoAboutPage,
             WhiteLabelLogoType.Notification => IsDefaultLogoDark,
+            WhiteLabelLogoType.SpreadsheetEditor => IsDefaultLogoSpreadsheetEditor,
+            WhiteLabelLogoType.SpreadsheetEditorEmbed => IsDefaultLogoSpreadsheetEditorEmbed,
+            WhiteLabelLogoType.PresentationEditor => IsDefaultLogoPresentationEditor,
+            WhiteLabelLogoType.PresentationEditorEmbed => IsDefaultLogoPresentationEditorEmbed,
+            WhiteLabelLogoType.PdfEditor => IsDefaultLogoPdfEditor,
+            WhiteLabelLogoType.PdfEditorEmbed => IsDefaultLogoPdfEditorEmbed,
+            WhiteLabelLogoType.DiagramEditor => IsDefaultLogoDiagramEditor,
+            WhiteLabelLogoType.DiagramEditorEmbed => IsDefaultLogoDiagramEditorEmbed,
             _ => true
         };
     }
@@ -240,6 +353,30 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             case WhiteLabelLogoType.AboutPage:
                 IsDefaultLogoAboutPage = value;
                 break;
+            case WhiteLabelLogoType.SpreadsheetEditor:
+                IsDefaultLogoSpreadsheetEditor = value;
+                break;
+            case WhiteLabelLogoType.SpreadsheetEditorEmbed:
+                IsDefaultLogoSpreadsheetEditorEmbed = value;
+                break;
+            case WhiteLabelLogoType.PresentationEditor:
+                IsDefaultLogoPresentationEditor = value;
+                break;
+            case WhiteLabelLogoType.PresentationEditorEmbed:
+                IsDefaultLogoPresentationEditorEmbed = value;
+                break;
+            case WhiteLabelLogoType.PdfEditor:
+                IsDefaultLogoPdfEditor = value;
+                break;
+            case WhiteLabelLogoType.PdfEditorEmbed:
+                IsDefaultLogoPdfEditorEmbed = value;
+                break;
+            case WhiteLabelLogoType.DiagramEditor:
+                IsDefaultLogoDiagramEditor = value;
+                break;
+            case WhiteLabelLogoType.DiagramEditorEmbed:
+                IsDefaultLogoDiagramEditorEmbed = value;
+                break;
         }
     }
 
@@ -255,6 +392,14 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             WhiteLabelLogoType.LeftMenu => dark ? DarkLogoLeftMenuExt : LogoLeftMenuExt,
             WhiteLabelLogoType.AboutPage => dark ? DarkLogoAboutPageExt : LogoAboutPageExt,
             WhiteLabelLogoType.Notification => "png",
+            WhiteLabelLogoType.SpreadsheetEditor => dark ? DarkLogoSpreadsheetEditorExt : LogoSpreadsheetEditorExt,
+            WhiteLabelLogoType.SpreadsheetEditorEmbed => dark ? DarkLogoSpreadsheetEditorEmbedExt : LogoSpreadsheetEditorExt,
+            WhiteLabelLogoType.PresentationEditor => dark ? DarkLogoPresentationEditorExt : LogoPresentationEditorExt,
+            WhiteLabelLogoType.PresentationEditorEmbed => dark ? DarkLogoPresentationEditorEmbedExt : LogoPresentationEditorEmbedExt,
+            WhiteLabelLogoType.PdfEditor => dark ? DarkLogoPdfEditorExt : LogoPdfEditorExt,
+            WhiteLabelLogoType.PdfEditorEmbed => dark ? DarkLogoPdfEditorEmbedExt : LogoPdfEditorExt,
+            WhiteLabelLogoType.DiagramEditor => dark ? DarkLogoDiagramEditorExt : LogoDiagramEditorExt,
+            WhiteLabelLogoType.DiagramEditorEmbed => dark ? DarkLogoDiagramEditorEmbedExt : LogoDiagramEditorEmbedExt,
             _ => ""
         };
     }
@@ -331,6 +476,86 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
                 else
                 {
                     LogoAboutPageExt = fileExt;
+                }
+                break;
+            case WhiteLabelLogoType.SpreadsheetEditor:
+                if (dark)
+                {
+                    DarkLogoSpreadsheetEditorExt = fileExt;
+                }
+                else
+                {
+                    LogoSpreadsheetEditorExt = fileExt;
+                }
+                break;
+            case WhiteLabelLogoType.SpreadsheetEditorEmbed:
+                if (dark)
+                {
+                    DarkLogoSpreadsheetEditorEmbedExt = fileExt;
+                }
+                else
+                {
+                    LogoSpreadsheetEditorEmbedExt = fileExt;
+                }
+                break;
+            case WhiteLabelLogoType.PresentationEditor:
+                if (dark)
+                {
+                    DarkLogoPresentationEditorExt = fileExt;
+                }
+                else
+                {
+                    LogoPresentationEditorExt = fileExt;
+                }
+                break;
+            case WhiteLabelLogoType.PresentationEditorEmbed:
+                if (dark)
+                {
+                    DarkLogoPresentationEditorEmbedExt = fileExt;
+                }
+                else
+                {
+                    LogoPresentationEditorEmbedExt = fileExt;
+                }
+                break;
+            case WhiteLabelLogoType.PdfEditor:
+                if (dark)
+                {
+                    DarkLogoPdfEditorExt = fileExt;
+                }
+                else
+                {
+                    LogoPdfEditorExt = fileExt;
+                }
+                break;
+            case WhiteLabelLogoType.PdfEditorEmbed:
+                if (dark)
+                {
+                    DarkLogoPdfEditorEmbedExt = fileExt;
+                }
+                else
+                {
+                    LogoPdfEditorEmbedExt = fileExt;
+                }
+                break;
+            case WhiteLabelLogoType.DiagramEditor:
+                if (dark)
+                {
+                    DarkLogoDiagramEditorExt = fileExt;
+                }
+                else
+                {
+                    LogoDiagramEditorExt = fileExt;
+                }
+                break;
+            case WhiteLabelLogoType.DiagramEditorEmbed:
+                if (dark)
+                {
+                    DarkLogoDiagramEditorEmbedExt = fileExt;
+                }
+                else
+                {
+                    LogoDiagramEditorEmbedExt = fileExt;
                 }
                 break;
         }
@@ -782,6 +1007,14 @@ public class TenantWhiteLabelSettingsHelper(
             WhiteLabelLogoType.LeftMenu => TenantWhiteLabelSettings.LogoLeftMenuSize,
             WhiteLabelLogoType.AboutPage => TenantWhiteLabelSettings.LogoAboutPageSize,
             WhiteLabelLogoType.Notification => TenantWhiteLabelSettings.LogoNotificationSize,
+            WhiteLabelLogoType.SpreadsheetEditor => TenantWhiteLabelSettings.LogoSpreadsheetEditorSize,
+            WhiteLabelLogoType.SpreadsheetEditorEmbed => TenantWhiteLabelSettings.LogoSpreadsheetEditorEmbedSize,
+            WhiteLabelLogoType.PresentationEditor => TenantWhiteLabelSettings.LogoPresentationEditorSize,
+            WhiteLabelLogoType.PresentationEditorEmbed => TenantWhiteLabelSettings.LogoPresentationEditorEmbedSize,
+            WhiteLabelLogoType.PdfEditor => TenantWhiteLabelSettings.LogoPdfEditorSize,
+            WhiteLabelLogoType.PdfEditorEmbed => TenantWhiteLabelSettings.LogoPdfEditorEmbedSize,
+            WhiteLabelLogoType.DiagramEditor => TenantWhiteLabelSettings.LogoDiagramEditorSize,
+            WhiteLabelLogoType.DiagramEditorEmbed => TenantWhiteLabelSettings.LogoDiagramEditorEmbedSize,
             _ => new MagickGeometry(0, 0)
         };
     }
@@ -812,6 +1045,14 @@ public class TenantWhiteLabelSettingsHelper(
             WhiteLabelLogoType.Favicon => false,
             WhiteLabelLogoType.DocsEditor => false,
             WhiteLabelLogoType.DocsEditorEmbed => false,
+            WhiteLabelLogoType.SpreadsheetEditor => false,
+            WhiteLabelLogoType.SpreadsheetEditorEmbed => false,
+            WhiteLabelLogoType.PresentationEditor => false,
+            WhiteLabelLogoType.PresentationEditorEmbed => false,
+            WhiteLabelLogoType.PdfEditor => false,
+            WhiteLabelLogoType.PdfEditorEmbed => false,
+            WhiteLabelLogoType.DiagramEditor => false,
+            WhiteLabelLogoType.DiagramEditorEmbed => false,
             _ => true
         };
     }

@@ -38,8 +38,8 @@ public class AuditTrailTypesRequestDto
     public ProductType? ProductType { get; set; }
 
     /// <summary>
-    /// The module within the product associated with the audit trail.
+    /// The location associated with the audit trail.
     /// </summary>
     [FromQuery(Name = "moduleType")]
-    public ModuleType? ModuleType { get; set; }
+    public LocationType? LocationType { get; set; }
 }

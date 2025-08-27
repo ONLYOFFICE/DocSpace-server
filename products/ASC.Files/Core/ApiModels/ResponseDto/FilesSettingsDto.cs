@@ -80,12 +80,7 @@ public class FilesSettingsDto
     /// The list of extensions of the template files.
     /// </summary>
     public List<string> ExtsWebTemplate { get; set; }
-
-    /// <summary>
-    /// The list of extensions of the co-authoring files.
-    /// </summary>
-    public List<string> ExtsCoAuthoring { get; set; }
-
+    
     /// <summary>
     /// The list of extensions of the files that must be converted.
     /// </summary>
@@ -363,7 +358,6 @@ public class FilesSettingsDtoConverter(
             ExtsWebRestrictedEditing = fileUtility.ExtsWebRestrictedEditing,
             ExtsWebCommented = fileUtility.ExtsWebCommented,
             ExtsWebTemplate = fileUtility.ExtsWebTemplate,
-            ExtsCoAuthoring = fileUtility.ExtsCoAuthoring,
             ExtsMustConvert = fileUtility.ExtsMustConvert,
             ExtsConvertible = await fileUtility.GetExtsConvertibleAsync(),
             ExtsUploadable = fileUtility.ExtsUploadable,

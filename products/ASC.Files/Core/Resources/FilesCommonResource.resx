@@ -225,9 +225,6 @@
   <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Error occurred in the Documents Service</value>
   </data>
-  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
-    <value>The file is opened for editing by {0}. Currently, the co-editing feature is not supported for this file format.</value>
-  </data>
   <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>The file is open for editing in a mobile application by {0}</value>
   </data>

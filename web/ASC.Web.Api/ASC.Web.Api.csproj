@@ -27,6 +27,7 @@
       <None Remove="img\audit.svg" />
       <None Remove="img\backup.svg" />
       <None Remove="img\customization.svg" />
+      <None Remove="img\free_backup.svg" />
       <None Remove="img\restore.svg" />
       <None Remove="img\room.svg" />
       <None Remove="img\sso.svg" />
@@ -37,10 +38,12 @@
     </ItemGroup>
     <ItemGroup>
       <EmbeddedResource Include="img\audit.svg" />
+      <EmbeddedResource Include="img\free_backup.svg" />
       <EmbeddedResource Include="img\restore.svg" />
       <EmbeddedResource Include="img\room.svg" />
       <EmbeddedResource Include="img\sso.svg" />
       <EmbeddedResource Include="img\thirdparty.svg" />
+      <EmbeddedResource Include="img\backup_wallet.svg" />
       <EmbeddedResource Include="img\total_size_wallet.svg" />
       <EmbeddedResource Include="img\total_size.svg" />
       <EmbeddedResource Include="img\users.svg" />

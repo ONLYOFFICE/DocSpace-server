@@ -264,18 +264,14 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (await fileTracker.IsEditingAsync(file.Id))
         {
-            bool canCoAuthoring;
             if ((editPossible || reviewPossible || fillFormsPossible || commentPossible)
                 && tryCoAuthoring
-                && (!(canCoAuthoring = fileUtility.CanCoAuthoring(file.Title)) || await fileTracker.IsEditingAloneAsync(file.Id)))
+                && (await fileTracker.IsEditingAloneAsync(file.Id)))
             {
                 if (tryEdit)
                 {
                     var editingBy = (await fileTracker.GetEditingByAsync(file.Id)).FirstOrDefault();
-                    strError = string.Format(!canCoAuthoring 
-                                                 ? FilesCommonResource.ErrorMessage_EditingCoauth
-                                                 : FilesCommonResource.ErrorMessage_EditingMobile,
-                                             await global.GetUserNameAsync(editingBy, true));
+                    strError = string.Format(FilesCommonResource.ErrorMessage_EditingMobile, await global.GetUserNameAsync(editingBy, true));
                 }
                 
                 rightToEdit = editPossible = reviewPossible = fillFormsPossible = commentPossible = false;
@@ -458,7 +454,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public bool IsDocSubmitKey(string docKey, string key)
     {
-        var submitKey = Encoding.UTF8.GetString(Convert.FromBase64String(FixBase64String(key)));
+        var submitKey = Encoding.UTF8.GetString(Convert.FromBase64String(key.Base64FromUrlSafe()));
 
         var keySplit = submitKey.Split(Convert.ToChar("_"), 3);
 
@@ -467,21 +463,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             return true;
         }
         return false;
-    }
-    
-    static string FixBase64String(string input)
-    {
-        // Convert from URL-safe Base64 to standard Base64
-        var fixedInput = input.Replace('-', '+').Replace('_', '/');
-    
-        // Add padding if necessary
-        switch (fixedInput.Length % 4)
-        {
-            case 2: fixedInput += "=="; break;
-            case 3: fixedInput += "="; break;
-        }
-    
-        return fixedInput;
     }
 
     public async Task CheckUsersForDropAsync<T>(File<T> file)

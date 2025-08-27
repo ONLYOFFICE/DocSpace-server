@@ -549,8 +549,16 @@ public abstract class VirtualRoomsController<T>(
         var linkAce = inDto.RoomLink.LinkType switch
         {
             LinkType.Invitation => await _fileStorageService.SetInvitationLinkAsync(inDto.Id, inDto.RoomLink.LinkId, inDto.RoomLink.Title, inDto.RoomLink.Access),
-            LinkType.External => await _fileStorageService.SetExternalLinkAsync(inDto.Id, FileEntryType.Folder, inDto.RoomLink.LinkId, inDto.RoomLink.Title,
-                inDto.RoomLink.Access, inDto.RoomLink.ExpirationDate, inDto.RoomLink.Password?.Trim(), inDto.RoomLink.DenyDownload),
+            LinkType.External => await _fileStorageService.SetExternalLinkAsync(
+                inDto.Id, 
+                FileEntryType.Folder, 
+                inDto.RoomLink.LinkId, 
+                inDto.RoomLink.Title,
+                inDto.RoomLink.Access, 
+                inDto.RoomLink.ExpirationDate, 
+                inDto.RoomLink.Password?.Trim(), 
+                inDto.RoomLink.DenyDownload,
+                inDto.RoomLink.Internal),
             _ => throw new InvalidOperationException()
         };
 
@@ -794,24 +802,24 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/news</path>
     /// <collection>list</collection>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "List of file entry information", typeof(List<NewItemsDto<FileEntryDto>>))]
+    [SwaggerResponse(200, "List of file entry information", typeof(List<NewItemsDto<FileEntryBaseDto>>))]
     [HttpGet("{id}/news")]
-    public async Task<List<NewItemsDto<FileEntryDto>>> GetNewRoomItems(RoomIdRequestDto<T> inDto)
+    public async Task<List<NewItemsDto<FileEntryBaseDto>>> GetNewRoomItems(RoomIdRequestDto<T> inDto)
     {
         var newItems = await _fileStorageService.GetNewRoomFilesAsync(inDto.Id);
-        var result = new List<NewItemsDto<FileEntryDto>>();
+        var result = new List<NewItemsDto<FileEntryBaseDto>>();
 
         foreach (var (date, entries) in newItems)
         {
             var apiDateTime = apiDateTimeHelper.Get(date);
-            var items = new List<FileEntryDto>();
+            var items = new List<FileEntryBaseDto>();
 
             foreach (var en in entries)
             {
                 items.Add(await GetFileEntryWrapperAsync(en));
             }
 
-            result.Add(new NewItemsDto<FileEntryDto> { Date = apiDateTime, Items = items });
+            result.Add(new NewItemsDto<FileEntryBaseDto> { Date = apiDateTime, Items = items });
         }
 
         return result;

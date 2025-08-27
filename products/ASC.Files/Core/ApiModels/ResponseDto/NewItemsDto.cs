@@ -50,18 +50,18 @@ public class RoomNewItemsDto
     /// <summary>
     /// The room file entry.
     /// </summary>
-    public FileEntryDto Room { get; init; }
+    public FileEntryBaseDto Room { get; init; }
 
     /// <summary>
     /// The list of file entry items.
     /// </summary>
-    public IEnumerable<FileEntryDto> Items { get; init; }
+    public IEnumerable<FileEntryBaseDto> Items { get; init; }
 }
 
 [Scope]
 public class RoomNewItemsDtoHelper(FileDtoHelper fileDtoHelper, FolderDtoHelper folderDtoHelper)
 {
-    private readonly ConcurrentDictionary<string, FileEntryDto> _roomDtoCache = new();
+    private readonly ConcurrentDictionary<string, FileEntryBaseDto> _roomDtoCache = new();
 
     public async Task<RoomNewItemsDto> GetAsync(FileEntry roomEntry, IEnumerable<FileEntry> entries)
     {
@@ -72,7 +72,7 @@ public class RoomNewItemsDtoHelper(FileDtoHelper fileDtoHelper, FolderDtoHelper 
             _roomDtoCache.TryAdd(roomKey, roomDto);
         }
 
-        var files = new List<FileEntryDto>();
+        var files = new List<FileEntryBaseDto>();
         foreach (var entry in entries)
         {
             files.Add(await GetFileEntryDtoAsync(entry));
@@ -85,9 +85,9 @@ public class RoomNewItemsDtoHelper(FileDtoHelper fileDtoHelper, FolderDtoHelper 
         };
     }
     
-    private async Task<FileEntryDto> GetFileEntryDtoAsync(FileEntry entry)
+    private async Task<FileEntryBaseDto> GetFileEntryDtoAsync(FileEntry entry)
     {
-        FileEntryDto dto;
+        FileEntryBaseDto dto;
         if (entry.FileEntryType == FileEntryType.Folder)
         {
             dto = entry switch
@@ -110,7 +110,7 @@ public class RoomNewItemsDtoHelper(FileDtoHelper fileDtoHelper, FolderDtoHelper 
         return dto;
     }
     
-    private async Task<FileEntryDto> GetShortRoomDtoAsync(FileEntry entry)
+    private async Task<FileEntryBaseDto> GetShortRoomDtoAsync(FileEntry entry)
     {
         return entry switch
         {

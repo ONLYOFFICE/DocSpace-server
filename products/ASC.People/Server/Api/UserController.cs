@@ -531,17 +531,21 @@ public class UserController(
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
-        
-        if (!string.IsNullOrEmpty(inDto.MemberBase.Email))
+
+        var email = string.IsNullOrEmpty(inDto.MemberBase.Email) && !string.IsNullOrEmpty(inDto.MemberBase.EncEmail)
+            ? emailValidationKeyModelHelper.DecryptEmail(inDto.MemberBase.EncEmail)
+            : inDto.MemberBase.Email;
+
+        if (!string.IsNullOrEmpty(email))
         {
-            var email = (inDto.MemberBase.Email ?? "").Trim();
+            email = email.Trim();
 
             if (!email.TestEmailRegex())
             {
                 throw new ArgumentException(Resource.ErrorNotCorrectEmail);
             }
             
-            var address = new MailAddress(inDto.MemberBase.Email);
+            var address = new MailAddress(email);
             if (!string.Equals(address.Address, user.Email, StringComparison.OrdinalIgnoreCase))
             {
                 user.Email = address.Address.ToLowerInvariant();
@@ -568,7 +572,18 @@ public class UserController(
             try
             {
                 await securityContext.SetUserPasswordHashAsync(inDto.UserId, inDto.MemberBase.PasswordHash);
-                messageService.Send(MessageAction.UserUpdatedPassword);
+
+                var messageTarget = MessageTarget.Create(inDto.UserId);
+                messageService.Send(MessageAction.UserUpdatedPassword, messageTarget);
+
+                var passwordChangeEvent = (await auditEventsRepository.GetByFilterAsync(
+                    userId: securityContext.CurrentAccount.ID,
+                    action: MessageAction.UserUpdatedPassword,
+                    target: messageTarget.ToString(),
+                    limit: 1))
+                    .FirstOrDefault();
+
+                await studioNotifyService.SendUserPasswordChangedAsync(user, passwordChangeEvent);
 
                 await cookiesManager.ResetUserCookieAsync(inDto.UserId, false);
                 messageService.Send(MessageAction.CookieSettingsUpdated);

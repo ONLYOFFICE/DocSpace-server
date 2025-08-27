@@ -25,8 +25,14 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Convention;
-using ASC.Data.Storage;
+using ASC.Common.Threading.DistributedLock.Abstractions;
+using ASC.Core.Billing;
+using ASC.Core.Common;
+using ASC.Core.Tenants;
+using ASC.Data.Backup.Core.Quota;
 using ASC.Data.Backup.Services;
+using ASC.Data.Storage;
+using ASC.Web.Core.PublicResources;
 
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -48,7 +54,9 @@ public class BackupController(
     IEventBus eventBus,
     CommonLinkUtility commonLinkUtility,
     CoreSettings coreSettings,
-    BackupService backupService)
+    BackupService backupService,
+    IDistributedLockProvider distributedLockProvider,
+    CountFreeBackupChecker freeBackupsChecker)
     : ControllerBase
 {
     private Guid CurrentUserId => authContext.CurrentAccount.ID;
@@ -200,26 +208,76 @@ public class BackupController(
         {
             storageParams.TryAdd("subdir", "backup");
         }
-        
 
-        var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
-            ? commonLinkUtility.GetFullAbsolutePath("")
-            : null;
-        
-        var taskId = await backupService.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
         var tenantId = tenantManager.GetCurrentTenantId();
-        
-        await eventBus.PublishAsync(new BackupRequestIntegrationEvent(
-             tenantId: tenantId,
-             storageParams: storageParams,
-             storageType: storageType,
-             createBy: CurrentUserId,
-             dump: inDto.Dump,
-             taskId: taskId,
-             serverBaseUri: serverBaseUri
-        ));
 
-        return await backupService.GetBackupProgressAsync(inDto.Dump);
+        IDistributedLockHandle lockHandle = null;
+        Session billingSession = null;
+
+        try
+        {
+            lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetFreeBackupsCountCheckKey(tenantId));
+
+            try
+            {
+                await freeBackupsChecker.CheckAppend();
+            }
+            catch (TenantQuotaException)
+            {
+                var backupServiceEnabled = await backupService.IsBackupServiceEnabledAsync(tenantId);
+                if (!backupServiceEnabled)
+                {
+                    throw;
+                }
+
+                billingSession = await backupService.OpenCustomerSessionForBackupAsync(tenantId);
+                if (billingSession == null)
+                {
+                    throw new BillingException(Resource.ErrorNotAllowedOption);
+                }
+            }
+
+            var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
+                ? commonLinkUtility.GetFullAbsolutePath("")
+                : null;
+
+            var taskId = await backupService.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
+
+            await eventBus.PublishAsync(new BackupRequestIntegrationEvent(
+                 tenantId: tenantId,
+                 storageParams: storageParams,
+                 storageType: storageType,
+                 createBy: CurrentUserId,
+                 dump: inDto.Dump,
+                 taskId: taskId,
+                 serverBaseUri: serverBaseUri,
+                 billingSessionId: billingSession?.SessionId ?? 0,
+                 billingSessionExpire: billingSession?.Expire ?? default
+            ));
+
+            return await backupService.GetBackupProgressAsync(inDto.Dump);
+
+        }
+        catch (Exception ex) when (ex is AccountingPaymentRequiredException || ex is AccountingCustomerNotFoundException)
+        {
+            throw new BillingException(Resource.ErrorPaymentRequired);
+        }
+        catch (Exception)
+        {
+            if (billingSession != null)
+            {
+                await backupService.CloseCustomerSessionForBackupAsync(tenantId, billingSession.SessionId);
+            }
+
+            throw;
+        }
+        finally
+        {
+            if (lockHandle != null)
+            {
+                await lockHandle.ReleaseAsync();
+            }
+        }
     }
 
     /// <summary>
@@ -385,5 +443,48 @@ public class BackupController(
     public object GetTempPath()
     {
         return backupService.GetTmpFolder();
+    }
+
+    /// <summary>
+    /// Returns the number of backups for a period of time. The default is one month.
+    /// </summary>
+    /// <short>Get the number of backups</short>
+    /// <path>api/2.0/backup/getbackupscount</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Number of backups", typeof(int))]
+    [AllowNotPayment]
+    [HttpGet("getbackupscount")]
+    public async Task<int> GetBackupsCountAsync(BackupsCountDto dto)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var to = dto.To ?? DateTime.UtcNow.AddSeconds(1);
+        var from = dto.From ?? to.AddMonths(-1);
+
+        if (from > to)
+        {
+            throw new ArgumentException("From date must be less than to date");
+        }
+
+        var result = await backupService.GetBackupsCountAsync(tenantId, dto.Paid, from, to);
+        return result;
+    }
+
+    /// <summary>
+    /// Returns the backup service state.
+    /// </summary>
+    /// <short>Get the backup service state</short>
+    /// <path>api/2.0/backup/getservicestate</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Backup service state", typeof(BackupServiceStateDto))]
+    [AllowNotPayment]
+    [HttpGet("getservicestate")]
+    public async Task<BackupServiceStateDto> GetBackupsServiceStateAsync()
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var backupServiceEnabled = await backupService.IsBackupServiceEnabledAsync(tenantId);
+
+        return new BackupServiceStateDto { Enabled = backupServiceEnabled };
     }
 }

@@ -279,3 +279,4 @@ global using Thumbnail = ASC.Files.Core.Thumbnail;
 global using Token = ASC.Web.Files.ThirdPartyApp.Token;
 global using UserInfo = ASC.Core.Users.UserInfo;
 global using SortOrder = ASC.Api.Core.Core.SortOrder;
+global using Location = ASC.Files.Core.Core.Entries.Location;

@@ -38,8 +38,9 @@ public class ExternalShare(Global global,
     private ExternalSessionSnapshot _snapshot;
     private string _dbKey;
     private const string RoomLinkPattern = "rooms/share?key={0}";
+    private const string PersonalFolderLinkPattern = "rooms/personal/filter?key={0}";
 
-    public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId, bool isFile = false)
+    public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
     {
         var key = await CreateShareKeyAsync(linkId);
         string url = null;
@@ -65,14 +66,9 @@ public class ExternalShare(Global global,
             case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
                 url = string.Format(RoomLinkPattern, key);
                 break;
-            case Folder<T> { RootFolderType: FolderType.VirtualRooms } folder:
+            case Folder<T> { RootFolderType: FolderType.VirtualRooms or FolderType.USER } folder:
                 url = QueryHelpers.AddQueryString(string.Format(RoomLinkPattern, key), "folder", HttpUtility.UrlEncode(folder.Id.ToString()!));
                 break;
-        }
-
-        if (isFile)
-        {
-            url = QueryHelpers.AddQueryString(url, FilesLinkUtility.IsFile, "true");
         }
 
         return new LinkData
@@ -366,7 +362,12 @@ public class ValidationInfo
     /// The external data title.
     /// </summary>
     public string Title { get; set; }
-
+    
+    /// <summary>
+    /// The type of the external data.
+    /// </summary>
+    public FileEntryType? Type { get; set; }
+    
     /// <summary>
     /// The entity ID of the external data.
     /// </summary>
@@ -375,7 +376,17 @@ public class ValidationInfo
     /// <summary>
     /// The entry title of the external data.
     /// </summary>
-    public string EntryTitle { get; set; }
+    public string EntityTitle { get; set; }
+    
+    /// <summary>
+    /// The entry type of the external data.
+    /// </summary>
+    public FileEntryType? EntityType { get; set; }
+    
+    /// <summary>
+    /// Indicates whether the entity represents a room.
+    /// </summary>
+    public bool? IsRoom { get; set; } //TODO:rename
 
     /// <summary>
     /// The access rights type of the external data.
@@ -401,6 +412,11 @@ public class ValidationInfo
     /// Specifies whether the user is authenticated or not.
     /// </summary>
     public bool IsAuthenticated { get; set; }
+    
+    /// <summary>
+    /// The room ID of the external data.
+    /// </summary>
+    public bool IsRoomMember { get; set; }
 }
 
 public record DownloadSession
