@@ -47,7 +47,7 @@ public static class McpServerStatusExtensions
             Connected = connection.Connected
         };
 
-        if (connection.ConnectionType is not ConnectionType.OAuth || connection.OauthProvider == null)
+        if (connection.ConnectionType is not ConnectionType.OAuth || connection.OauthProvider is not { IsEnabled: true })
         {
             return serverStatus;
         }

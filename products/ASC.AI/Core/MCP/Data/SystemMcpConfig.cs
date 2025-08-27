@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Common.Configuration;
-using ASC.FederatedLogin.LoginProviders;
-
 namespace ASC.AI.Core.MCP.Data;
 
 [Singleton]
@@ -41,13 +38,15 @@ public class SystemMcpConfig
             {
                 Id = new Guid("883da87d-5ae0-49fd-8cb9-2cb82181667e"),
                 ServerType = ServerType.DocSpace,
-                ConnectionType = ConnectionType.Direct
+                ConnectionType = ConnectionType.Direct,
+                Internal = true
             }},
             {"github", new StaticServerInfo
             {
                 Id = new Guid("b55705b3-035f-442e-9983-0ea5bb4daa57"),
                 ServerType = ServerType.Github,
                 ConnectionType = ConnectionType.OAuth,
+                Internal = false,
                 LoginProviderSelector = x => x.Get<GithubLoginProvider>()
             }},
             {"box", new StaticServerInfo
@@ -55,6 +54,7 @@ public class SystemMcpConfig
                 Id = new Guid("791b1cd0-e8c3-4ba2-b966-9037ab3a825b"),
                 ServerType = ServerType.Box,
                 ConnectionType = ConnectionType.OAuth,
+                Internal = false,
                 LoginProviderSelector = x => x.Get<BoxLoginProvider>()
             }}
         }.ToFrozenDictionary();
@@ -89,6 +89,7 @@ public class SystemMcpConfig
                 Headers = item.Headers,
                 Endpoint = item.Endpoint,
                 ConnectionType = staticInfo.ConnectionType,
+                Internal = staticInfo.Internal,
                 LoginProviderSelector = staticInfo.LoginProviderSelector
             };
             
@@ -104,5 +105,6 @@ public class SystemMcpConfig
         public ServerType ServerType { get; init; }
         public ConnectionType ConnectionType { get; init; }
         public Func<ConsumerFactory, OauthProvider>? LoginProviderSelector { get; init; }
+        public bool Internal { get; init; }
     }
 }

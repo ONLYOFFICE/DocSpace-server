@@ -36,7 +36,7 @@ public class McpServer
     public Dictionary<string, string>? Headers { get; set; }
     public ServerType ServerType { get; init; }
     public ConnectionType ConnectionType { get; init; }
-    public bool System { get; init; }
+    public bool Internal { get; init; }
     public bool Enabled { get; set; }
 }
 

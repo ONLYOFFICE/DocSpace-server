@@ -31,8 +31,7 @@ public class McpDao(
     IDbContextFactory<AiDbContext> dbContextFactory,
     SystemMcpConfig systemMcpConfig,
     InstanceCrypto crypto,
-    ConsumerFactory consumerFactory,
-    IMapper mapper)
+    ConsumerFactory consumerFactory)
 {
     public async Task<McpServer> AddServerAsync(
         int tenantId, 
@@ -159,7 +158,7 @@ public class McpDao(
             
             foreach (var systemServer in systemMcpConfig.Servers.Values)
             {
-                if (!states.TryGetValue(systemServer.Id, out var state) || !state.Enabled)
+                if (!systemServer.Internal && (!states.TryGetValue(systemServer.Id, out var state) || !state.Enabled))
                 {
                     continue;
                 }
@@ -206,20 +205,21 @@ public class McpDao(
         
         var servers = new List<McpServer>();
 
-        var systemServers = new List<SystemMcpServer>();
+        var systemServers = systemMcpConfig.Servers.Values.Where(x => !x.Internal).ToList();
+        var filteredSystemServers = new List<SystemMcpServer>();
 
-        systemServers.AddRange(systemMcpConfig.Servers.Values.Skip(offset).Take(count));
-        offset = Math.Max(0, offset - systemMcpConfig.Servers.Count);
-        count = Math.Max(0, count - systemServers.Count);
+        filteredSystemServers.AddRange(systemServers.Skip(offset).Take(count));
+        offset = Math.Max(0, offset - systemServers.Count);
+        count = Math.Max(0, count - filteredSystemServers.Count);
 
-        if (systemServers.Count > 0)
+        if (filteredSystemServers.Count > 0)
         {
             var states = await dbContext.GetServersStatesAsync(
                 tenantId, 
-                systemServers.Select(x => x.Id)
+                filteredSystemServers.Select(x => x.Id)
             ).ToDictionaryAsync(x => x.ServerId);
 
-            foreach (var systemServer in systemServers)
+            foreach (var systemServer in filteredSystemServers)
             {
                 var server = new McpServer
                 {
@@ -247,7 +247,7 @@ public class McpDao(
         }
         
         var dbTotalCount = await dbContext.GetServersCountAsync(tenantId);
-        var total = dbTotalCount + systemMcpConfig.Servers.Count;
+        var total = dbTotalCount + systemServers.Count;
         
         return (servers, total);
     }

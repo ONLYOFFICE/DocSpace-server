@@ -24,20 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Common.Configuration;
-using ASC.FederatedLogin.LoginProviders;
-
 namespace ASC.AI.Core.MCP.Data;
 
 public class SystemMcpServer
 {
     public Guid Id { get; init; }
-    public required string Name { get; set; }
-    public string? Description { get; set; }
-    public required string Endpoint { get; set; }
-    public Dictionary<string, string>? Headers { get; set; }
+    public required string Name { get; init; }
+    public string? Description { get; init; }
+    public required string Endpoint { get; init; }
+    public Dictionary<string, string>? Headers { get; init; }
     public ServerType Type { get; init; }
     public ConnectionType ConnectionType { get; init; }
+    public bool Internal { get; init; }
     public Func<ConsumerFactory, OauthProvider>? LoginProviderSelector { get; init; }
 }
 
@@ -55,8 +53,8 @@ public static class SystemMcpServerExtensions
             Headers = systemMcpServer.Headers,
             ServerType = systemMcpServer.Type,
             ConnectionType = systemMcpServer.ConnectionType,
-            System = true,
-            Enabled = state?.Enabled ?? false
+            Internal = systemMcpServer.Internal,
+            Enabled = state?.Enabled ?? systemMcpServer.Internal
         };
     }
 }
