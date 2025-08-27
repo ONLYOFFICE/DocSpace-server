@@ -510,7 +510,6 @@ public class FoldersControllerCommon(
     /// </summary>
     /// <short>Get the "Favorites" section</short>
     /// <path>api/2.0/files/@favorites</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Favorites\" section contents", typeof(FolderContentDto<int>))]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
@@ -665,11 +664,12 @@ public class FoldersControllerCommon(
             withoutTrash = true;
         }
         
+        yield return await globalFolderHelper.FolderFavoritesAsync;
+
         if (await filesSettingsHelper.GetRecentSection())
         {
             yield return await globalFolderHelper.FolderRecentAsync;
         }
-        
         var my = await globalFolderHelper.FolderMyAsync;
         if (my != 0)
         {
