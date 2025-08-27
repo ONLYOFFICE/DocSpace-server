@@ -550,6 +550,12 @@ public class WhitelabelController(
             throw new ArgumentException("site");
         }
 
+        var quota = await tenantManager.GetCurrentTenantQuotaAsync();
+        if (!quota.Branding)
+        {
+            wrapper.Settings.HideAbout = false;
+        }
+
         wrapper.Settings.IsLicensor = false;
 
         await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);

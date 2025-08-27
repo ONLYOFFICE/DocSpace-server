@@ -40,7 +40,7 @@ public class RabbitMQSettings
     public string SslCertPath { get; set; }
     public string ClientProvidedName { get; set; }
     public ushort RequestedChannelMax { get; set; } = DefaultChannelMax;
-
+    
     public ConnectionFactory GetConnectionFactory()
     {
         var factory = new ConnectionFactory

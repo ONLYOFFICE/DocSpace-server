@@ -136,9 +136,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Üstündən Yazma Parametrləri Yeniləndi</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Sənədlər</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Parametrlər</value>
   </data>
@@ -409,9 +406,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Daşıyın</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Digərləri</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Sahib dəyişdirildi: {0}</value>
   </data>
@@ -429,9 +423,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Parol Gücü Parametrləri Yeniləndi</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Adamlar</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platforma</value>
@@ -492,9 +483,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sessiya Başladı</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Parametrlər</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO Deaktivdir</value>
@@ -912,5 +900,32 @@
   </data>
   <data name="ApiKeyUpdated" xml:space="preserve">
     <value>İstifadəçi API Açarı Yenilənib: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Avtorizasiya linki aktivləşdirildi</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Müştəri əməliyyatı tamamlandı</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Müştəri əməliyyatları hesabatı endirildi</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Müştəri abunəliyi yeniləndi: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Müştəri pul kisəsinə pul yükləndi: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Müştəri pul kisəsinin artırılması parametrləri yeniləndi</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP autentifikasiyası deaktiv edilib</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP identifikasiyası aktivləşdirilib</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP sinxronizasiyası tamamlandı</value>
   </data>
 </root>

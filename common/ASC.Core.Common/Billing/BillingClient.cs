@@ -35,7 +35,8 @@ public class BillingClient
     private const int StripePaymentSystemId = 9;
     private const int AccountingPaymentSystemId = 11;
 
-    internal const string HttpClientOption = "billing";
+    internal const string HttpClientName = "billingHttpClient";
+    internal const string ResiliencePipelineName = "billingResiliencePipeline";
     public const string GetCurrentPaymentsUri = "GetActiveResources";
 
     public BillingClient(IConfiguration configuration, IHttpClientFactory httpClientFactory)
@@ -137,18 +138,25 @@ public class BillingClient
         return customerInfo;
     }
 
-    public async Task<bool> TopUpDepositAsync(string portalId, decimal amount, string currency)
+    public async Task<bool> TopUpDepositAsync(string portalId, decimal amount, string currency, string customerParticipantName)
     {
-        var result = await RequestAsync("Deposit", portalId, [Tuple.Create("Amount", amount.ToString(CultureInfo.InvariantCulture)), Tuple.Create("Currency", currency)]);
+        var parameters = new[]
+        {
+            Tuple.Create("Amount", amount.ToString(CultureInfo.InvariantCulture)),
+            Tuple.Create("Currency", currency),
+            Tuple.Create("CustomerParticipantName", customerParticipantName)
+        };
+        var result = await RequestAsync("Deposit", portalId, parameters);
         return result == "\"ok\"";
     }
 
-    public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType, string currency)
+    public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType, string currency, string customerParticipantName)
     {
         var parameters = products.Select(p => Tuple.Create("ProductId", p))
             .Concat(quantity.Select(q => Tuple.Create("ProductQty", q.ToString())))
             .Concat([Tuple.Create("ProductQuantityType", ((int)productQuantityType).ToString())])
             .Concat([Tuple.Create("Currency", currency)])
+            .Concat([Tuple.Create("CustomerParticipantName", customerParticipantName)])
             .ToArray();
 
         var result = await RequestAsync("ChangeSubscription", portalId, parameters);
@@ -229,7 +237,7 @@ public class BillingClient
             request.Headers.Add("Authorization", CreateAuthToken(_configuration.Key, _configuration.Secret));
         }
 
-        var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientOption : "");
+        var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientName : "");
         httpClient.Timeout = TimeSpan.FromMilliseconds(60000);
 
         var data = new Dictionary<string, List<string>>();
@@ -289,26 +297,25 @@ public class BillingClient
     }
 }
 
-public static class BillingHttplClientExtension
+public static class BillingHttpClientExtension
 {
     public static void AddBillingHttpClient(this IServiceCollection services)
     {
-        services.AddHttpClient(BillingClient.HttpClientOption)
+        services.AddHttpClient(BillingClient.HttpClientName)
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .AddPolicyHandler((_, request) =>
+            .AddResilienceHandler(BillingClient.ResiliencePipelineName, builder =>
             {
-                if (!request.RequestUri.AbsolutePath.EndsWith(BillingClient.GetCurrentPaymentsUri))
+                builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
                 {
-                    return null;
-                }
-
-                return Policy.HandleResult<HttpResponseMessage>
-                    (msg =>
-                    {
-                        var result = msg.Content.ReadAsStringAsync().Result;
-                        return result.Contains("{\"Message\":\"error: cannot find ");
-                    })
-                    .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+                    MaxRetryAttempts = 2,
+                    Delay = TimeSpan.FromSeconds(1),
+                    BackoffType = DelayBackoffType.Exponential,
+                    ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                        .HandleResult(response => {
+                            var result = response.Content.ReadAsStringAsync().Result;
+                            return result.Contains("{\"Message\":\"error: cannot find ");
+                        })
+                });
             });
     }
 }

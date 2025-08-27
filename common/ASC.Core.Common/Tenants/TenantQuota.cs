@@ -322,15 +322,15 @@ public class TenantQuota : IMapFrom<DbQuota>
         set => _customFeature.Value = value;
     }
 
-    private readonly TenantQuotaFeatureFlag _autoBackupRestoreFeature;
+    private readonly TenantQuotaFeatureFlag _restoreFeature;
 
     /// <summary>
-    /// Specifies if the automatic backup option is enabled or not.
+    /// Specifies if the restore is enabled or not.
     /// </summary>
-    public bool AutoBackupRestore
+    public bool Restore
     {
-        get => _autoBackupRestoreFeature.Value;
-        set => _autoBackupRestoreFeature.Value = value;
+        get => _restoreFeature.Value;
+        set => _restoreFeature.Value = value;
     }
 
     private readonly TenantQuotaFeatureFlag _oauthFeature;
@@ -377,13 +377,35 @@ public class TenantQuota : IMapFrom<DbQuota>
         set => _yearFeature.Value = value;
     }
 
+    private readonly CountFreeBackupFeature _countFreeBackup;
+
+    /// <summary>
+    /// The number of free backups within a month.
+    /// </summary>
+    public int CountFreeBackup
+    {
+        get => _countFreeBackup.Value;
+        set => _countFreeBackup.Value = value;
+    }
+
+    private readonly WalletFeatureFlag _backup;
+
+    /// <summary>
+    /// Specifies if the backup anabled as a wallet service or not.
+    /// </summary>
+    public bool Backup
+    {
+        get => _backup.Value;
+        set => _backup.Value = value;
+    }
+
     public TenantQuota()
     {
         _featuresList = [];
 
         _countUserFeature = new CountUserFeature(this) { Order = 1 };
         _countPaidUserFeature = new CountPaidUserFeature(this);
-        _usersInRoomFeature = new UsersInRoomFeature(this) { Order = 8, Visible = false };
+        _usersInRoomFeature = new UsersInRoomFeature(this) { Visible = false };
         _countRoomFeature = new CountRoomFeature(this) { Order = 2 };
         _maxTotalSizeFeature = new MaxTotalSizeFeature(this);
         _maxFileSizeFeature = new MaxFileSizeFeature(this);
@@ -391,20 +413,22 @@ public class TenantQuota : IMapFrom<DbQuota>
         _trialFeature = new TenantQuotaFeatureFlag(this) { Name = "trial", Visible = false };
         _freeFeature = new FreeFeature(this) { Visible = false };
         _updateFeature = new TenantQuotaFeatureFlag(this) { Name = "update", Standalone = true };
-        _auditFeature = new TenantQuotaFeatureFlag(this) { Name = "audit", Order = 7, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _auditFeature = new TenantQuotaFeatureFlag(this) { Name = "audit", Order = 8, EmployeeType = EmployeeType.DocSpaceAdmin };
         _docsEditionFeature = new TenantQuotaFeatureFlag(this) { Name = "docs", Visible = false };
-        _ldapFeature = new TenantQuotaFeatureFlag(this) { Name = "ldap", Order = 3, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _ldapFeature = new TenantQuotaFeatureFlag(this) { Name = "ldap", Order = 4, EmployeeType = EmployeeType.DocSpaceAdmin };
         _ssoFeature = new TenantQuotaFeatureFlag(this) { Name = "sso", Order = 5, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _brandingFeature = new TenantQuotaFeatureFlag(this) { Name = "branding", Visible = false };
-        _customizationFeature = new TenantQuotaFeatureFlag(this) { Name = "customization", Order = 4, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _brandingFeature = new TenantQuotaFeatureFlag(this) { Name = "branding", EmployeeType = EmployeeType.DocSpaceAdmin };
+        _customizationFeature = new TenantQuotaFeatureFlag(this) { Name = "customization", Order = 3, EmployeeType = EmployeeType.DocSpaceAdmin };
         _lifetimeFeature = new TenantQuotaFeatureFlag(this) { Name = "lifetime", Standalone = true };
         _customFeature = new TenantQuotaFeatureFlag(this) { Name = "custom", Visible = false };
-        _autoBackupRestoreFeature = new TenantQuotaFeatureFlag(this) { Name = "restore", Order = 6, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _restoreFeature = new TenantQuotaFeatureFlag(this) { Name = "restore", Order = 7, EmployeeType = EmployeeType.DocSpaceAdmin };
         _oauthFeature = new TenantQuotaFeatureFlag(this) { Name = "oauth" };
         _contentSearchFeature = new TenantQuotaFeatureFlag(this) { Name = "contentsearch", Visible = false };
         _thirdPartyFeature = new TenantQuotaFeatureFlag(this) { Name = "thirdparty", Order = 9, EmployeeType = EmployeeType.DocSpaceAdmin };
         _statisticFeature = new TenantQuotaFeatureFlag(this) { Name = "statistic", Order = 10 };
-        _yearFeature = new TenantQuotaFeatureFlag(this) { Name = "year", Order = 11, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _yearFeature = new TenantQuotaFeatureFlag(this) { Name = "year", EmployeeType = EmployeeType.DocSpaceAdmin };
+        _countFreeBackup = new CountFreeBackupFeature(this) { Order = 6, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _backup = new WalletFeatureFlag(this) { Name = "backup", EmployeeType = EmployeeType.DocSpaceAdmin };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -426,12 +450,14 @@ public class TenantQuota : IMapFrom<DbQuota>
             _customizationFeature,
             _lifetimeFeature,
             _customFeature,
-            _autoBackupRestoreFeature,
+            _restoreFeature,
             _oauthFeature,
             _contentSearchFeature,
             _thirdPartyFeature,
             _statisticFeature,
-            _yearFeature
+            _yearFeature,
+            _countFreeBackup,
+            _backup
         };
     }
 

@@ -532,6 +532,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
             Mode = source.Mode,
             ModeWrite = source.ModeWrite,
             Plugins = source.Plugins,
+            Recent = await source.GetRecent(fileType, file.Id).ToListAsync(),
             Templates = await source.GetTemplates(fileType, configuration.Document.Title),
             User = await source.GetUserAsync()
         };
@@ -559,7 +560,7 @@ public class CustomizationConfigConverter<T>(
 
         var result = new CustomizationConfigDto
         {
-            About = source.About,
+            About = await source.IsAboutPageVisible(),
             Customer = coreBaseSettings.Standalone ? await customerConfigConverter.Convert(source.Customer) : null,
             Feedback = await source.GetFeedback(),
             Forcesave = source.GetForceSave(file),

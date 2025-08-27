@@ -29,9 +29,9 @@ namespace ASC.Files.Tests.FilesController;
 [Collection("Test Collection")]
 public class MoveFolderTest(
     FilesApiFactory filesFactory, 
-    WebApplicationFactory<WebApiProgram> apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    WepApiFactory apiFactory, 
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
     [Fact]
@@ -50,7 +50,7 @@ public class MoveFolderTest(
         // Act
         var copyParams = new BatchRequestDto
         {
-            DestFolderId = new BatchRequestDtoDestFolderId(targetFolderId),
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolderId),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [],
             FolderIds = [new(sourceFolder.Id)]
@@ -67,11 +67,11 @@ public class MoveFolderTest(
         results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
         
         // Verify both folders exist
-        var sourceFolderInfo = (await _filesFoldersApi.GetFolderInfoAsync(sourceFolder.Id, TestContext.Current.CancellationToken)).Response;
+        var sourceFolderInfo = (await _foldersApi.GetFolderInfoAsync(sourceFolder.Id, TestContext.Current.CancellationToken)).Response;
         sourceFolderInfo.Should().NotBeNull();
         
         // Find the copied folder in the target directory
-        var targetFolderContent = (await _filesFoldersApi.GetFolderByFolderIdAsync(targetFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var targetFolderContent = (await _foldersApi.GetFolderByFolderIdAsync(targetFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var copiedFolder = targetFolderContent.Folders.FirstOrDefault(f => f.Title == sourceFolder.Title);
         
         copiedFolder.Should().NotBeNull();
@@ -94,7 +94,7 @@ public class MoveFolderTest(
         // Act
         var moveParams = new BatchRequestDto
         {
-            DestFolderId = new BatchRequestDtoDestFolderId(targetFolder.Id),
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolder.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [],
             FolderIds = [new(sourceFolder.Id)]
@@ -111,7 +111,7 @@ public class MoveFolderTest(
         results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
         
         // Verify folder was moved
-        var movedFolder = (await _filesFoldersApi.GetFolderInfoAsync(sourceFolder.Id, TestContext.Current.CancellationToken)).Response;
+        var movedFolder = (await _foldersApi.GetFolderInfoAsync(sourceFolder.Id, TestContext.Current.CancellationToken)).Response;
         movedFolder.Should().NotBeNull();
         movedFolder.ParentId.Should().Be(targetFolder.Id);
     }

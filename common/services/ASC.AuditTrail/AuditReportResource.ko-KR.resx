@@ -354,9 +354,6 @@
   <data name="UserLinkedSocialAccount" xml:space="preserve">
     <value>소셜 계정이 연결되었습니다. 제공자: {0}</value>
   </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>설정</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>설정</value>
   </data>
@@ -426,9 +423,6 @@
   <data name="PlatformCol" xml:space="preserve">
     <value>플랫폼</value>
   </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>사람</value>
-  </data>
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>비밀번호가 업데이트되었습니다</value>
   </data>
@@ -452,9 +446,6 @@
   </data>
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>덮어쓰기 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>기타</value>
   </data>
   <data name="UserTfaGenerateCodes" xml:space="preserve">
     <value>새로운 백업 코드가 생성되었습니다</value>
@@ -692,9 +683,6 @@
   </data>
   <data name="DownloadActionType" xml:space="preserve">
     <value>다운로드</value>
-  </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>문서</value>
   </data>
   <data name="DocumentServiceLocationSetting" xml:space="preserve">
     <value>문서 서비스 위치가 업데이트되었습니다</value>

@@ -66,6 +66,7 @@ public class TariffService(
     BillingClient billingClient,
     AccountingClient accountingClient,
     IServiceProvider serviceProvider,
+    ResiliencePipelineProvider<string> resiliencePipelineProvider,
     TenantExtraConfig tenantExtraConfig)
     : ITariffService
 {
@@ -167,8 +168,8 @@ public class TariffService(
                             }
                             else
                             {
-                                await AddInitialQuotaAsync(asynctariff, tenantId);
-                            }
+                            await AddInitialQuotaAsync(asynctariff, tenantId);
+                        }
                         }
 
                         if (asynctariff.Id == tariff.Id)
@@ -334,7 +335,7 @@ public class TariffService(
         return productIds;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota)
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName)
     {
         if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
         {
@@ -345,7 +346,7 @@ public class TariffService(
 
         try
         {
-            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds, quantity.Values, productQuantityType, currency);
+            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds, quantity.Values, productQuantityType, currency, customerParticipantName);
 
             if (!changed)
             {
@@ -595,7 +596,31 @@ public class TariffService(
                 var result = cache.Get<IDictionary<string, Dictionary<string, decimal>>>(key);
                 if (result == null)
                 {
-                    result = await billingClient.GetProductPriceInfoAsync(partnerId, wallet, productIds);
+                    if (wallet)
+                    {
+                        var serviceAccounts = productIds.Where(x => int.TryParse(x, out var id) && id > 10000).ToArray();
+                        productIds = productIds.Where(x => !serviceAccounts.Contains(x)).ToArray();
+
+                        var accountingPrices = serviceAccounts.Length > 0
+                            ? await accountingClient.GetProductPriceInfoAsync(partnerId, serviceAccounts)
+                            : new Dictionary<string, Dictionary<string, decimal>>();
+
+                        var billingPrices = productIds.Length > 0
+                            ? await billingClient.GetProductPriceInfoAsync(partnerId, wallet, productIds)
+                            : new Dictionary<string, Dictionary<string, decimal>>();
+
+                        foreach (var billingPrice in billingPrices)
+                        {
+                            accountingPrices.Add(billingPrice.Key, billingPrice.Value);
+                        }
+
+                        result = accountingPrices;
+                    }
+                    else
+                    {
+                        result = await billingClient.GetProductPriceInfoAsync(partnerId, wallet, productIds);
+                    }
+
                     cache.Insert(key, result, DateTime.Now.AddHours(1));
                 }
 
@@ -1029,7 +1054,7 @@ public class TariffService(
         return result;
     }
 
-    private async Task<bool> IsFreeTariffAsync(Tariff tariff)
+    public async Task<bool> IsFreeTariffAsync(Tariff tariff)
     {
         var freeTariff = await tariff.Quotas.ToAsyncEnumerable().FirstOrDefaultAwaitAsync(async tariffRow =>
         {
@@ -1093,7 +1118,7 @@ public class TariffService(
         return customerInfo;
     }
 
-    public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, bool waitForChanges = false)
+    public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, bool waitForChanges = false)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
 
@@ -1109,7 +1134,7 @@ public class TariffService(
 
         try
         {
-            result = await billingClient.TopUpDepositAsync(portalId, amount, currency);
+            result = await billingClient.TopUpDepositAsync(portalId, amount, currency, customerParticipantName);
         }
         catch (Exception error)
         {
@@ -1121,11 +1146,9 @@ public class TariffService(
             return result;
         }
 
-        var retryPolicy = Policy
-            .HandleResult<bool>(result => result == false)
-            .WaitAndRetryAsync(15, retryAttempt => TimeSpan.FromSeconds(1));
+        var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingClient.BalanceResiliencePipelineName);
 
-        var updated = await retryPolicy.ExecuteAsync(async () =>
+        var updated = await pipeline.ExecuteAsync(async (_) =>
         {
             var newBalance = await GetCustomerBalanceAsync(tenantId, true);
             var newBalanceAmount = newBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
@@ -1183,16 +1206,30 @@ public class TariffService(
         return balance;
     }
 
-    public async Task<Session> OpenCustomerSessionAsync(int tenantId, int serviceAccount, string externalRef, int quantity)
+    public async Task<Session> OpenCustomerSessionAsync(int tenantId, int serviceAccount, string externalRef, int quantity, int duration)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await accountingClient.OpenCustomerSessionAsync(portalId, serviceAccount, externalRef, quantity);
+        return await accountingClient.OpenCustomerSessionAsync(portalId, serviceAccount, externalRef, quantity, duration);
     }
 
-    public async Task<bool> PerformCustomerOperationAsync(int tenantId, int serviceAccount, int sessionId, int quantity)
+    public async Task<bool> CloseCustomerSessionAsync(int tenantId, int sessionId)
+    {
+        await accountingClient.CloseCustomerSessionAsync(sessionId);
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
+        return true;
+    }
+
+    public async Task<Session> ExtendCustomerSessionAsync(int tenantId, int sessionId, int duration)
+    {
+        var session = await accountingClient.ExtendCustomerSessionAsync(sessionId, duration);
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
+        return session;
+    }
+
+    public async Task<bool> CompleteCustomerSessionAsync(int tenantId, int serviceAccount, int sessionId, int quantity, string customerParticipantName)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        await accountingClient.PerformCustomerOperationAsync(portalId, serviceAccount, sessionId, quantity);
+        await accountingClient.CompleteCustomerSessionAsync(portalId, serviceAccount, sessionId, quantity, customerParticipantName);
         await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         return true;
     }

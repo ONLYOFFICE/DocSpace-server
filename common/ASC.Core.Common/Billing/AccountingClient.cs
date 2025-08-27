@@ -26,8 +26,6 @@
 
 using System.Collections.Specialized;
 
-using Polly.Extensions.Http;
-
 namespace ASC.Core.Billing;
 
 [Singleton]
@@ -36,9 +34,12 @@ public class AccountingClient
     public readonly bool Configured;
 
     private readonly AccountingConfiguration _configuration;
+    private readonly ICache _cache;
     private readonly IHttpClientFactory _httpClientFactory;
 
     internal const string HttpClientName = "accountingHttpClient";
+    internal const string ResiliencePipelineName = "accountingResiliencePipeline";
+    internal const string BalanceResiliencePipelineName = "balanceResiliencePipeline";
 
     private readonly JsonSerializerOptions _deserializationOptions = new()
     {
@@ -51,9 +52,10 @@ public class AccountingClient
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    public AccountingClient(IConfiguration configuration, IHttpClientFactory httpClientFactory)
+    public AccountingClient(IConfiguration configuration, ICache cache, IHttpClientFactory httpClientFactory)
     {
         _configuration = configuration.GetSection("core:accounting").Get<AccountingConfiguration>() ?? new AccountingConfiguration();
+        _cache = cache;
         _httpClientFactory = httpClientFactory;
 
         _configuration.Url = (_configuration.Url ?? "").Trim().TrimEnd('/');
@@ -72,30 +74,53 @@ public class AccountingClient
         return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/balance/{portalId}", addPolicy: addPolicy);
     }
 
-    public async Task<Session> OpenCustomerSessionAsync(string portalId, int serviceAccount, string externalRef, int quantity)
+    public async Task<Session> OpenCustomerSessionAsync(string portalId, int serviceAccount, string externalRef, int quantity, int duration)
     {
         var data = new
         {
             CustomerName = portalId,
             ServiceAccount = serviceAccount,
             ExternalRef = externalRef,
-            Quantity = quantity
+            Quantity = quantity,
+            Duration = duration
         };
 
         return await RequestAsync<Session>(HttpMethod.Post, "/session/open", data: data);
     }
 
-    public async Task PerformCustomerOperationAsync(string portalId, int serviceAccount, int sessionId, int quantity)
+    public async Task CloseCustomerSessionAsync(int sessionId)
+    {
+        var queryParams = new NameValueCollection
+        {
+            { "sessionId", sessionId.ToString() }
+        };
+
+        _ = await RequestAsync<string>(HttpMethod.Put, $"/session/close", queryParams);
+    }
+
+    public async Task<Session> ExtendCustomerSessionAsync(int sessionId, int duration)
+    {
+        var queryParams = new NameValueCollection
+        {
+            { "sessionId", sessionId.ToString() },
+            { "duration", duration.ToString() }
+        };
+
+        return await RequestAsync<Session>(HttpMethod.Put, $"/session/extend", queryParams);
+    }
+
+    public async Task CompleteCustomerSessionAsync(string portalId, int serviceAccount, int sessionId, int quantity, string customerParticipantName)
     {
         var data = new
         {
             CustomerName = portalId,
             ServiceAccount = serviceAccount,
             SessionId = sessionId,
-            Quantity = quantity
+            Quantity = quantity,
+            CustomerParticipantName = customerParticipantName
         };
 
-        _ = await RequestAsync<string>(HttpMethod.Post, "/operation/provided", data: data);
+        _ = await RequestAsync<string>(HttpMethod.Post, "/operation/sessionComplete", data: data);
     }
 
     public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal, int? offset, int? limit)
@@ -131,7 +156,14 @@ public class AccountingClient
 
     public async Task<List<Currency>> GetAllCurrenciesAsync()
     {
-        return await RequestAsync<List<Currency>>(HttpMethod.Get, "/currency/all", null);
+        var key = "accounting-currencies";
+        var result = _cache.Get<List<Currency>>(key);
+        if (result == null)
+        {
+            result = await RequestAsync<List<Currency>>(HttpMethod.Get, "/currency/all", null);
+            _cache.Insert(key, result, DateTime.Now.AddDays(1));
+        }
+        return result;
     }
 
     public List<string> GetSupportedCurrencies()
@@ -139,6 +171,50 @@ public class AccountingClient
         return _configuration.Currencies;
     }
 
+    public async Task<ServiceInfo> GetServiceInfoAsync(int serviceAccount)
+    {
+        return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/account/{serviceAccount}");
+    }
+
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, string[] serviceAccounts)
+    {
+        var key = $"accounting-prices-{partnerId}-{string.Join(",", serviceAccounts)}";
+        var result = _cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
+
+        if (result != null)
+        {
+            return result;
+        }
+
+        var currencies = await GetAllCurrenciesAsync();
+
+        result = [];
+        foreach (var serviceAccount in serviceAccounts)
+        {
+            if (!int.TryParse(serviceAccount, out var serviceAccountId))
+            {
+                continue;
+            }
+
+            var serviceInfo = await GetServiceInfoAsync(serviceAccountId);
+            if (serviceInfo == null)
+            {
+                continue;
+            }
+
+            var currency = currencies.FirstOrDefault(c => c.Id == serviceInfo.CurrencyId);
+            var currencyCode = currency?.Code ?? "USD";
+
+            result.Add(serviceAccount, new Dictionary<string, decimal>
+            {
+                { currencyCode, serviceInfo.PriceValue }
+            });
+        }
+
+        _cache.Insert(key, result, DateTime.Now.AddDays(1));
+
+        return result;
+    }
 
     private async Task<T> RequestAsync<T>(HttpMethod httpMethod, string path, NameValueCollection queryParams = null, object data = null, bool addPolicy = false)
     {
@@ -190,6 +266,16 @@ public class AccountingClient
 
             if (!response.IsSuccessStatusCode)
             {
+                if (response.StatusCode == HttpStatusCode.PaymentRequired)
+                {
+                    throw new AccountingPaymentRequiredException();
+                }
+
+                if (response.StatusCode == HttpStatusCode.BadRequest && Regex.IsMatch(responseString, @"Customer account '.*?' not found"))
+                {
+                    throw new AccountingCustomerNotFoundException();
+                }
+
                 throw new Exception($"Accounting request failed with status code {response.StatusCode} {responseString}");
             }
 
@@ -206,6 +292,14 @@ public class AccountingClient
             var result = JsonSerializer.Deserialize<T>(responseString, _deserializationOptions);
 
             return result;
+        }
+        catch (AccountingPaymentRequiredException)
+        {
+            throw;
+        }
+        catch (AccountingCustomerNotFoundException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -316,8 +410,43 @@ public class Session
     /// The three-character ISO 4217 currency symbol of the reserved amount.
     /// </summary>
     public string Currency { get; init; }
+
+    /// <summary>
+    /// The expiration date of the session.
+    /// </summary>
+    public DateTime Expire { get; init; }
 }
 
+/// <summary>
+/// Represents a service information.
+/// </summary>
+public class ServiceInfo
+{
+    /// <summary>
+    /// The service ID.
+    /// </summary>
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The price value.
+    /// </summary>
+    public decimal PriceValue { get; init; }
+
+    /// <summary>
+    /// The currency ID.
+    /// </summary>
+    public int CurrencyId { get; init; }
+
+    /// <summary>
+    /// The name.
+    /// </summary>
+    public string Name { get; init; }
+
+    /// <summary>
+    /// The account number.
+    /// </summary>
+    public int AccountNumber { get; init; }
+}
 
 /// <summary>
 /// Represents a report containing a collection of operations.
@@ -405,16 +534,36 @@ public class Currency
     public string Code { get; init; }
 }
 
-public static class AccountingHttplClientExtension
+public static class AccountingHttpClientExtension
 {
     public static void AddAccountingHttpClient(this IServiceCollection services)
     {
         services.AddHttpClient(AccountingClient.HttpClientName)
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .AddPolicyHandler((_, _) => HttpPolicyExtensions.HandleTransientHttpError()
-                .OrResult(x => !x.IsSuccessStatusCode)
-                .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+            .AddResilienceHandler(AccountingClient.ResiliencePipelineName, builder =>
+            {
+                builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+                {
+                    MaxRetryAttempts = 2,
+                    Delay = TimeSpan.FromSeconds(1),
+                    BackoffType = DelayBackoffType.Exponential,
+                    ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                        .Handle<HttpRequestException>()
+                        .Handle<TaskCanceledException>()
+                        .HandleResult(response => !response.IsSuccessStatusCode),
+                });
+            });
 
+        services.AddResiliencePipeline<string, bool>(AccountingClient.BalanceResiliencePipelineName, pipelineBuilder =>
+        {
+            pipelineBuilder.AddRetry(new RetryStrategyOptions<bool>()
+            {
+                MaxRetryAttempts = 15,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Constant,
+                ShouldHandle = new PredicateBuilder<bool>().HandleResult(result => result == false)
+            });
+        });
     }
 }
 
@@ -430,3 +579,7 @@ public class AccountingException : Exception
 }
 
 public class AccountingNotConfiguredException(string message = "Accounting service is not configured") : AccountingException(message);
+
+public class AccountingPaymentRequiredException(string message = "Payment required") : AccountingException(message);
+
+public class AccountingCustomerNotFoundException(string message = "Customer not found") : AccountingException(message);

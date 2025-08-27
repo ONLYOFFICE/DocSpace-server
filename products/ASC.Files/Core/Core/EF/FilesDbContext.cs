@@ -43,7 +43,6 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbFilesLink> FilesLink { get; set; }
     public DbSet<DbFilesProperties> FilesProperties { get; set; }
     public DbSet<DbTenant> Tenants { get; set; }
-    public DbSet<FilesConverts> FilesConverts { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<DbFileOrder> FileOrder { get; set; }
     public DbSet<DbRoomSettings> RoomSettings { get; set; }
@@ -52,6 +51,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbFilesAuditReference> FilesAuditReference { get; set; }
     public DbSet<DbUserRelation> UserRelations { get; set; }
     public DbSet<DbFilesFormRoleMapping> FilesFormRoleMapping { get; set; }
+    public DbSet<DbAuditEvent> AuditEvents { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -71,7 +71,6 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbFilesLink()
             .AddDbFilesProperties()
             .AddDbTenant()
-            .AddFilesConverts()
             .AddDbFileOrder()
             .AddUser()
             .AddDbRoomSettings()
@@ -79,6 +78,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddUserGroup()
             .AddFilesAuditReference()
             .AddUserRelation()
+            .AddAuditEvent()
             .AddDbFunctions();
     }
 }

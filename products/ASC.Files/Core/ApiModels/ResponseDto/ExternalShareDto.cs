@@ -47,7 +47,12 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     /// The external data title.
     /// </summary>
     public string Title { get; set; }
-
+    
+    /// <summary>
+    /// The type of the external data.
+    /// </summary>
+    public FileEntryType? Type { get; set; }
+    
     /// <summary>
     /// The tenant ID.
     /// </summary>
@@ -59,10 +64,20 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     public string EntityId { get; set; }
    
     /// <summary>
-    /// The title of the shared entry.
+    /// The title of the shared entity.
     /// </summary>
-    public string EntryTitle { get; set; }
+    public string EntityTitle { get; set; }
 
+    /// <summary>
+    /// The entry type of the external data.
+    /// </summary>
+    public FileEntryType? EntityType { get; set; }
+    
+    /// <summary>
+    /// Indicates whether the entity represents a room.
+    /// </summary>
+    public bool? IsRoom { get; set; }
+    
     /// <summary>
     /// Specifies whether to share the external data or not.
     /// </summary>
@@ -77,4 +92,9 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     /// Specifies whether the user is authenticated or not.
     /// </summary>
     public bool IsAuthenticated { get; set; }
+    
+    /// <summary>
+    /// The room ID of the external data.
+    /// </summary>
+    public bool IsRoomMember { get; set; }
 }

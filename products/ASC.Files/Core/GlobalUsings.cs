@@ -76,6 +76,7 @@ global using ASC.Core.Common.Configuration;
 global using ASC.Files.Core.RoomTemplates.Events;
 
 global using ASC.Files.Core.RoomTemplates.Operations;
+global using ASC.Core.Billing;
 global using ASC.Core.Common.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
@@ -225,6 +226,12 @@ global using Newtonsoft.Json.Linq;
 
 global using OpenSearch.Client;
 
+global using Polly;
+global using Polly.Contrib.WaitAndRetry;
+global using Polly.Registry;
+global using Polly.Retry;
+global using Polly.Timeout;
+
 global using ProtoBuf;
 
 global using WebDav;
@@ -258,3 +265,4 @@ global using Thumbnail = ASC.Files.Core.Thumbnail;
 global using Token = ASC.Web.Files.ThirdPartyApp.Token;
 global using UserInfo = ASC.Core.Users.UserInfo;
 global using SortOrder = ASC.Api.Core.Core.SortOrder;
+global using Location = ASC.Files.Core.Core.Entries.Location;

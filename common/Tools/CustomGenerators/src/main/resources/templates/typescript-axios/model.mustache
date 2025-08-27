@@ -10,5 +10,5 @@ import type { {{class}} } from './{{filename}}';{{/oneOf}}{{/hasOneOf}}{{^hasAll
 // @ts-ignore
 import type { {{class}} } from './{{filename}}';{{/imports}}{{/hasOneOf}}{{/hasAllOf}}{{/withSeparateModelsAndApi}}
 {{#models}}{{#model}}
-{{#isEnum}}{{>modelEnum}}{{/isEnum}}{{#oneOf}}{{#-first}}{{>modelOneOf}}{{/-first}}{{/oneOf}}{{#allOf}}{{#-first}}{{>modelAllOf}}{{/-first}}{{/allOf}}{{^isEnum}}{{^oneOf}}{{^allOf}}{{>modelGeneric}}{{/allOf}}{{/oneOf}}{{/isEnum}}
+{{#isEnum}}{{>modelEnum}}{{/isEnum}}{{#oneOf}}{{#-first}}{{>modelOneOf}}{{/-first}}{{/oneOf}}{{#vendorExtensions.x-uses-allOf}}{{>modelAllOf}}{{/vendorExtensions.x-uses-allOf}}{{^isEnum}}{{^oneOf}}{{^vendorExtensions.x-uses-allOf}}{{^allOf}}{{>modelGeneric}}{{/allOf}}{{/vendorExtensions.x-uses-allOf}}{{/oneOf}}{{/isEnum}}
 {{/model}}{{/models}}

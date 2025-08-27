@@ -24,7 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Security;
 using System.Text.Json;
+
+using ASC.Common.Web;
+using ASC.Core.Common.Settings;
+using ASC.Files.Core.Security;
 
 namespace ASC.Data.Backup.Services;
 
@@ -35,11 +40,59 @@ public class BackupService(
         BackupWorker backupWorker,
         BackupRepository backupRepository,
         TenantExtra tenantExtra,
-        TenantManager tenantManager)
+        ITariffService tariffService,
+        TenantManager tenantManager,
+        SettingsManager settingsManager,
+        MessageService messageService,
+        CoreBaseSettings coreBaseSettings,
+        AuthContext authContext,
+        PermissionContext permissionContext,
+        IDaoFactory daoFactory,
+        FileSecurity fileSecurity,
+        StorageFactory storageFactory)
     {
-    public async Task<string> StartBackupAsync(StartBackupRequest request, bool enqueueTask = true, string taskId = null)
+    private const string BackupTempModule = "backup_temp";
+    private const string BackupFileName = "backup";
+    private const int BackupCustomerSessionDuration = 86400; // 60 * 60 * 24;
+
+    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null, int billingSessionId = 0, DateTime billingSessionExpire = default)
     {
-        var progress = await backupWorker.StartBackupAsync(request, enqueueTask, taskId);
+        await DemandPermissionsBackupAsync();
+
+        if (!coreBaseSettings.Standalone && dump)
+        {
+            throw new ArgumentException("backup can not start as dump");
+        }
+
+        var backupRequest = new StartBackupRequest
+        {
+            TenantId = tenantManager.GetCurrentTenantId(),
+            UserId = authContext.CurrentAccount.ID,
+            StorageType = storageType,
+            StorageParams = storageParams,
+            Dump = dump,
+            ServerBaseUri = serverBaseUri
+        };
+
+        switch (storageType)
+        {
+            case BackupStorageType.ThridpartyDocuments:
+            case BackupStorageType.Documents:
+                backupRequest.StorageBasePath = storageParams["folderId"];
+                break;
+            case BackupStorageType.Local:
+                if (!coreBaseSettings.Standalone)
+                {
+                    throw new Exception("Access denied");
+                }
+
+                backupRequest.StorageBasePath = storageParams["filePath"];
+                break;
+        }
+
+        messageService.Send(MessageAction.StartBackupSetting);
+
+        var progress = await backupWorker.StartBackupAsync(backupRequest, enqueueTask, taskId, billingSessionId, billingSessionExpire);
         if (!string.IsNullOrEmpty(progress.Error))
         {
             throw new FaultException();
@@ -47,8 +100,26 @@ public class BackupService(
         return progress.TaskId;
     }
 
+    public async Task CheckAccessToFolderAsync<T>(T folderId)
+    {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(folderId);
+
+        if (folder == null)
+        {
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.RoomTemplates || folder.FolderType == FolderType.Archive || !await fileSecurity.CanCreateAsync(folder))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+    }
+
     public async Task DeleteBackupAsync(Guid backupId)
     {
+        await DemandPermissionsBackupAsync();
+
         var backupRecord = await backupRepository.GetBackupRecordAsync(backupId);
         if (backupRecord.TenantId == -1)
         {
@@ -72,8 +143,12 @@ public class BackupService(
         await storage.DeleteAsync(backupRecord.StoragePath);
     }
 
-    public async Task DeleteAllBackupsAsync(int tenantId)
+    public async Task DeleteAllBackupsAsync(bool dump)
     {
+        await DemandPermissionsBackupAsync();
+
+        var tenantId = dump ? -1 : tenantManager.GetCurrentTenantId();
+
         foreach (var backupRecord in await backupRepository.GetBackupRecordsByTenantIdAsync(tenantId))
         {
             try
@@ -94,8 +169,36 @@ public class BackupService(
         }
     }
 
-    public async Task<List<BackupHistoryRecord>> GetBackupHistoryAsync(int tenantId)
+    public async Task CheckAccessToFileAsync<T>(T fileId)
     {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
+        {
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(file.ParentId);
+
+        if (folder == null)
+        {
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.RoomTemplates || folder.FolderType == FolderType.Archive || !await fileSecurity.CanCreateAsync(folder))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+    }
+
+    public async Task<List<BackupHistoryRecord>> GetBackupHistoryAsync(bool dump)
+    {
+        await DemandPermissionsBackupAsync();
+
+        var tenantId = dump ? -1 : tenantManager.GetCurrentTenantId();
+
         var backupHistory = new List<BackupHistoryRecord>();
         foreach (var record in await backupRepository.GetBackupRecordsByTenantIdAsync(tenantId))
         {
@@ -133,8 +236,43 @@ public class BackupService(
         }
     }
 
-    public async Task<string> StartRestoreAsync(StartRestoreRequest request, bool enqueueTask = true, string taskId = null)
+    public async Task<string> StartRestoreAsync(string backupId,
+        BackupStorageType storageType,
+        Dictionary<string, string> storageParams,
+        bool notify,
+        string serverBaseUri,
+        bool dump,
+        bool enqueueTask = true,
+        string taskId = null)
     {
+        await DemandPermissionsRestoreAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var request = new StartRestoreRequest
+        {
+            TenantId = tenantId,
+            NotifyAfterCompletion = notify,
+            StorageParams = storageParams,
+            ServerBaseUri = serverBaseUri,
+            Dump = dump
+        };
+
+        if (Guid.TryParse(backupId, out var guidBackupId))
+        {
+            request.BackupId = guidBackupId;
+        }
+        else
+        {
+            request.StorageType = storageType;
+            request.FilePathOrId = storageParams["filePath"];
+
+            if (request.StorageType == BackupStorageType.Local && enqueueTask)
+            {
+                var path = await GetTmpFilePathAsync(tenantId);
+                path = File.Exists(path + ".tar.gz") ? path + ".tar.gz" : path + ".tar";
+                request.FilePathOrId = path;
+            }
+        }
+
         if (request.StorageType == BackupStorageType.Local && (string.IsNullOrEmpty(request.FilePathOrId) || !File.Exists(request.FilePathOrId)) && enqueueTask)
         {
             throw new FileNotFoundException();
@@ -161,8 +299,24 @@ public class BackupService(
         return progress.TaskId;
     }
 
-    public async Task<BackupProgress> GetBackupProgress(int tenantId)
+    public async Task<BackupProgress> GetBackupProgressAsync(bool dump)
     {
+        await DemandPermissionsBackupAsync();
+
+        if (dump)
+        {
+            return await GetDumpBackupProgress();
+        }
+        else
+        {
+            return await GetBackupProgressAsync(tenantManager.GetCurrentTenantId());
+        }
+    }
+
+    public async Task<BackupProgress> GetBackupProgressAsync(int tenantId)
+    {
+        await DemandPermissionsBackupAsync();
+
         return await backupWorker.GetBackupProgressAsync(tenantId);
     }
 
@@ -176,18 +330,30 @@ public class BackupService(
         return await backupWorker.GetTransferProgressAsync(tenantId);
     }
 
-    public async Task<BackupProgress> GetRestoreProgressAsync(int tenantId)
+    public async Task<BackupProgress> GetRestoreProgressAsync(bool? dump)
     {
-        return await backupWorker.GetRestoreProgressAsync(tenantId);
-    }
-    public async Task<BackupProgress> GetAnyRestoreProgressAsync(int tenantId)
-    {
-        return await backupWorker.GetAnyRestoreProgressAsync(tenantId);
-    }
+        if (!coreBaseSettings.Standalone)
+        {
+            dump = false;
+        }
 
-    public async Task<BackupProgress> GetDumpRestoreProgressAsync()
-    {
-        return await backupWorker.GetDumpRestoreProgressAsync();
+        if (dump.HasValue)
+        {
+            if (dump.Value)
+            {
+                return await backupWorker.GetDumpRestoreProgressAsync();
+            }
+            else
+            {
+                var tenantId = tenantManager.GetCurrentTenantId();
+                return await backupWorker.GetRestoreProgressAsync(tenantId);
+            }
+        }
+        else
+        {
+            var tenantId = tenantManager.GetCurrentTenantId();
+            return await backupWorker.GetAnyRestoreProgressAsync(tenantId);
+        }
     }
 
     public string GetTmpFolder()
@@ -195,27 +361,219 @@ public class BackupService(
         return backupWorker.TempFolder;
     }
 
-    public async Task CreateScheduleAsync(CreateScheduleRequest request)
+    public async Task CreateScheduleAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, int backupsStored, CronParams cronParams, bool dump)
     {
+        await DemandPermissionsBackupAsync();
+        await DemandPermissionsAutoBackupAsync();
+
+        if (!coreBaseSettings.Standalone && dump)
+        {
+            throw new ArgumentException("backup can not start as dump");
+        }
+
+        ValidateCronSettings(cronParams);
+
+        var scheduleRequest = new CreateScheduleRequest
+        {
+            TenantId = dump ? -1 : tenantManager.GetCurrentTenantId(),
+            Cron = cronParams.ToString(),
+            NumberOfBackupsStored = backupsStored,
+            StorageType = storageType,
+            StorageParams = storageParams,
+            Dump = dump
+        };
+
+        if (dump)
+        {
+            scheduleRequest.StorageParams.Add("tenantId", tenantManager.GetCurrentTenantId().ToString());
+        }
+
+        switch (storageType)
+        {
+            case BackupStorageType.ThridpartyDocuments:
+            case BackupStorageType.Documents:
+                scheduleRequest.StorageBasePath = storageParams["folderId"];
+                break;
+            case BackupStorageType.Local:
+                if (!coreBaseSettings.Standalone)
+                {
+                    throw new Exception("Access denied");
+                }
+
+                scheduleRequest.StorageBasePath = storageParams["filePath"];
+                break;
+        }
+
         await backupRepository.SaveBackupScheduleAsync(
             new BackupSchedule
             {
-                TenantId = request.TenantId,
-                Cron = request.Cron,
-                BackupsStored = request.NumberOfBackupsStored,
-                StorageType = request.StorageType,
-                StorageBasePath = request.StorageBasePath,
-                StorageParams = JsonSerializer.Serialize(request.StorageParams),
-                Dump = request.Dump
+                TenantId = scheduleRequest.TenantId,
+                Cron = scheduleRequest.Cron,
+                BackupsStored = scheduleRequest.NumberOfBackupsStored,
+                StorageType = scheduleRequest.StorageType,
+                StorageBasePath = scheduleRequest.StorageBasePath,
+                StorageParams = JsonSerializer.Serialize(scheduleRequest.StorageParams),
+                Dump = scheduleRequest.Dump
             });
+    }
+
+    public async Task DeleteScheduleAsync(bool dump)
+    {
+        await DemandPermissionsBackupAsync();
+
+        var tenantId = dump ? -1 : tenantManager.GetCurrentTenantId();
+        await backupRepository.DeleteBackupScheduleAsync(tenantId);
     }
 
     public async Task DeleteScheduleAsync(int tenantId)
     {
+        await DemandPermissionsBackupAsync();
+
         await backupRepository.DeleteBackupScheduleAsync(tenantId);
     }
 
-    public async Task<ScheduleResponse> GetScheduleAsync(int tenantId, bool? dump)
+    public async Task<string> GetTmpFilePathAsync(int tenantId)
+    {
+        var discStore = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), BackupTempModule, (IQuotaController)null) as DiscDataStore;
+        var folder = discStore.GetPhysicalPath("", "");
+
+        if (!Directory.Exists(folder))
+        {
+            Directory.CreateDirectory(folder);
+        }
+
+        return Path.Combine(folder, $"{tenantId}-{BackupFileName}");
+    }
+
+    public async Task<ScheduleDto> GetScheduleAsync(bool? dump)
+    {
+        await DemandPermissionsBackupAsync();
+        ScheduleResponse response = null;
+        if (dump.HasValue && dump.Value)
+        {
+            response = await InnerGetScheduleAsync(-1, dump);
+        }
+        else
+        {
+            response = await InnerGetScheduleAsync(tenantManager.GetCurrentTenantId(), dump);
+        }
+        if (response == null)
+        {
+            return null;
+        }
+
+        var schedule = new ScheduleDto
+        {
+            StorageType = response.StorageType,
+            StorageParams = response.StorageParams ?? new Dictionary<string, string>(),
+            CronParams = new CronParams(response.Cron),
+            BackupsStored = response.NumberOfBackupsStored.NullIfDefault(),
+            LastBackupTime = response.LastBackupTime,
+            Dump = response.Dump
+        };
+
+        if (response.StorageType != BackupStorageType.ThirdPartyConsumer)
+        {
+            schedule.StorageParams["folderId"] = response.StorageBasePath;
+        }
+
+        return schedule;
+    }
+
+    public async Task<Session> OpenCustomerSessionForBackupAsync(int tenantId)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        var serviceAccount = await GetBackupServiceAccountId();
+        var externalRef = Guid.NewGuid().ToString();
+
+        var result = await tariffService.OpenCustomerSessionAsync(tenantId, serviceAccount, externalRef, 1, BackupCustomerSessionDuration);
+
+        return result;
+    }
+
+    public async Task<bool> CloseCustomerSessionForBackupAsync(int tenantId, int sessionId)
+    {
+        if (sessionId <= 0 || !tariffService.IsConfigured())
+        {
+            return false;
+        }
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            return false;
+        }
+
+        var result = await tariffService.CloseCustomerSessionAsync(tenantId, sessionId);
+
+        return result;
+    }
+
+    public async Task<Session> ExtendCustomerSessionForBackupAsync(int tenantId, int sessionId)
+    {
+        if (sessionId <= 0 || !tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        var result = await tariffService.ExtendCustomerSessionAsync(tenantId, sessionId, BackupCustomerSessionDuration);
+
+        return result;
+    }
+
+    public async Task<bool> CompleteCustomerSessionForBackupAsync(int tenantId, int sessionId, string customerParticipantName)
+    {
+        if (sessionId <= 0 || !tariffService.IsConfigured())
+        {
+            return false;
+        }
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            return false;
+        }
+
+        var serviceAccount = await GetBackupServiceAccountId();
+
+        var result = await tariffService.CompleteCustomerSessionAsync(tenantId, serviceAccount, sessionId, 1, customerParticipantName);
+
+        if (result)
+        {
+            messageService.Send(MessageAction.CustomerOperationPerformed);
+        }
+
+        return result;
+    }
+
+    public async Task<int> GetBackupsCountAsync(int tenantId, bool paid, DateTime from, DateTime to)
+    {
+        return await backupRepository.GetBackupsCountAsync(tenantId, paid, from, to);
+    }
+
+    public async Task<bool> IsBackupServiceEnabledAsync(int tenantId)
+    {
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
+        return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.Backup);
+    }
+
+    private async Task<ScheduleResponse> InnerGetScheduleAsync(int tenantId, bool? dump)
     {
         var schedule = await backupRepository.GetBackupScheduleAsync(tenantId, dump);
         if (schedule != null)
@@ -236,4 +594,168 @@ public class BackupService(
 
         return null;
     }
+
+    private static void ValidateCronSettings(CronParams cronParams)
+    {
+        new CronExpression(cronParams.ToString());
+    }
+
+    private async Task DemandPermissionsBackupAsync()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (!coreBaseSettings.Standalone && !SetupInfo.IsVisibleSettings(nameof(ManagementType.Backup)))
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+    }
+
+    private async Task DemandPermissionsAutoBackupAsync()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (!SetupInfo.IsVisibleSettings("AutoBackup"))
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+
+        if (coreBaseSettings.Standalone)
+        {
+            return;
+        }
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var quota = await tenantManager.GetTenantQuotaAsync(tenantId);
+
+        if (quota.CountFreeBackup == 0 && !await IsBackupServiceEnabledAsync(tenantId))
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+    }
+
+    public async Task DemandPermissionsRestoreAsync()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var quota = await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId());
+        if (!SetupInfo.IsVisibleSettings("Restore") || (!coreBaseSettings.Standalone && !quota.Restore))
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+    }
+
+    private async Task<int> GetBackupServiceAccountId()
+    {
+        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
+
+        var backupQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.Backup);
+
+        return backupQuota == null ? throw new ItemNotFoundException("Backup quota not found") : int.Parse(backupQuota.ProductId);
+    }
+}
+
+/// <summary>
+/// The backup schedule parameters.
+/// </summary>
+public class ScheduleDto
+{
+    /// <summary>
+    /// The backup storage type.
+    /// </summary>
+    public BackupStorageType StorageType { get; set; }
+
+    /// <summary>
+    /// The backup storage parameters.
+    /// </summary>
+    public Dictionary<string, string> StorageParams { get; set; }
+
+    /// <summary>
+    /// The backup cron parameters.
+    /// </summary>
+    public CronParams CronParams { get; init; }
+
+    /// <summary>
+    /// The maximum number of the stored backup copies.
+    /// </summary>
+    public int? BackupsStored { get; init; }
+
+    /// <summary>
+    /// The date and time when the last backup was reated.
+    /// </summary>
+    public DateTime LastBackupTime { get; set; }
+
+    /// <summary>
+    /// Specifies if a dump will be created or not.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
+    public bool Dump { get; set; }
+}
+
+/// <summary>
+/// The backup cron parameters.
+/// </summary>
+public class CronParams
+{
+    /// <summary>
+    /// The backup period type.
+    /// </summary>
+    public BackupPeriod Period { get; init; }
+
+    /// <summary>
+    /// The time of the day to start the backup process.
+    /// </summary>
+    public int Hour { get; init; }
+
+    /// <summary>
+    /// The day of the week to start the backup process.
+    /// </summary>
+    public int Day { get; init; }
+
+    public CronParams() { }
+
+    public CronParams(string cronString)
+    {
+        var tokens = cronString.Split(' ');
+        Hour = Convert.ToInt32(tokens[2]);
+        if (tokens[3] != "?")
+        {
+            Period = BackupPeriod.EveryMonth;
+            Day = Convert.ToInt32(tokens[3]);
+        }
+        else if (tokens[5] != "*")
+        {
+            Period = BackupPeriod.EveryWeek;
+            Day = Convert.ToInt32(tokens[5]);
+        }
+        else
+        {
+            Period = BackupPeriod.EveryDay;
+        }
+    }
+
+    public override string ToString()
+    {
+        return Period switch
+        {
+            BackupPeriod.EveryDay => string.Format("0 0 {0} ? * *", Hour),
+            BackupPeriod.EveryMonth => string.Format("0 0 {0} {1} * ?", Hour, Day),
+            BackupPeriod.EveryWeek => string.Format("0 0 {0} ? * {1}", Hour, Day),
+            _ => base.ToString()
+        };
+    }
+}
+
+/// <summary>
+/// The backup period type.
+/// </summary>
+public enum BackupPeriod
+{
+    [SwaggerEnum(Description = "Every day")]
+    EveryDay = 0,
+
+    [SwaggerEnum(Description = "Every week")]
+    EveryWeek = 1,
+
+    [SwaggerEnum(Description = "Every month")]
+    EveryMonth = 2
 }

@@ -26,6 +26,6 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerM
 {{>apiInner}}
 {{/apis}}{{/apiInfo}}
 {{/withSeparateModelsAndApi}}{{#withSeparateModelsAndApi}}
-{{#apiInfo}}{{#apis}}{{#operations}}{{#operation}}{{#-first}}export * from './{{tsApiPackage}}/{{vendorExtensions.x-classFoldername}}/{{vendorExtensions.x-classFilename}}';
-{{/-first}}{{/operation}}{{/operations}}{{/apis}}{{/apiInfo}}
+{{#apiInfo}}{{#apis}}{{#operations}}export * from './{{tsApiPackage}}/{{x-folder}}/{{x-file}}';
+{{/operations}}{{/apis}}{{/apiInfo}}
 {{/withSeparateModelsAndApi}}

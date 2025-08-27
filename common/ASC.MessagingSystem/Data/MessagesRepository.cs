@@ -35,13 +35,16 @@ public class MessagesRepository(
 {
     private static readonly HashSet<MessageAction> _forceSaveAuditActions = 
     [
-        MessageAction.RoomInviteLinkUsed, 
-        MessageAction.UserSentEmailChangeInstructions, 
-        MessageAction.UserSentPasswordChangeInstructions, 
-        MessageAction.SendJoinInvite, 
+        MessageAction.RoomInviteLinkUsed,
+        MessageAction.UserSentEmailChangeInstructions,
+        MessageAction.UserSentPasswordChangeInstructions,
+        MessageAction.UserUpdatedPassword,
+        MessageAction.SendJoinInvite,
         MessageAction.RoomRemoveUser,
         MessageAction.PortalRenamed,
-        MessageAction.RoomCreated
+        MessageAction.RoomCreated,
+        MessageAction.FileOpenedForChange,
+        MessageAction.FormOpenedForFilling
     ];
 
     public async Task<int> AddAsync(EventMessage message)

@@ -448,15 +448,6 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The file is opened for editing by {0}. Currently, the co-editing feature is not supported for this file format..
-        /// </summary>
-        public static string ErrorMessage_EditingCoauth {
-            get {
-                return ResourceManager.GetString("ErrorMessage_EditingCoauth", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The file is open for editing in a mobile application by {0}.
         /// </summary>
         public static string ErrorMessage_EditingMobile {

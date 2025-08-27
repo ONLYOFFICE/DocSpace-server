@@ -29,9 +29,9 @@ namespace ASC.Files.Tests.FilesController;
 [Collection("Test Collection")]
 public class FileCustomizationTest(
     FilesApiFactory filesFactory, 
-    WebApplicationFactory<WebApiProgram> apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    WepApiFactory apiFactory, 
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
     [Fact]
@@ -40,12 +40,12 @@ public class FileCustomizationTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var file = await CreateFile("file_for_custom_filter.xlsx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_for_custom_filter.xlsx",  Initializer.Owner);
         
         // Act
         var customFilterParams = new CustomFilterParameters(enabled: true);
-        await Assert.ThrowsAsync<Docspace.Client.ApiException>(
-            async () => await _filesFilesApi.SetCustomFilterTagAsync(file.Id, customFilterParams, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.SetCustomFilterTagAsync(file.Id, customFilterParams, TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -54,12 +54,12 @@ public class FileCustomizationTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var createdRoom = await CreateVirtualRoom("room_for_custom_filter", Initializer.Owner); 
+        var createdRoom = await CreateVirtualRoom("room_for_custom_filter"); 
         var file = await CreateFile("file_for_custom_filter.xlsx", createdRoom.Id);
         
         // Act
         var customFilterParams = new CustomFilterParameters(enabled: true);
-        var result = (await _filesFilesApi.SetCustomFilterTagAsync(file.Id, customFilterParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.SetCustomFilterTagAsync(file.Id, customFilterParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -74,16 +74,16 @@ public class FileCustomizationTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var createdRoom = await CreateVirtualRoom("room_for_custom_filter", Initializer.Owner); 
+        var createdRoom = await CreateVirtualRoom("room_for_custom_filter"); 
         var file = await CreateFile("file_for_custom_filter_disable.xlsx", createdRoom.Id);
         
         // First enable custom filter
         var enableParams = new CustomFilterParameters(enabled: true);
-        await _filesFilesApi.SetCustomFilterTagAsync(file.Id, enableParams, TestContext.Current.CancellationToken);
+        await _filesApi.SetCustomFilterTagAsync(file.Id, enableParams, TestContext.Current.CancellationToken);
         
         // Then disable it
         var disableParams = new CustomFilterParameters(enabled: false);
-        var result = (await _filesFilesApi.SetCustomFilterTagAsync(file.Id, disableParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.SetCustomFilterTagAsync(file.Id, disableParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();

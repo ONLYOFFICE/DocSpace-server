@@ -503,40 +503,40 @@ $TrulyYours</value>
     <value>Visitar a Secção dos Pagamentos</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; criou um novo documento: &lt;a href={1}&gt;{2}&lt;/a&gt; na sala: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; criou um novo documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; na sala: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>b&gt;{0}&lt;/b&gt; editou o documento: &lt;a href={1}&gt;{2}&lt;/a&gt; na sala: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>b&gt;{0}&lt;/b&gt; editou o documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; na sala: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; carregou um novo documento: &lt;a href={1}&gt;{2}&lt;/a&gt; na sala: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; carregou um novo documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; na sala: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; adicionou um novo comentário à versão do documento: &lt;a href={1}&gt;{2}&lt;/a&gt; na sala: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; adicionou um novo comentário à versão do documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; na sala: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; moveu a sala: &lt;a href={1}&gt;{2}&lt;/a&gt; para o arquivo - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; moveu a sala: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; para o arquivo - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; criou uma nova sala: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; criou uma nova sala: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; eliminou a sala: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; renomeou a sala: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; renomeou a sala: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; recebeu o papel de &lt;b&gt;{1}&lt;/b&gt; na sala: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; recebeu o papel de &lt;b&gt;{1}&lt;/b&gt; na sala: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; foi adicionado(a) à sala: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; foi adicionado(a) à sala: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Foi adicionado um novo utilizador do DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; foi removido(a) da sala: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; foi removido(a) da sala: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUsersUpdatedType" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; alterou o nível de acesso dos utilizadores &lt;b&gt;{1}&lt;/b&gt; para &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -1988,5 +1988,53 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>O seu tipo de utilizador do DocSpace foi alterado</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Ir para Serviços</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Aceda às Definições da Carteira</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Olá, $UserName!
+
+Estamos entrando em contato para informar que a renovação automática do seu plano de serviço adquirido não pôde ser concluída.
+
+Solicitamos que renove manualmente o seu plano de serviço atual (ou adquira um novo).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Olá, $UserName!
+
+Estamos a contactá-lo para informar que o pagamento da sua subscrição será automaticamente debitado da sua conta dentro de 3 dias.
+
+Para garantir uma transação tranquila, por favor, confirme se há fundos suficientes disponíveis no seu método de pagamento.
+
+Caso tenha alguma dúvida ou necessite de assistência, entre em contacto com a nossa "equipa de suporte":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Olá, $UserName!
+
+Estamos a contactá-lo para informar que a recarga automática do saldo da DocSpace Wallet não foi bem-sucedida.
+
+Solicitamos que verifique manualmente e atualize o saldo da sua carteira.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Ação necessária: Não é possível renovar automaticamente o plano de serviço no seu ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Próximo pagamento da sua assinatura ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Ação necessária: Não é possível recarregar automaticamente o saldo da Carteira no seu ${LetterLogoText} DocSpace</value>
   </data>
 </root>

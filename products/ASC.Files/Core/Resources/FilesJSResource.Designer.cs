@@ -61,6 +61,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to New PDF form.
+        /// </summary>
+        public static string TitleNewFilePdfFormText {
+            get {
+                return ResourceManager.GetString("TitleNewFilePdfFormText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New presentation.
         /// </summary>
         public static string TitleNewFilePresentation {

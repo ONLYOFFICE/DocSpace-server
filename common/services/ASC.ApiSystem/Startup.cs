@@ -51,13 +51,13 @@ public class Startup
     }
 
     public async Task ConfigureServices(WebApplicationBuilder builder)
-    {        
-        var services = builder.Services;
+    {
         if (_configuration.GetValue<bool>("openTelemetry:enable"))
         {
             builder.ConfigureOpenTelemetry();
         }
         
+        var services = builder.Services;
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
@@ -149,8 +149,10 @@ public class Startup
         services.AddScoped<AuthHandler>();
         services.AddScoped<ApiSystemAuthHandler>();
         services.AddScoped<ApiSystemBasicAuthHandler>();
-        
-        
+
+        services.AddBillingHttpClient();
+        services.AddAccountingHttpClient();
+
         services
             .AddAuthentication()
             .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })

@@ -37,12 +37,10 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        ExternalShare externalShare,
-        AuthContext authContext,
         ConfigurationConverter<int> configurationConverter,
         SecurityContext securityContext,
         IHttpContextAccessor httpContextAccessor)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, httpContextAccessor);
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, configurationConverter, securityContext, httpContextAccessor);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -52,12 +50,10 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        ExternalShare externalShare,
-        AuthContext authContext,
         ConfigurationConverter<string> configurationConverter,
         SecurityContext securityContext,
         IHttpContextAccessor httpContextAccessor)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, httpContextAccessor);
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, configurationConverter, securityContext, httpContextAccessor);
 
 public abstract class EditorController<T>(
     FileStorageService fileStorageService,
@@ -67,8 +63,6 @@ public abstract class EditorController<T>(
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        ExternalShare externalShare,
-        AuthContext authContext,
         ConfigurationConverter<T> configurationConverter,
         SecurityContext securityContext,
         IHttpContextAccessor httpContextAccessor)
@@ -82,6 +76,7 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Saved file parameters", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "Saved file parameters", typeof(FileDto<string>))]
     [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("{fileId}/saveediting")]
@@ -114,6 +109,7 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "File information", typeof(FileDto<string>))]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("{fileId}/startfilling")]
     public async Task<FileDto<T>> StartFillingFile(StartFillingRequestDto<T> inDto)
@@ -147,6 +143,7 @@ public abstract class EditorController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Configuration parameters", typeof(ConfigurationDto<int>))]
+    [SwaggerResponse(200, "Configuration parameters", typeof(ConfigurationDto<string>))]
     [SwaggerResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]
     [AllowNotPayment]
@@ -209,25 +206,9 @@ public abstract class EditorController<T>(
             result.EditorConfig.Embedded.ShareUrl = "";
             result.EditorConfig.Customization.Goback = await configuration.EditorConfig?.Customization.GetGoBack(inDto.EditorType, file);
         }
-
-        if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
-            && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
-        {
-            var linkId = await externalShare.GetLinkIdAsync();
-
-            if (linkId != Guid.Empty && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
-            {
-                await entryManager.MarkFileAsRecentByLink(file, linkId);
-            }
-            else
-            {
-                await entryManager.MarkAsRecent(file);
-            }
-        }
         
         if (formOpenSetup != null)
         {
-
             if (formOpenSetup.RootFolder.FolderType is FolderType.VirtualDataRoom)
             {
                 result.StartFilling = file.Security[FileSecurity.FilesSecurityActions.StartFilling];
