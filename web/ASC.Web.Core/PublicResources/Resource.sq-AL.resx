@@ -1171,7 +1171,7 @@
     <value>Njësia e matjes</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
-    <value>Raporti i operacioneve të klientit({0}-{1})</value>
+    <value>Raporti i operacioneve të klientit ({0}-{1})</value>
   </data>
   <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
     <value>Tërheqje</value>
