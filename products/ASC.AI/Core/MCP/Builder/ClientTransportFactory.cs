@@ -29,7 +29,7 @@ using ASC.FederatedLogin.Helpers;
 namespace ASC.AI.Core.MCP.Builder;
 
 [Scope]
-public class HttpTransportFactory(
+public class ClientTransportFactory(
     CommonLinkUtility commonLinkUtility, 
     CookiesManager cookiesManager,
     IHttpClientFactory clientFactory,

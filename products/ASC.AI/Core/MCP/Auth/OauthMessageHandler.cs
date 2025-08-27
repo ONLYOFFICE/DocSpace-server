@@ -54,17 +54,11 @@ public class OauthMessageHandler : DelegatingHandler
             return response;
         }
 
-        var token = await _refreshTokenDelegate(cancellationToken);
-        if (token == null)
-        {
-            return response;
-        }
-        
-        _token = token;
+        _token = await _refreshTokenDelegate(cancellationToken);
             
         var clonedRequest = await CloneRequestAsync(request);
         
-        clonedRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
+        clonedRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token.AccessToken);
         
         return await base.SendAsync(clonedRequest, cancellationToken);
     }

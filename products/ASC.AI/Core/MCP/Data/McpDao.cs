@@ -41,7 +41,8 @@ public class McpDao(
         string endpoint, 
         string name, 
         Dictionary<string, string>? headers,
-        string description)
+        string description,
+        ConnectionType connectionType)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -52,7 +53,8 @@ public class McpDao(
             TenantId = tenantId,
             Name = name,
             Endpoint = endpoint,
-            Description = description
+            Description = description,
+            ConnectionType = connectionType
         };
 
         if (headers is { Count: > 0 })

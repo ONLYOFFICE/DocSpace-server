@@ -45,7 +45,7 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     public async Task<McpServerDto> UpdateServerAsync(UpdateServerRequestDto inDto)
     {
         var server = await mcpService.UpdateCustomServerAsync(inDto.Id, inDto.Body.Endpoint, inDto.Body.Name, 
-            inDto.Body.Headers, inDto.Body.Description, inDto.Body.Enabled);
+            inDto.Body.Headers, inDto.Body.Description);
         
         return mapper.Map<McpServer, McpServerDto>(server);
     }
@@ -123,5 +123,17 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
         var tools = await mcpService.GetToolsAsync(inDto.RoomId, inDto.ServerId);
         
         return tools.Select(x => new McpToolDto { Name = x.Key, Enabled = x.Value }).ToList();
+    }
+
+    [HttpPost("rooms/{roomId}/servers/{serverId}/connect")]
+    public async Task ConnectServerAsync(ConnectServerRequestDto inDto)
+    {
+        await mcpService.ConnectServerAsync(inDto.RoomId, inDto.ServerId, inDto.Body.Code);
+    }
+    
+    [HttpPost("rooms/{roomId}/servers/{serverId}/disconnect")]
+    public async Task DisconnectServerAsync(DisconnectServerRequestDto inDto)
+    {
+        await mcpService.DisconnectServerAsync(inDto.RoomId, inDto.ServerId);
     }
 }

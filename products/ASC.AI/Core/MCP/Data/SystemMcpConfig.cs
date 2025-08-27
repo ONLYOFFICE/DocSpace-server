@@ -49,6 +49,13 @@ public class SystemMcpConfig
                 ServerType = ServerType.Github,
                 ConnectionType = ConnectionType.OAuth,
                 LoginProviderSelector = x => x.Get<GithubLoginProvider>()
+            }},
+            {"box", new StaticServerInfo
+            {
+                Id = new Guid("791b1cd0-e8c3-4ba2-b966-9037ab3a825b"),
+                ServerType = ServerType.Box,
+                ConnectionType = ConnectionType.OAuth,
+                LoginProviderSelector = x => x.Get<BoxLoginProvider>()
             }}
         }.ToFrozenDictionary();
     

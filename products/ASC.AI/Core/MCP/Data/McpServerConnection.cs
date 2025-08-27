@@ -42,6 +42,7 @@ public class McpServerConnection
     public bool System { get; init; }
     public OauthProvider? OauthProvider { get; init; }
     public McpServerSettings? Settings { get; set; }
+    public bool Connected => ConnectionType is ConnectionType.Direct || Settings?.OauthCredential != null;
 }
 
 public static class McpRoomServerExtensions

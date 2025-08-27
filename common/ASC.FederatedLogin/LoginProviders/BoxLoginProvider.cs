@@ -27,15 +27,15 @@
 namespace ASC.FederatedLogin.LoginProviders;
 
 [Scope]
-public class BoxLoginProvider : Consumer, IOAuthProvider
+public class BoxLoginProvider : OauthProvider
 {
-    public string Scopes => string.Empty;
-    public string CodeUrl => "https://app.box.com/api/oauth2/authorize";
-    public string AccessTokenUrl => "https://app.box.com/api/oauth2/token";
-    public string RedirectUri => this["boxRedirectUrl"];
-    public string ClientID => this["boxClientId"];
-    public string ClientSecret => this["boxClientSecret"];
-    public bool IsEnabled
+    public override string Scopes => string.Empty;
+    public override string CodeUrl => "https://app.box.com/api/oauth2/authorize";
+    public override string AccessTokenUrl => "https://app.box.com/api/oauth2/token";
+    public override string RedirectUri => this["boxRedirectUrl"];
+    public override string ClientID => this["boxClientId"];
+    public override string ClientSecret => this["boxClientSecret"];
+    public override bool IsEnabled
     {
         get
         {

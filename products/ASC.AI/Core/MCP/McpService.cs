@@ -27,6 +27,7 @@
 using System.Web;
 
 using ASC.AI.Core.MCP.Builder;
+using ASC.FederatedLogin.Helpers;
 
 namespace ASC.AI.Core.MCP;
 
@@ -41,7 +42,8 @@ public class McpService(
     ILogger<McpService> logger,
     UserManager userManager,
     IDistributedLockProvider distributedLockProvider,
-    HttpTransportFactory httpTransportFactory)
+    ClientTransportFactory clientTransportFactory,
+    OAuth20TokenHelper oauthTokenHelper)
 {
     private const int MaxMcpServersByRoom = 5;
     
@@ -57,23 +59,20 @@ public class McpService(
         ArgumentException.ThrowIfNullOrEmpty(name);
         ArgumentException.ThrowIfNullOrEmpty(description);
 
-        if (headers is { Count: > 0 })
+        var options = new SseClientTransportOptions
         {
-            var options = new SseClientTransportOptions
-            {
-                Name = name,
-                Endpoint = new Uri(endpoint),
-                AdditionalHeaders = headers,
-                TransportMode = HttpTransportMode.AutoDetect,
-                ConnectionTimeout = TimeSpan.FromSeconds(15)
-            };
+            Name = name,
+            Endpoint = new Uri(endpoint),
+            AdditionalHeaders = headers,
+            TransportMode = HttpTransportMode.AutoDetect,
+            ConnectionTimeout = TimeSpan.FromSeconds(15)
+        };
         
-            var transport = new SseClientTransport(options, httpClientFactory.CreateClient());
+        var transport = new SseClientTransport(options, httpClientFactory.CreateClient());
         
-            await ThrowIfNotConnectAsync(transport);
-        }
+        await ThrowIfNotConnectAsync(transport);
         
-        return await mcpDao.AddServerAsync(tenantManager.GetCurrentTenantId(), endpoint, name, headers, description);
+        return await mcpDao.AddServerAsync(tenantManager.GetCurrentTenantId(), endpoint, name, headers, description, ConnectionType.Direct);
     }
 
     public async Task<McpServer> UpdateCustomServerAsync(
@@ -81,8 +80,7 @@ public class McpService(
         string? url, 
         string? name, 
         Dictionary<string, string>? headers, 
-        string? description, 
-        bool? enabled)
+        string? description)
     {
         await ThrowIfNotAccessAsync();
 
@@ -91,6 +89,8 @@ public class McpService(
         {
             throw new ItemNotFoundException("MCP Server not found");
         }
+
+        var needConnect = false;
         
         if (!string.IsNullOrEmpty(name))
         {
@@ -101,11 +101,13 @@ public class McpService(
         {
             var uri = new Uri(url);
             server.Endpoint = uri.ToString();
+            needConnect = true;
         }
 
         if (headers != null)
         {
             server.Headers = headers.Count > 0 ? headers : null;
+            needConnect = true;
         }
 
         if (!string.IsNullOrEmpty(description))
@@ -113,11 +115,24 @@ public class McpService(
             server.Description = description;
         }
 
-        if (enabled.HasValue)
+        if (!needConnect)
         {
-            server.Enabled = enabled.Value;
+            return await mcpDao.UpdateServerAsync(server);
         }
-        
+
+        var options = new SseClientTransportOptions
+        {
+            Name = server.Name,
+            Endpoint = new Uri(server.Endpoint),
+            AdditionalHeaders = server.Headers,
+            TransportMode = HttpTransportMode.AutoDetect,
+            ConnectionTimeout = TimeSpan.FromSeconds(15)
+        };
+            
+        var transport = new SseClientTransport(options, httpClientFactory.CreateClient());
+            
+        await ThrowIfNotConnectAsync(transport);
+
         return await mcpDao.UpdateServerAsync(server);
     }
     
@@ -219,23 +234,23 @@ public class McpService(
         var tenantId = tenantManager.GetCurrentTenantId();
         var statuses = new List<McpServerStatus>();
         
-        var roomServers = await mcpDao.GetServerConnectionAsync(tenantId, roomId).ToListAsync();
-        foreach (var roomServer in roomServers)
+        var connections = await mcpDao.GetServerConnectionAsync(tenantId, roomId).ToListAsync();
+        foreach (var connection in connections)
         {
             var serverStatus = new McpServerStatus
             {
-                Id = roomServer.Id,
-                Name = roomServer.Name,
-                ServerType = roomServer.ServerType,
-                Connected = roomServer.ConnectionType is ConnectionType.Direct ||
-                            roomServer.Settings?.OauthCredential != null
+                Id = connection.Id,
+                Name = connection.Name,
+                ServerType = connection.ServerType,
+                Connected = connection.ConnectionType is ConnectionType.Direct ||
+                            connection.Settings?.OauthCredential != null
             };
             
-            if (roomServer.ConnectionType is ConnectionType.OAuth)
+            if (connection.ConnectionType is ConnectionType.OAuth)
             {
-                if (roomServer.OauthProvider != null)
+                if (connection.OauthProvider != null)
                 {
-                    var provider = roomServer.OauthProvider;
+                    var provider = connection.OauthProvider;
                     
                     var builder = new UriBuilder(provider.CodeUrl);
                         
@@ -254,6 +269,83 @@ public class McpService(
         }
 
         return statuses;
+    }
+
+    public async Task ConnectServerAsync(int roomId, Guid serverId, string code)
+    {
+        var room = await GetRoomAsync(roomId);
+        
+        if (!await fileSecurity.CanUseChatsAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+        
+        var tenantId = tenantManager.GetCurrentTenantId();
+        
+        var connection = await mcpDao.GetMcpConnectionAsync(tenantId, roomId, serverId);
+        if (connection == null)
+        {
+            throw new ItemNotFoundException("Mcp server not found");
+        }
+        
+        var token = oauthTokenHelper.GetAccessToken(connection.OauthProvider, code);
+        if (token == null)
+        {
+            throw new ArgumentException("Invalid code");
+        }
+
+        if (connection.Settings == null)
+        {
+            connection.Settings = new McpServerSettings
+            {
+                OauthCredential = token
+            };
+        }
+        else
+        {
+            connection.Settings.OauthCredential = token;
+        }
+
+        var transport = await clientTransportFactory.CreateAsync(connection);
+
+        try
+        {
+            await using var client = await McpClientFactory.CreateAsync(transport);
+            await client.PingAsync();
+        }
+        catch (Exception e)
+        {
+            throw new InvalidOperationException("Failed to connect to server", e);
+        }
+
+        await mcpDao.SaveSettingsAsync(tenantId, roomId, authContext.CurrentAccount.ID, serverId, connection.Settings);
+    }
+
+    public async Task DisconnectServerAsync(int roomId, Guid serverId)
+    {
+        var room = await GetRoomAsync(roomId);
+        
+        if (!await fileSecurity.CanUseChatsAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+        
+        var tenantId = tenantManager.GetCurrentTenantId();
+        
+        var connection = await mcpDao.GetMcpConnectionAsync(tenantId, roomId, serverId);
+        if (connection == null)
+        {
+            throw new ItemNotFoundException("Mcp server not found");
+        }
+
+        if (connection.Settings?.OauthCredential == null)
+        {
+            return;
+        }
+        
+        connection.Settings.OauthCredential = null;
+        
+        await mcpDao.SaveSettingsAsync(tenantId, roomId, authContext.CurrentAccount.ID, serverId, connection.Settings);
     }
 
     public async Task<IReadOnlyDictionary<string, bool>> GetToolsAsync(int roomId, Guid serverId)
@@ -336,7 +428,8 @@ public class McpService(
         
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var connections = mcpDao.GetServerConnectionAsync(tenantId, roomId);
+        var connections = mcpDao.GetServerConnectionAsync(tenantId, roomId)
+            .Where(x => x.Connected);
         
         var tasks = await connections.Select(ConnectAsync).ToListAsync();
         
@@ -358,7 +451,7 @@ public class McpService(
     
     private async Task<IReadOnlyDictionary<string, bool>> GetToolsAsync(McpServerConnection connection)
     {
-        var transport = await httpTransportFactory.CreateAsync(connection);
+        var transport = await clientTransportFactory.CreateAsync(connection);
 
         await using var mcpClient = await McpClientFactory.CreateAsync(transport);
         
@@ -404,7 +497,7 @@ public class McpService(
     
     private async Task<McpContainer?> ConnectAsync(McpServerConnection connection)
     {
-        var transport = await httpTransportFactory.CreateAsync(connection);
+        var transport = await clientTransportFactory.CreateAsync(connection);
         
         try
         {
