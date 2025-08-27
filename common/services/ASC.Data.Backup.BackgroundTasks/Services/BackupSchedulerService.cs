@@ -151,6 +151,7 @@ public sealed class BackupSchedulerService(
                 if (lockHandle != null)
                 {
                     await lockHandle.ReleaseAsync();
+                    lockHandle = null;
                 }
             }
         }
