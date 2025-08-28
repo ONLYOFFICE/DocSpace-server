@@ -138,28 +138,47 @@ public class BillingClient
         return customerInfo;
     }
 
-    public async Task<bool> TopUpDepositAsync(string portalId, decimal amount, string currency, string customerParticipantName)
+    public async Task<bool> TopUpDepositAsync(string portalId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
-        var parameters = new[]
+        var parameters = new List<Tuple<string, string>>
         {
             Tuple.Create("Amount", amount.ToString(CultureInfo.InvariantCulture)),
-            Tuple.Create("Currency", currency),
-            Tuple.Create("CustomerParticipantName", customerParticipantName)
+            Tuple.Create("Currency", currency)
         };
-        var result = await RequestAsync("Deposit", portalId, parameters);
+
+        if (!string.IsNullOrEmpty(customerParticipantName))
+        {
+            parameters.Add(Tuple.Create("CustomerParticipantName", customerParticipantName));
+        }
+
+        if (metadata != null)
+        {
+            parameters.Add(Tuple.Create("Metadata", JsonSerializer.Serialize(metadata)));
+        }
+
+        var result = await RequestAsync("Deposit", portalId, parameters.ToArray());
         return result == "\"ok\"";
     }
 
-    public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType, string currency, string customerParticipantName)
+    public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType, string currency, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
         var parameters = products.Select(p => Tuple.Create("ProductId", p))
             .Concat(quantity.Select(q => Tuple.Create("ProductQty", q.ToString())))
             .Concat([Tuple.Create("ProductQuantityType", ((int)productQuantityType).ToString())])
             .Concat([Tuple.Create("Currency", currency)])
-            .Concat([Tuple.Create("CustomerParticipantName", customerParticipantName)])
-            .ToArray();
+            .ToList();
 
-        var result = await RequestAsync("ChangeSubscription", portalId, parameters);
+        if (!string.IsNullOrEmpty(customerParticipantName))
+        {
+            parameters.Add(Tuple.Create("CustomerParticipantName", customerParticipantName));
+        }
+
+        if (metadata != null)
+        {
+            parameters.Add(Tuple.Create("Metadata", JsonSerializer.Serialize(metadata)));
+        }
+
+        var result = await RequestAsync("ChangeSubscription", portalId, parameters.ToArray());
         var changed = JsonSerializer.Deserialize<bool>(result);
 
         return changed;

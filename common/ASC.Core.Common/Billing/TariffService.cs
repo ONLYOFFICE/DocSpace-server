@@ -335,7 +335,7 @@ public class TariffService(
         return productIds;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName)
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
         if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
         {
@@ -346,7 +346,7 @@ public class TariffService(
 
         try
         {
-            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds, quantity.Values, productQuantityType, currency, customerParticipantName);
+            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds, quantity.Values, productQuantityType, currency, customerParticipantName, metadata);
 
             if (!changed)
             {
@@ -1118,7 +1118,7 @@ public class TariffService(
         return customerInfo;
     }
 
-    public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, bool waitForChanges = false)
+    public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null, bool waitForChanges = false)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
 
@@ -1134,7 +1134,7 @@ public class TariffService(
 
         try
         {
-            result = await billingClient.TopUpDepositAsync(portalId, amount, currency, customerParticipantName);
+            result = await billingClient.TopUpDepositAsync(portalId, amount, currency, customerParticipantName, metadata);
         }
         catch (Exception error)
         {
