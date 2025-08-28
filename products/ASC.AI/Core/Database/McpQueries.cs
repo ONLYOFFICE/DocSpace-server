@@ -35,7 +35,7 @@ public partial class AiDbContext
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
-    public IAsyncEnumerable<DbMcpServer> GetServersAsync(int tenantId, IEnumerable<Guid> ids)
+    public IAsyncEnumerable<DbMcpServerUnit> GetServersAsync(int tenantId, IEnumerable<Guid> ids)
     {
         return McpQueries.GetServersByIdsAsync(this, tenantId, ids);
     }
@@ -159,10 +159,20 @@ static file class McpQueries
                     })
                 .FirstOrDefault());
 
-    public static readonly Func<AiDbContext, int, IEnumerable<Guid>, IAsyncEnumerable<DbMcpServer>>
-        GetServersByIdsAsync =
-            EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
-                ctx.McpServers.Where(x => x.TenantId == tenantId && ids.Contains(x.Id)));
+    public static readonly Func<AiDbContext, int, IEnumerable<Guid>, IAsyncEnumerable<DbMcpServerUnit>> GetServersByIdsAsync = 
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, IEnumerable<Guid> ids) => 
+            ctx.McpServers
+                .Where(x => x.TenantId == tenantId && ids.Contains(x.Id))
+                .GroupJoin(
+                    ctx.McpServerStates,
+                    server => new { TenantId = tenantId, server.Id },
+                    state => new { TenantId = tenantId, Id = state.ServerId },
+                    (server, states) => new { server, states })
+                .SelectMany(
+                    x => x.states.DefaultIfEmpty(),
+                    (x, state) =>
+                        new DbMcpServerUnit { Server = x.server, State = state })
+        );
 
     public static readonly Func<AiDbContext, int, int, int, IAsyncEnumerable<DbMcpServerUnit>> GetServersAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int offset, int count) =>
