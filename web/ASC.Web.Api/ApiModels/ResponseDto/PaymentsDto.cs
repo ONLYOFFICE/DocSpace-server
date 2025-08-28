@@ -133,7 +133,7 @@ public class OperationDto
         Date = apiDateTimeHelper.Get(operation.Date);
         Service = operation.Service;
         Description = description;
-        Details = string.Empty;
+        Details = operation.Metadata != null && operation.Metadata.TryGetValue("details", out var details) ? details : string.Empty;
         ServiceUnit = unitOfMeasurement;
         Quantity = operation.Quantity;
         Currency = operation.Currency;

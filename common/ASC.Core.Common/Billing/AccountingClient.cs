@@ -427,6 +427,10 @@ public class Operation
     /// Display name of the participant.
     /// </summary>
     public string ParticipantDisplayName { get; set; }
+    /// <summary>
+    /// Metadata of the operation.
+    /// </summary>
+    public Dictionary<string, string> Metadata { get; set; }
 }
 
 /// <summary>
