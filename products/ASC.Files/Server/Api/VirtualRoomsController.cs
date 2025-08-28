@@ -911,6 +911,21 @@ public class VirtualRoomsCommonController(
     }
 
     /// <summary>
+    /// Updates the name of a custom tag.
+    /// </summary>
+    /// <short>Update tag</short>
+    /// <path>api/2.0/files/tags</path>
+    [Tags("Rooms")]
+    [SwaggerResponse(200, "Updated tag name", typeof(object))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [HttpPut("tags")]
+    public async Task<string> UpdateRoomTag(UpdateTagRequestDto inDto)
+    {
+        var updatedTag = await customTagsService.UpdateTagAsync(inDto.OldName, inDto.NewName);
+        return updatedTag.Name;
+    }
+
+    /// <summary>
     /// Returns a list of custom tags.
     /// </summary>
     /// <short>Get tags</short>

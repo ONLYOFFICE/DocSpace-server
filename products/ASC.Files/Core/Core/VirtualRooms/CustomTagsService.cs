@@ -67,6 +67,37 @@ public class CustomTagsService(
         return savedTag;
     }
 
+    public async Task<TagInfo> UpdateTagAsync(string oldName, string newName)
+    {
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is not EmployeeType.RoomAdmin and not EmployeeType.DocSpaceAdmin)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        ArgumentException.ThrowIfNullOrEmpty(oldName);
+        ArgumentException.ThrowIfNullOrEmpty(newName);
+
+        var tagDao = daoFactory.GetTagDao<int>();
+        var existedTag = await tagDao.GetTagsInfoAsync(oldName, TagType.Custom, true).FirstOrDefaultAsync();
+
+        if (existedTag == null)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        var tag = await tagDao.GetTagsInfoAsync(oldName, TagType.Custom, true).FirstOrDefaultAsync();
+        if (tag != null && tag.Id != existedTag.Id)
+        {
+            throw new ArgumentException($"Tag with name '{newName}' already exists");
+        }
+        existedTag.Name = newName;
+
+        var savedTag = await tagDao.SaveTagInfoAsync(existedTag);
+
+        return savedTag;
+    }
+
     public async Task DeleteTagsAsync<T>(List<string> names)
     {
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))

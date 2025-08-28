@@ -24,40 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Entries;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The tag information.
+/// The request parameters for creating a tag.
 /// </summary>
-public class TagInfo : IMapFrom<DbFilesTag>
+public class UpdateTagRequestDto
 {
     /// <summary>
-    /// The tag ID.
+    /// The old tag name.
     /// </summary>
-    public int Id { get; set; }
+    [StringLength(255)]
+    public required string OldName { get; set; }
 
     /// <summary>
-    /// The tag name.
+    /// The new tag name.
     /// </summary>
-    public string Name { get; set; }
-
-    /// <summary>
-    /// The tag owner ID.
-    /// </summary>
-    public Guid Owner { get; set; }
-
-    /// <summary>
-    /// The tag type.
-    /// </summary>
-    public TagType Type { get; set; }
-
-    /// <summary>
-    /// The tag entry ID.
-    /// </summary>
-    public object EntryId { get; set; }
-
-    /// <summary>
-    /// The file entry type for which the tag has been created.
-    /// </summary>
-    public FileEntryType EntryType { get; set; }
+    [StringLength(255)]
+    public required string NewName { get; set; }
 }
