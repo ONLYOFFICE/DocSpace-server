@@ -207,7 +207,10 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
             await socketManager.BackupProgressAsync((int)Percentage, Dump);
             await PublishChanges();
 
-            await backupService.CompleteCustomerSessionForBackupAsync(TenantId, _billingSessionId, _isScheduled ? BackupResource.ScheduledBackup : _userId.ToString());
+            var customerParticipantName = _isScheduled ? null : _userId.ToString();
+            var metadata = _isScheduled ? new Dictionary<string, string> { { "details", BackupResource.ScheduledBackup } } : null;
+
+            await backupService.CompleteCustomerSessionForBackupAsync(TenantId, _billingSessionId, customerParticipantName, metadata);
         }
         catch (Exception error)
         {
