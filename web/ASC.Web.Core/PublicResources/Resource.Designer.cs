@@ -115,6 +115,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Backup.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_backup {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_backup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Disk space.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_disk_storage {
@@ -201,6 +210,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string AdminMessageSent {
             get {
                 return ResourceManager.GetString("AdminMessageSent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Automatic renewal.
+        /// </summary>
+        public static string AutoRenewal {
+            get {
+                return ResourceManager.GetString("AutoRenewal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Automatic top up.
+        /// </summary>
+        public static string AutoTopUp {
+            get {
+                return ResourceManager.GetString("AutoTopUp", resourceCulture);
             }
         }
         
@@ -1996,6 +2023,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Payment required.
+        /// </summary>
+        public static string ErrorPaymentRequired {
+            get {
+                return ResourceManager.GetString("ErrorPaymentRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Request limit is exceeded.
         /// </summary>
         public static string ErrorRequestLimitExceeded {
@@ -2959,11 +2995,29 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tracking user logins &amp; action.
+        ///   Looks up a localized string similar to Tracking logins &amp; actions.
         /// </summary>
         public static string TariffsFeature_audit {
             get {
                 return ResourceManager.GetString("TariffsFeature_audit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Backup.
+        /// </summary>
+        public static string TariffsFeature_backup_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_backup_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable backups for your DocSpace. Costs will be billed automatically..
+        /// </summary>
+        public static string TariffsFeature_backup_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_backup_wallet_price_count", resourceCulture);
             }
         }
         
@@ -2995,6 +3049,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} free backups per month.
+        /// </summary>
+        public static string TariffsFeature_free_backup {
+            get {
+                return ResourceManager.GetString("TariffsFeature_free_backup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of free backups should not exceed {0} within a month.
+        /// </summary>
+        public static string TariffsFeature_free_backup_exception {
+            get {
+                return ResourceManager.GetString("TariffsFeature_free_backup_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The number of admins should not exceed {0}.
         /// </summary>
         public static string TariffsFeature_manager_exception {
@@ -3013,7 +3085,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Automatic backup &amp; recovery.
+        ///   Looks up a localized string similar to Data recovery.
         /// </summary>
         public static string TariffsFeature_restore {
             get {
@@ -3157,7 +3229,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unlimited number of users.
+        ///   Looks up a localized string similar to Unlimited number of users and guests.
         /// </summary>
         public static string TariffsFeature_users {
             get {

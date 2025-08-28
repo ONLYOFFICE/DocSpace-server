@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 
-namespace ASC.Migrations.Core.Utils;
+namespace ASC.Core.Common.EF.Migration;
 
 public class Options
 {

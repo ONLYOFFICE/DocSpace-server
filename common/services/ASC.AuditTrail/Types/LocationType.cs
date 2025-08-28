@@ -30,7 +30,7 @@ namespace ASC.AuditTrail.Types;
 /// The module type.
 /// </summary>
 [EnumExtensions]
-public enum ModuleType
+public enum LocationType
 {
     [SwaggerEnum("None")]
     None,

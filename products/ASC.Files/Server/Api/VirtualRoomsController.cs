@@ -547,8 +547,16 @@ public abstract class VirtualRoomsController<T>(
         var linkAce = inDto.RoomLink.LinkType switch
         {
             LinkType.Invitation => await _fileStorageService.SetInvitationLinkAsync(inDto.Id, inDto.RoomLink.LinkId, inDto.RoomLink.Title, inDto.RoomLink.Access),
-            LinkType.External => await _fileStorageService.SetExternalLinkAsync(inDto.Id, FileEntryType.Folder, inDto.RoomLink.LinkId, inDto.RoomLink.Title,
-                inDto.RoomLink.Access, inDto.RoomLink.ExpirationDate, inDto.RoomLink.Password?.Trim(), inDto.RoomLink.DenyDownload),
+            LinkType.External => await _fileStorageService.SetExternalLinkAsync(
+                inDto.Id, 
+                FileEntryType.Folder, 
+                inDto.RoomLink.LinkId, 
+                inDto.RoomLink.Title,
+                inDto.RoomLink.Access, 
+                inDto.RoomLink.ExpirationDate, 
+                inDto.RoomLink.Password?.Trim(), 
+                inDto.RoomLink.DenyDownload,
+                inDto.RoomLink.Internal),
             _ => throw new InvalidOperationException()
         };
 

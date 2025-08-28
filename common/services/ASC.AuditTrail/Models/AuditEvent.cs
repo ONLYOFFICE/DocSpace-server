@@ -36,14 +36,10 @@ public class AuditEvent : BaseEvent, IMapFrom<AuditEventQuery>
     [Event("ActionTypeCol", 30)]
     public string ActionTypeText { get; set; }
 
-    [Event("ProductCol", 31)]
-    public string Product { get; set; }
-
-    [Event("ModuleCol", 32)]
-    public string Module { get; set; }
-
     [Event("TargetIdCol", 34)]
     public MessageTarget Target { get; set; }
+    
+    [Event("LocationCol", 32)]
     public string Context { get; set; }
 
     public override void Mapping(Profile profile)

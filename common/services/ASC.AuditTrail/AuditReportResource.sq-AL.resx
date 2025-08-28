@@ -237,9 +237,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Janë përditësuar cilësimet e përsëritjes</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Dokumentet</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Cilësimet</value>
   </data>
@@ -540,9 +537,6 @@
   <data name="OAuthModule" xml:space="preserve">
     <value>OAuth</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Të tjerët</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Pronari u ndryshua: {0}</value>
   </data>
@@ -560,9 +554,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Cilësimet e fuqisë së fjalëkalimit u përditësuan</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Njerëz</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platforma</value>
@@ -746,9 +737,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesioni filloi</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Cilësimet</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO u çaktivizua</value>
@@ -983,5 +971,23 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook u perditësua: {0}</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Cilësimet e dukshmërisë së banerëve promovues janë ndryshuar</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Operacioni i kryer nga klienti</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Raporti i operacioneve të klientit u shkarkua</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Abonimi i klientit është përditësua: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Portofoli i klientit u rimbush: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e rimbushjes së portofolit të klientit u përditësuan</value>
   </data>
 </root>

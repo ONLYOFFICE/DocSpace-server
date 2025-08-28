@@ -27,6 +27,8 @@
 extern alias ASCPeople;
 using ASC.People.Tests.Data;
 
+using DocSpace.API.SDK.Api.People;
+
 using Testcontainers.OpenSearch;
 
 namespace ASC.People.Tests.Factory;
@@ -45,7 +47,7 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
     private readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings" ];
     
     public HttpClient HttpClient { get; private set;} = null!;
-    public PeopleProfilesApi PeopleProfilesApi { get; private set;} = null!;
+    public ProfilesApi PeopleProfilesApi { get; private set;} = null!;
     
     public PeopleFactory()
     {        
@@ -160,7 +162,7 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
 
         HttpClient = CreateClient();
         var configuration = new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') };
-        PeopleProfilesApi = new PeopleProfilesApi(HttpClient, configuration);
+        PeopleProfilesApi = new ProfilesApi(HttpClient, configuration);
         
         var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();
         tablesToIgnore.AddRange(_tablesToBackup.Select(r=> new Table(MakeCopyTableName(r))));

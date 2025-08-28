@@ -121,6 +121,12 @@ public class GetFolderRequestDto<T>
     /// </summary>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
+    
+    /// <summary>
+    /// Represents the location context of the request, specifying the area
+    /// where the operation is performed, such as a room, documents, or a link.
+    /// </summary>
+    public Location? Location { get; set; }
 }
 
 /// <summary>

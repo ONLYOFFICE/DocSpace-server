@@ -184,7 +184,7 @@ public class PaymentController(
 
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Set, currency, true);
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Set, currency, true, securityContext.CurrentAccount.ID.ToString());
 
         if (result)
         {
@@ -301,7 +301,7 @@ public class PaymentController(
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency, false);
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency, false, securityContext.CurrentAccount.ID.ToString());
 
         if (result)
         {
@@ -488,7 +488,55 @@ public class PaymentController(
             }
         }
 
-        return await tariffHelper.GetQuotasAsync(inDto.Wallet).ToListAsync();
+        return await tariffHelper.GetQuotasAsync(false, inDto.Wallet).ToListAsync();
+    }
+
+    /// <summary>
+    /// Returns the available wallet services.
+    /// </summary>
+    /// <short>
+    /// Get wallet services
+    /// </short>
+    /// <path>api/2.0/portal/payment/walletservices</path>
+    /// <collection>list</collection>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "List of available wallet services", typeof(IEnumerable<QuotaDto>))]
+    [HttpGet("walletservices")]
+    public async Task<IEnumerable<QuotaDto>> GetWalletServices()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        return await tariffHelper.GetQuotasAsync(true, true).ToListAsync();
+    }
+
+    /// <summary>
+    /// Returns the wallet services.
+    /// </summary>
+    /// <short>
+    /// Get wallet service
+    /// </short>
+    /// <path>api/2.0/portal/payment/walletservice</path>
+    /// <collection>list</collection>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Wallet service", typeof(QuotaDto))]
+    [HttpGet("walletservice")]
+    public async Task<QuotaDto> GetWalletService(GetWalletServiceRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var quotaList = await quotaService.GetTenantQuotasAsync();
+        var quota = quotaList.FirstOrDefault(q => q.Wallet && q.TenantId == (int)inDto.Service);
+        if (quota == null)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        return await tariffHelper.ToQuotaDtoAsync(quota, false);
     }
 
     /// <summary>
@@ -666,7 +714,7 @@ public class PaymentController(
 
         await DemandPayerAsync(customerInfo);
 
-        var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, true);
+        var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), true);
 
         if (result)
         {
@@ -706,75 +754,6 @@ public class PaymentController(
         }
 
         var result = await tariffService.GetCustomerBalanceAsync(tenant.Id, inDto.Refresh);
-        return result;
-    }
-
-    /// <summary>
-    /// Trying to open a customer session and block amount money on the balance.
-    /// </summary>
-    /// <short>
-    /// Open customer session
-    /// </short>
-    /// <path>api/2.0/portal/payment/customer/opensession</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The customer session", typeof(Session))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpPost("customer/opensession")]
-    public async Task<Session> OpenCustomerSession(OpenCustomerSessionRequestDto inDto)
-    {
-        if (!tariffService.IsConfigured())
-        {
-            return null;
-        }
-
-        var tenant = tenantManager.GetCurrentTenant();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            return null;
-        }
-
-        await DemandPayerAsync(customerInfo);
-
-        var result = await tariffService.OpenCustomerSessionAsync(tenant.Id, inDto.ServiceAccount, inDto.ExternalRef, inDto.Quantity);
-        return result;
-    }
-
-    /// <summary>
-    /// Perform customer operation and return true if the operation is succesfully provided.
-    /// </summary>
-    /// <short>
-    /// Perform customer operation
-    /// </short>
-    /// <path>api/2.0/portal/payment/customer/performoperation</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is succesfully provided", typeof(bool))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpPost("customer/performoperation")]
-    public async Task<bool> PerformCustomerOperation(PerformCustomerOperationRequestDto inDto)
-    {
-        if (!tariffService.IsConfigured())
-        {
-            return false;
-        }
-
-        var tenant = tenantManager.GetCurrentTenant();
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null)
-        {
-            return false;
-        }
-
-        await DemandPayerAsync(customerInfo);
-
-        var result = await tariffService.PerformCustomerOperationAsync(tenant.Id, inDto.ServiceAccount, inDto.SessionId, inDto.Quantity);
-
-        messageService.Send(MessageAction.CustomerOperationPerformed);
-
         return result;
     }
 
@@ -1002,6 +981,87 @@ public class PaymentController(
         var result = await settingsManager.SaveAsync(settings);
 
         messageService.Send(MessageAction.CustomerWalletTopUpSettingsUpdated);
+
+        return settings;
+    }
+
+    /// <summary>
+    /// Get the wallet services settings.
+    /// </summary>
+    /// <short>
+    /// Get wallet services settings
+    /// </short>
+    /// <path>api/2.0/portal/payment/servicessettings</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The wallet services settings", typeof(TenantWalletServiceSettings))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("servicessettings")]
+    public async Task<TenantWalletServiceSettings> GetTenantWalletServiceSettings()
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        await DemandAdminAsync();
+
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>();
+
+        return settings;
+    }
+
+    /// <summary>
+    /// Change wallet service state.
+    /// </summary>
+    /// <short>
+    /// Change wallet service state
+    /// </short>
+    /// <path>api/2.0/portal/payment/servicestate</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The wallet service settings", typeof(TenantWalletServiceSettings))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpPost("servicestate")]
+    public async Task<TenantWalletServiceSettings> ChangeTenantWalletServiceState(ChangeWalletServiceStateRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        await DemandPayerAsync(customerInfo);
+
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>();
+
+        settings.EnabledServices ??= [];
+
+        if (inDto.Enabled && !settings.EnabledServices.Contains(inDto.Service))
+        {
+            settings.EnabledServices.Add(inDto.Service);
+        }
+
+        if (!inDto.Enabled && settings.EnabledServices.Contains(inDto.Service))
+        {
+            settings.EnabledServices.Remove(inDto.Service);
+        }
+
+        if (settings.EnabledServices.Count == 0)
+        {
+            settings.EnabledServices = null;
+        }
+
+        var result = await settingsManager.SaveAsync(settings);
+
+        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
 
         return settings;
     }

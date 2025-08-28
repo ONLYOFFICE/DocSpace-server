@@ -136,9 +136,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Üstündən Yazma Parametrləri Yeniləndi</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Sənədlər</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Parametrlər</value>
   </data>
@@ -409,9 +406,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Daşıyın</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Digərləri</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Sahib dəyişdirildi: {0}</value>
   </data>
@@ -429,9 +423,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Parol Gücü Parametrləri Yeniləndi</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Adamlar</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platforma</value>
@@ -492,9 +483,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sessiya Başladı</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Parametrlər</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO Deaktivdir</value>
