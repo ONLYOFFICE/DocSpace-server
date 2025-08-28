@@ -345,16 +345,16 @@ module.exports = (io) => {
     }
   }
 
-  function deleteFolder({ id, room, userIds } = {}) {
+  function deleteFolder({ id, room, data, userIds } = {}) {
     logger.info(`delete folder ${id} in room ${room}`);
     
     if(userIds)
     {
-      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "folder"));
+      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "folder", data));
     }
     else
     {
-      modifyFolder(room, "delete", id, "folder");
+      modifyFolder(room, "delete", id, "folder", data);
     }
   }
 

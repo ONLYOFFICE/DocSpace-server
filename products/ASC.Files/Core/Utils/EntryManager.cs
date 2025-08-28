@@ -460,7 +460,6 @@ public class EntryManager(IDaoFactory daoFactory,
 
             Task<int> allFoldersCountTask;
             Task<int> allFilesCountTask;
-            var filesToUpdate = new List<File<T>>();
             
             if (room is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
             {
@@ -485,9 +484,6 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
                 
                 entries = await temp.ToListAsync();
-                
-
-                filesToUpdate = entries.OfType<File<T>>().ToList();
             }
             else
             {
@@ -556,17 +552,19 @@ public class EntryManager(IDaoFactory daoFactory,
                 entries = new List<FileEntry>(folders.Count + files.Count);
                 entries.AddRange(folders);
                 entries.AddRange(files);
-
-                filesToUpdate = files;
             }
 
+            var filesToUpdate = entries.OfType<File<T>>().ToList();
             var fileStatusTask = entryStatusManager.SetFileStatusAsync(filesToUpdate);
             var formInfoTask = entryStatusManager.SetFormInfoAsync(filesToUpdate);
+            
+            var foldersToUpdate = entries.OfType<Folder<T>>().ToList();
+            var folderStatusTask = entryStatusManager.SetIsFavoriteFoldersAsync(foldersToUpdate);
             
             var tagsNewTask = fileMarker.SetTagsNewAsync(parent, entries);
             var originsTask = SetOriginsAsync(parent, entries);
 
-            await Task.WhenAll(fileStatusTask, tagsNewTask, originsTask, formInfoTask);
+            await Task.WhenAll(fileStatusTask, folderStatusTask, tagsNewTask, originsTask, formInfoTask);
 
             total = await allFoldersCountTask + await allFilesCountTask;
 

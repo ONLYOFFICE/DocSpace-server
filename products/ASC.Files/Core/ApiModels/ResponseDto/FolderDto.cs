@@ -178,7 +178,8 @@ public class FolderDtoHelper(
     FileSecurityCommon fileSecurityCommon,
     SecurityContext securityContext,
     UserManager userManager,
-    IUrlShortener urlShortener
+    IUrlShortener urlShortener,
+    EntryStatusManager entryStatusManager
     )
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
 {
@@ -315,14 +316,16 @@ public class FolderDtoHelper(
                 newBadges = 0;
             }
         }
-
+        
         var result = await GetAsync<FolderDto<T>, T>(folder);
         if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates)
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;
         }
-
+        
+        await entryStatusManager.SetIsFavoriteFolderAsync(folder);
+        
         result.IsShareable = folder.Shareable.NullIfDefault();
         result.IsFavorite = folder.IsFavorite.NullIfDefault();
         result.New = newBadges;
