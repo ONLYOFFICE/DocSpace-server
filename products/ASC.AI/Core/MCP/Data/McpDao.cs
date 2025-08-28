@@ -147,6 +147,18 @@ public class McpDao(
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
         var servers = new List<McpServer>();
+        
+        var dbTotalCount = await dbContext.GetActiveServersTotalCountAsync(tenantId);
+        
+        var dbServers = await dbContext.GetActiveServersAsync(tenantId, offset, count)
+            .SelectAwait(async x => await x.ToMcpServerAsync(crypto))
+            .ToListAsync();
+        
+        servers.AddRange(dbServers);
+        
+        offset = Math.Max(0, offset - dbTotalCount);
+        count = Math.Max(0, count - dbServers.Count);
+        
         var systemServers = new List<McpServer>();
         
         if (systemMcpConfig.Servers.Count > 0)
@@ -177,23 +189,13 @@ public class McpDao(
                     
                 systemServers.Add(server);
             }
-        }
-        
-        servers.AddRange(systemServers.Skip(offset).Take(count));
-        
-        offset = Math.Max(0, offset - systemServers.Count);
-        count = Math.Max(0, count - servers.Count);
-        
-        if (count > 0)
-        {
-            var dbServers = await dbContext.GetActiveServersAsync(tenantId, offset, count)
-                .SelectAwait(async x => await x.ToMcpServerAsync(crypto))
-                .ToListAsync();
             
-            servers.AddRange(dbServers);
+            if (count > 0)
+            {
+                servers.AddRange(systemServers.Skip(offset).Take(count));
+            }
         }
         
-        var dbTotalCount = await dbContext.GetActiveServersTotalCountAsync(tenantId);
         var total = dbTotalCount + systemServers.Count;
         
         return (servers, total);
@@ -204,49 +206,50 @@ public class McpDao(
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
         var servers = new List<McpServer>();
-
+        
+        var dbTotalCount = await dbContext.GetServersCountAsync(tenantId);
+        
         var systemServers = systemMcpConfig.Servers.Values.Where(x => !x.Internal).ToList();
-        var filteredSystemServers = new List<SystemMcpServer>();
-
-        filteredSystemServers.AddRange(systemServers.Skip(offset).Take(count));
-        offset = Math.Max(0, offset - systemServers.Count);
-        count = Math.Max(0, count - filteredSystemServers.Count);
-
-        if (filteredSystemServers.Count > 0)
-        {
-            var states = await dbContext.GetServersStatesAsync(
-                tenantId, 
-                filteredSystemServers.Select(x => x.Id)
-            ).ToDictionaryAsync(x => x.ServerId);
-
-            foreach (var systemServer in filteredSystemServers)
-            {
-                var server = new McpServer
-                {
-                    Id = systemServer.Id,
-                    Name = systemServer.Name,
-                    Description = systemServer.Description,
-                    Endpoint = systemServer.Endpoint,
-                    Headers = systemServer.Headers,
-                    ServerType = systemServer.Type,
-                    ConnectionType = systemServer.ConnectionType,
-                    Enabled = states.TryGetValue(systemServer.Id, out var state) && state.Enabled
-                };
-                
-                servers.Add(server);
-            }
-        }
+        
+        var dbServers = await dbContext.GetServersAsync(tenantId, offset, count)
+            .SelectAwait(async x => await x.ToMcpServerAsync(crypto))
+            .ToListAsync();
+        
+        servers.AddRange(dbServers);
+        
+        offset = Math.Max(0, offset - dbTotalCount);
+        count = Math.Max(0, count - dbServers.Count);
         
         if (count > 0)
         {
-            var dbServers = await dbContext.GetServersAsync(tenantId, offset, count)
-                .SelectAwait(async x => await x.ToMcpServerAsync(crypto))
-                .ToListAsync();
-            
-            servers.AddRange(dbServers);
+            var filteredSystemServers = systemServers.Skip(offset).Take(count).ToList();
+
+            if (filteredSystemServers.Count > 0)
+            {
+                var states = await dbContext.GetServersStatesAsync(
+                    tenantId, 
+                    filteredSystemServers.Select(x => x.Id)
+                ).ToDictionaryAsync(x => x.ServerId);
+
+                foreach (var systemServer in filteredSystemServers)
+                {
+                    var server = new McpServer
+                    {
+                        Id = systemServer.Id,
+                        Name = systemServer.Name,
+                        Description = systemServer.Description,
+                        Endpoint = systemServer.Endpoint,
+                        Headers = systemServer.Headers,
+                        ServerType = systemServer.Type,
+                        ConnectionType = systemServer.ConnectionType,
+                        Enabled = states.TryGetValue(systemServer.Id, out var state) && state.Enabled
+                    };
+                    
+                    servers.Add(server);
+                }
+            }
         }
         
-        var dbTotalCount = await dbContext.GetServersCountAsync(tenantId);
         var total = dbTotalCount + systemServers.Count;
         
         return (servers, total);
