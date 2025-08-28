@@ -38,6 +38,7 @@ public class BillingClient
     internal const string HttpClientName = "billingHttpClient";
     internal const string ResiliencePipelineName = "billingResiliencePipeline";
     public const string GetCurrentPaymentsUri = "GetActiveResources";
+    public const string MetadataDetails = "details";
 
     public BillingClient(IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {

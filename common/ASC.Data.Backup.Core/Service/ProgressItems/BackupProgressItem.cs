@@ -208,7 +208,7 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
             await PublishChanges();
 
             var customerParticipantName = _isScheduled ? null : _userId.ToString();
-            var metadata = _isScheduled ? new Dictionary<string, string> { { "details", BackupResource.ScheduledBackup } } : null;
+            var metadata = _isScheduled ? new Dictionary<string, string> { { BillingClient.MetadataDetails, BackupResource.ScheduledBackup } } : null;
 
             await backupService.CompleteCustomerSessionForBackupAsync(TenantId, _billingSessionId, customerParticipantName, metadata);
         }

@@ -184,7 +184,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 var (description, unitOfMeasurement) = GetServiceDescAndUOM(operation.Service);
 
                 operation.Description = description;
-                operation.Details = operation.Metadata != null && operation.Metadata.TryGetValue("details", out var details) ? details : string.Empty;
+                operation.Details = operation.Metadata != null && operation.Metadata.TryGetValue(BillingClient.MetadataDetails, out var details) ? details : string.Empty;
                 operation.ServiceUnit = unitOfMeasurement;
                 operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
                 operation.ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)

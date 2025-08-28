@@ -190,7 +190,7 @@ public class RenewSubscriptionService(
             // TODO: support other currencies
             var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
 
-            var metadata = new Dictionary<string, string> { { "details", Resource.AutoRenewal } };
+            var metadata = new Dictionary<string, string> { { BillingClient.MetadataDetails, Resource.AutoRenewal } };
 
             var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, ProductQuantityType.Renew, defaultCurrency, false, null, metadata);
 
