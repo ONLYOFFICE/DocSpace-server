@@ -390,7 +390,10 @@ static file class FileQueries
                         ).FirstOrDefault(),
                         LastOpened = ctx.AuditEvents
                             .OrderByDescending(a => a.Date)
-                            .Where(a => a.Target == fileId.ToString() && a.UserId == userId && a.Action == (int)MessageAction.FileOpenedForChange && r.TenantId == tenantId)
+                            .Where(a => a.Target == fileId.ToString() && 
+                                        a.UserId == userId && 
+                                        (a.Action == (int)MessageAction.FileOpenedForChange || a.Action == (int)MessageAction.FormOpenedForFilling) && 
+                                        a.TenantId == tenantId)
                             .Select(a => a.Date)
                             .FirstOrDefault()
                     })
@@ -426,7 +429,10 @@ static file class FileQueries
                             ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                         LastOpened = ctx.AuditEvents
                             .OrderByDescending(a => a.Date)
-                            .Where(a => a.Target == fileId.ToString() && a.UserId == userId && a.Action == (int)MessageAction.FileOpenedForChange && r.TenantId == tenantId)
+                            .Where(a => a.Target == fileId.ToString() && 
+                                        a.UserId == userId && 
+                                        (a.Action == (int)MessageAction.FileOpenedForChange || a.Action == (int)MessageAction.FormOpenedForFilling) && 
+                                        a.TenantId == tenantId)
                             .Select(a => a.Date)
                             .FirstOrDefault()
                     })
@@ -455,7 +461,10 @@ static file class FileQueries
                             ).FirstOrDefault(),
                         LastOpened = ctx.AuditEvents
                             .OrderByDescending(a => a.Date)
-                            .Where(a => a.Target == fileId.ToString() && a.UserId == userId && a.Action == (int)MessageAction.FileOpenedForChange && r.TenantId == tenantId)
+                            .Where(a => a.Target == fileId.ToString() && 
+                                        a.UserId == userId && 
+                                        (a.Action == (int)MessageAction.FileOpenedForChange || a.Action == (int)MessageAction.FormOpenedForFilling) && 
+                                        a.TenantId == tenantId)
                             .Select(a => a.Date)
                             .FirstOrDefault()
                     })
