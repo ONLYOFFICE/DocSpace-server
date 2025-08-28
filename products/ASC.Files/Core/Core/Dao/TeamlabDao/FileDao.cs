@@ -2629,14 +2629,7 @@ internal class FileDao(
         {
             Entry = x.f, 
             Tag = x.t, 
-            LastOpened = filesDbContext.AuditEvents
-                .OrderByDescending(a => a.Date)
-                .Where(r => r.Target == x.f.Id.ToString() && 
-                            r.UserId == currentUserId && 
-                            (r.Action == (int)MessageAction.FileOpenedForChange || r.Action == (int)MessageAction.FormOpenedForFilling) &&
-                            r.TenantId == tenantId)
-                .Select(r => r.Date)
-                .FirstOrDefault(),
+            LastOpened = x.l.CreateOn,
             Security = filesDbContext.Security
                 .FirstOrDefault(s => s.TenantId == tenantId && 
                                      s.EntryType == FileEntryType.File && 
