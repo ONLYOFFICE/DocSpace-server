@@ -36,6 +36,7 @@ public class SocketManager(
     ChannelWriter<SocketData> channelWriter,
     MachinePseudoKeys machinePseudoKeys,
     IConfiguration configuration,
+    ExternalShare externalShare,
     FileSecurity fileSecurity,
     UserManager userManager,
     IDaoFactory daoFactory,
@@ -147,7 +148,22 @@ public class SocketManager(
     {
         await MakeRequest("end-restore", new { tenantId, dump, result });
     }
-
+    
+    public async Task AddFileToRecentAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    {
+        await MakeRequest("add-recent-file", file, true, users);
+    }
+    
+    public async Task UpdateFileRecentAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    {
+        await MakeRequest("update-recent-file", file, true, users);
+    }
+    
+    public async Task RemoveFileFromRecentAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    {
+        await MakeRequest("delete-recent-file", file, true, users);
+    }
+    
     private async Task<IEnumerable<Guid>> GetRecipientListForForm<T>(File<T> form)
     {
         List<Guid> users = null;
@@ -166,7 +182,7 @@ public class SocketManager(
     private async Task MakeCreateFormRequest<T>(string method, FileEntry<T> entry, IEnumerable<Guid> userIds, bool isOneMember)
     {
         var room = FolderRoom(entry.FolderIdDisplay);
-        var data = Serialize(entry);
+        var data = await Serialize(entry);
 
         await base.MakeRequest(method, new
         {
@@ -188,11 +204,28 @@ public class SocketManager(
             await action();
         }
 
+        var parentId = entry.ParentId;
+        switch (method)
+        {
+            case "add-recent-file":
+                method = "create-file";
+                entry.ParentId = entry.FolderIdDisplay;
+                break;
+            case "update-recent-file":
+                method = "update-file";
+                entry.ParentId = entry.FolderIdDisplay;
+                break;
+            case "delete-recent-file":
+                method = "delete-file";
+                entry.ParentId = entry.FolderIdDisplay;
+                break;
+        }
+
         var data = "";
 
         if (withData)
         {
-            data = Serialize(entry);
+            data = await Serialize(entry);
         }
 
         foreach (var userIds in whoCanRead.Chunk(1000))
@@ -205,6 +238,8 @@ public class SocketManager(
                 userIds
             });
         }
+        
+        entry.ParentId = parentId;
     }
 
     private string FileRoom<T>(T fileId)
@@ -221,8 +256,16 @@ public class SocketManager(
         return $"{tenantId}-DIR-{folderId}";
     }
 
-    private string Serialize<T>(FileEntry<T> entry)
-    {
+    private async Task<string> Serialize<T>(FileEntry<T> entry)
+    { 
+        var externalMediaAccess = entry.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink };
+        string requestToken = null;
+            
+        if (externalMediaAccess)
+        {
+            requestToken = await externalShare.CreateShareKeyAsync(entry.ShareRecord.Subject);
+        }
+        
         return entry switch
         {
             File<T> file => JsonSerializer.Serialize(new FileDto<T>
@@ -231,7 +274,8 @@ public class SocketManager(
                 FolderId = file.ParentId, 
                 Title = file.Title, 
                 Version = file.Version, 
-                VersionGroup = file.VersionGroup
+                VersionGroup = file.VersionGroup,
+                RequestToken = requestToken
             }, _jsonSerializerOptions),
             Folder<T> folder => JsonSerializer.Serialize(new FolderDto<T>
             {
@@ -242,7 +286,8 @@ public class SocketManager(
                 CreatedBy = new EmployeeDto
                 {
                     Id = folder.CreateBy
-                }
+                },
+                RequestToken = requestToken
             }, _jsonSerializerOptions),
             _ => string.Empty
         };

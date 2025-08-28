@@ -35,14 +35,14 @@ public class BaseTest(
     ) : IAsyncLifetime
 {
     protected readonly HttpClient _filesClient = filesFactory.HttpClient;
-    protected readonly FilesFoldersApi _foldersApi = filesFactory.FilesFoldersApi;
-    protected readonly FilesFilesApi _filesApi = filesFactory.FilesFilesApi;
-    protected readonly FilesOperationsApi _filesOperationsApi = filesFactory.FilesOperationsApi;
+    protected readonly FoldersApi _foldersApi = filesFactory.FoldersApi;
+    protected readonly FilesApi _filesApi = filesFactory.FilesApi;
+    protected readonly OperationsApi _filesOperationsApi = filesFactory.OperationsApi;
     protected readonly RoomsApi _roomsApi = filesFactory.RoomsApi;
-    protected readonly FilesSettingsApi _filesSettingsApi = filesFactory.FilesSettingsApi;
-    protected readonly FilesQuotaApi _quotaApi = filesFactory.FilesQuotaApi;
-    protected readonly FilesSharingApi _filesSharingApi = filesFactory.FilesSharingApi;
-    protected readonly SettingsQuotaApi _settingsQuotaApi = apiFactory.SettingsQuotaApi;
+    protected readonly SettingsApi _filesSettingsApi = filesFactory.SettingsApi;
+    protected readonly QuotaApi _quotaApi = filesFactory.QuotaApi;
+    protected readonly SharingApi _filesSharingApi = filesFactory.SharingApi;
+    protected readonly DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = apiFactory.SettingsQuotaApi;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
 
     //   FileShare.None
@@ -204,7 +204,7 @@ public class BaseTest(
         var initialLinkParams = new FileLinkRequest(
             access: fileShare,
             primary: primary,
-            varInternal: varInternal
+            @internal: varInternal
         );
 
         if (expirationDate != null)

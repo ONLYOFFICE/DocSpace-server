@@ -198,7 +198,7 @@ public class FolderDtoHelper(
             if (folder.Tags == null)
             {
                 var tagDao = _daoFactory.GetTagDao<T>();
-                result.Tags = await tagDao.GetTagsAsync(TagType.Custom, [folder]).Select(t => t.Name).ToListAsync();
+                result.Tags = await tagDao.GetTagsAsync([TagType.Custom], [folder]).Select(t => t.Name).ToListAsync();
             }
             else
             {

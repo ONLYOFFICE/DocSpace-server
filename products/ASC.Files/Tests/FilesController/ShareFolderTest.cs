@@ -310,7 +310,7 @@ public class ShareFolderTest(
         sharedToLink.Internal.Should().BeTrue();
         primaryLink.CanEditAccess.Should().BeFalse();
         
-        var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, new FolderLinkRequest(sharedToLink.Id, varInternal: false), TestContext.Current.CancellationToken)).Response;
+        var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, new FolderLinkRequest(sharedToLink.Id, @internal: false), TestContext.Current.CancellationToken)).Response;
         updatedLink.Should().BeNull();
     }
     
@@ -328,7 +328,7 @@ public class ShareFolderTest(
         sharedToLink.Internal.Should().BeFalse();
         primaryLink.CanEditAccess.Should().BeFalse();
         
-        var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, new FolderLinkRequest(sharedToLink.Id, varInternal: true), TestContext.Current.CancellationToken)).Response;
+        var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, new FolderLinkRequest(sharedToLink.Id, @internal: true), TestContext.Current.CancellationToken)).Response;
         var updatedSharedToLink = DeserializeSharedToLink(updatedLink);
         updatedSharedToLink.Internal.Should().BeFalse();
     }
@@ -351,7 +351,7 @@ public class ShareFolderTest(
         sharedToLink.Internal.Should().BeFalse();
         primaryLink.CanEditAccess.Should().BeTrue();
         
-        var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, new FolderLinkRequest(sharedToLink.Id, varInternal: true), TestContext.Current.CancellationToken)).Response;
+        var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, new FolderLinkRequest(sharedToLink.Id, @internal: true), TestContext.Current.CancellationToken)).Response;
         var updatedSharedToLink = DeserializeSharedToLink(updatedLink);
         updatedSharedToLink.Internal.Should().BeTrue();
     }

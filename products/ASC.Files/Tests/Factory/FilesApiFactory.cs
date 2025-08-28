@@ -42,14 +42,15 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     private readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings" ];
     
     public HttpClient HttpClient { get; private set;} = null!;
-    public FilesFoldersApi FilesFoldersApi { get; private set;} = null!;
-    public FilesFilesApi FilesFilesApi { get; private set;} = null!;
-    public FilesOperationsApi FilesOperationsApi { get; private set;} = null!;
+    public FoldersApi FoldersApi { get; private set;} = null!;
+    public FilesApi FilesApi { get; private set;} = null!;
+    public OperationsApi OperationsApi { get; private set;} = null!;
     public RoomsApi RoomsApi { get; private set;} = null!;
-    public FilesSettingsApi FilesSettingsApi { get; private set;} = null!;
-    public FilesQuotaApi  FilesQuotaApi { get; private set;} = null!;
-    public FilesSharingApi  FilesSharingApi { get; private set;} = null!;
-    public SettingsQuotaApi  SettingsQuotaApi { get; private set;} = null!;
+    public SettingsApi SettingsApi { get; private set;} = null!;
+    public QuotaApi  QuotaApi { get; private set;} = null!;
+    public SharingApi  SharingApi { get; private set;} = null!;
+    
+    public DocSpace.API.SDK.Api.Settings.QuotaApi  SettingsQuotaApi { get; private set;} = null!;
     
     public FilesApiFactory()
     {        
@@ -164,14 +165,14 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
 
         HttpClient = CreateClient();
         var configuration = new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') };
-        FilesFoldersApi = new FilesFoldersApi(HttpClient, configuration);
-        FilesFilesApi = new FilesFilesApi(HttpClient, configuration);
-        FilesOperationsApi = new FilesOperationsApi(HttpClient, configuration);
+        FoldersApi = new FoldersApi(HttpClient, configuration);
+        FilesApi = new FilesApi(HttpClient, configuration);
+        OperationsApi = new OperationsApi(HttpClient, configuration);
         RoomsApi = new RoomsApi(HttpClient, configuration);
-        FilesSettingsApi = new FilesSettingsApi(HttpClient, configuration);
-        FilesQuotaApi = new FilesQuotaApi(HttpClient, configuration);
-        FilesSharingApi = new FilesSharingApi(HttpClient, configuration);
-        SettingsQuotaApi = new SettingsQuotaApi(HttpClient, configuration);
+        SettingsApi = new SettingsApi(HttpClient, configuration);
+        QuotaApi = new QuotaApi(HttpClient, configuration);
+        SharingApi = new SharingApi(HttpClient, configuration);
+        SettingsQuotaApi = new DocSpace.API.SDK.Api.Settings.QuotaApi(HttpClient, configuration);
         
         var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();
         tablesToIgnore.AddRange(_tablesToBackup.Select(r=> new Table(MakeCopyTableName(r))));

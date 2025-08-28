@@ -24,11 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Migrations.Core.Models;
+namespace ASC.Core.Common.EF.Migration;
 
-public class ProviderInfo
+public enum ConfigurationInfo
 {
-    public string ConnectionString { get; set; }
-    public Provider Provider { get; set; }
-    public string ProviderFullName { get; set; }
+    SaaS,
+    Standalone
 }

@@ -1986,4 +1986,52 @@ $TrulyYours</value>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Lloji përdoruesit tuaj në DocSpace ka ndryshuar</value>
   </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Shkoni te shërbimet</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Shkoni te cilësimet e portofolit</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Po ju kontaktojmë për të ju informuar se rinovimi automatik i planit tuaj te blerë të shërbimit nuk u realizua me sukses.
+
+Ju lutem të rinovoni manualisht planin tuaj aktual të shërbimit (ose të blini një të ri).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Po ju kontaktojmë për të ju informuar se pagesa për abonimin tuaj do të tërhiqet automatikisht nga llogaria juaj pas 3 ditësh.
+
+Për të siguruar një transaksion të suksesshëm, ju lutem konfirmoni që keni fonde të mjaftueshme në metodën tuaj të pagesës.
+
+Në qoftë se keni ndonjë pyetje ose keni nevojë për ndihme, mos hezitoni të kontaktoni me "ekipin tonë te suportit":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Po ju kontaktojmë për të ju informuar se rimbushja automatike e balancës në portofolin DocSpace nuk u realizua me sukses.
+
+Ju lutem të kontrolloni dhe përditësoni manualisht balancën e portofolit tuaj.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Kërkohet veprim: Nuk mund të rinovohet automatikisht plani i shërbimit në DocSpace-in tuaj ${LetterLogoText}</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Pagesa e ardhshme për abonimin në DocSpace-in tuaj ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Kërkohet veprim: Nuk mund të rimbushet automatikisht balanca e portofolit në DocSpace-in tuaj ${LetterLogoText} DocSpace</value>
+  </data>
 </root>
