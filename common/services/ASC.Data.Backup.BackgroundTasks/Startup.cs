@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Data.Backup.Core.Quota;
 using ASC.Files.Core.Core;
 
 namespace ASC.Data.Backup.BackgroundTasks;
@@ -57,6 +58,6 @@ public class Startup : BaseStartup
         services.AddBaseDbContextPool<BackupsContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
-
+        services.RegisterFreeBackupQuotaFeature();
     }
 }

@@ -340,7 +340,7 @@ public class FileEntryDtoHelper(
             OriginId = entry.OriginId,
             OriginTitle = entry.OriginTitle,
             OriginRoomId = entry.OriginRoomId,
-            OriginRoomTitle = entry.OriginRoomTitle,
+            OriginRoomTitle = entry.OriginRoomTitle, 
             AutoDelete = permanentlyDeletedOn != default ? apiDateTimeHelper.Get(permanentlyDeletedOn) : null
         };
     }

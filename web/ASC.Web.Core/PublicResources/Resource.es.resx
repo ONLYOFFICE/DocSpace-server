@@ -1111,4 +1111,13 @@
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Espacio de almacenamiento utilizado:</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Espacio en disco</value>
+  </data>
+  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
+    <value>Descripción</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Recarga de saldo</value>
+  </data>
 </root>

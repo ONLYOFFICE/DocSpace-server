@@ -50,7 +50,7 @@ internal abstract class BaseTagDao<T>(
         serviceProvider,
         distributedLockProvider), ITagDao<T>
 {
-    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, TagType tagType, IEnumerable<FileEntry<T>> fileEntries)
+    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, IEnumerable<TagType> tagType, IEnumerable<FileEntry<T>> fileEntries)
     {
         var mapping = daoFactory.GetMapping<T>();
         var filesId = new HashSet<string>();
@@ -89,7 +89,7 @@ internal abstract class BaseTagDao<T>(
         }
     }
 
-    public IAsyncEnumerable<Tag> GetTagsAsync(TagType tagType, IEnumerable<FileEntry<T>> fileEntries)
+    public IAsyncEnumerable<Tag> GetTagsAsync(IEnumerable<TagType> tagType, IEnumerable<FileEntry<T>> fileEntries)
     {
         return GetTagsAsync(Guid.Empty, tagType, fileEntries);
     }
@@ -110,11 +110,11 @@ internal abstract class BaseTagDao<T>(
         }
     }
 
-    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, TagType tagType)
+    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, T entryId, params IEnumerable<TagType> tagType)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var fromDb = await filesDbContext.TagsByOwnerAsync(tenantId, tagType, owner).ToListAsync();
+        var fromDb = await filesDbContext.TagsByOwnerAsync(tenantId, owner, Equals(entryId, default(T)) ? null : entryId.ToString(), tagType).ToListAsync();
         
         foreach (var e in fromDb)
         {

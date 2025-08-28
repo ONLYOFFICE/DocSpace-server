@@ -27,48 +27,6 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// Client session opening parameters
-/// </summary>
-public class OpenCustomerSessionRequestDto
-{
-    /// <summary>
-    /// Service account
-    /// </summary>
-    public int ServiceAccount { get; set; }
-
-    /// <summary>
-    /// External reference
-    /// </summary>
-    public string ExternalRef { get; set; }
-
-    /// <summary>
-    /// Quantity
-    /// </summary>
-    public int Quantity { get; set; }
-}
-
-/// <summary>
-/// Parameters for performing a customer operation
-/// </summary>
-public class PerformCustomerOperationRequestDto
-{
-    /// <summary>
-    /// Service account
-    /// </summary>
-    public int ServiceAccount { get; set; }
-
-    /// <summary>
-    /// Session ID
-    /// </summary>
-    public int SessionId { get; set; }
-
-    /// <summary>
-    /// Quantity
-    /// </summary>
-    public int Quantity { get; set; }
-}
-
-/// <summary>
 /// Parameters of the request for receiving the report on client operations
 /// </summary>
 public class CustomerOperationsRequestDto

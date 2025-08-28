@@ -24,9 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Migrations.Core.Models;
-public enum ConfigurationInfo
+
+namespace ASC.Core.Common.EF.Migration;
+
+public class Options
 {
-    SaaS,
-    Standalone
+    public string Path { get; set; }
+    public IEnumerable<ProviderInfo> Providers { get; set; }
+    public IEnumerable<ProviderInfo> TeamlabsiteProviders { get; set; }
 }
