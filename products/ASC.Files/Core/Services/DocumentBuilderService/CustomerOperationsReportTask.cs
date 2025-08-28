@@ -145,7 +145,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         {
             await writer.WriteAsync(scriptParts[0]);
 
-            var partialRecords = GetCustomerOperationsReportDataAsync(tariffService, tenantUtil, displayUserSettingsHelper, tenant.Id, utcStartDate, utcEndDate, taskData.ParticipantName, taskData.Credit, taskData.Withdrawal);
+            var partialRecords = GetCustomerOperationsReportDataAsync(tariffService, tenantUtil, displayUserSettingsHelper, tenant.Id, utcStartDate, utcEndDate, taskData.ParticipantName, taskData.Credit, taskData.Debit);
 
             if (partialRecords != null)
             {
@@ -162,14 +162,14 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return (scriptFilePath, tempFileName, outputFileName);
     }
 
-    private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(TariffService tariffService, TenantUtil tenantUtil, DisplayUserSettingsHelper displayUserSettingsHelper, int tenantId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? withdrawal)
+    private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(TariffService tariffService, TenantUtil tenantUtil, DisplayUserSettingsHelper displayUserSettingsHelper, int tenantId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? debit)
     {
         var offset = 0;
         var limit = 1000;
 
         while (true)
         {
-            var report = await tariffService.GetCustomerOperationsAsync(tenantId, utcStartDate, utcEndDate, participantName, credit, withdrawal, offset, limit);
+            var report = await tariffService.GetCustomerOperationsAsync(tenantId, utcStartDate, utcEndDate, participantName, credit, debit, offset, limit);
 
             if (report?.Collection == null)
             {
@@ -223,7 +223,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
                 new(record.Quantity.ToString(), "General", "right"),
                 new(record.ServiceUnit, "@"),
                 new(record.Credit.ToString(), "0.0000000000", "right"),
-                new(record.Withdrawal.ToString(), "0.0000000000", "right"),
+                new(record.Debit.ToString(), "0.0000000000", "right"),
                 new(record.Currency, "@")
             };
 
@@ -253,4 +253,4 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
     record PropertyValue(string Value, string Format, string Halign = null);
 }
 
-public record CustomerOperationsReportTaskData(IDictionary<string, string> Headers, DateTime? StartDate, DateTime? EndDate, string ParticipantName, bool? Credit, bool? Withdrawal);
+public record CustomerOperationsReportTaskData(IDictionary<string, string> Headers, DateTime? StartDate, DateTime? EndDate, string ParticipantName, bool? Credit, bool? Debit);

@@ -41,7 +41,7 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
         DateTime? endDate = null,
         string participantName = null,
         bool? credit = null,
-        bool? withdrawal = null,
+        bool? debit = null,
         IDictionary<string, string> headers = null,
         bool terminate = false)
     : base(createBy, tenantId)
@@ -51,7 +51,7 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
         EndDate = endDate;
         ParticipantName = participantName;
         Credit = credit;
-        Withdrawal = withdrawal;
+        Debit = debit;
         Headers = headers;
         Terminate = terminate;
     }
@@ -72,7 +72,7 @@ public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
     public bool? Credit { get; set; }
 
     [ProtoMember(6)]
-    public bool? Withdrawal { get; set; }
+    public bool? Debit { get; set; }
 
     [ProtoMember(7)]
     public IDictionary<string, string> Headers { get; set; }

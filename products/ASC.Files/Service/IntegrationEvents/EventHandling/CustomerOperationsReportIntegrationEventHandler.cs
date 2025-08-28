@@ -61,7 +61,7 @@ public class CustomerOperationsReportIntegrationEventHandler(
 
                 var task = serviceProvider.GetService<CustomerOperationsReportTask>();
 
-                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, new CustomerOperationsReportTaskData(@event.Headers, @event.StartDate, @event.EndDate, @event.ParticipantName, @event.Credit, @event.Withdrawal));
+                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, new CustomerOperationsReportTaskData(@event.Headers, @event.StartDate, @event.EndDate, @event.ParticipantName, @event.Credit, @event.Debit));
 
                 await documentBuilderTaskManager.StartTask(task);
             }

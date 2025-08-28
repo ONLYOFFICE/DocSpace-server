@@ -100,7 +100,7 @@ public class AccountingClient
         _ = await RequestAsync<string>(HttpMethod.Post, "/operation/provided", data: data);
     }
 
-    public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? withdrawal, int? offset, int? limit)
+    public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? debit, int? offset, int? limit)
     {
         var queryParams = new NameValueCollection
         {
@@ -118,9 +118,9 @@ public class AccountingClient
             queryParams.Add("credit", credit.Value.ToString().ToLowerInvariant());
         }
 
-        if (withdrawal.HasValue)
+        if (debit.HasValue)
         {
-            queryParams.Add("withdrawal", withdrawal.Value.ToString().ToLowerInvariant());
+            queryParams.Add("debit", debit.Value.ToString().ToLowerInvariant());
         }
 
         if (offset.HasValue)
@@ -416,9 +416,9 @@ public class Operation
     /// </summary>
     public decimal Credit { get; set; }
     /// <summary>
-    /// Withdrawal amount of the operation.
+    /// Debit amount of the operation.
     /// </summary>
-    public decimal Withdrawal { get; set; }
+    public decimal Debit { get; set; }
     /// <summary>
     /// Original name of the participant.
     /// </summary>

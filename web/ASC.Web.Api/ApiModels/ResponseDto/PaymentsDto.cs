@@ -114,9 +114,9 @@ public class OperationDto
     /// </summary>
     public decimal Credit { get; set; }
     /// <summary>
-    /// Withdrawal amount of the operation.
+    /// Debit amount of the operation.
     /// </summary>
-    public decimal Withdrawal { get; set; }
+    public decimal Debit { get; set; }
     /// <summary>
     /// Original name of the participant.
     /// </summary>
@@ -138,7 +138,7 @@ public class OperationDto
         Quantity = operation.Quantity;
         Currency = operation.Currency;
         Credit = operation.Credit;
-        Withdrawal = operation.Withdrawal;
+        Debit = operation.Debit;
         ParticipantName = operation.ParticipantName;
         ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
             ? value
