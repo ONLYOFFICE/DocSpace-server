@@ -177,6 +177,29 @@ internal abstract class BaseTagDao<T>(
         return mapper.Map<DbFilesTag, TagInfo>(tag.Entity);
     }
 
+    public async Task<TagInfo> UpdateTagInfoAsync(TagInfo tagInfo)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var existingTag = await filesDbContext.Tag
+            .FirstOrDefaultAsync(t => t.Id == tagInfo.Id && t.TenantId == tenantId);
+
+        if (existingTag == null)
+        {
+            throw new ItemNotFoundException($"Tag with id {tagInfo.Id} not found");
+        }
+
+        existingTag.Name = tagInfo.Name;
+        existingTag.Owner = tagInfo.Owner;
+        existingTag.Type = tagInfo.Type;
+
+        filesDbContext.Tag.Update(existingTag);
+        await filesDbContext.SaveChangesAsync();
+
+        return mapper.Map<DbFilesTag, TagInfo>(existingTag);
+    }
+
     public async Task<IEnumerable<Tag>> SaveTagsAsync(IEnumerable<Tag> tags, Guid createdBy = default)
     {
         var result = new List<Tag>();

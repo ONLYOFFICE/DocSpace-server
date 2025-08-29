@@ -86,14 +86,14 @@ public class CustomTagsService(
             throw new ItemNotFoundException();
         }
 
-        var tag = await tagDao.GetTagsInfoAsync(oldName, TagType.Custom, true).FirstOrDefaultAsync();
+        var tag = await tagDao.GetTagsInfoAsync(newName, TagType.Custom, true).FirstOrDefaultAsync();
         if (tag != null && tag.Id != existedTag.Id)
         {
             throw new ArgumentException($"Tag with name '{newName}' already exists");
         }
         existedTag.Name = newName;
 
-        var savedTag = await tagDao.SaveTagInfoAsync(existedTag);
+        var savedTag = await tagDao.UpdateTagInfoAsync(existedTag);
 
         return savedTag;
     }
