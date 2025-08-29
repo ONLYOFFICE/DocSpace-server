@@ -348,7 +348,7 @@ public class DocumentServiceTrackerHelper(
             {
                 var linkId = await externalShare.GetLinkIdAsync();
 
-                if (linkId != Guid.Empty && file.RootFolderType == FolderType.USER && file.CreateBy != securityContext.CurrentAccount.ID)
+                if (linkId != Guid.Empty && file.CreateBy != securityContext.CurrentAccount.ID)
                 {
                     await entryManager.MarkFileAsRecentByLink(file, linkId);
                 }

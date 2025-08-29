@@ -2129,6 +2129,20 @@ public class EntryManager(IDaoFactory daoFactory,
 
                     await fileMarker.RemoveMarkAsNewForAllAsync(file);
                     await linkDao.DeleteAllLinkAsync(file.Id);
+                    
+                    if (!result.Encrypted && !result.ProviderEntry && await fileSecurity.CanReadAsync(result))
+                    {
+                        var linkId = await externalShare.GetLinkIdAsync();
+
+                        if (linkId != Guid.Empty && result.CreateBy != securityContext.CurrentAccount.ID)
+                        {
+                            await MarkFileAsRecentByLink(result, linkId);
+                        }
+                        else
+                        {
+                            await MarkAsRecent(result);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
