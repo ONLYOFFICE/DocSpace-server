@@ -568,4 +568,10 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Filloni plotësimin</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Mysafir</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Administratori i dhomës</value>
+  </data>
 </root>

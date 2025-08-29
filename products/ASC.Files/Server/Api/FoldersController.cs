@@ -170,7 +170,6 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "New folder parameters", typeof(FolderDto<int>))]
-    [SwaggerResponse(200, "New folder parameters", typeof(FolderDto<string>))]
     [HttpPost("folder/{folderId}")]
     public async Task<FolderDto<T>> CreateFolder(CreateFolderRequestDto<T> inDto)
     {
@@ -207,7 +206,6 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}/order</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "List of file operations", typeof(FolderDto<int>))]
-    [SwaggerResponse(200, "List of file operations", typeof(FolderDto<string>))]
     [HttpPut("folder/{folderId}/order")]
     public async Task<FolderDto<T>> SetFolderOrder(OrderFolderRequestDto<T> inDto)
     {
@@ -226,7 +224,6 @@ public abstract class FoldersController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder contents", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(200, "Folder contents", typeof(FolderContentDto<string>))]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [SwaggerResponse(404, "The required folder was not found")]
     [AllowAnonymous]
@@ -240,7 +237,7 @@ public abstract class FoldersController<T>(
             formsItemDto = new FormsItemDto(inDto.FormsItemKey, inDto.FormsItemType);
         }
 
-        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.FilterType, inDto.RoomId, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, split, formsItemDto);
+        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.FilterType, inDto.RoomId, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, split, formsItemDto, inDto.Location);
         return folder.NotFoundIfNull();
     }
 
@@ -327,7 +324,6 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder parameters", typeof(FolderDto<int>))]
-    [SwaggerResponse(200, "Folder parameters", typeof(FolderDto<string>))]
     [SwaggerResponse(403, "You don't have enough permission to rename the folder")]
     [HttpPut("folder/{folderId}")]
     public async Task<FolderDto<T>> RenameFolder(CreateFolderRequestDto<T> inDto)
@@ -485,7 +481,8 @@ public class FoldersControllerCommon(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     UserManager userManager,
-    SecurityContext securityContext)
+    SecurityContext securityContext,
+    FilesSettingsHelper filesSettingsHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -576,12 +573,11 @@ public class FoldersControllerCommon(
     /// </summary>
     /// <short>Get the "Recent" section</short>
     /// <path>api/2.0/files/@recent</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Recent\" section contents", typeof(FolderContentDto<int>))]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [SwaggerResponse(404, "The required folder was not found")]
-    [HttpGet("recent")]
+    [HttpGet("@recent")]
     public async Task<FolderContentDto<int>> GetRecentFolder(GetRecentFolderRequestDto inDto)
     {
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderRecentAsync, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, inDto.Extension);
@@ -664,7 +660,12 @@ public class FoldersControllerCommon(
         {
             withoutTrash = true;
         }
-
+        
+        if (await filesSettingsHelper.GetRecentSection())
+        {
+            yield return await globalFolderHelper.FolderRecentAsync;
+        }
+        
         var my = await globalFolderHelper.FolderMyAsync;
         if (my != 0)
         {

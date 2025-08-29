@@ -1033,11 +1033,6 @@ public class FileSecurity(IDaoFactory daoFactory,
 
             if (folder.FolderType == FolderType.Recent)
             {
-                if (isGuest)
-                {
-                    return false;
-                }
-
                 return action == FilesSecurityActions.Read;
             }
 
@@ -1108,11 +1103,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                 if (action == FilesSecurityActions.EditExpiration && folder.FolderType is FolderType.FillingFormsRoom)
                 {
                     return false;
-                }
-
-                if (action == FilesSecurityActions.EditAccess && folder.FolderType is FolderType.EditingRoom or FolderType.VirtualDataRoom)
-                {
-                    return _linkCountRoomSettingsAccesses.TryGetValue(folder.FolderType, out var accesses) && (accesses.TryGetValue(SubjectType.ExternalLink, out _) || accesses.TryGetValue(SubjectType.PrimaryExternalLink, out _));
                 }
                 
                 if (!isGuest)
@@ -2452,7 +2442,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tags = await tagDao.GetTagsAsync(TagType.Custom, entries).ToLookupAsync(f => (T)f.EntryId);
+        var tags = await tagDao.GetTagsAsync([TagType.Custom], entries).ToLookupAsync(f => (T)f.EntryId);
 
         foreach (var room in entries)
         {
@@ -2469,7 +2459,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.Pin, entries).ToDictionaryAsync(t => (T)t.EntryId);
+        var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Pin], entries).ToDictionaryAsync(t => (T)t.EntryId);
 
         foreach (var fileEntry in entries.Where(e => e.FileEntryType == FileEntryType.Folder))
         {
@@ -2965,7 +2955,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (includeAvailableLinks && linkId == Guid.Empty)
         {
-            await foreach (var tag in daoFactory.GetTagDao<T>().GetTagsAsync(userId, TagType.RecentByLink))
+            await foreach (var tag in daoFactory.GetTagDao<T>().GetTagsAsync(userId, default, TagType.RecentByLink))
             {
                 if (Guid.TryParse(tag.Name, out var tagId))
                 {

@@ -138,18 +138,25 @@ public class BillingClient
         return customerInfo;
     }
 
-    public async Task<bool> TopUpDepositAsync(string portalId, decimal amount, string currency)
+    public async Task<bool> TopUpDepositAsync(string portalId, decimal amount, string currency, string customerParticipantName)
     {
-        var result = await RequestAsync("Deposit", portalId, [Tuple.Create("Amount", amount.ToString(CultureInfo.InvariantCulture)), Tuple.Create("Currency", currency)]);
+        var parameters = new[]
+        {
+            Tuple.Create("Amount", amount.ToString(CultureInfo.InvariantCulture)),
+            Tuple.Create("Currency", currency),
+            Tuple.Create("CustomerParticipantName", customerParticipantName)
+        };
+        var result = await RequestAsync("Deposit", portalId, parameters);
         return result == "\"ok\"";
     }
 
-    public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType, string currency)
+    public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType, string currency, string customerParticipantName)
     {
         var parameters = products.Select(p => Tuple.Create("ProductId", p))
             .Concat(quantity.Select(q => Tuple.Create("ProductQty", q.ToString())))
             .Concat([Tuple.Create("ProductQuantityType", ((int)productQuantityType).ToString())])
             .Concat([Tuple.Create("Currency", currency)])
+            .Concat([Tuple.Create("CustomerParticipantName", customerParticipantName)])
             .ToArray();
 
         var result = await RequestAsync("ChangeSubscription", portalId, parameters);

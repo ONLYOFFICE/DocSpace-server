@@ -286,10 +286,16 @@ public class FileEntryDtoHelper(
         }
 
         var canSetAccess = await fileSharingHelper.CanSetAccessAsync(entry);
+        if (entry is Folder<TId> { FolderType: FolderType.EditingRoom or FolderType.VirtualDataRoom })
+        {
+            canSetAccess = false;
+        }
+        
         Dictionary<SubjectType, int> shareSettings = null;
-
+        
         if (canSetAccess)
         {
+            
             var primaryCount = await _fileSecurity.GetLinksSettings(entry, SubjectType.PrimaryExternalLink);
             var additionalCount = await _fileSecurity.GetLinksSettings(entry, SubjectType.ExternalLink);
 
@@ -309,7 +315,7 @@ public class FileEntryDtoHelper(
                 shareSettings.Add(SubjectType.ExternalLink, additionalCount);
             }
         }
-
+        
         return new T
         {
             Id = entry.Id,
@@ -334,7 +340,7 @@ public class FileEntryDtoHelper(
             OriginId = entry.OriginId,
             OriginTitle = entry.OriginTitle,
             OriginRoomId = entry.OriginRoomId,
-            OriginRoomTitle = entry.OriginRoomTitle,
+            OriginRoomTitle = entry.OriginRoomTitle, 
             AutoDelete = permanentlyDeletedOn != default ? apiDateTimeHelper.Get(permanentlyDeletedOn) : null
         };
     }

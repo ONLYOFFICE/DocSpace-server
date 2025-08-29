@@ -27,6 +27,9 @@
 using ASC.People.Tests.Data;
 using ASC.People.Tests.Factory;
 
+using DocSpace.API.SDK.Api.People;
+using DocSpace.API.SDK.Api.Portal;
+
 namespace ASC.People.Tests.PeopleController;
 
 [Collection("Test Collection")]
@@ -37,8 +40,8 @@ public class BaseTest(
 {
     protected readonly HttpClient _peopleClient = peopleFactory.HttpClient;
     protected readonly HttpClient _apiClient = apiFactory.HttpClient;
-    protected readonly PeopleProfilesApi _peopleProfilesApi = peopleFactory.PeopleProfilesApi;
-    protected readonly PortalUsersApi _portalUsersApi = apiFactory.PortalUsersApi;
+    protected readonly ProfilesApi _peopleProfilesApi = peopleFactory.PeopleProfilesApi;
+    protected readonly UsersApi _portalUsersApi = apiFactory.PortalUsersApi;
     private readonly Func<Task> _resetDatabase = peopleFactory.ResetDatabaseAsync;
 
     public async ValueTask InitializeAsync()

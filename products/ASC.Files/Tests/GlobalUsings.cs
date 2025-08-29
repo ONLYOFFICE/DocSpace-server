@@ -20,6 +20,8 @@ global using Bogus;
 global using Bogus.DataSets;
 
 global using DocSpace.API.SDK.Api;
+global using DocSpace.API.SDK.Api.Files;
+global using DocSpace.API.SDK.Api.Rooms;
 global using DocSpace.API.SDK.Client;
 global using DocSpace.API.SDK.Model;
 
@@ -60,7 +62,6 @@ global using FileLinkRequest = DocSpace.API.SDK.Model.FileLinkRequest;
 global using FileOperationDto = DocSpace.API.SDK.Model.FileOperationDto;
 global using FileShare = DocSpace.API.SDK.Model.FileShare;
 global using FileShareDto = DocSpace.API.SDK.Model.FileShareDto;
-global using FolderLinkRequest =DocSpace.API.SDK.Model.FolderLinkRequest;
 global using FolderType = DocSpace.API.SDK.Model.FolderType;
 global using RoomType = DocSpace.API.SDK.Model.RoomType;
 global using User = ASC.Files.Tests.Data.User;
@@ -69,3 +70,5 @@ global using WebApiProgram = ASCWebApi::Program;
 global using FilesProgram = ASCFiles::Program;
 global using PeopleProgram = ASCPeople::Program;
 global using FilesServiceProgram = ASCFilesService::Program;
+global using LinkType = DocSpace.API.SDK.Model.LinkType;
+global using Task = System.Threading.Tasks.Task;

@@ -240,7 +240,7 @@ public class LicenseReader(
             Ldap = true,
             Sso = true,
             ThirdParty = true,
-            AutoBackupRestore = true,
+            Restore = true,
             Oauth = true,
             ContentSearch = true,
             MaxFileSize = defaultQuota.MaxFileSize,

@@ -62,7 +62,6 @@ public static class OpenApiExtension
                     Url = new Uri("https://helpdesk.onlyoffice.com/hc/en-us")
                 }
             });
-            c.OperationFilter<OneOfResponseFilter>();
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
             c.DocumentFilter<LowercaseDocumentFilter>();
             c.SchemaFilter<DerivedSchemaFilter>();

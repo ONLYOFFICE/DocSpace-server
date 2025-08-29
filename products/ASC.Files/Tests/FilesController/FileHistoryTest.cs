@@ -58,7 +58,7 @@ public class FileHistoryTest(
         // Check that each version has the correct properties
         foreach (var version in versions)
         {
-            version.Id.Should().Be(file.Id);
+            version.Id.Should().Be(file.Id.ToString());
             version.Title.Should().Be(file.Title);
             version.FileExst.Should().Be(".docx");
         }

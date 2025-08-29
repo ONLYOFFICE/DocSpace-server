@@ -108,7 +108,7 @@ public class CopyFileTest(
         // Act
         var moveParams = new BatchRequestDto
         {
-            DestFolderId = new BatchRequestDtoDestFolderId(targetFolder.Id),
+            DestFolderId = new  BatchRequestDtoAllOfDestFolderId(targetFolder.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new(sourceFile.Id)],
             FolderIds = []

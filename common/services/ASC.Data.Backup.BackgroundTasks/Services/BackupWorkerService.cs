@@ -29,7 +29,7 @@ namespace ASC.Data.Backup.BackgroundTasks;
 [Singleton]
 internal sealed class BackupWorkerService(
     BackupWorker backupWorker,
-    IConfiguration configuration,
+    BackupConfigurationService backupConfigurationService,
     NotifyConfiguration notifyConfiguration)
     : IHostedService
 {
@@ -37,9 +37,7 @@ internal sealed class BackupWorkerService(
     {
         notifyConfiguration.Configure();
 
-        var settings = configuration.GetSection("backup").Get<BackupSettings>();
-
-        backupWorker.Start(settings);
+        backupWorker.Start(backupConfigurationService.Settings);
 
         return Task.CompletedTask;
     }

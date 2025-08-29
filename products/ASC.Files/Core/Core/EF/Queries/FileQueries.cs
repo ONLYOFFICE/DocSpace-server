@@ -28,22 +28,22 @@ namespace ASC.Files.Core.EF;
 
 public partial class FilesDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
-    public Task<DbFileQuery> DbFileQueryAsync(int tenantId, int fileId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
+    public Task<DbFileQuery> DbFileQueryAsync(int tenantId, Guid userId, int fileId)
     {
-        return FileQueries.DbFileQueryAsync(this, tenantId, fileId);
+        return FileQueries.DbFileQueryAsync(this, tenantId, userId, fileId);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
-    public Task<DbFileQuery> DbFileQueryByFileVersionAsync(int tenantId, int fileId, int fileVersion)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<DbFileQuery> DbFileQueryByFileVersionAsync(int tenantId, Guid userId, int fileId, int fileVersion)
     {
-        return FileQueries.DbFileQueryByFileVersionAsync(this, tenantId, fileId, fileVersion);
+        return FileQueries.DbFileQueryByFileVersionAsync(this, tenantId, userId, fileId, fileVersion);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
-    public Task<DbFileQuery> DbFileQueryFileStableAsync(int tenantId, int fileId, int fileVersion)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<DbFileQuery> DbFileQueryFileStableAsync(int tenantId, Guid userId, int fileId, int fileVersion)
     {
-        return FileQueries.DbFileQueryFileStableAsync(this, tenantId, fileId, fileVersion);
+        return FileQueries.DbFileQueryFileStableAsync(this, tenantId, userId, fileId, fileVersion);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
@@ -346,9 +346,9 @@ public partial class FilesDbContext
 
 static file class FileQueries
 {
-    public static readonly Func<FilesDbContext, int, int, Task<DbFileQuery>> DbFileQueryAsync =
+    public static readonly Func<FilesDbContext, int, Guid, int, Task<DbFileQuery>> DbFileQueryAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId) =>
+            (FilesDbContext ctx, int tenantId, Guid userId, int fileId) =>
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId && r.CurrentVersion)
@@ -387,17 +387,22 @@ static file class FileQueries
                                     ).Skip(1).FirstOrDefault()
                                 select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
                             select f.Order
-                        ).FirstOrDefault()
+                        ).FirstOrDefault(),
+                        LastOpened =  ctx.TagLink
+                            .Where(a => a.EntryId == fileId.ToString() && 
+                                        a.CreateBy == userId && 
+                                        a.TenantId == tenantId)
+                            .Select(a => a.CreateOn)
+                            .FirstOrDefault()
                     })
                     .SingleOrDefault());
 
-    public static readonly Func<FilesDbContext, int, int, int, Task<DbFileQuery>> DbFileQueryByFileVersionAsync =
+    public static readonly Func<FilesDbContext, int, Guid, int, int, Task<DbFileQuery>> DbFileQueryByFileVersionAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId, int fileVersion) =>
+            (FilesDbContext ctx, int tenantId, Guid userId, int fileId, int fileVersion) =>
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId && r.Version == fileVersion)
-
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -419,13 +424,19 @@ static file class FileQueries
                             x.TenantId == r.TenantId && 
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                             x.EntryType == FileEntryType.Folder && 
-                            ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId))
+                            ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
+                        LastOpened = ctx.TagLink
+                            .Where(a => a.EntryId == fileId.ToString() && 
+                                        a.CreateBy == userId && 
+                                        a.TenantId == tenantId)
+                            .Select(a => a.CreateOn)
+                            .FirstOrDefault()
                     })
                     .SingleOrDefault());
 
-    public static readonly Func<FilesDbContext, int, int, int, Task<DbFileQuery>> DbFileQueryFileStableAsync =
+    public static readonly Func<FilesDbContext, int, Guid, int, int, Task<DbFileQuery>> DbFileQueryFileStableAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int fileId, int fileVersion) =>
+            (FilesDbContext ctx, int tenantId, Guid userId, int fileId, int fileVersion) =>
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId && r.Forcesave == ForcesaveType.None)
@@ -443,7 +454,13 @@ static file class FileQueries
                                       ).FirstOrDefault()
                                 where f.TenantId == r.TenantId
                                 select f
-                            ).FirstOrDefault()
+                            ).FirstOrDefault(),
+                        LastOpened = ctx.TagLink
+                            .Where(a => a.EntryId == fileId.ToString() && 
+                                        a.CreateBy == userId && 
+                                        a.TenantId == tenantId)
+                            .Select(a => a.CreateOn)
+                            .FirstOrDefault()
                     })
                     .FirstOrDefault());
 
