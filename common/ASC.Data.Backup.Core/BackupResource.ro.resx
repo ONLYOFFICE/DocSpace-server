@@ -135,4 +135,25 @@
   <data name="RestoreException" xml:space="preserve">
     <value>Ceva nu a mers bine la restaurarea backup-ului. Încercați să-l restaurați din nou sau contactați serviciul de asistenţă.</value>
   </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Copiere de rezervă automată</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Stocare temporară</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Copiere de rezervă a sălii</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Fișierul local</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Aplicație de stocare de la terțe</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Resursă terță parte</value>
+  </data>
 </root>

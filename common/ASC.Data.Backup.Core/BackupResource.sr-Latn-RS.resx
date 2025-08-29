@@ -135,4 +135,25 @@
   <data name="RestoreException" xml:space="preserve">
     <value>Došlo je do greške prilikom vraćanja rezervne kopije. Pokušajte ponovo ili kontaktirajte podršku.</value>
   </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Automatka rezervna kopija</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Privremeno skladište</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Soba za rezervne kopije</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Lokalna datoteka</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Skladište treće strane</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Resurs treće strane</value>
+  </data>
 </root>
