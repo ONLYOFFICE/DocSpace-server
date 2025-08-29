@@ -388,12 +388,18 @@ public class EntryManager(IDaoFactory daoFactory,
             var fileDao = daoFactory.GetFileDao<T>();
             var userId = authContext.CurrentAccount.ID;
 
-            var filesTotalCountTask = fileDao.GetFilesByTagCountAsync(userId, [TagType.Recent, TagType.RecentByLink], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location);
-            var files = await fileDao.GetFilesByTagAsync(userId, [TagType.Recent, TagType.RecentByLink], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, new OrderBy(SortedByType.LastOpened, false), from, count).ToListAsync();
+            total = 0;
+            var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent, TagType.RecentByLink], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, new OrderBy(SortedByType.LastOpened, false), from, count);
             
-            entries.AddRange(files);
+            await foreach (var e in fileSecurity.CanReadAsync(files).Where(r=> r.Item2).Select(t=> t.Item1))
+            {
+                total++;
 
-            total = await filesTotalCountTask;
+                if (total > from && total <= from + count)
+                {
+                    entries.Add(e);
+                }
+            }
 
             return (entries, total);
         }

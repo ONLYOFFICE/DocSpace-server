@@ -921,19 +921,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         return haveAccess;
     }
     
-    private async IAsyncEnumerable<Tuple<FileEntry<T>, bool>> CanAsync<T>(IAsyncEnumerable<FileEntry<T>> entry, Guid userId, FilesSecurityActions action)
+    private IAsyncEnumerable<Tuple<FileEntry<T>, bool>> CanAsync<T>(IAsyncEnumerable<FileEntry<T>> entries, Guid userId, FilesSecurityActions action)
     {
-        await foreach (var r in SetSecurity(entry, userId))
-        {
-            if (r.Security != null && r.Security.TryGetValue(action, out var security))
-            {
-                yield return new Tuple<FileEntry<T>, bool>(r, security);
-            }
-            else
-            {
-                yield return new Tuple<FileEntry<T>, bool>(r, await CanAsync(r, userId, action));
-            }
-        }
+        return entries.SelectAwait(async r => new Tuple<FileEntry<T>, bool>(r, await CanAsync(r, userId, action)));
     }
 
     private async Task<bool> FilterEntryAsync<T>(FileEntry<T> e, FilesSecurityActions action, Guid userId, IEnumerable<FileShareRecord<T>> shares, bool isOutsider, bool isGuest, 
