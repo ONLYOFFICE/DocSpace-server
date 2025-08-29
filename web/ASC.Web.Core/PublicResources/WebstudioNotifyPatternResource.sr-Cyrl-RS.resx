@@ -743,6 +743,7 @@ $OrangeButton
 
 "$__AuthorName":"$__AuthorUrl" се придружио вашем порталу на "${__VirtualRootPath}":"${__VirtualRootPath}".
 
+
 ^Ако не желите да примате обавештења о новим корисницима, управљајте својим "подешавањима претплате":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">

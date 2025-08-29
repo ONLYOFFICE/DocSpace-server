@@ -2079,14 +2079,6 @@ public class EntryManager(IDaoFactory daoFactory,
                     }
                 }
             }
-            
-            var tagDao = daoFactory.GetTagDao<T>();
-            var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Recent, TagType.RecentByLink], [file]).ToListAsync();
-            await tagDao.RemoveTagsAsync(tags);
-            file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
-            await socketManager.RemoveFileFromRecentAsync(file, [authContext.CurrentAccount.ID]);
-            file.FolderIdDisplay = file.ParentId;
-            
             await notifyClient.SendFormSubmittedAsync(room, originalForm, pdfFile);
 
             if (fillingSessionId != null)

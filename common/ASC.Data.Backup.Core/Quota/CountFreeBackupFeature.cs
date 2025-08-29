@@ -42,6 +42,13 @@ public class CountFreeBackupChecker(
         return string.Format(Resource.TariffsFeature_free_backup_exception, size);
     }
 
+    public override Task CheckUsed(TenantQuota quota)
+    {
+        //do not throw exception during the transition period from free to paid backup
+        //TODO: remove method a month after release
+        return Task.CompletedTask;
+    }
+
     public override async Task CheckAddAsync(int tenantId, int newValue)
     {
         if (coreBaseSettings.Standalone)

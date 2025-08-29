@@ -20,6 +20,8 @@ global using Bogus;
 global using Bogus.DataSets;
 
 global using DocSpace.API.SDK.Api;
+global using DocSpace.API.SDK.Api.Files;
+global using DocSpace.API.SDK.Api.Rooms;
 global using DocSpace.API.SDK.Client;
 global using DocSpace.API.SDK.Model;
 
@@ -68,3 +70,5 @@ global using WebApiProgram = ASCWebApi::Program;
 global using FilesProgram = ASCFiles::Program;
 global using PeopleProgram = ASCPeople::Program;
 global using FilesServiceProgram = ASCFilesService::Program;
+global using LinkType = DocSpace.API.SDK.Model.LinkType;
+global using Task = System.Threading.Tasks.Task;

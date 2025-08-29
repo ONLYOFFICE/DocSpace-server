@@ -928,4 +928,7 @@
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>Настройки пополнения кошелька клиента обновлены</value>
   </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Изменены настройки видимости рекламных баннеров</value>
+  </data>
 </root>
