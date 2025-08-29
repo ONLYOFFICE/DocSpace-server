@@ -2602,7 +2602,6 @@ internal class FileDao(
     private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var currentUserId = securityContext.CurrentAccount.ID;
         
         var initQuery = filesDbContext.Tag
             .Where(x => x.TenantId == tenantId && x.Owner == tagOwner && tagType.Contains(x.Type))

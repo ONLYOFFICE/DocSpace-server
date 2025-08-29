@@ -775,24 +775,26 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             if (tag.EntryType == FileEntryType.File)
             {
-                if (tag.EntryId is int eId)
+                switch (tag.EntryId)
                 {
-                    fileIdsInt.Add(eId);
-                }
-                else if (tag.EntryId is string esId)
-                {
-                    fileIdsString.Add(esId);
+                    case int eId:
+                        fileIdsInt.Add(eId);
+                        break;
+                    case string esId:
+                        fileIdsString.Add(esId);
+                        break;
                 }
             }
             else
             {
-                if (tag.EntryId is int eId)
+                switch (tag.EntryId)
                 {
-                    folderIdsInt.Add(eId);
-                }
-                else if (tag.EntryId is string esId)
-                {
-                    folderIdsString.Add(esId);
+                    case int eId:
+                        folderIdsInt.Add(eId);
+                        break;
+                    case string esId:
+                        folderIdsString.Add(esId);
+                        break;
                 }
             }
         }
