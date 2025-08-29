@@ -1214,12 +1214,7 @@ public class FileMarker(
 
             await tagDao.RemoveTagsAsync(toRemove);
         }
-
-        if (tags.ContainsKey(linkIdString))
-        {
-            return MarkResult.MarkExists;
-        }
-
+        
         var tag = Tag.RecentByLink(authContext.CurrentAccount.ID, linkId, entry);
         await tagDao.SaveTagsAsync(tag);
 
@@ -1321,6 +1316,5 @@ public class AsyncTaskData<T> : DistributedTask
 public enum MarkResult
 {
     Marked,
-    NotMarked,
-    MarkExists
+    NotMarked
 }

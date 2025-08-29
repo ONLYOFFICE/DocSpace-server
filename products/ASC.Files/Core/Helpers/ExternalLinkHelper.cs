@@ -260,8 +260,6 @@ public class ExternalLinkHelper(
         {
             case MarkResult.NotMarked:
                 return false;
-            case MarkResult.MarkExists:
-                return true;
             case MarkResult.Marked:
                 room.FolderIdDisplay = IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync);
                 await socketManager.CreateFolderAsync(room, [userId]);
