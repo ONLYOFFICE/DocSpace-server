@@ -1873,6 +1873,8 @@ public class FileStorageService //: IFileStorageService
 
             if (result.Renamed)
             {
+                await entryManager.MarkAsRecent(file);
+                
                 await filesMessageService.SendAsync(MessageAction.FileRenamed, file, file.Title, oldTitle);
 
                 await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
