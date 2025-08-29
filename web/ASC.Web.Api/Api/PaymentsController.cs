@@ -433,7 +433,7 @@ public class PaymentController(
     /// </short>
     /// <path>api/2.0/portal/payment/prices</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "List of available portal prices", typeof(object))]
+    [SwaggerResponse(200, "List of available portal prices", typeof(Dictionary<string, decimal>))]
     [HttpGet("prices")]
     public async Task<object> GetPortalPrices()
     {

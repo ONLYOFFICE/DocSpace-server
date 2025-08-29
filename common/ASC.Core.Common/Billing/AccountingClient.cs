@@ -184,7 +184,7 @@ public class AccountingClient
         return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/account/{serviceAccount}");
     }
 
-    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, string[] serviceAccounts)
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, IEnumerable<string> serviceAccounts)
     {
         var key = $"accounting-prices-{partnerId}-{string.Join(",", serviceAccounts)}";
         var result = _cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
