@@ -56,7 +56,7 @@ public static class SubscriptionMethodExtension
             .Add(MySqlAddSubscriptionMethod, Provider.MySql)
             .Add(PgSqlAddSubscriptionMethod, Provider.PostgreSql)
             .HasData(
-            new DbSubscriptionMethod { Source = "asc.web.studio", Action = "send_whats_new", Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e", Sender = "email.sender", TenantId = -1 },
+            new DbSubscriptionMethod { Source = "asc.web.studio", Action = "send_whats_new", Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e", Sender = "email.sender|telegram.sender", TenantId = -1 },
             new DbSubscriptionMethod { Source = "6504977c-75af-4691-9099-084d3ddeea04", Action = "new feed", Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e", Sender = "email.sender|messanger.sender", TenantId = -1 },
             new DbSubscriptionMethod { Source = "6a598c74-91ae-437d-a5f4-ad339bd11bb2", Action = "new post", Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e", Sender = "email.sender|messanger.sender", TenantId = -1 },
             new DbSubscriptionMethod { Source = "853b6eb9-73ee-438d-9b09-8ffeedf36234", Action = "new topic in forum", Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e", Sender = "email.sender|messanger.sender", TenantId = -1 },
@@ -80,14 +80,14 @@ public static class SubscriptionMethodExtension
             new DbSubscriptionMethod { Source = "6045b68c-2c2e-42db-9e53-c272e814c4ad", Action = "taskclosed", Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e", Sender = "email.sender|messanger.sender", TenantId = -1 },
             new DbSubscriptionMethod { Source = "40650da3-f7c1-424c-8c89-b9c115472e08", Action = "calendar_sharing", Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e", Sender = "email.sender|messanger.sender", TenantId = -1 },
             new DbSubscriptionMethod { Source = "40650da3-f7c1-424c-8c89-b9c115472e08", Action = "event_alert", Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e", Sender = "email.sender|messanger.sender", TenantId = -1 },
-            new DbSubscriptionMethod { Source = "asc.web.studio", Action = "admin_notify", Recipient = "cd84e66b-b803-40fc-99f9-b2969a54a1de", Sender = "email.sender", TenantId = -1 },
+            new DbSubscriptionMethod { Source = "asc.web.studio", Action = "admin_notify", Recipient = "cd84e66b-b803-40fc-99f9-b2969a54a1de", Sender = "email.sender|telegram.sender", TenantId = -1 },
             new DbSubscriptionMethod { Source = "13ff36fb-0272-4887-b416-74f52b0d0b02", Action = "SetAccess", Recipient = "abef62db-11a8-4673-9d32-ef1d8af19dc0", Sender = "email.sender|messanger.sender", TenantId = -1 },
             new DbSubscriptionMethod { Source = "13ff36fb-0272-4887-b416-74f52b0d0b02", Action = "ResponsibleForTask", Recipient = "abef62db-11a8-4673-9d32-ef1d8af19dc0", Sender = "email.sender|messanger.sender", TenantId = -1 },
             new DbSubscriptionMethod { Source = "13ff36fb-0272-4887-b416-74f52b0d0b02", Action = "AddRelationshipEvent", Recipient = "abef62db-11a8-4673-9d32-ef1d8af19dc0", Sender = "email.sender|messanger.sender", TenantId = -1 },
             new DbSubscriptionMethod { Source = "13ff36fb-0272-4887-b416-74f52b0d0b02", Action = "ExportCompleted", Recipient = "abef62db-11a8-4673-9d32-ef1d8af19dc0", Sender = "email.sender|messanger.sender", TenantId = -1 },
             new DbSubscriptionMethod { Source = "13ff36fb-0272-4887-b416-74f52b0d0b02", Action = "CreateNewContact", Recipient = "abef62db-11a8-4673-9d32-ef1d8af19dc0", Sender = "email.sender|messanger.sender", TenantId = -1 },
             new DbSubscriptionMethod { Source = "13ff36fb-0272-4887-b416-74f52b0d0b02", Action = "ResponsibleForOpportunity", Recipient = "abef62db-11a8-4673-9d32-ef1d8af19dc0", Sender = "email.sender|messanger.sender", TenantId = -1 },
-            new DbSubscriptionMethod { Source = "asc.web.studio", Action = "periodic_notify", Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e", Sender = "email.sender", TenantId = -1 }
+            new DbSubscriptionMethod { Source = "asc.web.studio", Action = "periodic_notify", Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e", Sender = "email.sender|telegram.sender", TenantId = -1 }
             );
 
         return modelBuilder;
