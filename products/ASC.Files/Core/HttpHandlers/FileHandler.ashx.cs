@@ -490,15 +490,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         if (authContext.IsAuthenticated && !file.ProviderEntry 
             && (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title) || !fileUtility.CanWebView(file.Title)))
         {
-            var linkId = await externalShare.GetLinkIdAsync();
-            if (linkId != Guid.Empty)
-            {
-                await entryManager.MarkFileAsRecentByLink(file, linkId);
-            }
-            else
-            {
-                await entryManager.MarkAsRecent(file);
-            }
+            await entryManager.MarkAsRecent(file);
         }
     }
 

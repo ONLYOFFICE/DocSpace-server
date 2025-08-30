@@ -1875,33 +1875,38 @@ public class EntryManager(IDaoFactory daoFactory,
             Renamed = renamed
         };
     }
+    
 
-    public async Task MarkFileAsRecentByLink<T>(File<T> file, Guid linkId)
-    {
-        var marked = await fileMarker.MarkAsRecentByLink(file, linkId);
-        if (marked != MarkResult.NotMarked)
-        {
-            file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
-            await socketManager.AddFileToRecentAsync(file, [authContext.CurrentAccount.ID]);
-        }
-    }
-
-    public async Task MarkAsRecent<T>(File<T> file)
+    public async Task MarkAsRecent<T>(File<T> file, Guid? linkId = null)
     {
         if (file.Encrypted || file.ProviderEntry)
         {
             throw new NotSupportedException();
         }
+        
+        linkId ??= await externalShare.GetLinkIdAsync();
+        
+        if (linkId != Guid.Empty && file.CreateBy != securityContext.CurrentAccount.ID)
+        {
+            var marked = await fileMarker.MarkAsRecentByLink(file, linkId.Value);
+            if (marked != MarkResult.NotMarked)
+            {
+                file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
+                await socketManager.AddFileToRecentAsync(file, [authContext.CurrentAccount.ID]);
+            }
+        }
+        else
+        {
+            var tagDao = daoFactory.GetTagDao<T>();
+            var userId = authContext.CurrentAccount.ID;
 
-        var tagDao = daoFactory.GetTagDao<T>();
-        var userID = authContext.CurrentAccount.ID;
+            var tag = Tag.Recent(userId, file);
 
-        var tag = Tag.Recent(userID, file);
+            await tagDao.SaveTagsAsync(tag);
 
-        await tagDao.SaveTagsAsync(tag);
-
-        file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
-        await socketManager.AddFileToRecentAsync(file, [authContext.CurrentAccount.ID]);
+            file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
+            await socketManager.AddFileToRecentAsync(file, [authContext.CurrentAccount.ID]);
+        }
     }
 
     private async Task InitFormFillingFolders<T>(File<T> file, Folder<T> folder, EntryProperties<T> properties, IFolderDao<T> folderDao, IFileDao<T> fileDao, Guid createBy) {
@@ -2132,16 +2137,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     
                     if (!result.Encrypted && !result.ProviderEntry && await fileSecurity.CanReadAsync(result))
                     {
-                        var linkId = await externalShare.GetLinkIdAsync();
-
-                        if (linkId != Guid.Empty && result.CreateBy != securityContext.CurrentAccount.ID)
-                        {
-                            await MarkFileAsRecentByLink(result, linkId);
-                        }
-                        else
-                        {
-                            await MarkAsRecent(result);
-                        }
+                        await MarkAsRecent(result);
                     }
                 }
             }

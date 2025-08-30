@@ -2945,7 +2945,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (includeAvailableLinks && linkId == Guid.Empty)
         {
-            await foreach (var tag in daoFactory.GetTagDao<T>().GetTagsAsync(userId, default, TagType.RecentByLink))
+            await foreach (var tag in daoFactory.GetTagDao<T>().GetTagsAsync(userId, default, TagType.RecentByLink, TagType.Recent))
             {
                 if (Guid.TryParse(tag.Name, out var tagId))
                 {
