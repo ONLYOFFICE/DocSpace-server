@@ -425,6 +425,10 @@ public interface IFolderDao<T>
     Task<WatermarkSettings> GetWatermarkSettings(Folder<T> room);
     Task<Folder<T>> DeleteWatermarkSettings(Folder<T> room);
     Task<Folder<T>> DeleteLifetimeSettings(Folder<T> room);
+    
+    IAsyncEnumerable<Folder<T>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, bool excludeSubject, Location? location, OrderBy orderBy, int offset = 0, int count = -1);
+    
     #endregion
 }
 
