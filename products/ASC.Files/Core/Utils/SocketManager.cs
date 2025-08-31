@@ -157,7 +157,7 @@ public class SocketManager(
     
     public async Task RemoveFileFromRecentAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("delete-recent-file", file, true, users);
+        await MakeRequest("delete-recent-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderRecentAsync<T>());
     }
     
     private async Task<IEnumerable<Guid>> GetRecipientListForForm<T>(File<T> form)
