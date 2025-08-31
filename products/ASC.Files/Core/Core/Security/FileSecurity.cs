@@ -2943,11 +2943,11 @@ public class FileSecurity(IDaoFactory daoFactory,
             result.Add(linkId);
         }
 
-        if (includeAvailableLinks && linkId == Guid.Empty)
+        if (includeAvailableLinks)
         {
-            await foreach (var tag in daoFactory.GetTagDao<T>().GetTagsAsync(userId, default, TagType.RecentByLink, TagType.Recent))
+            await foreach (var tag in daoFactory.GetTagDao<T>().GetTagsAsync(userId, default, TagType.RecentByLink))
             {
-                if (Guid.TryParse(tag.Name, out var tagId))
+                if (Guid.TryParse(tag.Name, out var tagId) && linkId != tagId)
                 {
                     result.Add(tagId);
                 }
