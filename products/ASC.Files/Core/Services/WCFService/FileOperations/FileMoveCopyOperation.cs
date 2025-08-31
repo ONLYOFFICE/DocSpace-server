@@ -1166,7 +1166,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 }
 
                                 await socketManager.CreateFileAsync(newFile);
-
+                                await entryManager.MarkAsRecent(newFile);
+                                
                                 if (copy)
                                 {
                                     await filesMessageService.SendCopyMessageAsync(newFile, parentFolder, toFolder, toParentFolders.ToList(), true, _headers, [newFile.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
