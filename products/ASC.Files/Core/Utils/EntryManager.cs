@@ -1891,7 +1891,6 @@ public class EntryManager(IDaoFactory daoFactory,
             var marked = await fileMarker.MarkAsRecentByLink(file, linkId.Value);
             if (marked != MarkResult.NotMarked)
             {
-                file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
                 await socketManager.AddFileToRecentAsync(file, [authContext.CurrentAccount.ID]);
             }
         }
@@ -1903,8 +1902,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var tag = Tag.Recent(userId, file);
 
             await tagDao.SaveTagsAsync(tag);
-
-            file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
+            
             await socketManager.AddFileToRecentAsync(file, [authContext.CurrentAccount.ID]);
         }
     }
