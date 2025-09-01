@@ -166,7 +166,6 @@ public class DocumentServiceTrackerHelper(
     IHttpClientFactory clientFactory,
     IHttpContextAccessor httpContextAccessor,
     WebhookManager webhookManager,
-    ExternalShare externalShare,
     FileSecurity fileSecurity)
 {
     public string GetCallbackUrl<T>(T fileId, int? tenantId = null)

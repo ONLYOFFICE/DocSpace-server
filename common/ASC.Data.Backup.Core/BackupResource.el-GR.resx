@@ -76,4 +76,25 @@
   <data name="BackupInvalid" xml:space="preserve">
     <value>Το αρχείο αντιγράφου ασφαλείας δεν είναι έγκυρο.</value>
   </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Αυτόματα αντίγραφα ασφαλείας</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Προσωρινή αποθήκευση</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Δημιουργία αντιγράφου ασφαλείας δωματίου</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Τοπικό αρχείο</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Αποθήκευση τρίτων</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Πόρος τρίτου μέρους</value>
+  </data>
 </root>

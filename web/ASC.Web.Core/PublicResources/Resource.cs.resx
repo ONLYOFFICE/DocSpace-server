@@ -1088,16 +1088,10 @@
     <value>Měna</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Datum a čas</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Popis</value>
+    <value>Datum</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Množství</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Název služby</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Místo na disku</value>
@@ -1110,9 +1104,6 @@
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Zpráva o operacích zákazníka ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Výběr</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>Skupina nebyla nalezena</value>
