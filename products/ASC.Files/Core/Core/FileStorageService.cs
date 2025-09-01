@@ -418,7 +418,7 @@ public class FileStorageService //: IFileStorageService
             });
         }
         
-        if (parent.FolderType == FolderType.Recent && searchArea == SearchArea.RecentByLinks)
+        if (parent.FolderType == FolderType.Recent && searchArea == SearchArea.RecentByLinks || parent.FolderType == FolderType.Favorites)
         {
             parent.Title = FilesUCResource.MyFiles;
         }

@@ -283,7 +283,10 @@ public class FileDtoHelper(
 
             result.CanShare = false;
             result.ViewAccessibility[Accessibility.CanConvert] = false;
+        }
 
+        if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })
+        {
             result.Order = "";
 
             var myId = await _globalFolderHelper.GetFolderMyAsync<T>();
