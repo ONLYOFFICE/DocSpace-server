@@ -144,11 +144,6 @@ public class McpService(
             {
                 throw new ItemNotFoundException("MCP Server not found");
             }
-
-            if (server.Internal)
-            {
-                throw new InvalidOperationException("Internal server cannot be disabled");
-            }
         
             await mcpDao.SetServerStateAsync(tenantId, serverId, enabled);
         

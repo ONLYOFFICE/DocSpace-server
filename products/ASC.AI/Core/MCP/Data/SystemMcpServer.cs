@@ -35,7 +35,6 @@ public class SystemMcpServer
     public Dictionary<string, string>? Headers { get; init; }
     public ServerType Type { get; init; }
     public ConnectionType ConnectionType { get; init; }
-    public bool Internal { get; init; }
     public Func<ConsumerFactory, OauthProvider>? LoginProviderSelector { get; init; }
 }
 
@@ -53,8 +52,7 @@ public static class SystemMcpServerExtensions
             Headers = systemMcpServer.Headers,
             ServerType = systemMcpServer.Type,
             ConnectionType = systemMcpServer.ConnectionType,
-            Internal = systemMcpServer.Internal,
-            Enabled = state?.Enabled ?? systemMcpServer.Internal
+            Enabled = state?.Enabled ?? false
         };
     }
 }

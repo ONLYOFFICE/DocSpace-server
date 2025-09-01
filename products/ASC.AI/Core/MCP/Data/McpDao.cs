@@ -170,7 +170,7 @@ public class McpDao(
             
             foreach (var systemServer in systemMcpConfig.Servers.Values)
             {
-                if (!systemServer.Internal && (!states.TryGetValue(systemServer.Id, out var state) || !state.Enabled))
+                if (!states.TryGetValue(systemServer.Id, out var state) || !state.Enabled)
                 {
                     continue;
                 }
@@ -209,8 +209,6 @@ public class McpDao(
         
         var dbTotalCount = await dbContext.GetServersCountAsync(tenantId);
         
-        var systemServers = systemMcpConfig.Servers.Values.Where(x => !x.Internal).ToList();
-        
         var dbServers = await dbContext.GetServersAsync(tenantId, offset, count)
             .SelectAwait(async x => await x.ToMcpServerAsync(crypto))
             .ToListAsync();
@@ -222,7 +220,7 @@ public class McpDao(
         
         if (count > 0)
         {
-            var filteredSystemServers = systemServers.Skip(offset).Take(count).ToList();
+            var filteredSystemServers = systemMcpConfig.Servers.Values.Skip(offset).Take(count).ToList();
 
             if (filteredSystemServers.Count > 0)
             {
@@ -250,7 +248,7 @@ public class McpDao(
             }
         }
         
-        var total = dbTotalCount + systemServers.Count;
+        var total = dbTotalCount + systemMcpConfig.Servers.Count;
         
         return (servers, total);
     }
