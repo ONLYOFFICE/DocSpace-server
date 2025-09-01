@@ -344,7 +344,7 @@ public class FolderDtoHelper(
         await entryStatusManager.SetIsFavoriteFolderAsync(folder);
         
         result.IsShareable = folder.Shareable.NullIfDefault();
-        result.IsFavorite = folder.IsFavorite.NullIfDefault();
+        result.IsFavorite = folder.IsFavorite;
         result.New = newBadges;
         result.Pinned = folder.Pinned;
         result.Private = folder.SettingsPrivate;

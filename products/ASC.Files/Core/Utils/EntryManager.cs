@@ -206,16 +206,17 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
     public async Task SetIsFavoriteFoldersAsync<T>(List<Folder<T>> folders)
     {
-        if (folders.Count == 0)
+        var toCheck = folders.Where(f => !f.IsFavorite.HasValue).ToList();
+        if (toCheck.Count == 0)
         {
             return;
         }
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsFavorite = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Favorite], folders).ToListAsync();
+        var tagsFavorite = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Favorite], toCheck).ToListAsync();
 
-        foreach (var folder in folders.Where(f => tagsFavorite.Exists(r => r.EntryId.Equals(f.Id))))
+        foreach (var folder in toCheck.Where(f => tagsFavorite.Exists(r => r.EntryId.Equals(f.Id))))
         {
             folder.IsFavorite = true;
         }
@@ -493,7 +494,12 @@ public class EntryManager(IDaoFactory daoFactory,
                     entries.Add(e);
                 }
             }
+            
+            var setFilesStatus = entryStatusManager.SetFileStatusAsync(entries.OfType<File<T>>().ToList());
+            var setFavorites = entryStatusManager.SetIsFavoriteFoldersAsync(entries.OfType<Folder<T>>().ToList());
 
+            await Task.WhenAll(setFilesStatus, setFavorites);
+            
             return (entries, total);
         }
         else if (parent.FolderType == FolderType.Templates)
