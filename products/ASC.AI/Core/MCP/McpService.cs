@@ -227,7 +227,9 @@ public class McpService(
 
     private async Task<List<McpServerStatus>> GetServerStatusesAsync(int roomId, int tenantId)
     {
-        var connections = await mcpDao.GetServerConnectionAsync(tenantId, roomId).ToListAsync();
+        var userId = authContext.CurrentAccount.ID;
+        
+        var connections = await mcpDao.GetServerConnectionAsync(tenantId, roomId, userId).ToListAsync();
 
         return connections.Select(connection => connection.ToMcpServerStatus()).ToList();
     }
@@ -237,8 +239,9 @@ public class McpService(
         await ThrowIfNotAccessUseMcpAsync(roomId);
         
         var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
         
-        var connection = await mcpDao.GetMcpConnectionAsync(tenantId, roomId, serverId);
+        var connection = await mcpDao.GetMcpConnectionAsync(tenantId, roomId, userId, serverId);
         if (connection == null)
         {
             throw new ItemNotFoundException("Mcp server not found");
@@ -284,8 +287,9 @@ public class McpService(
         await ThrowIfNotAccessUseMcpAsync(roomId);
         
         var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
         
-        var connection = await mcpDao.GetMcpConnectionAsync(tenantId, roomId, serverId);
+        var connection = await mcpDao.GetMcpConnectionAsync(tenantId, roomId, userId, serverId);
         if (connection == null)
         {
             throw new ItemNotFoundException("Mcp server not found");
@@ -307,7 +311,10 @@ public class McpService(
     {
         await ThrowIfNotAccessUseMcpAsync(roomId);
         
-        var connection = await mcpDao.GetMcpConnectionAsync(tenantManager.GetCurrentTenantId(), roomId, serverId);
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
+        
+        var connection = await mcpDao.GetMcpConnectionAsync(tenantId, roomId, userId, serverId);
         if (connection == null)
         {
             throw new ItemNotFoundException("Mcp server not found");
@@ -321,8 +328,9 @@ public class McpService(
         await ThrowIfNotAccessUseMcpAsync(roomId);
         
         var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
         
-        var connection = await mcpDao.GetMcpConnectionAsync(tenantId, roomId, serverId);
+        var connection = await mcpDao.GetMcpConnectionAsync(tenantId, roomId, userId, serverId);
         if (connection == null)
         {
             throw new ItemNotFoundException("Mcp server not found");
@@ -359,7 +367,7 @@ public class McpService(
             }
         }
         
-        await mcpDao.SaveSettingsAsync(tenantId, roomId, authContext.CurrentAccount.ID, serverId, settings);
+        await mcpDao.SaveSettingsAsync(tenantId, roomId, userId, serverId, settings);
         
         return await GetToolsAsync(connection);
     }
@@ -370,7 +378,7 @@ public class McpService(
         
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var connections = mcpDao.GetServerConnectionAsync(tenantId, roomId)
+        var connections = mcpDao.GetServerConnectionAsync(tenantId, roomId, authContext.CurrentAccount.ID)
             .Where(x => x.Connected);
         
         var tasks = await connections.Select(ConnectAsync).ToListAsync();
@@ -400,8 +408,10 @@ public class McpService(
         {
             return;
         }
+        
+        var userId = authContext.CurrentAccount.ID;
 
-        var connection = await mcpDao.GetMcpConnectionAsync(tenantId, callData.RoomId, callData.ServerId);
+        var connection = await mcpDao.GetMcpConnectionAsync(tenantId, callData.RoomId, userId, callData.ServerId);
         if (connection == null)
         {
             return;
@@ -425,7 +435,7 @@ public class McpService(
             settings.ToolsConfiguration.Allowed.Add(callData.Name);
         }
         
-        await mcpDao.SaveSettingsAsync(tenantId, callData.RoomId, authContext.CurrentAccount.ID, callData.ServerId, settings);
+        await mcpDao.SaveSettingsAsync(tenantId, callData.RoomId, userId, callData.ServerId, settings);
     }
     
     private async Task<IReadOnlyDictionary<string, bool>> GetToolsAsync(McpServerConnection connection)

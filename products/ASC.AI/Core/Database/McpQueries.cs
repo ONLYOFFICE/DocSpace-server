@@ -46,16 +46,16 @@ public partial class AiDbContext
         return McpQueries.GetRoomServersCount(this, tenantId, roomId);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
-    public Task<DbRoomServerUnit?> GetRoomServerAsync(int tenantId, int roomId, Guid id)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
+    public Task<DbRoomServerUnit?> GetRoomServerAsync(int tenantId, int roomId, Guid userId, Guid serverId)
     {
-        return McpQueries.GetRoomServerAsync(this, tenantId, roomId, id);
+        return McpQueries.GetRoomServerAsync(this, tenantId, roomId, userId, serverId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
-    public IAsyncEnumerable<DbRoomServerUnit> GetRoomServersAsync(int tenantId, int roomId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public IAsyncEnumerable<DbRoomServerUnit> GetRoomServersAsync(int tenantId, int roomId, Guid userId)
     {
-        return McpQueries.GetRoomServersAsync(this, tenantId, roomId);
+        return McpQueries.GetRoomServersAsync(this, tenantId, roomId, userId);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
@@ -143,10 +143,10 @@ static file class McpQueries
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, Guid id) =>
             ctx.McpServers.FirstOrDefault(x => x.TenantId == tenantId && x.Id == id));
 
-    public static readonly Func<AiDbContext, int, int, Guid, Task<DbRoomServerUnit?>> GetRoomServerAsync =
-        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int roomId, Guid id) =>
+    public static readonly Func<AiDbContext, int, int, Guid, Guid, Task<DbRoomServerUnit?>> GetRoomServerAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int roomId, Guid userId, Guid serverId) =>
             ctx.RoomMcpServers
-                .Where(x => x.TenantId == tenantId && x.RoomId == roomId && x.ServerId == id)
+                .Where(x => x.TenantId == tenantId && x.RoomId == roomId && x.ServerId == serverId)
                 .Select(x =>
                     new DbRoomServerUnit
                     {
@@ -155,7 +155,7 @@ static file class McpQueries
                         RoomId = x.RoomId,
                         Server = ctx.McpServers.FirstOrDefault(y => y.TenantId == tenantId && y.Id == x.ServerId),
                         Settings = ctx.RoomMcpServerSettings.FirstOrDefault(y =>
-                            y.TenantId == tenantId && y.ServerId == x.ServerId)
+                            y.TenantId == tenantId && y.RoomId == x.RoomId && y.UserId == userId && y.ServerId == x.ServerId)
                     })
                 .FirstOrDefault());
 
@@ -224,8 +224,8 @@ static file class McpQueries
             ctx.RoomMcpServers
                 .Count(x => x.TenantId == tenantId && x.RoomId == roomId));
 
-    public static readonly Func<AiDbContext, int, int, IAsyncEnumerable<DbRoomServerUnit>> GetRoomServersAsync =
-        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int roomId) =>
+    public static readonly Func<AiDbContext, int, int, Guid, IAsyncEnumerable<DbRoomServerUnit>> GetRoomServersAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int roomId, Guid userId) =>
             ctx.RoomMcpServers
                 .GroupJoin(
                     ctx.McpServers,
@@ -237,8 +237,8 @@ static file class McpQueries
                     (x, s) => new { x.map, server = s })
                 .GroupJoin(
                     ctx.RoomMcpServerSettings,
-                    x => new { tenantId = x.map.TenantId, roomId = x.map.RoomId, id = x.map.ServerId },
-                    s => new { tenantId = s.TenantId, roomId = s.RoomId, id = s.ServerId },
+                    x => new { tenantId = x.map.TenantId, roomId = x.map.RoomId, userId, id = x.map.ServerId },
+                    s => new { tenantId = s.TenantId, roomId = s.RoomId, userId, id = s.ServerId },
                     (x, group) => new { x.map, x.server, settings = group })
                 .SelectMany(
                     x => x.settings.DefaultIfEmpty(),

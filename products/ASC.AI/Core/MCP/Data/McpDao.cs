@@ -360,11 +360,11 @@ public class McpDao(
         });
     }
 
-    public async Task<McpServerConnection?> GetMcpConnectionAsync(int tenantId, int roomId, Guid serverId)
+    public async Task<McpServerConnection?> GetMcpConnectionAsync(int tenantId, int roomId, Guid userId, Guid serverId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
-        var item = await dbContext.GetRoomServerAsync(tenantId, roomId, serverId);
+        var item = await dbContext.GetRoomServerAsync(tenantId, roomId, userId, serverId);
         if (item == null)
         {
             return null;
@@ -383,10 +383,10 @@ public class McpDao(
         return await item.ToMcpRoomServerAsync(crypto, consumerFactory);
     }
     
-    public async IAsyncEnumerable<McpServerConnection> GetServerConnectionAsync(int tenantId, int roomId)
+    public async IAsyncEnumerable<McpServerConnection> GetServerConnectionAsync(int tenantId, int roomId, Guid userId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        await foreach (var item in dbContext.GetRoomServersAsync(tenantId, roomId))
+        await foreach (var item in dbContext.GetRoomServersAsync(tenantId, roomId, userId))
         {
             if (item.Server == null)
             {
