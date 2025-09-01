@@ -85,6 +85,7 @@ try
     await eventBus.SubscribeAsync<CreateRoomTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
     await eventBus.SubscribeAsync<CreateRoomFromTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
     await eventBus.SubscribeAsync<DataStorageEncryptionIntegrationEvent, DataStorageEncryptionIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<CustomerOperationsReportIntegrationEvent, CustomerOperationsReportIntegrationEventHandler>();
 
     sp.GetRequiredService<FileTrackerHelper>().Subscribe();
 

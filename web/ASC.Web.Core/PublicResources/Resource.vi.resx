@@ -1088,16 +1088,10 @@
     <value>Loại tiền</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Ngày và giờ</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Mô tả</value>
+    <value>Ngày</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Số lượng</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Tên dịch vụ</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Dung lượng ổ đĩa</value>
@@ -1110,8 +1104,5 @@
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Báo cáo hoạt động khách hàng ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Trừ phí</value>
   </data>
 </root>

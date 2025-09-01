@@ -135,4 +135,25 @@
   <data name="BackupInvalid" xml:space="preserve">
     <value>Plik kopii zapasowej jest nieprawidłowy.</value>
   </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Automatyczna kopia zapasowa</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Tymczasowe miejsce przechowywania</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Stwórz kopię zapasową pokoju</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Plik lokalny</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Przechowywanie przez strony trzecie</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Zasób strony trzeciej</value>
+  </data>
 </root>

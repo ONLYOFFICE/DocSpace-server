@@ -1147,22 +1147,16 @@
     <value>Արտարժույթ</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Ամսաթիվ և ժամ</value>
+    <value>Ամսաթիվ</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Քանակ</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Ծառայության անվանում</value>
   </data>
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Չափման միավոր</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Հաճախորդների գործունեության հաշվետվություն ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Հեռացում</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>Խումբը չհաջողվեց գտնել</value>
