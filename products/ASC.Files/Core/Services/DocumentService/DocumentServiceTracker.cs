@@ -346,17 +346,9 @@ public class DocumentServiceTrackerHelper(
             
             if (securityContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry && await fileSecurity.CanReadAsync(file))
             {
-                var linkId = await externalShare.GetLinkIdAsync();
-
-                if (linkId != Guid.Empty && file.CreateBy != securityContext.CurrentAccount.ID)
-                {
-                    await entryManager.MarkFileAsRecentByLink(file, linkId);
-                }
-                else
-                {
-                    await entryManager.MarkAsRecent(file);
-                }
+                await entryManager.MarkAsRecent(file);
             }
+            
             securityContext.Logout();
         }
     }
