@@ -6,7 +6,6 @@
     <OutputType>Library</OutputType>
     <NoWarn>NU1701;1591</NoWarn>
     <ImplicitUsings>enable</ImplicitUsings>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
 
