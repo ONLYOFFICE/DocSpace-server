@@ -31,16 +31,30 @@ public class ToolHolder : IAsyncDisposable
     public readonly List<AITool> Tools = [];
     
     private readonly List<IMcpClient> _clients = [];
+    private readonly Dictionary<string, ToolProperties> _properties = [];
 
-    public void AddTool(AITool tool)
+    public void AddTool(ToolWrapper toolWrapper)
     {
-        Tools.Add(tool);
+        Tools.Add(toolWrapper.Tool);
+        _properties.Add(toolWrapper.Tool.Name, toolWrapper.Properties);
     }
 
-    public void AddMcpTool(IMcpClient client, IEnumerable<AITool> tools)
+    public void AddMcpTool(IMcpClient client, IEnumerable<ToolWrapper> tools)
     {
         _clients.Add(client);
-        Tools.AddRange(tools);
+
+        foreach (var tool in tools)
+        {
+            Tools.Add(tool.Tool);
+            _properties.Add(tool.Tool.Name, tool.Properties);
+        }
+    }
+    
+    public ToolProperties GetProperties(string toolName)
+    {
+        return !_properties.TryGetValue(toolName, out var properties) 
+            ? throw new ArgumentException($"Tool {toolName} not found") 
+            : properties;
     }
     
     public async ValueTask DisposeAsync()
@@ -50,4 +64,17 @@ public class ToolHolder : IAsyncDisposable
             await client.DisposeAsync();
         }
     }
+}
+
+public class ToolWrapper
+{
+    public required AITool Tool { get; init; }
+    public required ToolProperties Properties { get; init; }
+}
+
+public class ToolProperties
+{
+    public Guid ServerId { get; set; }
+    public int RoomId { get; set; }
+    public bool AutoInvoke { get; set; }
 }

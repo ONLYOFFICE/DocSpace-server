@@ -32,5 +32,5 @@ public class ChatClientOptions
     public required string Key { get; init; }
     public ProviderType Provider { get; init; }
     public required string ModelId { get; init; }
-    public List<AITool>? Tools { get; init; }
+    public ToolHolder? ToolHolder { get; init; }
 }

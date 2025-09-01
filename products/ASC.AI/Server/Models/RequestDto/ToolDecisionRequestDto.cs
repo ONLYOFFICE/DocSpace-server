@@ -24,42 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat;
+using ASC.AI.Core.Chat.Function;
 
-[Scope]
-public class ChatTools(
-    McpService mcpService,
-    KnowledgeSearchEngine searchEngine)
+namespace ASC.AI.Models.RequestDto;
+
+public class ToolDecisionRequestDto
 {
-    public async Task<ToolHolder> GetAsync(int roomId)
-    {
-        var holder = await mcpService.GetToolsAsync(roomId);
-        
-        var searchTool = MakeSearchTool(roomId);
-        holder.AddTool(searchTool);
-        
-        return holder;
-    }
+    [FromRoute(Name = "callId")]
+    public required string CallId { get; init; }
+    
+    [FromBody]
+    public required ToolDecisionRequestBody Body { get; init; }
+}
 
-    private ToolWrapper MakeSearchTool(int roomId)
-    {
-        var searchTool = AIFunctionFactory.Create(
-            ([Description("Query to search")]string query) => searchEngine.SearchAsync(roomId, query), 
-            new AIFunctionFactoryOptions
-            {
-                Name = "knowledge_search",
-                Description = "Search in knowledge base"
-            });
-
-        return new ToolWrapper
-        {
-            Tool = searchTool, 
-            Properties = new ToolProperties
-            {
-                ServerId = Guid.Empty,
-                RoomId = roomId,
-                AutoInvoke = true
-            }
-        };
-    }
+public class ToolDecisionRequestBody
+{
+    public ToolExecutionDecision Decision { get; init; }
 }

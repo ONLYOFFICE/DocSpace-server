@@ -50,6 +50,7 @@ public class DbMcpServerSettings : BaseEntity
 public class ToolsConfiguration
 {
     public required HashSet<string> Excluded { get; set; }
+    public required HashSet<string> Allowed { get; set; }
 }
 
 public static class DbMcpToolsSettingsExtensions 

@@ -38,7 +38,8 @@ public class ChatController(
     ApiContext apiContext,
     IMapper mapper,
     MessageExporter exporter,
-    FileDtoHelper fileDtoHelper) : ControllerBase
+    FileDtoHelper fileDtoHelper,
+    McpService mcpService) : ControllerBase
 {
     [HttpPost("rooms/{roomId}/chats")]
     public async Task<IActionResult> StartNewChatAsync(StartNewChatRequestDto inDto)
@@ -133,5 +134,11 @@ public class ChatController(
     {
         var models = await chatService.GetModelsAsync(inDto.ProviderId);
         return mapper.Map<IEnumerable<ModelData>, IEnumerable<ModelDto>>(models);
+    }
+
+    [HttpPost("chats/tool-permissions/{callId}/decision")]
+    public async Task ProvidePermissionAsync(ToolDecisionRequestDto inDto)
+    {
+        await mcpService.ProvideMcpToolPermissionAsync(inDto.CallId, inDto.Body.Decision);
     }
 }

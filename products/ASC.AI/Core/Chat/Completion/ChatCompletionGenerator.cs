@@ -35,6 +35,11 @@ public class ChatCompletionGenerator(
     ToolHolder toolHolder,
     IHistoryWriterFactory historyWriterFactory)
 {
+    private static readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web)
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+    };
+    
     public async IAsyncEnumerable<ChatCompletion> GenerateCompletionAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         HistoryWriter? historyWriter = null;
@@ -89,19 +94,19 @@ public class ChatCompletionGenerator(
                 {
                     case TextContent textContent:
                         yield return new ChatCompletion(EventType.NewToken,
-                            JsonSerializer.Serialize(textContent, JsonSerializerOptions.Web));
+                            JsonSerializer.Serialize(textContent, _serializerOptions));
                         break;
                     case FunctionCallContent functionCall:
                         yield return new ChatCompletion(EventType.ToolCall,
-                            JsonSerializer.Serialize(functionCall, JsonSerializerOptions.Web));
+                            JsonSerializer.Serialize(functionCall, _serializerOptions));
                         break;
                     case FunctionResultContent functionResult:
                         yield return new ChatCompletion(EventType.ToolResult,
-                            JsonSerializer.Serialize(functionResult, JsonSerializerOptions.Web));
+                            JsonSerializer.Serialize(functionResult, _serializerOptions));
                         break;
                     case ErrorContent error:
                         yield return new ChatCompletion(EventType.Error, 
-                            JsonSerializer.Serialize(error, JsonSerializerOptions.Web));
+                            JsonSerializer.Serialize(error, _serializerOptions));
                         break;
                 }
             }

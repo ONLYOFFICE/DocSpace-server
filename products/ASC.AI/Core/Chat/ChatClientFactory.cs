@@ -24,10 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Core.Chat.Function;
+
 namespace ASC.AI.Core.Chat;
 
 [Scope]
-public class ChatClientFactory(IHttpClientFactory httpClientFactory)
+public class ChatClientFactory(
+    IHttpClientFactory httpClientFactory,
+    IToolPermissionRequester toolPermissionRequester)
 {
     public IChatClient Create(ChatClientOptions options)
     {
@@ -54,14 +58,11 @@ public class ChatClientFactory(IHttpClientFactory httpClientFactory)
         }
         else
         {
-            var httpClient = httpClientFactory.CreateClient();
-            httpClient.DefaultRequestHeaders.Add("AuthorizationJwt", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmFhNmU0LWYxMzMtMTFlYS1iMTI2LTAwZmZlZWM4YjRlZiIsIm5hbWUiOiJBZG1pbmlzdHJhdG9yIiwiY3VzdG9tZXJJZCI6IjEzMDhfc3RhbmQxIn0.6KJaCsdGJEF0lea7y1nSgGnS85XB_wW8aPEz2kV1Dds");
-            
             var credential = new ApiKeyCredential(options.Key);
             var openAiOptions = new OpenAIClientOptions
             {
                 Endpoint = new Uri(options.Endpoint),
-                Transport = new HttpClientPipelineTransport(httpClient)
+                Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
             };
         
             var openAiClient = new OpenAIClient(credential, openAiOptions);
@@ -70,14 +71,19 @@ public class ChatClientFactory(IHttpClientFactory httpClientFactory)
             builder = chatClient.AsIChatClient().AsBuilder();
         }
 
-        if (options.Tools is { Count: > 0 })
+        if (options.ToolHolder?.Tools is { Count: > 0 })
         {
             builder.ConfigureOptions(x =>
             {
-                x.Tools = options.Tools;
+                x.Tools = options.ToolHolder.Tools;
                 x.ToolMode = ChatToolMode.Auto;
-                x.AllowMultipleToolCalls = true;
-            }).UseFunctionInvocation();
+            });
+            
+            builder = builder.Use((innerClient, _) => 
+                new ManagedFunctionInvokingChatClient(
+                    innerClient,
+                    options.ToolHolder,
+                    toolPermissionRequester));
         }
 
         return builder.Build();

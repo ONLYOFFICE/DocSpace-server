@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Core.Chat.Function;
+
 namespace ASC.AI.Core.MCP;
 
 [Scope]
@@ -38,7 +40,8 @@ public class McpService(
     UserManager userManager,
     IDistributedLockProvider distributedLockProvider,
     ClientTransportFactory clientTransportFactory,
-    OAuth20TokenHelper oauthTokenHelper)
+    OAuth20TokenHelper oauthTokenHelper,
+    IToolPermissionProvider toolPermissionProvider)
 {
     private const int MaxMcpServersByRoom = 5;
     
@@ -335,7 +338,8 @@ public class McpService(
             {
                 ToolsConfiguration = new ToolsConfiguration
                 {
-                    Excluded = excludedTools
+                    Excluded = excludedTools,
+                    Allowed = []
                 }
             };
         }
@@ -345,7 +349,8 @@ public class McpService(
             {
                 settings.ToolsConfiguration = new ToolsConfiguration
                 {
-                    Excluded = excludedTools
+                    Excluded = excludedTools,
+                    Allowed = []
                 };
             }
             else
@@ -385,6 +390,43 @@ public class McpService(
         
         return holder;
     }
+
+    public async Task ProvideMcpToolPermissionAsync(string callId, ToolExecutionDecision decision)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        
+        var callData = await toolPermissionProvider.ProvidePermissionAsync(callId, decision);
+        if (callData == null || decision is not ToolExecutionDecision.AlwaysAllow)
+        {
+            return;
+        }
+
+        var connection = await mcpDao.GetMcpConnectionAsync(tenantId, callData.RoomId, callData.ServerId);
+        if (connection == null)
+        {
+            return;
+        }
+        
+        var settings = connection.Settings;
+
+        if (settings == null)
+        {
+            settings = new McpServerSettings
+            {
+                ToolsConfiguration = new ToolsConfiguration { Excluded = [], Allowed = [callData.Name] }
+            };
+        }
+        else if (settings.ToolsConfiguration == null)
+        {
+            settings.ToolsConfiguration = new ToolsConfiguration { Excluded = [], Allowed = [callData.Name] };
+        }
+        else
+        {
+            settings.ToolsConfiguration.Allowed.Add(callData.Name);
+        }
+        
+        await mcpDao.SaveSettingsAsync(tenantId, callData.RoomId, authContext.CurrentAccount.ID, callData.ServerId, settings);
+    }
     
     private async Task<IReadOnlyDictionary<string, bool>> GetToolsAsync(McpServerConnection connection)
     {
@@ -398,7 +440,7 @@ public class McpService(
         {
             return tools.ToDictionary(t => t.Name, _ => true);
         }
-            
+        
         var excludedTools = connection.Settings.ToolsConfiguration.Excluded;
         
         return tools.ToDictionary(t => t.Name, t => !excludedTools.Contains(t.Name));
@@ -462,13 +504,31 @@ public class McpService(
 
             var tools = await mcpClient.ListToolsAsync();
 
-            if (connection.Settings?.ToolsConfiguration == null)
+            var wrappers = new List<ToolWrapper>(tools.Count);
+            var configuration = connection.Settings?.ToolsConfiguration;
+            
+            foreach (var tool in tools)
             {
-                return new McpContainer(mcpClient, tools);
+                if (configuration?.Excluded.Contains(tool.Name) == true)
+                {
+                    continue;
+                }
+
+                var wrapper = new ToolWrapper
+                {
+                    Tool = tool,
+                    Properties = new ToolProperties
+                    {
+                        ServerId = connection.ServerId,
+                        RoomId = connection.RoomId,
+                        AutoInvoke = configuration?.Allowed.Contains(tool.Name) == true
+                    }
+                };
+                
+                wrappers.Add(wrapper);
             }
             
-            var excludedTools = connection.Settings.ToolsConfiguration.Excluded;
-            return new McpContainer(mcpClient, tools.Where(x => !excludedTools.Contains(x.Name)).ToList());
+            return new McpContainer(mcpClient, wrappers);
         }
         catch (Exception e)
         {
@@ -477,10 +537,10 @@ public class McpService(
         }
     }
     
-    private class McpContainer(IMcpClient client, IEnumerable<AITool> tools)
+    private class McpContainer(IMcpClient client, IEnumerable<ToolWrapper> tools)
     {
         public IMcpClient Client { get; } = client;
-        public IEnumerable<AITool> Tools { get; } = tools;
+        public IEnumerable<ToolWrapper> Tools { get; } = tools;
     }
 
     private string GetLockKey(int tenantId)

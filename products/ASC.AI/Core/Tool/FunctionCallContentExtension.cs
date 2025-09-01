@@ -24,42 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat;
+namespace ASC.AI.Core.Tool;
 
-[Scope]
-public class ChatTools(
-    McpService mcpService,
-    KnowledgeSearchEngine searchEngine)
+public static class FunctionCallContentExtension
 {
-    public async Task<ToolHolder> GetAsync(int roomId)
+    public static void MarkAsManaged(this FunctionCallContent functionCallContent)
     {
-        var holder = await mcpService.GetToolsAsync(roomId);
-        
-        var searchTool = MakeSearchTool(roomId);
-        holder.AddTool(searchTool);
-        
-        return holder;
-    }
-
-    private ToolWrapper MakeSearchTool(int roomId)
-    {
-        var searchTool = AIFunctionFactory.Create(
-            ([Description("Query to search")]string query) => searchEngine.SearchAsync(roomId, query), 
-            new AIFunctionFactoryOptions
-            {
-                Name = "knowledge_search",
-                Description = "Search in knowledge base"
-            });
-
-        return new ToolWrapper
-        {
-            Tool = searchTool, 
-            Properties = new ToolProperties
-            {
-                ServerId = Guid.Empty,
-                RoomId = roomId,
-                AutoInvoke = true
-            }
-        };
+        functionCallContent.AdditionalProperties ??= new AdditionalPropertiesDictionary();
+        functionCallContent.AdditionalProperties.Add("managed", true);
     }
 }

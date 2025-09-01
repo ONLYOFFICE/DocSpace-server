@@ -24,42 +24,29 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat;
+namespace ASC.AI.Core.Chat.Function;
 
-[Scope]
-public class ChatTools(
-    McpService mcpService,
-    KnowledgeSearchEngine searchEngine)
+public interface IToolPermissionRequester
 {
-    public async Task<ToolHolder> GetAsync(int roomId)
-    {
-        var holder = await mcpService.GetToolsAsync(roomId);
-        
-        var searchTool = MakeSearchTool(roomId);
-        holder.AddTool(searchTool);
-        
-        return holder;
-    }
+    Task<ToolExecutionDecision> RequestPermissionAsync(CallData callData, CancellationToken cancellationToken);
+}
 
-    private ToolWrapper MakeSearchTool(int roomId)
-    {
-        var searchTool = AIFunctionFactory.Create(
-            ([Description("Query to search")]string query) => searchEngine.SearchAsync(roomId, query), 
-            new AIFunctionFactoryOptions
-            {
-                Name = "knowledge_search",
-                Description = "Search in knowledge base"
-            });
+public interface IToolPermissionProvider
+{
+    Task<CallData?> ProvidePermissionAsync(string callId, ToolExecutionDecision decision);
+}
 
-        return new ToolWrapper
-        {
-            Tool = searchTool, 
-            Properties = new ToolProperties
-            {
-                ServerId = Guid.Empty,
-                RoomId = roomId,
-                AutoInvoke = true
-            }
-        };
-    }
+public enum ToolExecutionDecision
+{
+    Allow,
+    AlwaysAllow,
+    Deny
+}
+
+public class CallData
+{
+    public Guid ServerId { get; init; }
+    public int RoomId { get; init; }
+    public required string CallId { get; init; }
+    public required string Name { get; init; }
 }

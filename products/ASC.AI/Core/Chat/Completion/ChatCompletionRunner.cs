@@ -45,7 +45,7 @@ public class ChatCompletionRunner(
     {
         ArgumentException.ThrowIfNullOrEmpty(message);
         
-        var config = await GetRungConfigAsync(roomId);
+        var config = await GetRunConfigAsync(roomId);
         
         var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
         var toolTask = chatTools.GetAsync(roomId);
@@ -75,7 +75,7 @@ public class ChatCompletionRunner(
             Key = config.Key,
             Provider = config.ProviderType,
             ModelId = config.ModelId,
-            Tools = toolHolder.Tools
+            ToolHolder = toolHolder
         });
         
         return new ChatCompletionGenerator(client, logger, chatSocketClient, messages, toolHolder, writerFactory);
@@ -94,7 +94,7 @@ public class ChatCompletionRunner(
             throw new ItemNotFoundException("Chat not found");
         }
 
-        var config = await GetRungConfigAsync(chat.RoomId);
+        var config = await GetRunConfigAsync(chat.RoomId);
         
         var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
         var toolsTask = chatTools.GetAsync(chat.RoomId);
@@ -124,13 +124,13 @@ public class ChatCompletionRunner(
             Key = config.Key,
             Provider = config.ProviderType,
             ModelId = config.ModelId,
-            Tools = toolHolder.Tools
+            ToolHolder = toolHolder
         });
 
         return new ChatCompletionGenerator(client, logger, chatSocketClient, messages, toolHolder, writerFactory);
     }
 
-    private async Task<ChatConfiguration> GetRungConfigAsync(int roomId)
+    private async Task<ChatConfiguration> GetRunConfigAsync(int roomId)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         

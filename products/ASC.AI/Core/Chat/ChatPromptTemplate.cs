@@ -93,6 +93,7 @@ public static class ChatPromptTemplate
         
         **Error handling:**
             - If a function call fails or returns an error, analyze the error message.
+            - If an error occurs when calling a function, it means that the user has refused to execute it. But do not try to call it again.
             - Attempt to fix the issue and retry the call.
             - Make up to three retries, adjusting your approach each time based on the specific error.
             - After each failed attempt, explain your reasoning for the adjustment.

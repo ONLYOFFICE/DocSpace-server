@@ -63,7 +63,7 @@ public static class ControllerExtensions
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
-                    await writer.WriteAsync("event: ping\n\n", cancellationToken);
+                    await writer.WriteAsync($": ping - {DateTimeOffset.UtcNow:O}\n\n", cancellationToken);
                 }
             }
             catch
