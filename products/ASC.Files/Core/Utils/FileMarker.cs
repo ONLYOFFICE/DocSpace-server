@@ -1196,7 +1196,6 @@ public class FileMarker(
     {
         switch (entry)
         {
-            case File<T> when entry.RootFolderType is not FolderType.USER:
             case Folder<T> folder when !DocSpaceHelper.IsRoom(folder.FolderType):
                 return MarkResult.NotMarked;
         }

@@ -1873,6 +1873,8 @@ public class FileStorageService //: IFileStorageService
 
             if (result.Renamed)
             {
+                await entryManager.MarkAsRecent(file);
+                
                 await filesMessageService.SendAsync(MessageAction.FileRenamed, file, file.Title, oldTitle);
 
                 await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
@@ -3627,8 +3629,7 @@ public class FileStorageService //: IFileStorageService
         {
             switch (e)
             {
-                case File<T> file:        
-                    file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
+                case File<T> file:
                     tasks.Add(socketManager.RemoveFileFromRecentAsync(file, users));
                     break;
                 case Folder<T> folder:
