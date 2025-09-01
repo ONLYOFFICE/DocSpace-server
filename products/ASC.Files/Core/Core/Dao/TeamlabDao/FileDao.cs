@@ -2654,12 +2654,14 @@ internal class FileDao(
                 null,
         });
         
-        if (tagType.Any(r => r is TagType.RecentByLink or TagType.Recent))
+        if (tagType.Any(r => r is TagType.RecentByLink or TagType.Recent or TagType.Favorite))
         {
+            var documentsTagType = tagType.Contains(TagType.Favorite) ? TagType.Favorite : TagType.Recent;
+            
             query = location switch
             {
                 Location.Documents => 
-                    query.Where(x => x.Tag.Type == TagType.Recent && 
+                    query.Where(x => x.Tag.Type == documentsTagType && 
                        filesDbContext.Folders
                         .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.USER)
                         .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
@@ -2668,7 +2670,7 @@ internal class FileDao(
                         .Select(t =>  t.folder.Id)
                         .Any()),
                 Location.Room => 
-                    query.Where(x => x.Tag.Type == TagType.Recent && 
+                    query.Where(x => x.Tag.Type == documentsTagType && 
                          filesDbContext.Folders
                              .Where(f => f.TenantId == tenantId && (f.FolderType == FolderType.CustomRoom || f.FolderType == FolderType.EditingRoom || f.FolderType == FolderType.FillingFormsRoom || f.FolderType == FolderType.PublicRoom || f.FolderType == FolderType.VirtualDataRoom))
                              .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
@@ -2685,7 +2687,7 @@ internal class FileDao(
                          .OrderByDescending(t => t.tree.Level)
                          .Select(t =>  t.folder.Id)
                          .Any())),
-                _ => query.Where(x => 
+                _ => documentsTagType == TagType.Favorite ? query : query.Where(x => 
                     (x.Tag.Type == TagType.Recent || x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow))) &&
                         !filesDbContext.Folders
                         .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.TRASH)
