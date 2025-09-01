@@ -56,7 +56,7 @@ public class CustomTagsService(
         var tagInfo = new TagInfo
         {
             Name = name,
-            Owner = Guid.Empty,
+            Owner = authContext.CurrentAccount.ID,
             Type = TagType.Custom
         };
 
@@ -85,7 +85,10 @@ public class CustomTagsService(
         {
             throw new ItemNotFoundException();
         }
-
+        if (!existedTag.Owner.Equals(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
         var tag = await tagDao.GetTagsInfoAsync(newName, TagType.Custom, true).FirstOrDefaultAsync();
         if (tag != null && tag.Id != existedTag.Id)
         {
