@@ -135,4 +135,25 @@
   <data name="BackupInvalid" xml:space="preserve">
     <value>Záložný súbor je neplatný.</value>
   </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Automatická záloha</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Dočasné úložisko</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Zálohovať miestnosť</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Miestny súbor</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Úložisko tretích strán</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Zdroj tretej strany</value>
+  </data>
 </root>

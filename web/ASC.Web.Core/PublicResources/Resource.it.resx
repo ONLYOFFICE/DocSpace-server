@@ -1088,22 +1088,16 @@
     <value>Valuta</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Data e ore</value>
+    <value>Data</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Quantità</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Nome del servizio</value>
   </data>
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Unità di misura</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Report delle operazioni cliente ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Prelievo</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>Il gruppo non è stato trovato</value>
@@ -1116,9 +1110,6 @@
   </data>
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Spazio di archiviazione utilizzato:</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Descrizione</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Spazio su disco</value>

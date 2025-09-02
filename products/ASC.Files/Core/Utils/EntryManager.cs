@@ -388,12 +388,18 @@ public class EntryManager(IDaoFactory daoFactory,
             var fileDao = daoFactory.GetFileDao<T>();
             var userId = authContext.CurrentAccount.ID;
 
-            var filesTotalCountTask = fileDao.GetFilesByTagCountAsync(userId, [TagType.Recent, TagType.RecentByLink], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location);
-            var files = await fileDao.GetFilesByTagAsync(userId, [TagType.Recent, TagType.RecentByLink], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, new OrderBy(SortedByType.LastOpened, false), from, count).ToListAsync();
+            total = 0;
+            var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent, TagType.RecentByLink], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, new OrderBy(SortedByType.LastOpened, false), from, count);
             
-            entries.AddRange(files);
+            await foreach (var e in fileSecurity.CanReadAsync(files).Where(r=> r.Item2).Select(t=> t.Item1))
+            {
+                total++;
 
-            total = await filesTotalCountTask;
+                if (total > from && total <= from + count)
+                {
+                    entries.Add(e);
+                }
+            }
 
             return (entries, total);
         }
@@ -1869,33 +1875,36 @@ public class EntryManager(IDaoFactory daoFactory,
             Renamed = renamed
         };
     }
+    
 
-    public async Task MarkFileAsRecentByLink<T>(File<T> file, Guid linkId)
-    {
-        var marked = await fileMarker.MarkAsRecentByLink(file, linkId);
-        if (marked != MarkResult.NotMarked)
-        {
-            file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
-            await socketManager.AddFileToRecentAsync(file, [authContext.CurrentAccount.ID]);
-        }
-    }
-
-    public async Task MarkAsRecent<T>(File<T> file)
+    public async Task MarkAsRecent<T>(File<T> file, Guid? linkId = null)
     {
         if (file.Encrypted || file.ProviderEntry)
         {
             throw new NotSupportedException();
         }
+        
+        linkId ??= await externalShare.GetLinkIdAsync();
+        
+        if (linkId != Guid.Empty && file.CreateBy != securityContext.CurrentAccount.ID)
+        {
+            var marked = await fileMarker.MarkAsRecentByLink(file, linkId.Value);
+            if (marked != MarkResult.NotMarked)
+            {
+                await socketManager.AddFileToRecentAsync(file, [authContext.CurrentAccount.ID]);
+            }
+        }
+        else
+        {
+            var tagDao = daoFactory.GetTagDao<T>();
+            var userId = authContext.CurrentAccount.ID;
 
-        var tagDao = daoFactory.GetTagDao<T>();
-        var userID = authContext.CurrentAccount.ID;
+            var tag = Tag.Recent(userId, file);
 
-        var tag = Tag.Recent(userID, file);
-
-        await tagDao.SaveTagsAsync(tag);
-
-        file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
-        await socketManager.AddFileToRecentAsync(file, [authContext.CurrentAccount.ID]);
+            await tagDao.SaveTagsAsync(tag);
+            
+            await socketManager.AddFileToRecentAsync(file, [authContext.CurrentAccount.ID]);
+        }
     }
 
     private async Task InitFormFillingFolders<T>(File<T> file, Folder<T> folder, EntryProperties<T> properties, IFolderDao<T> folderDao, IFileDao<T> fileDao, Guid createBy) {
@@ -2123,6 +2132,13 @@ public class EntryManager(IDaoFactory daoFactory,
 
                     await fileMarker.RemoveMarkAsNewForAllAsync(file);
                     await linkDao.DeleteAllLinkAsync(file.Id);
+                    
+                    await socketManager.RemoveFileFromRecentAsync(file, [authContext.CurrentAccount.ID]);
+                    
+                    if (!result.Encrypted && !result.ProviderEntry && await fileSecurity.CanReadAsync(result))
+                    {
+                        await MarkAsRecent(result);
+                    }
                 }
             }
             catch (Exception ex)

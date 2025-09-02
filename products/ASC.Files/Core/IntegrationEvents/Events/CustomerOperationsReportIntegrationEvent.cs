@@ -24,84 +24,59 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModels.RequestsDto;
+namespace ASC.Files.Core.IntegrationEvents.Events;
 
-/// <summary>
-/// Parameters of the request for receiving the report on client operations
-/// </summary>
-public class CustomerOperationsRequestDto
+[ProtoContract]
+public record CustomerOperationsReportIntegrationEvent : IntegrationEvent
 {
-    /// <summary>
-    /// Start date
-    /// </summary>
-    [FromQuery(Name = "startDate")]
-    public DateTime StartDate { get; set; }
+    private CustomerOperationsReportIntegrationEvent() : base()
+    {
+    }
 
-    /// <summary>
-    /// End date
-    /// </summary>
-    [FromQuery(Name = "endDate")]
-    public DateTime EndDate { get; set; }
+    public CustomerOperationsReportIntegrationEvent(
+        Guid createBy,
+        int tenantId,
+        string baseUri,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        string participantName = null,
+        bool? credit = null,
+        bool? debit = null,
+        IDictionary<string, string> headers = null,
+        bool terminate = false)
+    : base(createBy, tenantId)
+    {
+        BaseUri = baseUri;
+        StartDate = startDate;
+        EndDate = endDate;
+        ParticipantName = participantName;
+        Credit = credit;
+        Debit = debit;
+        Headers = headers;
+        Terminate = terminate;
+    }
 
-    /// <summary>
-    /// Participant name
-    /// </summary>
-    [FromQuery(Name = "participantName")]
-    public string ParticipantName { get; set; }
+    [ProtoMember(1)]
+    public string BaseUri { get; set; }
 
-    /// <summary>
-    /// Include credit operations (true by default)
-    /// </summary>
-    [FromQuery(Name = "credit")]
-    public bool? Credit { get; set; }
-
-    /// <summary>
-    /// Include debit operations (true by default)
-    /// </summary>
-    [FromQuery(Name = "debit")]
-    public bool? Debit { get; set; }
-
-    /// <summary>
-    /// Offset (0 by default)
-    /// </summary>
-    [FromQuery(Name = "offset")]
-    public int? Offset { get; set; }
-
-    /// <summary>
-    /// Limit (25 by default)
-    /// </summary>
-    [FromQuery(Name = "limit")] 
-    public int? Limit { get; set; }
-
-}
-
-/// <summary>
-/// Parameters of the request for generating the report on client operations
-/// </summary>
-public class CustomerOperationsReportRequestDto
-{
-    /// <summary>
-    /// Start date
-    /// </summary>
+    [ProtoMember(2)]
     public DateTime? StartDate { get; set; }
 
-    /// <summary>
-    /// End date
-    /// </summary>
+    [ProtoMember(3)]
     public DateTime? EndDate { get; set; }
 
-    /// <summary>
-    /// Participant name
-    /// </summary>
+    [ProtoMember(4)]
     public string ParticipantName { get; set; }
 
-    /// <summary>
-    /// Include credit operations
-    /// </summary>
+    [ProtoMember(5)]
     public bool? Credit { get; set; }
 
-    /// <summary>
-    /// Include debit operations
-    /// </summary>
+    [ProtoMember(6)]
     public bool? Debit { get; set; }
+
+    [ProtoMember(7)]
+    public IDictionary<string, string> Headers { get; set; }
+
+    [ProtoMember(8)]
+    public bool Terminate { get; set; }
 }
