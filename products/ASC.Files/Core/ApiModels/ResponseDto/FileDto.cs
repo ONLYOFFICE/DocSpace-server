@@ -281,6 +281,7 @@ public class FileDtoHelper(
                 result.Security[action] = false;   
             }
 
+            result.Locked = false;
             result.CanShare = false;
             result.ViewAccessibility[Accessibility.CanConvert] = false;
 
