@@ -621,6 +621,6 @@ public class ShareRoomTest(
         // Get the primary external link
         var primaryLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        primaryLink.CanEditAccess.Should().BeTrue();
+        primaryLink.CanEditInternal.Should().BeTrue();
     }
 }
