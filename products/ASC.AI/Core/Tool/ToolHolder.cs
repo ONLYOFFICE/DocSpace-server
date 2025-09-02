@@ -38,7 +38,7 @@ public class ToolHolder : IAsyncDisposable
     public void AddTool(ToolWrapper toolWrapper)
     {
         Tools.Add(toolWrapper.Tool);
-        _properties.TryAdd(toolWrapper.Tool.Name, toolWrapper.Properties);
+        _properties.Add(toolWrapper.Tool.Name, toolWrapper.Properties);
     }
 
     public void AddMcpTool(IMcpClient client, IEnumerable<ToolWrapper> toolWrappers)
@@ -69,6 +69,7 @@ public class ToolHolder : IAsyncDisposable
             }
 
             toolWrapper.Tool = mcpClientTool.WithName(uniqueName);
+            Tools.Add(toolWrapper.Tool);
             _properties.Add(toolWrapper.Tool.Name, toolWrapper.Properties);
         }
     }
