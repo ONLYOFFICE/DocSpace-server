@@ -1021,7 +1021,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
-            if (folder.FolderType == FolderType.Recent)
+            if (folder.FolderType is FolderType.Recent or FolderType.Favorites)
             {
                 return action == FilesSecurityActions.Read;
             }

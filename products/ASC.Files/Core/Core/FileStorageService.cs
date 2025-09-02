@@ -418,7 +418,7 @@ public class FileStorageService //: IFileStorageService
             });
         }
         
-        if (parent.FolderType == FolderType.Recent && searchArea == SearchArea.RecentByLinks)
+        if (parent.FolderType == FolderType.Recent && searchArea == SearchArea.RecentByLinks || parent.FolderType == FolderType.Favorites)
         {
             parent.Title = FilesUCResource.MyFiles;
         }
@@ -3495,11 +3495,11 @@ public class FileStorageService //: IFileStorageService
     {
         if (favorite)
         {
-            await AddToFavoritesAsync(new List<T>(0), new List<T>(1) { fileId });
+            await AddToFavoritesAsync([], [fileId]);
         }
         else
         {
-            await DeleteFavoritesAsync(new List<T>(0), new List<T>(1) { fileId });
+            await DeleteFavoritesAsync([], [fileId]);
         }
 
         return favorite;
@@ -3532,9 +3532,21 @@ public class FileStorageService //: IFileStorageService
 
         foreach (var entry in entries)
         {
+            switch (entry)
+            {
+                case File<T> file:
+                    file.FolderIdDisplay = await globalFolderHelper.GetFolderFavoritesAsync<T>();
+                    await socketManager.AddFileToFavoritesAsync(file, [authContext.CurrentAccount.ID]);
+                    break;
+                case Folder<T> folder:
+                    folder.FolderIdDisplay = await globalFolderHelper.GetFolderFavoritesAsync<T>();
+                    await socketManager.AddFolderToFavoritesAsync(folder, [authContext.CurrentAccount.ID]);
+                    break;
+            }
+
             await filesMessageService.SendAsync(MessageAction.FileMarkedAsFavorite, entry, entry.Title);
         }
-
+        
         return entries;
     }
 
@@ -3558,8 +3570,22 @@ public class FileStorageService //: IFileStorageService
 
         await tagDao.RemoveTagsAsync(tags);
 
+        var folderIdFavorites = await globalFolderHelper.GetFolderFavoritesAsync<T>();
+        
         foreach (var entry in entries)
         {
+            switch (entry)
+            {
+                case File<T> file:
+                    file.FolderIdDisplay = folderIdFavorites;
+                    await socketManager.RemoveFileFromFavoritesAsync(file, [authContext.CurrentAccount.ID]);
+                    break;
+                case Folder<T> folder:
+                    folder.FolderIdDisplay = folderIdFavorites;
+                    await socketManager.RemoveFolderFromFavoritesAsync(folder, [authContext.CurrentAccount.ID]);
+                    break;
+            }
+
             await filesMessageService.SendAsync(MessageAction.FileRemovedFromFavorite, entry, entry.Title);
         }
     }
@@ -3624,7 +3650,7 @@ public class FileStorageService //: IFileStorageService
         var users = new[] { authContext.CurrentAccount.ID };
 
         var tasks = new List<Task>(entries.Count);
-
+        
         foreach (var e in entries)
         {
             switch (e)

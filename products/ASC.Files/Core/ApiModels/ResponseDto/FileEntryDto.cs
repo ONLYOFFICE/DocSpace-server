@@ -134,6 +134,11 @@ public abstract class FileEntryBaseDto
     public string Order { get; set; }
 
     /// <summary>
+    /// Specifies if the file is a favorite or not.
+    /// </summary>
+    public bool? IsFavorite { get; set; }
+    
+    /// <summary>
     /// The file entry type.
     /// </summary>
     public abstract FileEntryType FileEntryType { get; }
