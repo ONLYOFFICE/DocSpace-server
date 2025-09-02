@@ -35,19 +35,19 @@ public class ChatTools(
     {
         var holder = await mcpService.GetToolsAsync(roomId);
         
-        var searchTool = MakeSearchTool(roomId);
+        var searchTool = MakeKnowledgeSearchTool(roomId);
         holder.AddTool(searchTool);
         
         return holder;
     }
 
-    private ToolWrapper MakeSearchTool(int roomId)
+    private ToolWrapper MakeKnowledgeSearchTool(int roomId)
     {
         var searchTool = AIFunctionFactory.Create(
             ([Description("Query to search")]string query) => searchEngine.SearchAsync(roomId, query), 
             new AIFunctionFactoryOptions
             {
-                Name = "knowledge_search",
+                Name = "docspace_knowledge_search",
                 Description = "Search in knowledge base"
             });
 
@@ -56,7 +56,7 @@ public class ChatTools(
             Tool = searchTool, 
             Properties = new ToolProperties
             {
-                ServerId = Guid.Empty,
+                Name = searchTool.Name,
                 RoomId = roomId,
                 AutoInvoke = true
             }

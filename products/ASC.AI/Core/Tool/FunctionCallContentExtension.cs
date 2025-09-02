@@ -26,11 +26,39 @@
 
 namespace ASC.AI.Core.Tool;
 
+public class McpServerData
+{
+    public Guid ServerId { get; init; }
+    public required string ServerName { get; init; }
+    public ServerType ServerType { get; init; }
+}
+
 public static class FunctionCallContentExtension
 {
     public static void MarkAsManaged(this FunctionCallContent functionCallContent)
     {
         functionCallContent.AdditionalProperties ??= new AdditionalPropertiesDictionary();
         functionCallContent.AdditionalProperties.Add("managed", true);
+    }
+    
+    public static void AddMcpServerData(this FunctionCallContent functionCallContent, McpServerData mcpServerData)
+    {
+        functionCallContent.AdditionalProperties ??= new AdditionalPropertiesDictionary();
+        functionCallContent.AdditionalProperties.Add("mcpServerData", mcpServerData);
+    }
+
+    public static McpServerData? GetMcpServerData(this FunctionCallContent functionCallContent)
+    {
+        if (functionCallContent.AdditionalProperties is null)
+        {
+            return null;
+        }
+        
+        if (!functionCallContent.AdditionalProperties.TryGetValue("mcpServerData", out var mcpServerData))
+        {
+            return null;
+        }
+        
+        return mcpServerData as McpServerData;
     }
 }

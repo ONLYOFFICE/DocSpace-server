@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Security.Cryptography;
+
 namespace ASC.AI.Core.Tool;
 
 public class ToolHolder : IAsyncDisposable
@@ -36,17 +38,38 @@ public class ToolHolder : IAsyncDisposable
     public void AddTool(ToolWrapper toolWrapper)
     {
         Tools.Add(toolWrapper.Tool);
-        _properties.Add(toolWrapper.Tool.Name, toolWrapper.Properties);
+        _properties.TryAdd(toolWrapper.Tool.Name, toolWrapper.Properties);
     }
 
-    public void AddMcpTool(IMcpClient client, IEnumerable<ToolWrapper> tools)
+    public void AddMcpTool(IMcpClient client, IEnumerable<ToolWrapper> toolWrappers)
     {
         _clients.Add(client);
 
-        foreach (var tool in tools)
+        foreach (var toolWrapper in toolWrappers)
         {
-            Tools.Add(tool.Tool);
-            _properties.Add(tool.Tool.Name, tool.Properties);
+            if (toolWrapper.Tool is not McpClientTool mcpClientTool || toolWrapper.Properties.McpServerData is null)
+            {
+                continue;
+            }
+            
+            if (!_properties.ContainsKey(mcpClientTool.Name))
+            {
+                Tools.Add(toolWrapper.Tool);
+                _properties.Add(toolWrapper.Tool.Name, toolWrapper.Properties);
+                
+                continue;
+            }
+
+            var serverName = toolWrapper.Properties.McpServerData.ServerName;
+            
+            var uniqueName = GetUniqueName(serverName, toolWrapper.Tool.Name);
+            if (string.IsNullOrEmpty(uniqueName))
+            {
+                continue;
+            }
+
+            toolWrapper.Tool = mcpClientTool.WithName(uniqueName);
+            _properties.Add(toolWrapper.Tool.Name, toolWrapper.Properties);
         }
     }
     
@@ -64,17 +87,44 @@ public class ToolHolder : IAsyncDisposable
             await client.DisposeAsync();
         }
     }
+
+    private static string GetUniqueName(string serverName, string toolName)
+    {
+        const int maxToolNameLength = 64;
+        const int maxHashLength = 4;
+        
+        var name = $"{serverName}_{toolName}";
+        if (name.Length <= maxToolNameLength)
+        {
+            return name;
+        }
+        
+        var hashBytes = SHA1.HashData(Encoding.UTF8.GetBytes(serverName));
+        var hash = Convert.ToHexStringLower(hashBytes).Replace("-", "").ToLower();
+
+        var availableForHash = maxToolNameLength - (toolName.Length + 1);
+        if (availableForHash < 1)
+        {
+            return string.Empty;
+        }
+        
+        var hashLength = Math.Min(maxHashLength, availableForHash);
+        var truncatedHash = hash[..hashLength];
+
+        return $"{toolName}_{truncatedHash}";
+    }
 }
 
 public class ToolWrapper
 {
-    public required AITool Tool { get; init; }
+    public required AITool Tool { get; set; }
     public required ToolProperties Properties { get; init; }
 }
 
 public class ToolProperties
 {
-    public Guid ServerId { get; set; }
-    public int RoomId { get; set; }
+    public McpServerData? McpServerData { get; init; }
+    public required string Name { get; init; }
+    public int RoomId { get; init; }
     public bool AutoInvoke { get; set; }
 }

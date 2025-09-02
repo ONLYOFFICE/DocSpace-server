@@ -529,7 +529,13 @@ public class McpService(
                     Tool = tool,
                     Properties = new ToolProperties
                     {
-                        ServerId = connection.ServerId,
+                        McpServerData = new McpServerData
+                        {
+                            ServerId = connection.ServerId,
+                            ServerName = connection.Name,
+                            ServerType = connection.ServerType
+                        },
+                        Name = tool.Name,
                         RoomId = connection.RoomId,
                         AutoInvoke = configuration?.Allowed.Contains(tool.Name) == true
                     }
