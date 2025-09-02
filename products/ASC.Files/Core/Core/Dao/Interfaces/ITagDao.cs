@@ -36,7 +36,7 @@ public interface ITagDao<T>
     IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, IEnumerable<FileEntry<T>> fileEntries);
     IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, FileEntry<T> fileEntry);
     Task<IEnumerable<Tag>> SaveTagsAsync(IEnumerable<Tag> tag, Guid createdBy = default);
-    Task<IEnumerable<Tag>> SaveTagsAsync(Tag tag);
+    Task<IEnumerable<Tag>> SaveTagsAsync(Tag tag, Guid createdBy = default);
     IAsyncEnumerable<TagInfo> GetTagsInfoAsync(string searchText, TagType tagType, bool byName, int from = 0, int count = 0);
     IAsyncEnumerable<TagInfo> GetTagsInfoAsync(IEnumerable<string> names, TagType type);
     Task<TagInfo> SaveTagInfoAsync(TagInfo tagInfo);
