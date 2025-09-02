@@ -1894,24 +1894,24 @@ public class EntryManager(IDaoFactory daoFactory,
         
         linkId ??= await externalShare.GetLinkIdAsync();
         
-        if (linkId != Guid.Empty && file.CreateBy != securityContext.CurrentAccount.ID)
+        var userId = authContext.CurrentAccount.ID;
+        if (linkId != Guid.Empty && file.CreateBy != userId)
         {
             var marked = await fileMarker.MarkAsRecentByLink(file, linkId.Value);
             if (marked != MarkResult.NotMarked)
             {
-                await socketManager.AddFileToRecentAsync(file, [authContext.CurrentAccount.ID]);
+                await socketManager.AddFileToRecentAsync(file, [userId]);
             }
         }
         else
         {
             var tagDao = daoFactory.GetTagDao<T>();
-            var userId = authContext.CurrentAccount.ID;
 
             var tag = Tag.Recent(userId, file);
 
-            await tagDao.SaveTagsAsync(tag);
+            await tagDao.SaveTagsAsync(tag, userId);
             
-            await socketManager.AddFileToRecentAsync(file, [authContext.CurrentAccount.ID]);
+            await socketManager.AddFileToRecentAsync(file, [userId]);
         }
     }
 
