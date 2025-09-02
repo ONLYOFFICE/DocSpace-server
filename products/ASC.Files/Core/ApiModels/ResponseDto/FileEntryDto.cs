@@ -281,7 +281,7 @@ public class FileEntryDtoHelper(
         if (entry.FullShared)
         {
             var linkId = await _externalShare.GetLinkIdAsync();
-            var securityDao = _daoFactory.GetSecurityDao<int>();
+            var securityDao = _daoFactory.GetSecurityDao<string>();
             var record = await securityDao.GetSharesAsync([linkId]).FirstOrDefaultAsync();
             if (record != null)
             {
