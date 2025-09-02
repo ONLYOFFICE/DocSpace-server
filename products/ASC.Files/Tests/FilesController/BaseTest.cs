@@ -191,7 +191,7 @@ public class BaseTest(
     
     protected static FileShareLink DeserializeSharedToLink(FileShareDto updatedLink1Response)
     {
-        return JsonSerializer.Deserialize<FileShareLink>((updatedLink1Response.SharedTo as JObject)!.ToString(), JsonSerializerOptions.Web)!;
+        return JsonSerializer.Deserialize<FileShareLink>(((JsonElement)updatedLink1Response.SharedTo).ToString(), JsonSerializerOptions.Web)!;
     }
     
     protected async Task<(string, int)> CreateFileAndShare(FileShare fileShare, bool primary = true, bool varInternal = false, DateTime? expirationDate = null)

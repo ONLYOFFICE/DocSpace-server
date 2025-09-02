@@ -104,7 +104,7 @@ public class ShareFolderTest(
         
         fileInfo.Should().NotBeNull();
         fileInfo.Title.Should().Be(file.Title);
-        fileInfo.Shared.Should().BeTrue();
+        fileInfo.ParentShared.Should().BeTrue();
     }
     
     [Theory]
@@ -311,7 +311,8 @@ public class ShareFolderTest(
         primaryLink.CanEditAccess.Should().BeFalse();
         
         var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, new FolderLinkRequest(sharedToLink.Id, @internal: false), TestContext.Current.CancellationToken)).Response;
-        updatedLink.Should().BeNull();
+        var updatedSharedToLink = DeserializeSharedToLink(updatedLink);
+        updatedSharedToLink.Internal.Should().BeTrue();
     }
     
     [Fact]

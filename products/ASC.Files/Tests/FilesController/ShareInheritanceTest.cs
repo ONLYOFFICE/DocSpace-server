@@ -816,8 +816,8 @@ public class ShareInheritanceTest(
         
         var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
-        fileInfo.AvailableExternalRights.Should().HaveCount(3);
-        fileInfo.AvailableExternalRights.Where(r => r.Value).Should().ContainKeys(nameof(FileShare.FillForms), nameof(FileShare.Restrict), nameof(FileShare.None));
+        fileInfo.AvailableExternalRights.Should().HaveCount(2);
+        fileInfo.AvailableExternalRights.Where(r => r.Value).Should().ContainKeys(nameof(FileShare.FillForms), nameof(FileShare.None));
     }
 
     [Fact]
