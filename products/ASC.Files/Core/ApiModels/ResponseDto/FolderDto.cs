@@ -286,6 +286,31 @@ public class FolderDtoHelper(
 
         if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })
         {
+            var forbiddenActions = new List<FileSecurity.FilesSecurityActions>
+            {
+                FileSecurity.FilesSecurityActions.FillForms,
+                FileSecurity.FilesSecurityActions.Edit,
+                FileSecurity.FilesSecurityActions.SubmitToFormGallery,
+                FileSecurity.FilesSecurityActions.CreateRoomFrom,
+                FileSecurity.FilesSecurityActions.Duplicate,
+                FileSecurity.FilesSecurityActions.Delete,
+                FileSecurity.FilesSecurityActions.Lock,
+                FileSecurity.FilesSecurityActions.CustomFilter,
+                FileSecurity.FilesSecurityActions.Embed,
+                FileSecurity.FilesSecurityActions.StartFilling,
+                FileSecurity.FilesSecurityActions.StopFilling,
+                FileSecurity.FilesSecurityActions.CopySharedLink,
+                FileSecurity.FilesSecurityActions.CopyLink,
+                FileSecurity.FilesSecurityActions.FillingStatus
+            };
+
+            foreach (var action in forbiddenActions)
+            {
+                result.Security[action] = false;   
+            }
+
+            result.CanShare = false;
+
             result.Order = "";
 
             var myId = await _globalFolderHelper.GetFolderMyAsync<T>();
