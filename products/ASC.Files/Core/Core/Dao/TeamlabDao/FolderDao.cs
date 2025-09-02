@@ -615,7 +615,7 @@ internal class FolderDao(
 
     public async IAsyncEnumerable<Folder<int>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, OrderBy orderBy, int offset = 0, int count = -1)
     {
-        if (filterType == FilterType.FoldersOnly)
+        if (CheckInvalidFilter(filterType))
         {
             yield break;
         }
@@ -660,7 +660,23 @@ internal class FolderDao(
             yield return mapper.Map<DbFolderQuery, Folder<int>>(folder);
         }
     }
+    
+    public async Task<int> GetFoldersByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location)
+    {
+        if (CheckInvalidFilter(filterType))
+        {
+            return 0;
+        }
+        
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        
+        var q = GetFoldersByTagQuery(filesDbContext, tagOwner, tagType, location);
 
+        q = await GetFoldersQueryWithFilters(q, subjectGroup, subjectId, searchText, excludeSubject);
+
+        return await q.CountAsync();
+    }
+    
     private IQueryable<FolderByTagQuery> GetFoldersByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();

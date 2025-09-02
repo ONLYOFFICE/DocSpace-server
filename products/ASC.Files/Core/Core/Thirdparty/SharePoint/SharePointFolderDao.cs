@@ -487,7 +487,13 @@ internal class SharePointFolderDao(
     {
         throw new NotImplementedException();
     }
+    
+    public Task<int> GetFoldersByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, bool excludeSubject, Location? location)
+    {
+        throw new NotImplementedException();
     }
+}
 
 static file class Queries
 {
