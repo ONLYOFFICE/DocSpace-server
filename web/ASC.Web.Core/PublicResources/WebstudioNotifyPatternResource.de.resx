@@ -1348,7 +1348,7 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace wurde &lt;span style="color: #FF6F3D;"&gt;deaktiviert&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace wurde &lt;span style="color: #FF6F3D;"&gt;gelöscht&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ihr ${LetterLogoText} DocSpace wurde erfolgreich deaktiviert. Bitte beachten Sie, dass alle Ihre Daten in Übereinstimmung mit unserer &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Datenschutzerklärung&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1972,5 +1972,29 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Erforderliche Aktion: Das Wallet-Guthaben in Ihrem ${LetterLogoText} DocSpace kann nicht automatisch aufgeladen werden</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Passwort erfolgreich geändert
+
+Ihr Passwort für das Konto *$UserName*, *$UserEmail* wurde am *$Date* in DocSpace erfolgreich geändert: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Gerät: *$Device*
+#if($Location != "")
+Standort: *$Location*
+#end
+Browser: *$Browser*
+
+Wenn diese Aktion von Ihnen durchgeführt wurde, sind keine weiteren Schritte erforderlich. Sollte diese Änderung verdächtig erscheinen oder nicht von Ihnen autorisiert sein, setzen Sie bitte umgehend Ihr Passwort zurück und deaktivieren Sie den Zugriff auf DocSpace für dieses Gerät.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Ihr Passwort wurde erfolgreich geändert</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>DocSpace öffnen</value>
   </data>
 </root>

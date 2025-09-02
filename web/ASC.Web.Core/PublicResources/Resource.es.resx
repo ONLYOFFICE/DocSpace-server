@@ -1114,10 +1114,52 @@
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Espacio en disco</value>
   </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Descripción</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
     <value>Recarga de saldo</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contacto</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Débito</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detalles</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Copia de seguridad</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Copia de seguridad</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Historial de transacciones</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Renovación automática</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Recarga automática</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Pago requerido</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Copia de seguridad</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Active las copias de seguridad para su DocSpace. Los costes se facturarán automáticamente.</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} copias de seguridad gratuitas al mes</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>El número de copias de seguridad gratuitas no debe superar {0} en un mes</value>
   </data>
 </root>

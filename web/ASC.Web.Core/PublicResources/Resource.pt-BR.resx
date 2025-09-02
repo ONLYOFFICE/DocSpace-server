@@ -1111,4 +1111,52 @@
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Espaço de armazenamento usado:</value>
   </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contato</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Débito</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detalhes</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Espaço em disco</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Histórico de transações</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Renovação automática</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Recarga automática</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Pagamento obrigatório</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Habilite backups para o seu DocSpace. Os custos serão cobrados automaticamente.</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} backups gratuitos por mês</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>O número de backups gratuitos não deve exceder {0} em um mês</value>
+  </data>
 </root>
