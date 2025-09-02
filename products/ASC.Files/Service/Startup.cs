@@ -90,7 +90,7 @@ public class Startup : BaseWorkerStartup
         services.RegisterQueue<FileDeleteOperation>(10);
         services.RegisterQueue<FileMoveCopyOperation>(10);
         services.RegisterQueue<FileDuplicateOperation>(10);
-        services.RegisterQueue<FileDownloadOperation>(10);
+        services.RegisterQueue<FileDownloadOperation>(10, timeUntilUnregisterInSeconds: 60 * 2);
         services.RegisterQueue<FileMarkAsReadOperation>(10);
         services.RegisterQueue<FormFillingReportTask>();
         services.RegisterQueue<CreateRoomTemplateOperation>();

@@ -388,13 +388,11 @@ static file class FileQueries
                                 select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
                             select f.Order
                         ).FirstOrDefault(),
-                        LastOpened = ctx.AuditEvents
-                            .OrderByDescending(a => a.Date)
-                            .Where(a => a.Target == fileId.ToString() && 
-                                        a.UserId == userId && 
-                                        (a.Action == (int)MessageAction.FileOpenedForChange || a.Action == (int)MessageAction.FormOpenedForFilling) && 
+                        LastOpened =  ctx.TagLink
+                            .Where(a => a.EntryId == fileId.ToString() && 
+                                        a.CreateBy == userId && 
                                         a.TenantId == tenantId)
-                            .Select(a => a.Date)
+                            .Select(a => a.CreateOn)
                             .FirstOrDefault()
                     })
                     .SingleOrDefault());
@@ -427,13 +425,11 @@ static file class FileQueries
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                             x.EntryType == FileEntryType.Folder && 
                             ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
-                        LastOpened = ctx.AuditEvents
-                            .OrderByDescending(a => a.Date)
-                            .Where(a => a.Target == fileId.ToString() && 
-                                        a.UserId == userId && 
-                                        (a.Action == (int)MessageAction.FileOpenedForChange || a.Action == (int)MessageAction.FormOpenedForFilling) && 
+                        LastOpened = ctx.TagLink
+                            .Where(a => a.EntryId == fileId.ToString() && 
+                                        a.CreateBy == userId && 
                                         a.TenantId == tenantId)
-                            .Select(a => a.Date)
+                            .Select(a => a.CreateOn)
                             .FirstOrDefault()
                     })
                     .SingleOrDefault());
@@ -459,13 +455,11 @@ static file class FileQueries
                                 where f.TenantId == r.TenantId
                                 select f
                             ).FirstOrDefault(),
-                        LastOpened = ctx.AuditEvents
-                            .OrderByDescending(a => a.Date)
-                            .Where(a => a.Target == fileId.ToString() && 
-                                        a.UserId == userId && 
-                                        (a.Action == (int)MessageAction.FileOpenedForChange || a.Action == (int)MessageAction.FormOpenedForFilling) && 
+                        LastOpened = ctx.TagLink
+                            .Where(a => a.EntryId == fileId.ToString() && 
+                                        a.CreateBy == userId && 
                                         a.TenantId == tenantId)
-                            .Select(a => a.Date)
+                            .Select(a => a.CreateOn)
                             .FirstOrDefault()
                     })
                     .FirstOrDefault());

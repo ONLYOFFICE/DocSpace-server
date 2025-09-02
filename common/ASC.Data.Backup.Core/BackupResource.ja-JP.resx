@@ -135,4 +135,25 @@
   <data name="RestoreException" xml:space="preserve">
     <value>バックアップの復元中に問題が発生しました。もう一度復元を試みるか、サポートに連絡してください。</value>
   </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>自動バックアップ</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>一時的な保存場所</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>ルームをバックアップする</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>ローカルファイル</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>第三者ストレージ</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>サードパーティーリソース</value>
+  </data>
 </root>
