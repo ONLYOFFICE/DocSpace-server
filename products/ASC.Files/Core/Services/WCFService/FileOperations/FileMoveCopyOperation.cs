@@ -1219,6 +1219,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         }
                     }
                 }
+                catch (TenantQuotaException ex)
+                {
+                    Err = ex.Message;
+
+                    Logger.InformationUnableFileMoveCopyOperation(fileId.ToString(), ex.Message);
+                }
                 catch (Exception ex)
                 {
                     Err = ex.Message;

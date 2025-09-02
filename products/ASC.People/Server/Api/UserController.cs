@@ -1501,19 +1501,19 @@ public class UserController(
 
         if (userid == Guid.Empty)
         {
-            throw new ArgumentNullException(inDto.UserId);
+            throw new ArgumentNullException(nameof(inDto.UserId));
         }
 
         var email = (inDto.Email ?? "").Trim();
 
         if (string.IsNullOrEmpty(email))
         {
-            throw new Exception(Resource.ErrorEmailEmpty);
+            throw new ArgumentException(Resource.ErrorEmailEmpty);
         }
 
         if (!email.TestEmailRegex())
         {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
+            throw new ArgumentException(Resource.ErrorNotCorrectEmail);
         }
 
         var viewer = await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
@@ -1522,30 +1522,30 @@ public class UserController(
 
         if (_userManager.IsSystemUser(user.Id) || user.Status == EmployeeStatus.Terminated || user.Status ==  EmployeeStatus.Pending)
         {
-            throw new Exception(Resource.ErrorUserNotFound);
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         if (!viewerIsAdmin && viewer.Id != user.Id)
         {
-            throw new Exception(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) && viewer.Id != user.Id)
         {
-            throw new Exception(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         if (!viewer.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user) && viewer.Id != user.Id)
         {
-            throw new Exception(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         var existentUser = await _userManager.GetUserByEmailAsync(email);
 
         if (existentUser.Id != Constants.LostUser.Id)
         {
-            throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+            throw new ArgumentException(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
         }
 
         if (!viewerIsAdmin)
@@ -1556,7 +1556,7 @@ public class UserController(
         {
             if (email == user.Email)
             {
-                throw new Exception(Resource.ErrorEmailsAreTheSame);
+                throw new ArgumentException(Resource.ErrorEmailsAreTheSame);
             }
 
             user.Email = email;
