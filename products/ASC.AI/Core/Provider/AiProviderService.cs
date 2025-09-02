@@ -114,6 +114,13 @@ public class AiProviderService(
         return await providerDao.GetProvidersTotalCountAsync(tenantManager.GetCurrentTenantId());
     }
 
+    public async Task<List<ProviderSettingsData>> GetAvailableProvidersAsync()
+    {
+        await ThrowIfNotAccessAsync();
+        
+        return providerSettings.GetAvailableProviders().ToList();
+    }
+
     public async Task DeleteProvidersAsync(List<int> ids)
     {
         await ThrowIfNotAccessAsync();

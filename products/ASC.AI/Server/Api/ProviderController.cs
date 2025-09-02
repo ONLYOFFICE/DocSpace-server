@@ -35,7 +35,8 @@ namespace ASC.AI.Api;
 public class ProviderController(
     AiProviderService providerService, 
     ApiDateTimeHelper apiDateTimeHelper,
-    ApiContext apiContext) : ControllerBase
+    ApiContext apiContext,
+    IMapper mapper) : ControllerBase
 {
     [HttpPost("providers")]
     public async Task<ProviderDto> AddProviderAsync(CreateProviderRequestDto inDto)
@@ -75,5 +76,13 @@ public class ProviderController(
         await providerService.DeleteProvidersAsync(inDto.Ids);
 
         return NoContent();
+    }
+
+    [HttpGet("providers/available")]
+    public async Task<List<ProviderSettingsDto>> GetAvailableProvidersAsync()
+    {
+        var providers = await providerService.GetAvailableProvidersAsync();
+        
+        return mapper.Map<List<ProviderSettingsData>, List<ProviderSettingsDto>>(providers);
     }
 }

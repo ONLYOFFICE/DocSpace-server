@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,28 +26,8 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class ProviderDto
+public class ProviderSettingsDto : IMapFrom<ProviderSettingsData>
 {
-    public int Id { get; init; }
-    public required string Title { get; init; }
     public ProviderType Type { get; init; }
-    public string? Url { get; init; }
-    public required ApiDateTime CreatedOn { get; init; }
-    public required ApiDateTime ModifiedOn { get; init; }
-}
-
-public static class ProviderDtoExtensions
-{
-    public static ProviderDto ToDto(this AiProvider provider, ApiDateTimeHelper apiDateTimeHelper)
-    {
-        return new ProviderDto
-        {
-            Id = provider.Id, 
-            Title = provider.Title, 
-            Url = provider.Url,
-            Type = provider.Type,
-            CreatedOn = apiDateTimeHelper.Get(provider.CreatedOn),
-            ModifiedOn = apiDateTimeHelper.Get(provider.ModifiedOn)
-        };
-    }
+    public required string Url { get; init; }
 }

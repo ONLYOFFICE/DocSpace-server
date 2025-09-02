@@ -47,4 +47,9 @@ public class ProviderSettings
     {
         return _settings.Values;
     }
+
+    public IEnumerable<ProviderSettingsData> GetAvailableProviders()
+    {
+        return _settings.Values;
+    }
 }
