@@ -71,7 +71,7 @@ internal class SelectorFactory(IServiceProvider serviceProvider)
             return serviceProvider.GetService<IDaoSelector<Item, Item, Item>>();
         }
 
-        throw new ItemNotFoundException($"Selector '{selector}' not found");
+        return null;
     }
 
     public Dictionary<IDaoSelector, List<string>> GetSelectors(IEnumerable<string> ids)
