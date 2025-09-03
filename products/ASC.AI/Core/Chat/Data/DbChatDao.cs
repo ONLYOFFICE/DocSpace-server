@@ -24,13 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using AiDbContext = ASC.AI.Core.Database.AiDbContext;
-
 namespace ASC.AI.Core.Chat.Data;
 
 [Scope]
 public class DbChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper mapper)
 {
+    private static readonly JsonSerializerOptions _serializerOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+        AllowOutOfOrderMetadataProperties = true
+    };
+    
     public async Task<ChatSession> AddChatAsync(int tenantId, int roomId, Guid userId, string title, Message message)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -49,7 +53,7 @@ public class DbChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper 
             {
                 ChatId = id,
                 Role = message.Role,
-                Content = JsonSerializer.Serialize(message.Contents, AiUtils.SerializerOptions),
+                Content = JsonSerializer.Serialize(message.Contents, _serializerOptions),
                 CreatedOn = now
             };
 
@@ -88,7 +92,7 @@ public class DbChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper 
             {
                 ChatId = chatId, 
                 Role = message.Role, 
-                Content = JsonSerializer.Serialize(message.Contents, AiUtils.SerializerOptions),
+                Content = JsonSerializer.Serialize(message.Contents, _serializerOptions),
                 CreatedOn = DateTime.UtcNow
             };
             
@@ -168,7 +172,7 @@ public class DbChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper 
             { 
                 ChatId = chatId,
                 Role = message.Role,
-                Content = JsonSerializer.Serialize(message.Contents, AiUtils.SerializerOptions),
+                Content = JsonSerializer.Serialize(message.Contents, _serializerOptions),
                 CreatedOn = now
             };
 
@@ -192,7 +196,7 @@ public class DbChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper 
             yield return new Message(
                 msg.Id,
                 msg.Role, 
-                JsonSerializer.Deserialize<List<MessageContent>>(msg.Content, AiUtils.SerializerOptions)!,
+                JsonSerializer.Deserialize<List<MessageContent>>(msg.Content, _serializerOptions)!,
                 msg.CreatedOn);
         }
     }
@@ -210,7 +214,7 @@ public class DbChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper 
         return new Message(
             message.Id,
             message.Role,
-            JsonSerializer.Deserialize<List<MessageContent>>(message.Content, AiUtils.SerializerOptions)!,
+            JsonSerializer.Deserialize<List<MessageContent>>(message.Content, _serializerOptions)!,
             message.CreatedOn);
     }
 
@@ -225,7 +229,7 @@ public class DbChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper 
             yield return new Message(
                 msg.Id,
                 msg.Role, 
-                JsonSerializer.Deserialize<List<MessageContent>>(msg.Content, AiUtils.SerializerOptions)!,
+                JsonSerializer.Deserialize<List<MessageContent>>(msg.Content, _serializerOptions)!,
                 msg.CreatedOn);
         }
     }

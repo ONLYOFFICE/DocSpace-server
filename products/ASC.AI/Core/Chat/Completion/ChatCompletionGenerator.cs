@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
 namespace ASC.AI.Core.Chat.Completion;
 
 public class ChatCompletionGenerator(
@@ -35,11 +34,6 @@ public class ChatCompletionGenerator(
     ToolHolder toolHolder,
     IHistoryWriterFactory historyWriterFactory)
 {
-    private static readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web)
-    {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
-    };
-    
     public async IAsyncEnumerable<ChatCompletion> GenerateCompletionAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         HistoryWriter? historyWriter = null;
@@ -80,7 +74,7 @@ public class ChatCompletionGenerator(
                     historyWriter = await historyWriterFactory.CreateAsync();
                     yield return new ChatCompletion(
                         EventType.MessageStart, 
-                        JsonSerializer.Serialize(new MessageStart { ChatId = historyWriter.Chat.Id }, JsonSerializerOptions.Web));
+                        JsonSerializer.Serialize(new MessageStart { ChatId = historyWriter.Chat.Id }, AiUtils.ContentSerializerOptions));
                 }
                     
                 responses.Add(response);
@@ -93,22 +87,22 @@ public class ChatCompletionGenerator(
                     case TextContent textContent:
                         yield return new ChatCompletion(
                             EventType.NewToken,
-                            JsonSerializer.Serialize(textContent, _serializerOptions));
+                            JsonSerializer.Serialize(textContent, AiUtils.ContentSerializerOptions));
                         break;
                     case FunctionCallContent functionCall:
                         yield return new ChatCompletion(
                             EventType.ToolCall,
-                            JsonSerializer.Serialize(functionCall, _serializerOptions));
+                            JsonSerializer.Serialize(functionCall, AiUtils.ContentSerializerOptions));
                         break;
                     case FunctionResultContent functionResult:
                         yield return new ChatCompletion(
                             EventType.ToolResult,
-                            JsonSerializer.Serialize(functionResult, _serializerOptions));
+                            JsonSerializer.Serialize(functionResult, AiUtils.ContentSerializerOptions));
                         break;
                     case ErrorContent error:
                         yield return new ChatCompletion(
                             EventType.Error, 
-                            JsonSerializer.Serialize(error, _serializerOptions));
+                            JsonSerializer.Serialize(error, AiUtils.ContentSerializerOptions));
                         break;
                 }
             }
@@ -138,6 +132,6 @@ public class ChatCompletionGenerator(
         yield return new ChatCompletion(
             EventType.MessageStop, 
             JsonSerializer.Serialize(
-                new MessageStop { MessageId = messageId }, _serializerOptions));
+                new MessageStop { MessageId = messageId }, AiUtils.ContentSerializerOptions));
     }
 }
