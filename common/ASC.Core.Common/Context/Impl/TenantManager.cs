@@ -341,12 +341,12 @@ public class TenantManager(
     {
         var quotas = (await GetTenantQuotasAsync(all, wallet))
             .Where(q => !string.IsNullOrEmpty(q.ProductId))
-            .DistinctBy(q => q.ProductId);
+            .ToDictionary(q => q.ProductId, q => q.Name);
 
         var tenant = GetCurrentTenant(false);
 
-        var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, wallet, quotas.Select(p => p.ProductId));
-        var result = prices.ToDictionary(price => quotas.First(quota => quota.ProductId == price.Key).Name, price => price.Value);
+        var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, wallet, quotas.Keys);
+        var result = prices.ToDictionary(price => quotas.GetValueOrDefault(price.Key), price => price.Value);
 
         return result;
     }
