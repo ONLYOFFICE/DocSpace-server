@@ -84,46 +84,46 @@ public class BillingClient
 
     public async Task<string> GetPaymentUrlAsync(string portalId, IEnumerable<string> products, string affiliateId = null, string partnerId = null, string campaign = null, string currency = null, string language = null, string customerEmail = null, string quantity = null, string backUrl = null)
     {
-        var additionalParameters = new List<Tuple<string, string>> { Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()) };
-        if (!string.IsNullOrEmpty(affiliateId))
-        {
-            additionalParameters.Add(Tuple.Create("AffiliateId", affiliateId));
-        }
-        if (!string.IsNullOrEmpty(partnerId))
-        {
-            additionalParameters.Add(Tuple.Create("PartnerId", partnerId));
-        }
-        if (!string.IsNullOrEmpty(campaign))
-        {
-            additionalParameters.Add(Tuple.Create("campaign", campaign));
-        }
-        if (!string.IsNullOrEmpty(currency))
-        {
-            additionalParameters.Add(Tuple.Create("Currency", currency));
-        }
-        if (!string.IsNullOrEmpty(language))
-        {
-            additionalParameters.Add(Tuple.Create("Language", language));
-        }
-        if (!string.IsNullOrEmpty(customerEmail))
-        {
-            additionalParameters.Add(Tuple.Create("CustomerEmail", customerEmail));
-        }
-        if (!string.IsNullOrEmpty(quantity))
-        {
-            additionalParameters.Add(Tuple.Create("Quantity", quantity));
-        }
-        if (!string.IsNullOrEmpty(backUrl))
-        {
-            additionalParameters.Add(Tuple.Create("BackRef", backUrl));
-            additionalParameters.Add(Tuple.Create("ShopUrl", backUrl));
-        }
-
         var parameters = products
             .Distinct()
             .Select(p => Tuple.Create("ProductId", p))
-            .Concat(additionalParameters)
-            .ToArray();
+            .ToList();
+
+        parameters.Add(Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()));
+
+        if (!string.IsNullOrEmpty(affiliateId))
+        {
+            parameters.Add(Tuple.Create("AffiliateId", affiliateId));
+        }
+        if (!string.IsNullOrEmpty(partnerId))
+        {
+            parameters.Add(Tuple.Create("PartnerId", partnerId));
+        }
+        if (!string.IsNullOrEmpty(campaign))
+        {
+            parameters.Add(Tuple.Create("campaign", campaign));
+        }
+        if (!string.IsNullOrEmpty(currency))
+        {
+            parameters.Add(Tuple.Create("Currency", currency));
+        }
+        if (!string.IsNullOrEmpty(language))
+        {
+            parameters.Add(Tuple.Create("Language", language));
+        }
+        if (!string.IsNullOrEmpty(customerEmail))
+        {
+            parameters.Add(Tuple.Create("CustomerEmail", customerEmail));
+        }
+        if (!string.IsNullOrEmpty(quantity))
+        {
+            parameters.Add(Tuple.Create("Quantity", quantity));
+        }
+        if (!string.IsNullOrEmpty(backUrl))
+        {
+            parameters.Add(Tuple.Create("BackRef", backUrl));
+            parameters.Add(Tuple.Create("ShopUrl", backUrl));
+        }
 
         var result = await RequestAsync("GetSinglePaymentUrl", portalId, parameters);
         var paymentUrl = JsonSerializer.Deserialize<string>(result);
@@ -157,7 +157,7 @@ public class BillingClient
             parameters.Add(Tuple.Create("Metadata", JsonSerializer.Serialize(metadata)));
         }
 
-        var result = await RequestAsync("Deposit", portalId, parameters.ToArray());
+        var result = await RequestAsync("Deposit", portalId, parameters);
         return result == "\"ok\"";
     }
 
@@ -165,9 +165,10 @@ public class BillingClient
     {
         var parameters = products.Select(p => Tuple.Create("ProductId", p))
             .Concat(quantity.Select(q => Tuple.Create("ProductQty", q.ToString())))
-            .Concat([Tuple.Create("ProductQuantityType", ((int)productQuantityType).ToString())])
-            .Concat([Tuple.Create("Currency", currency)])
             .ToList();
+
+        parameters.Add(Tuple.Create("ProductQuantityType", ((int)productQuantityType).ToString()));
+        parameters.Add(Tuple.Create("Currency", currency));
 
         if (!string.IsNullOrEmpty(customerParticipantName))
         {
@@ -179,7 +180,7 @@ public class BillingClient
             parameters.Add(Tuple.Create("Metadata", JsonSerializer.Serialize(metadata)));
         }
 
-        var result = await RequestAsync("ChangeSubscription", portalId, parameters.ToArray());
+        var result = await RequestAsync("ChangeSubscription", portalId, parameters);
         var changed = JsonSerializer.Deserialize<bool>(result);
 
         return changed;
@@ -189,9 +190,10 @@ public class BillingClient
     {
         var parameters = products.Select(p => Tuple.Create("ProductId", p))
             .Concat(quantity.Select(q => Tuple.Create("ProductQty", q.ToString())))
-            .Concat([Tuple.Create("ProductQuantityType", ((int)productQuantityType).ToString())])
-            .Concat([Tuple.Create("Currency", currency)])
-            .ToArray();
+            .ToList();
+
+        parameters.Add(Tuple.Create("ProductQuantityType", ((int)productQuantityType).ToString()));
+        parameters.Add(Tuple.Create("Currency", currency));
 
         var result = await RequestAsync("CalculateSubscription", portalId, parameters);
 
@@ -200,7 +202,7 @@ public class BillingClient
         return response;
     }
 
-    public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, bool wallet, string[] productIds)
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, bool wallet, List<string> productIds)
     {
         ArgumentNullException.ThrowIfNull(productIds);
 
@@ -213,7 +215,7 @@ public class BillingClient
             parameters.Add(Tuple.Create("PartnerId", partnerId));
         }
         
-        var result = await RequestAsync("GetProductsPrices", null, parameters.ToArray());
+        var result = await RequestAsync("GetProductsPrices", null, parameters);
         var prices = JsonSerializer.Deserialize<Dictionary<int, Dictionary<string, Dictionary<string, decimal>>>>(result);
 
         if (prices.TryGetValue(paymentSystemId, out var pricesPaymentSystem))
@@ -229,7 +231,7 @@ public class BillingClient
                 .ToDictionary(e => e.ProductId, e => e.Prices);
         }
 
-        return new Dictionary<string, Dictionary<string, decimal>>();
+        return [];
     }
 
 
@@ -242,7 +244,7 @@ public class BillingClient
         return $"ASC {pkey}:{now}:{hash}";
     }
 
-    private async Task<string> RequestAsync(string method, string portalId, Tuple<string, string>[] parameters = null, bool addPolicy = false)
+    private async Task<string> RequestAsync(string method, string portalId, List<Tuple<string, string>> parameters = null, bool addPolicy = false)
     {
         var url = _configuration.Url + method;
 
