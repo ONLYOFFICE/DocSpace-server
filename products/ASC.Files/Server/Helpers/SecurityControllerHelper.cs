@@ -56,16 +56,7 @@ public class SecurityControllerHelper(
         tenantManager,
         authContext)
 {
-    public IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync<T>(T fileId)
-    {
-        return GetSecurityInfoAsync(new List<T> { fileId }, []);
-    }
-
-    public IAsyncEnumerable<FileShareDto> GetFolderSecurityInfoAsync<T>(T folderId)
-    {
-        return GetSecurityInfoAsync([], new List<T> { folderId });
-    }
-
+    
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfoAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds)
     {
         var fileShares = await _fileStorageService.GetSharedInfoAsync(fileIds, folderIds);

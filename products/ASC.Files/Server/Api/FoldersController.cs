@@ -449,30 +449,6 @@ public abstract class FoldersController<T>(
 
         apiContext.SetCount(counter);
     }
-    
-    /// <summary>
-    /// Returns the access rights of a folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Get the folder access rights</short>
-    /// <path>api/2.0/files/folder/{id}/share</path>
-    /// <collection>list</collection>
-    [Tags("Files / Folders")]
-    [SwaggerResponse(200, "Security information of folder files", typeof(IAsyncEnumerable<FileShareDto>))]
-    [HttpGet("folder/{id}/share")]
-    public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfo(FolderSecurityInfoRequestDto<T> inDto)
-    {
-        var offset = inDto.StartIndex;
-        var count = inDto.Count;
-        var text = inDto.Text;
-
-        var totalCountTask = await fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.Link, text);
-        apiContext.SetCount(Math.Min(totalCountTask - offset, count)).SetTotalCount(totalCountTask);
-
-        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.Link, text, offset, count))
-        {
-            yield return await fileShareDtoHelper.Get(ace);
-        }
-    }
 }
 
 public class FoldersControllerCommon(
