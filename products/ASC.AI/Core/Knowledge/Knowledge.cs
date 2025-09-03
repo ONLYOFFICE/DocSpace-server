@@ -28,6 +28,5 @@ namespace ASC.AI.Core.Knowledge;
 
 public class Knowledge
 {
-    public int FileId { get; init; }
-    public string? Text { get; init; }
+    public List<AIContent>? Content { get; init; }
 }

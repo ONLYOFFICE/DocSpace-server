@@ -32,7 +32,7 @@ public class KnowledgeSearchEngine(
     VectorStore vectorStore,
     EmbeddingGeneratorFactory embeddingGeneratorFactory)
 {
-    public async Task<IEnumerable<Knowledge>> SearchAsync(int roomId, string query)
+    public async Task<Knowledge> SearchAsync(int roomId, string query)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         
@@ -51,10 +51,10 @@ public class KnowledgeSearchEngine(
             5,
             searchOptions).ToListAsync();
 
-        return chunks.Select(x => new Knowledge
-        {
-            FileId = x.FileId,
-            Text = x.TextEmbedding
-        });
+        var content = chunks.Select(x => new { fileId = x.FileId, text = x.TextEmbedding });
+        
+        var json = JsonSerializer.Serialize(content);
+
+        return new Knowledge { Content = [new TextContent(json)] };
     }
 }
