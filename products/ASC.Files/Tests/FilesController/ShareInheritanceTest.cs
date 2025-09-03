@@ -51,7 +51,7 @@ public class ShareInheritanceTest(
             linkType: LinkType.External);
 
         var roomLinkResponse = (await _roomsApi.SetRoomLinkAsync(room.Id, roomLink, TestContext.Current.CancellationToken)).Response;
-        var roomSharedTo = DeserializeSharedToLink(roomLinkResponse);
+        var roomSharedTo = roomLinkResponse.SharedLink;
 
         // Act - Access file as external user through room link
         await _filesClient.Authenticate(null);
@@ -81,7 +81,7 @@ public class ShareInheritanceTest(
             linkType: LinkType.External);
 
         var roomLinkResponse = (await _roomsApi.SetRoomLinkAsync(room.Id, roomLink, TestContext.Current.CancellationToken)).Response;
-        var roomSharedTo = DeserializeSharedToLink(roomLinkResponse);
+        var roomSharedTo = roomLinkResponse.SharedLink;
 
         // Create folder link with read-only access (more restrictive than room)
         var folderLink = new FolderLinkRequest(
@@ -89,7 +89,7 @@ public class ShareInheritanceTest(
             title: "Folder Link");
 
         var folderLinkResponse = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, folderLink, TestContext.Current.CancellationToken)).Response;
-        var folderSharedTo = DeserializeSharedToLink(folderLinkResponse);
+        var folderSharedTo = folderLinkResponse.SharedLink;
 
         // Act - Access file through folder link
         await _filesClient.Authenticate(null);
@@ -130,7 +130,7 @@ public class ShareInheritanceTest(
             linkType: LinkType.External);
 
         var roomLinkResponse = (await _roomsApi.SetRoomLinkAsync(room.Id, roomLink, TestContext.Current.CancellationToken)).Response;
-        var roomSharedTo = DeserializeSharedToLink(roomLinkResponse);
+        var roomSharedTo = roomLinkResponse.SharedLink;
 
         // Create folder link with read-only access
         var folderLink = new FolderLinkRequest(
@@ -138,14 +138,14 @@ public class ShareInheritanceTest(
             title: "Folder Link");
 
         var folderLinkResponse = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, folderLink, TestContext.Current.CancellationToken)).Response;
-        var folderSharedTo = DeserializeSharedToLink(folderLinkResponse);
+        var folderSharedTo = folderLinkResponse.SharedLink;
 
         // Create file link with comment access
         var fileLink = new FileLinkRequest(
             access: FileShare.Comment);
 
         var fileLinkResponse = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, fileLink, TestContext.Current.CancellationToken)).Response;
-        var fileSharedTo = DeserializeSharedToLink(fileLinkResponse);
+        var fileSharedTo = fileLinkResponse.SharedLink;
 
         // Act - Access file through file link
         await _filesClient.Authenticate(null);
@@ -198,7 +198,7 @@ public class ShareInheritanceTest(
             title: "Folder Link");
 
         var folderLinkResponse = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, folderLink, TestContext.Current.CancellationToken)).Response;
-        var folderSharedTo = DeserializeSharedToLink(folderLinkResponse);
+        var folderSharedTo = folderLinkResponse.SharedLink;
 
         // Act - Access file through folder link
         await _filesClient.Authenticate(null);
@@ -226,14 +226,14 @@ public class ShareInheritanceTest(
             title: "Folder Link");
 
         var folderLinkResponse = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, folderLink, TestContext.Current.CancellationToken)).Response;
-        var folderSharedTo = DeserializeSharedToLink(folderLinkResponse);
+        var folderSharedTo = folderLinkResponse.SharedLink;
 
         // Create file link with editing access
         var fileLink = new FileLinkRequest(
             access: FileShare.Editing);
 
         var fileLinkResponse = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, fileLink, TestContext.Current.CancellationToken)).Response;
-        var fileSharedTo = DeserializeSharedToLink(fileLinkResponse);
+        var fileSharedTo = fileLinkResponse.SharedLink;
 
         // Act - Access file through file link
         await _filesClient.Authenticate(null);
@@ -275,7 +275,7 @@ public class ShareInheritanceTest(
             denyDownload: true);
 
         var roomLinkResponse = (await _roomsApi.SetRoomLinkAsync(room.Id, roomLink, TestContext.Current.CancellationToken)).Response;
-        var roomSharedTo = DeserializeSharedToLink(roomLinkResponse);
+        var roomSharedTo = roomLinkResponse.SharedLink;
 
         // Act - Access file as external user through room link
         await _filesClient.Authenticate(null);
@@ -304,7 +304,7 @@ public class ShareInheritanceTest(
             denyDownload: true);
 
         var folderLinkResponse = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, folderLink, TestContext.Current.CancellationToken)).Response;
-        var folderSharedTo = DeserializeSharedToLink(folderLinkResponse);
+        var folderSharedTo = folderLinkResponse.SharedLink;
 
         // Act - Access file through folder link
         await _filesClient.Authenticate(null);
@@ -342,7 +342,7 @@ public class ShareInheritanceTest(
             denyDownload: true);
 
         var fileLinkResponse = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, fileLink, TestContext.Current.CancellationToken)).Response;
-        var fileSharedTo = DeserializeSharedToLink(fileLinkResponse);
+        var fileSharedTo = fileLinkResponse.SharedLink;
 
         // Act - Access file through file link
         await _filesClient.Authenticate(null);
@@ -381,12 +381,12 @@ public class ShareInheritanceTest(
             title: "Folder Link without Password");
 
         var folderLinkResponse = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, folderLink, TestContext.Current.CancellationToken)).Response;
-        var folderSharedTo = DeserializeSharedToLink(folderLinkResponse);
-        
+        var folderSharedTo = folderLinkResponse.SharedLink;
+
         // Create file link without password
         var fileLink = new FileLinkRequest(access: FileShare.Editing);
         var fileLinkResponse = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, fileLink, TestContext.Current.CancellationToken)).Response;
-        var fileSharedTo = DeserializeSharedToLink(fileLinkResponse);
+        var fileSharedTo = fileLinkResponse.SharedLink;
         
         // Act - Try to access folder via folder link (should work without password)
         await _filesClient.Authenticate(null);
@@ -433,7 +433,7 @@ public class ShareInheritanceTest(
             password: filePassword);
 
         var fileLinkResponse = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, fileLink, TestContext.Current.CancellationToken)).Response;
-        var fileSharedTo = DeserializeSharedToLink(fileLinkResponse);
+        var fileSharedTo = fileLinkResponse.SharedLink;
 
         // Act - Try to access file without providing password
         await _filesClient.Authenticate(null);
@@ -488,9 +488,9 @@ public class ShareInheritanceTest(
         var folderLinkResponse = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, folderLink, TestContext.Current.CancellationToken)).Response;
         var fileLinkResponse = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, fileLink, TestContext.Current.CancellationToken)).Response;
 
-        var roomSharedTo = DeserializeSharedToLink(roomLinkResponse);
-        var folderSharedTo = DeserializeSharedToLink(folderLinkResponse);
-        var fileSharedTo = DeserializeSharedToLink(fileLinkResponse);
+        var roomSharedTo = roomLinkResponse.SharedLink;
+        var folderSharedTo = folderLinkResponse.SharedLink;
+        var fileSharedTo = fileLinkResponse.SharedLink;
 
         // Act - Access file through different entry points
         await _filesClient.Authenticate(null);
@@ -565,8 +565,8 @@ public class ShareInheritanceTest(
         var roomLinkResponse = (await _roomsApi.SetRoomLinkAsync(room.Id, roomLink, TestContext.Current.CancellationToken)).Response;
         var folderLinkResponse = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, folderLink, TestContext.Current.CancellationToken)).Response;
 
-        var roomSharedTo = DeserializeSharedToLink(roomLinkResponse);
-        var folderSharedTo = DeserializeSharedToLink(folderLinkResponse);
+        var roomSharedTo = roomLinkResponse.SharedLink;
+        var folderSharedTo = folderLinkResponse.SharedLink;
 
         // Wait for room link to expire
         await Task.Delay(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
@@ -610,8 +610,8 @@ public class ShareInheritanceTest(
         var folderLinkResponse = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, folderLink, TestContext.Current.CancellationToken)).Response;
         var fileLinkResponse = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, fileLink, TestContext.Current.CancellationToken)).Response;
 
-        var folderSharedTo = DeserializeSharedToLink(folderLinkResponse);
-        var fileSharedTo = DeserializeSharedToLink(fileLinkResponse);
+        var folderSharedTo = folderLinkResponse.SharedLink;
+        var fileSharedTo = fileLinkResponse.SharedLink;
 
         // Wait for folder link to expire
         await Task.Delay(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
@@ -644,7 +644,7 @@ public class ShareInheritanceTest(
 
         // Get the primary external link
         var primaryLink = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var originalSharedTo = DeserializeSharedToLink(primaryLink);
+        var originalSharedTo = primaryLink.SharedLink;
 
         // Act - Set the link with FileShare.None
         var updateRequest = new FileLinkRequest(
@@ -652,7 +652,7 @@ public class ShareInheritanceTest(
             access: FileShare.None);
 
         var updatedLink = (await _filesApi.SetFileExternalLinkAsync(file.Id, updateRequest, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = DeserializeSharedToLink(updatedLink);
+        var updatedSharedTo = updatedLink.SharedLink;
 
         // Assert
         updatedLink.Should().NotBeNull();
@@ -677,7 +677,7 @@ public class ShareInheritanceTest(
         
         // Get the primary external link
         var primaryLink = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var originalSharedTo = DeserializeSharedToLink(primaryLink);
+        var originalSharedTo = primaryLink.SharedLink;
 
         // Act - Set the link with FileShare.None
         var updateRequest = new FileLinkRequest(
@@ -685,7 +685,7 @@ public class ShareInheritanceTest(
             expirationDate: new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1)});
 
         var updatedLink = (await _filesApi.SetFileExternalLinkAsync(file.Id, updateRequest, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = DeserializeSharedToLink(updatedLink);
+        var updatedSharedTo = updatedLink.SharedLink;
 
         // Assert
         updatedLink.Should().NotBeNull();
@@ -703,7 +703,7 @@ public class ShareInheritanceTest(
         
         // Get the primary external link
         var primaryLink = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var originalSharedTo = DeserializeSharedToLink(primaryLink);
+        var originalSharedTo = primaryLink.SharedLink;
 
         // Act - Set the link with FileShare.None
         var updateRequest = new FileLinkRequest(
@@ -711,7 +711,7 @@ public class ShareInheritanceTest(
             @internal: true);
 
         var updatedLink = (await _filesApi.SetFileExternalLinkAsync(file.Id, updateRequest, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = DeserializeSharedToLink(updatedLink);
+        var updatedSharedTo = updatedLink.SharedLink;
 
         // Assert
         updatedLink.Should().NotBeNull();
@@ -729,7 +729,7 @@ public class ShareInheritanceTest(
 
         // Get the primary external link
         var primaryLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var originalSharedTo = DeserializeSharedToLink(primaryLink);
+        var originalSharedTo = primaryLink.SharedLink;
 
         // Act - Set the link with FileShare.None
         var updateRequest = new FolderLinkRequest(
@@ -737,7 +737,7 @@ public class ShareInheritanceTest(
             access: FileShare.None);
 
         var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, updateRequest, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = DeserializeSharedToLink(updatedLink);
+        var updatedSharedTo = updatedLink.SharedLink;
 
         // Assert
         updatedLink.Should().NotBeNull();
@@ -762,7 +762,7 @@ public class ShareInheritanceTest(
         
         // Act - Set the link with FileShare.None
         var primaryLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var originalSharedTo = DeserializeSharedToLink(primaryLink);
+        var originalSharedTo = primaryLink.SharedLink;
         
         // Assert
         primaryLink.Should().NotBeNull();
@@ -780,20 +780,20 @@ public class ShareInheritanceTest(
 
         // Get the primary external link
         var primaryFolderLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var originalFolderSharedTo = DeserializeSharedToLink(primaryFolderLink);
+        var originalFolderSharedTo = primaryFolderLink.SharedLink;
 
         var primaryFileLink = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var originalFileSharedTo = DeserializeSharedToLink(primaryFileLink);
+        var originalFileSharedTo = primaryFileLink.SharedLink;
 
         // Act - Set the link with FileShare.None
         var updateFolderRequest = new FolderLinkRequest(linkId: originalFolderSharedTo.Id, @internal: false, access: primaryFolderLink.Access);
         var updateFileRequest = new FileLinkRequest(linkId: originalFileSharedTo.Id, @internal: false, access: primaryFolderLink.Access);
 
         var updatedFolderLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, updateFolderRequest, TestContext.Current.CancellationToken)).Response;
-        var updatedFolderSharedTo = DeserializeSharedToLink(updatedFolderLink);
-        
+        var updatedFolderSharedTo = updatedFolderLink.SharedLink;
+
         var updatedFileLink = (await _filesApi.SetFileExternalLinkAsync(file.Id, updateFileRequest, TestContext.Current.CancellationToken)).Response;
-        var updatedFileSharedTo = DeserializeSharedToLink(updatedFileLink);
+        var updatedFileSharedTo = updatedFileLink.SharedLink;
         
         // Assert
         updatedFolderLink.Should().NotBeNull();

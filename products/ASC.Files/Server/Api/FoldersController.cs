@@ -419,9 +419,9 @@ public abstract class FoldersController<T>(
         
         var result =  await fileShareDtoHelper.Get(linkAce);
 
-        if (inDto.FolderLink.LinkId != Guid.Empty && linkAce.Id != inDto.FolderLink.LinkId && result.SharedTo is FileShareLink link)
+        if (inDto.FolderLink.LinkId != Guid.Empty && linkAce.Id != inDto.FolderLink.LinkId && result.SharedLink != null)
         {
-            link.RequestToken = null;
+            result.SharedLink.RequestToken = null;
         }
         
         return result;

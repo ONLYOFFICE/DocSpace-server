@@ -80,7 +80,7 @@ public class ShareFolderTest(
         
         // Act
         var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = DeserializeSharedToLink(result);
+        var sharedTo = result.SharedLink;
 
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, sharedTo.RequestToken);
@@ -133,11 +133,11 @@ public class ShareFolderTest(
         
         // Act
         var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = DeserializeSharedToLink(result);
+        var sharedTo = result.SharedLink;
 
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1) }, folder.Title + " updated", "11111111", true, true);
         var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
+        var updatedSharedTo = updatedExternalLink.SharedLink;
 
         // Assert
         updatedExternalLink.Should().NotBeNull();
@@ -161,7 +161,7 @@ public class ShareFolderTest(
         
         // Act
         var externalLink =  (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = DeserializeSharedToLink(externalLink);
+        var sharedTo = externalLink.SharedLink;
         
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, denyDownload: true);
         await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken);
@@ -182,11 +182,11 @@ public class ShareFolderTest(
         
         // Act
         var externalLink =  (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = DeserializeSharedToLink(externalLink);
-        
+        var sharedTo = externalLink.SharedLink;
+
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, denyDownload: true);
         var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
+        var updatedSharedTo = updatedExternalLink.SharedLink;
         
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
@@ -207,7 +207,7 @@ public class ShareFolderTest(
         
         // Act
         var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = DeserializeSharedToLink(result);
+        var sharedTo = result.SharedLink;
 
         var data = new FolderLinkRequest(sharedTo.Id, password: "11111111");
         await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken);
@@ -228,11 +228,11 @@ public class ShareFolderTest(
         
         // Act
         var externalLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = DeserializeSharedToLink(externalLink);
-        
+        var sharedTo = externalLink.SharedLink;
+
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, password: "11111111");
         var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
+        var updatedSharedTo = updatedExternalLink.SharedLink;
         
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
@@ -251,12 +251,12 @@ public class ShareFolderTest(
         
         // Act
         var externalLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = DeserializeSharedToLink(externalLink);
+        var sharedTo = externalLink.SharedLink;
 
         var password = "11111111";
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, password: password);
         var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
+        var updatedSharedTo = updatedExternalLink.SharedLink;
         
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
@@ -279,7 +279,7 @@ public class ShareFolderTest(
         
         var linkParams = new FolderLinkRequest(access: FileShare.Read);
         var externalLink = (await _foldersApi.CreateFolderPrimaryExternalLinkAsync(folder.Id, linkParams, TestContext.Current.CancellationToken)).Response;
-        var sharedTo = DeserializeSharedToLink(externalLink);
+        var sharedTo = externalLink.SharedLink;
         
         // Act
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.None);
@@ -305,13 +305,13 @@ public class ShareFolderTest(
         
         // Get the primary external link
         var primaryLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedToLink = DeserializeSharedToLink(primaryLink);
-        
+        var sharedToLink = primaryLink.SharedLink;
+
         sharedToLink.Internal.Should().BeTrue();
         primaryLink.CanEditAccess.Should().BeFalse();
-        
+
         var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, new FolderLinkRequest(sharedToLink.Id, @internal: false), TestContext.Current.CancellationToken)).Response;
-        var updatedSharedToLink = DeserializeSharedToLink(updatedLink);
+        var updatedSharedToLink = updatedLink.SharedLink;
         updatedSharedToLink.Internal.Should().BeTrue();
     }
     
@@ -324,13 +324,13 @@ public class ShareFolderTest(
         
         // Get the primary external link
         var primaryLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedToLink = DeserializeSharedToLink(primaryLink);
-        
+        var sharedToLink = primaryLink.SharedLink;
+
         sharedToLink.Internal.Should().BeFalse();
         primaryLink.CanEditAccess.Should().BeFalse();
-        
+
         var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, new FolderLinkRequest(sharedToLink.Id, @internal: true), TestContext.Current.CancellationToken)).Response;
-        var updatedSharedToLink = DeserializeSharedToLink(updatedLink);
+        var updatedSharedToLink = updatedLink.SharedLink;
         updatedSharedToLink.Internal.Should().BeFalse();
     }
     
@@ -346,7 +346,7 @@ public class ShareFolderTest(
         
         // Get the primary external link
         var primaryLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedToLink = DeserializeSharedToLink(primaryLink);
+        var sharedToLink = primaryLink.SharedLink;
         
         sharedToLink.Internal.Should().BeFalse();
         primaryLink.CanEditInternal.Should().BeTrue();

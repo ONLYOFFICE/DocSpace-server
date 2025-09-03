@@ -189,10 +189,6 @@ public class BaseTest(
         return statuses;
     }
     
-    protected static FileShareLink DeserializeSharedToLink(FileShareDto updatedLink1Response)
-    {
-        return JsonSerializer.Deserialize<FileShareLink>(((JsonElement)updatedLink1Response.SharedTo).ToString(), JsonSerializerOptions.Web)!;
-    }
     
     protected async Task<(string, int)> CreateFileAndShare(FileShare fileShare, bool primary = true, bool varInternal = false, DateTime? expirationDate = null)
     {
@@ -213,9 +209,8 @@ public class BaseTest(
         }
         
         var initialLink = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
-        var fileShareLink = DeserializeSharedToLink(initialLink);
         
-        return (fileShareLink.RequestToken, file.Id);
+        return (initialLink.SharedLink.RequestToken, file.Id);
     }
     
     protected async Task<FileDtoInteger> TryOpenEditAsync(string share, int fileId, User? user = null, bool throwException = false)

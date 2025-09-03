@@ -565,9 +565,9 @@ public abstract class VirtualRoomsController<T>(
 
         var result = await fileShareDtoHelper.Get(linkAce);
 
-        if (inDto.RoomLink.LinkId != Guid.Empty && linkAce.Id != inDto.RoomLink.LinkId && result.SharedTo is FileShareLink link)
+        if (inDto.RoomLink.LinkId != Guid.Empty && linkAce.Id != inDto.RoomLink.LinkId  && result.SharedLink != null)
         {
-            link.RequestToken = null;
+            result.SharedLink.RequestToken = null;
         }
 
         return result;

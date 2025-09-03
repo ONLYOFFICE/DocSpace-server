@@ -69,7 +69,7 @@ public class ShareFileTest(
         
         // Act
         var result = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = DeserializeSharedToLink(result);
+        var sharedTo = result.SharedLink;
         
         // Assert
         result.Should().NotBeNull();
@@ -188,7 +188,7 @@ public class ShareFileTest(
         );
         
         var initialLink = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
-        var sharedTo = DeserializeSharedToLink(initialLink);
+        var sharedTo = initialLink.SharedLink;
         
         // Act - Update the link
         var updateLinkParams = new FileLinkRequest(
@@ -201,7 +201,7 @@ public class ShareFileTest(
         );
 
         var updatedLink = (await _filesApi.SetFileExternalLinkAsync(file.Id, updateLinkParams, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = DeserializeSharedToLink(updatedLink);
+        var updatedSharedTo = updatedLink.SharedLink;
         
         // Assert
         updatedLink.Should().NotBeNull();
@@ -235,8 +235,8 @@ public class ShareFileTest(
         var link1Response = (await _filesApi.SetFileExternalLinkAsync(file.Id, link1Request, TestContext.Current.CancellationToken)).Response;
         var link2Response = (await _filesApi.SetFileExternalLinkAsync(file.Id, link2Request, TestContext.Current.CancellationToken)).Response;
 
-        var link1SharedTo = DeserializeSharedToLink(link1Response);
-        var link2SharedTo = DeserializeSharedToLink(link2Response);
+        var link1SharedTo = link1Response.SharedLink;
+        var link2SharedTo = link2Response.SharedLink;
 
         // Act - Update both links with different properties
         var updateLink1Request = new FileLinkRequest(
@@ -258,8 +258,8 @@ public class ShareFileTest(
         var allLinks = (await _filesApi.GetFileLinksAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        var updatedLink1SharedTo = DeserializeSharedToLink(updatedLink1Response);
-        var updatedLink2SharedTo = DeserializeSharedToLink(updatedLink2Response);
+        var updatedLink1SharedTo = updatedLink1Response.SharedLink;
+        var updatedLink2SharedTo = updatedLink2Response.SharedLink;
 
         // Verify first link updates
         updatedLink1SharedTo.Id.Should().Be(link1SharedTo.Id);
@@ -382,9 +382,9 @@ public class ShareFileTest(
         var editingResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, editingLink, TestContext.Current.CancellationToken)).Response;
         var commentResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, commentLink, TestContext.Current.CancellationToken)).Response;
 
-        var readOnlySharedTo = DeserializeSharedToLink(readOnlyResponse);
-        var editingSharedTo = DeserializeSharedToLink(editingResponse);
-        var commentSharedTo = DeserializeSharedToLink(commentResponse);
+        var readOnlySharedTo = readOnlyResponse.SharedLink;
+        var editingSharedTo = editingResponse.SharedLink;
+        var commentSharedTo = commentResponse.SharedLink;
 
         // Act - Access with read-only link
         await _filesClient.Authenticate(null);
@@ -444,8 +444,8 @@ public class ShareFileTest(
         var unrestrictedResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, unrestrictedLink, TestContext.Current.CancellationToken)).Response;
         var passwordProtectedResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, passwordProtectedLink, TestContext.Current.CancellationToken)).Response;
 
-        var unrestrictedSharedTo = DeserializeSharedToLink(unrestrictedResponse);
-        var passwordProtectedSharedTo = DeserializeSharedToLink(passwordProtectedResponse);
+        var unrestrictedSharedTo = unrestrictedResponse.SharedLink;
+        var passwordProtectedSharedTo = passwordProtectedResponse.SharedLink;
 
         // Act & Assert - First try unrestricted link
         await _filesClient.Authenticate(null);
