@@ -78,11 +78,9 @@ public class ChatCompletionGenerator(
                 if (historyWriter == null)
                 {
                     historyWriter = await historyWriterFactory.CreateAsync();
-                    if (historyWriter.IsNew)
-                    {
-                        yield return new ChatCompletion(EventType.Metadata, 
-                            JsonSerializer.Serialize(new Metadata { ChatId = historyWriter.Chat.Id }, JsonSerializerOptions.Web));
-                    }
+                    yield return new ChatCompletion(
+                        EventType.MessageStart, 
+                        JsonSerializer.Serialize(new MessageStart { ChatId = historyWriter.Chat.Id }, JsonSerializerOptions.Web));
                 }
                     
                 responses.Add(response);
@@ -93,19 +91,23 @@ public class ChatCompletionGenerator(
                 switch (content)
                 {
                     case TextContent textContent:
-                        yield return new ChatCompletion(EventType.NewToken,
+                        yield return new ChatCompletion(
+                            EventType.NewToken,
                             JsonSerializer.Serialize(textContent, _serializerOptions));
                         break;
                     case FunctionCallContent functionCall:
-                        yield return new ChatCompletion(EventType.ToolCall,
+                        yield return new ChatCompletion(
+                            EventType.ToolCall,
                             JsonSerializer.Serialize(functionCall, _serializerOptions));
                         break;
                     case FunctionResultContent functionResult:
-                        yield return new ChatCompletion(EventType.ToolResult,
+                        yield return new ChatCompletion(
+                            EventType.ToolResult,
                             JsonSerializer.Serialize(functionResult, _serializerOptions));
                         break;
                     case ErrorContent error:
-                        yield return new ChatCompletion(EventType.Error, 
+                        yield return new ChatCompletion(
+                            EventType.Error, 
                             JsonSerializer.Serialize(error, _serializerOptions));
                         break;
                 }
@@ -132,5 +134,10 @@ public class ChatCompletionGenerator(
         {
             await chatSocketClient.CommitMessageAsync(historyWriter.Chat.Id, messageId);
         }
+        
+        yield return new ChatCompletion(
+            EventType.MessageStop, 
+            JsonSerializer.Serialize(
+                new MessageStop { MessageId = messageId }, _serializerOptions));
     }
 }
