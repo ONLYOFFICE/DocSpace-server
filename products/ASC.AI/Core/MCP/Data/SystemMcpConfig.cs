@@ -24,12 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Collections.Immutable;
+
 namespace ASC.AI.Core.MCP.Data;
 
 [Singleton]
 public class SystemMcpConfig
 {
     public readonly IReadOnlyDictionary<Guid, SystemMcpServer> Servers = new Dictionary<Guid, SystemMcpServer>().AsReadOnly();
+
+    public readonly ImmutableHashSet<string> ReservedServerNames;
     
     private readonly FrozenDictionary<string, StaticServerInfo> _staticInfos =
         new Dictionary<string, StaticServerInfo>
@@ -58,6 +62,17 @@ public class SystemMcpConfig
     
     public SystemMcpConfig(IConfiguration configuration)
     {
+        var reservedServerNames = new HashSet<string>();
+
+        foreach (var item in _staticInfos)
+        {
+            reservedServerNames.Add(item.Key);
+        }
+
+        reservedServerNames.Add("docspace");
+        
+        ReservedServerNames = reservedServerNames.ToImmutableHashSet();
+        
         var settings = configuration.GetSection("ai:mcp").Get<List<McpConfig>>();
         if (settings == null)
         {

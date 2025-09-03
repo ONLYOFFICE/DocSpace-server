@@ -92,6 +92,10 @@ public static class DbMcpServerOptionsExtensions
 
             entity.HasIndex(e => new { e.TenantId, e.Id })
                 .HasDatabaseName("IX_tenant_id_id");
+            
+            entity.HasIndex(e => new { e.TenantId, e.Name })
+                .HasDatabaseName("IX_tenant_id_name")
+                .IsUnique();
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")

@@ -135,6 +135,12 @@ public partial class AiDbContext
     {
         return McpQueries.UpdateOauthCredentials(this, tenantId, roomId, userId, serverId, token);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public Task<bool> ServerNameIsExistsAsync(int tenantId, string name)
+    {
+        return McpQueries.ServerNameIsExistsAsync(this, tenantId, name);
+    }
 }
 
 static file class McpQueries
@@ -306,6 +312,10 @@ static file class McpQueries
                 .Where(x => x.TenantId == tenantId && x.RoomId == roomId && x.UserId == userId && x.ServerId == serverId)
                 .ExecuteUpdate(x => 
                     x.SetProperty(y => y.OauthCredentials, token)));
+
+    public static readonly Func<AiDbContext, int, string, Task<bool>> ServerNameIsExistsAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, string name) =>
+            ctx.McpServers.Any(x => x.TenantId == tenantId && x.Name == name));
 }
 
 public class DbRoomServerUnit

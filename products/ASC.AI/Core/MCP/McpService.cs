@@ -24,12 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.RegularExpressions;
+
 using ASC.AI.Core.Chat.Function;
 
 namespace ASC.AI.Core.MCP;
 
 [Scope]
-public class McpService(
+public partial class McpService(
     TenantManager tenantManager,
     AuthContext authContext,
     McpDao mcpDao, 
@@ -41,9 +43,11 @@ public class McpService(
     IDistributedLockProvider distributedLockProvider,
     ClientTransportFactory clientTransportFactory,
     OAuth20TokenHelper oauthTokenHelper,
-    IToolPermissionProvider toolPermissionProvider)
+    IToolPermissionProvider toolPermissionProvider,
+    SystemMcpConfig systemMcpConfig)
 {
     private const int MaxMcpServersByRoom = 5;
+    private static readonly Regex _serverNameRegex = ServerNameRegex();
     
     public async Task<McpServer> AddCustomServerAsync(
         string endpoint, 
@@ -56,6 +60,10 @@ public class McpService(
         ArgumentException.ThrowIfNullOrEmpty(endpoint);
         ArgumentException.ThrowIfNullOrEmpty(name);
         ArgumentException.ThrowIfNullOrEmpty(description);
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+        
+        await ThrowIfServerNameNotValid(tenantId, name);
 
         var options = new SseClientTransportOptions
         {
@@ -70,7 +78,7 @@ public class McpService(
         
         await ThrowIfNotConnectAsync(transport);
         
-        return await mcpDao.AddServerAsync(tenantManager.GetCurrentTenantId(), endpoint, name, headers, description, ConnectionType.Direct);
+        return await mcpDao.AddServerAsync(tenantId, endpoint, name, headers, description, ConnectionType.Direct);
     }
 
     public async Task<McpServer> UpdateCustomServerAsync(
@@ -81,8 +89,10 @@ public class McpService(
         string? description)
     {
         await ThrowIfNotAccessAsync();
+        
+        var tenantId = tenantManager.GetCurrentTenantId();
 
-        var server = await mcpDao.GetServerAsync(tenantManager.GetCurrentTenantId(), serverId);
+        var server = await mcpDao.GetServerAsync(tenantId, serverId);
         if (server == null)
         {
             throw new ItemNotFoundException("MCP Server not found");
@@ -92,6 +102,8 @@ public class McpService(
         
         if (!string.IsNullOrEmpty(name))
         {
+            await ThrowIfServerNameNotValid(tenantId, name);
+            
             server.Name = name;
         }
 
@@ -562,5 +574,26 @@ public class McpService(
     private string GetLockKey(int tenantId)
     {
         return $"mcp_{tenantId}";
+    }
+    
+    [GeneratedRegex("^[a-zA-Z0-9_-]+$")]
+    private static partial Regex ServerNameRegex();
+
+    private async Task ThrowIfServerNameNotValid(int tenantId, string name)
+    {
+        if (!_serverNameRegex.IsMatch(name))
+        {
+            throw new ArgumentException("Invalid MCP server name. Only letters, numbers, underscores, and hyphens are allowed.");
+        }
+
+        if (systemMcpConfig.ReservedServerNames.Contains(name))
+        {
+            throw new ArgumentException("Invalid MCP server name. MCP server name is not allowed.");
+        }
+
+        if (await mcpDao.ServerNameIsExistsAsync(tenantId, name))
+        {
+            throw new ArgumentException("Invalid MCP server name. MCP server name is already exists.");
+        }
     }
 }

@@ -469,4 +469,11 @@ public class McpDao(
             await context.UpdateOauthCredentials(tenantId, roomId, userId, serverId, encryptedToken);
         });
     }
+
+    public async Task<bool> ServerNameIsExistsAsync(int tenantId, string name)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        return await dbContext.ServerNameIsExistsAsync(tenantId, name);
+    }
 }
