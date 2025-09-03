@@ -345,7 +345,7 @@ public class TenantManager(
 
         var tenant = GetCurrentTenant(false);
 
-        var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, wallet, quotas.Keys);
+        var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, wallet, [.. quotas.Keys]);
         var result = prices.ToDictionary(price => quotas.GetValueOrDefault(price.Key), price => price.Value);
 
         return result;

@@ -575,11 +575,11 @@ public class TariffService(
         return result;
     }
 
-    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, bool wallet, IEnumerable<string> productIds)
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, bool wallet, List<string> productIds)
     {
         ArgumentNullException.ThrowIfNull(productIds);
 
-        if (!productIds.Any())
+        if (productIds.Count == 0)
         {
             return [];
         }
@@ -594,16 +594,23 @@ public class TariffService(
                 {
                     if (wallet)
                     {
-                        var accountingServices = productIds.Where(x => int.TryParse(x, out var id) && id > 10000);
-                        var billingProducts = productIds.Where(x => !accountingServices.Contains(x));
+                        var accountingServices = new List<string>();
+                        var billingProducts = new List<string>();
 
-                        var accountingPrices = accountingServices.Any()
-                            ? await accountingClient.GetProductPriceInfoAsync(partnerId, accountingServices)
-                            : [];
+                        foreach (var productId in productIds)
+                        {
+                            if (int.TryParse(productId, out var id) && id > 10000)
+                            {
+                                accountingServices.Add(productId);
+                            }
+                            else
+                            {
+                                billingProducts.Add(productId);
+                            }
+                        }
 
-                        var billingPrices = billingProducts.Any()
-                            ? await billingClient.GetProductPriceInfoAsync(partnerId, wallet, billingProducts)
-                            : [];
+                        var accountingPrices = accountingServices.Count == 0 ? [] : await accountingClient.GetProductPriceInfoAsync(partnerId, accountingServices);
+                        var billingPrices = billingProducts.Count == 0 ? [] : await billingClient.GetProductPriceInfoAsync(partnerId, wallet, billingProducts);
 
                         foreach (var billingPrice in billingPrices)
                         {
@@ -628,9 +635,7 @@ public class TariffService(
             }
         }
 
-        return productIds
-            .Select(p => new { ProductId = p, Prices = new Dictionary<string, decimal>() })
-            .ToDictionary(e => e.ProductId, e => e.Prices);
+        return productIds.ToDictionary(p => p, p => new Dictionary<string, decimal>());
     }
 
     public async Task<Uri> GetAccountLinkAsync(int tenant, string backUrl)
