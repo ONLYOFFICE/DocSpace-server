@@ -244,7 +244,7 @@ public class BillingClient
         return $"ASC {pkey}:{now}:{hash}";
     }
 
-    private async Task<string> RequestAsync(string method, string portalId, IEnumerable<Tuple<string, string>> parameters = null, bool addPolicy = false)
+    private async Task<string> RequestAsync(string method, string portalId, List<Tuple<string, string>> parameters = null, bool addPolicy = false)
     {
         var url = _configuration.Url + method;
 
