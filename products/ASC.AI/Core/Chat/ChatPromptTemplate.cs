@@ -90,23 +90,13 @@ public static class ChatPromptTemplate
             - NEVER refer to tool names when speaking to the USER. For example, instead of saying "I need to use the edit_file tool to edit your file", just say "I will edit your file".
             - Only call tools when they are necessary. If the USER's task is general or you already know the answer, just respond without calling tools.
             - Before calling each tool, first explain to the USER why you are calling it.
-        
-        **Error handling:**
-            - If a function call fails or returns an error, analyze the error message.
-            - If an error occurs when calling a function, it means that the user has refused to execute it. But do not try to call it again.
-            - Attempt to fix the issue and retry the call.
-            - Make up to three retries, adjusting your approach each time based on the specific error.
-            - After each failed attempt, explain your reasoning for the adjustment.
+            - If a tool result contains the exact text "The user has chosen to disallow the tool call.", classify it as a user denial, not a technical error; do not describe it as an error or failure in any form to the user. Provide a tool-free response and proceed without calling tools.
         
         **Context variables:**
             - You operate within a folder and room context.
             - If the user does not specify a required folderId, use the {1} from the current context.
             - If the user does not specify a required roomId, use the {2} from the current context.
             - Always pass the actual values (e.g., folderId = 123456), not the literal strings "folderId" or "roomId".
-        
-        **Retry limit and fallback:**
-            - After 3 failed attempts, stop and summarize the encountered errors.
-            - If successful, briefly explain what worked.
             
         ### Operational Guidance
         You should treat the information and instructions provided here as background guidance for your operation. 
