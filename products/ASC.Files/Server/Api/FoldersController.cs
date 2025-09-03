@@ -669,6 +669,8 @@ public class FoldersControllerCommon(
         {
             yield return await globalFolderHelper.FolderRecentAsync;
         }
+
+        yield return await globalFolderHelper.FolderShareAsync;
         
         var my = await globalFolderHelper.FolderMyAsync;
         if (my != 0)
