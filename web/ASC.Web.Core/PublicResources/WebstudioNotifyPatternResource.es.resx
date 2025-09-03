@@ -1409,7 +1409,7 @@ $TrulyYours</value>
     <value>5 consejos para trabajar eficazmente en sus documentos</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace se ha desactivado</value>
+    <value>${LetterLogoText} DocSpace se ha eliminado</value>
   </data>
   <data name="subject_saas_admin_modules_v1" xml:space="preserve">
     <value>Configure su ${LetterLogoText} DocSpace</value>

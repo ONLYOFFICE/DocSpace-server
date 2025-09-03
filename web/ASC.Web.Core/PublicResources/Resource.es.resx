@@ -803,7 +803,7 @@
     <value>Personalización de marca</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Seguimiento de las conexiones y acciones de los usuarios</value>
+    <value>Seguimiento de inicios de sesión y acciones</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Tamaño máximo del archivo</value>
@@ -818,7 +818,7 @@
     <value>El número de administradores</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Copias de seguridad y recuperación automáticas</value>
+    <value>Recuperación de datos</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Número ilimitado de salas activas</value>
@@ -845,7 +845,7 @@
     <value>Usuarios en la sala:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Número ilimitado de usuarios</value>
+    <value>Número ilimitado de usuarios e invitados</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>l número de usuarios no debe superar {0}</value>

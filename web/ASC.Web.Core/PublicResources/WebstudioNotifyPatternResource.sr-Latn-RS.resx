@@ -355,7 +355,7 @@
     <value>Brisanje portala ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace je deaktiviran</value>
+    <value>${LetterLogoText} DocSpace je obrisan</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Promena adrese portala</value>
@@ -1194,7 +1194,7 @@ Ako imate bilo kakvih pitanja ili vam je potrebna pomoć, slobodno nas kontakti
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace je &lt;span style="color: #FF6F3D;"&gt;deaktiviran&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace je &lt;span style="color: #FF6F3D;"&gt;obrisan&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Vaš ${LetterLogoText} DocSpace je uspešno deaktiviran. Imajte na umu da će svi vaši podaci biti izbrisani u skladu sa našom &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Politikom privatnosti&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -2033,5 +2033,29 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Potrebna akcija: Nije moguće automatski dopuniti stanje novčanika u vašem ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Lozinka je uspešno promenjena
+
+Vaša lozinka za nalog *$UserName*, *$UserEmail* je uspešno promenjena dana *$Date* u DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: $IP
+Uređaj: *$Device*
+#if($Location != "")
+Lokacija: *$Location*
+#end
+Pregledač: *$Browser*
+
+Ako ste vi izvršili ovu radnju — nisu potrebni dalji koraci. Ako ova promena izgleda sumnjivo ili nije bila ovlašćena od strane vas, odmah resetujte lozinku i onemogućite pristup DocSpace-u za ovaj uređaj.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Vaša lozinka je uspešno promenjena</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Otvori DocSpace</value>
   </data>
 </root>

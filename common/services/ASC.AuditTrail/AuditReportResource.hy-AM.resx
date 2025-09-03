@@ -987,4 +987,13 @@
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP սինխրոնիզացիան ավարտվեց</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Լոկացիա</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Գովազդային պաստառների տեսանելիության կարգավորումները փոխվել են</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Հաճախորդի դրամապանակի միացված ծառայությունների կարգավորումները թարմացվել են</value>
+  </data>
 </root>

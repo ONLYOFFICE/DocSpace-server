@@ -446,7 +446,7 @@
     <value>Marca e personalização</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Acompanhamento de logins e ações do usuário</value>
+    <value>Rastreamento de logins e ações</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Tamanho máximo do arquivo</value>
@@ -461,7 +461,7 @@
     <value>Número de administradores</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Backup e recuperação automática</value>
+    <value>Recuperação de dados</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Número ilimitado de salas ativas</value>
@@ -488,7 +488,7 @@
     <value>Usuários na sala:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Número ilimitado de usuários</value>
+    <value>Número ilimitado de usuários e convidados</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>O número de usuários não deve exceder {0}</value>
@@ -1158,5 +1158,8 @@
   </data>
   <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
     <value>O número de backups gratuitos não deve exceder {0} em um mês</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Recarga de saldo</value>
   </data>
 </root>

@@ -126,4 +126,7 @@
   <data name="TitleNewFileText" xml:space="preserve">
     <value>Нови документ</value>
   </data>
+  <data name="TitleNewFilePdfFormText" xml:space="preserve">
+    <value>Нови PDF-образац</value>
+  </data>
 </root>

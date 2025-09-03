@@ -1048,7 +1048,7 @@ Dieser Link ist nur 7 Tage gültig.</value>
     <value>${LetterLogoText} DocSpace beitreten</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace wurde deaktiviert</value>
+    <value>${LetterLogoText} DocSpace wurde gelöscht</value>
   </data>
   <data name="subject_saas_admin_modules_v1" xml:space="preserve">
     <value>Konfigurieren Sie Ihren ${LetterLogoText} DocSpace</value>

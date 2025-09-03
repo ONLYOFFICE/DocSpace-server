@@ -448,7 +448,7 @@
     <value>Брисање портала ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace је деактивиран</value>
+    <value>${LetterLogoText} DocSpace је обрисан</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Промена адресе портала</value>
@@ -1151,7 +1151,7 @@ $TrulyYours</value>
 Добиц́ете више савета о томе како да користите своју веб канцеларију. Можете да откажете претплате на страници профила у било ком тренутку, као и да их поново омогуц́ите.</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Ваш ${LetterLogoText} DocSpace ц́е бити &lt;span style="color: #FF6F3D;"&gt;избрисан&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Ваш ${LetterLogoText} DocSpace ц́е бити &lt;span style="color: #FF6F3D;"&gt;обрисан&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Нисте ушли у свој ${LetterLogoText} DocSpace&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; више од пола године. &lt;/td&gt;&lt;/tr&gt;
 
@@ -1427,7 +1427,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace је &lt;span style="color: #FF6F3D;"&gt;деактивиран&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace је &lt;span style="color: #FF6F3D;"&gt;обрисан&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ваш ${LetterLogoText} DocSpace је успешно деактивиран. Имајте на уму да ц́е сви ваши подаци бити избрисани у складу са нашом &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Политиком приватности&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -2030,5 +2030,29 @@ $TrulyYours</value>
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Лозинка је успешно промењена
+
+Ваша лозинка за налог *$UserName*, *$UserEmail* је успешно промењена дана *$Date* у DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: $IP
+Уређај: *$Device*
+#if($Location != "")
+Локација: *$Location*
+#end
+Прегледач: *$Browser*
+
+Ако сте ви извршили ову radnju — нису потребни даљи кораци. Ако ова промена изгледа сумњиво или није била овлашћена од стране вас, одмах ресетујте лозинку и онемогућите приступ DocSpace-у за овај уређај.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Отвори DocSpace</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Ваша лозинка је успешно промењена</value>
   </data>
 </root>

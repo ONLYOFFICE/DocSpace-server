@@ -1441,7 +1441,7 @@ $TrulyYours</value>
     <value>Solicitação do departamento de vendas</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>O ${LetterLogoText} DocSpace foi desativado</value>
+    <value>O DocSpace ${LetterLogoText} foi excluído.</value>
   </data>
   <data name="subject_saas_admin_modules_v1" xml:space="preserve">
     <value>Configure seu ${LetterLogoText} DocSpace</value>
