@@ -1316,7 +1316,7 @@ public class UserController(
 
         foreach (var user in users)
         {
-            if (user.IsActive)
+            if (user.IsActive || user.Status == EmployeeStatus.Terminated)
             {
                 continue;
             }
