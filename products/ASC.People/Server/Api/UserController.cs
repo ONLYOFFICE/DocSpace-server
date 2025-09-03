@@ -817,9 +817,10 @@ public class UserController(
     {
         await securityContext.AuthByClaimAsync();
 
+        var model = emailValidationKeyModelHelper.GetModel();
         var targetUser = await _userManager.GetUserByEmailAsync(inDto.Email);
-
-        if (Equals(targetUser, Constants.LostUser))
+        
+        if (Equals(targetUser, Constants.LostUser) || model.UiD != targetUser.Id)
         {
             throw new ItemNotFoundException("User not found");
         }
