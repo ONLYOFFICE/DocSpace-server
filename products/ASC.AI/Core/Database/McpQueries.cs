@@ -226,7 +226,7 @@ static file class McpQueries
 
     public static readonly Func<AiDbContext, int, int, Guid, IAsyncEnumerable<DbRoomServerUnit>> GetRoomServersAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int roomId, Guid userId) =>
-            ctx.RoomMcpServers
+            ctx.RoomMcpServers.Where(x => x.TenantId == tenantId && x.RoomId == roomId)
                 .GroupJoin(
                     ctx.McpServers,
                     m => new { tenantId = m.TenantId, id = m.ServerId },
