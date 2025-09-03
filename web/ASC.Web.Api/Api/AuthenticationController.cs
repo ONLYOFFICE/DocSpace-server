@@ -191,12 +191,12 @@ public class AuthenticationController(
 
         if (user == null || Equals(user, Constants.LostUser))
         {
-            throw new Exception(Resource.ErrorUserNotFound);
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         if (user.Status != EmployeeStatus.Active)
         {
-            throw new Exception(Resource.ErrorUserDisabled);
+            throw new InvalidOperationException(Resource.ErrorUserDisabled);
         }
 
         if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))

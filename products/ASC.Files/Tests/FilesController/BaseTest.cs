@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using DocSpace.API.SDK.Api.Files;
-using DocSpace.API.SDK.Api.Rooms;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -194,7 +191,7 @@ public class BaseTest(
     
     protected static FileShareLink DeserializeSharedToLink(FileShareDto updatedLink1Response)
     {
-        return JsonSerializer.Deserialize<FileShareLink>((updatedLink1Response.SharedTo as JObject)!.ToString(), JsonSerializerOptions.Web)!;
+        return JsonSerializer.Deserialize<FileShareLink>(((JsonElement)updatedLink1Response.SharedTo).ToString(), JsonSerializerOptions.Web)!;
     }
     
     protected async Task<(string, int)> CreateFileAndShare(FileShare fileShare, bool primary = true, bool varInternal = false, DateTime? expirationDate = null)

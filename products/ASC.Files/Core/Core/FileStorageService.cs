@@ -382,10 +382,9 @@ public class FileStorageService //: IFileStorageService
         var newTask = fileMarker.GetRootFoldersIdMarkedAsNewAsync(parentId);
         var breadCrumbs = await breadCrumbsTask;
 
-        if (parentRoom != null)
+        if (parentRoom != null && breadCrumbs.Count >= 2)
         {
-            var aces = await fileSharing.GetSharedInfoAsync(parentRoom);
-            if (breadCrumbs.FirstOrDefault() is Folder<T> { FolderType: FolderType.VirtualRooms } && !aces.Exists(u => u.Id == authContext.CurrentAccount.ID))
+            if (breadCrumbs[0] is Folder<T> { FolderType: FolderType.VirtualRooms } && breadCrumbs [1] is Folder<T> second && !DocSpaceHelper.IsRoom(second.FolderType))
             {
                 breadCrumbs = breadCrumbs.Skip(1).ToList();
             }
@@ -433,7 +432,7 @@ public class FileStorageService //: IFileStorageService
             });
         }
         
-        if (parent.FolderType == FolderType.Recent && searchArea == SearchArea.RecentByLinks)
+        if (parent.FolderType == FolderType.Recent && searchArea == SearchArea.RecentByLinks || parent.FolderType == FolderType.Favorites)
         {
             parent.Title = FilesUCResource.MyFiles;
         }
@@ -1933,6 +1932,8 @@ public class FileStorageService //: IFileStorageService
 
             if (result.Renamed)
             {
+                await entryManager.MarkAsRecent(file);
+                
                 await filesMessageService.SendAsync(MessageAction.FileRenamed, file, file.Title, oldTitle);
 
                 await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
@@ -3553,11 +3554,11 @@ public class FileStorageService //: IFileStorageService
     {
         if (favorite)
         {
-            await AddToFavoritesAsync(new List<T>(0), new List<T>(1) { fileId });
+            await AddToFavoritesAsync([], [fileId]);
         }
         else
         {
-            await DeleteFavoritesAsync(new List<T>(0), new List<T>(1) { fileId });
+            await DeleteFavoritesAsync([], [fileId]);
         }
 
         return favorite;
@@ -3590,9 +3591,21 @@ public class FileStorageService //: IFileStorageService
 
         foreach (var entry in entries)
         {
+            switch (entry)
+            {
+                case File<T> file:
+                    file.FolderIdDisplay = await globalFolderHelper.GetFolderFavoritesAsync<T>();
+                    await socketManager.AddFileToFavoritesAsync(file, [authContext.CurrentAccount.ID]);
+                    break;
+                case Folder<T> folder:
+                    folder.FolderIdDisplay = await globalFolderHelper.GetFolderFavoritesAsync<T>();
+                    await socketManager.AddFolderToFavoritesAsync(folder, [authContext.CurrentAccount.ID]);
+                    break;
+            }
+
             await filesMessageService.SendAsync(MessageAction.FileMarkedAsFavorite, entry, entry.Title);
         }
-
+        
         return entries;
     }
 
@@ -3616,8 +3629,22 @@ public class FileStorageService //: IFileStorageService
 
         await tagDao.RemoveTagsAsync(tags);
 
+        var folderIdFavorites = await globalFolderHelper.GetFolderFavoritesAsync<T>();
+        
         foreach (var entry in entries)
         {
+            switch (entry)
+            {
+                case File<T> file:
+                    file.FolderIdDisplay = folderIdFavorites;
+                    await socketManager.RemoveFileFromFavoritesAsync(file, [authContext.CurrentAccount.ID]);
+                    break;
+                case Folder<T> folder:
+                    folder.FolderIdDisplay = folderIdFavorites;
+                    await socketManager.RemoveFolderFromFavoritesAsync(folder, [authContext.CurrentAccount.ID]);
+                    break;
+            }
+
             await filesMessageService.SendAsync(MessageAction.FileRemovedFromFavorite, entry, entry.Title);
         }
     }
@@ -3682,13 +3709,12 @@ public class FileStorageService //: IFileStorageService
         var users = new[] { authContext.CurrentAccount.ID };
 
         var tasks = new List<Task>(entries.Count);
-
+        
         foreach (var e in entries)
         {
             switch (e)
             {
-                case File<T> file:        
-                    file.FolderIdDisplay = await globalFolderHelper.GetFolderRecentAsync<T>();
+                case File<T> file:
                     tasks.Add(socketManager.RemoveFileFromRecentAsync(file, users));
                     break;
                 case Folder<T> folder:

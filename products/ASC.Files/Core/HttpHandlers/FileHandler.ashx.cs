@@ -288,7 +288,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
             
-            var t1 = TryMarkAsRecentByLink(file);
+            var t1 = TryMarkAsRecent(file);
             var t2 = fileMarker.RemoveMarkAsNewAsync(file).AsTask();
             
             await Task.WhenAll(t1, t2);
@@ -485,16 +485,12 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)));
     }
 
-    private async Task TryMarkAsRecentByLink<T>(File<T> file)
+    private async Task TryMarkAsRecent<T>(File<T> file)
     {
-        if (authContext.IsAuthenticated && file.RootFolderType == FolderType.USER && !file.ProviderEntry && file.CreateBy != authContext.CurrentAccount.ID
+        if (authContext.IsAuthenticated && !file.ProviderEntry 
             && (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title) || !fileUtility.CanWebView(file.Title)))
         {
-            var linkId = await externalShare.GetLinkIdAsync();
-            if (linkId != Guid.Empty)
-            {
-                await entryManager.MarkFileAsRecentByLink(file, linkId);
-            }
+            await entryManager.MarkAsRecent(file);
         }
     }
 
@@ -1055,7 +1051,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var view = bool.TryParse(context.Request.Query[FilesLinkUtility.View].FirstOrDefault(), out var v) && v;
             if (view)
             {
-                var t1 = TryMarkAsRecentByLink(file);
+                var t1 = TryMarkAsRecent(file);
                 var t2 = fileMarker.RemoveMarkAsNewAsync(file).AsTask();
                 
                 await Task.WhenAll(t1, t2);

@@ -24,12 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+namespace ASC.Core.Common.EF.Migration;
 
-namespace ASC.Migrations.Core.Utils;
-
-public class Options
+public class ProjectInfo
 {
+    public string AssemblyName { get; set; }
     public string Path { get; set; }
-    public IEnumerable<ProviderInfo> Providers { get; set; }
-    public IEnumerable<ProviderInfo> TeamlabsiteProviders { get; set; }
 }

@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using LinkType =  DocSpace.API.SDK.Model.LinkType;
-using Task = System.Threading.Tasks.Task;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -624,6 +621,6 @@ public class ShareRoomTest(
         // Get the primary external link
         var primaryLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        primaryLink.CanEditAccess.Should().BeTrue();
+        primaryLink.CanEditInternal.Should().BeTrue();
     }
 }

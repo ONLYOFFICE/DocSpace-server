@@ -1088,22 +1088,16 @@
     <value>货币</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>日期和时间</value>
+    <value>日期</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>数量</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>服务名称</value>
   </data>
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>计量单位</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>客户操作报告 ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>提现</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>未找到该群组</value>
@@ -1116,9 +1110,6 @@
   </data>
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>已使用储存空间：</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>描述</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>磁盘空间</value>

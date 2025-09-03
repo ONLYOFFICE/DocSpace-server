@@ -28,6 +28,7 @@ global using System.Reflection;
 global using System.Text.RegularExpressions;
 
 global using ASC.Core.Common.EF;
+global using ASC.Core.Common.EF.Migration;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.EF.Model.Chat;
 global using ASC.Core.Common.Hosting;
@@ -38,7 +39,6 @@ global using ASC.EventBus.Extensions.Logger.Extensions;
 global using ASC.Files.Core.EF;
 global using ASC.MessagingSystem.EF.Model;
 global using ASC.Migrations.Core.Identity;
-global using ASC.Migrations.Core.Models;
 global using ASC.Migrations.Core.Utils;
 global using ASC.Webhooks.Core.EF.Model;
 

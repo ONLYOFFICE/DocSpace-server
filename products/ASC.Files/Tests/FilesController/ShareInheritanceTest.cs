@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using LinkType =  DocSpace.API.SDK.Model.LinkType;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -818,8 +816,8 @@ public class ShareInheritanceTest(
         
         var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
-        fileInfo.AvailableExternalRights.Should().HaveCount(3);
-        fileInfo.AvailableExternalRights.Where(r => r.Value).Should().ContainKeys(nameof(FileShare.FillForms), nameof(FileShare.Restrict), nameof(FileShare.None));
+        fileInfo.AvailableExternalRights.Should().HaveCount(2);
+        fileInfo.AvailableExternalRights.Where(r => r.Value).Should().ContainKeys(nameof(FileShare.FillForms), nameof(FileShare.None));
     }
 
     [Fact]

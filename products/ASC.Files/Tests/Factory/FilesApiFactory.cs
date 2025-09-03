@@ -25,8 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCFiles;
-using DocSpace.API.SDK.Api.Files;
-using DocSpace.API.SDK.Api.Rooms;
 
 namespace ASC.Files.Tests.Factory;
 

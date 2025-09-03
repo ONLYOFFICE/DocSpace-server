@@ -1088,22 +1088,16 @@
     <value>通貨</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>日時</value>
+    <value>日付</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>数量</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>サービス名</value>
   </data>
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>計測単位</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>顧客操作レポート({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>出金</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>グループが見つかりませんでした</value>
@@ -1116,9 +1110,6 @@
   </data>
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>使用されたストレージスペース：</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>数量</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>ディスク容量</value>

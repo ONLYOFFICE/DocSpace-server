@@ -256,7 +256,7 @@ public class FileDtoHelper(
             }
         }
 
-        if (contextFolder is { FolderType: FolderType.Recent })
+        if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })
         {
             var forbiddenActions = new List<FileSecurity.FilesSecurityActions>
             {
@@ -281,6 +281,7 @@ public class FileDtoHelper(
                 result.Security[action] = false;   
             }
 
+            result.Locked = false;
             result.CanShare = false;
             result.ViewAccessibility[Accessibility.CanConvert] = false;
 
@@ -447,6 +448,7 @@ public class FileDtoHelper(
         result.PureContentLength = file.ContentLength.NullIfDefault();
         result.Comment = file.Comment;
         result.Encrypted = file.Encrypted.NullIfDefault();
+        result.IsFavorite = file.IsFavorite.NullIfDefault();
         result.Locked = file.Locked.NullIfDefault();
         result.LockedBy = file.LockedBy;
         result.Access = file.Access;

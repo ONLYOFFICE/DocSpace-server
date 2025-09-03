@@ -76,4 +76,25 @@
   <data name="RestoreException" xml:space="preserve">
     <value>Yedəkləməni bərpa edərkən problem yarandı. Lütfən, yenidən bərpa etməyə cəhd edin və ya dəstək ilə əlaqə saxlayın.</value>
   </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Avtomatik ehtiyat nüsxəsi</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Müvəqqəti yaddaş</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Ehtiyat otaq</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Yerli fayl</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Üçüncü Tərəf Yaddaşı</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Üçüncü tərəf resursu</value>
+  </data>
 </root>

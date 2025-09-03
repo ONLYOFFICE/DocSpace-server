@@ -249,9 +249,9 @@ var authorizationBuilder = builder
 AddIdentityEnv(authorizationBuilder);
 
 var clientBasePath = Path.Combine(basePath, "client");
-var installPackages = builder.AddExecutable("asc-install-packages", "yarn", clientBasePath, "install");
-var buildPackages = builder.AddExecutable("asc-build-packages", "yarn", clientBasePath, "build").WaitForCompletion(installPackages);
-var startPackages = builder.AddExecutable("asc-start-packages", "yarn", clientBasePath, "start").WaitForCompletion(buildPackages);
+var installPackages = builder.AddExecutable("asc-install-packages", "pnpm", clientBasePath, "install");
+var buildPackages = builder.AddExecutable("asc-build-packages", "pnpm", clientBasePath, "build").WaitForCompletion(installPackages);
+var startPackages = builder.AddExecutable("asc-start-packages", "pnpm", clientBasePath, "start").WaitForCompletion(buildPackages);
 installPackages.WithRelationship(buildPackages.Resource, "Parent");
 buildPackages.WithRelationship(startPackages.Resource, "Parent");
 
@@ -416,7 +416,7 @@ void AddWaitFor<T>(IResourceBuilder<T> resourceBuilder, bool includeMigrate = tr
 {
     if (includeMigrate)
     {
-        resourceBuilder.WaitFor(migrate);
+        resourceBuilder.WaitForCompletion(migrate);
     }
 
     if (includeRabbitMq)

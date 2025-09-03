@@ -209,6 +209,7 @@ public class MigrationContext : DbContext
             .AddIdentityScope()
             .AddIdentityShedlock()
             .AddUserRelation()
+            .AddUserRelation()
             .AddDbChats()
             .AddDbChatsMessages()
             .AddDbAiProviders()
@@ -216,7 +217,6 @@ public class MigrationContext : DbContext
             .AddDbMcpServerStates()
             .AddDbMcpServerSettings()
             .AddDbRoomMcpServers()
-            .AddDbFileVectorization()
-            .AddDbFunctions();
+            .AddDbFileVectorization();
     }
 }

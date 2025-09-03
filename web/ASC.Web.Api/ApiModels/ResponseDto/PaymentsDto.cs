@@ -56,7 +56,7 @@ public class ReportDto
     /// </summary>
     public int CurrentPage { get; set; }
 
-    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper)
+    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)
     {
         Offset = report.Offset;
         Limit = report.Limit;
@@ -70,7 +70,7 @@ public class ReportDto
         {
             foreach (var operation in report.Collection)
             {
-                Collection.Add(new OperationDto(operation, apiDateTimeHelper));
+                Collection.Add(new OperationDto(operation, apiDateTimeHelper, participantDisplayNames));
             }
         }
     }
@@ -94,6 +94,10 @@ public class OperationDto
     /// </summary>
     public string Description { get; set; }
     /// <summary>
+    /// Brief details of the operation.
+    /// </summary>
+    public string Details { get; set; }
+    /// <summary>
     /// Unit of the service.
     /// </summary>
     public string ServiceUnit { get; set; }
@@ -110,23 +114,38 @@ public class OperationDto
     /// </summary>
     public decimal Credit { get; set; }
     /// <summary>
-    /// Withdrawal amount of the operation.
+    /// Debit amount of the operation.
     /// </summary>
-    public decimal Withdrawal { get; set; }
+    public decimal Debit { get; set; }
+    /// <summary>
+    /// Original name of the participant.
+    /// </summary>
+    public string ParticipantName { get; set; }
+    /// <summary>
+    /// Display name of the participant.
+    /// </summary>
+    public string ParticipantDisplayName { get; set; }
 
-    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper)
+    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)
     {
+        var (description, unitOfMeasurement) = GetServiceDescAndUOM(operation.Service);
+
         Date = apiDateTimeHelper.Get(operation.Date);
         Service = operation.Service;
-        Description = GetServiceDesc(operation.Service);
-        ServiceUnit = operation.ServiceUnit;
+        Description = description;
+        Details = operation.Metadata != null && operation.Metadata.TryGetValue(BillingClient.MetadataDetails, out var details) ? details : string.Empty;
+        ServiceUnit = unitOfMeasurement;
         Quantity = operation.Quantity;
         Currency = operation.Currency;
         Credit = operation.Credit;
-        Withdrawal = operation.Withdrawal;
+        Debit = operation.Debit;
+        ParticipantName = operation.ParticipantName;
+        ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
+            ? value
+            : operation.ParticipantName;
     }
 
-    public static string GetServiceDesc(string serviceName)
+    private static (string, string) GetServiceDescAndUOM(string serviceName)
     {
         // for testing purposes
         if (serviceName != null && serviceName.StartsWith("disk-storage"))
@@ -134,7 +153,13 @@ public class OperationDto
             serviceName = "disk-storage";
         }
 
-        return Resource.ResourceManager.GetString("AccountingCustomerOperationServiceDesc_" + (serviceName ?? "top-up"));
+        if (string.IsNullOrEmpty(serviceName))
+        {
+            serviceName = "top-up";
+        }
+
+        return (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}"),
+            Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"));
     }
 }
 

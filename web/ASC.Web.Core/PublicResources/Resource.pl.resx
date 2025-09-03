@@ -1088,16 +1088,10 @@
     <value>Waluta</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Data i godzina</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Opis</value>
+    <value>Data</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Ilość</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Nazwa usługi</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Miejsce na dysku</value>
@@ -1110,9 +1104,6 @@
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Raport operacji klienta ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Obciążenie</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>Nie znaleziono grupy</value>
