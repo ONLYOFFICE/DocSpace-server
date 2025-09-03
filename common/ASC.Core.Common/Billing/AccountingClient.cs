@@ -26,6 +26,8 @@
 
 using System.Collections.Specialized;
 
+using ASC.Web.Core.Users;
+
 namespace ASC.Core.Billing;
 
 [Singleton]
@@ -109,7 +111,7 @@ public class AccountingClient
         return await RequestAsync<Session>(HttpMethod.Put, $"/session/extend", queryParams);
     }
 
-    public async Task CompleteCustomerSessionAsync(string portalId, int serviceAccount, int sessionId, int quantity, string customerParticipantName)
+    public async Task CompleteCustomerSessionAsync(string portalId, int serviceAccount, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
         var data = new
         {
@@ -117,13 +119,14 @@ public class AccountingClient
             ServiceAccount = serviceAccount,
             SessionId = sessionId,
             Quantity = quantity,
-            CustomerParticipantName = customerParticipantName
+            CustomerParticipantName = customerParticipantName,
+            Metadata = metadata
         };
 
         _ = await RequestAsync<string>(HttpMethod.Post, "/operation/sessionComplete", data: data);
     }
 
-    public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal, int? offset, int? limit)
+    public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? debit, int? offset, int? limit)
     {
         var queryParams = new NameValueCollection
         {
@@ -131,14 +134,19 @@ public class AccountingClient
             { "endDate", utcEndDate.ToString("o") }
         };
 
+        if (!string.IsNullOrEmpty(participantName))
+        {
+            queryParams.Add("participantName", participantName.Trim());
+        }
+
         if (credit.HasValue)
         {
             queryParams.Add("credit", credit.Value.ToString().ToLowerInvariant());
         }
 
-        if (withdrawal.HasValue)
+        if (debit.HasValue)
         {
-            queryParams.Add("withdrawal", withdrawal.Value.ToString().ToLowerInvariant());
+            queryParams.Add("debit", debit.Value.ToString().ToLowerInvariant());
         }
 
         if (offset.HasValue)
@@ -176,7 +184,7 @@ public class AccountingClient
         return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/account/{serviceAccount}");
     }
 
-    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, string[] serviceAccounts)
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, List<string> serviceAccounts)
     {
         var key = $"accounting-prices-{partnerId}-{string.Join(",", serviceAccounts)}";
         var result = _cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
@@ -477,6 +485,27 @@ public class Report
     /// Current page number of the report.
     /// </summary>
     public int CurrentPage { get; set; }
+
+    public async Task<Dictionary<string, string>> GetParticipantDisplayNamesAsync(DisplayUserSettingsHelper displayUserSettingsHelper)
+    {
+        var participantDisplayNames = new Dictionary<string, string>();
+
+        foreach (var operation in Collection)
+        {
+            if (string.IsNullOrEmpty(operation.ParticipantName) || participantDisplayNames.ContainsKey(operation.ParticipantName))
+            {
+                continue;
+            }
+
+            if (Guid.TryParse(operation.ParticipantName, out var userId))
+            {
+                var participantDisplayName = await displayUserSettingsHelper.GetFullUserNameAsync(userId);
+                participantDisplayNames.Add(operation.ParticipantName, participantDisplayName);
+            }
+        }
+
+        return participantDisplayNames;
+    }
 }
 
 /// <summary>
@@ -497,6 +526,10 @@ public class Operation
     /// </summary>
     public string Description { get; set; }
     /// <summary>
+    /// Brief details of the operation.
+    /// </summary>
+    public string Details { get; set; }
+    /// <summary>
     /// Unit of the service.
     /// </summary>
     public string ServiceUnit { get; set; }
@@ -513,9 +546,21 @@ public class Operation
     /// </summary>
     public decimal Credit { get; set; }
     /// <summary>
-    /// Withdrawal amount of the operation.
+    /// Debit amount of the operation.
     /// </summary>
-    public decimal Withdrawal { get; set; }
+    public decimal Debit { get; set; }
+    /// <summary>
+    /// Original name of the participant.
+    /// </summary>
+    public string ParticipantName { get; set; }
+    /// <summary>
+    /// Display name of the participant.
+    /// </summary>
+    public string ParticipantDisplayName { get; set; }
+    /// <summary>
+    /// Metadata of the operation.
+    /// </summary>
+    public Dictionary<string, string> Metadata { get; set; }
 }
 
 /// <summary>

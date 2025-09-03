@@ -1088,16 +1088,10 @@
     <value>Mena</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Dátum a čas</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Popis</value>
+    <value>Dátum</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Množstvo</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Názov služby</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Miesto na disku</value>
@@ -1110,8 +1104,5 @@
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Hlásenie o operáciách zákazníka ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Výber</value>
   </data>
 </root>

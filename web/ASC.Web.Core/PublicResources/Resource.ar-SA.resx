@@ -1159,16 +1159,10 @@
     <value>عملة</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>التاريخ والوقت</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>الوصف</value>
+    <value>التاريخ</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>كمية</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>اسم الخدمة</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>مساحة القرص</value>
@@ -1181,8 +1175,5 @@
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>تقرير عمليات العملاء ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>انسحاب</value>
   </data>
 </root>

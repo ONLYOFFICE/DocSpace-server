@@ -135,4 +135,25 @@
   <data name="BackupInvalid" xml:space="preserve">
     <value>Файлът с резервно копие е невалиден.</value>
   </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Автоматично архивиране</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Временно съхранение</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Резервна стая</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Локален файл</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Памет за трети страни</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Ресурс на трета страна</value>
+  </data>
 </root>

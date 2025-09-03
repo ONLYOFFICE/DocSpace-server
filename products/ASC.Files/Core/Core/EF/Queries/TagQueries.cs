@@ -449,7 +449,7 @@ static file class TagQueries
                 ctx.Tag.Where(r => r.TenantId == tenantId)
                     .Join(ctx.TagLink, r => r.Id, l => l.TagId, (tag, link) => new TagLinkData { Tag = tag, Link = link })
                     .Where(r => r.Link.TenantId == r.Tag.TenantId)
-                    .Where(r => (r.Tag.Type == TagType.New || r.Tag.Type == TagType.Recent) && r.Link.CreateOn <= date)
+                    .Where(r => (r.Tag.Type == TagType.New || r.Tag.Type == TagType.Recent || r.Tag.Type == TagType.RecentByLink) && r.Link.CreateOn <= date)
                     .Select(r=> r.Link)
                     .ExecuteDelete());
 

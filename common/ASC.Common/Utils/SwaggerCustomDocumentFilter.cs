@@ -42,44 +42,6 @@ public class HideRouteDocumentFilter(string routeToHide) : IDocumentFilter
     }
 }
 
-public class OneOfResponseFilter : IOperationFilter
-{
-    public void Apply(OpenApiOperation operation, OperationFilterContext context)
-    {
-        var method = context.MethodInfo;
-        var responseAttributes = method.GetCustomAttributes<SwaggerResponseAttribute>().Where(attr => attr.StatusCode == 200 && attr.Type != null).ToList();
-        if (responseAttributes.Count > 1)
-        {
-            var intType = responseAttributes.Select(attr => attr.Type).FirstOrDefault(t => t is { IsGenericType: true } && t.GetGenericArguments().Length == 1 && t.GetGenericArguments()[0] == typeof(int));
-            if (intType == null)
-            {
-                return;
-            }
-            var intTypeSchema = context.SchemaGenerator.GenerateSchema(intType, context.SchemaRepository);
-
-            if (operation.Responses.TryGetValue("200", out var response))
-            {
-                foreach (var content in response.Content)
-                {
-                    var schema = content.Value.Schema;
-                    if (schema.Type == "array")
-                    {
-                        content.Value.Schema = new OpenApiSchema
-                        {
-                            Items = intTypeSchema,
-                            Type = "array"
-                        };
-                    }
-                    else
-                    {
-                        content.Value.Schema = intTypeSchema;
-                    }
-                }
-            }
-        }
-    }
-}
-
 public class DerivedSchemaFilter : ISchemaFilter
 {
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)

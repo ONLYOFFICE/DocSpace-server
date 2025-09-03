@@ -335,7 +335,7 @@ public class TariffService(
         return productIds;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName)
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
         if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
         {
@@ -346,7 +346,7 @@ public class TariffService(
 
         try
         {
-            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds, quantity.Values, productQuantityType, currency, customerParticipantName);
+            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds, quantity.Values, productQuantityType, currency, customerParticipantName, metadata);
 
             if (!changed)
             {
@@ -539,7 +539,7 @@ public class TariffService(
                     url =
                         await billingClient.GetPaymentUrlAsync(
                             "__Tenant__",
-                            productIds.ToArray(),
+                            productIds,
                             affiliateId,
                             partnerId,
                             null,
@@ -575,17 +575,13 @@ public class TariffService(
         return result;
     }
 
-    public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, bool wallet, string[] productIds)
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, bool wallet, List<string> productIds)
     {
         ArgumentNullException.ThrowIfNull(productIds);
 
-        var def = productIds
-            .Select(p => new { ProductId = p, Prices = new Dictionary<string, decimal>() })
-            .ToDictionary(e => e.ProductId, e => e.Prices);
-
-        if (productIds.Length == 0)
+        if (productIds.Count == 0)
         {
-            return def;
+            return [];
         }
 
         if (billingClient.Configured)
@@ -593,21 +589,28 @@ public class TariffService(
             try
             {
                 var key = $"billing-prices-{partnerId}-{string.Join(",", productIds)}";
-                var result = cache.Get<IDictionary<string, Dictionary<string, decimal>>>(key);
+                var result = cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
                 if (result == null)
                 {
                     if (wallet)
                     {
-                        var serviceAccounts = productIds.Where(x => int.TryParse(x, out var id) && id > 10000).ToArray();
-                        productIds = productIds.Where(x => !serviceAccounts.Contains(x)).ToArray();
+                        var accountingServices = new List<string>();
+                        var billingProducts = new List<string>();
 
-                        var accountingPrices = serviceAccounts.Length > 0
-                            ? await accountingClient.GetProductPriceInfoAsync(partnerId, serviceAccounts)
-                            : new Dictionary<string, Dictionary<string, decimal>>();
+                        foreach (var productId in productIds)
+                        {
+                            if (int.TryParse(productId, out var id) && id > 10000)
+                            {
+                                accountingServices.Add(productId);
+                            }
+                            else
+                            {
+                                billingProducts.Add(productId);
+                            }
+                        }
 
-                        var billingPrices = productIds.Length > 0
-                            ? await billingClient.GetProductPriceInfoAsync(partnerId, wallet, productIds)
-                            : new Dictionary<string, Dictionary<string, decimal>>();
+                        var accountingPrices = accountingServices.Count == 0 ? [] : await accountingClient.GetProductPriceInfoAsync(partnerId, accountingServices);
+                        var billingPrices = billingProducts.Count == 0 ? [] : await billingClient.GetProductPriceInfoAsync(partnerId, wallet, billingProducts);
 
                         foreach (var billingPrice in billingPrices)
                         {
@@ -632,7 +635,7 @@ public class TariffService(
             }
         }
 
-        return def;
+        return productIds.ToDictionary(p => p, p => new Dictionary<string, decimal>());
     }
 
     public async Task<Uri> GetAccountLinkAsync(int tenant, string backUrl)
@@ -1118,7 +1121,7 @@ public class TariffService(
         return customerInfo;
     }
 
-    public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, bool waitForChanges = false)
+    public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null, bool waitForChanges = false)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
 
@@ -1134,7 +1137,7 @@ public class TariffService(
 
         try
         {
-            result = await billingClient.TopUpDepositAsync(portalId, amount, currency, customerParticipantName);
+            result = await billingClient.TopUpDepositAsync(portalId, amount, currency, customerParticipantName, metadata);
         }
         catch (Exception error)
         {
@@ -1226,20 +1229,20 @@ public class TariffService(
         return session;
     }
 
-    public async Task<bool> CompleteCustomerSessionAsync(int tenantId, int serviceAccount, int sessionId, int quantity, string customerParticipantName)
+    public async Task<bool> CompleteCustomerSessionAsync(int tenantId, int serviceAccount, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        await accountingClient.CompleteCustomerSessionAsync(portalId, serviceAccount, sessionId, quantity, customerParticipantName);
+        await accountingClient.CompleteCustomerSessionAsync(portalId, serviceAccount, sessionId, quantity, customerParticipantName, metadata);
         await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         return true;
     }
 
-    public async Task<Report> GetCustomerOperationsAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal, int? offset, int? limit)
+    public async Task<Report> GetCustomerOperationsAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? debit, int? offset, int? limit)
     {
         try
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
-            return await accountingClient.GetCustomerOperationsAsync(portalId, utcStartDate, utcEndDate, credit, withdrawal, offset, limit);
+            return await accountingClient.GetCustomerOperationsAsync(portalId, utcStartDate, utcEndDate, participantName, credit, debit, offset, limit);
         }
         catch (Exception error)
         {

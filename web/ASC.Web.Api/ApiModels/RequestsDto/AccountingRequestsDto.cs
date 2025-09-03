@@ -44,16 +44,22 @@ public class CustomerOperationsRequestDto
     public DateTime EndDate { get; set; }
 
     /// <summary>
+    /// Participant name
+    /// </summary>
+    [FromQuery(Name = "participantName")]
+    public string ParticipantName { get; set; }
+
+    /// <summary>
     /// Include credit operations (true by default)
     /// </summary>
     [FromQuery(Name = "credit")]
     public bool? Credit { get; set; }
 
     /// <summary>
-    /// Include withdrawal operations (true by default)
+    /// Include debit operations (true by default)
     /// </summary>
-    [FromQuery(Name = "withdrawal")]
-    public bool? Withdrawal { get; set; }
+    [FromQuery(Name = "debit")]
+    public bool? Debit { get; set; }
 
     /// <summary>
     /// Offset (0 by default)
@@ -85,12 +91,17 @@ public class CustomerOperationsReportRequestDto
     public DateTime? EndDate { get; set; }
 
     /// <summary>
+    /// Participant name
+    /// </summary>
+    public string ParticipantName { get; set; }
+
+    /// <summary>
     /// Include credit operations
     /// </summary>
     public bool? Credit { get; set; }
 
     /// <summary>
-    /// Include withdrawal operations
+    /// Include debit operations
     /// </summary>
-    public bool? Withdrawal { get; set; }
+    public bool? Debit { get; set; }
 }

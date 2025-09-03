@@ -124,7 +124,6 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <path>api/2.0/files/{folderId}/insert</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
-    [SwaggerResponse(200, "Inserted file", typeof(FileDto<string>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "Folder not found")]
     [HttpPost("{folderId}/insert", Order = 1)]

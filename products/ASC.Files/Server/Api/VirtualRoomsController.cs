@@ -280,7 +280,6 @@ public abstract class VirtualRoomsController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
-    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<FolderDto<T>> GetRoomInfo(RoomIdRequestDto<T> inDto)
@@ -297,7 +296,6 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Updated room information", typeof(FolderDto<int>))]
-    [SwaggerResponse(200, "Updated room information", typeof(FolderDto<string>))]
     [HttpPut("{id}")]
     public async Task<FolderDto<T>> UpdateRoom(UpdateRoomRequestDto<T> inDto)
     {
@@ -645,7 +643,6 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
-    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [SwaggerResponse(403, "You don't have permission to edit the room")]
     [HttpDelete("{id}/tags")]
     public async Task<FolderDto<T>> DeleteRoomTags(BatchTagsRequestDto<T> inDto)
@@ -663,7 +660,6 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
-    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [SwaggerResponse(404, "The required room was not found")]
     [HttpPost("{id}/logo")]
     public async Task<FolderDto<T>> CreateRoomLogo(LogoRequest<T> inDto)
@@ -682,7 +678,6 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/cover</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room cover", typeof(FolderDto<int>))]
-    [SwaggerResponse(200, "Room cover", typeof(FolderDto<string>))]
     [SwaggerResponse(403, "You don't have permission to change cover")]
     [SwaggerResponse(404, "The required room was not found")]
     [HttpPost("{id}/cover")]
@@ -719,7 +714,6 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
-    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [HttpDelete("{id}/logo")]
     public async Task<FolderDto<T>> DeleteRoomLogo(RoomIdRequestDto<T> inDto)
     {
@@ -737,7 +731,6 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/pin</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
-    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [HttpPut("{id}/pin")]
     public async Task<FolderDto<T>> PinRoom(RoomIdRequestDto<T> inDto)
     {
@@ -753,7 +746,6 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/unpin</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
-    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [HttpPut("{id}/unpin")]
     public async Task<FolderDto<T>> UnpinRoom(RoomIdRequestDto<T> inDto)
     {
@@ -783,7 +775,6 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/reorder</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
-    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [HttpPut("{id}/reorder")]
     public async Task<FolderDto<T>> ReorderRoom(RoomIdRequestDto<T> inDto)
     {

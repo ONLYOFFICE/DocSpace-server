@@ -40,7 +40,8 @@ public class SocketManager(
     FileSecurity fileSecurity,
     UserManager userManager,
     IDaoFactory daoFactory,
-    FileSharing fileSharing)
+    FileSharing fileSharing,
+    GlobalFolderHelper globalFolderHelper)
     : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
@@ -151,17 +152,33 @@ public class SocketManager(
     
     public async Task AddFileToRecentAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("add-recent-file", file, true, users);
-    }
-    
-    public async Task UpdateFileRecentAsync<T>(File<T> file, IEnumerable<Guid> users = null)
-    {
-        await MakeRequest("update-recent-file", file, true, users);
+        await MakeRequest("add-recent-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderRecentAsync<T>());
     }
     
     public async Task RemoveFileFromRecentAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
         await MakeRequest("delete-recent-file", file, true, users);
+        await MakeRequest("delete-recent-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderRecentAsync<T>());
+    }
+
+    public async Task AddFileToFavoritesAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    {
+        await MakeRequest("add-favorites-file", file, true, users);
+    }
+    
+    public async Task RemoveFileFromFavoritesAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    {
+        await MakeRequest("delete-favorites-file", file, true, users);
+    }
+    
+    public async Task AddFolderToFavoritesAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
+    {
+        await MakeRequest("add-favorites-folder", folder, true, users);
+    }
+    
+    public async Task RemoveFolderFromFavoritesAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
+    {
+        await MakeRequest("delete-favorites-folder", folder, true, users);
     }
     
     private async Task<IEnumerable<Guid>> GetRecipientListForForm<T>(File<T> form)
@@ -194,9 +211,14 @@ public class SocketManager(
         });
         
     }
-    private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
+    private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null, T folderIdDisplay = default)
     {
-        var room = FolderRoom(entry.FolderIdDisplay);
+        if (Equals(folderIdDisplay, default(T)))
+        {
+            folderIdDisplay = entry.FolderIdDisplay;
+        }
+        
+        var room = FolderRoom(folderIdDisplay);
         var whoCanRead = users ?? await WhoCanRead(entry);
 
         if (action != null)
@@ -208,15 +230,21 @@ public class SocketManager(
         switch (method)
         {
             case "add-recent-file":
+            case "add-favorites-file":
                 method = "create-file";
-                entry.ParentId = entry.FolderIdDisplay;
-                break;
-            case "update-recent-file":
-                method = "update-file";
-                entry.ParentId = entry.FolderIdDisplay;
+                entry.ParentId = folderIdDisplay;
                 break;
             case "delete-recent-file":
+            case "delete-favorites-file":
                 method = "delete-file";
+                entry.ParentId = folderIdDisplay;
+                break;
+            case "add-favorites-folder":
+                method = "create-folder";
+                entry.ParentId = entry.FolderIdDisplay;
+                break;
+            case "delete-favorites-folder":
+                method = "delete-folder";
                 entry.ParentId = entry.FolderIdDisplay;
                 break;
         }

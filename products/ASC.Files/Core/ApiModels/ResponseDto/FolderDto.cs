@@ -53,12 +53,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// Specifies if the folder can be shared or not.
     /// </summary>
     public bool? IsShareable { get; set; }
-
-    /// <summary>
-    /// Specifies if the folder is favorite or not.
-    /// </summary>
-    public bool? IsFavorite { get; set; }
-
+    
     /// <summary>
     /// The new element index in the folder.
     /// </summary>
@@ -183,7 +178,8 @@ public class FolderDtoHelper(
     FileSecurityCommon fileSecurityCommon,
     SecurityContext securityContext,
     UserManager userManager,
-    IUrlShortener urlShortener
+    IUrlShortener urlShortener,
+    EntryStatusManager entryStatusManager
     )
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
 {
@@ -288,6 +284,48 @@ public class FolderDtoHelper(
             result.AvailableExternalRights = await _fileSecurity.GetFolderAccesses(folder, SubjectType.ExternalLink);
         }
 
+        if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })
+        {
+            var forbiddenActions = new List<FileSecurity.FilesSecurityActions>
+            {
+                FileSecurity.FilesSecurityActions.FillForms,
+                FileSecurity.FilesSecurityActions.Edit,
+                FileSecurity.FilesSecurityActions.SubmitToFormGallery,
+                FileSecurity.FilesSecurityActions.CreateRoomFrom,
+                FileSecurity.FilesSecurityActions.Duplicate,
+                FileSecurity.FilesSecurityActions.Delete,
+                FileSecurity.FilesSecurityActions.Lock,
+                FileSecurity.FilesSecurityActions.CustomFilter,
+                FileSecurity.FilesSecurityActions.Embed,
+                FileSecurity.FilesSecurityActions.StartFilling,
+                FileSecurity.FilesSecurityActions.StopFilling,
+                FileSecurity.FilesSecurityActions.CopySharedLink,
+                FileSecurity.FilesSecurityActions.CopyLink,
+                FileSecurity.FilesSecurityActions.FillingStatus
+            };
+
+            foreach (var action in forbiddenActions)
+            {
+                result.Security[action] = false;   
+            }
+
+            result.CanShare = false;
+
+            result.Order = "";
+
+            var myId = await _globalFolderHelper.GetFolderMyAsync<T>();
+            result.OriginTitle = Equals(result.OriginId, myId) ? FilesUCResource.MyFiles : result.OriginTitle;
+            
+            if (Equals(result.OriginRoomId, myId))
+            {
+                result.OriginRoomTitle = FilesUCResource.MyFiles;
+            }
+            else if(Equals(result.OriginRoomId,  await _globalFolderHelper.FolderArchiveAsync))
+            {
+                result.OriginRoomTitle = result.OriginTitle;
+            }
+        }
+        
         return result;
     }
     
@@ -320,16 +358,18 @@ public class FolderDtoHelper(
                 newBadges = 0;
             }
         }
-
+        
         var result = await GetAsync<FolderDto<T>, T>(folder);
         if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates)
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;
         }
-
+        
+        await entryStatusManager.SetIsFavoriteFolderAsync(folder);
+        
         result.IsShareable = folder.Shareable.NullIfDefault();
-        result.IsFavorite = folder.IsFavorite.NullIfDefault();
+        result.IsFavorite = folder.IsFavorite;
         result.New = newBadges;
         result.Pinned = folder.Pinned;
         result.Private = folder.SettingsPrivate;

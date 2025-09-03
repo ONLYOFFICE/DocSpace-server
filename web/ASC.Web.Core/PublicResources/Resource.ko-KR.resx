@@ -1088,16 +1088,10 @@
     <value>통화</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>날짜 및 시간</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>설명</value>
+    <value>날짜</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>수량</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>서비스명</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>디스크 공간</value>
@@ -1110,9 +1104,6 @@
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>고객 작업 보고서({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>철회</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>해당 그룹을 찾지 못했습니다</value>
