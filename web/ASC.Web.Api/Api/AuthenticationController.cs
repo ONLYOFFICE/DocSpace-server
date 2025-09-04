@@ -185,7 +185,7 @@ public class AuthenticationController(
     public async Task<AuthenticationTokenDto> AuthenticateMe(AuthRequestsDto inDto)
     {
         var wrapper = await GetUserAsync(inDto);
-        var viaEmail = wrapper.ViaEmail;
+        var loginType = wrapper.LoginType;
         var user = wrapper.UserInfo;
         var session = inDto.Session;
 
@@ -248,7 +248,15 @@ public class AuthenticationController(
 
         try
         {
-            var action = viaEmail ? MessageAction.LoginSuccessViaApi : MessageAction.LoginSuccessViaApiSocialAccount;
+            var action = loginType switch
+            {
+                LoginType.EmailAndPassword => MessageAction.LoginSuccessViaApi,
+                LoginType.EmailAndPasswordHash => MessageAction.LoginSuccessViaPassword,
+                LoginType.ConfirmLink => MessageAction.AuthLinkActivated,
+                LoginType.SocialAccount => MessageAction.LoginSuccessViaApiSocialAccount,
+                _ => throw new NotImplementedException()
+            };
+
             var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session);
 
             if (!string.IsNullOrEmpty(inDto.Culture))
@@ -274,7 +282,16 @@ public class AuthenticationController(
         }
         catch (Exception ex)
         {
-            messageService.SendLoginMessage(viaEmail ? MessageAction.LoginFailViaApi : MessageAction.LoginFailViaApiSocialAccount, user.DisplayUserName(false, displayUserSettingsHelper));
+            var action = loginType switch
+            {
+                LoginType.EmailAndPassword => MessageAction.LoginFailViaApi,
+                LoginType.EmailAndPasswordHash => MessageAction.LoginFail,
+                LoginType.ConfirmLink => MessageAction.LoginFail,
+                LoginType.SocialAccount => MessageAction.LoginFailViaApiSocialAccount,
+                _ => throw new NotImplementedException()
+            };
+
+            messageService.SendLoginMessage(action, user.DisplayUserName(false, displayUserSettingsHelper));
             throw new AuthenticationException("User authentication failed", ex);
         }
         finally
@@ -423,10 +440,7 @@ public class AuthenticationController(
     
     private async Task<UserInfoWrapper> GetUserAsync(AuthRequestsDto inDto)
     {
-        var wrapper = new UserInfoWrapper
-        {
-            ViaEmail = true
-        };
+        var wrapper = new UserInfoWrapper();
 
         var action = MessageAction.LoginFailViaApi;
         UserInfo user = null;
@@ -435,6 +449,8 @@ public class AuthenticationController(
         {
             if (inDto.ConfirmData != null)
             {
+                wrapper.LoginType = LoginType.ConfirmLink;
+
                 var email = inDto.ConfirmData.Email;
 
                 var (checkKeyResult, _) = await emailValidationKeyModelHelper.ValidateAsync(new EmailValidationKeyModel { Key = inDto.ConfirmData.Key, Email = email, Type = ConfirmType.Auth, First = inDto.ConfirmData.First.ToString() });
@@ -445,7 +461,8 @@ public class AuthenticationController(
                                    ? await userManager.GetUserByEmailAsync(email)
                                    : await userManager.GetUsersAsync(new Guid(email));
 
-                    messageService.SendLoginMessage(MessageAction.AuthLinkActivated, email, inDto.ConfirmData.Key);
+                    //todo: check link to single use !!!
+                    //messageService.SendLoginMessage(MessageAction.AuthLinkActivated, email, inDto.ConfirmData.Key);
 
                     if (securityContext.IsAuthenticated && securityContext.CurrentAccount.ID != user.Id)
                     {
@@ -457,6 +474,8 @@ public class AuthenticationController(
             }
             else if ((string.IsNullOrEmpty(inDto.Provider) && string.IsNullOrEmpty(inDto.SerializedProfile)) || inDto.Provider == "email")
             {
+                wrapper.LoginType = LoginType.EmailAndPasswordHash;
+
                 inDto.UserName.ThrowIfNull(new ArgumentException(@"userName empty", "userName"));
                 if (!string.IsNullOrEmpty(inDto.Password))
                 {
@@ -471,6 +490,8 @@ public class AuthenticationController(
 
                 if (string.IsNullOrEmpty(inDto.PasswordHash))
                 {
+                    wrapper.LoginType = LoginType.EmailAndPassword;
+
                     inDto.Password = (inDto.Password ?? "").Trim();
 
                     if (!string.IsNullOrEmpty(inDto.Password))
@@ -501,14 +522,17 @@ public class AuthenticationController(
                 {
                     throw new Exception(Resource.ErrorNotAllowedOption);
                 }
-                wrapper.ViaEmail = false;
+
+                wrapper.LoginType = LoginType.SocialAccount;
+
                 action = MessageAction.LoginFailViaApiSocialAccount;
+
                 var thirdPartyProfile = !string.IsNullOrEmpty(inDto.SerializedProfile) ? 
                     await loginProfileTransport.FromTransport(inDto.SerializedProfile) : 
                     providerManager.GetLoginProfile(inDto.Provider, inDto.AccessToken, inDto.CodeOAuth);
 
                 inDto.UserName = thirdPartyProfile.EMail;
-                
+
                 user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, await GetUserByThirdParty(thirdPartyProfile));
             }
         }
@@ -689,5 +713,13 @@ public class AuthenticationController(
 class UserInfoWrapper
 {
     public UserInfo UserInfo { get; set; }
-    public bool ViaEmail { get; set; }
+    public LoginType LoginType { get; set; }
+}
+
+enum LoginType
+{
+    EmailAndPassword,
+    EmailAndPasswordHash,
+    ConfirmLink,
+    SocialAccount
 }

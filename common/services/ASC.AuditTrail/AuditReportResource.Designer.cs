@@ -1465,6 +1465,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Login success via login and password.
+        /// </summary>
+        public static string LoginSuccessViaPassword {
+            get {
+                return ResourceManager.GetString("LoginSuccessViaPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Login via SMS successful.
         /// </summary>
         public static string LoginSuccessViaSms {
