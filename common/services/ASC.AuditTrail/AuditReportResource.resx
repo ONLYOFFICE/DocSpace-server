@@ -996,4 +996,7 @@
   <data name="LocationCol" xml:space="preserve">
     <value>Location</value>
   </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Successful Login via OAuth 2.0</value>
+  </data>
 </root>

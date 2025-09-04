@@ -118,7 +118,10 @@ public enum MessageAction
     SessionCompleted = 1017,
 
     [SwaggerEnum("Authorization link activated")]
-    AuthLinkActivated = 1027,  // last login
+    AuthLinkActivated = 1027,
+
+    [SwaggerEnum("Login success via OAuth 2.0")]
+    LoginSuccessViaOAuth = 1028,  // last login
 
     #endregion
 

@@ -118,6 +118,7 @@ public class LoginEventsRepository(
             (int)MessageAction.LoginSuccessViaApiSocialAccount,
             (int)MessageAction.LoginSuccesViaTfaApp,
             (int)MessageAction.LoginSuccessViaApiTfa,
+            (int)MessageAction.LoginSuccessViaOAuth,
 
             (int)MessageAction.Logout
         };
