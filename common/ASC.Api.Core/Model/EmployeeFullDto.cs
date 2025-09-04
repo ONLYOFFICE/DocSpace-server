@@ -230,7 +230,6 @@ public class EmployeeFullDto : EmployeeDto
 }
 [Scope]
 public class EmployeeFullDtoHelper(
-        ApiContext httpContext,
         UserManager userManager,
         AuthContext authContext,
         UserPhotoManager userPhotoManager,
@@ -246,7 +245,7 @@ public class EmployeeFullDtoHelper(
         GroupSummaryDtoHelper groupSummaryDtoHelper,
         TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
         ILogger<EmployeeDtoHelper> logger)
-    : EmployeeDtoHelper(httpContext, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
+    : EmployeeDtoHelper(displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
 {
     // public static Expression<Func<User, UserInfo>> GetExpression(ApiContext apiContext)
     // {
