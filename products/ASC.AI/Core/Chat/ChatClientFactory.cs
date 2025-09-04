@@ -79,11 +79,17 @@ public class ChatClientFactory(
                 x.ToolMode = ChatToolMode.Auto;
             });
             
-            builder = builder.Use((innerClient, _) => 
-                new ManagedFunctionInvokingChatClient(
+            builder = builder.Use((innerClient, _) =>
+            {
+                var funcClient = new ManagedFunctionInvokingChatClient(
                     innerClient,
                     options.ToolHolder,
-                    toolPermissionRequester));
+                    toolPermissionRequester);
+
+                funcClient.MaximumIterationsPerRequest = 128;
+                
+                return funcClient;
+            });
         }
 
         return builder.Build();
