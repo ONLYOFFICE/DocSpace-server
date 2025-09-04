@@ -1045,7 +1045,7 @@
     <value>Fillimi</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Ndjekja e hyrjeve dhe veprimeve të përdoruesve</value>
+    <value>Gjurmimi i hyrjeve dhe veprimeve</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding &amp; personalizim</value>
@@ -1063,7 +1063,7 @@
     <value>Numri i administratorëve</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Rezervimi dhe rikuperimi automatik</value>
+    <value>Rikuperimi i të dhënave</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Numri i pakufizuar i dhomave aktive</value>
@@ -1102,7 +1102,7 @@
     <value>Përdoruesit në dhomë:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Numri i pakufizuar i përdoruesve</value>
+    <value>Numri i pakufizuar përdoruesish dhe të ftuarish</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Numri i përdoruesve nuk duhet të kalojë {0}</value>
@@ -1150,7 +1150,7 @@
     <value>Monedha</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Data dhe ora</value>
+    <value>Data</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Sasia</value>
