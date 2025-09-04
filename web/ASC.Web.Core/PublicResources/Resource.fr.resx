@@ -878,7 +878,7 @@
     <value>Utilisateurs dans la salle :</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Nombre illimité d’utilisateurs et d’invités</value>
+    <value>Nombre illimité d'utilisateurs et d'invités</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Le nombre d'utilisateurs ne peut pas dépasser {0}</value>

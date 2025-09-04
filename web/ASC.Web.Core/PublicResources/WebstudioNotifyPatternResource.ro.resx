@@ -2041,20 +2041,20 @@ $TrulyYours</value>
   </data>
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Parola a fost schimbată cu succes
- 
-Parola dvs pentru contul  *$UserName*, *$UserEmail* a fost schimbată cu succes la data de *$Date* în spațiul DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
+Parola dvs pentru contul *$UserName*, *$UserEmail* a fost schimbată cu succes la data de *$Date* în spațiul DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
 IP: *$IP*
 Dispozitivul: *$Device*
 #if($Location != "")
 Locaţia: *$Location*
 #end
 Browser: *$Browser*
- 
-Dacă această acţiune a fost întreprinsă de dumneavoastră, nu trebuie să faci nimic altceva. Dacă ați observat această activitate suspectă sau dacă nu recunoașteți această activitate, schimbați imediat parola și blocați accesul la DocSpace pentru acest dispozitiv.
- 
+
+Dacă această acţiune a fost întreprinsă de dumneavoastră, nu trebuie să faci nimic altceva. Dacă ați observat această activitate suspectă sau dacă nu recunoașteți această activitate, schimbați imediat parola și blocați accesul la DocSpace pentru acest dispozitiv.
+
 $OrangeButton
- 
+
 $TrulyYours</value>
   </data>
 </root>

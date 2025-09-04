@@ -1976,7 +1976,7 @@ $TrulyYours</value>
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.Password cambiata con successo
 
-La tua password per l’account *$UserName*, *$UserEmail* è stata cambiata con successo il*$Date* in DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+La tua password per l'account *$UserName*, *$UserEmail* è stata cambiata con successo il*$Date* in DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 IP: *$IP*
 Dispositivo: *$Device*
@@ -1985,7 +1985,7 @@ Posizione: *$Location*
 #end
 Browser: *$Browser*
 
-Se questa azione è stata effettuata da te, non sono necessari ulteriori passaggi. Se invece questa modifica ti sembra sospetta o non è stata autorizzata, reimposta immediatamente la tua password e disabilita l’accesso a DocSpace per questo dispositivo.
+Se questa azione è stata effettuata da te, non sono necessari ulteriori passaggi. Se invece questa modifica ti sembra sospetta o non è stata autorizzata, reimposta immediatamente la tua password e disabilita l'accesso a DocSpace per questo dispositivo.
 
 $OrangeButton
 

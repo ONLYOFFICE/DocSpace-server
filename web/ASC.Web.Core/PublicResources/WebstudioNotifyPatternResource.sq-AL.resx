@@ -2034,4 +2034,28 @@ $TrulyYours</value>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Kërkohet veprim: Nuk mund të rimbushet automatikisht balanca e portofolit në DocSpace-in tuaj ${LetterLogoText} DocSpace</value>
   </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Password u ndryshua me sukses
+
+Fjalëkalimi juaj për llogarinë *$UserName*, *$UserEmail* u ndryshua me sukses më *$Date* në DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Pajisja: *$Device*
+#if($Location != "")
+Vendndodhja: *$Location*
+#end
+Shfletuesi: *$Browser*
+
+Nëse ky veprim është bërë nga ju — nuk kërkohen hapa të mëtejshëm. Nëse ky ndryshim duket i dyshimtë ose nuk është autorizuar nga ju, ju lutemi rivendosni menjëherë fjalëkalimin tuaj dhe çaktivizoni qasjen në DocSpace për këtë pajisje.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Fjalëkalimi juaj u ndryshua me sukses</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Hapni DocSpace-in tuaj</value>
+  </data>
 </root>
