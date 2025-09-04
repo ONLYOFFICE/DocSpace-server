@@ -29,7 +29,7 @@ namespace ASC.AI.Core.Database;
 public partial class AiDbContext
 {
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
-    public Task<DbMcpServer?> GetServerAsync(int tenantId, Guid id)
+    public Task<DbMcpServerUnit?> GetServerAsync(int tenantId, Guid id)
     {
         return McpQueries.GetServerAsync(this, tenantId, id);
     }
@@ -145,9 +145,15 @@ public partial class AiDbContext
 
 static file class McpQueries
 {
-    public static readonly Func<AiDbContext, int, Guid, Task<DbMcpServer?>> GetServerAsync =
+    public static readonly Func<AiDbContext, int, Guid, Task<DbMcpServerUnit?>> GetServerAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, Guid id) =>
-            ctx.McpServers.FirstOrDefault(x => x.TenantId == tenantId && x.Id == id));
+            ctx.McpServers.Where(x => x.TenantId == tenantId && x.Id == id)
+                .Select(x => new DbMcpServerUnit
+                {
+                    Server = x,
+                    State = ctx.McpServerStates.FirstOrDefault(y => y.TenantId == tenantId && y.ServerId == id)
+                })
+                .FirstOrDefault());
 
     public static readonly Func<AiDbContext, int, int, Guid, Guid, Task<DbRoomServerUnit?>> GetRoomServerAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int roomId, Guid userId, Guid serverId) =>

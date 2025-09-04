@@ -288,11 +288,13 @@ public class McpDao(
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
 
-        var server = await dbContext.GetServerAsync(options.TenantId, options.Id);
-        if (server == null)
+        var serverUnit = await dbContext.GetServerAsync(options.TenantId, options.Id);
+        if (serverUnit == null)
         {
             return options;
         }
+
+        var server = serverUnit.Server;
         
         await strategy.ExecuteAsync(async () =>
         {

@@ -100,7 +100,7 @@ public partial class McpService(
 
         var needConnect = false;
         
-        if (!string.IsNullOrEmpty(name))
+        if (!string.IsNullOrEmpty(name) && name != server.Name)
         {
             await ThrowIfServerNameNotValid(tenantId, name);
             
