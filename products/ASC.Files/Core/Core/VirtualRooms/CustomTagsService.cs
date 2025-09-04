@@ -56,7 +56,7 @@ public class CustomTagsService(
         var tagInfo = new TagInfo
         {
             Name = name,
-            Owner = authContext.CurrentAccount.ID,
+            Owner = Guid.Empty,
             Type = TagType.Custom
         };
 
@@ -70,7 +70,7 @@ public class CustomTagsService(
     public async Task<TagInfo> UpdateTagAsync(string oldName, string newName)
     {
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
-        if (userType is not EmployeeType.RoomAdmin and not EmployeeType.DocSpaceAdmin)
+        if (userType is not EmployeeType.DocSpaceAdmin)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -84,10 +84,6 @@ public class CustomTagsService(
         if (existedTag == null)
         {
             throw new ItemNotFoundException();
-        }
-        if (!existedTag.Owner.Equals(authContext.CurrentAccount.ID))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
         var tag = await tagDao.GetTagsInfoAsync(newName, TagType.Custom, true).FirstOrDefaultAsync();
         if (tag != null && tag.Id != existedTag.Id)
@@ -103,7 +99,8 @@ public class CustomTagsService(
 
     public async Task DeleteTagsAsync<T>(List<string> names)
     {
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is not EmployeeType.DocSpaceAdmin)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
