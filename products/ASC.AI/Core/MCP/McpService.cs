@@ -541,7 +541,7 @@ public partial class McpService(
                     Tool = tool,
                     Properties = new ToolProperties
                     {
-                        McpServerData = new McpServerData
+                        McpServerInfo = new McpServerInfo
                         {
                             ServerId = connection.ServerId,
                             ServerName = connection.Name,

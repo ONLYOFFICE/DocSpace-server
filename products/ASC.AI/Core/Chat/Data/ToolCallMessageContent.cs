@@ -31,13 +31,15 @@ public class ToolCallMessageContent(
     string callId,
     string name,
     IDictionary<string, object?>? arguments = null,
-    object? result = null)
+    object? result = null,
+    McpServerInfo? mcpServerInfo = null)
     : MessageContent
 {
     public string CallId { get; } = callId;
     public string Name { get; } = name;
     public IDictionary<string, object?>? Arguments { get; } = arguments;
     public object? Result { get; set; } = result;
+    public McpServerInfo? McpServerInfo { get; } = mcpServerInfo;
 
     private static readonly JsonSerializerOptions _options = 
         new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };

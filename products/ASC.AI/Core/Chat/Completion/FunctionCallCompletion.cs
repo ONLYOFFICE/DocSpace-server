@@ -24,47 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Tool;
+namespace ASC.AI.Core.Chat.Completion;
 
-public class McpServerInfo
+public class ToolCallCompletion : ChatCompletion
 {
-    public Guid ServerId { get; init; }
-    public required string ServerName { get; init; }
-    public ServerType ServerType { get; init; }
-}
-
-public static class FunctionCallContentExtension
-{
-    public static void MarkAsManaged(this FunctionCallContent functionCallContent)
-    {
-        functionCallContent.AdditionalProperties ??= new AdditionalPropertiesDictionary();
-        functionCallContent.AdditionalProperties.Add("managed", true);
-    }
-
-    public static bool IsManaged(this FunctionCallContent functionCallContent)
-    {
-        return functionCallContent.AdditionalProperties is not null && 
-            functionCallContent.AdditionalProperties.ContainsKey("managed");
-    }
+    public required string CallId { get; init; }
+    public required string Name { get; init; }
+    public IDictionary<string, object?>? Arguments { get; init; }
+    public bool Managed { get; init; }
+    public McpServerInfo? McpServerInfo { get; init; }
     
-    public static void AddMcpServerData(this FunctionCallContent functionCallContent, McpServerInfo mcpServerInfo)
+    public override string GetEventName()
     {
-        functionCallContent.AdditionalProperties ??= new AdditionalPropertiesDictionary();
-        functionCallContent.AdditionalProperties.Add("mcpServerData", mcpServerInfo);
-    }
-
-    public static McpServerInfo? GetMcpServerInfo(this FunctionCallContent functionCallContent)
-    {
-        if (functionCallContent.AdditionalProperties is null)
-        {
-            return null;
-        }
-        
-        if (!functionCallContent.AdditionalProperties.TryGetValue("mcpServerData", out var mcpServerData))
-        {
-            return null;
-        }
-        
-        return mcpServerData as McpServerInfo;
+        return "tool_call";
     }
 }

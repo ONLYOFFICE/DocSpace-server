@@ -47,12 +47,9 @@ public class ChatController(
         var generator = await chatCompletionRunner.StartNewChatAsync(
             inDto.RoomId, inDto.Body.Message, inDto.Body.Files);
 
-        var source = generator
-            .GenerateCompletionAsync(Request.HttpContext.RequestAborted)
-            .Select(x => 
-                $"event: {x.Type.ToEventString()}\ndata: {x.Content}\n\n");
+        var source = generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted);
 
-        await this.StreamSentEventAsync(source, Request.HttpContext.RequestAborted);
+        await StreamSentEventAsync(source, Request.HttpContext.RequestAborted);
         
         return Ok();
     }
@@ -62,13 +59,10 @@ public class ChatController(
     {
         var generator = await chatCompletionRunner.StartChatAsync(
             inDto.ChatId, inDto.Body.Message, inDto.Body.Files);
-        
-        var source = generator
-            .GenerateCompletionAsync(Request.HttpContext.RequestAborted)
-            .Select(x => 
-                $"event: {x.Type.ToEventString()}\ndata: {x.Content}\n\n");
 
-        await this.StreamSentEventAsync(source, Request.HttpContext.RequestAborted);
+        var source = generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted);
+
+        await StreamSentEventAsync(source, Request.HttpContext.RequestAborted);
         
         return Ok();
     }
@@ -140,5 +134,82 @@ public class ChatController(
     public async Task ProvidePermissionAsync(ToolDecisionRequestDto inDto)
     {
         await mcpService.ProvideMcpToolPermissionAsync(inDto.CallId, inDto.Body.Decision);
+    }
+    
+    public async Task StreamSentEventAsync(
+        IAsyncEnumerable<ChatCompletion> completions,
+        CancellationToken cancellationToken)
+    {
+        Response.ContentType = "text/event-stream";
+        Response.Headers.CacheControl = "no-cache";
+        Response.Headers.KeepAlive = "keep-alive";
+        
+        var channel = Channel.CreateUnbounded<ChatCompletion>();
+        var writer = channel.Writer;
+        var reader = channel.Reader;
+        
+        var mainTask = Task.Run(async () =>
+        {
+            try
+            {
+                await foreach (var content in completions.WithCancellation(cancellationToken))
+                {
+                    await writer.WriteAsync(content, cancellationToken);
+                }
+            }
+            finally
+            {
+                writer.TryComplete();
+            }
+        }, cancellationToken);
+        
+        var pingTask = Task.Run(async () =>
+        {
+            try
+            {
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+                    await writer.WriteAsync(PingCompletion.Instance, cancellationToken);
+                }
+            }
+            catch
+            {
+                // ignored
+            }
+        }, cancellationToken);
+        
+        await foreach (var content in reader.ReadAllAsync(cancellationToken))
+        {
+            if (content is PingCompletion)
+            {
+                await Response.WriteAsync($": ping - {DateTimeOffset.UtcNow:O}\n\n", cancellationToken: cancellationToken);
+            }
+            else
+            {
+                await Response.WriteAsync($"event: {content.GetEventName()}\n", cancellationToken: cancellationToken);
+            
+                await Response.WriteAsync("data: ", cancellationToken: cancellationToken);
+                await JsonSerializer.SerializeAsync(Response.Body, content, JsonSerializerOptions.Web, cancellationToken: cancellationToken);
+            
+                await Response.WriteAsync("\n\n", cancellationToken: cancellationToken);
+            }
+            
+            await Response.Body.FlushAsync(cancellationToken);
+        }
+        
+        await Task.WhenAll(mainTask, pingTask);
+    }
+
+    private class PingCompletion : ChatCompletion
+    {
+        public static PingCompletion Instance { get; } = new();
+        
+        private PingCompletion() { }
+        
+        public override string GetEventName()
+        {
+            return string.Empty;
+        }
     }
 }

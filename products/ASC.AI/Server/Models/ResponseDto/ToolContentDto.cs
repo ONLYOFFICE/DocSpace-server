@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Core.Tool;
+
 namespace ASC.AI.Models.ResponseDto;
 
 public class ToolContentDto : MessageContentDto, IMapFrom<ToolCallMessageContent>
@@ -32,4 +34,5 @@ public class ToolContentDto : MessageContentDto, IMapFrom<ToolCallMessageContent
     public required string Name { get; init; }
     public IDictionary<string, object?>? Arguments { get; init; }
     public object? Result { get; init; }
+    public McpServerInfo? McpServerInfo { get; init; }
 }

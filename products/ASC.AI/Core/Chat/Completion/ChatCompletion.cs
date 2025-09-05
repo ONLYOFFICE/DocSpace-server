@@ -26,8 +26,13 @@
 
 namespace ASC.AI.Core.Chat.Completion;
 
-public class ChatCompletion(EventType type, string content)
+[JsonDerivedType(typeof(TextCompletion))]
+[JsonDerivedType(typeof(ToolCallCompletion))]
+[JsonDerivedType(typeof(ToolResultCompletion))]
+[JsonDerivedType(typeof(ErrorCompletion))]
+[JsonDerivedType(typeof(MessageStartCompletion))]
+[JsonDerivedType(typeof(MessageStopCompletion))]
+public abstract class ChatCompletion
 {
-    public EventType Type { get; } = type;
-    public string Content { get; } = content;
+    public abstract string GetEventName();
 }

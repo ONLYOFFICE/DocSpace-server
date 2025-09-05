@@ -51,9 +51,9 @@ public class ManagedFunctionInvokingChatClient(
                     functionCallContent.MarkAsManaged();
                 }
 
-                if (properties.McpServerData is not null)
+                if (properties.McpServerInfo is not null)
                 {
-                    functionCallContent.AddMcpServerData(properties.McpServerData);
+                    functionCallContent.AddMcpServerData(properties.McpServerInfo);
                 }
             }
             
@@ -74,14 +74,14 @@ public class ManagedFunctionInvokingChatClient(
             return await base.InvokeFunctionAsync(context, cancellationToken);
         }
 
-        if (properties.McpServerData == null)
+        if (properties.McpServerInfo == null)
         {
             throw new ArgumentException("McpServerData is not set for the tool.");
         }
 
         var callData = new CallData
         {
-            ServerId = properties.McpServerData.ServerId,
+            ServerId = properties.McpServerInfo.ServerId,
             RoomId = properties.RoomId,
             CallId = context.CallContent.CallId, 
             Name = properties.Name

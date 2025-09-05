@@ -80,7 +80,10 @@ public class ChatHistory(DbChatDao chatDao)
                     case FunctionCallContent functionCallContent:
                         {
                             var toolCall = new ToolCallMessageContent(
-                                functionCallContent.CallId, functionCallContent.Name, functionCallContent.Arguments);
+                                functionCallContent.CallId, 
+                                functionCallContent.Name, 
+                                functionCallContent.Arguments,
+                                mcpServerInfo: functionCallContent.GetMcpServerInfo());
                     
                             toolCalls.Add(functionCallContent.CallId, toolCall);
                             continue;

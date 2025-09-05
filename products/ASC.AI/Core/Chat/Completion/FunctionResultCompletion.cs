@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,13 @@
 
 namespace ASC.AI.Core.Chat.Completion;
 
-public class MessageStart
+public class ToolResultCompletion : ChatCompletion
 {
-    public Guid ChatId { get; init; }
+    public required string CallId { get; init; }
+    public object? Result { get; init; }
+    
+    public override string GetEventName()
+    {
+        return "tool_result";
+    }
 }

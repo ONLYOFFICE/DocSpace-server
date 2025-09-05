@@ -47,7 +47,7 @@ public class ToolHolder : IAsyncDisposable
 
         foreach (var toolWrapper in toolWrappers)
         {
-            if (toolWrapper.Tool is not McpClientTool mcpClientTool || toolWrapper.Properties.McpServerData is null)
+            if (toolWrapper.Tool is not McpClientTool mcpClientTool || toolWrapper.Properties.McpServerInfo is null)
             {
                 continue;
             }
@@ -60,7 +60,7 @@ public class ToolHolder : IAsyncDisposable
                 continue;
             }
 
-            var serverName = toolWrapper.Properties.McpServerData.ServerName;
+            var serverName = toolWrapper.Properties.McpServerInfo.ServerName;
             
             var uniqueName = GetUniqueName(serverName, toolWrapper.Tool.Name);
             if (string.IsNullOrEmpty(uniqueName))
@@ -124,7 +124,7 @@ public class ToolWrapper
 
 public class ToolProperties
 {
-    public McpServerData? McpServerData { get; init; }
+    public McpServerInfo? McpServerInfo { get; init; }
     public required string Name { get; init; }
     public int RoomId { get; init; }
     public bool AutoInvoke { get; set; }

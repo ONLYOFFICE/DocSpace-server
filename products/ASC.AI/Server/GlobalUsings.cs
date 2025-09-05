@@ -27,8 +27,6 @@
 global using ASC.Api.Core;
 global using ASC.Api.Core.Convention;
 
-global using ASC.AI.Extensions;
-
 global using ASC.AI.Core.Chat;
 global using ASC.AI.Core.Chat.Data;
 global using ASC.AI.Core.Chat.Completion;
