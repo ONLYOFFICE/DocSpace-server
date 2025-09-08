@@ -205,4 +205,24 @@ public class CustomTagsService(
             yield return tagInfo.Name;
         }
     }
+
+    public async Task<bool> HasTagLiks(string name)
+    {
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is not EmployeeType.DocSpaceAdmin)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+        var tagDao = daoFactory.GetTagDao<int>();
+        var existedTag = await tagDao.GetTagsInfoAsync(name, TagType.Custom, true).FirstOrDefaultAsync();
+
+        if (existedTag == null)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        var hasTagLiks = await tagDao.HasTagLiksAsync(existedTag);
+
+        return hasTagLiks;
+    }
 }

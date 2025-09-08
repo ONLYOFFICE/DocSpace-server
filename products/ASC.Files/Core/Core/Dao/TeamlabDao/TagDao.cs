@@ -199,6 +199,12 @@ internal abstract class BaseTagDao<T>(
 
         return mapper.Map<DbFilesTag, TagInfo>(existingTag);
     }
+    public async Task<bool> HasTagLiksAsync(TagInfo tag)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        return await filesDbContext.AnyTagLinkByIdsAsync(tenantId, new List<int> { tag.Id });
+    }
 
     public async Task<IEnumerable<Tag>> SaveTagsAsync(IEnumerable<Tag> tags, Guid createdBy = default)
     {
@@ -507,12 +513,6 @@ internal abstract class BaseTagDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await filesDbContext.DeleteTagLinksAsync(tenantId, tagsIds, entryId, entry.FileEntryType);
-
-        var any = await filesDbContext.AnyTagLinkByIdsAsync(tenantId, tagsIds);
-        if (!any)
-        {
-            await filesDbContext.DeleteTagsByIdsAsync(tenantId, tagsIds);
-        }
     }
 
     public async Task RemoveTagsAsync(IEnumerable<Tag> tags)
@@ -568,15 +568,8 @@ internal abstract class BaseTagDao<T>(
 
         if (id != 0)
         {
-            var entryId = (tag.EntryId is int fid ? fid : await MappingIdAsync(filesDbContext, tenantId, tag.EntryId))?.ToString();
-
-            await filesDbContext.DeleteTagLinksByTagIdAsync(tenantId, id, entryId, tag.EntryType);
-
-            var any = await filesDbContext.AnyTagLinkByIdAsync(tenantId, id);
-            if (!any)
-            {
-                await filesDbContext.DeleteTagByIdAsync(tenantId, id);
-            }
+            await filesDbContext.DeleteTagLinksByTagIdAsync(tenantId, id);
+            await filesDbContext.DeleteTagByIdAsync(tenantId, id);
         }
     }
 

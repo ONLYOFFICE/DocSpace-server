@@ -41,6 +41,7 @@ public interface ITagDao<T>
     IAsyncEnumerable<TagInfo> GetTagsInfoAsync(IEnumerable<string> names, TagType type);
     Task<TagInfo> SaveTagInfoAsync(TagInfo tagInfo);
     Task<TagInfo> UpdateTagInfoAsync(TagInfo tagInfo);
+    Task<bool> HasTagLiksAsync(TagInfo tagName);
     Task UpdateNewTags(IEnumerable<Tag> tag, Guid createdBy = default);
     Task UpdateNewTags(Tag tag);
     Task RemoveTagsAsync(FileEntry<T> entry, IEnumerable<int> tagsIds);

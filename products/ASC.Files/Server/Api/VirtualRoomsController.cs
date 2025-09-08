@@ -948,6 +948,22 @@ public class VirtualRoomsCommonController(
     }
 
     /// <summary>
+    /// Checks if a specific custom tag has linked items.
+    /// </summary>
+    /// <short>Has tag links</short>
+    /// <path>api/2.0/files/tags/{tagName}/has-links</path>
+    /// <collection>item</collection>
+    [Tags("Rooms")]
+    [SwaggerResponse(200, "True if tag has links, false otherwise", typeof(bool))]
+    [SwaggerResponse(404, "Tag not found")]
+    [HttpGet("tags/{tagName}/has-links")]
+    public async Task<bool> HasTagLinks(string tagName)
+    {
+        var hasTagLiks = await customTagsService.HasTagLiks(tagName);
+        return hasTagLiks;
+    }
+
+    /// <summary>
     /// Deletes a bunch of custom tags specified in the request.
     /// </summary>
     /// <short>Delete tags</short>
