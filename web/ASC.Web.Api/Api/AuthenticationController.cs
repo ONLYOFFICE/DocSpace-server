@@ -116,6 +116,11 @@ public class AuthenticationController(
             throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
+        if (user.Status != EmployeeStatus.Active)
+        {
+            throw new InvalidOperationException(Resource.ErrorUserDisabled);
+        }
+
         var sms = false;
         string token = default;
 
@@ -441,6 +446,17 @@ public class AuthenticationController(
     public async Task<AuthenticationTokenDto> SendSmsCode(AuthRequestsDto inDto)
     {
         var user = (await GetUserAsync(inDto)).UserInfo;
+
+        if (user == null || Equals(user, Constants.LostUser))
+        {
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
+        }
+
+        if (user.Status != EmployeeStatus.Active)
+        {
+            throw new InvalidOperationException(Resource.ErrorUserDisabled);
+        }
+
         await smsManager.PutAuthCodeAsync(user, true);
 
         return new AuthenticationTokenDto
