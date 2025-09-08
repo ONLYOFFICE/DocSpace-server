@@ -2039,7 +2039,7 @@ $TrulyYours</value>
 
 Vaša lozinka za nalog *$UserName*, *$UserEmail* je uspešno promenjena dana *$Date* u DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-IP: $IP
+IP: *$IP*
 Uređaj: *$Device*
 #if($Location != "")
 Lokacija: *$Location*

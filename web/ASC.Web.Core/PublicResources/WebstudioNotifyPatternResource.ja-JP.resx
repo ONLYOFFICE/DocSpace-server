@@ -1991,14 +1991,14 @@ $TrulyYours</value>
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.パスワードの変更が完了しました
 
-アカウント $UserName、$UserEmail のパスワードが $Date にDocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}"で正常に変更されました。
+アカウント *$UserName*、*$UserEmail* のパスワードが *$Date* にDocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}"で正常に変更されました。
 
-IP: $IP 
-デバイス: $Device
+IP: *$IP*
+デバイス: *$Device*
 #if($Location != "")
-場所: $Location 
-#end 
-ブラウザ: $Browser
+場所: *$Location*
+#end
+ブラウザ: *$Browser*
 
 この操作があなた自身によって行われた場合は、これ以上の対応は必要ありません。この変更が不審に思われる場合や、あなたが許可していない場合は、すぐにパスワードをリセットし、このデバイスからのDocSpaceへのアクセスを無効にしてください。
 

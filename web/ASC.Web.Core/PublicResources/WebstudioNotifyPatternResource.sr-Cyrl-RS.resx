@@ -2036,7 +2036,7 @@ $TrulyYours</value>
 
 Ваша лозинка за налог *$UserName*, *$UserEmail* је успешно промењена дана *$Date* у DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-IP: $IP
+IP: *$IP*
 Уређај: *$Device*
 #if($Location != "")
 Локација: *$Location*
