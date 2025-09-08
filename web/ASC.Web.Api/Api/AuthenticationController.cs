@@ -108,21 +108,34 @@ public class AuthenticationController(
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthRequestsDto inDto)
     {
-        var tenant = (tenantManager.GetCurrentTenant()).Id;
+        var tenantId = tenantManager.GetCurrentTenant().Id;
         var user = (await GetUserAsync(inDto)).UserInfo;
+
+        if (user == null || Equals(user, Constants.LostUser))
+        {
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
+        }
+
         var sms = false;
+        string token = default;
 
         try
         {
             if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
             {
                 sms = true;
-                await smsManager.ValidateSmsCodeAsync(user, inDto.Code, true);
+                var (smsValidationResult, smsAuthToken) = await smsManager.ValidateSmsCodeAsync(user, inDto.Code, true);
+                if (smsValidationResult)
+                {
+                    token = smsAuthToken;
+                }
             }
             else if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
             {
-                if (await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true))
+                var (tfaValidationResult, tfaAuthToken) = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true);
+                if (tfaValidationResult)
                 {
+                    token = tfaAuthToken;
                     messageService.Send(MessageAction.UserConnectedTfaApp, MessageTarget.Create(user.Id));
                     await socketManager.UpdateUserAsync(userManager.GetUsers(authContext.CurrentAccount.ID));
                 }
@@ -132,8 +145,8 @@ public class AuthenticationController(
                 throw new SecurityException("Auth code is not available");
             }
 
-            var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
-            var expires = await tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
+            token = string.IsNullOrEmpty(token) ? await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id) : token;
+            var expires = await tenantCookieSettingsHelper.GetExpiresTimeAsync(tenantId);
 
             var result = new AuthenticationTokenDto
             {
