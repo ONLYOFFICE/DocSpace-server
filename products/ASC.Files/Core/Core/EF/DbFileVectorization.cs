@@ -44,8 +44,9 @@ public class DbFileVectorization : BaseEntity
 public enum VectorizationStatus
 {
     Scheduled,
-    InProgress,
-    Completed
+    InProcess,
+    Completed,
+    Failed
 }
 
 public static class DbFileVectorizationExtension

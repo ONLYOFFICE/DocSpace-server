@@ -34,6 +34,5 @@ public class VectorizationStartRequestDto
 
 public class VectorizationStartRequestBoy
 {
-    public int KnowledgeFolderId { get; init; }
-    public required IEnumerable<JsonElement> Files { get; init; }
+    public required int FileId { get; init; }
 }

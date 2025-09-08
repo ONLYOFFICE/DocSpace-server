@@ -26,7 +26,6 @@
 
 using ASC.Files.Core.Vectorization;
 using ASC.Files.Core.Vectorization.Events;
-using ASC.Files.Core.Vectorization.Upload;
 
 namespace ASC.AI.Service.Handlers;
 
@@ -36,11 +35,11 @@ public class UploadVectorizationIntegrationEventHandler(
     TenantManager tenantManager,
     SecurityContext securityContext,
     AuthManager authManager,
-    VectorizationTaskService<UploadVectorizationTask, UploadVectorizationTaskData> service,
+    VectorizationTaskService vectorizationTaskService,
     IServiceProvider serviceProvider) 
-    : IIntegrationEventHandler<UploadVectorizationIntegrationEvent>
+    : IIntegrationEventHandler<VectorizationIntegrationEvent>
 {
-    public async Task Handle(UploadVectorizationIntegrationEvent @event)
+    public async Task Handle(VectorizationIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
@@ -49,10 +48,10 @@ public class UploadVectorizationIntegrationEventHandler(
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
             
-            var task = serviceProvider.GetRequiredService<UploadVectorizationTask>();
-            task.Init(@event.TaskId, @event.TenantId, @event.CreateBy, @event.Data);
+            var task = serviceProvider.GetRequiredService<VectorizationTask>();
+            task.Init(@event.TaskId, @event.TenantId, @event.CreateBy, @event.FileId);
             
-            await service.StartAsync(task);
+            await vectorizationTaskService.StartAsync(task);
         }
     }
 }

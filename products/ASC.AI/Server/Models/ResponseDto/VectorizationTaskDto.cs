@@ -49,7 +49,7 @@ public static class VectorizationTaskExtensions
         
         return new VectorizationTaskDto
         {
-            Id = VectorizationTaskIdHelper.MakeTaskId(task.Id, task.Type),
+            Id = task.Id,
             Error = task.Exception?.Message,
             Percentage = (int)task.Percentage,
             IsCompleted = task.IsCompleted,

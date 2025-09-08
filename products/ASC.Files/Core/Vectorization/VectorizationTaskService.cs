@@ -27,31 +27,27 @@
 #nullable enable
 namespace ASC.Files.Core.Vectorization;
 
-[Singleton(GenericArguments = [typeof(CopyVectorizationTask), typeof(CopyVectorizationTaskData)])]
-[Singleton(GenericArguments = [typeof(UploadVectorizationTask), typeof(UploadVectorizationTaskData)])]
-public class VectorizationTaskService<T, TData>(
-    IDistributedTaskQueueFactory queueFactory) 
-    where T : VectorizationTask<TData> 
-    where TData : VectorizationTaskData
+[Singleton]
+public class VectorizationTaskService(IDistributedTaskQueueFactory queueFactory) 
 {
-    private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>();
+    private readonly DistributedTaskQueue<VectorizationTask> _queue = queueFactory.CreateQueue<VectorizationTask>();
 
-    public Task StartAsync(T task)
+    public Task StartAsync(VectorizationTask task)
     {
         return _queue.EnqueueTask(task);
     }
 
-    public Task<string> StoreAsync(T task)
+    public Task<string> StoreAsync(VectorizationTask task)
     {
         return _queue.PublishTask(task);
     }
 
-    public async Task<T?> GetAsync(string id)
+    public async Task<VectorizationTask?> GetAsync(string id)
     {
         return await _queue.PeekTask(id);
     }
 
-    public async Task<List<T>> GetTasksAsync()
+    public async Task<List<VectorizationTask>> GetTasksAsync()
     {
         return await _queue.GetAllTasks();
     }

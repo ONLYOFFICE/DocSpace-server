@@ -74,9 +74,8 @@ try
     var sp = ((IApplicationBuilder)app).ApplicationServices;
 
     var eventBus = sp.GetRequiredService<IEventBus>();
-
-    await eventBus.SubscribeAsync<CopyVectorizationIntegrationEvent, CopyVectorizationIntegrationEventHandler>();
-    await eventBus.SubscribeAsync<UploadVectorizationIntegrationEvent, UploadVectorizationIntegrationEventHandler>();
+    
+    await eventBus.SubscribeAsync<VectorizationIntegrationEvent, UploadVectorizationIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
 

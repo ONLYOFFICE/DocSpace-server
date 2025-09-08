@@ -48,7 +48,6 @@ global using ASC.Files.Core.ApiModels.ResponseDto;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Vectorization;
-global using ASC.Files.Core.Vectorization.Copy;
 
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;

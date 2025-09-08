@@ -26,28 +26,35 @@
 
 namespace ASC.Files.Core.Vectorization;
 
-public static class VectorizationTaskIdHelper
+[Scope]
+public class VectorizationTaskPublisher(
+    TenantManager tenantManager,
+    AuthContext authContext,
+    IServiceProvider serviceProvider,
+    IEventBus eventBus,
+    VectorizationTaskService vectorizationTaskService)
 {
-    private const string CopyPrefix = "copy_";
-    private const string UploadPrefix = "upload_";
-    
-    public static string MakeTaskId(string id, VectorizationTaskType type)
+    public async Task<VectorizationTask> PublishAsync(int fileId)
     {
-        return type switch
+        if (fileId <= 0)
         {
-            VectorizationTaskType.Copy => $"{CopyPrefix}{id}",
-            VectorizationTaskType.Upload => $"{UploadPrefix}{id}",
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-        };
-    }
-    
-    public static (string id, VectorizationTaskType type) ProcessId(string id)
-    {
-        return id switch
+            throw new ArgumentOutOfRangeException(nameof(fileId), @"File id must be greater than 0");
+        }
+        
+        var task = serviceProvider.GetRequiredService<VectorizationTask>();
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
+        
+        task.Init(tenantId, userId, fileId);
+        
+        var taskId = await vectorizationTaskService.StoreAsync(task);
+        
+        await eventBus.PublishAsync(new VectorizationIntegrationEvent(userId, tenantId)
         {
-            _ when id.StartsWith(CopyPrefix) => (id[CopyPrefix.Length..], VectorizationTaskType.Copy),
-            _ when id.StartsWith(UploadPrefix) => (id[UploadPrefix.Length..], VectorizationTaskType.Upload),
-            _ => throw new ArgumentOutOfRangeException(nameof(id), id, null)
-        };
+            TaskId = taskId,
+            FileId = fileId
+        });
+        
+        return (await vectorizationTaskService.GetAsync(taskId))!;
     }
 }

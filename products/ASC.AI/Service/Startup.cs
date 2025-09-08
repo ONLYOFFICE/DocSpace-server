@@ -25,8 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Common.Threading;
-using ASC.Files.Core.Vectorization.Copy;
-using ASC.Files.Core.Vectorization.Upload;
+using ASC.Files.Core.Vectorization;
 
 namespace ASC.AI.Service;
 
@@ -56,7 +55,6 @@ public class Startup : BaseWorkerStartup
         
         services.RegisterQuotaFeature();
         
-        services.RegisterQueue<CopyVectorizationTask>();
-        services.RegisterQueue<UploadVectorizationTask>();
+        services.RegisterQueue<VectorizationTask>();
     }
 }

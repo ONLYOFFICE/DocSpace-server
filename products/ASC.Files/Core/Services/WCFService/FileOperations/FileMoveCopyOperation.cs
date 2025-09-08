@@ -873,6 +873,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
         var cachedFolderDao = scope.ServiceProvider.GetService<ICacheFolderDao<T>>();
         var entryManager = scope.ServiceProvider.GetService<EntryManager>();
+        var vectorizationTaskPublisher = scope.ServiceProvider.GetService<VectorizationTaskPublisher>();
 
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();
@@ -917,6 +918,10 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             {
                 Err = FilesCommonResource.ErrorMessage_NotSupportedFormat;
             }
+            else if (toFolder.FolderType is FolderType.Knowledge && !copy)
+            {
+                Err = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
+            }
             else
             {
                 if (toFolder.RootFolderType == FolderType.VirtualRooms)
@@ -934,8 +939,10 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 var parentFolder = await FolderDao.GetFolderAsync(file.ParentId);
                 try
                 {
-                    var conflict = _resolveType == FileConflictResolveType.Duplicate
-                                   || file.RootFolderType == FolderType.Privacy || file.Encrypted
+                    var conflict = _resolveType == FileConflictResolveType.Duplicate || 
+                                   file.RootFolderType == FolderType.Privacy || 
+                                   file.Encrypted || 
+                                   toFolder.FolderType == FolderType.Knowledge 
                         ? null
                         : await fileDao.GetFileAsync(toFolderId, file.Title);
 
@@ -950,9 +957,20 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 newFile = await FileDao.CopyFileAsync(file.Id, toFolderId); //Stream copy will occur inside dao
                                 newFile.Title = title;
 
-                                if (!newFile.ProviderEntry)
+                                if (!newFile.ProviderEntry && newFile is File<int> internalFile)
                                 {
+                                    var needVectorization = toFolder.FolderType is FolderType.Knowledge;
+                                    if (needVectorization)
+                                    {
+                                        newFile.VectorizationStatus = VectorizationStatus.Scheduled;
+                                    }
+                                    
                                     await fileDao.SaveFileAsync(newFile, null);
+
+                                    if (needVectorization)
+                                    {
+                                        var task = await vectorizationTaskPublisher.PublishAsync(internalFile.Id);
+                                    }
                                 }
                                 
                                 await filesMessageService.SendCopyMessageAsync(newFile, parentFolder, toFolder, toParentFolders, false, _headers, [newFile.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);

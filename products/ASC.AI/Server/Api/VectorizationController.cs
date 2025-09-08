@@ -31,13 +31,13 @@ namespace ASC.AI.Api;
 [ApiController]
 [ControllerName("ai")]
 public class VectorizationController(
-    CopyVectorizationTaskPublisher vectorizationTaskPublisher,
+    VectorizationTaskPublisher vectorizationTaskPublisher,
     VectorizationTaskHolder taskHolder) : ControllerBase
 {
     [HttpPost("vectorization/tasks")]
     public async Task<VectorizationTaskDto> StartTaskAsync(VectorizationStartRequestBoy inDto)
     {
-        var task = await vectorizationTaskPublisher.PublishAsync(inDto.KnowledgeFolderId, inDto.Files);
+        var task = await vectorizationTaskPublisher.PublishAsync(inDto.FileId);
         return task.ToDto()!;
     }
 

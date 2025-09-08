@@ -31,18 +31,13 @@ namespace ASC.Files.Core.Vectorization;
 [Scope]
 public class VectorizationTaskHolder(
     AuthContext authContext,
-    VectorizationTaskService<CopyVectorizationTask, CopyVectorizationTaskData> copyVectorizationTaskService,
-    VectorizationTaskService<UploadVectorizationTask, UploadVectorizationTaskData> uploadVectorizationTaskService)
+    VectorizationTaskService vectorizationTaskService)
 {
     public async Task<VectorizationTask?> GetAsync(string id)
     {
-        var (taskId, type) = VectorizationTaskIdHelper.ProcessId(id);
+        var task = await vectorizationTaskService.GetAsync(id);
         
-        VectorizationTask? task = type is VectorizationTaskType.Copy
-            ? await copyVectorizationTaskService.GetAsync(taskId)
-            : await uploadVectorizationTaskService.GetAsync(taskId);
-        
-        if (task == null || task.UserId != authContext.CurrentAccount.ID)
+        if (task == null)
         {
             throw new ItemNotFoundException("Task not found");
         }
@@ -54,73 +49,37 @@ public class VectorizationTaskHolder(
 
         task.Percentage = 100;
 
-        if (type is VectorizationTaskType.Copy)
-        {
-            await copyVectorizationTaskService.DeleteAsync(task.Id);
-        }
-        else
-        {
-            await uploadVectorizationTaskService.DeleteAsync(task.Id);
-        }
+        await vectorizationTaskService.DeleteAsync(task.Id);
 
         return task;
     }
 
     public async IAsyncEnumerable<VectorizationTask> GetAsync()
     {
-        var copyTasks = await copyVectorizationTaskService.GetTasksAsync();
-        foreach (var task in copyTasks)
+        var tasks = await vectorizationTaskService.GetTasksAsync();
+        foreach (var task in tasks)
         {
-            if (!await CheckTaskAsync(task, copyVectorizationTaskService))
-            {
-                continue;
-            }
-
-            yield return task;
-        }
-        
-        var uploadTasks = await uploadVectorizationTaskService.GetTasksAsync();
-        foreach (var task in uploadTasks)
-        {
-            if (!await CheckTaskAsync(task, uploadVectorizationTaskService))
-            {
-                continue;
-            }
-
-            yield return task;
-        }
-
-        yield break;
-
-        async Task<bool> CheckTaskAsync<T, TData>(VectorizationTask task, VectorizationTaskService<T, TData> service) 
-            where T : VectorizationTask<TData> 
-            where TData : VectorizationTaskData
-        {
-            if (task.UserId != authContext.CurrentAccount.ID)
-            {
-                return false;
-            }
-
             if (task.Status <= DistributedTaskStatus.Running)
             {
-                return true;
+                yield return task;
+                continue;
             }
 
             task.Percentage = 100;
-            await service.DeleteAsync(task.Id);
-
-            return true;
+            await vectorizationTaskService.DeleteAsync(task.Id);
+        
+            yield return task;
         }
     }
 
     public async Task TerminateAsync(string id)
     {
-        var task = await copyVectorizationTaskService.GetAsync(id);
-        if (task == null || task.UserId != authContext.CurrentAccount.ID)
+        var task = await vectorizationTaskService.GetAsync(id);
+        if (task == null)
         {
             return;
         }
         
-        await copyVectorizationTaskService.DeleteAsync(task.Id);
+        await vectorizationTaskService.DeleteAsync(task.Id);
     }
 }

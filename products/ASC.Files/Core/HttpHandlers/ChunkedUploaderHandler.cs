@@ -53,7 +53,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
     IDaoFactory daoFactory,
     IEventBus eventBus,
     WebhookManager webhookManager,
-    UploadVectorizationTaskPublisher vectorizationTaskPublisher)
+    VectorizationTaskPublisher vectorizationTaskPublisher)
 {
     public async Task Invoke(HttpContext context)
     {
@@ -198,7 +198,6 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, session.File);
 
                     var vectorizationTaskId = string.Empty;
-                    var notify = true;
                     
                     if (session.File.Version <= 1)
                     {
@@ -219,19 +218,15 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                             await eventBus.PublishAsync(evt);
 
-                            if (session.RequiredVectorization && session.File.Id is int id && session.FolderId is int parentId)
+                            if (session.RequiredVectorization && session.File.Id is int id)
                             {
-                                var task = await vectorizationTaskPublisher.PublishAsync(id, parentId);
-                                vectorizationTaskId = VectorizationTaskIdHelper.MakeTaskId(task.Id, task.Type);
-                                notify = false;
+                                var task = await vectorizationTaskPublisher.PublishAsync(id);
+                                vectorizationTaskId = task.Id;
                             }
                         }
                     }
 
-                    if (notify)
-                    {
-                        await socketManager.CreateFileAsync(session.File);
-                    }
+                    await socketManager.CreateFileAsync(session.File);
                     
                     await WriteSuccess(context, await ToResponseObject(session.File, vectorizationTaskId), (int)HttpStatusCode.Created);
 

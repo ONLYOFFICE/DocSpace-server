@@ -28,85 +28,88 @@ using Chunk = ASC.Files.Core.Vectorization.Data.Chunk;
 
 namespace ASC.Files.Core.Vectorization;
 
-public enum VectorizationTaskType
+[Transient]
+public class VectorizationTask : DistributedTaskProgress
 {
-    Copy,
-    Upload
-}
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private int _tenantId;
+    private int _fileId;
+    private Guid _userId;
 
-public abstract class VectorizationTask : DistributedTaskProgress
-{
-    public Guid UserId { get; set; }
-    public VectorizationTaskType Type { get; set; }
-}
-
-public abstract class VectorizationTask<T> 
-    : VectorizationTask where T : VectorizationTaskData
-{
-    private readonly IServiceScopeFactory _serviceScopeFactory = null!;
-
-    protected VectorizationTask() { }
-
-    protected VectorizationTask(IServiceScopeFactory serviceScopeFactory)
+    private ILogger _logger;
+    private IFileDao<int> _fileDao;
+    
+    public VectorizationTask() { }
+    
+    public VectorizationTask(IServiceScopeFactory serviceScopeFactory)
     {
         _serviceScopeFactory = serviceScopeFactory;
     }
-    
-    protected T Data { get; private set; } = null!;
-    protected ILogger Logger { get; private set; } = null!;
 
-    private int _tenantId;
-    
-    public virtual void Init(int tenantId, Guid userId, T data)
+    public void Init(int tenantId, Guid userId, int fileId)
     {
         _tenantId = tenantId;
-        UserId = userId;
-        Data = data;
+        _fileId = fileId;
+        _userId = userId;
     }
 
-    public void Init(string taskId, int tenantId, Guid userId, T data)
+    public void Init(string taskId, int tenantId, Guid userId, int fileId)
     {
         Id = taskId;
-        Init(tenantId, userId, data);
+        Init(tenantId, userId, fileId);
     }
 
-    protected abstract IAsyncEnumerable<File<int>> GetFilesAsync(IServiceProvider serviceProvider);
-    protected abstract int GetTotalFilesCount();
-    
     protected override async Task DoJob()
     {
         try
         {
             await using var scope = _serviceScopeFactory.CreateAsyncScope();
-            Logger = scope.ServiceProvider.GetRequiredService<ILogger<VectorizationTask<T>>>();
+            _logger = scope.ServiceProvider.GetRequiredService<ILogger<VectorizationTask>>();
 
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             await tenantManager.SetCurrentTenantAsync(_tenantId);
 
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-            await securityContext.AuthenticateMeWithoutCookieAsync(UserId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
 
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
+
+            _fileDao = daoFactory.GetFileDao<int>();
+            
+            var file = await _fileDao.GetFileAsync(_fileId);
+            if (file == null)
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            }
+            
+            var folderDao = daoFactory.GetFolderDao<int>();
+            var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
+
+            if (!parents.Exists(x => x.FolderType == FolderType.Knowledge))
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            }
+            
+            var room = parents.FirstOrDefault(x => x.FolderType == FolderType.AiRoom);
+            if (room == null)
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            }
+            
             var fileProcessor = scope.ServiceProvider.GetRequiredService<FileTextProcessor>();
             var generatorFactory = scope.ServiceProvider.GetRequiredService<EmbeddingGeneratorFactory>();
             var vectorStore = scope.ServiceProvider.GetRequiredService<VectorStore>();
-            var socketManager = scope.ServiceProvider.GetRequiredService<SocketManager>();
-            var settings = scope.ServiceProvider.GetRequiredService<VectorizationSettings>();
-
-            var fileDao = daoFactory.GetFileDao<int>();
-            var embeddingGenerator = generatorFactory.Create();
+            var vectorizationSettings = scope.ServiceProvider.GetRequiredService<VectorizationSettings>();
             
+            var embeddingGenerator = generatorFactory.Create();
             var splitterSettings = new SplitterSettings
             {
                 MaxTokensPerChunk = (int)(generatorFactory.Model.ContextLength * 0.75),
-                ChunkOverlap = settings.ChunkOverlap
+                ChunkOverlap = vectorizationSettings.ChunkOverlap
             };
-            
-            var folderDao = daoFactory.GetFolderDao<int>();
-            var room = await folderDao.GetParentFoldersAsync(Data.ParentId)
-                .FirstOrDefaultAsync(x => x.FolderType == FolderType.AiRoom);
 
-            var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName,
+            var collection = vectorStore.GetCollection<Chunk>(
+                Chunk.IndexName,
                 new VectorCollectionOptions
                 {
                     Dimension = generatorFactory.Model.Dimension, 
@@ -115,105 +118,50 @@ public abstract class VectorizationTask<T>
             
             await collection.EnsureCollectionExistsAsync(CancellationToken);
 
-            var totalFiles = GetTotalFilesCount();
-            var currentFileIndex = 0;
+            var textChunks = await fileProcessor.GetTextChunksAsync(file, splitterSettings);
+            var totalBatches = (textChunks.Count + vectorizationSettings.ChunksBatchSize - 1) / vectorizationSettings.ChunksBatchSize;
+            var currentBatch = 0;
 
-            await foreach (var file in GetFilesAsync(scope.ServiceProvider))
+            foreach (var batch in textChunks.Chunk(vectorizationSettings.ChunksBatchSize))
             {
-                var notify = false;
-                
-                try
-                {
-                    await VectorizeFileAsync(totalFiles, currentFileIndex, room.Id, file, fileProcessor, splitterSettings, 
-                        settings, embeddingGenerator, collection);
-                    
-                    await fileDao.SetVectorizationStatusAsync(file.Id, VectorizationStatus.Completed);
-                    
-                    currentFileIndex++;
-                    notify = true;
-                }
-                catch (Exception e)
-                {
-                    Logger.ErrorWithException(e);
-                    await ClenUpAsync(fileDao, file.Id);
-                    currentFileIndex++;
-                }
-                
-                if (notify)
-                {
-                    await socketManager.CreateFileAsync(file);
-                }
-            }
+                var embeddings = await embeddingGenerator.GenerateAsync(batch, cancellationToken: CancellationToken);
+                var chunks = batch.Select((text, index) => 
+                    new Chunk 
+                    { 
+                        Id = Guid.NewGuid(), 
+                        TenantId = _tenantId,
+                        RoomId = room.Id,
+                        FileId = file.Id, 
+                        TextEmbedding = text, 
+                        Embedding = embeddings[index].Vector.ToArray() 
+                    }).ToList();
 
-            if (Status <= DistributedTaskStatus.Running)
-            {
-                Status = DistributedTaskStatus.Completed;
+                await collection.UpsertAsync(chunks, CancellationToken);
+            
+                currentBatch++;
+
+                var progress = (double)currentBatch / totalBatches;
+                this.Percentage = Math.Min(99, (int)(progress * 100));
+                await PublishChanges();
             }
+            
+            await _fileDao.SetVectorizationStatusAsync(file.Id, VectorizationStatus.Completed);
+
+            Status = DistributedTaskStatus.Completed;
         }
         catch (Exception e)
         {
-            Logger.ErrorWithException(e);
+            _logger.ErrorWithException(e);
             Exception = e;
             Status = DistributedTaskStatus.Failted;
+            
+            await _fileDao.SetVectorizationStatusAsync(_fileId, VectorizationStatus.Failed);
         }
         finally
         {
             IsCompleted = true;
             this.Percentage = 100;
             await PublishChanges();
-        }
-    }
-    
-    private async Task VectorizeFileAsync(
-        int totalFiles,
-        int currentFileIndex,
-        int roomId,
-        File<int> file,
-        FileTextProcessor fileProcessor,
-        SplitterSettings splitterSettings,
-        VectorizationSettings vectorizationSettings,
-        IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
-        VectorStoreCollection<Chunk> vectorStoreCollection)
-    {
-        var textChunks = await fileProcessor.GetTextChunksAsync(file, splitterSettings);
-        var totalBatches = (textChunks.Count + vectorizationSettings.ChunksBatchSize - 1) / vectorizationSettings.ChunksBatchSize;
-        var currentBatch = 0;
-
-        foreach (var batch in textChunks.Chunk(vectorizationSettings.ChunksBatchSize))
-        {
-            var embeddings = await embeddingGenerator.GenerateAsync(batch, cancellationToken: CancellationToken);
-            var chunks = batch.Select((text, index) => 
-                new Chunk 
-                { 
-                    Id = Guid.NewGuid(), 
-                    TenantId = _tenantId,
-                    RoomId = roomId,
-                    FileId = file.Id, 
-                    TextEmbedding = text, 
-                    Embedding = embeddings[index].Vector.ToArray() 
-                }).ToList();
-
-            await vectorStoreCollection.UpsertAsync(chunks, CancellationToken);
-            
-            currentBatch++;
-
-            var fileProgress = (double)currentBatch / totalBatches;
-            var totalProgress = (currentFileIndex + fileProgress) / totalFiles;
-            this.Percentage = Math.Min(99, (int)(totalProgress * 100));
-            await PublishChanges();
-        }
-    }
-
-    private async Task ClenUpAsync(IFileDao<int> fileDao, int fileId)
-    {
-        try
-        {
-            await fileDao.DeleteFileAsync(fileId);
-        }
-        catch (Exception e)
-        {
-            Logger.ErrorWithException(e);
-            Exception = e;
         }
     }
 }
