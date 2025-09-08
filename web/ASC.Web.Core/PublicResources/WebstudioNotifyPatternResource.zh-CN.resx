@@ -840,7 +840,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace &lt;span style="color: #FF6F3D;"&gt;协作空间已停用&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText}协作空间 已被&lt;span style="color: #FF6F3D;"&gt;删除&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;您的 ${LetterLogoText} 协作空间已成功停用。请注意，您的所有数据将被删除，依据是我们的&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;隐私政策&lt;/a&gt;。&lt;/td&gt;&lt;/tr&gt;
 
@@ -1378,7 +1378,7 @@ $OrangeButton
     <value>加入 ${LetterLogoText} 协作空间</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} 协作空间已停用</value>
+    <value>${LetterLogoText} 协作空间已删除</value>
   </data>
   <data name="subject_opensource_admin_activation_v1" xml:space="preserve">
     <value>欢迎来到 ${LetterLogoText} 协作空间！</value>
@@ -1995,5 +1995,29 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>需要操作：无法自动为您的${LetterLogoText}协作空间中的钱包余额充值</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>您的密码已成功更改</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>打开协作空间</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.密码成功更改
+
+您已于 *$Date* 在协作空间中成功更改了帐户 *$UserName* ， *$UserEmail* 的密码："${__VirtualRootPath}":"${__VirtualRootPath}"。
+
+IP 地址：*$IP*
+设备：*$Device*
+#if($Location != "")
+位置：*$Location*
+#end
+浏览器：*$Browser*
+
+如果此操作由您本人执行，则可忽视此邮件。如果此更改可疑或未经您授权，请立即重置密码并禁用此设备对协作空间的访问权限。
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>
