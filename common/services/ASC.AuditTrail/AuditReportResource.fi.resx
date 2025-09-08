@@ -928,4 +928,13 @@
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP-synkronointi valmis</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Sijainti</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Kampanjabannerien näkyvyysasetuksia muutettu</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Asiakkaan lompakkoa käyttävien palveluiden asetukset päivitetty</value>
+  </data>
 </root>

@@ -406,7 +406,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace foi &lt;span style="color: #FF6F3D;"&gt;desativado&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace foi &lt;span style="color: #FF6F3D;"&gt;eliminado&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Seu ${LetterLogoText} DocSpace foi desativado com sucesso. Observe que todos os seus dados serão excluídos de acordo com nossa &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Política de Privacidade&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -752,7 +752,7 @@ $TrulyYours</value>
     <value>Eliminação do portal ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>O ${LetterLogoText} DocSpace foi desativado</value>
+    <value>${LetterLogoText} O DocSpace foi eliminado</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Alteração do endereço do portal</value>
@@ -2036,5 +2036,29 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Ação necessária: Não é possível recarregar automaticamente o saldo da Carteira no seu ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>A sua senha foi alterada com sucesso</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Abra o DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Password alterada com sucesso
+
+A sua palavra-passe para a conta *$UserName*, *$UserEmail* foi alterada com sucesso em *$Date* no DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Dispositivo: *$Device*
+#if($Location != "")
+Localização: *$Location*
+#end
+Navegador: *$Browser*
+
+Se esta ação foi realizada por si, não é necessário qualquer outro passo. Se esta alteração parecer suspeita ou não tiver sido autorizada por si, reponha a sua palavra-passe imediatamente e desative o acesso ao DocSpace para este dispositivo.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

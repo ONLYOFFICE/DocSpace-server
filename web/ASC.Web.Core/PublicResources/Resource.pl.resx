@@ -368,7 +368,7 @@
     <value>Co nowego</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Śledzenie logowań i działań użytkowników</value>
+    <value>Śledzenie logowań i działań</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Maksymalny rozmiar pliku</value>
@@ -383,7 +383,7 @@
     <value>Liczba administratorów</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Automatyczne tworzenie kopii zapasowych i przywracanie</value>
+    <value>Odzyskiwanie danych</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Nieograniczona liczba aktywnych pokoi</value>
@@ -410,7 +410,7 @@
     <value>Liczba użytkowników w pokoju:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Nieograniczona liczba użytkowników</value>
+    <value>Nieograniczona liczba użytkowników i gości</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Liczba użytkowników nie powinna być większa niż {0}</value>
@@ -1116,5 +1116,50 @@
   </data>
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Zużyta pamięć:</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Automatyczne odnawianie</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Liczba bezpłatnych kopii zapasowych nie powinna przekraczać {0} w ciągu miesiąca</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Kopia zapasowa</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Kopia zapasowa</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Szczegóły</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debet</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Kontakt</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Typ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Kopia zapasowa</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} bezpłatnych kopii zapasowych miesięcznie</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Historia transakcji</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Automatyczne doładowanie</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Wymagana płatność</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Włącz kopie zapasowe w DocSpace. Koszty będą naliczane automatycznie.</value>
   </data>
 </root>

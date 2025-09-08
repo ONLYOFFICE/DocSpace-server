@@ -368,7 +368,7 @@
     <value>Tin tức mới</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Theo dõi thông tin đăng nhập và hành động của người dùng</value>
+    <value>Theo dõi đăng nhập và hành động</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Kích thước tập tin tối đa</value>
@@ -383,7 +383,7 @@
     <value>Số lượng quản trị viên</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Tự động sao lưu &amp; khôi phục</value>
+    <value>Phục hồi dữ liệu</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Không giới hạn số lượng phòng hoạt động</value>
@@ -410,7 +410,7 @@
     <value>Người dùng trong phòng:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Số lượng người dùng không giới hạn</value>
+    <value>Số lượng người dùng và khách không giới hạn</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Số lượng người dùng không được vượt quá {0}</value>
@@ -1104,5 +1104,62 @@
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Báo cáo hoạt động khách hàng ({0}-{1})</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Không gian lưu trữ đã dùng:</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Điều chỉnh dung lượng lưu trữ theo đúng nhu cầu của bạn.</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Lưu trữ đĩa bổ sung</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Không tìm thấy nhóm</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Sao lưu</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Sao lưu</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Sao lưu</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Tự động gia hạn</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Số lượng bản sao lưu miễn phí không được vượt quá {0} trong vòng một tháng</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Bật tính năng sao lưu cho DocSpace của bạn. Chi phí sẽ được tự động tính phí.</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Ghi nợ</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Liên hệ</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Lịch sử giao dịch</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Nạp tiền tự động</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Yêu cầu thanh toán</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Kiểu</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} bản sao lưu miễn phí mỗi tháng</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Chi tiết</value>
   </data>
 </root>

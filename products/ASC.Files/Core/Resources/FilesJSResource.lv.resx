@@ -67,4 +67,7 @@
   <data name="TitleNewFileText" xml:space="preserve">
     <value>Jauns dokuments</value>
   </data>
+  <data name="TitleNewFilePdfFormText" xml:space="preserve">
+    <value>Jauna PDF veidlapa</value>
+  </data>
 </root>

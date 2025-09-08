@@ -67,4 +67,7 @@
   <data name="TitleNewFileText" xml:space="preserve">
     <value>신규 문서</value>
   </data>
+  <data name="TitleNewFilePdfFormText" xml:space="preserve">
+    <value>새로운 PDF 양식</value>
+  </data>
 </root>

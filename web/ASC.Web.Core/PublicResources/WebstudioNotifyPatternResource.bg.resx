@@ -960,7 +960,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace е &lt;span style="color: #FF6F3D;"&gt;деактивиран&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace е &lt;span style="color: #FF6F3D;"&gt;изтрит&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Вашият ${LetterLogoText} DocSpace беше успешно деактивиран. Моля, имайте предвид, че всички ваши данни ще бъдат изтрити в съответствие с нашата &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Декларация за поверителност&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1120,7 +1120,7 @@ $TrulyYours</value>
     <value>Вашият ${LetterLogoText} DocSpace ще бъде изтрит</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace е деактивиран</value>
+    <value>${LetterLogoText} DocSpace беше изтрит</value>
   </data>
   <data name="subject_opensource_user_welcome_v1" xml:space="preserve">
     <value>Добре дошли в ${LetterLogoText} DocSpace!</value>
@@ -1968,5 +1968,29 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Изисква се действие: Не може да се зареди автоматично балансът на портфейла във вашия ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Паролата ви беше променена успешно</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Отворете DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Паролата е променена успешно
+
+Паролата ви за акаунта *$UserName*, *$UserEmail* беше успешно променена на *$Date* в DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Устройство: *$Device*
+#if($Location != "")
+Местоположение: *$Location*
+#end
+Браузър: *$Browser*
+
+Ако това действие е извършено от вас, не са необходими допълнителни стъпки. Ако тази промяна изглежда подозрителна или не е била разрешена от вас, моля, незабавно нулирайте паролата си и деактивирайте достъпа до DocSpace за това устройство.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

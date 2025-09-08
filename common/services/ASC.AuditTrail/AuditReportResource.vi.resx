@@ -928,4 +928,13 @@
   <data name="LdapSync" xml:space="preserve">
     <value>Đồng bộ hóa LDAP đã hoàn tất</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Địa điểm</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Cài đặt hiển thị biểu ngữ quảng cáo đã thay đổi</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Đã cập nhật cài đặt dịch vụ hỗ trợ ví của khách hàng</value>
+  </data>
 </root>

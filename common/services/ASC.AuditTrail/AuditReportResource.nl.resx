@@ -928,4 +928,13 @@
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP-synchronisatie voltooid</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Locatie</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Zichtbaarheidsinstellingen voor promotionele banners gewijzigd</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Instellingen voor ingeschakelde klantportemonnee-services bijgewerkt</value>
+  </data>
 </root>
