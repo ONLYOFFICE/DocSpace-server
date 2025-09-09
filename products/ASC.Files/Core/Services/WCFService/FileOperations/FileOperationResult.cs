@@ -54,4 +54,7 @@ public class FileOperationResult
 
     [ProtoMember(8)]
     public bool Finished { get; init; }
+    
+    [ProtoMember(9)]
+    public IEnumerable<SpawnedOperation> SpawnedOperations { get; init; }
 }

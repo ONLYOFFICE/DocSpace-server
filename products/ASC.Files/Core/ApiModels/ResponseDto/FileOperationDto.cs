@@ -80,6 +80,11 @@ public class FileOperationDto
     /// The list of folders of the file operation.
     /// </summary>
     public List<FileEntryBaseDto> Folders { get; set; }
+    
+    /// <summary>
+    /// The list of spawned operations of the file operation.
+    /// </summary>
+    public IEnumerable<SpawnedOperation> SpawnedOperations { get; set; }
 }
 
 [Scope]
@@ -97,7 +102,8 @@ public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
             Progress = o.Progress,
             Error = o.Error,
             Processed = o.Processed,
-            Finished = o.Finished
+            Finished = o.Finished,
+            SpawnedOperations = o.SpawnedOperations
         };
 
         if (string.IsNullOrEmpty(o.Result) || result.OperationType == FileOperationType.Delete)

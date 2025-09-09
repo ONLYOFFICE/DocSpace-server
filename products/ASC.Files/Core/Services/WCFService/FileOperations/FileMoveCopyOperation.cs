@@ -970,6 +970,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     if (needVectorization)
                                     {
                                         var task = await vectorizationTaskPublisher.PublishAsync(internalFile);
+                                        
+                                        SpawnedOperations ??= [];
+                                        SpawnedOperations.Add(new VectorizationSpawnedOperation
+                                        {
+                                            FileId = internalFile.Id, 
+                                            Id = task.Id
+                                        });
                                     }
                                 }
                                 

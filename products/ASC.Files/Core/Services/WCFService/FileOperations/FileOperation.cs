@@ -45,6 +45,8 @@ public abstract class FileOperation : DistributedTaskProgress
     public bool Finish { get; set; }
     public bool Hold { get; set; }
 
+    public List<SpawnedOperation> SpawnedOperations { get; set; }
+    
     protected readonly IPrincipal _principal;
     protected readonly string _culture;
 
@@ -199,6 +201,20 @@ public abstract class ComposeFileOperation<T1, T2> : FileOperation
         {
             progress /= 2;
         }
+        
+        var spawnedOperations = new List<SpawnedOperation>();
+
+        if (DaoOperation.SpawnedOperations != null)
+        {
+            spawnedOperations.AddRange(DaoOperation.SpawnedOperations);
+        }
+
+        if (ThirdPartyOperation.SpawnedOperations != null)
+        {
+            spawnedOperations.AddRange(ThirdPartyOperation.SpawnedOperations);
+        }
+        
+        SpawnedOperations = spawnedOperations;
 
         Progress = progress < 100 ? progress : 100;
         await PublishChanges();
@@ -424,3 +440,15 @@ public record FileOperationScope(
     IDaoFactory DaoFactory,
     FileSecurity FileSecurity,
     ILogger<FileOperationScope> Options);
+
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "operationType")]
+[JsonDerivedType(typeof(VectorizationSpawnedOperation), "vectorization")]
+public class SpawnedOperation
+{
+    public string Id { get; init; }
+}
+
+public class VectorizationSpawnedOperation : SpawnedOperation
+{
+    public int FileId { get; init; }
+}
