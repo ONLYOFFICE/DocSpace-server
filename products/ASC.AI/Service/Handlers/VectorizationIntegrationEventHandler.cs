@@ -30,8 +30,8 @@ using ASC.Files.Core.Vectorization.Events;
 namespace ASC.AI.Service.Handlers;
 
 [Scope]
-public class UploadVectorizationIntegrationEventHandler(
-    ILogger<UploadVectorizationIntegrationEventHandler> logger,
+public class VectorizationIntegrationEventHandler(
+    ILogger<VectorizationIntegrationEventHandler> logger,
     TenantManager tenantManager,
     SecurityContext securityContext,
     AuthManager authManager,

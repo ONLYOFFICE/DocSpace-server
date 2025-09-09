@@ -75,7 +75,7 @@ try
 
     var eventBus = sp.GetRequiredService<IEventBus>();
     
-    await eventBus.SubscribeAsync<VectorizationIntegrationEvent, UploadVectorizationIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<VectorizationIntegrationEvent, VectorizationIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
 
