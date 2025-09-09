@@ -32,16 +32,18 @@ import com.asc.authorization.application.exception.authentication.Authentication
 import com.asc.authorization.application.security.authentication.BasicSignature;
 import com.asc.authorization.application.security.authentication.TenantAuthority;
 import com.asc.authorization.application.security.oauth.error.AuthenticationError;
+import com.asc.authorization.application.security.oauth.service.AuthorizationLoginEventRegistrationService;
 import com.asc.authorization.application.security.oauth.service.GrpcRegisteredClientService;
 import com.asc.authorization.application.security.service.SignatureService;
 import com.asc.common.application.proto.ClientResponse;
 import com.asc.common.core.domain.value.enums.AuditCode;
-import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
 import com.asc.common.service.transfer.message.AuditMessage;
+import com.asc.common.service.transfer.message.LoginRegisteredEvent;
 import com.asc.common.utilities.HttpUtils;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -78,7 +80,9 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
   private final HttpUtils httpUtils;
   private final SignatureService signatureService;
   private final GrpcRegisteredClientService registeredClientService;
-  private final AuditMessagePublisher auditMessagePublisher;
+  private final AuthorizationLoginEventRegistrationService
+      authorizationLoginEventRegistrationService;
+
   private final SecurityConfigurationProperties configurationProperties;
 
   /**
@@ -220,13 +224,27 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
    */
   private void publishAudit(
       HttpServletRequest request, BasicSignature signature, ClientResponse client) {
-    auditMessagePublisher.publish(
+    var eventDate = ZonedDateTime.now();
+    authorizationLoginEventRegistrationService.registerLogin(
+        LoginRegisteredEvent.builder()
+            .login(signature.getUserEmail())
+            .active(false)
+            .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
+            .browser(httpUtils.getClientBrowser(request))
+            .platform(httpUtils.getClientOS(request))
+            .date(eventDate)
+            .tenantId(signature.getTenantId())
+            .userId(signature.getUserId())
+            .page(httpUtils.getFullURL(request))
+            .action(1028)
+            .build(),
         AuditMessage.builder()
             .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
             .initiator(serviceName)
             .target(client.getClientId())
             .browser(httpUtils.getClientBrowser(request))
             .platform(httpUtils.getClientOS(request))
+            .date(eventDate)
             .tenantId(signature.getTenantId())
             .userId(signature.getUserId())
             .userEmail(signature.getUserEmail())

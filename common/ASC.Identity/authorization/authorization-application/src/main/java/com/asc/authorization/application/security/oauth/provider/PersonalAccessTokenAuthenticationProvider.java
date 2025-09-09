@@ -34,10 +34,12 @@ import com.asc.authorization.application.security.authentication.TenantAuthority
 import com.asc.authorization.application.security.oauth.authentication.PersonalAccessTokenAuthenticationToken;
 import com.asc.authorization.application.security.oauth.error.AuthenticationError;
 import com.asc.authorization.application.security.oauth.grant.ExtendedAuthorizationGrantType;
+import com.asc.authorization.application.security.oauth.service.AuthorizationLoginEventRegistrationService;
 import com.asc.common.core.domain.value.enums.AuditCode;
-import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
 import com.asc.common.service.transfer.message.AuditMessage;
+import com.asc.common.service.transfer.message.LoginRegisteredEvent;
 import com.asc.common.utilities.HttpUtils;
+import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -81,9 +83,10 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
       "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
   private final HttpUtils httpUtils;
-  private final AuditMessagePublisher auditMessagePublisher;
   private final OAuth2AuthorizationService authorizationService;
   private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
+  private final AuthorizationLoginEventRegistrationService
+      authorizationLoginEventRegistrationService;
 
   /**
    * Authenticates the provided personal access token request.
@@ -158,15 +161,27 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
       var accessToken = accessToken(authorizationBuilder, generatedAccessToken, tokenContext);
       authorizationService.save(authorizationBuilder.build());
 
-      log.debug("Authentication successful for user: {}", patAuthentication.getUserId());
-
-      auditMessagePublisher.publish(
+      var eventDate = ZonedDateTime.now();
+      authorizationLoginEventRegistrationService.registerLogin(
+          LoginRegisteredEvent.builder()
+              .login(patAuthentication.getUserEmail())
+              .active(false)
+              .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
+              .browser(httpUtils.getClientBrowser(request))
+              .platform(httpUtils.getClientOS(request))
+              .date(eventDate)
+              .tenantId(patAuthentication.getTenantId())
+              .userId(patAuthentication.getUserId())
+              .page(httpUtils.getFullURL(request))
+              .action(1028)
+              .build(),
           AuditMessage.builder()
               .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
               .initiator(serviceName)
               .target(registeredClient.getClientId())
               .browser(httpUtils.getClientBrowser(request))
               .platform(httpUtils.getClientOS(request))
+              .date(eventDate)
               .tenantId(patAuthentication.getTenantId())
               .userId(patAuthentication.getUserId())
               .userEmail(patAuthentication.getUserEmail())
@@ -174,6 +189,8 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
               .page(httpUtils.getFullURL(request))
               .action(AuditCode.GENERATE_PERSONAL_ACCESS_TOKEN.getCode())
               .build());
+
+      log.debug("Authentication successful for user: {}", patAuthentication.getUserId());
 
       return new OAuth2AccessTokenAuthenticationToken(
           registeredClient, clientPrincipal, accessToken, null);
