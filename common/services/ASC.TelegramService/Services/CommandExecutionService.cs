@@ -118,7 +118,7 @@ namespace ASC.TelegramService.Services
             return [.. parsedParams];
         }
 
-        public async Task HandleCommand(Message msg, ITelegramBotClient client, int tenantId, CancellationToken cancellationToken)
+        public void HandleCommand(Message msg, ITelegramBotClient client, int tenantId, CancellationToken cancellationToken)
         {
             try
             {
@@ -137,7 +137,7 @@ namespace ASC.TelegramService.Services
                 context.TenantId = tenantId;
 
                 cancellationToken.ThrowIfCancellationRequested();
-                _ = await Task.FromResult(command.Invoke(context, param));
+                command.Invoke(context, param);
             }
             catch (Exception ex)
             {

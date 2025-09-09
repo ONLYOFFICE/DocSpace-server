@@ -29,18 +29,17 @@ using ASC.Web.Core.Notify.Channels;
 
 namespace ASC.Web.Core.Notify
 {
-    public class NotificationChannelStatus()
+    public class NotificationChannelStatus
     {
         public string Name { get; set; }
         public bool IsEnabled { get; set; }
     }
 
-    [Singleton]
-    public class NotificationChannelsHelper(IConfiguration configuration, IServiceProvider serviceProvider)
+    [Scope]
+    public class NotificationChannelsHelper(IConfiguration configuration, IEnumerable<INotificationChannel> channels)
     {
         public IEnumerable<INotificationChannel> GetNotificationChannels()
         {
-            var channels = serviceProvider.GetServices<INotificationChannel>();
             var config = configuration.GetSection("notify").Get<NotifyServiceCfg>();
 
             return channels.Where(channel => config.Senders.Any(sender => sender.Name == channel.Name));

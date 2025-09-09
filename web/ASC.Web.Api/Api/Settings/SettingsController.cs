@@ -52,7 +52,6 @@ public partial class SettingsController(
     IFusionCache fusionCache,
     ProviderManager providerManager,
     FirstTimeTenantSettings firstTimeTenantSettings,
-    TelegramHelper telegramHelper,
     PasswordHasher passwordHasher,
     DnsSettings dnsSettings,
     CustomColorThemesSettingsHelper customColorThemesSettingsHelper,

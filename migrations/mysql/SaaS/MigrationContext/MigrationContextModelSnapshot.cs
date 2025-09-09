@@ -1016,7 +1016,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6fe286a4-479e-4c25-a8d9-0156e332b0c0",
                             Action = "sharedocument",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender|messanger.sender|telegram.sender"
                         },
                         new
                         {
@@ -1024,7 +1024,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6fe286a4-479e-4c25-a8d9-0156e332b0c0",
                             Action = "sharefolder",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender|messanger.sender|telegram.sender"
                         },
                         new
                         {
@@ -1032,7 +1032,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6fe286a4-479e-4c25-a8d9-0156e332b0c0",
                             Action = "updatedocument",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender|messanger.sender|telegram.sender"
                         },
                         new
                         {

@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Core.Notify.Channels
 {
-    [Singleton(typeof(INotificationChannel))]
+    [Scope(typeof(INotificationChannel))]
     public class EmailNotificationChannel : INotificationChannel
     {
         public string Name => ASC.Core.Configuration.Constants.NotifyEMailSenderSysName;

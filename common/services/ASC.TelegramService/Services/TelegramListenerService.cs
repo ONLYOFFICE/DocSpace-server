@@ -33,18 +33,14 @@ public class TelegramListenerService(
     ILogger<TelegramHandlerService> logger,
     TelegramHandlerService telegramHandler,
     ICacheNotify<DisableClientProto> cacheDisableClient,
-    TenantManager tenantManager,
-    ConsumerFactory consumerFactory) : BackgroundService
+    TenantManager singletonTenantManager,
+    IServiceProvider serviceProvider) : BackgroundService
 {
-    private readonly ILogger<TelegramHandlerService> _logger = logger;
-    private readonly TelegramLoginProvider _telegramLoginProvider = consumerFactory.Get<TelegramLoginProvider>();
     private CancellationToken _stoppingToken;
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _stoppingToken = stoppingToken;
-
-        await CreateClientsAsync();
 
         cacheRegisterUser.Subscribe(RegisterUser, CacheNotifyAction.Insert);
         cacheCreateClient.Subscribe(CreateOrUpdateClient, CacheNotifyAction.Insert);
@@ -52,12 +48,16 @@ public class TelegramListenerService(
 
         stoppingToken.Register(() =>
         {
-            _logger.DebugTelegramStopping();
+            logger.DebugTelegramStopping();
 
             cacheRegisterUser.Unsubscribe(CacheNotifyAction.Insert);
             cacheCreateClient.Unsubscribe(CacheNotifyAction.Insert);
             cacheDisableClient.Unsubscribe(CacheNotifyAction.Insert);
         });
+        
+        _ = Task.Run(async () => await CreateClientsAsync(), stoppingToken);
+        
+        return Task.CompletedTask;
     }
 
     private void DisableClient(DisableClientProto n)
@@ -77,15 +77,18 @@ public class TelegramListenerService(
 
     private async Task CreateClientsAsync()
     {
-        var tenants = await tenantManager.GetTenantsAsync();
+        var tenants = await singletonTenantManager.GetTenantsAsync();
 
         foreach (var tenant in tenants)
         {
+            await using var scope = serviceProvider.CreateAsyncScope();
+            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             tenantManager.SetCurrentTenant(tenant);
-
-            if (_telegramLoginProvider.IsEnabled())
+            var consumerFactory = scope.ServiceProvider.GetService<ConsumerFactory>();
+            var telegramLoginProvider = consumerFactory.Get<TelegramLoginProvider>();
+            if (telegramLoginProvider.IsEnabled())
             {
-                await telegramHandler.CreateOrUpdateClientForTenant(tenant.Id, _telegramLoginProvider.TelegramBotToken, _telegramLoginProvider.TelegramAuthTokenLifespan, _telegramLoginProvider.TelegramProxy, true, _stoppingToken, true);
+                await telegramHandler.CreateOrUpdateClientForTenant(tenant.Id, telegramLoginProvider.TelegramBotToken, telegramLoginProvider.TelegramAuthTokenLifespan, telegramLoginProvider.TelegramProxy, true, _stoppingToken, true);
             }
         }
     }

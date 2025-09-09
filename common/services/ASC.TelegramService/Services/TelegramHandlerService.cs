@@ -27,13 +27,13 @@
 namespace ASC.TelegramService.Services;
 
 [Singleton]
-public class TelegramHandlerService(IDistributedCache distributedCache,
-                       CommandExecutionService command,
-                       ILogger<TelegramHandlerService> logger,
-                       IServiceScopeFactory scopeFactory)
+public class TelegramHandlerService(
+    IDistributedCache distributedCache,
+   CommandExecutionService command,
+   ILogger<TelegramHandlerService> logger,
+   IServiceScopeFactory scopeFactory)
 {
     private readonly Dictionary<int, TenantTgClient> _clients = [];
-    private readonly ILogger<TelegramHandlerService> _log = logger;
 
     public async Task SendMessage(NotifyMessage msg)
     {
@@ -58,7 +58,7 @@ public class TelegramHandlerService(IDistributedCache distributedCache,
 
             if (tgUser == null)
             {
-                _log.DebugCouldntFind(msg.Reciever);
+                logger.DebugCouldntFind(msg.Reciever);
                 return;
             }
 
@@ -68,7 +68,7 @@ public class TelegramHandlerService(IDistributedCache distributedCache,
         }
         catch (Exception e)
         {
-            _log.DebugCouldntSend(msg.Reciever, e);
+            logger.DebugCouldntSend(msg.Reciever, e);
         }
     }
 
@@ -111,7 +111,7 @@ public class TelegramHandlerService(IDistributedCache distributedCache,
 
                 if (client.CancellationTokenSource != null)
                 {
-                    client.CancellationTokenSource.Cancel();
+                    await client.CancellationTokenSource.CancelAsync();
                     client.CancellationTokenSource.Dispose();
                     client.CancellationTokenSource = null;
                 }
@@ -169,43 +169,36 @@ public class TelegramHandlerService(IDistributedCache distributedCache,
         var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken);
 
         client.StartReceiving(
-            updateHandler: (botClient, update, cancellationToken) => HandleUpdateAsync(botClient, update, tenantId, cancellationToken),
+            updateHandler: (botClient, update, ct) => HandleUpdate(botClient, update, tenantId, ct),
             errorHandler: HandleErrorAsync,
-                              cancellationToken: linkedCts.Token);
+            cancellationToken: linkedCts.Token);
     }
 
-    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, int tenantId, CancellationToken cancellationToken)
+    private Task HandleUpdate(ITelegramBotClient botClient, Update update, int tenantId, CancellationToken cancellationToken)
     {
-        if (update.Type != UpdateType.Message)
+        if (update.Type != UpdateType.Message || 
+            update.Message?.Type != MessageType.Text || 
+            string.IsNullOrEmpty(update.Message.Text) || update.Message.Text[0] != '/')
         {
-            return;
+            return Task.CompletedTask;
         }
 
-        if (update.Message.Type != MessageType.Text)
-        {
-            return;
-        }
-
-        if (string.IsNullOrEmpty(update.Message.Text) || update.Message.Text[0] != '/')
-        {
-            return;
-        }
-
-        await command.HandleCommand(update.Message, botClient, tenantId, cancellationToken);
+        command.HandleCommand(update.Message, botClient, tenantId, cancellationToken);
+        return Task.CompletedTask;
     }
 
     Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {
         var errorMessage = exception is ApiRequestException apiException
-            ? string.Format("Telegram API Error:\n[{0}]\n{1}", apiException.ErrorCode, apiException.Message)
+            ? $"Telegram API Error:\n[{apiException.ErrorCode}]\n{apiException.Message}"
             : exception.ToString();
-        _log.Error(errorMessage);
+        logger.Error(errorMessage);
 
         return Task.CompletedTask;
     }
 
     private static string UserKey(string userId, int tenantId)
     {
-        return string.Format("{0}:{1}", userId, tenantId);
+        return $"{userId}:{tenantId}";
     }
 }
