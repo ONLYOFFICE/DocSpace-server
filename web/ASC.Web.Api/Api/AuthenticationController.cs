@@ -284,7 +284,7 @@ public class AuthenticationController(
                     break;
                 case LoginType.SocialAccount:
                     action = MessageAction.LoginSuccessViaApiSocialAccount;
-                    description = [wrapper.Provider];
+                    description = [ConsumerExtension.GetResourceString(wrapper.Provider) ?? wrapper.Provider];
                     break;
                 default:
                     action = MessageAction.LoginSuccess;
