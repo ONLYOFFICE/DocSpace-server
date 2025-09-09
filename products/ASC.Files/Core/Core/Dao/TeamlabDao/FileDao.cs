@@ -298,16 +298,6 @@ internal class FileDao(
             q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.FormsWithFillingRole);
         }
 
-        if (parentType == FolderType.Knowledge)
-        {
-            q = q.Join(
-                filesDbContext.FileVectorization, 
-                f => f.Id, 
-                v => v.FileId, (f, v) => new { f, v })
-                .Where(x => x.v.Status == VectorizationStatus.Completed)
-                .Select(x => x.f);
-        }
-
         q = q.Skip(offset);
 
         if (count > 0)
