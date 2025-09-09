@@ -1438,7 +1438,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Login Via Social Account Success.
+        ///   Looks up a localized string similar to Login Via Social Account Success: {0}.
         /// </summary>
         public static string LoginSuccessViaApiSocialAccount {
             get {

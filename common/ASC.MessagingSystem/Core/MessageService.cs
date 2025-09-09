@@ -73,9 +73,9 @@ public class MessageService(
         SendRequestMessage(action, loginName: loginName);
     }
 
-    public void SendLoginMessage(MessageAction action, string loginName, string d1)
+    public void SendLoginMessage(MessageAction action, string loginName, params string[] d)
     {
-        SendRequestMessage(action, loginName: loginName, description: d1);
+        SendRequestMessage(action, loginName: loginName, description: d);
     }
 
     #endregion
