@@ -969,7 +969,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                                     if (needVectorization)
                                     {
-                                        var task = await vectorizationTaskPublisher.PublishAsync(internalFile.Id);
+                                        var task = await vectorizationTaskPublisher.PublishAsync(internalFile);
                                     }
                                 }
                                 

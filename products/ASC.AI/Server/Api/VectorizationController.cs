@@ -48,10 +48,10 @@ public class VectorizationController(
         return task.ToDto();
     }
 
-    [HttpGet("vectorization/tasks")]
-    public async Task<List<VectorizationTaskDto>> GetTasksAsync()
+    [HttpGet("vectorization/rooms/{roomId}/tasks")]
+    public async Task<List<VectorizationTaskDto>> GetTasksAsync(GetVectorizationTasksRequestDto inDto)
     {
-        var tasks = taskHolder.GetAsync();
+        var tasks = taskHolder.GetAsync(inDto.RoomId);
         return await tasks.Select(t => t.ToDto()!).ToListAsync();
     }
     

@@ -30,13 +30,11 @@ namespace ASC.Files.Core.Vectorization;
 
 [Scope]
 public class VectorizationTaskHolder(
-    AuthContext authContext,
     VectorizationTaskService vectorizationTaskService)
 {
     public async Task<VectorizationTask?> GetAsync(string id)
     {
         var task = await vectorizationTaskService.GetAsync(id);
-        
         if (task == null)
         {
             throw new ItemNotFoundException("Task not found");
@@ -54,10 +52,11 @@ public class VectorizationTaskHolder(
         return task;
     }
 
-    public async IAsyncEnumerable<VectorizationTask> GetAsync()
+    public async IAsyncEnumerable<VectorizationTask> GetAsync(int roomId)
     {
         var tasks = await vectorizationTaskService.GetTasksAsync();
-        foreach (var task in tasks)
+        
+        foreach (var task in tasks.Where(x => x.RoomId == roomId))
         {
             if (task.Status <= DistributedTaskStatus.Running)
             {

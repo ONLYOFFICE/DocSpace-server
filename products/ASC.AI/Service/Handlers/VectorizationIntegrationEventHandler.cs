@@ -49,7 +49,7 @@ public class VectorizationIntegrationEventHandler(
             await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
             
             var task = serviceProvider.GetRequiredService<VectorizationTask>();
-            task.Init(@event.TaskId, @event.TenantId, @event.CreateBy, @event.FileId);
+            task.Init(@event.TaskId, @event.TenantId, @event.CreateBy, @event.FileId, @event.RoomId);
             
             await vectorizationTaskService.StartAsync(task);
         }

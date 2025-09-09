@@ -32,7 +32,8 @@ public class VectorizationTaskPublisher(
     AuthContext authContext,
     IServiceProvider serviceProvider,
     IEventBus eventBus,
-    VectorizationTaskService vectorizationTaskService)
+    VectorizationTaskService vectorizationTaskService,
+    IDaoFactory daoFactory)
 {
     public async Task<VectorizationTask> PublishAsync(int fileId)
     {
@@ -41,18 +42,38 @@ public class VectorizationTaskPublisher(
             throw new ArgumentOutOfRangeException(nameof(fileId), @"File id must be greater than 0");
         }
         
+        var fileDao = daoFactory.GetFileDao<int>();
+        var file = await fileDao.GetFileAsync(fileId);
+        
+        return await PublishAsync(file);
+    }
+    
+    public async Task<VectorizationTask> PublishAsync(File<int> file)
+    {
+        if (file == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        var room = await DocSpaceHelper.GetParentRoom(file, daoFactory.GetFolderDao<int>());
+        if (room is not { FolderType: FolderType.AiRoom })
+        {
+            throw new InvalidOperationException();
+        }
+        
         var task = serviceProvider.GetRequiredService<VectorizationTask>();
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
         
-        task.Init(tenantId, userId, fileId);
+        task.Init(tenantId, userId, file.Id, room.Id);
         
         var taskId = await vectorizationTaskService.StoreAsync(task);
         
         await eventBus.PublishAsync(new VectorizationIntegrationEvent(userId, tenantId)
         {
             TaskId = taskId,
-            FileId = fileId
+            FileId = file.Id,
+            RoomId = room.Id
         });
         
         return (await vectorizationTaskService.GetAsync(taskId))!;

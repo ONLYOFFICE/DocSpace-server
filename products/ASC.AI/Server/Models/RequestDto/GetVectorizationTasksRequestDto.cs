@@ -24,21 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Vectorization.Events;
+namespace ASC.AI.Models.RequestDto;
 
-[ProtoContract]
-public record VectorizationIntegrationEvent : IntegrationEvent
+public class GetVectorizationTasksRequestDto
 {
-    private VectorizationIntegrationEvent() : base() { }
-    
-    public VectorizationIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId) { }
-    
-    [ProtoMember(1)]
-    public required string TaskId { get; set; }
-    
-    [ProtoMember(2)]
-    public int FileId { get; set; }
-    
-    [ProtoMember(3)]
-    public int RoomId { get; set; }
+    [FromRoute(Name = "roomId")]
+    public int RoomId { get; init; }
 }

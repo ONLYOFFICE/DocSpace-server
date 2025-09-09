@@ -31,6 +31,8 @@ namespace ASC.Files.Core.Vectorization;
 [Transient]
 public class VectorizationTask : DistributedTaskProgress
 {
+    public int RoomId { get; set; }
+    
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private int _tenantId;
     private int _fileId;
@@ -46,17 +48,18 @@ public class VectorizationTask : DistributedTaskProgress
         _serviceScopeFactory = serviceScopeFactory;
     }
 
-    public void Init(int tenantId, Guid userId, int fileId)
+    public void Init(int tenantId, Guid userId, int fileId, int roomId)
     {
         _tenantId = tenantId;
         _fileId = fileId;
         _userId = userId;
+        RoomId = roomId;
     }
 
-    public void Init(string taskId, int tenantId, Guid userId, int fileId)
+    public void Init(string taskId, int tenantId, Guid userId, int fileId, int roomId)
     {
         Id = taskId;
-        Init(tenantId, userId, fileId);
+        Init(tenantId, userId, fileId, roomId);
     }
 
     protected override async Task DoJob()
