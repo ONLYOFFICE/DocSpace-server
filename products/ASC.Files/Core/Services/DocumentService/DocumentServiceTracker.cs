@@ -166,7 +166,6 @@ public class DocumentServiceTrackerHelper(
     IHttpClientFactory clientFactory,
     IHttpContextAccessor httpContextAccessor,
     WebhookManager webhookManager,
-    ExternalShare externalShare,
     FileSecurity fileSecurity)
 {
     public string GetCallbackUrl<T>(T fileId, int? tenantId = null)
@@ -346,17 +345,9 @@ public class DocumentServiceTrackerHelper(
             
             if (securityContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry && await fileSecurity.CanReadAsync(file))
             {
-                var linkId = await externalShare.GetLinkIdAsync();
-
-                if (linkId != Guid.Empty && file.RootFolderType == FolderType.USER && file.CreateBy != securityContext.CurrentAccount.ID)
-                {
-                    await entryManager.MarkFileAsRecentByLink(file, linkId);
-                }
-                else
-                {
-                    await entryManager.MarkAsRecent(file);
-                }
+                await entryManager.MarkAsRecent(file);
             }
+            
             securityContext.Logout();
         }
     }

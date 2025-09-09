@@ -1088,16 +1088,10 @@
     <value>Valuta</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Datum in ura</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Opis</value>
+    <value>Datum</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Količina</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Ime storitve</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Prostor na disku</value>
@@ -1110,9 +1104,6 @@
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Poročilo o poslovanju stranke ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Dvig</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>Skupine ni bilo mogoče najti</value>

@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "7.13.0"
+  },
+  "generatorName": "my-postman-collection",
+  "inputSpec": "./tools/api-docs.json",
+  "outputDir": "postman-collection-sdk"
+}

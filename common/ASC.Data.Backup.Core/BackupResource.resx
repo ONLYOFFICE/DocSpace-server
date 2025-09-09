@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Automatic backup</value>
+  </data>
   <data name="BackupException" xml:space="preserve">
     <value>Something went wrong while creating the backup. Please try creating it again or contact support.</value>
   </data>
@@ -126,6 +129,24 @@
   <data name="BackupNotFound" xml:space="preserve">
     <value>The backup file is invalid. Please use the file created in the same portal.</value>
   </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Temporary storage</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Backup room</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Local file</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Third-party storage</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Third-party resource</value>
+  </data>
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Set Password</value>
   </data>
@@ -134,8 +155,5 @@
   </data>
   <data name="RestoreException" xml:space="preserve">
     <value>Something went wrong while restoring the backup. Please try restoring it again or contact support.</value>
-  </data>
-  <data name="ScheduledBackup" xml:space="preserve">
-    <value>Scheduled backup</value>
   </data>
 </root>

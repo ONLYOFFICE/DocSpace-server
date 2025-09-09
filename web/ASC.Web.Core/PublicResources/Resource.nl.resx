@@ -1088,16 +1088,10 @@
     <value>Valuta</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Datum en tijd</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Beschrijving</value>
+    <value>Datum</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Aantal</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Naam van de dienst</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Schijfruimte</value>
@@ -1110,9 +1104,6 @@
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Klantactiviteitenverslag ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Opname</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>De groep kon niet worden gevonden.</value>

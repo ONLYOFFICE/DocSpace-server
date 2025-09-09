@@ -1147,22 +1147,16 @@
     <value>Valuta</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Datum I vreme</value>
+    <value>Datum</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Količina</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Naziv usluge</value>
   </data>
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Jedinica mere</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Izveštaj o korisničkim operacijama ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Isplata</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>Grupa nije pronađena</value>
@@ -1175,9 +1169,6 @@
   </data>
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Skladišni prostor iskorišćen:</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Opis</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Prostor na disku</value>

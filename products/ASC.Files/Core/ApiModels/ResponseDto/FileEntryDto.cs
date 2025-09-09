@@ -134,6 +134,11 @@ public abstract class FileEntryBaseDto
     public string Order { get; set; }
 
     /// <summary>
+    /// Specifies if the file is a favorite or not.
+    /// </summary>
+    public bool? IsFavorite { get; set; }
+    
+    /// <summary>
     /// The file entry type.
     /// </summary>
     public abstract FileEntryType FileEntryType { get; }
@@ -276,7 +281,7 @@ public class FileEntryDtoHelper(
         if (entry.FullShared)
         {
             var linkId = await _externalShare.GetLinkIdAsync();
-            var securityDao = _daoFactory.GetSecurityDao<int>();
+            var securityDao = _daoFactory.GetSecurityDao<string>();
             var record = await securityDao.GetSharesAsync([linkId]).FirstOrDefaultAsync();
             if (record != null)
             {

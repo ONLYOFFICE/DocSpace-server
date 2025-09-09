@@ -135,4 +135,25 @@
   <data name="RestoreException" xml:space="preserve">
     <value>Під час відновлення резервної копії сталася помилка. Спробуйте відновити її ще раз або зверніться до служби підтримки.</value>
   </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Автоматичне резервне копіювання</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Тимчасове сховище</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Резервна кімната</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Локальний файл</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Стороннє сховище</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Сторонній ресурс</value>
+  </data>
 </root>

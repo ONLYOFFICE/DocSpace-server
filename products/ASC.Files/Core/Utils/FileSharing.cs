@@ -535,7 +535,12 @@ public class FileSharing(
         {
             throw new ArgumentNullException(FilesCommonResource.ErrorMessage_BadRequest);
         }
-
+        
+        if (!await fileSecurity.CanReadAsync(entry))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+        
         return await fileSecurity.IsPublicAsync(entry);
     }
 

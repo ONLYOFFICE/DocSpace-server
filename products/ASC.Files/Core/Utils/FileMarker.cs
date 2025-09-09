@@ -1196,7 +1196,6 @@ public class FileMarker(
     {
         switch (entry)
         {
-            case File<T> when entry.RootFolderType is not FolderType.USER:
             case Folder<T> folder when !DocSpaceHelper.IsRoom(folder.FolderType):
                 return MarkResult.NotMarked;
         }
@@ -1215,8 +1214,8 @@ public class FileMarker(
             await tagDao.RemoveTagsAsync(toRemove);
         }
         
-        var tag = Tag.RecentByLink(authContext.CurrentAccount.ID, linkId, entry);
-        await tagDao.SaveTagsAsync(tag);
+        var tag = Tag.RecentByLink(userId, linkId, entry);
+        await tagDao.SaveTagsAsync(tag, userId);
 
         return MarkResult.Marked;
     }
