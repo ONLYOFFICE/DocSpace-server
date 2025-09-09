@@ -275,7 +275,9 @@ public class AuthenticationController(
                 _ => throw new NotImplementedException()
             };
 
-            var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session);
+            var token = inDto.ConfirmData == null
+                ? await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session)
+                : await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session, inDto.ConfirmData.Email, inDto.ConfirmData.Key);
 
             if (!string.IsNullOrEmpty(inDto.Culture))
             {
@@ -489,9 +491,6 @@ public class AuthenticationController(
                     user = email.Contains('@')
                                    ? await userManager.GetUserByEmailAsync(email)
                                    : await userManager.GetUsersAsync(new Guid(email));
-
-                    //todo: check link to single use !!!
-                    //messageService.SendLoginMessage(MessageAction.AuthLinkActivated, email, inDto.ConfirmData.Key);
 
                     if (securityContext.IsAuthenticated && securityContext.CurrentAccount.ID != user.Id)
                     {

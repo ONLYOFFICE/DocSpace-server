@@ -259,14 +259,14 @@ public class MessageService(
         _ = Sender.SendAsync(message);
     }
     
-    public async Task<int> SendLoginMessageAsync(MessageUserData userData, MessageAction action)
+    public async Task<int> SendLoginMessageAsync(MessageUserData userData, MessageAction action, string initiator, params string[] description)
     {
         if (Sender == null)
         {
             return 0;
         }
 
-        var message = messageFactory.Create(Request, userData, action);
+        var message = messageFactory.Create(Request, userData, action, initiator, description);
         if (!messagePolicy.Check(message))
         {
             return 0;

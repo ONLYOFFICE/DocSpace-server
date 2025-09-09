@@ -100,7 +100,7 @@ public class MessageFactory(
         }
     }
 
-    public EventMessage Create(HttpRequest request, MessageUserData userData, MessageAction action)
+    public EventMessage Create(HttpRequest request, MessageUserData userData, MessageAction action, string initiator, params string[] description)
     {
         try
         {
@@ -110,7 +110,9 @@ public class MessageFactory(
                 TenantId = userData?.TenantId ?? tenantManager.GetCurrentTenantId(),
                 UserId = userData?.UserId ?? authContext.CurrentAccount.ID,
                 Action = action,
-                Active = true
+                Active = true,
+                Initiator = initiator,
+                Description = description?.Select(s => s ?? "").ToArray(),
             };
 
             if (request != null)
