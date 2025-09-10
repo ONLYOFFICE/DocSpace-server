@@ -72,12 +72,16 @@ public abstract class SecurityController<T>(
     [HttpGet("file/{fileId}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFileSecurityInfo(FileIdRequestDto<T> inDto)
     {        
-        var fileShares = await fileSharing.GetSharedInfoAsync([inDto.FileId], []);
+        var counter = 0;
 
-        foreach (var fileShareDto in fileShares)
+        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.FileId, FileEntryType.File, ShareFilterType.UserOrGroup, null, 0, 100))
         {
-            yield return await fileShareDtoHelper.Get(fileShareDto);
+            counter++;
+
+            yield return await fileShareDtoHelper.Get(ace);
         }
+
+        apiContext.SetCount(counter);
     }
 
     /// <summary>
@@ -91,12 +95,16 @@ public abstract class SecurityController<T>(
     [HttpGet("folder/{folderId}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfo(FolderIdRequestDto<T> inDto)
     {        
-        var fileShares = await fileSharing.GetSharedInfoAsync([], [inDto.FolderId]);
+        var counter = 0;
 
-        foreach (var fileShareDto in fileShares)
+        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.FolderId, FileEntryType.Folder, ShareFilterType.UserOrGroup, null, 0, 100))
         {
-            yield return await fileShareDtoHelper.Get(fileShareDto);
+            counter++;
+
+            yield return await fileShareDtoHelper.Get(ace);
         }
+
+        apiContext.SetCount(counter);
     }
 
     /// <summary>
