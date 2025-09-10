@@ -529,4 +529,63 @@ public class ShareFileTest(
         user2Security.Should().NotBeNull();
         user2Security!.Access.Should().Be(FileShare.Editing);
     }
+
+    [Fact]
+    public async Task GetFileSecurityInfo_SharedFileWithGroup_ReturnsGroupSecurityInformation()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        await _peopleClient.Authenticate(Initializer.Owner);
+
+        var file = await CreateFileInMy("file_security_info_group.docx", Initializer.Owner);
+        
+        // Add users to the group
+        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        var user2 = await Initializer.InviteContact(EmployeeType.User);
+        
+        // Create a group
+        var group = (await _groupApi.AddGroupAsync(new GroupRequestDto([user1.Id, user2.Id], Initializer.Owner.Id, "TestGroup"), TestContext.Current.CancellationToken)).Response;
+
+        // Share the file with the group
+        var shareInfo = new List<FileShareParams>
+        {
+            new() { ShareTo = group.Id, Access = FileShare.Comment }
+        };
+
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = shareInfo
+        };
+
+        // Set file security info for the group
+        await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest, TestContext.Current.CancellationToken);
+
+        // Act
+        var securityInfos = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        securityInfos.Should().NotBeEmpty();
+
+        // Verify group has comment access
+        var groupSecurity = securityInfos.FirstOrDefault(s => s.SharedToGroup.Id == group.Id);
+        groupSecurity.Should().NotBeNull();
+        groupSecurity!.Access.Should().Be(FileShare.Comment);
+        groupSecurity.SharedToGroup.Should().NotBeNull();
+        groupSecurity.SharedToGroup!.Name.Should().Be("TestGroup");
+
+        // Verify that file is accessible by group members with correct permissions
+        await _filesClient.Authenticate(user1);
+        var fileAsUser1 = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        fileAsUser1.Should().NotBeNull();
+        fileAsUser1.Access.Should().Be(FileShare.Comment);
+        fileAsUser1.Security.Comment.Should().BeTrue();
+        fileAsUser1.Security.Edit.Should().BeFalse();
+
+        await _filesClient.Authenticate(user2);
+        var fileAsUser2 = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        fileAsUser2.Should().NotBeNull();
+        fileAsUser2.Access.Should().Be(FileShare.Comment);
+        fileAsUser2.Security.Comment.Should().BeTrue();
+        fileAsUser2.Security.Edit.Should().BeFalse();
+    }
 }

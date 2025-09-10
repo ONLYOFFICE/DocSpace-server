@@ -162,7 +162,7 @@ public static class Initializer
         
         var fakeMember = _fakerMember.Generate();
         
-        var createMemberResponse = await _peopleFactory.PeopleProfilesApi.AddMemberWithHttpInfoAsync(new DocSpace.API.SDK.Model.MemberRequestDto
+        var createMemberResponse = await _peopleFactory.ProfilesApi.AddMemberWithHttpInfoAsync(new DocSpace.API.SDK.Model.MemberRequestDto
         {
             FromInviteLink = true,
             CultureName = "en-US",

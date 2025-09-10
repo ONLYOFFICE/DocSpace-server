@@ -410,4 +410,62 @@ public class ShareFolderTest(
         user2Security.Should().NotBeNull();
         user2Security!.Access.Should().Be(FileShare.Editing);
     }
+    
+    [Fact]
+    public async Task GetFolderSecurityInfo_SharedFolderWithGroup_ReturnsGroupSecurityInformation()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        await _peopleClient.Authenticate(Initializer.Owner);
+        
+        var folder = await CreateFolderInMy("folder_security_info_group", Initializer.Owner);
+        var fileInFolder = await CreateFile("file_in_folder", folder.Id);
+        
+        // Add users to the group
+        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        var user2 = await Initializer.InviteContact(EmployeeType.User);
+        
+        // Create a group
+        var group = (await _groupApi.AddGroupAsync(new GroupRequestDto([user1.Id, user2.Id], Initializer.Owner.Id, "TestFolderGroup"), TestContext.Current.CancellationToken)).Response;
+        
+        // Share the folder with the group
+        var shareInfo = new List<FileShareParams>
+        {
+            new() { ShareTo = group.Id, Access = FileShare.Editing }
+        };
+
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = shareInfo
+        };
+
+        // Set folder security info for the group
+        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken);
+
+        // Act
+        var securityInfos = (await _sharingApi.GetFolderSecurityInfoAsync(folder.Id, TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        securityInfos.Should().NotBeEmpty();
+
+        // Verify the group has editing access
+        var groupSecurity = securityInfos.FirstOrDefault(s => s.SharedToGroup?.Id == group.Id);
+        groupSecurity.Should().NotBeNull();
+        groupSecurity!.Access.Should().Be(FileShare.Editing);
+        groupSecurity.SharedToGroup.Should().NotBeNull();
+        groupSecurity.SharedToGroup.Name.Should().Be("TestFolderGroup");
+
+        // Verify that the file in the folder is accessible by group members with correct permissions
+        await _filesClient.Authenticate(user1);
+        var fileAsUser1 = (await _filesApi.GetFileInfoAsync(fileInFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        fileAsUser1.Should().NotBeNull();
+        fileAsUser1.Access.Should().Be(FileShare.Editing);
+        fileAsUser1.Security.Edit.Should().BeTrue();
+
+        await _filesClient.Authenticate(user2);
+        var fileAsUser2 = (await _filesApi.GetFileInfoAsync(fileInFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        fileAsUser2.Should().NotBeNull();
+        fileAsUser2.Access.Should().Be(FileShare.Editing);
+        fileAsUser2.Security.Edit.Should().BeTrue();
+    }
 }
