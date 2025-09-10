@@ -52,17 +52,17 @@ public class VectorizationTaskPublisher(
             throw new InvalidOperationException();
         }
 
+        if (!await fileSecurity.CanReadAsync(file))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         var folderDao = daoFactory.GetFolderDao<int>();
         
         var parentFolder = await folderDao.GetFolderAsync(file.ParentId);
         if (parentFolder is not { FolderType: FolderType.Knowledge })
         {
             throw new InvalidOperationException();
-        }
-
-        if (!await fileSecurity.CanCopyToAsync(parentFolder))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
         
         return await PublishAsync(file);
