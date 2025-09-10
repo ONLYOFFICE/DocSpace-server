@@ -24,6 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Globalization;
+
+using ASC.Web.Files.Classes;
+using ASC.Web.Files.Services.DocumentService;
+
 namespace ASC.AI.Core.Chat;
 
 [Scope]
@@ -32,10 +37,11 @@ public class MessageExporter(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     TenantUtil tenantUtil,
-    IServiceProvider serviceProvider,
-    SocketManager socketManager,
     AuthContext authContext,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    FileConverter fileConverter,
+    PathProvider pathProvider,
+    DocumentServiceConnector documentServiceConnector)
 {
     public async Task<File<T>> ExportMessageAsync<T>(T folderId, string title, int messageId)
     {
@@ -73,8 +79,13 @@ public class MessageExporter(
         var bytes = Encoding.UTF8.GetBytes(markdown);
 
         await using var ms = new MemoryStream(bytes);
+        var fileUri = await pathProvider.GetTempUrlAsync(ms, ".md");
 
-        return await CreateFileAsync(folder.Id, ms, $"{title}.txt");
+        var (_, outFileUri, outFileType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, "md", "docx", Guid.NewGuid().ToString("n"), null, CultureInfo.CurrentUICulture.Name, null, null, null, false, false);
+
+        var outFile = await fileConverter.SaveConvertedFileAsync(folder, outFileUri, outFileType, title, false);
+
+        return outFile;
     }
 
     public async Task<File<int>> ExportMessagesAsync(Guid chatId)
@@ -103,30 +114,20 @@ public class MessageExporter(
 
         await foreach (var message in chatDao.GetMessagesAsync(chatId))
         {
-            builder.Append(message.ToMarkdown(tenantUtil));
-            builder.Append("---\n\n");
+            _ = builder.Append(message.ToMarkdown(tenantUtil))
+                .Append("---\n\n");
         }
 
         var markdown = builder.ToString();
         var bytes = Encoding.UTF8.GetBytes(markdown);
 
         await using var ms = new MemoryStream(bytes);
+        var fileUri = await pathProvider.GetTempUrlAsync(ms, ".md");
 
-        return await CreateFileAsync(resultStorage.Id, ms, $"{chat.Title.Trim()}.txt");
-    }
+        var (_, outFileUri, outFileType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, "md", "docx", Guid.NewGuid().ToString("n"), null, CultureInfo.CurrentUICulture.Name, null, null, null, false, false);
 
-    private async Task<File<T>> CreateFileAsync<T>(T parentId, Stream content, string title)
-    {
-        var file = serviceProvider.GetService<File<T>>()!;
-        file.ParentId = parentId;
-        file.Comment = FilesCommonResource.CommentCreate;
-        file.Title = title;
-        file.ContentLength = content.Length;
-        
-        var fileDao = daoFactory.GetFileDao<T>();
-        var savedFile = await fileDao.SaveFileAsync(file, content);
-        await socketManager.CreateFileAsync(file);
-        
-        return savedFile;
+        var outFile = await fileConverter.SaveConvertedFileAsync(resultStorage, outFileUri, outFileType, chat.Title, false);
+
+        return outFile;
     }
 }
