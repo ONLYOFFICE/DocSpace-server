@@ -495,6 +495,11 @@ public class EntryManager(IDaoFactory daoFactory,
                 var (parentFolderType, additionalOption) = parent.ShareRecord is { Share: FileShare.FillForms }
                     ? (parent.FolderType, AdditionalFilterOption.FormsWithFillingRole)
                     : (FolderType.DEFAULT, AdditionalFilterOption.All);
+                
+                if (parent.FolderType == FolderType.Knowledge)		
+                {		
+                    parentFolderType = FolderType.Knowledge;
+                }
 
                 allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId, parentFolderType, additionalOption);
                 allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId, formsItemDto, parentFolderType, additionalOption);

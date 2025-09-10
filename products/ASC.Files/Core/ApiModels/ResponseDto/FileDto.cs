@@ -194,6 +194,11 @@ public class FileDto<T> : FileEntryDto<T>
     /// The file entry type.
     /// </summary>
     public override FileEntryType FileEntryType { get => FileEntryType.File; }
+    
+    /// <summary>
+    /// The vectorization status of the file.
+    /// </summary>
+    public VectorizationStatus? VectorizationStatus { get; set; }
 }
 
 [Scope]
@@ -227,6 +232,7 @@ public class FileDtoHelper(
         var result = await GetFileWrapperAsync(file, order, expiration, contextFolder);
 
         result.FolderId = file.ParentId;
+        result.VectorizationStatus = file.VectorizationStatus;
         
         if (file.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
         {

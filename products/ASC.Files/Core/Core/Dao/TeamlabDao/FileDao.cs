@@ -305,7 +305,11 @@ internal class FileDao(
             q = q.Take(count);
         }
 
-        var result = withShared ? FromQueryWithShared(filesDbContext, q) : FromQuery(filesDbContext, q);
+        var attachVectorizationStatus = parentType is FolderType.Knowledge;
+
+        var result = withShared 
+            ? FromQueryWithShared(filesDbContext, q, attachVectorizationStatus) 
+            : FromQuery(filesDbContext, q, attachVectorizationStatus);
 
         await foreach (var e in result.AsAsyncEnumerable())
         {
@@ -2265,7 +2269,7 @@ internal class FileDao(
         return q;
     }
 
-    private IQueryable<DbFileQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles)
+    private IQueryable<DbFileQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles, bool attachVectorizationStatus = false)
     {
         return dbFiles
             .Select(r => new DbFileQuery
@@ -2293,7 +2297,13 @@ internal class FileDao(
                             ).Skip(1).FirstOrDefault()
                         select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
                     select f.Order
-                ).FirstOrDefault()
+                ).FirstOrDefault(),
+                VectorizationStatus = attachVectorizationStatus 
+                    ? filesDbContext.FileVectorization
+                        .Where(x => x.TenantId == r.TenantId && x.FileId == r.Id)
+                        .Select(x => x.Status)
+                        .FirstOrDefault()
+                    : null
             });
     }
 
@@ -2320,7 +2330,7 @@ internal class FileDao(
             });
     }
     
-    private static IQueryable<DbFileQuery> FromQueryWithShared(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles)
+    private static IQueryable<DbFileQuery> FromQueryWithShared(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles, bool attachVectorizationStatus = false)
     {
         return dbFiles
             .Select(r => new DbFileQuery
@@ -2357,7 +2367,13 @@ internal class FileDao(
                             ).Skip(1).FirstOrDefault()
                         select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
                     select f.Order
-                ).FirstOrDefault()
+                ).FirstOrDefault(),
+                VectorizationStatus = attachVectorizationStatus 
+                    ? filesDbContext.FileVectorization
+                        .Where(x => x.TenantId == r.TenantId && x.FileId == r.Id)
+                        .Select(x => x.Status)
+                        .FirstOrDefault()
+                    : null
             });
     }
     
@@ -2795,6 +2811,7 @@ public class DbFileQuery
     public DbFolder OriginRoom { get; set; }
     public DbFilesSecurity SharedRecord { get; set; }
     public DateTime? LastOpened { get; set; }
+    public VectorizationStatus? VectorizationStatus { get; set; }
 }
 
 public class FileByTagQuery : IQueryResult<DbFile>

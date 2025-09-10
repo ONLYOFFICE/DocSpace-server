@@ -267,7 +267,7 @@ public class FileUploader(
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
             }
 
-            file.VectorizationStatus = VectorizationStatus.Scheduled;
+            file.VectorizationStatus = VectorizationStatus.InProgress;
             requiredVectorization = true;
         }
         

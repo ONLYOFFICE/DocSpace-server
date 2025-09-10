@@ -962,7 +962,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     var needVectorization = toFolder.FolderType is FolderType.Knowledge;
                                     if (needVectorization)
                                     {
-                                        newFile.VectorizationStatus = VectorizationStatus.Scheduled;
+                                        newFile.VectorizationStatus = VectorizationStatus.InProgress;
                                     }
                                     
                                     await fileDao.SaveFileAsync(newFile, null);

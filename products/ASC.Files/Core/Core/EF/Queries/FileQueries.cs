@@ -398,6 +398,10 @@ static file class FileQueries
                                         a.CreateBy == userId && 
                                         a.TenantId == tenantId)
                             .Select(a => a.CreateOn)
+                            .FirstOrDefault(),
+                        VectorizationStatus = ctx.FileVectorization
+                            .Where(x => x.TenantId == r.TenantId && x.FileId == r.Id)
+                            .Select(x => x.Status)
                             .FirstOrDefault()
                     })
                     .SingleOrDefault());
