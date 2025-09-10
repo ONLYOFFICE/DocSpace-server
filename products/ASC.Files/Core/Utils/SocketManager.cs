@@ -180,6 +180,12 @@ public class SocketManager(
     {
         await MakeRequest("delete-favorites-folder", folder, true, users);
     }
+
+    public async Task StartVectorization(int roomId, int fileId, string taskId)
+    {
+        var room = FolderRoom(roomId);
+        await MakeRequest("start-vectorization", new { room, fileId, taskId });
+    }
     
     private async Task<IEnumerable<Guid>> GetRecipientListForForm<T>(File<T> form)
     {

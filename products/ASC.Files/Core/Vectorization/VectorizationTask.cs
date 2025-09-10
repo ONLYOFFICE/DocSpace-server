@@ -74,6 +74,10 @@ public class VectorizationTask : DistributedTaskProgress
 
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
+            
+            var socketManager = scope.ServiceProvider.GetRequiredService<SocketManager>();
+
+            await socketManager.StartVectorization(RoomId, FileId, Id);
 
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
 

@@ -540,6 +540,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:commit-chat-message", { messageId });
   }
 
+  function startVectorization({ room, fileId, taskId }) {
+    logger.info(`start vectorization ${fileId} in room ${room}`);
+    filesIO.to(room).emit("s:start-vectorization", { fileId, taskId });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -573,6 +578,7 @@ module.exports = (io) => {
     endBackup,
     endRestore,
     encryptionProgress,
-    commitChatMessage
+    commitChatMessage,
+    startVectorization
   };
 };
