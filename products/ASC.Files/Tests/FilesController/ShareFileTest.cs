@@ -567,7 +567,7 @@ public class ShareFileTest(
         securityInfos.Should().NotBeEmpty();
 
         // Verify group has comment access
-        var groupSecurity = securityInfos.FirstOrDefault(s => s.SharedToGroup.Id == group.Id);
+        var groupSecurity = securityInfos.FirstOrDefault(s => s.SharedToGroup?.Id == group.Id);
         groupSecurity.Should().NotBeNull();
         groupSecurity!.Access.Should().Be(FileShare.Comment);
         groupSecurity.SharedToGroup.Should().NotBeNull();
