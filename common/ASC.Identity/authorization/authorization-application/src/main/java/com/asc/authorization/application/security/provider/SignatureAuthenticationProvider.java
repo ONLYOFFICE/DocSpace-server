@@ -32,18 +32,12 @@ import com.asc.authorization.application.exception.authentication.Authentication
 import com.asc.authorization.application.security.authentication.BasicSignature;
 import com.asc.authorization.application.security.authentication.TenantAuthority;
 import com.asc.authorization.application.security.oauth.error.AuthenticationError;
-import com.asc.authorization.application.security.oauth.service.AuthorizationLoginEventRegistrationService;
 import com.asc.authorization.application.security.oauth.service.GrpcRegisteredClientService;
 import com.asc.authorization.application.security.service.SignatureService;
 import com.asc.common.application.proto.ClientResponse;
-import com.asc.common.core.domain.value.enums.AuditCode;
-import com.asc.common.service.transfer.message.AuditMessage;
-import com.asc.common.service.transfer.message.LoginRegisteredEvent;
-import com.asc.common.utilities.HttpUtils;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +46,6 @@ import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -73,15 +66,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Component
 @RequiredArgsConstructor
 public class SignatureAuthenticationProvider implements AuthenticationProvider {
-  /** The name of the current service, used for audit logging. */
-  @Value("${spring.application.name}")
-  private String serviceName;
-
-  private final HttpUtils httpUtils;
   private final SignatureService signatureService;
   private final GrpcRegisteredClientService registeredClientService;
-  private final AuthorizationLoginEventRegistrationService
-      authorizationLoginEventRegistrationService;
 
   private final SecurityConfigurationProperties configurationProperties;
 
@@ -139,7 +125,6 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
 
       validateClient(client);
       setRequestAttributes(request, signature);
-      publishAudit(request, signature, client);
 
       return buildAuthentication(signature, client);
     } catch (InterruptedException | ExecutionException e) {
@@ -213,45 +198,6 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
             List.of(new TenantAuthority(signature.getTenantId(), signature.getTenantUrl())));
     authenticationToken.setDetails(client.getClientId());
     return authenticationToken;
-  }
-
-  /**
-   * Publishes an audit log for the authentication attempt.
-   *
-   * @param request the {@link HttpServletRequest}.
-   * @param signature the {@link BasicSignature}.
-   * @param client the {@link ClientResponse}.
-   */
-  private void publishAudit(
-      HttpServletRequest request, BasicSignature signature, ClientResponse client) {
-    var eventDate = ZonedDateTime.now();
-    authorizationLoginEventRegistrationService.registerLogin(
-        LoginRegisteredEvent.builder()
-            .login(signature.getUserEmail())
-            .active(false)
-            .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
-            .browser(httpUtils.getClientBrowser(request))
-            .platform(httpUtils.getClientOS(request))
-            .date(eventDate)
-            .tenantId(signature.getTenantId())
-            .userId(signature.getUserId())
-            .page(httpUtils.getFullURL(request))
-            .action(1028)
-            .build(),
-        AuditMessage.builder()
-            .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
-            .initiator(serviceName)
-            .target(client.getClientId())
-            .browser(httpUtils.getClientBrowser(request))
-            .platform(httpUtils.getClientOS(request))
-            .date(eventDate)
-            .tenantId(signature.getTenantId())
-            .userId(signature.getUserId())
-            .userEmail(signature.getUserEmail())
-            .userName(signature.getUserName())
-            .page(httpUtils.getFullURL(request))
-            .action(AuditCode.GENERATE_AUTHORIZATION_CODE_TOKEN.getCode())
-            .build());
   }
 
   /**
