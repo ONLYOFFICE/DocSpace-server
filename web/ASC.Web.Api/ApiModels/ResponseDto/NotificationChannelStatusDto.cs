@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,18 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.TelegramService.Extension;
-
-public static class ConfigurationManagerExtension
+namespace ASC.Web.Api.ApiModels.ResponseDto
 {
-    public static ConfigurationManager AddTelegramConfiguration(
-        this ConfigurationManager config,
-        IHostEnvironment env)
+    public class NotificationChannelStatusDto : IMapFrom<IEnumerable<NotificationChannelStatus>>
     {
-        config
-            .AddJsonFile("notify.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"notify.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+        public List<NotificationChannelDto> Channels { get; set; } = [];
 
-        return config;
+        public void Mapping(Profile profile)
+        {
+            profile.CreateMap<IEnumerable<NotificationChannelStatus>, NotificationChannelStatusDto>()
+                .ConvertUsing<NotificationChannelsConverter>();
+        }
+    }
+
+    public class NotificationChannelDto
+    {
+        public string Name { get; set; }
+        public bool IsEnabled { get; set; }
     }
 }

@@ -24,18 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.TelegramService.Extension;
+using ASC.TelegramService.Services;
 
-public static class ConfigurationManagerExtension
+namespace ASC.TelegramService.Log;
+internal static partial class TelegramHandlerServiceLogger
 {
-    public static ConfigurationManager AddTelegramConfiguration(
-        this ConfigurationManager config,
-        IHostEnvironment env)
-    {
-        config
-            .AddJsonFile("notify.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"notify.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Couldn't find telegramId for user '{reciever}'")]
+    public static partial void DebugCouldntFind(this ILogger<TelegramHandlerService> logger, string reciever);
 
-        return config;
-    }
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Couldn't send message for user '{reciever}'")]
+    public static partial void DebugCouldntSend(this ILogger<TelegramHandlerService> logger, string reciever, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "TelegramListenerService background task is stopping.'")]
+    public static partial void DebugTelegramStopping(this ILogger<TelegramHandlerService> logger);
 }

@@ -24,18 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.TelegramService.Extension;
+using ASC.TelegramService.Services;
 
-public static class ConfigurationManagerExtension
+namespace ASC.TelegramService.Log;
+internal static partial class CommandExecutionServiceLogger
 {
-    public static ConfigurationManager AddTelegramConfiguration(
-        this ConfigurationManager config,
-        IHostEnvironment env)
-    {
-        config
-            .AddJsonFile("notify.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"notify.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
-
-        return config;
-    }
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Couldn't handle ({text}) message")]
+    public static partial void DebugCouldntHandle(this ILogger<CommandExecutionService> logger, string text, Exception exception);
 }

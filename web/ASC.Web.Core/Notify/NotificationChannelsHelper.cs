@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,18 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.TelegramService.Extension;
+using ASC.Core.Common.Notify.Model;
+using ASC.Web.Core.Notify.Channels;
 
-public static class ConfigurationManagerExtension
+namespace ASC.Web.Core.Notify
 {
-    public static ConfigurationManager AddTelegramConfiguration(
-        this ConfigurationManager config,
-        IHostEnvironment env)
+    public class NotificationChannelStatus
     {
-        config
-            .AddJsonFile("notify.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"notify.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+        public string Name { get; set; }
+        public bool IsEnabled { get; set; }
+    }
 
-        return config;
+    [Scope]
+    public class NotificationChannelsHelper(IConfiguration configuration, IEnumerable<INotificationChannel> channels)
+    {
+        public IEnumerable<INotificationChannel> GetNotificationChannels()
+        {
+            var config = configuration.GetSection("notify").Get<NotifyServiceCfg>();
+
+            return channels.Where(channel => config.Senders.Any(sender => sender.Name == channel.Name));
+        }
     }
 }

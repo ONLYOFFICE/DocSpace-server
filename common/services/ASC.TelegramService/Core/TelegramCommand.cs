@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,9 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.TelegramService.Log;
-internal static partial class CoreLogger
+namespace ASC.TelegramService.Core
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Couldn't handle ({text}) message")]
-    public static partial void DebugCouldntHandle(this ILogger<CommandModule> logger, string text, Exception exception);
+    public class TelegramCommand(Message msg, string cmdName, string[] args = null)
+    {
+        public string CommandName { get; private set; } = cmdName;
+        public string[] Args { get; private set; } = args;
+        public Message Message { get; private set; } = msg;
+        public User User { get { return Message.From; } }
+        public Chat Chat { get { return Message.Chat; } }
+    }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,18 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.TelegramService.Extension;
-
-public static class ConfigurationManagerExtension
+namespace ASC.TelegramService.Core
 {
-    public static ConfigurationManager AddTelegramConfiguration(
-        this ConfigurationManager config,
-        IHostEnvironment env)
+    public abstract class CommandContext
     {
-        config
-            .AddJsonFile("notify.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"notify.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+        public ITelegramBotClient Client { get; set; }
+        public TelegramCommand Context { get; set; }
+        public int TenantId { get; set; }
 
-        return config;
+        protected async Task ReplyAsync(string message)
+        {
+            _ = await Client.SendMessage(Context.Chat, message);
+        }
     }
 }

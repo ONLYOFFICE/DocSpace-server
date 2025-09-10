@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,18 +24,21 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.TelegramService.Extension;
-
-public static class ConfigurationManagerExtension
+namespace ASC.TelegramService.Core
 {
-    public static ConfigurationManager AddTelegramConfiguration(
-        this ConfigurationManager config,
-        IHostEnvironment env)
+    public abstract class ParamParser(Type type)
     {
-        config
-            .AddJsonFile("notify.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"notify.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+        protected Type _type = type;
 
-        return config;
+        public abstract object FromString(string arg);
+        public abstract string ToString(object arg);
+    }
+
+    public abstract class ParamParser<T> : ParamParser
+    {
+        protected ParamParser() : base(typeof(T)) { }
+
+        public abstract override object FromString(string arg);
+        public abstract override string ToString(object arg);
     }
 }
