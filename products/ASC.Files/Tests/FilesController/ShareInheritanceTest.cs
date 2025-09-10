@@ -440,10 +440,10 @@ public class ShareInheritanceTest(
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, fileSharedTo.RequestToken);
 
         // Check that password is required
-        var externalShareData = (await _filesSharingApi.GetExternalShareDataAsync(fileSharedTo.RequestToken, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var externalShareData = (await _sharingApi.GetExternalShareDataAsync(fileSharedTo.RequestToken, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Then provide password and verify access
-        var externalShareDataWithHttpInfo = await _filesSharingApi.ApplyExternalSharePasswordWithHttpInfoAsync(
+        var externalShareDataWithHttpInfo = await _sharingApi.ApplyExternalSharePasswordWithHttpInfoAsync(
             fileSharedTo.RequestToken,
             new ExternalShareRequestParam { Password = filePassword },
             cancellationToken: TestContext.Current.CancellationToken);

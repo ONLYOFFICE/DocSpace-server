@@ -41,7 +41,7 @@ public class BaseTest(
     protected readonly RoomsApi _roomsApi = filesFactory.RoomsApi;
     protected readonly SettingsApi _filesSettingsApi = filesFactory.SettingsApi;
     protected readonly QuotaApi _quotaApi = filesFactory.QuotaApi;
-    protected readonly SharingApi _filesSharingApi = filesFactory.SharingApi;
+    protected readonly SharingApi _sharingApi = filesFactory.SharingApi;
     protected readonly DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = apiFactory.SettingsQuotaApi;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
 

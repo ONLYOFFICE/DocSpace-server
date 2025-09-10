@@ -73,7 +73,15 @@ public class FileSecurity(IDaoFactory daoFactory,
     private static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> _availableRoomFileAccesses =
         new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>
     {
-        { FolderType.USER, _defaultFileShareDictionary },
+        { FolderType.USER, 
+            new Dictionary<SubjectType, HashSet<FileShare>>
+            {
+                { SubjectType.User, DefaultFileAccess },
+                { SubjectType.Group, DefaultFileAccess },
+                { SubjectType.ExternalLink, DefaultFileAccess },
+                { SubjectType.PrimaryExternalLink, DefaultFileAccess }
+            }.ToFrozenDictionary() 
+        },
         { FolderType.CustomRoom, _defaultFileShareDictionary },
         { FolderType.PublicRoom, _defaultFileShareDictionary },
         { FolderType.EditingRoom, _defaultFileShareDictionary },
@@ -2773,10 +2781,9 @@ public class FileSecurity(IDaoFactory daoFactory,
     }
 
     public async Task<IDictionary<string, bool>> GetFileAccesses<T>(File<T> file, SubjectType subjectType)
-    {        
-        var room = new Folder<T>();
+    {
         var result = new Dictionary<string, bool>();
-
+        
         var mustConvert = fileUtility.MustConvert(file.Title);
         var canEdit = fileUtility.CanWebEdit(file.Title);
         var canCustomFiltering = fileUtility.CanWebCustomFilterEditing(file.Title);
@@ -2788,8 +2795,8 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (parentRoomType == null)
         {
-            room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
-            
+            var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+
             if (room != null)
             {
                 parentRoomType = room.FolderType;

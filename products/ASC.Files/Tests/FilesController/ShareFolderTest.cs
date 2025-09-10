@@ -236,7 +236,7 @@ public class ShareFolderTest(
         
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
-        var externalShareData = (await _filesSharingApi.GetExternalShareDataAsync(updatedSharedTo.RequestToken, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var externalShareData = (await _sharingApi.GetExternalShareDataAsync(updatedSharedTo.RequestToken, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
 
         externalShareData.Status.Should().Be(Status.RequiredPassword);
@@ -260,8 +260,8 @@ public class ShareFolderTest(
         
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
-        var externalShareDataWrongPassword = (await _filesSharingApi.ApplyExternalSharePasswordAsync(updatedSharedTo.RequestToken, new ExternalShareRequestParam { Password = password + "1" }, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var externalShareData = (await _filesSharingApi.ApplyExternalSharePasswordAsync(updatedSharedTo.RequestToken, new ExternalShareRequestParam { Password = password }, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var externalShareDataWrongPassword = (await _sharingApi.ApplyExternalSharePasswordAsync(updatedSharedTo.RequestToken, new ExternalShareRequestParam { Password = password + "1" }, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var externalShareData = (await _sharingApi.ApplyExternalSharePasswordAsync(updatedSharedTo.RequestToken, new ExternalShareRequestParam { Password = password }, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
 
         externalShareDataWrongPassword.Status.Should().Be(Status.InvalidPassword);
@@ -366,5 +366,48 @@ public class ShareFolderTest(
         
         // Get the primary external link
         await Assert.ThrowsAsync<ApiException>(async () => await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken));
+    }
+    
+    [Fact]
+    public async Task GetFolderSecurityInfo_SharedFolder_ReturnsSecurityInformation()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var folder = await CreateFolderInMy("folder", Initializer.Owner);
+        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        var user2 = await Initializer.InviteContact(EmployeeType.User);
+
+        // Share the folder with different access levels
+        var shareInfo = new List<FileShareParams>
+        {
+            new() { ShareTo = user1.Id, Access = FileShare.Read },
+            new() { ShareTo = user2.Id, Access = FileShare.Editing }
+        };
+
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = shareInfo
+        };
+
+        // Set folder security info
+        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken);
+
+        // Act
+        var securityInfos = (await _sharingApi.GetFolderSecurityInfoAsync(folder.Id, TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        securityInfos.Should().NotBeEmpty();
+        securityInfos.Should().HaveCountGreaterThanOrEqualTo(2); // At least 2 users + owner
+
+        // Verify user1 has read access
+        var user1Security = securityInfos.FirstOrDefault(s => s.SharedToUser.Id == user1.Id);
+        user1Security.Should().NotBeNull();
+        user1Security!.Access.Should().Be(FileShare.Read);
+
+        // Verify user2 has editing access
+        var user2Security = securityInfos.FirstOrDefault(s => s.SharedToUser.Id == user2.Id);
+        user2Security.Should().NotBeNull();
+        user2Security!.Access.Should().Be(FileShare.Editing);
     }
 }

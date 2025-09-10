@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using SecurityInfoSimpleRequestDto = DocSpace.API.SDK.Model.SecurityInfoSimpleRequestDto;
+
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -461,12 +463,12 @@ public class ShareFileTest(
         await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken));
 
         // Get external share data to verify password is required
-        var externalShareData = (await _filesSharingApi.GetExternalShareDataAsync(passwordProtectedSharedTo.RequestToken, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var externalShareData = (await _sharingApi.GetExternalShareDataAsync(passwordProtectedSharedTo.RequestToken, cancellationToken: TestContext.Current.CancellationToken)).Response;
         externalShareData.Status.Should().Be(Status.RequiredPassword);
 
         // Now provide correct password
         var password = "securepassword123";
-        var externalShareDataWithHttpInfo = await _filesSharingApi.ApplyExternalSharePasswordWithHttpInfoAsync(
+        var externalShareDataWithHttpInfo = await _sharingApi.ApplyExternalSharePasswordWithHttpInfoAsync(
             passwordProtectedSharedTo.RequestToken, 
             new ExternalShareRequestParam { Password = password }, 
             cancellationToken: TestContext.Current.CancellationToken);
@@ -483,5 +485,48 @@ public class ShareFileTest(
         fileWithPasswordProtectedAccess.Should().NotBeNull();
         //fileWithPasswordProtectedAccess.Title.Should().Be(file.Title);
         fileWithPasswordProtectedAccess.Security.Edit.Should().BeTrue(); // Should have editing permissions
+    }
+    
+    [Fact]
+    public async Task GetFileSecurityInfo_SharedFile_ReturnsSecurityInformation()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var file = await CreateFileInMy("file_security_info.docx", Initializer.Owner);
+        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        var user2 = await Initializer.InviteContact(EmployeeType.User);
+
+        // Share the file with different access levels
+        var shareInfo = new List<FileShareParams>
+        {
+            new() { ShareTo = user1.Id, Access = FileShare.Read },
+            new() { ShareTo = user2.Id, Access = FileShare.Editing }
+        };
+
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = shareInfo
+        };
+
+        // Set file security info
+        await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest, TestContext.Current.CancellationToken);
+
+        // Act
+        var securityInfos = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        securityInfos.Should().NotBeEmpty();
+        securityInfos.Should().HaveCountGreaterThanOrEqualTo(2); // At least 2 users + owner
+
+        // Verify user1 has read access
+        var user1Security = securityInfos.FirstOrDefault(s => s.SharedToUser.Id == user1.Id);
+        user1Security.Should().NotBeNull();
+        user1Security!.Access.Should().Be(FileShare.Read);
+
+        // Verify user2 has editing access
+        var user2Security = securityInfos.FirstOrDefault(s => s.SharedToUser.Id == user2.Id);
+        user2Security.Should().NotBeNull();
+        user2Security!.Access.Should().Be(FileShare.Editing);
     }
 }

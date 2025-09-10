@@ -132,7 +132,8 @@ public class FileSharingAceHelper(
                     continue;
                 }
 
-                if (!(await fileSecurity.GetFileAccesses(file, w.SubjectType)).Contains(new KeyValuePair<string,bool>(w.Access.ToStringFast(), true)))
+                var fileAccesses = await fileSecurity.GetFileAccesses(file, w.SubjectType);
+                if (fileAccesses == null || !fileAccesses.Contains(new KeyValuePair<string,bool>(w.Access.ToStringFast(), true)))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
