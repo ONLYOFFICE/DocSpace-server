@@ -136,7 +136,7 @@ public class ChatController(
         await mcpService.ProvideMcpToolPermissionAsync(inDto.CallId, inDto.Body.Decision);
     }
     
-    public async Task StreamSentEventAsync(
+    private async Task StreamSentEventAsync(
         IAsyncEnumerable<ChatCompletion> completions,
         CancellationToken cancellationToken)
     {
