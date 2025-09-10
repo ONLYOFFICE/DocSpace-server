@@ -32,10 +32,10 @@ namespace ASC.Files.Core.Vectorization;
 public class VectorizationTask : DistributedTaskProgress
 {
     public int RoomId { get; set; }
+    public int FileId { get; set; }
     
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private int _tenantId;
-    private int _fileId;
     private Guid _userId;
 
     private ILogger _logger;
@@ -51,9 +51,9 @@ public class VectorizationTask : DistributedTaskProgress
     public void Init(int tenantId, Guid userId, int fileId, int roomId)
     {
         _tenantId = tenantId;
-        _fileId = fileId;
         _userId = userId;
         RoomId = roomId;
+        FileId = fileId;
     }
 
     public void Init(string taskId, int tenantId, Guid userId, int fileId, int roomId)
@@ -79,7 +79,7 @@ public class VectorizationTask : DistributedTaskProgress
 
             _fileDao = daoFactory.GetFileDao<int>();
             
-            var file = await _fileDao.GetFileAsync(_fileId);
+            var file = await _fileDao.GetFileAsync(FileId);
             if (file == null)
             {
                 throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
@@ -158,7 +158,7 @@ public class VectorizationTask : DistributedTaskProgress
             Exception = e;
             Status = DistributedTaskStatus.Failted;
             
-            await _fileDao.SetVectorizationStatusAsync(_fileId, VectorizationStatus.Failed);
+            await _fileDao.SetVectorizationStatusAsync(FileId, VectorizationStatus.Failed);
         }
         finally
         {

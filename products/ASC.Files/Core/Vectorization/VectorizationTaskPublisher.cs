@@ -33,7 +33,9 @@ public class VectorizationTaskPublisher(
     IServiceProvider serviceProvider,
     IEventBus eventBus,
     VectorizationTaskService vectorizationTaskService,
-    IDaoFactory daoFactory)
+    IDaoFactory daoFactory,
+    IDistributedLockProvider distributedLockProvider,
+    FileSecurity fileSecurity)
 {
     public async Task<VectorizationTask> PublishAsync(int fileId)
     {
@@ -43,7 +45,25 @@ public class VectorizationTaskPublisher(
         }
         
         var fileDao = daoFactory.GetFileDao<int>();
+        
         var file = await fileDao.GetFileAsync(fileId);
+        if (file.VectorizationStatus is not VectorizationStatus.Failed)
+        {
+            throw new InvalidOperationException();
+        }
+
+        var folderDao = daoFactory.GetFolderDao<int>();
+        
+        var parentFolder = await folderDao.GetFolderAsync(file.ParentId);
+        if (parentFolder is not { FolderType: FolderType.Knowledge })
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!await fileSecurity.CanCopyToAsync(parentFolder))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
         
         return await PublishAsync(file);
     }
@@ -61,21 +81,31 @@ public class VectorizationTaskPublisher(
             throw new InvalidOperationException();
         }
         
-        var task = serviceProvider.GetRequiredService<VectorizationTask>();
-        var tenantId = tenantManager.GetCurrentTenantId();
-        var userId = authContext.CurrentAccount.ID;
-        
-        task.Init(tenantId, userId, file.Id, room.Id);
-        
-        var taskId = await vectorizationTaskService.StoreAsync(task);
-        
-        await eventBus.PublishAsync(new VectorizationIntegrationEvent(userId, tenantId)
+        await using (await distributedLockProvider.TryAcquireLockAsync($"vectorization_task_{file.Id}"))
         {
-            TaskId = taskId,
-            FileId = file.Id,
-            RoomId = room.Id
-        });
+            var tasks = await vectorizationTaskService.GetTasksAsync();
+            var existingTask = tasks.FirstOrDefault(x => x.FileId == file.Id);
+            if (existingTask != null)
+            {
+                return existingTask;
+            }
         
-        return (await vectorizationTaskService.GetAsync(taskId))!;
+            var task = serviceProvider.GetRequiredService<VectorizationTask>();
+            var tenantId = tenantManager.GetCurrentTenantId();
+            var userId = authContext.CurrentAccount.ID;
+        
+            task.Init(tenantId, userId, file.Id, room.Id);
+        
+            var taskId = await vectorizationTaskService.StoreAsync(task);
+        
+            await eventBus.PublishAsync(new VectorizationIntegrationEvent(userId, tenantId)
+            {
+                TaskId = taskId,
+                FileId = file.Id,
+                RoomId = room.Id
+            });
+            
+            return (await vectorizationTaskService.GetAsync(taskId))!;
+        }
     }
 }
