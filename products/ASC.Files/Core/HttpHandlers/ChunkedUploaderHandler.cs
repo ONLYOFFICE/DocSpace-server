@@ -218,7 +218,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                             await eventBus.PublishAsync(evt);
 
-                            if (session.RequiredVectorization && session.File.Id is File<int> file)
+                            if (session.RequiredVectorization && session.File is File<int> file)
                             {
                                 var task = await vectorizationTaskPublisher.PublishAsync(file);
                                 vectorizationTaskId = task.Id;

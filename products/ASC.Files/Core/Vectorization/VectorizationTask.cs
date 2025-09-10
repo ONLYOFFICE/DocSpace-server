@@ -31,8 +31,8 @@ namespace ASC.Files.Core.Vectorization;
 [Transient]
 public class VectorizationTask : DistributedTaskProgress
 {
-    public int RoomId { get; set; }
-    public int FileId { get; set; }
+    public int RoomId { get; private set; }
+    public int FileId { get; private set; }
     
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private int _tenantId;
@@ -90,8 +90,8 @@ public class VectorizationTask : DistributedTaskProgress
             }
             
             var folderDao = daoFactory.GetFolderDao<int>();
+            
             var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
-
             if (!parents.Exists(x => x.FolderType == FolderType.Knowledge))
             {
                 throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
@@ -162,13 +162,28 @@ public class VectorizationTask : DistributedTaskProgress
             Exception = e;
             Status = DistributedTaskStatus.Failted;
             
-            await _fileDao.SetVectorizationStatusAsync(FileId, VectorizationStatus.Failed);
+            try
+            {
+                await _fileDao.SetVectorizationStatusAsync(FileId, VectorizationStatus.Failed);
+            }
+            catch (Exception exception)
+            {
+                _logger.ErrorWithException(exception);
+            }
         }
         finally
         {
             IsCompleted = true;
             this.Percentage = 100;
-            await PublishChanges();
+
+            try
+            {
+                await PublishChanges();
+            }
+            catch (Exception e)
+            {
+                _logger.ErrorWithException(e);
+            }
         }
     }
 }
