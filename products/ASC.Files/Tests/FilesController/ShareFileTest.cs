@@ -558,8 +558,9 @@ public class ShareFileTest(
         };
 
         // Set file security info for the group
-        await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest, TestContext.Current.CancellationToken);
-
+        var result = (await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest, TestContext.Current.CancellationToken)).Response;
+        result.Should().NotBeNull();
+        result.Should().AllSatisfy(r => r.SubjectType.Should().BeOneOf(SubjectType.Group, SubjectType.User));
         // Act
         var securityInfos = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
 

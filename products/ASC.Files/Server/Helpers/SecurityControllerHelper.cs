@@ -91,7 +91,7 @@ public class SecurityControllerHelper(
             await _fileStorageService.SetAceObjectAsync(aceCollection, notify);
         }
 
-        await foreach (var s in GetSecurityInfoAsync(fileIds, folderIds))
+        await foreach (var s in GetSecurityInfoAsync(fileIds, folderIds).Where(r => r.SubjectType is SubjectType.User or SubjectType.Group))
         {
             yield return s;
         }

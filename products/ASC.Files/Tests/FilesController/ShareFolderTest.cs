@@ -440,7 +440,9 @@ public class ShareFolderTest(
         };
 
         // Set folder security info for the group
-        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken);
+        var result = (await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken)).Response;
+        result.Should().NotBeNull();
+        result.Should().AllSatisfy(r => r.SubjectType.Should().BeOneOf(SubjectType.Group, SubjectType.User));
 
         // Act
         var securityInfos = (await _sharingApi.GetFolderSecurityInfoAsync(folder.Id, TestContext.Current.CancellationToken)).Response;
