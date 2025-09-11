@@ -84,7 +84,9 @@ public abstract class ExportTask<T>(IServiceScopeFactory serviceScopeFactory) : 
 
             await foreach (var message in messages)
             {
-                _ = builder.Append(message.ToMarkdown(tenantUtil))
+                var content = message.ToMarkdown(tenantUtil);
+                content = CutThink(content);
+                _ = builder.Append(content)
                     .Append("---\n\n");
             }
 
@@ -120,6 +122,14 @@ public abstract class ExportTask<T>(IServiceScopeFactory serviceScopeFactory) : 
             Percentage = 100;
             await PublishChanges();
         }
+    }
+
+    private string CutThink(string content)
+    {
+        var start = content.IndexOf("<think>");
+        var end = content.IndexOf("</think>") + "</think>".Length + 1;
+
+        return content.Substring(0, start) + content.Substring(end);
     }
 
     private abstract class ExportFolder
