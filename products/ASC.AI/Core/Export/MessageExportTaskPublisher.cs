@@ -30,6 +30,7 @@ namespace ASC.AI.Core.Export;
 
 [Scope]
 public class MessageExportTaskPublisher(
+    CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager,
     AuthContext authContext,
     IEventBus eventBus)
@@ -50,6 +51,7 @@ public class MessageExportTaskPublisher(
             IsFolderThirdParty = isFolderThirdParty,
             Title = title,
             MessageId = messageId,
+            BaseUri = commonLinkUtility.ServerRootPath
         };
         
         await eventBus.PublishAsync(new MessageExportIntegrationEvent(userId, tenantId)

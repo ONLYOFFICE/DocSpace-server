@@ -65,6 +65,13 @@ public abstract class ExportTask<T>(IServiceScopeFactory serviceScopeFactory) : 
 
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             await securityContext.AuthenticateMeWithoutCookieAsync(UserId);
+            
+            var commonLinkUtility = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>();
+            
+            if (!string.IsNullOrEmpty(Data.BaseUri))
+            {
+                commonLinkUtility.ServerUri = Data.BaseUri;
+            }
 
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
             var folder = ExportFolder.Create(daoFactory, Data);

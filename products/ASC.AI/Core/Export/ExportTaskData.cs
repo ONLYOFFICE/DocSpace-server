@@ -39,4 +39,7 @@ public abstract class ExportTaskData
 
     [ProtoMember(3)]
     public bool IsFolderThirdParty { get; set; }
+    
+    [ProtoMember(4)]
+    public required string BaseUri { get; set; }
 }

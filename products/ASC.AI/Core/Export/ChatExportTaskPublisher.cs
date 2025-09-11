@@ -30,6 +30,7 @@ namespace ASC.AI.Core.Export;
 
 [Scope]
 public class ChatExportTaskPublisher(
+    CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager,
     AuthContext authContext,
     IEventBus eventBus)
@@ -49,6 +50,7 @@ public class ChatExportTaskPublisher(
             IsFolderThirdParty = isFolderThirdParty,
             Title = title,
             ChatId = chatId,
+            BaseUri = commonLinkUtility.ServerRootPath
         };
         
         await eventBus.PublishAsync(new ChatExportIntegrationEvent(userId, tenantId)
