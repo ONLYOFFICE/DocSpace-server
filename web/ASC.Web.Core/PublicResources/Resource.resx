@@ -1221,4 +1221,7 @@
   <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
     <value>GB</value>
   </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>The number of plugins exceeds the limit</value>
+  </data>
 </root>

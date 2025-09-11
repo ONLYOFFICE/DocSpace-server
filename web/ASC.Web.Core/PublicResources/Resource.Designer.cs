@@ -2194,6 +2194,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The number of plugins exceeds the limit.
+        /// </summary>
+        public static string ErrorWebPluginMaxCount {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginMaxCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Wrong plugin name.
         /// </summary>
         public static string ErrorWebPluginName {
