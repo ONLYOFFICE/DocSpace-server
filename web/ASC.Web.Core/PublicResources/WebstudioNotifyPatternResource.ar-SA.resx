@@ -2128,8 +2128,8 @@ $TrulyYours</value>
 
 IP: *$IP*
 الجهاز: *$Device*
-#if($الموقع!= "")
-الموقع: *$الموقع*
+#if($Location != "")
+الموقع: *$Location*
 #end
 المتصفح: *$Browser*
 
