@@ -34,10 +34,10 @@ public class TimezonesRequestsDto
     /// <summary>
     /// The IANA time zone identifier.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// The user-friendly name for the time zone.
     /// </summary>
-    public string DisplayName { get; set; }
+    public required string DisplayName { get; set; }
 }

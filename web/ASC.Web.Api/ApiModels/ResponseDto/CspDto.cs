@@ -39,5 +39,5 @@ public class CspDto
     /// <summary>
     /// The CSP header.
     /// </summary>
-    public string Header { get; set; }
+    public required string Header { get; set; }
 }

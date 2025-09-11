@@ -57,5 +57,5 @@ public class UserInvitationRequestDto<T>
     /// The user invitation parameters.
     /// </summary>
     [FromBody]
-    public UserInvitation UserInvitation { get; set; }
+    public required UserInvitation UserInvitation { get; set; }
 }

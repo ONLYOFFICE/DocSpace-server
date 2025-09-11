@@ -52,5 +52,5 @@ public class DeleteRoomRequestDto<T>
     /// The parameters for deleting a room.
     /// </summary>
     [FromBody]
-    public DeleteRoomRequest DeleteRoom { get; set; }
+    public required DeleteRoomRequest DeleteRoom { get; set; }
 }

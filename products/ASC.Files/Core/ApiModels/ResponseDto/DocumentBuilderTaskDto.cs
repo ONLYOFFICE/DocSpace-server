@@ -36,7 +36,7 @@ public class DocumentBuilderTaskDto
     /// <summary>
     /// The document builder ID.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// The error message occured while the document building process.
@@ -46,17 +46,17 @@ public class DocumentBuilderTaskDto
     /// <summary>
     /// The percentage of the progress of the document building process.
     /// </summary>
-    public int Percentage { get; set; }
+    public required int Percentage { get; set; }
 
     /// <summary>
     /// Specifies whether the document building process is completed or not.
     /// </summary>
-    public bool IsCompleted { get; set; }
+    public required bool IsCompleted { get; set; }
 
     /// <summary>
     /// The status of the document building process.
     /// </summary>
-    public DistributedTaskStatus Status { get; set; }
+    public required DistributedTaskStatus Status { get; set; }
 
     /// <summary>
     /// The result file ID.

@@ -73,5 +73,5 @@ public class RoomInvitationRequestDto<T>
     /// The room invitation request.
     /// </summary>
     [FromBody]
-    public RoomInvitationRequest RoomInvitation { get; set; }
+    public required RoomInvitationRequest RoomInvitation { get; set; }
 }

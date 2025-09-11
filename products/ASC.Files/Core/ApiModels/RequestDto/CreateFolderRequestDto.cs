@@ -53,5 +53,5 @@ public class CreateFolderRequestDto<T>
     /// The parameters for creating a folder.
     /// </summary>
     [FromBody]
-    public CreateFolder Folder { get; set; }
+    public required CreateFolder Folder { get; set; }
 }

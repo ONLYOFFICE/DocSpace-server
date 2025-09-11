@@ -58,7 +58,7 @@ public class WebPluginRequestsDto
     /// The configuration settings for the web plugin instance.
     /// </summary>
     [FromBody]
-    public WebPluginRequests WebPlugin { get; set; }
+    public required WebPluginRequests WebPlugin { get; set; }
 }
 
 /// <summary>
