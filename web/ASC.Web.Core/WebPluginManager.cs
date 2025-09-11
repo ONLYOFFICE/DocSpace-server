@@ -143,7 +143,7 @@ public class WebPluginManager(
         {
             using var zipFile = new ZipFile(file.OpenReadStream());
 
-            var maxEntriesCount = webPluginConfigSettings.AssetMaxCount + 3; // asset files, config file, plugin file, asset folder
+            long maxEntriesCount = webPluginConfigSettings.AssetMaxCount + 3; // asset files, config file, plugin file, asset folder
 
             AnalyzeZip(zipFile, webPluginConfigSettings.MaxSize, maxEntriesCount, 100, 2); // 100:1 ratio, 2 depth levels
 
