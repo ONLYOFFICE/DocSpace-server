@@ -2040,7 +2040,7 @@ $TrulyYours</value>
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.비밀번호가 성공적으로 변경되었습니다.
 
-*$UserName*, *$UserEmail* 계정의 비밀번호가 *$Date*에 DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}"에서 성공적으로 변경되었습니다.
+*$UserName*, *$UserEmail* 계정의 비밀번호가 *$Date* 에 DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}" 에서 성공적으로 변경되었습니다.
 
 IP: *$IP*
 기기: *$Device*

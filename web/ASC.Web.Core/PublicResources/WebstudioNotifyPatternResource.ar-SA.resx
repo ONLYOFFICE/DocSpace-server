@@ -2124,7 +2124,7 @@ $TrulyYours</value>
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.تم تغيير كلمة المرور بنجاح
 
-تم تغيير كلمة المرور الخاصة بحسابك *$UserName*، *$UserEmail* بنجاح في *$Date* في DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+تم تغيير كلمة المرور الخاصة بحسابك *$UserName* ، *$UserEmail* بنجاح في *$Date* في DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 IP: *$IP*
 الجهاز: *$Device*

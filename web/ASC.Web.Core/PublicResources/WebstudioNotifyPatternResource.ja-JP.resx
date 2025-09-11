@@ -1991,7 +1991,7 @@ $TrulyYours</value>
   <data name="pattern_password_changed" xml:space="preserve">
     <value>h1.パスワードの変更が完了しました
 
-アカウント *$UserName*、*$UserEmail* のパスワードが *$Date* にDocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}"で正常に変更されました。
+アカウント *$UserName*, *$UserEmail* のパスワードが *$Date* にDocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}" で正常に変更されました。
 
 IP: *$IP*
 デバイス: *$Device*
