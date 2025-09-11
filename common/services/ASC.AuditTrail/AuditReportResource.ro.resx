@@ -987,4 +987,10 @@
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>Setările de alimentare a portofelului de client au fost actualizate</value>
   </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Setările serviciilor care au fost activate cu portofelul clientului au fost actualizate</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Locaţie</value>
+  </data>
 </root>

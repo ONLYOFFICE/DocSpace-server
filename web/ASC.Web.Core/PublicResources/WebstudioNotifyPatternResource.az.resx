@@ -1416,7 +1416,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} DocSpace-niz silinəcək</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace deaktiv edilib</value>
+    <value>${LetterLogoText} DocSpace silindi</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace biznes abunəliyini kəşf edin</value>
@@ -1972,5 +1972,29 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Tələb olunan əməliyyat: ${LetterLogoText} DocSpace-də avtomatik olaraq Pul kisəsi balansını artırmaq mümkün olmadı</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Parolunuz uğurla dəyişdirildi</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>DocSpace-i açın</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Parol uğurla dəyişdirildi
+
+*$UserName*, *$UserEmail* hesabınız üçün parolunuz DocSpace-də *$Date* tarixində uğurla dəyişdirildi: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Cihaz: *$Device*
+#if($Location != "")
+Məkan: *$Location*
+#end
+Brauzer: *$Browser*
+
+Əgər bu hərəkəti sizin tərəfinizdən etmisinizsə - əlavə addımlar tələb olunmur. Bu dəyişiklik şübhəli görünürsə və ya sizin tərəfinizdən icazə verilməyibsə, lütfən, parolunuzu dərhal sıfırlayın və bu cihaz üçün DocSpace-ə girişi söndürün.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

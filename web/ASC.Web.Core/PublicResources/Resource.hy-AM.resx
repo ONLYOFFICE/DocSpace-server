@@ -139,7 +139,7 @@
     <value>Ադմինիստրատորների թիվը</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Հետևել օգտվողների մուտքերին &amp; գործողություն</value>
+    <value>Մուտքերի և գործողությունների հետևում</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Ավտոմատ կրկնօրինակում &amp; վերականգնում</value>
@@ -169,7 +169,7 @@
     <value>Օգտագործողները սենյակում:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Անսահմանափակ թվով օգտվողներ</value>
+    <value>Օգտատերերի և հյուրերի անսահմանափակ քանակ</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Օգտատերերի թիվը չպետք է գերազանցի {0}-ը</value>
@@ -1169,5 +1169,56 @@
   </data>
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Օգտագործված պահեստային տարածք:</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Մանրամասներ</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Դեբետ</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Կոնտակտ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Սկավառակի տարածություն</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Մնացորդի լիցքավորում</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Պահուստավորում</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Տեսակ</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Ավտոմատ երկարաձգում</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Ավտոմատ լիցքավորում</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Պահուստավորում</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} անվճար պահուստավորում ամսական</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Միացրեք ձեր DocSpace-ի պահուստավորումը: Արժեքները կգանձվեն ավտոմատ կերպով:</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Անվճար պահուստավորման քանակը մեկ ամսվա ընթացքում չպետք է գերազանցի {0}-ը</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Գործարքների պատմություն</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Պահուստավորում</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Պահանջվում է վճարում</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>ԳԲ</value>
   </data>
 </root>

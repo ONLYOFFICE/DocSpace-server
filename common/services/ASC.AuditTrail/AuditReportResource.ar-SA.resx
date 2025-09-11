@@ -987,4 +987,13 @@
   <data name="LdapSync" xml:space="preserve">
     <value>اكتملت مزامنة LDAP</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>الموقع</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>تم تغيير إعدادات رؤية اللافتات الترويجية</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>تم تحديث إعدادات الخدمات الممكّنة لمحفظة العملاء</value>
+  </data>
 </root>

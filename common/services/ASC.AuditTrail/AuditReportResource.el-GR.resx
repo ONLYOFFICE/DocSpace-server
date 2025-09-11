@@ -928,4 +928,13 @@
   <data name="LdapSync" xml:space="preserve">
     <value>Ο συγχρονισμός LDAP ολοκληρώθηκε</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Τοποθεσία</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Άλλαξαν οι ρυθμίσεις ορατότητας διαφημιστικών banner</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Οι ρυθμίσεις υπηρεσιών με δυνατότητα πορτοφολιού πελάτη ενημερώθηκαν</value>
+  </data>
 </root>

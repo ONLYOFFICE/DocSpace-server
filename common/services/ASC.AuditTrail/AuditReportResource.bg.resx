@@ -928,4 +928,13 @@
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP синхронизацията е завършена</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Местоположение</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Настройките за видимост на рекламните банери са променени</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Актуализирани са настройките за услуги с активиран клиентски портфейл</value>
+  </data>
 </root>
