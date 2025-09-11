@@ -129,7 +129,9 @@ public abstract class ExportTask<T>(IServiceScopeFactory serviceScopeFactory) : 
         var start = content.IndexOf("<think>");
         var end = content.IndexOf("</think>") + "</think>".Length + 1;
 
-        return content.Substring(0, start) + content.Substring(end);
+        return start < 0 || end < 0
+            ? content
+            : string.Concat(content.AsSpan(0, start), content.AsSpan(end));
     }
 
     private abstract class ExportFolder
