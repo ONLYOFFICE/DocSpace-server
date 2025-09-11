@@ -113,28 +113,28 @@ public class WebPluginManager(
 
         if (system && !coreBaseSettings.Standalone)
         {
-            throw new CustomHttpException(HttpStatusCode.Forbidden, Resource.ErrorWebPluginForbiddenSystem);
+            throw new InvalidOperationException(Resource.ErrorWebPluginForbiddenSystem);
         }
 
         if (Path.GetExtension(file.FileName).ToLowerInvariant() != webPluginConfigSettings.Extension)
         {
-            throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginFileExtension);
+            throw new ArgumentException(Resource.ErrorWebPluginFileExtension);
         }
 
         if (file.Length <= 0)
         {
-            throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginNoInputFile);
+            throw new ArgumentException(Resource.ErrorWebPluginNoInputFile);
         }
 
         if (file.Length > webPluginConfigSettings.MaxSize)
         {
-            throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginFileSize);
+            throw new ArgumentException(Resource.ErrorWebPluginFileSize);
         }
 
         var tenantWebPlugins = await GetWebPluginsForTenantAsync(tenantId);
         if (tenantWebPlugins.Count + 1 > webPluginConfigSettings.MaxSize)
         {
-            throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginMaxCount);
+            throw new InvalidOperationException(Resource.ErrorWebPluginMaxCount);
         }
 
         string tempDirToDelete = null;
@@ -169,7 +169,7 @@ public class WebPluginManager(
         }
         catch (Exception ex)
         {
-            throw new CustomHttpException(HttpStatusCode.BadRequest, $"{Resource.ErrorWebPluginArchive}. {ex.Message}");
+            throw new ArgumentException($"{Resource.ErrorWebPluginArchive}. {ex.Message}");
         }
         finally
         {
@@ -361,7 +361,7 @@ public class WebPluginManager(
     {
         var webPlugins = await GetWebPluginsAsync(tenantId);
 
-        var webPlugin = webPlugins.Find(x => x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)) ?? throw new CustomHttpException(HttpStatusCode.NotFound, Resource.ErrorWebPluginNotFound);
+        var webPlugin = webPlugins.Find(x => x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)) ?? throw new ItemNotFoundException(Resource.ErrorWebPluginNotFound);
 
         return webPlugin;
     }
@@ -416,14 +416,14 @@ public class WebPluginManager(
 
         if (webPlugin.System && !coreBaseSettings.Standalone)
         {
-            throw new CustomHttpException(HttpStatusCode.Forbidden, Resource.ErrorWebPluginForbiddenSystem);
+            throw new InvalidOperationException(Resource.ErrorWebPluginForbiddenSystem);
         }
 
         var storage = await GetPluginStorageAsync(tenantId);
 
         if (!await storage.IsDirectoryAsync(webPlugin.Name))
         {
-            throw new CustomHttpException(HttpStatusCode.NotFound, Resource.ErrorWebPluginNotFound);
+            throw new ItemNotFoundException(Resource.ErrorWebPluginNotFound);
         }
 
         await storage.DeleteDirectoryAsync(webPlugin.Name);
