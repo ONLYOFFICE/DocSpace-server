@@ -41,17 +41,19 @@ public class FileSecurityCommon(UserManager userManager, WebItemSecurity webItem
 }
 
 [Scope(typeof(IFileSecurity))]
-public class FileSecurity(IDaoFactory daoFactory,
-        UserManager userManager,
-        TenantManager tenantManager,
-        AuthContext authContext,
-        GlobalFolder globalFolder,
-        FileSecurityCommon fileSecurityCommon,
-        FileUtility fileUtility,
-        StudioNotifyHelper studioNotifyHelper,
-        BadgesSettingsHelper badgesSettingsHelper,
-        ExternalShare externalShare,
-        AuthManager authManager)
+public class FileSecurity(
+    IDaoFactory daoFactory,
+    UserManager userManager,
+    TenantManager tenantManager,
+    AuthContext authContext,
+    GlobalFolder globalFolder,
+    FileSecurityCommon fileSecurityCommon,
+    FileUtility fileUtility,
+    StudioNotifyHelper studioNotifyHelper,
+    BadgesSettingsHelper badgesSettingsHelper,
+    ExternalShare externalShare,
+    AuthManager authManager,
+    IMapper mapper)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -2090,14 +2092,33 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
+        var securityDao = daoFactory.GetSecurityDao<string>();
         var subjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID);
-
-        var records = await daoFactory.GetSecurityDao<string>().GetSharesAsync(subjects).ToListAsync();
-        var shares = await GetSharesForMeAsync(records, subjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
-
-        foreach (var item in shares)
+        List<FileShareRecord<int>> recordsInternal = [];
+        List<FileShareRecord<string>> recordsThirdParty = [];
+        
+        await foreach (var r in securityDao.GetSharesAsync(subjects))
         {
+            if (int.TryParse(r.EntryId, out _))
+            {
+                recordsInternal.Add(mapper.Map<FileShareRecord<int>>(r));
+            }
+            else
+            {
+                recordsThirdParty.Add(r);
+            }
+        }
+        
+        
+        var firstTask = GetSharesForMeAsync(recordsInternal, subjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+        var secondTask = GetSharesForMeAsync(recordsThirdParty, subjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+
+        foreach (var items in await Task.WhenAll(firstTask.AsTask(), secondTask.AsTask()))
+        {
+            foreach (var item in items)
+            {
                 yield return item;
+            }
         }
     }
 

@@ -32,6 +32,9 @@ public class FilesMappingProfile : Profile
 {
     public FilesMappingProfile()
     {
+        CreateMap<FileShareRecord<string>, FileShareRecord<int>>()
+            .ForMember(r=> r.EntryId, cfg => cfg.MapFrom(src => Convert.ToInt32(src.EntryId)));
+        
         CreateMap<DbFile, File<int>>();
 
         CreateMap<DbFileQuery, File<int>>()

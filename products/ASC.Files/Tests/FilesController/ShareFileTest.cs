@@ -481,7 +481,7 @@ public class ShareFileTest(
         _filesClient.DefaultRequestHeaders.Remove("Cookie");
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
 
-        // Verify the file is accessible with correct password
+        // Verify the file is accessible with the correct password
         fileWithPasswordProtectedAccess.Should().NotBeNull();
         //fileWithPasswordProtectedAccess.Title.Should().Be(file.Title);
         fileWithPasswordProtectedAccess.Security.Edit.Should().BeTrue(); // Should have editing permissions
@@ -510,8 +510,10 @@ public class ShareFileTest(
         };
 
         // Set file security info
-        await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest, TestContext.Current.CancellationToken);
-
+        var result = (await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest, TestContext.Current.CancellationToken)).Response;
+        result.Should().NotBeNull();
+        result.Should().AllSatisfy(r => r.SubjectType.Should().BeOneOf(SubjectType.Group, SubjectType.User));
+        
         // Act
         var securityInfos = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
 
@@ -528,6 +530,31 @@ public class ShareFileTest(
         var user2Security = securityInfos.FirstOrDefault(s => s.SharedToUser.Id == user2.Id);
         user2Security.Should().NotBeNull();
         user2Security!.Access.Should().Be(FileShare.Editing);
+        
+        // Verify that the file is accessible by group members with correct permissions
+        await _filesClient.Authenticate(user1);
+        var fileAsUser1 = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        fileAsUser1.Should().NotBeNull();
+        fileAsUser1.Access.Should().Be(FileShare.Read);
+        fileAsUser1.Security.Read.Should().BeTrue();
+        fileAsUser1.Security.Edit.Should().BeFalse();
+        
+        var sharedFolderIdAsUser1 = await GetFolderIdAsync(FolderType.SHARE, user1);
+        var sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser1, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        sharedFolderAsUser1.Should().NotBeNull();
+        sharedFolderAsUser1.Files.Should().Contain(r => r.Title == file.Title && r.Access == FileShare.Read);
+        
+        await _filesClient.Authenticate(user2);
+        var fileAsUser2 = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        fileAsUser2.Should().NotBeNull();
+        fileAsUser2.Access.Should().Be(FileShare.Editing);
+        fileAsUser2.Security.Read.Should().BeTrue();
+        fileAsUser2.Security.Edit.Should().BeTrue();
+        
+        var sharedFolderIdAsUser2 = await GetFolderIdAsync(FolderType.SHARE, user2);
+        var sharedFolderAsUser2 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser2, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        sharedFolderAsUser2.Should().NotBeNull();
+        sharedFolderAsUser2.Files.Should().Contain(r => r.Title == file.Title && r.Access == FileShare.Editing);
     }
 
     [Fact]
@@ -581,12 +608,22 @@ public class ShareFileTest(
         fileAsUser1.Access.Should().Be(FileShare.Comment);
         fileAsUser1.Security.Comment.Should().BeTrue();
         fileAsUser1.Security.Edit.Should().BeFalse();
-
+        
+        var sharedFolderIdAsUser1 = await GetFolderIdAsync(FolderType.SHARE, user1);
+        var sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser1, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        sharedFolderAsUser1.Should().NotBeNull();
+        sharedFolderAsUser1.Files.Should().Contain(r => r.Title == file.Title && r.Access == FileShare.Comment);
+        
         await _filesClient.Authenticate(user2);
         var fileAsUser2 = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         fileAsUser2.Should().NotBeNull();
         fileAsUser2.Access.Should().Be(FileShare.Comment);
         fileAsUser2.Security.Comment.Should().BeTrue();
         fileAsUser2.Security.Edit.Should().BeFalse();
+        
+        var sharedFolderIdAsUser2 = await GetFolderIdAsync(FolderType.SHARE, user2);
+        var sharedFolderAsUser2 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser2, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        sharedFolderAsUser2.Should().NotBeNull();
+        sharedFolderAsUser2.Files.Should().Contain(r => r.Title == file.Title && r.Access == FileShare.Comment);
     }
 }

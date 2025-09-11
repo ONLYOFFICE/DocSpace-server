@@ -391,8 +391,10 @@ public class ShareFolderTest(
         };
 
         // Set folder security info
-        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken);
-
+        var result = (await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken)).Response;
+        result.Should().NotBeNull();
+        result.Should().AllSatisfy(r => r.SubjectType.Should().BeOneOf(SubjectType.Group, SubjectType.User));
+        
         // Act
         var securityInfos = (await _sharingApi.GetFolderSecurityInfoAsync(folder.Id, TestContext.Current.CancellationToken)).Response;
 
@@ -409,6 +411,96 @@ public class ShareFolderTest(
         var user2Security = securityInfos.FirstOrDefault(s => s.SharedToUser.Id == user2.Id);
         user2Security.Should().NotBeNull();
         user2Security!.Access.Should().Be(FileShare.Editing);
+        
+        // Verify that the file is accessible by group members with correct permissions
+        await _filesClient.Authenticate(user1);
+        var folderAsUser1 = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        folderAsUser1.Should().NotBeNull();
+        folderAsUser1.Access.Should().Be(FileShare.Read);
+        folderAsUser1.Security.Read.Should().BeTrue();
+        folderAsUser1.Security.Edit.Should().BeFalse();
+        
+        var sharedFolderIdAsUser1 = await GetFolderIdAsync(FolderType.SHARE, user1);
+        var sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser1, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        sharedFolderAsUser1.Should().NotBeNull();
+        sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Read);
+        
+        await _filesClient.Authenticate(user2);
+        var folderAsUser2 = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        folderAsUser2.Should().NotBeNull();
+        folderAsUser2.Access.Should().Be(FileShare.Editing);
+        folderAsUser2.Security.Read.Should().BeTrue();
+        
+        var sharedFolderIdAsUser2 = await GetFolderIdAsync(FolderType.SHARE, user2);
+        var sharedFolderAsUser2 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser2, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        sharedFolderAsUser2.Should().NotBeNull();
+        sharedFolderAsUser2.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Editing);
+    }
+    
+    [Fact]
+    public async Task GetFolderSecurityInfo_SharedFolderGroup_ReturnsSecurityInformation()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var folder = await CreateFolderInMy("folder", Initializer.Owner);
+        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        var user2 = await Initializer.InviteContact(EmployeeType.User);
+
+        // Create a group
+        var group = (await _groupApi.AddGroupAsync(new GroupRequestDto([user1.Id, user2.Id], Initializer.Owner.Id, "TestFolderGroup"), TestContext.Current.CancellationToken)).Response;
+        
+        // Share the folder with the group
+        var shareInfo = new List<FileShareParams>
+        {
+            new() { ShareTo = group.Id, Access = FileShare.Editing }
+        };
+
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = shareInfo
+        };
+
+        // Set folder security info
+        var result = (await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken)).Response;
+        result.Should().NotBeNull();
+        result.Should().AllSatisfy(r => r.SubjectType.Should().BeOneOf(SubjectType.Group, SubjectType.User));
+        
+        // Act
+        var securityInfos = (await _sharingApi.GetFolderSecurityInfoAsync(folder.Id, TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        securityInfos.Should().NotBeEmpty();
+        securityInfos.Should().HaveCountGreaterThanOrEqualTo(2); // At least 2 users + owner
+
+        // Verify group has read access
+        var user1Security = securityInfos.FirstOrDefault(s => s.SharedToGroup?.Id == group.Id);
+        user1Security.Should().NotBeNull();
+        user1Security!.Access.Should().Be(FileShare.Editing);
+        
+        // Verify that the file is accessible by group members with correct permissions
+        await _filesClient.Authenticate(user1);
+        var folderAsUser1 = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        folderAsUser1.Should().NotBeNull();
+        folderAsUser1.Access.Should().Be(FileShare.Editing);
+        folderAsUser1.Security.Read.Should().BeTrue();
+        folderAsUser1.Security.Edit.Should().BeFalse();
+        
+        var sharedFolderIdAsUser1 = await GetFolderIdAsync(FolderType.SHARE, user1);
+        var sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser1, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        sharedFolderAsUser1.Should().NotBeNull();
+        sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Editing);
+        
+        await _filesClient.Authenticate(user2);
+        var folderAsUser2 = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        folderAsUser2.Should().NotBeNull();
+        folderAsUser2.Access.Should().Be(FileShare.Editing);
+        folderAsUser2.Security.Read.Should().BeTrue();
+        
+        var sharedFolderIdAsUser2 = await GetFolderIdAsync(FolderType.SHARE, user2);
+        var sharedFolderAsUser2 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser2, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        sharedFolderAsUser2.Should().NotBeNull();
+        sharedFolderAsUser2.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Editing);
     }
     
     [Fact]
@@ -464,10 +556,20 @@ public class ShareFolderTest(
         fileAsUser1.Access.Should().Be(FileShare.Editing);
         fileAsUser1.Security.Edit.Should().BeTrue();
 
+        var sharedFolderIdAsUser1 = await GetFolderIdAsync(FolderType.SHARE, user1);
+        var sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser1, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        sharedFolderAsUser1.Should().NotBeNull();
+        sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Editing);
+        
         await _filesClient.Authenticate(user2);
         var fileAsUser2 = (await _filesApi.GetFileInfoAsync(fileInFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         fileAsUser2.Should().NotBeNull();
         fileAsUser2.Access.Should().Be(FileShare.Editing);
         fileAsUser2.Security.Edit.Should().BeTrue();
+        
+        var sharedFolderIdAsUser2 = await GetFolderIdAsync(FolderType.SHARE, user2);
+        var sharedFolderAsUser2 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser2, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        sharedFolderAsUser2.Should().NotBeNull();
+        sharedFolderAsUser2.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Editing);
     }
 }
