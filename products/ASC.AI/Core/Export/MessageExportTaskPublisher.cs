@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,18 +24,37 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Api;
+using ASC.EventBus.Abstractions;
+
+namespace ASC.AI.Core.Export;
 
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("ai")]
-public class MessageController(MessageExporter exporter, FileDtoHelper fileDtoHelper) : ControllerBase
+public class MessageExportTaskPublisher(
+    TenantManager tenantManager,
+    AuthContext authContext,
+    IEventBus eventBus)
 {
-    [HttpPost("messages/{messageId}/export")]
-    public async Task<FileDto<int>> ExportMessageAsync(ExportMessageRequestDto<int> inDto)
+    public async Task PublishAsync(string title, int messageId, string folderId, bool isFolderThirdParty)
     {
-        await exporter.ExportMessageAsync(inDto.Body.FolderId, inDto.Body.Title, inDto.MessageId);
-        return null;
+        if (messageId <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(messageId), @"Message id must be greater than 0");
+        }
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
+
+        var data = new MessageExportTaskData
+        {
+            FolderId = folderId,
+            IsFolderThirdParty = isFolderThirdParty,
+            Title = title,
+            MessageId = messageId,
+        };
+        
+        await eventBus.PublishAsync(new MessageExportIntegrationEvent(userId, tenantId)
+        {
+            Data = data
+        });
     }
 }

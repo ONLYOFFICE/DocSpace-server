@@ -119,8 +119,8 @@ public class ChatController(
     [HttpPost("chats/{chatId}/messages/export")]
     public async Task<FileDto<int>> ExportChatAsync(ExportChatRequestDto inDto)
     {
-        var file = await exporter.ExportMessagesAsync(inDto.ChatId);
-        return await fileDtoHelper.GetAsync(file);
+        await exporter.ExportMessagesAsync(inDto.ChatId);
+        return null;
     }
 
     [HttpGet("chats/models")]

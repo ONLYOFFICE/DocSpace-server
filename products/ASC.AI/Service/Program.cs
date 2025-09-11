@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Core.Export;
 using ASC.AI.Service;
 using ASC.AI.Service.Extensions;
 using ASC.AI.Service.Handlers;
@@ -76,6 +77,9 @@ try
     var eventBus = sp.GetRequiredService<IEventBus>();
     
     await eventBus.SubscribeAsync<VectorizationIntegrationEvent, VectorizationIntegrationEventHandler>();
+
+    await eventBus.SubscribeAsync<MessageExportIntegrationEvent, MessageExportIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<ChatExportIntegrationEvent, ChatExportIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
 

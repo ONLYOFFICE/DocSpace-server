@@ -24,71 +24,24 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Globalization;
-
-using ASC.Web.Files.Classes;
-using ASC.Web.Files.Services.DocumentService;
+using ASC.AI.Core.Export;
 
 namespace ASC.AI.Core.Chat;
 
 [Scope]
 public class MessageExporter(
     DbChatDao chatDao,
-    IDaoFactory daoFactory,
-    FileSecurity fileSecurity,
-    TenantUtil tenantUtil,
     AuthContext authContext,
     TenantManager tenantManager,
-    FileConverter fileConverter,
-    PathProvider pathProvider,
-    DocumentServiceConnector documentServiceConnector)
+    MessageExportTaskPublisher messageExport,
+    ChatExportTaskPublisher chatExport)
 {
-    public async Task<File<T>> ExportMessageAsync<T>(T folderId, string title, int messageId)
+    public async Task ExportMessageAsync<T>(T folderId, string title, int messageId)
     {
-        var message = await chatDao.GetMessageAsync(messageId, authContext.CurrentAccount.ID);
-        if (message == null)
-        {
-            throw new ItemNotFoundException("Message not found");
-        }
-
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var folder = await folderDao.GetFolderAsync(folderId);
-
-        if (folder == null)
-        {
-            throw new ItemNotFoundException("Folder not found");
-        }
-
-        if (folder.FolderType is FolderType.AiRoom)
-        {
-            folder = await folderDao.GetFoldersAsync(folder.Id, FolderType.ResultStorage)
-                .FirstOrDefaultAsync();
-            
-            if (folder == null)
-            {
-                throw new ItemNotFoundException("Folder not found");
-            }
-        }
-
-        if (!await fileSecurity.CanCreateAsync(folder))
-        {
-            throw new SecurityException("Access denied");
-        }
-
-        var markdown = message.ToMarkdown(tenantUtil);
-        var bytes = Encoding.UTF8.GetBytes(markdown);
-
-        await using var ms = new MemoryStream(bytes);
-        var fileUri = await pathProvider.GetTempUrlAsync(ms, ".md");
-
-        var (_, outFileUri, outFileType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, "md", "docx", Guid.NewGuid().ToString("n"), null, CultureInfo.CurrentUICulture.Name, null, null, null, false, false);
-
-        var outFile = await fileConverter.SaveConvertedFileAsync(folder, outFileUri, outFileType, title, false);
-
-        return outFile;
+        await messageExport.PublishAsync(title, messageId, folderId!.ToString()!, folderId is string);
     }
 
-    public async Task<File<int>> ExportMessagesAsync(Guid chatId)
+    public async Task ExportMessagesAsync(Guid chatId)
     {
         var chat = await chatDao.GetChatAsync(tenantManager.GetCurrentTenantId(), chatId);
         if (chat == null || chat.UserId != authContext.CurrentAccount.ID)
@@ -96,38 +49,6 @@ public class MessageExporter(
             throw new ItemNotFoundException("Chat not found");
         }
 
-        var folderDao = daoFactory.GetFolderDao<int>();
-        var resultStorage = await folderDao.GetFoldersAsync(chat.RoomId, FolderType.ResultStorage)
-            .FirstOrDefaultAsync();
-
-        if (resultStorage == null)
-        {
-            throw new ItemNotFoundException("Folder not found");
-        }
-
-        if (!await fileSecurity.CanCreateAsync(resultStorage))
-        {
-            throw new SecurityException("Access denied");
-        }
-
-        var builder = new StringBuilder();
-
-        await foreach (var message in chatDao.GetMessagesAsync(chatId))
-        {
-            _ = builder.Append(message.ToMarkdown(tenantUtil))
-                .Append("---\n\n");
-        }
-
-        var markdown = builder.ToString();
-        var bytes = Encoding.UTF8.GetBytes(markdown);
-
-        await using var ms = new MemoryStream(bytes);
-        var fileUri = await pathProvider.GetTempUrlAsync(ms, ".md");
-
-        var (_, outFileUri, outFileType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, "md", "docx", Guid.NewGuid().ToString("n"), null, CultureInfo.CurrentUICulture.Name, null, null, null, false, false);
-
-        var outFile = await fileConverter.SaveConvertedFileAsync(resultStorage, outFileUri, outFileType, chat.Title, false);
-
-        return outFile;
+        await chatExport.PublishAsync(chat.Title, chat.Id, chat.RoomId.ToString(), false);
     }
 }

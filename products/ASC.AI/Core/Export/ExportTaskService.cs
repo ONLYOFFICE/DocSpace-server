@@ -24,18 +24,42 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Api;
+#nullable enable
+using ASC.Common.Threading;
 
-[Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("ai")]
-public class MessageController(MessageExporter exporter, FileDtoHelper fileDtoHelper) : ControllerBase
+namespace ASC.AI.Core.Export;
+
+[Singleton(GenericArguments = [typeof(MessageExportTask), typeof(MessageExportTaskData)])]
+[Singleton(GenericArguments = [typeof(ChatExportTask), typeof(ChatExportTaskData)])]
+public class ExportTaskService<T, TData>(
+    IDistributedTaskQueueFactory queueFactory) 
+    where T : ExportTask<TData> 
+    where TData : ExportTaskData
 {
-    [HttpPost("messages/{messageId}/export")]
-    public async Task<FileDto<int>> ExportMessageAsync(ExportMessageRequestDto<int> inDto)
+    private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>();
+
+    public Task StartAsync(T task)
     {
-        await exporter.ExportMessageAsync(inDto.Body.FolderId, inDto.Body.Title, inDto.MessageId);
-        return null;
+        return _queue.EnqueueTask(task);
+    }
+
+    public Task<string> StoreAsync(T task)
+    {
+        return _queue.PublishTask(task);
+    }
+
+    public async Task<T?> GetAsync(string id)
+    {
+        return await _queue.PeekTask(id);
+    }
+
+    public async Task<List<T>> GetTasksAsync()
+    {
+        return await _queue.GetAllTasks();
+    }
+    
+    public async Task DeleteAsync(string id)
+    {
+        await _queue.DequeueTask(id);
     }
 }

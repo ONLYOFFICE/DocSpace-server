@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,18 +24,36 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Api;
+using ASC.EventBus.Abstractions;
+
+namespace ASC.AI.Core.Export;
 
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("ai")]
-public class MessageController(MessageExporter exporter, FileDtoHelper fileDtoHelper) : ControllerBase
+public class ChatExportTaskPublisher(
+    TenantManager tenantManager,
+    AuthContext authContext,
+    IEventBus eventBus)
 {
-    [HttpPost("messages/{messageId}/export")]
-    public async Task<FileDto<int>> ExportMessageAsync(ExportMessageRequestDto<int> inDto)
+    public async Task PublishAsync(string title, Guid chatId, string folderId, bool isFolderThirdParty)
     {
-        await exporter.ExportMessageAsync(inDto.Body.FolderId, inDto.Body.Title, inDto.MessageId);
-        return null;
+        if (Guid.Empty.Equals(chatId))
+        {
+            throw new ArgumentOutOfRangeException(nameof(chatId), @"Chat id must not be empty");
+        }
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
+
+        var data = new ChatExportTaskData
+        {
+            FolderId = folderId,
+            IsFolderThirdParty = isFolderThirdParty,
+            Title = title,
+            ChatId = chatId,
+        };
+        
+        await eventBus.PublishAsync(new ChatExportIntegrationEvent(userId, tenantId)
+        {
+            Data = data
+        });
     }
 }
