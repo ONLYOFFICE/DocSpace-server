@@ -46,7 +46,7 @@ public class WebPluginConfigSettings
 
     public int MaxCount
     {
-        get => _maxCount > 0 ? _maxCount : int.MaxValue;
+        get => _maxCount > 0 ? _maxCount : 10;
         set => _maxCount = value;
     }
 
@@ -70,7 +70,7 @@ public class WebPluginConfigSettings
 
     public int AssetMaxCount
     {
-        get => _assetMaxCount > 0 ? _assetMaxCount : int.MaxValue;
+        get => _assetMaxCount > 0 ? _assetMaxCount : 10;
         set => _assetMaxCount = value;
     }
 }
