@@ -928,4 +928,13 @@
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>Impostazioni di ricarica del portafoglio cliente aggiornate</value>
   </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Impostazioni dei servizi abilitati per il portafoglio clienti aggiornate</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Posizione</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Impostazioni di visibilità dei banner promozionali modificate</value>
+  </data>
 </root>

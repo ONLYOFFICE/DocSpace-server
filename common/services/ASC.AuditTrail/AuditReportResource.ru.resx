@@ -931,4 +931,10 @@
   <data name="BannerSettingsChanged" xml:space="preserve">
     <value>Изменены настройки видимости рекламных баннеров</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Размещение</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Обновлены настройки сервисов, подключенных через кошелек клиента</value>
+  </data>
 </root>

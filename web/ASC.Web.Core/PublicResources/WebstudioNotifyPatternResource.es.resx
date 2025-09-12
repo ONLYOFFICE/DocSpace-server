@@ -1255,7 +1255,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace se ha &lt;span style="color: #FF6F3D;"&gt;desactivado&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace se ha &lt;span style="color: #FF6F3D;"&gt;eliminado&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Su ${LetterLogoText} DocSpace se ha desactivado correctamente. Por favor, tenga en cuenta que todos sus datos serán eliminados de acuerdo con nuestra &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Política de Privacidad&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1409,7 +1409,7 @@ $TrulyYours</value>
     <value>5 consejos para trabajar eficazmente en sus documentos</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace se ha desactivado</value>
+    <value>${LetterLogoText} DocSpace se ha eliminado</value>
   </data>
   <data name="subject_saas_admin_modules_v1" xml:space="preserve">
     <value>Configure su ${LetterLogoText} DocSpace</value>
@@ -1972,5 +1972,29 @@ Le rogamos que compruebe y actualice manualmente el saldo de su monedero.
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Abrir DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Contraseña cambiada correctamente
+
+Su contraseña para la cuenta *$UserName*, *$UserEmail* se ha cambiado correctamente el *$Date* en DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Dispositivo: *$Device*
+#if($Location != "")
+Ubicación: *$Location*
+#end
+Navegador: *$Browser*
+
+Si esta acción fue realizada por usted, no se requieren más pasos. Si este cambio parece sospechoso o no ha sido autorizado por usted, restablezca su contraseña inmediatamente y deshabilite el acceso a DocSpace para este dispositivo.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Su contraseña se ha cambiado correctamente</value>
   </data>
 </root>

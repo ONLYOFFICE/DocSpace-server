@@ -836,7 +836,7 @@
     <value>Personnalisation</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Suivre l'historique des connexions et des actions</value>
+    <value>Suivi des connexions et des actions</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Taille de fichier maximale</value>
@@ -851,7 +851,7 @@
     <value>Nombre d'administrateurs</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Sauvegarde automatique &amp; récupération</value>
+    <value>Récupération des données</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Nombre illimité de salles actives</value>
@@ -878,7 +878,7 @@
     <value>Utilisateurs dans la salle :</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Nombre illimité d'utilisateurs</value>
+    <value>Nombre illimité d'utilisateurs et d'invités</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Le nombre d'utilisateurs ne peut pas dépasser {0}</value>
@@ -1116,5 +1116,50 @@
   </data>
   <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
     <value>Rechargement du solde</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Débit</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Détails</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Sauvegarde</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Sauvegarde</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>Go</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Historique des transactions</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Renouvellement automatique</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Recharge automatique</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Paiement requis</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Sauvegarde</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Activez les sauvegardes pour votre DocSpace. Les frais seront facturés automatiquement.</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} sauvegardes gratuites par mois</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Le nombre de sauvegardes gratuites ne doit pas dépasser {0} par mois</value>
   </data>
 </root>

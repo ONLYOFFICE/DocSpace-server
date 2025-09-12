@@ -95,7 +95,6 @@ public class EmployeeDto
 
 [Scope]
 public class EmployeeDtoHelper(
-    ApiContext httpContext,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     UserPhotoManager userPhotoManager,
     CommonLinkUtility commonLinkUtility,
@@ -104,7 +103,6 @@ public class EmployeeDtoHelper(
     ILogger<EmployeeDtoHelper> logger)
 {
     private readonly ConcurrentDictionary<Guid, EmployeeDto> _dictionary = new();
-    protected readonly ApiContext _httpContext = httpContext;
     protected readonly UserPhotoManager _userPhotoManager = userPhotoManager;
     protected readonly UserManager _userManager = userManager;
     protected readonly AuthContext _authContext = authContext;

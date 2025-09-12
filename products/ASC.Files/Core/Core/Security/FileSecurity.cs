@@ -1838,7 +1838,15 @@ public class FileSecurity(
                         {
                             return false;
                         }
-
+                        
+                        if (isRoom)
+                        {
+                            if (!(isDocSpaceAdmin && (!folder.SettingsDenyDownload || e.Access is not (FileShare.Restrict or FileShare.Read or FileShare.None))))
+                            {
+                                break;
+                            }
+                        }
+                        
                         return true;
                 }
 

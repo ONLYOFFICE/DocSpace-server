@@ -871,7 +871,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace &lt;span style="color: #FF6F3D;"&gt;devre dışı bırakıldı&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace &lt;span style="color: #FF6F3D;"&gt;silindi&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;${LetterLogoText} DocSpace'iniz başarıyla devre dışı bırakıldı. Tüm verilerinizin &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Gizlilik Politikamız&lt;/a&gt; uyarınca silineceğini lütfen unutmayın.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1406,7 +1406,7 @@ Bağlantı yalnızca 7 gün boyunca geçerlidir.</value>
     <value>Şimdi katılın ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace devre dışı bırakıldı</value>
+    <value>${LetterLogoText} DocSpace silindi</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Kullanıcı hesabını sildi</value>
@@ -1967,5 +1967,29 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Eylem Gerekiyor: ${LetterLogoText} DocSpace cüzdan bakiyeniz otomatik olarak yüklenemedi</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Şifreniz başarıyla değiştirildi</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Açık DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Şifre başarıyla değiştirildi
+
+*$UserName*, *$UserEmail* hesabınızın şifresi, DocSpace'de *$Date* tarihinde başarıyla değiştirildi: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Cihaz: *$Device*
+#if($Location != "")
+Konum: *$Location*
+#end
+Tarayıcı: *$Browser*
+
+Bu işlem sizin tarafınızdan yapıldıysa, başka bir adım gerekmez. Bu değişiklik şüpheli görünüyorsa veya sizin tarafınızdan yetkilendirilmemişse, lütfen şifrenizi hemen sıfırlayın ve bu cihaz için DocSpace erişimini devre dışı bırakın.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>
