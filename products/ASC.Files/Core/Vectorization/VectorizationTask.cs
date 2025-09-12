@@ -31,8 +31,8 @@ namespace ASC.Files.Core.Vectorization;
 [Transient]
 public class VectorizationTask : DistributedTaskProgress
 {
-    public int RoomId { get; private set; }
-    public int FileId { get; private set; }
+    public int RoomId { get; set; }
+    public int FileId { get; set; }
     
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private int _tenantId;
