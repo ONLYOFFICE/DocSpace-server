@@ -66,7 +66,7 @@ public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
             throw new SecurityException();
         }
 
-        return await encryptionKeyPairHelper.GetKeyPairAsync(inDto.FileId, fileStorageService);
+        return await encryptionKeyPairHelper.GetKeyPairAsync(inDto.FileId);
     }
 }
 

@@ -41,7 +41,8 @@ public class SecurityControllerHelper(
     IDaoFactory daoFactory,
     IEventBus eventBus,
     TenantManager tenantManager,
-    AuthContext authContext)
+    AuthContext authContext,
+    FileSharing fileSharing)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -59,7 +60,7 @@ public class SecurityControllerHelper(
     
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfoAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds)
     {
-        var fileShares = await _fileStorageService.GetSharedInfoAsync(fileIds, folderIds);
+        var fileShares = await fileSharing.GetSharedInfoAsync(fileIds, folderIds);
 
         foreach (var fileShareDto in fileShares)
         {

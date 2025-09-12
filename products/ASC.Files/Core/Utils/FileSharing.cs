@@ -847,7 +847,7 @@ public class FileSharing(
 
     public async Task<List<AceShortWrapper>> GetSharedInfoShortFileAsync<T>(File<T> file)
     {
-        var aces = await GetSharedInfoAsync(new List<T> { file.Id }, new List<T>());
+        var aces = await GetSharedInfoAsync([file.Id], []);
         var inRoom = file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive;
         
         return

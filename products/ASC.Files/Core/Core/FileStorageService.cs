@@ -3683,14 +3683,7 @@ public class FileStorageService //: IFileStorageService
     }
 
     #endregion
-
-    public async Task<List<AceWrapper>> GetSharedInfoAsync<T>(
-        IEnumerable<T> fileIds,
-        IEnumerable<T> folderIds)
-    {
-        return await fileSharing.GetSharedInfoAsync(fileIds, folderIds);
-    }
-
+    
     public async Task<bool> IsPublicAsync<T>(T entryId)
     {
         var entry = await GetEntryAsync(entryId, FileEntryType.Folder);
@@ -4499,7 +4492,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        var fileKeyPair = await encryptionKeyPairHelper.GetKeyPairAsync(fileId, this);
+        var fileKeyPair = await encryptionKeyPairHelper.GetKeyPairAsync(fileId);
 
         return [..fileKeyPair];
     }
