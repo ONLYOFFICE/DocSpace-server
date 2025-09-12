@@ -25,13 +25,13 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Common.Threading;
-using ASC.Files.Core.Vectorization;
 
 namespace ASC.AI.Models.ResponseDto;
 
 public class VectorizationTaskDto
 {
     public required string Id { get; init; }
+    public int FileId { get; init; }
     public int Percentage { get; init; }
     public string? Error { get; init; }
     public bool IsCompleted { get; init; }
@@ -53,7 +53,8 @@ public static class VectorizationTaskExtensions
             Error = task.Exception?.Message,
             Percentage = (int)task.Percentage,
             IsCompleted = task.IsCompleted,
-            Status = task.Status
+            Status = task.Status,
+            FileId = task.FileId
         };
     }
 }
