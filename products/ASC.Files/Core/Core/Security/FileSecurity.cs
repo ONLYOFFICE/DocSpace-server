@@ -1031,7 +1031,7 @@ public class FileSecurity(
                 return false;
             }
 
-            if (folder.FolderType is FolderType.Recent or FolderType.Favorites)
+            if (folder.FolderType is FolderType.Recent or FolderType.Favorites or FolderType.SHARE)
             {
                 return action == FilesSecurityActions.Read;
             }
