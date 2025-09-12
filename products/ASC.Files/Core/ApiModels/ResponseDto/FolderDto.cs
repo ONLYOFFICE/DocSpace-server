@@ -326,6 +326,21 @@ public class FolderDtoHelper(
             }
         }
         
+        if (folder.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID))
+        {
+            switch (contextFolder)
+            {
+                case { FolderType: FolderType.Recent }:
+                    result.RootFolderType = FolderType.Recent;
+                    result.ParentId = await _globalFolderHelper.GetFolderRecentAsync<T>();
+                    break;
+                case { FolderType: FolderType.SHARE }:
+                    result.RootFolderType = FolderType.SHARE;
+                    result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                    break;
+            }
+        }
+        
         return result;
     }
     

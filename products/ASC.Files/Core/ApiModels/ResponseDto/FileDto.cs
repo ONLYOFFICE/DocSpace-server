@@ -227,13 +227,6 @@ public class FileDtoHelper(
         var result = await GetFileWrapperAsync(file, order, expiration, contextFolder);
 
         result.FolderId = file.ParentId;
-        
-        if (file.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
-        {
-            result.RootFolderType = FolderType.Recent;
-            result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
-        }
-        
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
 
         if (result.CanShare)
@@ -297,6 +290,21 @@ public class FileDtoHelper(
             else if(Equals(result.OriginRoomId,  await _globalFolderHelper.FolderArchiveAsync))
             {
                 result.OriginRoomTitle = result.OriginTitle;
+            }
+        }
+        
+        if (file.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
+        {
+            switch (contextFolder)
+            {
+                case { FolderType: FolderType.Recent }:
+                    result.RootFolderType = FolderType.Recent;
+                    result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
+                    break;
+                case { FolderType: FolderType.SHARE }:
+                    result.RootFolderType = FolderType.SHARE;
+                    result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                    break;
             }
         }
         
