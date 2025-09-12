@@ -45,9 +45,11 @@ public class VectorizationTaskHolder(
             return task;
         }
 
-        task.Percentage = 100;
-
-        await vectorizationTaskService.DeleteAsync(task.Id);
+        if (task.IsCompleted && DateTime.UtcNow - task.LastModifiedOn >= TimeSpan.FromSeconds(10))
+        {
+            task.Percentage = 100;
+            await vectorizationTaskService.DeleteAsync(task.Id);
+        }
 
         return task;
     }
@@ -64,9 +66,12 @@ public class VectorizationTaskHolder(
                 continue;
             }
 
-            task.Percentage = 100;
-            await vectorizationTaskService.DeleteAsync(task.Id);
-        
+            if (task.IsCompleted && DateTime.UtcNow - task.LastModifiedOn >= TimeSpan.FromSeconds(10))
+            {
+                task.Percentage = 100;
+                await vectorizationTaskService.DeleteAsync(task.Id);
+            }
+
             yield return task;
         }
     }
