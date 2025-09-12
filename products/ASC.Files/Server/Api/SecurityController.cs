@@ -69,12 +69,12 @@ public abstract class SecurityController<T>(
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of shared file information", typeof(IAsyncEnumerable<FileShareDto>))]
-    [HttpGet("file/{fileId}/share")]
-    public async IAsyncEnumerable<FileShareDto> GetFileSecurityInfo(FileIdRequestDto<T> inDto)
+    [HttpGet("file/{id}/share")]
+    public async IAsyncEnumerable<FileShareDto> GetFileSecurityInfo(FilePrimaryIdRequestDto<T> inDto)
     {        
         var counter = 0;
 
-        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.FileId, FileEntryType.File, ShareFilterType.UserOrGroup, null, 0, 100))
+        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.File, ShareFilterType.UserOrGroup, null, inDto.StartIndex, inDto.Count))
         {
             counter++;
 
@@ -92,12 +92,12 @@ public abstract class SecurityController<T>(
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of shared file information", typeof(IAsyncEnumerable<FileShareDto>))]
-    [HttpGet("folder/{folderId}/share")]
-    public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfo(FolderIdRequestDto<T> inDto)
+    [HttpGet("folder/{id}/share")]
+    public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfo(FolderPrimaryIdRequestDto<T> inDto)
     {        
         var counter = 0;
 
-        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.FolderId, FileEntryType.Folder, ShareFilterType.UserOrGroup, null, 0, 100))
+        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, null, inDto.StartIndex, inDto.Count))
         {
             counter++;
 
