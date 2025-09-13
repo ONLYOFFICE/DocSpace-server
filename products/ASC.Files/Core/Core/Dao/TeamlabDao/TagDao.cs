@@ -49,7 +49,8 @@ internal abstract class BaseTagDao<T>(
         serviceProvider,
         distributedLockProvider), ITagDao<T>
 {
-    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, TagType tagType, IEnumerable<FileEntry<T>> fileEntries)
+    private const int MaxRecentTagsCount = 1000;
+    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, IEnumerable<TagType> tagType, IEnumerable<FileEntry<T>> fileEntries)
     {
         var mapping = daoFactory.GetMapping<T>();
         var filesId = new HashSet<string>();
@@ -88,7 +89,7 @@ internal abstract class BaseTagDao<T>(
         }
     }
 
-    public IAsyncEnumerable<Tag> GetTagsAsync(TagType tagType, IEnumerable<FileEntry<T>> fileEntries)
+    public IAsyncEnumerable<Tag> GetTagsAsync(IEnumerable<TagType> tagType, IEnumerable<FileEntry<T>> fileEntries)
     {
         return GetTagsAsync(Guid.Empty, tagType, fileEntries);
     }
@@ -109,11 +110,11 @@ internal abstract class BaseTagDao<T>(
         }
     }
 
-    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, TagType tagType)
+    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, T entryId, params IEnumerable<TagType> tagType)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var fromDb = await filesDbContext.TagsByOwnerAsync(tenantId, tagType, owner).ToListAsync();
+        var fromDb = await filesDbContext.TagsByOwnerAsync(tenantId, owner, Equals(entryId, default(T)) ? null : entryId.ToString(), tagType).ToListAsync();
         
         foreach (var e in fromDb)
         {
@@ -259,7 +260,7 @@ internal abstract class BaseTagDao<T>(
         return result;
     }
 
-    public async Task<IEnumerable<Tag>> SaveTagsAsync(Tag tag)
+    public async Task<IEnumerable<Tag>> SaveTagsAsync(Tag tag, Guid createdBy = default)
     {
         var result = new List<Tag>();
 
@@ -286,12 +287,24 @@ internal abstract class BaseTagDao<T>(
                 await using var tx = await internalFilesDbContext.Database.BeginTransactionAsync();
 
                 await DeleteTagsBeforeSave(internalFilesDbContext, tenantId);
-
+                
                 var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
                 var cacheTagId = new Dictionary<string, int>();
 
                 result.Add(await SaveTagAsync(internalFilesDbContext, tenantId, tag, cacheTagId, createOn));
 
+                if (tag.Type is TagType.Recent or TagType.RecentByLink && createdBy != Guid.Empty)
+                {
+                    await internalFilesDbContext.Tag.Where(r => r.TenantId == tenantId)
+                        .Join(internalFilesDbContext.TagLink, r => r.Id, l => l.TagId, (t, l) => new TagLinkData { Tag = t, Link = l })
+                        .Where(r => r.Link.TenantId == r.Tag.TenantId)
+                        .Where(r => (r.Tag.Type == TagType.Recent || r.Tag.Type == TagType.RecentByLink) && r.Link.CreateBy == createdBy)
+                        .Select(r => r.Link)
+                        .OrderByDescending(r => r.CreateOn)
+                        .Skip(MaxRecentTagsCount - 1)
+                        .ExecuteDeleteAsync();
+                }
+                
                 await tx.CommitAsync();
             });
         }

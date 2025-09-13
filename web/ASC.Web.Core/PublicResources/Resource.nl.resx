@@ -359,7 +359,7 @@
     <value>What's New</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Gebruikersaanmeldingen en acties bijhouden</value>
+    <value>Inloggegevens en acties bijhouden</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Maximale bestandsgrootte</value>
@@ -374,7 +374,7 @@
     <value>Aantal beheerders</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Automatische back-up en herstel</value>
+    <value>Gegevensherstel</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Onbeperkt aantal actieve kamers</value>
@@ -401,7 +401,7 @@
     <value>Gebruikers in kamer:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Onbeperkt aantal gebruikers</value>
+    <value>Onbeperkt aantal gebruikers en gasten</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Het aantal gebruikers mag niet groter zijn dan {0}</value>
@@ -1080,5 +1080,86 @@
   </data>
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>Webhook URL is niet beschikbaar. HEAD verzoek reageert niet 200 http status.</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Tegoed</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Valuta</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Aantal</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Schijfruimte</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Tegoed opladen</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Meeteenheid</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Klantactiviteitenverslag ({0}-{1})</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>De groep kon niet worden gevonden.</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Extra schijfopslagruimte</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Pas de opslag aan tot de exacte benodigde hoeveelheid.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Opslagruimte gebruikt:</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Automatische verlenging</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Het aantal gratis back-ups mag binnen een maand niet meer dan {0} bedragen</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Schakel back-ups in voor uw DocSpace. De kosten worden automatisch gefactureerd.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Back-up</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Back-up</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Back-up</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debiteren</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Transactiegeschiedenis</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Automatisch opwaarderen</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} gratis back-ups per maand</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Betaling vereist</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Details</value>
   </data>
 </root>

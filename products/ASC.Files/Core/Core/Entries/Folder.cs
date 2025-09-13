@@ -257,7 +257,7 @@ public class Folder<T> : FileEntry<T>, IFolder
     /// <summary>
     /// Specifies if the folder is favorite or not.
     /// </summary>
-    public bool IsFavorite { get; set; }
+    public bool? IsFavorite { get; set; }
     
     /// <summary>
     /// Specifies if the folder provider is mapped or not.

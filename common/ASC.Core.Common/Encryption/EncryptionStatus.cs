@@ -27,9 +27,16 @@
 namespace ASC.Core.Encryption;
 public enum EncryprtionStatus
 {
+    [SwaggerEnum("Decrypted")]
     Decrypted,
+
+    [SwaggerEnum("Encryption started")]
     EncryptionStarted,
+
+    [SwaggerEnum("Encrypted")]
     Encrypted,
+
+    [SwaggerEnum("Decryption started")]
     DecryptionStarted
 }
 

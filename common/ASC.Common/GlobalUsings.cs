@@ -31,6 +31,7 @@ global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
 global using System.Net.Mail;
+global using System.Net.Mime;
 global using System.Reflection;
 global using System.Security.Authentication;
 global using System.Security.Cryptography;

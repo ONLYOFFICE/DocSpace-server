@@ -529,19 +529,23 @@ public class UserController(
         var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) && viewer.Id != user.Id)
         {
-            throw new Exception(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
-        
-        if (!string.IsNullOrEmpty(inDto.MemberBase.Email))
+
+        var email = string.IsNullOrEmpty(inDto.MemberBase.Email) && !string.IsNullOrEmpty(inDto.MemberBase.EncEmail)
+            ? emailValidationKeyModelHelper.DecryptEmail(inDto.MemberBase.EncEmail)
+            : inDto.MemberBase.Email;
+
+        if (!string.IsNullOrEmpty(email))
         {
-            var email = (inDto.MemberBase.Email ?? "").Trim();
+            email = email.Trim();
 
             if (!email.TestEmailRegex())
             {
-                throw new Exception(Resource.ErrorNotCorrectEmail);
+                throw new ArgumentException(Resource.ErrorNotCorrectEmail);
             }
             
-            var address = new MailAddress(inDto.MemberBase.Email);
+            var address = new MailAddress(email);
             if (!string.Equals(address.Address, user.Email, StringComparison.OrdinalIgnoreCase))
             {
                 user.Email = address.Address.ToLowerInvariant();
@@ -565,11 +569,29 @@ public class UserController(
 
         if (!string.IsNullOrEmpty(inDto.MemberBase.PasswordHash))
         {
-            await securityContext.SetUserPasswordHashAsync(inDto.UserId, inDto.MemberBase.PasswordHash);
-            messageService.Send(MessageAction.UserUpdatedPassword);
+            try
+            {
+                await securityContext.SetUserPasswordHashAsync(inDto.UserId, inDto.MemberBase.PasswordHash);
 
-            await cookiesManager.ResetUserCookieAsync(inDto.UserId, false);
-            messageService.Send(MessageAction.CookieSettingsUpdated);
+                var messageTarget = MessageTarget.Create(inDto.UserId);
+                messageService.Send(MessageAction.UserUpdatedPassword, messageTarget);
+
+                var passwordChangeEvent = (await auditEventsRepository.GetByFilterAsync(
+                    userId: securityContext.CurrentAccount.ID,
+                    action: MessageAction.UserUpdatedPassword,
+                    target: messageTarget.ToString(),
+                    limit: 1))
+                    .FirstOrDefault();
+
+                await studioNotifyService.SendUserPasswordChangedAsync(user, passwordChangeEvent);
+
+                await cookiesManager.ResetUserCookieAsync(inDto.UserId, false);
+                messageService.Send(MessageAction.CookieSettingsUpdated);
+            }
+            catch (SecurityContext.PasswordException ex)
+            {
+                throw new ArgumentException(ex.Message);
+            }
         }
 
         return await employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(inDto.UserId.ToString()));
@@ -791,12 +813,14 @@ public class UserController(
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "GuestShareLink")]
     [HttpPost("guests/share/approve")]
-    public async Task<EmployeeFullDto> ApproveGuestShareLink(EmailMemberRequestDto inDto)
+    public async Task<EmployeeFullDto> ApproveGuestShareLink(EmailMemberRequestDto _)
     {
         await securityContext.AuthByClaimAsync();
 
-        var targetUser = await _userManager.GetUserByEmailAsync(inDto.Email);
-
+        var model = emailValidationKeyModelHelper.GetModel();
+        var targetEmail = emailValidationKeyModelHelper.DecryptEmail(model.EncEmail);
+        var targetUser = await _userManager.GetUserByEmailAsync(targetEmail);
+        
         if (Equals(targetUser, Constants.LostUser))
         {
             throw new ItemNotFoundException("User not found");
@@ -1294,7 +1318,7 @@ public class UserController(
 
         foreach (var user in users)
         {
-            if (user.IsActive)
+            if (user.IsActive || user.Status == EmployeeStatus.Terminated)
             {
                 continue;
             }
@@ -1321,10 +1345,11 @@ public class UserController(
                     continue;
                 }
 
-                var link = commonLinkUtility.GetInvitationLink(user.Email, type, authContext.CurrentAccount.ID, user.GetCulture()?.Name);
+                var culture = user.GetCulture()?.Name;
+                var link = commonLinkUtility.GetInvitationLink(user.Email, type, authContext.CurrentAccount.ID, culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
                 messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
-                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink);
+                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, culture);
             }
             else
             {
@@ -1478,19 +1503,19 @@ public class UserController(
 
         if (userid == Guid.Empty)
         {
-            throw new ArgumentNullException(inDto.UserId);
+            throw new ArgumentNullException(nameof(inDto.UserId));
         }
 
         var email = (inDto.Email ?? "").Trim();
 
         if (string.IsNullOrEmpty(email))
         {
-            throw new Exception(Resource.ErrorEmailEmpty);
+            throw new ArgumentException(Resource.ErrorEmailEmpty);
         }
 
         if (!email.TestEmailRegex())
         {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
+            throw new ArgumentException(Resource.ErrorNotCorrectEmail);
         }
 
         var viewer = await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
@@ -1499,30 +1524,30 @@ public class UserController(
 
         if (_userManager.IsSystemUser(user.Id) || user.Status == EmployeeStatus.Terminated || user.Status ==  EmployeeStatus.Pending)
         {
-            throw new Exception(Resource.ErrorUserNotFound);
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         if (!viewerIsAdmin && viewer.Id != user.Id)
         {
-            throw new Exception(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) && viewer.Id != user.Id)
         {
-            throw new Exception(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         if (!viewer.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user) && viewer.Id != user.Id)
         {
-            throw new Exception(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         var existentUser = await _userManager.GetUserByEmailAsync(email);
 
         if (existentUser.Id != Constants.LostUser.Id)
         {
-            throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+            throw new ArgumentException(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
         }
 
         if (!viewerIsAdmin)
@@ -1533,7 +1558,7 @@ public class UserController(
         {
             if (email == user.Email)
             {
-                throw new Exception(Resource.ErrorEmailsAreTheSame);
+                throw new ArgumentException(Resource.ErrorEmailsAreTheSame);
             }
 
             user.Email = email;
@@ -2275,7 +2300,7 @@ public class UserController(
             var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
             var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
             _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, [user.Id]);
-
+            await socketManager.UpdateUserAsync(user);
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
 

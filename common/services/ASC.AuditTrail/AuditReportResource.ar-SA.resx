@@ -201,9 +201,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>تم تحديث إعدادات الكتابة</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>المستندات</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>الإعدادات</value>
   </data>
@@ -474,9 +471,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>نقل</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>آخرين</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>تم تغيير المالك: {0}</value>
   </data>
@@ -494,9 +488,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>تم تحديث إعدادات قوة كلمة المرور</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>الأشخاص</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>منصة</value>
@@ -599,9 +590,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>تم بدء الجلسة</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>الاعدادات</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>تم تعطيل بوابة الدخول الموحد</value>
@@ -971,5 +959,41 @@
   </data>
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>الملف: {0}. تم تمكين الفلتر المخصص</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>تم تفعيل رابط التفويض</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>يتم تنفيذ عملية العميل</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>تم تنزيل تقرير عمليات العملاء</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>تم تحديث اشتراك العميل: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>تم تعبئة محفظة العميل: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>تم تحديث إعدادات تعبئة محفظة العميل</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>تم تعطيل مصادقة LDAP</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>تم تمكين مصادقة LDAP</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>اكتملت مزامنة LDAP</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>الموقع</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>تم تغيير إعدادات رؤية اللافتات الترويجية</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>تم تحديث إعدادات الخدمات الممكّنة لمحفظة العملاء</value>
   </data>
 </root>

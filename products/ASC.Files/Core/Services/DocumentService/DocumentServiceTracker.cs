@@ -144,7 +144,8 @@ public class DocumentServiceTracker
 }
 
 [Scope]
-public class DocumentServiceTrackerHelper(SecurityContext securityContext,
+public class DocumentServiceTrackerHelper(
+    SecurityContext securityContext,
     UserManager userManager,
     TenantManager tenantManager,
     FilesLinkUtility filesLinkUtility,
@@ -164,7 +165,8 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
     FileTrackerHelper fileTracker,
     IHttpClientFactory clientFactory,
     IHttpContextAccessor httpContextAccessor,
-    WebhookManager webhookManager)
+    WebhookManager webhookManager,
+    FileSecurity fileSecurity)
 {
     public string GetCallbackUrl<T>(T fileId, int? tenantId = null)
     {
@@ -340,7 +342,12 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             {
                 await filesMessageService.SendAsync(MessageAction.FileOpenedForChange, file, file.Title);
             }
-
+            
+            if (securityContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry && await fileSecurity.CanReadAsync(file))
+            {
+                await entryManager.MarkAsRecent(file);
+            }
+            
             securityContext.Logout();
         }
     }

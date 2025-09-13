@@ -64,11 +64,11 @@ public class BackupRequestedIntegrationEventHandler(
                     StorageType = @event.StorageType,
                     TenantId = @event.TenantId,
                     Dump = @event.Dump
-                });
+                }, @event.BillingSessionId, @event.BillingSessionExpire);
             }
             else
             {
-                await backupService.StartBackupAsync(@event.StorageType, @event.StorageParams, @event.ServerBaseUri, @event.Dump, true, @event.TaskId);
+                await backupService.StartBackupAsync(@event.StorageType, @event.StorageParams, @event.ServerBaseUri, @event.Dump, true, @event.TaskId, @event.BillingSessionId, @event.BillingSessionExpire);
             }
         }
     }

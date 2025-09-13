@@ -133,6 +133,27 @@
     <value>Đã xảy ra lỗi khi khôi phục bản sao lưu. Vui lòng thử khôi phục lại hoặc liên hệ với bộ phận hỗ trợ.</value>
   </data>
   <data name="BackupInvalid" xml:space="preserve">
-    <value>Tập tin sao lưu không hợp lệ. </value>
+    <value>Tập tin sao lưu không hợp lệ.</value>
+  </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Tự động sao lưu</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Lưu trữ tạm thời</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Phòng dự phòng</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Tập tin cục bộ</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Lưu trữ của bên thứ ba</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Tài nguyên của bên thứ ba</value>
   </data>
 </root>

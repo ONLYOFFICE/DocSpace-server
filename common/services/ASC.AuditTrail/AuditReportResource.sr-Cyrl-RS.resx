@@ -195,9 +195,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Подешавања преписивања ажурирана</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Документи</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Подешавања</value>
   </data>
@@ -483,9 +480,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Помери</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Други</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Власник промењен: {0}</value>
   </data>
@@ -503,9 +497,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Подешавања јачине лозинке ажурирана</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Људи</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Платформа</value>
@@ -569,9 +560,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Сесија започета</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Подешавања</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO онемогућен</value>
@@ -971,5 +959,41 @@
   </data>
   <data name="ApiKeyUpdated" xml:space="preserve">
     <value>Ажуриран кориснички Api кључ: {0}</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Извршена је корисничка операција</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Линк за ауторизацију је активиран</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Извештај о корисничким операцијама преузет</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Претплата корисника је ажурирана: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Кориснички новчаник је допуњен: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Подешавања допуне корисничког новчаника су ажурирана</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP аутентификација онемогућена</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP аутентификација омогућена</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP синхронизација завршена</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Локација</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Подашавања услуга омогућених за кориснички новчаник су ажурирана</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Поставке видљивости промотивних банера су променене</value>
   </data>
 </root>

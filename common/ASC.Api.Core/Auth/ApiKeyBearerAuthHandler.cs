@@ -64,7 +64,7 @@ public class ApiKeyBearerAuthHandler(
             
             var claims = new List<Claim>
             {
-                AuthConstants.Claim_ScopeRootWrite
+                AuthConstants.Claim_ScopeGlobalWrite
             };
 
             if (apiKey.Permissions is { Count: > 0 } && !apiKey.Permissions.Exists(x=> x == "*"))

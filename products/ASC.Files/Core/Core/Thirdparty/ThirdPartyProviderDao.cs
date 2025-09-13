@@ -241,14 +241,14 @@ internal abstract class ThirdPartyProviderDao
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
+    public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, OrderBy orderBy, int offset = 0, int count = -1)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }
 
-    public Task<int> GetFilesByTagCountAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject)
+    public Task<int> GetFilesByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location)
     {
         return Task.FromResult(0);
     }
@@ -518,6 +518,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
             FilterType.SpreadsheetsOnly or
             FilterType.ArchiveOnly or
             FilterType.MediaOnly or
+            FilterType.DiagramsOnly or
             FilterType.Pdf or
             FilterType.PdfForm;
     }

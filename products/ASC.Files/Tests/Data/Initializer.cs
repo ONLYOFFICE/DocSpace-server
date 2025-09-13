@@ -26,11 +26,9 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
-using ASC.Files.Tests.Factory;
-
 using MemberRequestDto = ASCPeople::ASC.People.ApiModels.RequestDto.MemberRequestDto;
 using PasswordHasher = ASC.Security.Cryptography.PasswordHasher;
-using WizardRequestsDto = Docspace.Model.WizardRequestsDto;
+using WizardRequestsDto = DocSpace.API.SDK.Model.WizardRequestsDto;
 
 namespace ASC.Files.Tests.Data;
 
@@ -130,7 +128,7 @@ public static class Initializer
         }
         
         await filesFactory.HttpClient.Authenticate(Owner);
-        _ = await filesFactory.FilesFoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
+        _ = await filesFactory.FoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         if (!_initialized)
         {
@@ -164,7 +162,7 @@ public static class Initializer
         
         var fakeMember = _fakerMember.Generate();
         
-        var createMemberResponse = await _peopleFactory.PeopleProfilesApi.AddMemberWithHttpInfoAsync(new Docspace.Model.MemberRequestDto
+        var createMemberResponse = await _peopleFactory.PeopleProfilesApi.AddMemberWithHttpInfoAsync(new DocSpace.API.SDK.Model.MemberRequestDto
         {
             FromInviteLink = true,
             CultureName = "en-US",
@@ -192,8 +190,14 @@ public static class Initializer
         };
     }
 
-    public static async Task Authenticate(this HttpClient client, User user)
-    {        
+    public static async ValueTask Authenticate(this HttpClient client, User? user)
+    {
+        if (user == null)
+        {
+            client.DefaultRequestHeaders.Authorization = null;
+            return;
+        }
+        
         var authMe = await _apiFactory.AuthenticationApi.AuthenticateMeAsync(new AuthRequestsDto
         {
             UserName = user.Email,
@@ -202,8 +206,8 @@ public static class Initializer
         
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authMe.Response.Token);
     }
-    
-    internal static string Password(
+
+    private static string Password(
         this Internet internet,
         int minLength,
         int maxLength,

@@ -58,43 +58,45 @@ public class PathProvider(WebImageSupplier webImageSupplier,
         return commonLinkUtility.GetFullAbsolutePath(string.Format(RoomUrlString, roomId, withSubfolders.ToString().ToLowerInvariant()));//ToDo
     }
 
-    public async Task<string> GetFolderUrlAsync<T>(Folder<T> folder, int projectID = 0)
+    public string GetFolderUrl<T>(Folder<T> folder, string key = null)
     {
         if (folder == null)
         {
             throw new ArgumentNullException(nameof(folder), FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        var folderDao = daoFactory.GetFolderDao<T>();
-
+        var result = "";
+        var urlPathEncode = HttpUtility.UrlPathEncode(folder.Id.ToString());
         switch (folder.RootFolderType)
         {
-            case FolderType.BUNCH:
-                if (projectID == 0)
-                {
-                    var path = await folderDao.GetBunchObjectIDAsync(folder.RootId);
-
-                    var projectIDFromDao = path.Split('/').Last();
-
-                    if (string.IsNullOrEmpty(projectIDFromDao))
-                    {
-                        return string.Empty;
-                    }
-
-                    projectID = Convert.ToInt32(projectIDFromDao);
-                }
-
-                return commonLinkUtility.GetFullAbsolutePath(string.Format("{0}?prjid={1}#{2}", ProjectVirtualPath, projectID, folder.Id));
-            default:
-                return commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + "#" + HttpUtility.UrlPathEncode(folder.Id.ToString()));
+            case FolderType.USER:
+                result = string.Format($"rooms/personal/filter?folder={urlPathEncode}");
+                break;
+            case FolderType.Recent:
+                result =  string.Format($"recent/filter?folder={urlPathEncode}");
+                break;
+            case FolderType.Archive:
+                result = string.Format($"rooms/archived/filter?folder={urlPathEncode}");
+                break;
+            case FolderType.VirtualRooms:
+            case FolderType.RoomTemplates:
+                result = string.Format($"rooms/shared/{urlPathEncode}/filter?folder={urlPathEncode}");
+                break;
         }
+
+        if (!string.IsNullOrEmpty(key))
+        {
+            result += $"&key={key}";
+        }
+        
+        return commonLinkUtility.GetFullAbsolutePath(string.Format($"{filesLinkUtility.FilesBaseAbsolutePath}{result}"));
     }
 
-    public async Task<string> GetFolderUrlByIdAsync<T>(T folderId)
+    public async Task<string> GetFolderUrlByIdAsync<T>(T folderId, string key = null)
     {
         var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
 
-        return await GetFolderUrlAsync(folder);
+        return GetFolderUrl(folder, key);
     }
 
     public string GetFileStreamUrl<T>(File<T> file, bool lastVersion = false)

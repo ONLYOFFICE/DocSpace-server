@@ -102,7 +102,13 @@ public class ApiKeysController(
     {
         var scopes = AuthorizationExtension.ScopesMap;
 
-        return scopes.AllKeys.SelectMany(key => scopes[key]?.Split(',')).Distinct().Order();
+        var globalScopes = new List<string>
+        {
+            AuthConstants.Claim_ScopeGlobalRead.Value, 
+            AuthConstants.Claim_ScopeGlobalWrite.Value
+        };
+        
+        return scopes.Keys.SelectMany(key => scopes[key]).Union(globalScopes).Distinct().Order();
     }
 
 
@@ -151,7 +157,6 @@ public class ApiKeysController(
     [Tags("Api keys")]
     [SwaggerResponse(200, "List of api keys for user", typeof(ApiKeyResponseDto))]
     [HttpGet("@self")]
-    [Authorize(AuthenticationSchemes = ApiKeyBearerDefaults.AuthenticationScheme)]
     public async Task<ApiKeyResponseDto> GetApiKey()
     {
         var token = httpContextAccessor?.HttpContext?.Request.Headers.Authorization.ToString()["Bearer ".Length..];
@@ -238,18 +243,14 @@ public class ApiKeysController(
         return result;
     }
 
-    private static bool IsValidPermission(List<string> permission)
+    private bool IsValidPermission(List<string> permission)
     {
         if (permission == null || permission.Count == 0)
         {
             return true;
         }
 
-        var scopes = AuthorizationExtension.ScopesMap;
-        var orderedScopes = scopes.AllKeys.SelectMany(key => scopes[key]?.Split(','))
-                                                                 .Concat(["*"])
-                                                                 .Distinct()
-                                                                 .Order();
+        var orderedScopes = GetAllPermissions().Union(new List<string> {"*"});
 
         return permission.All(x => orderedScopes.Contains(x));
     }

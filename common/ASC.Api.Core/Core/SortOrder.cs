@@ -28,6 +28,9 @@ namespace ASC.Api.Core.Core;
 
 public enum SortOrder
 {
+    [SwaggerEnum("Ascending")]
     Ascending,
+
+    [SwaggerEnum("Descending")]
     Descending
 }

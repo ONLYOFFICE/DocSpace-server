@@ -45,6 +45,11 @@ public class ConfirmDto
     /// The confirmation title.
     /// </summary>
     public string Title { get; set; }
+
+    /// <summary>
+    /// The confirmation email.
+    /// </summary>
+    public string Email { get; set; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]

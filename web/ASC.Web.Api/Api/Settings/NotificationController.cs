@@ -91,4 +91,21 @@ public class NotificationController(
         var settings = await roomsNotificationSettingsHelper.SetForCurrentUserAsync(inDto.RoomsId, inDto.Mute);
         return settings.Map();
     }
+
+    /// <summary>
+    /// Returns a list of notification channels
+    /// </summary>
+    /// <short>Gets notification channel settings</short>
+    /// <path>api/2.0/settings/notification/channels</path>
+    [Tags("Settings / Notifications")]
+    [SwaggerResponse(200, "Notification settings", typeof(NotificationChannelStatusDto))]
+    [HttpGet("channels")]
+    public NotificationChannelStatusDto GetNotificationChannels()
+    {
+        var channels = notificationControllerHelper.GetNotificationChannels();
+        return new NotificationChannelStatusDto
+        {
+            Channels = [.. channels.Select(c => new NotificationChannelDto { Name = c.Name, IsEnabled = c.IsEnabled })]
+        };
+    }
 }

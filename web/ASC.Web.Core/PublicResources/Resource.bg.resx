@@ -425,7 +425,7 @@
     <value>Какво ново</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Следене на вписванията и действията на потребителите</value>
+    <value>Проследяване на влизания и действия</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Макс размер на файловете</value>
@@ -440,7 +440,7 @@
     <value>Брой администратори</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Автоматичен бекъп и възстановяване</value>
+    <value>Възстановяване на данни</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Неограничен брой активни стаи</value>
@@ -467,7 +467,7 @@
     <value>Потребители в стаята:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Неограничен брой потребители</value>
+    <value>Неограничен брой потребители и гости</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Броят потребители не трябва да надвишава {0}</value>
@@ -1080,5 +1080,86 @@
   </data>
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>URL адресът на Webhook не е наличен. Заявката HEAD не е отговор 200 http състояние.</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Кредит</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Валута</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Количество</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Дисково пространство</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Зареждане на баланс</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Мерна единица</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Отчет за потребителски операции ({0}-{1})</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Групата не може да бъде открита</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Допълнително дисково пространство</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Регулирайте мястото до точната стойност, от която се нуждаете.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Използвано пространство:</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Автоматично подновяване</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Броят на безплатните резервни копия не трябва да надвишава {0} в рамките на един месец</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Активирайте архивирането на вашия DocSpace. Разходите ще бъдат таксувани автоматично.</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>ГБ</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Необходимо е плащане</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Резервно копие</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Резервно копие</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Резервно копие</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} безплатни резервни копия на месец</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Автоматично допълване</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Контакт</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Дебит</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Подробности</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Тип</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>История на транзакциите</value>
   </data>
 </root>

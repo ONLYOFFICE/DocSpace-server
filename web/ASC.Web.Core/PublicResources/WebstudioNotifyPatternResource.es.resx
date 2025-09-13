@@ -633,37 +633,37 @@ También le enviaremos los consejos útiles y las últimas noticias de ${LetterL
 $TrulyYours</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ha creado un nuevo documento: &lt;a href={1}&gt;{2}&lt;/a&gt; en la sala: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha creado un nuevo documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; en la sala: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ha añadido un nuevo comentario a la versión del documento: &lt;a href={1}&gt;{2}&lt;/a&gt; en la sala: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha añadido un nuevo comentario a la versión del documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; en la sala: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ha cargado un nuevo documento: &lt;a href={1}&gt;{2}&lt;/a&gt; en la sala: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha cargado un nuevo documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; en la sala: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ha cambiado el nombre de la sala: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha cambiado el nombre de la sala: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ha creado una nueva sala: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha creado una nueva sala: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; se ha eliminado de la sala: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; se ha eliminado de la sala: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ha editado el documento: &lt;a href={1}&gt;{2}&lt;/a&gt; en la sala: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha editado el documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; en la sala: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; ha eliminado la sala: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; se ha añadido a la sala: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; se ha añadido a la sala: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ha movido la sala: &lt;a href={1}&gt;{2}&lt;/a&gt; a archivo - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha movido la sala: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; a archivo - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; se le ha asignado el rol de &lt;b&gt;{1}&lt;/b&gt; en la sala: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; se le ha asignado el rol de &lt;b&gt;{1}&lt;/b&gt; en la sala: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Se ha añadido un nuevo usuario de DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -1255,7 +1255,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace se ha &lt;span style="color: #FF6F3D;"&gt;desactivado&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace se ha &lt;span style="color: #FF6F3D;"&gt;eliminado&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Su ${LetterLogoText} DocSpace se ha desactivado correctamente. Por favor, tenga en cuenta que todos sus datos serán eliminados de acuerdo con nuestra &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Política de Privacidad&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1409,7 +1409,7 @@ $TrulyYours</value>
     <value>5 consejos para trabajar eficazmente en sus documentos</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace se ha desactivado</value>
+    <value>${LetterLogoText} DocSpace se ha eliminado</value>
   </data>
   <data name="subject_saas_admin_modules_v1" xml:space="preserve">
     <value>Configure su ${LetterLogoText} DocSpace</value>
@@ -1938,5 +1938,63 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Próximo pago de suscripción para su ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Acción requerida: No se puede renovar automáticamente el plan de servicio en su ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Acción requerida: No se puede recargar automáticamente el saldo del Monedero en su ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Ir a Servicios</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Ir a la configuración del Monedero</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>¡Hola, $UserName!
+
+Nos ponemos en contacto con usted para informarle de que la renovación automática de su plan de servicio no se ha podido realizar.
+
+Le rogamos que renueve manualmente su plan de servicio actual (o que adquiera uno nuevo).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>¡Hola, $UserName!
+
+Nos ponemos en contacto con usted para informarle de que la recarga automática del saldo de su monedero en DocSpace no se ha realizado correctamente.
+
+Le rogamos que compruebe y actualice manualmente el saldo de su monedero.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Abrir DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Contraseña cambiada correctamente
+
+Su contraseña para la cuenta *$UserName*, *$UserEmail* se ha cambiado correctamente el *$Date* en DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Dispositivo: *$Device*
+#if($Location != "")
+Ubicación: *$Location*
+#end
+Navegador: *$Browser*
+
+Si esta acción fue realizada por usted, no se requieren más pasos. Si este cambio parece sospechoso o no ha sido autorizado por usted, restablezca su contraseña inmediatamente y deshabilite el acceso a DocSpace para este dispositivo.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Su contraseña se ha cambiado correctamente</value>
   </data>
 </root>

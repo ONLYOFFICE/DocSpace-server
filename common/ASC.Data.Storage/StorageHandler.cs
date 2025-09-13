@@ -35,7 +35,13 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 {
     public async Task InvokeAsync(HttpContext context, TenantManager tenantManager, AuthContext authContext, StorageFactory storageFactory, EmailValidationKeyProvider emailValidationKeyProvider, UserManager userManager)
     {
-        var storage = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), module);
+        var currentTenant = tenantManager.GetCurrentTenant(false);
+        if (currentTenant == null)
+        {
+            throw new ItemNotFoundException("tenant");
+        }
+
+        var storage = await storageFactory.GetStorageAsync(currentTenant.Id, module);
         var path = CrossPlatform.PathCombine(storagePath, GetRouteValue("pathInfo", context).Replace('/', Path.DirectorySeparatorChar));
         string header = context.Request.Query[Constants.QueryHeader];
         string auth = context.Request.Query[Constants.QueryAuth];
@@ -78,9 +84,11 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 
         var headers = header is { Length: > 0 } ? header.Split('&').Select(HttpUtility.UrlDecode).ToList() : [];
 
-        if (storage.IsContentAsAttachment(domain))
+        if (storage.IsContentAsAttachment(domain) && !headers.Any(h => h.StartsWith("Content-Disposition")))
         {
-            headers.Add("Content-Disposition:attachment");
+            var fileName = Path.GetFileName(path);
+            var contentDisposition = ContentDispositionUtil.GetHeaderValue(fileName);
+            headers.Add($"Content-Disposition:{contentDisposition}");
         }
 
         const int bigSize = 5 * 1024 * 1024;

@@ -504,37 +504,37 @@ $TrulyYours</value>
     <value>Đã thêm người dùng mới vào cổng ${LetterLogoText}</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; đã tạo một tài liệu mới: &lt;a href={1}&gt;{2}&lt;/a&gt; trong phòng: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã tạo một tài liệu mới: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; trong phòng: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; đã thêm nhận xét mới vào phiên bản tài liệu: &lt;a href={1}&gt;{2}&lt;/a&gt; trong phòng: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã thêm nhận xét mới vào phiên bản tài liệu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; trong phòng: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; đã tải lên một tài liệu mới: &lt;a href={1}&gt;{2}&lt;/a&gt; trong phòng: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã tải lên một tài liệu mới: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; trong phòng: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; đã đổi tên phòng: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã đổi tên phòng: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; đã tạo một phòng mới: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã tạo một phòng mới: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; đã bị xóa khỏi phòng: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã bị xóa khỏi phòng: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; đã chỉnh sửa tài liệu: &lt;a href={1}&gt;{2}&lt;/a&gt; trong phòng: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã chỉnh sửa tài liệu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; trong phòng: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; đã xóa phòng: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; đã được thêm vào phòng: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã được thêm vào phòng: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; đã chuyển phòng: &lt;a href={1}&gt;{2}&lt;/a&gt; đến sao lưu - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã chuyển phòng: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; đến sao lưu - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; đã được chỉ định vai trò của &lt;b&gt;{1}&lt;/b&gt; trong phòng: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã được chỉ định vai trò của &lt;b&gt;{1}&lt;/b&gt; trong phòng: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Đã thêm người dùng DocSpace mới: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -852,7 +852,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace &lt;span style="color: #FF6F3D;"&gt;đã bị hủy kích hoạt&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace &lt;span style="color: #FF6F3D;"&gt;đã bị xóa&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;${LetterLogoText} DocSpace của bạn đã được hủy kích hoạt thành công. Xin lưu ý rằng tất cả dữ liệu của bạn sẽ bị xóa theo &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Chính sách Bảo mật&lt;/a&gt; của chúng tôi.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1003,7 +1003,7 @@ $TrulyYours</value>
     <value>Nhấp vào đây để kích hoạt địa chỉ email của bạn</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace đã bị hủy kích hoạt</value>
+    <value>${LetterLogoText} DocSpace đã bị xóa</value>
   </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace của bạn sẽ bị xóa</value>
@@ -1924,6 +1924,78 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Chúng tôi mong nhận được ý kiến của bạn. Bạn có thể cho biết lý do vì sao bạn quyết định ngừng sử dụng DocSpace ${LetterLogoText}?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Nếu bạn muốn tiếp tục sử dụng DocSpace ${LetterLogoText} của mình, chỉ cần truy cập nó và thực hiện bất kỳ hành động nào.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Vào mục Dịch vụ</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Vào phần cài đặt Ví</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Chúng tôi liên hệ để thông báo cho bạn rằng việc tự động gia hạn gói dịch vụ bạn đã mua chưa được hoàn thành.
+
+Chúng tôi mong bạn tự thao tác gia hạn lại gói dịch vụ hiện tại của mình (hoặc mua gói mới).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Chúng tôi liên hệ để thông báo rằng khoản thanh toán gói dịch vụ của bạn sẽ tự động được ghi nợ từ tài khoản của bạn sau 3 ngày.
+
+Để đảm bảo giao dịch diễn ra suôn sẻ, xin vui lòng kiểm tra và chắc chắn rằng có đủ tiền trong tài khoản thanh toán của bạn.
+
+Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, xin hãy liên hệ với "nhóm hỗ trợ":"${__SupportLink}" của chúng tôi.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Chúng tôi đang liên hệ để thông báo với bạn rằng việc nạp tiền tự động vào số dư Ví DocSpace đã không thành công.
+
+Chúng tôi vui lòng yêu cầu bạn kiểm tra và cập nhật số dư ví của mình theo cách thủ công.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Cần hành động: Không thể tự động gia hạn gói dịch vụ trong DocSpace ${LetterLogoText} của bạn</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Thanh toán gói dịch vụ sắp tới cho DocSpace ${LetterLogoText} của bạn</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Cần hành động: Không thể tự động nạp tiền vào số dư Ví trong DocSpace ${LetterLogoText} của bạn</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Mở DocSpace</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Mật khẩu của bạn đã được thay đổi thành công</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Mật khẩu đã được thay đổi thành công
+
+Mật khẩu của bạn cho tài khoản *$UserName*, *$UserEmail* đã được thay đổi thành công vào ngày *$Date* trong DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Thiết bị: *$Device*
+#if($Location != "")
+Vị trí: *$Location*
+#end
+Trình duyệt: *$Browser*
+
+Nếu hành động này do bạn thực hiện — không cần thực hiện thêm bước nào nữa. Nếu thay đổi này có vẻ đáng ngờ hoặc không được bạn ủy quyền, vui lòng đặt lại mật khẩu ngay lập tức và vô hiệu hóa quyền truy cập vào DocSpace cho thiết bị này.
+
+$OrangeButton
 
 $TrulyYours</value>
   </data>

@@ -39,14 +39,10 @@ public class ExternalLinkHelper(
     SocketManager socketManager,
     GlobalFolderHelper globalFolderHelper)
 {
-    public async Task<ValidationInfo> ValidateAsync(string key, string password = null, string fileId = null)
+    public async Task<ValidationInfo> ValidateAsync(string key, string password = null, string fileId = null, string folderId = null)
     {
-        var result = new ValidationInfo
-        {
-            Status = Status.Invalid, 
-            Access = FileShare.Restrict
-        };
-        
+        var result = new ValidationInfo { Status = Status.Invalid, Access = FileShare.Restrict };
+
         var isAuth = securityContext.IsAuthenticated;
         result.IsAuthenticated = isAuth;
 
@@ -77,11 +73,22 @@ public class ExternalLinkHelper(
         {
             if (int.TryParse(fileId, out var entityId))
             {
-                await GetSubEntryAndProcessAsync(entityId, entryId, result);
+                await GetSubFileAndProcessAsync(entityId, entryId, result);
             }
             else
             {
-                await GetSubEntryAndProcessAsync(fileId, entryId, result);
+                await GetSubFileAndProcessAsync(fileId, entryId, result);
+            }
+        }
+        else if (!string.IsNullOrEmpty(folderId))
+        {
+            if (int.TryParse(folderId, out var entityId))
+            {
+                await GetSubFolderAndProcessAsync(entityId, entryId, result);
+            }
+            else
+            {
+                await GetSubFolderAndProcessAsync(folderId, entryId, result);
             }
         }
 
@@ -93,9 +100,24 @@ public class ExternalLinkHelper(
 
         if (status == Status.RequiredPassword)
         {
+            if (isAuth)
+            {
+                var canReadWithoutPassword = entry switch
+                {
+                    Folder<int> entryInt => DocSpaceHelper.IsRoom(entryInt.FolderType) && await fileSecurity.CanReadAsync(entryInt),
+                    Folder<string> entryString => DocSpaceHelper.IsRoom(entryString.FolderType) && await fileSecurity.CanReadAsync(entryString),
+                    _ => false
+                };
+
+                if (canReadWithoutPassword)
+                {
+                    result.Status = Status.Ok;
+                }
+            }
+
             return result;
         }
-        
+
         result.Access = record.Share;
         result.TenantId = record.TenantId;
         result.LinkId = data.Id;
@@ -104,7 +126,7 @@ public class ExternalLinkHelper(
         {
             var userId = securityContext.CurrentAccount.ID;
             var isDocSpaceAdmin = await userManager.IsDocSpaceAdminAsync(userId);
-            
+
             if (entry.CreateBy.Equals(userId))
             {
                 result.Shared = true;
@@ -133,7 +155,7 @@ public class ExternalLinkHelper(
             {
                 switch (entry)
                 {
-                    case Folder<int> folderInt: 
+                    case Folder<int> folderInt:
                         await socketManager.UpdateFolderAsync(folderInt, [userId]);
                         break;
                     case Folder<string> folderString:
@@ -149,54 +171,86 @@ public class ExternalLinkHelper(
         }
 
         await externalShare.SetAnonymousSessionKeyAsync();
-        
+
         return result;
     }
 
     private async Task<FileEntry> GetEntryAndProcessAsync<T>(T id, FileEntryType entryType, ValidationInfo info)
     {
+        FileEntry<T> entry;
         if (entryType == FileEntryType.Folder)
         {
-            var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(id);
-            if (folder == null)
+            entry = await daoFactory.GetFolderDao<T>().GetFolderAsync(id);
+            if (entry == null)
             {
                 return null;
             }
 
-            info.Id = folder.Id.ToString();
-            info.Title = folder.Title;
-        
-            return folder;
+            info.Id = entry.Id.ToString();
+            info.Title = entry.Title;
+            info.Type = FileEntryType.Folder;
+            info.IsRoom = DocSpaceHelper.IsRoom(((Folder<T>)entry).FolderType);
         }
-        
-        var file = await daoFactory.GetFileDao<T>().GetFileAsync(id);
-        if (file == null)
+        else
         {
-            return null;
-        }
-        
-        info.Id = file.Id.ToString();
-        info.Title = file.Title;
+            entry = await daoFactory.GetFileDao<T>().GetFileAsync(id);
+            if (entry == null)
+            {
+                return null;
+            }
 
-        return file;
+            info.Id = entry.Id.ToString();
+            info.Title = entry.Title;
+            info.Type = FileEntryType.File;
+        }
+
+        FileEntry<T> room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(entry.Id).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+        if (info.IsAuthenticated)
+        {
+            info.IsRoomMember = (await daoFactory.GetSecurityDao<T>().GetSharesAsync(room, [securityContext.CurrentAccount.ID])).Select(r => r.EntryId).Any();
+        }
+
+        return entry;
     }
-    
-    private async Task GetSubEntryAndProcessAsync<T>(T id, string rootId, ValidationInfo info)
+
+    private async Task GetSubFileAndProcessAsync<T>(T id, string rootId, ValidationInfo info)
     {
         var file = await daoFactory.GetFileDao<T>().GetFileAsync(id);
         if (file == null)
         {
             return;
         }
-        var (currentRoomId, _) = await daoFactory.GetFolderDao<T>().GetParentRoomInfoFromFileEntryAsync(file);
-        
-        if (Equals(currentRoomId, null) || !string.Equals(currentRoomId.ToString(), rootId))
+
+        var parentFolder = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(file.ParentId).FirstOrDefaultAsync(f => f.Id.ToString() == rootId);
+
+        if (parentFolder == null || Equals(parentFolder.Id, null))
         {
             return;
         }
-        
+
         info.EntityId = file.Id.ToString();
-        info.EntryTitle = file.Title;
+        info.EntityTitle = file.Title;
+        info.EntityType = FileEntryType.File;
+    }
+
+    private async Task GetSubFolderAndProcessAsync<T>(T id, string rootId, ValidationInfo info)
+    {
+        var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(id);
+        if (folder == null)
+        {
+            return;
+        }
+
+        var parentFolder = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => f.Id.ToString() == rootId);
+
+        if (parentFolder == null || Equals(parentFolder.Id, null))
+        {
+            return;
+        }
+
+        info.EntityId = folder.Id.ToString();
+        info.EntityTitle = folder.Title;
+        info.EntityType = FileEntryType.Folder;
     }
 
     private async Task<bool> MarkAsync<T>(Folder<T> room, Guid linkId, Guid userId)
@@ -206,8 +260,6 @@ public class ExternalLinkHelper(
         {
             case MarkResult.NotMarked:
                 return false;
-            case MarkResult.MarkExists:
-                return true;
             case MarkResult.Marked:
                 room.FolderIdDisplay = IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync);
                 await socketManager.CreateFolderAsync(room, [userId]);

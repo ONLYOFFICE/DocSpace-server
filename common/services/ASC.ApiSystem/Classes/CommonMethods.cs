@@ -258,7 +258,7 @@ public class CommonMethods(
             new MemoryCacheEntryOptions
             {
                 // Will not use absolute cache expiration
-                AbsoluteExpiration = DateTime.MaxValue,
+                AbsoluteExpiration = DateTimeOffset.MaxValue,
                 // Cache will expire after one hour
                 // You can change this time interval according
                 // to your requriements

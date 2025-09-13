@@ -371,7 +371,7 @@
     <value>Čo je nové</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Sledovanie prihlásení a akcií používateľov</value>
+    <value>Sledovanie prihlásení a akcií</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Maximálna veľkosť súboru</value>
@@ -386,7 +386,7 @@
     <value>Počet administrátorov</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Automatické zálohovanie a obnovenie</value>
+    <value>Obnova dát</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Neobmedzený počet aktívnych miestností</value>
@@ -413,7 +413,7 @@
     <value>Používateľov v miestnosti:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Neobmedzený počet používateľov</value>
+    <value>Neobmedzený počet používateľov a hostí</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Počet používateľov by nemal presahovať {0}</value>
@@ -1080,5 +1080,86 @@
   </data>
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>Webhook URL nie je dostupná. HEAD požiadavka nevrátila HTTP status 200.</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Kredit</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Mena</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Dátum</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Množstvo</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Miesto na disku</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Dobitie zostatku</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Jednotka merania</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Hlásenie o operáciách zákazníka ({0}-{1})</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Automatické obnovenie</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Počet bezplatných záloh by nemal prekročiť {0} za mesiac</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Záloha</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Dodatočné úložisko na disku</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Upravte si úložný priestor presne podľa potreby.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Záloha</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Skupinu sa nepodarilo nájsť</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Použitý objem úložiska:</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detaily</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debet</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Kontakt</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Typ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Záloha</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} bezplatných záloh mesačne</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>História transakcií</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Automatické dobíjanie</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Vyžaduje sa platba</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Povoľte zálohovanie pre váš DocSpace. Náklady budú účtované automaticky.</value>
   </data>
 </root>

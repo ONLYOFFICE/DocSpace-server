@@ -404,7 +404,7 @@
     <value>新鲜事</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>跟踪用户登录与活动</value>
+    <value>跟踪登录和操作</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>文件最大大小</value>
@@ -419,7 +419,7 @@
     <value>管理员数量</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>自动备份与恢复</value>
+    <value>数据恢复</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>不限激活的房间数量</value>
@@ -449,7 +449,7 @@
     <value>房间总用户数量：</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>不限用户数量</value>
+    <value>用户和访客数量不限</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>用户的数量不应超过{0}</value>
@@ -1080,5 +1080,86 @@
   </data>
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>Webhook URL 不可用。HEAD 请求未响应，HTTP 状态码为 200。</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>信用额度</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>货币</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>日期</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>数量</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>计量单位</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>客户操作报告 ({0}-{1})</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>未找到该群组</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>额外磁盘存储空间</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>按需调整存储空间大小。</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>已使用储存空间：</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>磁盘空间</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>余额充值</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>联系方式</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>借记卡</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>详情</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>备份</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>备份</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>交易记录</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>类型</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>自动续订</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>自动充值</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>需要付款</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>备份</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>启用协作空间备份功能。费用将自动计费。</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>每月{0}次免费备份</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>每月免费备份次数不超过{0}次</value>
   </data>
 </root>

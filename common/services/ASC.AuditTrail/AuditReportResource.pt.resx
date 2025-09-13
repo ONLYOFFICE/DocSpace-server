@@ -252,9 +252,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Atualização das Definições de Substituição</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Documentos</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Definições</value>
   </data>
@@ -525,9 +522,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Mover</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Outros</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Proprietário Alterado: {0}</value>
   </data>
@@ -545,9 +539,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>As Definições da Força da Palavra-Passe foram Atualizadas</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Pessoas</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Plataforma</value>
@@ -608,9 +599,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sessão Iniciada</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Definições</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO Desativado</value>
@@ -971,5 +959,41 @@
   </data>
   <data name="ApiKeyUpdated" xml:space="preserve">
     <value>Chave API do utilizador atualizada: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>O link de autorização foi ativado</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Operação do cliente realizada</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Relatório de operações do cliente descarregado</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Assinatura do cliente atualizada: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Carteira do cliente recarregada: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Configurações de recarga da carteira do cliente atualizadas</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Autenticação LDAP desativada</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Autenticação LDAP ativada</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Sincronização LDAP concluída</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Localização</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Configurações de visibilidade dos banners promocionais alteradas</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Configurações de serviços habilitados para carteira de cliente atualizadas</value>
   </data>
 </root>

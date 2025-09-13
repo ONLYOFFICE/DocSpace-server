@@ -36,14 +36,10 @@ public class AuditEvent : BaseEvent
     [Event("ActionTypeCol", 30)]
     public string ActionTypeText { get; set; }
 
-    [Event("ProductCol", 31)]
-    public string Product { get; set; }
-
-    [Event("ModuleCol", 32)]
-    public string Module { get; set; }
-
     [Event("TargetIdCol", 34)]
     public MessageTarget Target { get; set; }
+    
+    [Event("LocationCol", 32)]
     public string Context { get; set; }
 }
 
@@ -56,7 +52,7 @@ public partial class AuditEventMapper(EventTypeConverter eventTypeConverter)
     [MapperIgnoreSource(nameof(DbAuditEvent.Target))]
     private partial AuditEvent ToAuditEvent(DbAuditEvent auditEventQuery);
 
-    private AuditEvent ToAuditEvent(AuditEventQuery auditEventQuery)
+    public AuditEvent ToAuditEvent(AuditEventQuery auditEventQuery)
     {
         var result = ToAuditEvent(auditEventQuery.Event);
         eventTypeConverter.Convert(auditEventQuery, result);

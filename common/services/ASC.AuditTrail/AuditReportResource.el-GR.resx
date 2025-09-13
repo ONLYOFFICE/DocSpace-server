@@ -103,9 +103,6 @@
   <data name="DnsSettingsUpdated" xml:space="preserve">
     <value>Οι Ρυθμίσεις DNS Ενημερώθηκαν</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Έγγραφα</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Ρυθμίσεις</value>
   </data>
@@ -271,17 +268,11 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Μετακίνηση</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Άλλα</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Αλλαγή Κατόχου: {0}</value>
   </data>
   <data name="PageCol" xml:space="preserve">
     <value>Σελίδα</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Άνθρωποι</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Πλατφόρμα</value>
@@ -318,9 +309,6 @@
   </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Αποστολή</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Ρυθμίσεις</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Το SSO Απενεργοποιήθηκε</value>
@@ -912,5 +900,41 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook που ενημερώθηκε: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Ο σύνδεσμος εξουσιοδότησης έχει ενεργοποιηθεί</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Εκτελέστηκε λειτουργία πελάτη</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Έχει γίνει λήψη αναφοράς λειτουργιών πελάτη</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Η συνδρομή πελάτη ενημερώθηκε: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Το ποσό στο πορτοφόλι πελάτη ανανεώθηκε: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Έγινε ενημέρωση ρυθμίσεων ανανέωσης ποσού πορτοφολιού πελάτη</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Απενεργοποιήθηκε ο έλεγχος ταυτότητας LDAP</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Ενεργοποιήθηκε ο έλεγχος ταυτότητας LDAP</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Ο συγχρονισμός LDAP ολοκληρώθηκε</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Τοποθεσία</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Άλλαξαν οι ρυθμίσεις ορατότητας διαφημιστικών banner</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Οι ρυθμίσεις υπηρεσιών με δυνατότητα πορτοφολιού πελάτη ενημερώθηκαν</value>
   </data>
 </root>

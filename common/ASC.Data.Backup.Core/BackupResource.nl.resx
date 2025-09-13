@@ -135,4 +135,25 @@
   <data name="BackupInvalid" xml:space="preserve">
     <value>Het back-up bestand is ongeldig.</value>
   </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Automatische back-up</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Tijdelijke opslag</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Backup kamer</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Lokaal bestand</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Opslag door derden</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Bron van derden</value>
+  </data>
 </root>

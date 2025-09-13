@@ -40,8 +40,8 @@ public class EventTypeConverter(
         if (source?.Event == null)
         {
             return;
-        }        
-        
+        }
+
         if (source.Event.DescriptionRaw != null)
         {
             dest.Description = JsonSerializer.Deserialize<IList<string>>(source.Event.DescriptionRaw);
@@ -123,19 +123,19 @@ public class EventTypeConverter(
         var map = actionMapper.GetMessageMaps(dest.Action);
         if (map != null)
         {
-            if (dest.Action is 
-                (int)MessageAction.QuotaPerPortalChanged or 
-                (int)MessageAction.QuotaPerRoomChanged or 
-                (int)MessageAction.QuotaPerUserChanged
+            if (dest.Action is
+                    (int)MessageAction.QuotaPerPortalChanged or
+                    (int)MessageAction.QuotaPerRoomChanged or
+                    (int)MessageAction.QuotaPerUserChanged
                 && long.TryParse(dest.Description.FirstOrDefault(), out var size))
-            { 
+            {
                 dest.ActionText = string.Format(map.GetActionText(), CommonFileSizeComment.FilesSizeToString(AuditReportResource.FileSizePostfix, size));
             }
             else if (dest.Action is (int)MessageAction.CustomQuotaPerRoomDefault or
-                (int)MessageAction.CustomQuotaPerRoomChanged or
-                (int)MessageAction.CustomQuotaPerUserDefault or
-                (int)MessageAction.CustomQuotaPerUserChanged
-                && long.TryParse(dest.Description.FirstOrDefault(), out var customSize))
+                         (int)MessageAction.CustomQuotaPerRoomChanged or
+                         (int)MessageAction.CustomQuotaPerUserDefault or
+                         (int)MessageAction.CustomQuotaPerUserChanged
+                     && long.TryParse(dest.Description.FirstOrDefault(), out var customSize))
             {
                 dest.ActionText = string.Format(map.GetActionText(), dest.Description.LastOrDefault(), CommonFileSizeComment.FilesSizeToString(AuditReportResource.FileSizePostfix, customSize));
             }
@@ -145,10 +145,9 @@ public class EventTypeConverter(
             }
 
             dest.ActionTypeText = actionMapper.GetActionTypeText(map);
-            dest.Product = actionMapper.GetProductText(map);
-            dest.Module = actionMapper.GetModuleText(map);
+            dest.Context = actionMapper.GetLocationText(map);
         }
-        
+
         dest.Date = tenantUtil.DateTimeFromUtc(dest.Date);
         if (!string.IsNullOrEmpty(dest.IP))
         {
@@ -167,14 +166,14 @@ public class EventTypeConverter(
             {
                 var notificationInfo = JsonSerializer.Deserialize<EventDescription<JsonElement>>(rawNotificationInfo);
 
-                dest.Context = dest.Action == (int)MessageAction.RoomRenamed ? notificationInfo.RoomOldTitle :
+                var newContext = dest.Action == (int)MessageAction.RoomRenamed ? notificationInfo.RoomOldTitle :
                     !string.IsNullOrEmpty(notificationInfo.RoomTitle) ? notificationInfo.RoomTitle : notificationInfo.RootFolderTitle;
-            }
-        }
 
-        if (string.IsNullOrEmpty(dest.Context))
-        {
-            dest.Context = dest.Module;
+                if (newContext != null)
+                {
+                    dest.Context = newContext;
+                }
+            }
         }
     }
 }

@@ -12,7 +12,7 @@
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
     <PackageReference Include="MySql.Data" Version="9.2.0" />
-    <PackageReference Include="protobuf-net" Version="3.2.52" />
+    <PackageReference Include="protobuf-net" Version="3.2.56" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\products\ASC.Files\Core\ASC.Files.Core.csproj" />

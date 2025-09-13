@@ -70,6 +70,7 @@ public class PortalController(
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
     QuotaHelper quotaHelper,
+    ApiDateTimeHelper apiDateTimeHelper,
     IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
     IdentityClient client)
@@ -115,7 +116,15 @@ public class PortalController(
     [SwaggerResponse(200, "User information", typeof(UserInfo))]
     [HttpGet("users/{userID:guid}")]
     public async Task<UserInfo> GetUserById(UserIDRequestDto inDto)
-    {
+    {        
+        var user = await userManager.GetUsersAsync(inDto.Id);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+
+        if (!await userManager.CanUserViewAnotherUserAsync(currentUser, user))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+        
         return await userManager.GetUsersAsync(inDto.Id);
     }
 
@@ -257,8 +266,8 @@ public class PortalController(
 
         if (currentUserType is EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin)
         {
-            result.DueDate = source.DueDate;
-            result.DelayDueDate = source.DelayDueDate;
+            result.DueDate = apiDateTimeHelper.Get(source.DueDate);
+            result.DelayDueDate = apiDateTimeHelper.Get(source.DelayDueDate);
         }
         
         if (await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
@@ -268,8 +277,8 @@ public class PortalController(
             result.Enterprise = tenantExtra.Enterprise;
             result.Developer = tenantExtra.Developer;
             result.CustomerId = source.CustomerId;
-            result.LicenseDate = source.LicenseDate;
-            result.Quotas = source.Quotas;
+            result.LicenseDate = apiDateTimeHelper.Get(source.LicenseDate);
+            result.Quotas = source.Quotas.Concat(source.OverdueQuotas ?? []).ToList();
         }
         
         return result;
@@ -434,6 +443,11 @@ public class PortalController(
             throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
+        if (!coreBaseSettings.Standalone && !(await tenantManager.GetCurrentTenantQuotaAsync()).Customization)
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+        
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var alias = inDto.Alias;
@@ -455,13 +469,20 @@ public class PortalController(
         var messageDate = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
         if (!string.Equals(newAlias, oldAlias, StringComparison.InvariantCultureIgnoreCase))
         {
-            if (!string.IsNullOrEmpty(apiSystemHelper.ApiSystemUrl))
+            try
             {
-                await apiSystemHelper.ValidatePortalNameAsync(newAlias, user.Id);
+                if (!string.IsNullOrEmpty(apiSystemHelper.ApiSystemUrl))
+                {
+                    await apiSystemHelper.ValidatePortalNameAsync(newAlias, user.Id);
+                }
+                else
+                {
+                    await tenantManager.CheckTenantAddressAsync(newAlias.Trim());
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await tenantManager.CheckTenantAddressAsync(newAlias.Trim());
+                throw new ArgumentException(ex.Message, nameof(alias));
             }
 
             var oldDomain = tenant.GetTenantDomain(coreSettings);

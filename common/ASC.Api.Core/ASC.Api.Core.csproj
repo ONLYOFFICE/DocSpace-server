@@ -20,10 +20,10 @@
     <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="9.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.6" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.12.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.8" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.14.0" />
     <PackageReference Include="NLog.Targets.ElasticSearch" Version="7.7.0" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.5.0" />
 	<PackageReference Include="OpenTelemetry" Version="1.12.0" />
@@ -40,12 +40,12 @@
     <PackageReference Include="StackExchange.Redis.Extensions.AspNetCore" Version="11.0.0" />
     <PackageReference Include="StackExchange.Redis.Extensions.Newtonsoft" Version="11.0.0" />
 	<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
-	<PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.4" />
+	<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
 
-	<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.4" />
-	<PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.3.0" />
-	<PackageReference Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="2.3.0" />
-	<PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" Version="2.3.0" />
+	<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.3" />
+	<PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.4.0" />
+	<PackageReference Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="2.4.0" />
+	<PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" Version="2.4.0" />
   </ItemGroup>
 
   <ItemGroup>

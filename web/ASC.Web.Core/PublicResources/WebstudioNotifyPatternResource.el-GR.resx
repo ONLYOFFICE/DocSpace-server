@@ -134,37 +134,37 @@
     <value>${LetterLogoText}. Η διαδικασία κρυπτογράφησης ξεκίνησε</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; δημιούργησε ένα νέο έγγραφο: &lt;a href={1}&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; δημιούργησε ένα νέο έγγραφο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; πρόσθεσε ένα νέο σχόλιο στην έκδοση του εγγράφου: &lt;a href={1}&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; πρόσθεσε ένα νέο σχόλιο στην έκδοση του εγγράφου: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; μεταφόρτωσε ένα νέο έγγραφο: &lt;a href={1}&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; μεταφόρτωσε ένα νέο έγγραφο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; μετονόμασε το δωμάτιο: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; μετονόμασε το δωμάτιο: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; δημιούργησε ένα νέο δωμάτιο: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; δημιούργησε ένα νέο δωμάτιο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; αφαιρέθηκε από το δωμάτιο: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; αφαιρέθηκε από το δωμάτιο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; επεξεργάστηκε το έγγραφο: &lt;a href={1}&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; επεξεργάστηκε το έγγραφο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; διέγραψε το δωμάτιο: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; προστέθηκε στο δωμάτιο: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; προστέθηκε στο δωμάτιο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; μετέφερε το δωμάτιο: &lt;a href={1}&gt;{2}&lt;/a&gt; στο αρχείο - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; μετέφερε το δωμάτιο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; στο αρχείο - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>Στον χρήστη &lt;b&gt;{0}&lt;/b&gt; ανατέθηκε ο ρόλος &lt;b&gt;{1}&lt;/b&gt; στο δωμάτιο: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>Στον χρήστη &lt;b&gt;{0}&lt;/b&gt; ανατέθηκε ο ρόλος &lt;b&gt;{1}&lt;/b&gt; στο δωμάτιο: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Προστέθηκε νέος χρήστης DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -556,7 +556,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Το ${LetterLogoText} DocSpace έχει &lt;span style="color: #FF6F3D;"&gt;απενεργοποιηθεί&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Το ${LetterLogoText} DocSpace έχει &lt;span style="color: #FF6F3D;"&gt;διαγραφεί&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Το DocSpace σας στο ${LetterLogoText} απενεργοποιήθηκε επιτυχώς. Σημειώστε ότι όλα τα δεδομένα σας θα διαγραφούν σύμφωνα με την &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Πολιτική απορρήτου&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -752,7 +752,7 @@ $TrulyYours</value>
     <value>Διαγραφή της πύλης ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>Το ${LetterLogoText} DocSpace έχει απενεργοποιηθεί</value>
+    <value>Το ${LetterLogoText} DocSpace έχει διαγραφεί</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Αλλαγή της διεύθυνσης πύλης</value>
@@ -1925,5 +1925,77 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
     <value>Ο ρόλος σας σε ένα δωμάτιο DocSpace έχει αλλάξει</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Μεταβείτε στις Υπηρεσίες</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Γεια σου, $UserName!
+
+Επικοινωνούμε μαζί σας για να σας ενημερώσουμε ότι η αυτόματη ανανέωση του υπολοίπου ττου Πορτοφολιού στο DocSpace δεν ήταν επιτυχής.
+
+Σας παρακαλούμε να ελέγξετε και να ενημερώσετε χειροκίνητα το υπόλοιπο του πορτοφολιού σας.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Απαιτείται ενέργεια: Δεν είναι δυνατή η αυτόματη ανανέωση του προγράμματος υπηρεσιών στο DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Προσεχής καταβολή συνδρομής για το DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Απαιτείται ενέργεια: Δεν είναι δυνατή η αυτόματη ανανέωση του υπολοίπου του Πορτοφολιού στο DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Γεια σου, $UserName!
+
+Σας ενημερώνουμε ότι η καταβολή της συνδρομής σας θα χρεωθεί αυτόματα στον λογαριασμό σας σε 3 ημέρες.
+
+Για να εξασφαλιστεί η ομαλή διεκπεραίωση της συναλλαγής, βεβαιωθείτε ότι διαθέτετε επαρκή χρήματα στον τρόπο πληρωμής που έχετε επιλέξει.
+
+Αν έχετε απορίες ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε με την "ομάδα υποστήριξης":"${__SupportLink}" μας.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Καλησπέρα, $UserName!
+
+Σας ενημερώνουμε ότι η αυτόματη ανανέωση του προγράμματος υπηρεσιών που έχετε αγοράσει δεν ολοκληρώθηκε.
+
+Παρακαλείσθε να ανανεώσετε μη αυτόματα το τρέχον πρόγραμμα υπηρεσιών σας (ή να αγοράσετε ένα νέο).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Μεταβείτε στις Ρυθμίσεις πορτοφολιού</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Ανοίξτε το DocSpace</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Ο κωδικός πρόσβασής σας άλλαξε με επιτυχία</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Ο κωδικός πρόσβασης άλλαξε με επιτυχία
+
+Ο κωδικός πρόσβασής σας για τον λογαριασμό *$UserName*, *$UserEmail* άλλαξε με επιτυχία στις *$Date* στο DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Συσκευή: *$Device*
+#if($Location != "")
+Τοποθεσία: *$Location*
+#end
+Πρόγραμμα περιήγησης: *$Browser*
+
+Εάν αυτή η ενέργεια έγινε από εσάς — δεν απαιτούνται περαιτέρω βήματα. Εάν αυτή η αλλαγή φαίνεται ύποπτη ή δεν έχει εξουσιοδοτηθεί από εσάς, επαναφέρετε αμέσως τον κωδικό πρόσβασής σας και απενεργοποιήστε την πρόσβαση στο DocSpace για αυτήν τη συσκευή.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

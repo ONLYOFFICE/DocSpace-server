@@ -219,6 +219,11 @@ public class CustomizationConfigDto
     /// The go back configuration of the customization.
     /// </summary>
     public GobackConfig Goback { get; set; }
+    
+    /// <summary>
+    /// The review configuration of the customization.
+    /// </summary>
+    public ReviewConfig Review { get; set; }
 
     /// <summary>
     /// The logo of the customization.
@@ -229,11 +234,6 @@ public class CustomizationConfigDto
     /// Specifies if the share should be mentioned.
     /// </summary>
     public bool MentionShare { get; set; }
-
-    /// <summary>
-    /// The review display of the customization.
-    /// </summary>
-    public string ReviewDisplay { get; set; }
 
     /// <summary>
     /// The "Complete &amp; Submit" button settings.
@@ -286,6 +286,11 @@ public class LogoConfigDto
     /// The dark image of the logo.
     /// </summary>
     public string ImageDark { get; set; }
+
+    /// <summary>
+    /// The light image of the logo.
+    /// </summary>
+    public string ImageLight { get; set; }
 
     /// <summary>
     /// The embedded image of the logo.
@@ -527,6 +532,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
             Mode = source.Mode,
             ModeWrite = source.ModeWrite,
             Plugins = source.Plugins,
+            Recent = await source.GetRecent(fileType, file.Id).ToListAsync(),
             Templates = await source.GetTemplates(fileType, configuration.Document.Title),
             User = await source.GetUserAsync()
         };
@@ -559,9 +565,9 @@ public class CustomizationConfigConverter<T>(
             Feedback = await source.GetFeedback(),
             Forcesave = source.GetForceSave(file),
             Goback = await source.GetGoBack(configuration.EditorType, file),
-            Logo = await configConverter.Convert(configuration),
+            Logo = await configConverter.Convert(configuration, file),
             MentionShare = await source.GetMentionShare(file),
-            ReviewDisplay = source.GetReviewDisplay(configuration.EditorConfig.ModeWrite),
+            Review = source.GetReview(configuration.EditorConfig.ModeWrite),
             SubmitForm = await source.GetSubmitForm(file),
             Anonymous = anonymousConfigConverter.Convert(configuration)
         };
@@ -574,7 +580,7 @@ public class CustomizationConfigConverter<T>(
 [Scope(GenericArguments = [typeof(string)])]
 public class LogoConfigConverter<T>
 {
-    public async Task<LogoConfigDto> Convert(Configuration<T> configuration)
+    public async Task<LogoConfigDto> Convert(Configuration<T> configuration, File<T> file)
     {
         var source = configuration.EditorConfig?.Customization?.Logo;
         
@@ -583,11 +589,14 @@ public class LogoConfigConverter<T>
             return null;
         }
 
+        var fileType = FileUtility.GetFileTypeByFileName(file.Title);
+
         var result = new LogoConfigDto
         {
-            Image = await source.GetImage(configuration.EditorType),
-            ImageDark = await source.GetImageDark(),
-            ImageEmbedded = await source.GetImageEmbedded(configuration.EditorType),
+            Image = await source.GetImage(fileType, configuration.EditorType),
+            ImageDark = await source.GetImageDark(fileType),
+            ImageLight = await source.GetImageLight(fileType),
+            ImageEmbedded = await source.GetImageEmbedded(fileType, configuration.EditorType),
             Url = source.Url,
             Visible = source.GetVisible(configuration.EditorType)
         };

@@ -53,11 +53,12 @@ internal class ProviderAccountDao(
     ILogger<ProviderAccountDao> logger)
     : IProviderDao
 {
-    public virtual Task<IProviderInfo> GetProviderInfoAsync(int linkId)
+    public virtual async Task<IProviderInfo> GetProviderInfoAsync(int linkId)
     {
         var providersInfo = GetProvidersInfoInternalAsync(linkId);
 
-        return providersInfo.SingleAsync().AsTask();
+        var allproviders = await providersInfo.ToListAsync();
+        return allproviders.Single();
     }
 
     public async Task<IProviderInfo> GetProviderInfoByEntryIdAsync(string entryId)

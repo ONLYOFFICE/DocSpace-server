@@ -56,15 +56,15 @@ public class WebPluginsController(
 
         if (HttpContext.Request.Form.Files == null || HttpContext.Request.Form.Files.Count == 0)
         {
-            throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginNoInputFile);
+            throw new ArgumentException(Resource.ErrorWebPluginNoInputFile);
         }
 
         if (HttpContext.Request.Form.Files.Count > 1)
         {
-            throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginToManyInputFiles);
+            throw new ArgumentException(Resource.ErrorWebPluginToManyInputFiles);
         }
 
-        var file = HttpContext.Request.Form.Files[0] ?? throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginNoInputFile);
+        var file = HttpContext.Request.Form.Files[0] ?? throw new ArgumentException(Resource.ErrorWebPluginNoInputFile);
 
         var tenant = tenantManager.GetCurrentTenant();
 

@@ -26,7 +26,6 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
-using ASC.Files.Tests.Factory;
 
 namespace ASC.Files.Tests.FilesController;
 
@@ -58,7 +57,7 @@ public class CreateFileTest(
     [MemberData(nameof(Data))]
     public async Task CreateFile_FolderMy_Owner_ReturnsOk(string fileName)
     {
-        var createdFile = await CreateFile(fileName, FolderType.USER, Initializer.Owner);
+        var createdFile = await CreateFileInMy(fileName, Initializer.Owner);
         
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
@@ -75,7 +74,7 @@ public class CreateFileTest(
     {
         var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
         
-        var createdFile = await CreateFile(fileName, FolderType.USER, roomAdmin);
+        var createdFile = await CreateFileInMy(fileName, roomAdmin);
         
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
@@ -92,7 +91,7 @@ public class CreateFileTest(
     {
         var user = await Initializer.InviteContact(EmployeeType.User);
         
-        var createdFile = await CreateFile(fileName, FolderType.USER, user);
+        var createdFile = await CreateFileInMy(fileName, user);
 
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
@@ -111,7 +110,7 @@ public class CreateFileTest(
         //Arrange
         var file = new CreateFileJsonElement("test.docx");
         
-        await Assert.ThrowsAsync<ApiException>(async () => await _filesFilesApi.CreateFileAsync(Random.Shared.Next(10000, 20000), file, cancellationToken: TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateFileAsync(Random.Shared.Next(10000, 20000), file, cancellationToken: TestContext.Current.CancellationToken));
     }
     
     [Theory]
@@ -134,7 +133,7 @@ public class CreateFileTest(
         
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesFilesApi.CreateFileAsync(
+            async () => await _filesApi.CreateFileAsync(
                 await GetFolderIdAsync(FolderType.USER, Initializer.Owner), 
                 file, 
                 cancellationToken: TestContext.Current.CancellationToken));
@@ -159,7 +158,7 @@ public class CreateFileTest(
             createNewIfExist: true
         );
         
-        var result = (await _filesFilesApi.CreateTextFileAsync(userFolderId, createParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.CreateTextFileAsync(userFolderId, createParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -187,7 +186,7 @@ public class CreateFileTest(
             createNewIfExist: true
         );
         
-        var result = (await _filesFilesApi.CreateHtmlFileAsync(userFolderId, createParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.CreateHtmlFileAsync(userFolderId, createParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();

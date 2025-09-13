@@ -406,7 +406,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace je &lt;span style="color: #FF6F3D;"&gt;deaktiviran&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace je &lt;span style="color: #FF6F3D;"&gt;izbrisan&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Vaš ${LetterLogoText} DocSpace je bil uspešno deaktiviran. Upoštevajte, da bodo vsi vaši podatki izbrisani v skladu z našo &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Politiko zasebnosti&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -503,40 +503,40 @@ $TrulyYours</value>
     <value>Obiščite razdelek za plačila</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je ustvaril nov dokument: &lt;a href={1}&gt;{2}&lt;/a&gt; v sobi: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je ustvaril nov dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v sobi: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je uredil dokument: &lt;a href={1}&gt;{2}&lt;/a&gt; v sobi: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je uredil dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v sobi: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je naložil nov dokument: &lt;a href={1}&gt;{2}&lt;/a&gt; v sobi: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je naložil nov dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v sobi: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je dodal nov komentar na verzijo dokumenta: &lt;a href={1}&gt;{2}&lt;/a&gt; v sobi: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je dodal nov komentar na verzijo dokumenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v sobi: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je premaknil sobo: &lt;a href={1}&gt;{2}&lt;/a&gt; v arhiv - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je premaknil sobo: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v arhiv - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je ustvaril novo sobo: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je ustvaril novo sobo: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; je izbrisal sobo: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je preimenoval sobo: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je preimenoval sobo: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je bila dodeljena vloga &lt;b&gt;{1}&lt;/b&gt; v sobi: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je bila dodeljena vloga &lt;b&gt;{1}&lt;/b&gt; v sobi: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je bil dodan sobi: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je bil dodan sobi: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Dodan je bil nov uporabnik DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je bil odstranjen iz sobe: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je bil odstranjen iz sobe: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUsersUpdatedType" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; je spremenil nivo dostopa za uporabnike &lt;b&gt;{1}&lt;/b&gt; na &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -743,7 +743,7 @@ $TrulyYours</value>
     <value>Brisanje portala ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace je deaktiviran</value>
+    <value>Dokumentni prostor ${LetterLogoText} je izbrisan</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Sprememba naslova portala</value>
@@ -1984,5 +1984,77 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Vaša vrsta uporabnika DocSpace se je spremenila</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Pojdi na Storitve</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Pojdi v nastavitve Denarnice</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Pozdravljen, $UserName!
+
+Obveščamo vas, da samodejne obnove vašega naročniškega paketa ni bilo mogoče izvesti.
+
+Vljudno vas prosimo, da ročno obnovite svoj trenutni naročniški paket (ali kupite novega).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Pozdravljen, $UserName!
+
+Obveščamo vas, da bo plačilo vaše naročnine samodejno odtegnjeno z vašega računa v 3 dneh.
+
+Za zagotovitev nemotenega poteka transakcije vas prosimo, da potrdite, da je na vašem plačilnem računu na voljo dovolj sredstev.
+
+Če imate kakršna koli vprašanja ali potrebujete pomoč, se obrnite na našo "ekipo za podporo":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Pozdravljen, $UserName!
+
+Obveščamo vas, da samodejno polnjenje stanja denarnice DocSpace ni bilo uspešno.
+
+Vljudno vas prosimo, da stanje v denarnici preverite in posodobite ročno.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Zahtevano dejanje: Samodejno podaljšanje naročniškega paketa v vašem ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Prihajajoče plačilo naročnine za vaš ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Zahtevano dejanje: Stanja v denarnici ${LetterLogoText} v vašem DocSpace ni mogoče samodejno napolniti.</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Vaše geslo je bilo uspešno spremenjeno</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Odpri DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Geslo uspešno spremenjeno
+
+Vaše geslo za račun *$UserName*, *$UserEmail* je bilo uspešno spremenjeno dne *$Date* v DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Naprava: *$Device*
+#if($Location != "")
+Lokacija: *$Location*
+#end
+Brskalnik: *$Browser*
+
+Če ste to dejanje izvedli sami, nadaljnji koraki niso potrebni. Če se vam zdi ta sprememba sumljiva ali je niste odobrili, takoj ponastavite geslo in onemogočite dostop do DocSpace za to napravo.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

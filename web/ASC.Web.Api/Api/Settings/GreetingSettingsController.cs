@@ -84,7 +84,14 @@ public class GreetingSettingsController(
             var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
             if (quota.Free || quota.Trial)
             {
-                tenantManager.ValidateTenantName(inDto.Title);
+                try
+                {
+                    tenantManager.ValidateTenantName(inDto.Title);
+                }
+                catch (Exception ex)
+                {
+                    throw new ArgumentException(ex.Message, nameof(inDto.Title));
+                }
             }
         }
 

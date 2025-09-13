@@ -80,12 +80,7 @@ public class FilesSettingsDto
     /// The list of extensions of the template files.
     /// </summary>
     public List<string> ExtsWebTemplate { get; set; }
-
-    /// <summary>
-    /// The list of extensions of the co-authoring files.
-    /// </summary>
-    public List<string> ExtsCoAuthoring { get; set; }
-
+    
     /// <summary>
     /// The list of extensions of the files that must be converted.
     /// </summary>
@@ -135,6 +130,11 @@ public class FilesSettingsDto
     /// The list of the text document extensions. 
     /// </summary>
     public ImmutableList<string> ExtsDocument { get; set; }
+
+    /// <summary>
+    /// The list of the diagram extensions.
+    /// </summary>
+    public ImmutableList<string> ExtsDiagram { get; set; }
 
     /// <summary>
     /// The internal file formats.
@@ -347,7 +347,6 @@ public class FilesSettingsDtoConverter(
             ExtsWebRestrictedEditing = fileUtility.ExtsWebRestrictedEditing,
             ExtsWebCommented = fileUtility.ExtsWebCommented,
             ExtsWebTemplate = fileUtility.ExtsWebTemplate,
-            ExtsCoAuthoring = fileUtility.ExtsCoAuthoring,
             ExtsMustConvert = fileUtility.ExtsMustConvert,
             ExtsConvertible = await fileUtility.GetExtsConvertibleAsync(),
             ExtsUploadable = fileUtility.ExtsUploadable,
@@ -358,6 +357,7 @@ public class FilesSettingsDtoConverter(
             ExtsSpreadsheet = FileUtility.ExtsSpreadsheet,
             ExtsPresentation = FileUtility.ExtsPresentation,
             ExtsDocument = FileUtility.ExtsDocument,
+            ExtsDiagram = FileUtility.ExtsDiagram,
             InternalFormats = fileUtility.InternalExtension,
             MasterFormExtension = fileUtility.MasterFormExtension,
             ParamVersion = FilesLinkUtility.Version,

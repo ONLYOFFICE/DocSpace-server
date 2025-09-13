@@ -53,6 +53,7 @@ public class Group
     }
 }
 
+
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class GroupMapper
 {    
@@ -64,4 +65,11 @@ public static partial class GroupMapper
     
     // Handle nullable Guid mapping
     private static Guid MapNullableGuid(Guid? source) => source ?? Guid.Empty;
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class GroupInfoMapper
+{    
+    public partial GroupInfo MapToGroupInfo(DbGroup source);
+    
 }

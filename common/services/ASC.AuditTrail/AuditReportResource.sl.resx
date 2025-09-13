@@ -115,9 +115,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Nastavitve prepisovanja posodobljene</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Dokumenti</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Nastavitve</value>
   </data>
@@ -331,9 +328,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Premakni</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Drugi</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Lastnik spremenjen: {0}</value>
   </data>
@@ -351,9 +345,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Nastavitve moči gesla posodobljene</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Osebe</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platforma</value>
@@ -402,9 +393,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Seja začeta</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Nastavitve</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO onemogočen</value>
@@ -912,5 +900,41 @@
   </data>
   <data name="ApiKeyUpdated" xml:space="preserve">
     <value>Uporabniški ključ API posodobljen: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Povezava za aktivacijo je bila aktivirana</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Operacija stranke izvedena</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Poročilo o poslovanju stranke preneseno</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Naročnina stranke posodobljena: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Denarnica stranke napolnjena: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Nastavitve polnjenja denarnice stranke posodobljene</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Preverjanje LDAP je odklopljeno</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Preverjanje LDAP je omogočeno</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Sinhronizacija LDAP je končana</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Lokacija</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Nastavitve vidnosti promocijskih pasic so bile spremenjene</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Nastavitve storitev, omogočenih za denarnico strank, so bile posodobljene</value>
   </data>
 </root>

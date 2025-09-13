@@ -570,6 +570,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             {
                                 await filesMessageService.SendAsync(MessageAction.RoomCopied, newFolder, _headers, newFolder.Title);
                                 await webhookManager.PublishAsync(WebhookTrigger.RoomCopied, newFolder);
+                                var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
+                                _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
                             }
                             else
                             {
@@ -789,7 +791,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             {
                                 if (toFolder.FolderType == FolderType.Archive)
                                 {
-                                    var pins = await TagDao.GetTagsAsync(Guid.Empty, TagType.Pin, new List<FileEntry<T>> { folder }).ToListAsync();
+                                    var pins = await TagDao.GetTagsAsync(Guid.Empty, [TagType.Pin], new List<FileEntry<T>> { folder }).ToListAsync();
                                     if (pins.Count > 0)
                                     {
                                         await TagDao.RemoveTagsAsync(pins);
@@ -870,6 +872,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
         var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
         var cachedFolderDao = scope.ServiceProvider.GetService<ICacheFolderDao<T>>();
+        var entryManager = scope.ServiceProvider.GetService<EntryManager>();
 
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();
@@ -951,7 +954,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 {
                                     await fileDao.SaveFileAsync(newFile, null);
                                 }
-
+                                
                                 await filesMessageService.SendCopyMessageAsync(newFile, parentFolder, toFolder, toParentFolders, false, _headers, [newFile.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
                                 await webhookManager.PublishAsync(WebhookTrigger.FileCopied, newFile);
 
@@ -962,7 +965,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     properties.CopyToFillOut = true;
                                     await fileDao.SaveProperties(newFile.Id, properties);
                                 }
-
+                                
+                                await entryManager.MarkAsRecent(newFile);
                                 await socketManager.CreateFileAsync(newFile);
 
                                 if (ProcessedFile(fileId))
@@ -991,12 +995,22 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
 
                                 TTo newFileId = default;
-                                await socketManager.DeleteFileAsync(file, action: async () => newFileId = await FileDao.MoveFileAsync(file.Id, toFolderId, deleteLinks));
+                                await socketManager.DeleteFileAsync(file, action: async () =>
+                                {
+                                    newFileId = await FileDao.MoveFileAsync(file.Id, toFolderId, deleteLinks);
+                                    await fileStorageService.DeleteFromRecentAsync([], [file.Id]);
+                                });
+                                
                                 newFile = await fileDao.GetFileAsync(newFileId);
 
                                 await filesMessageService.SendMoveMessageAsync(newFile, parentFolder, toFolder, toParentFolders, false, _headers, [file.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
                                 await webhookManager.PublishAsync(parentFolder.FolderType == FolderType.TRASH ? WebhookTrigger.FileRestored : WebhookTrigger.FileMoved, newFile);
-
+                                
+                                if (newFile.RootFolderType != FolderType.TRASH)
+                                {
+                                    await entryManager.MarkAsRecent(newFile);
+                                }
+                                
                                 if (file.RootFolderType == FolderType.TRASH && newFile.ThumbnailStatus == Thumbnail.NotRequired)
                                 {
                                     newFile.ThumbnailStatus = Thumbnail.Waiting;
@@ -1152,7 +1166,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 }
 
                                 await socketManager.CreateFileAsync(newFile);
-
+                                await entryManager.MarkAsRecent(newFile);
+                                
                                 if (copy)
                                 {
                                     await filesMessageService.SendCopyMessageAsync(newFile, parentFolder, toFolder, toParentFolders.ToList(), true, _headers, [newFile.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
@@ -1203,6 +1218,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             //nothing
                         }
                     }
+                }
+                catch (TenantQuotaException ex)
+                {
+                    Err = ex.Message;
+
+                    Logger.InformationUnableFileMoveCopyOperation(fileId.ToString(), ex.Message);
                 }
                 catch (Exception ex)
                 {

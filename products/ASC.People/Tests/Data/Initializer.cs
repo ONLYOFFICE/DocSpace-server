@@ -30,7 +30,7 @@ using ASC.People.Tests.Factory;
 
 using MemberRequestDto = ASCPeople::ASC.People.ApiModels.RequestDto.MemberRequestDto;
 using PasswordHasher = ASC.Security.Cryptography.PasswordHasher;
-using WizardRequestsDto = Docspace.Model.WizardRequestsDto;
+using WizardRequestsDto = DocSpace.API.SDK.Model.WizardRequestsDto;
 
 namespace ASC.People.Tests.Data;
 
@@ -111,7 +111,7 @@ public static class Initializer
         {        
             _apiFactory = apiFactory;
             _peopleFactory = peopleFactory;
-            var settings  = (await apiFactory.CommonSettingsApi.GetSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+            var settings  = (await apiFactory.CommonSettingsApi.GetPortalSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
             
             if (!string.IsNullOrEmpty(settings.WizardToken))
             {
@@ -136,7 +136,7 @@ public static class Initializer
     {
         await _apiFactory.HttpClient.Authenticate(Owner);
 
-        var shortLink = (await _apiFactory.PortalUsersApi.GeInviteLinkAsync(employeeType, TestContext.Current.CancellationToken)).Response;
+        var shortLink = (await _apiFactory.PortalUsersApi.GetInvitationLinkAsync(employeeType, TestContext.Current.CancellationToken)).Response;
         var fullLink = await _apiFactory.HttpClient.GetAsync(shortLink);
         var confirmHeader = fullLink.RequestMessage?.RequestUri?.Query.Substring(1);
         if (confirmHeader == null)
@@ -156,7 +156,7 @@ public static class Initializer
         
         var fakeMember = FakerMember.Generate();
         
-        var createMemberResponse = await _peopleFactory.PeopleProfilesApi.AddMemberWithHttpInfoAsync(new Docspace.Model.MemberRequestDto
+        var createMemberResponse = await _peopleFactory.PeopleProfilesApi.AddMemberWithHttpInfoAsync(new DocSpace.API.SDK.Model.MemberRequestDto
         {
             FromInviteLink = true,
             CultureName = "en-US",

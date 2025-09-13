@@ -541,37 +541,37 @@ $TrulyYours</value>
     <value>${LetterLogoText} portalına yeni kullanıcı eklendi</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt; odasında yeni bir belge oluşturdu &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt; odasında yeni bir belge oluşturdu &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt; odasında belge sürümüne yeni bir yorum ekledi &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt; odasında belge sürümüne yeni bir yorum ekledi &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; &lt;a href={3}&gt;{4}&lt;/a&gt; yeni bir belge yükledi: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; yeni bir belge yükledi: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; odanın ismini değiştirdi: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; odanın ismini değiştirdi: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; yeni bir oda oluşturdu: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; yeni bir oda oluşturdu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; odadan kaldırıldı: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; odadan kaldırıldı: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; &lt;a href={3}&gt;{4}&lt;/a&gt; odasında belgeyi düzenledi &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; odasında belgeyi düzenledi &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; odayı sildi: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; odaya eklendi: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; odaya eklendi: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; odayı taşıdı: &lt;a href={1}&gt;{2}&lt;/a&gt; arşive - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; odayı taşıdı: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; arşive - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; &lt;a href={2}&gt;{3}&lt;/a&gt; odasında &lt;b&gt;{1}&lt;/b&gt; rolüne atandı</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; odasında &lt;b&gt;{1}&lt;/b&gt; rolüne atandı</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Yeni DocSpace kullanıcısı eklendi: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -871,7 +871,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace &lt;span style="color: #FF6F3D;"&gt;devre dışı bırakıldı&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace &lt;span style="color: #FF6F3D;"&gt;silindi&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;${LetterLogoText} DocSpace'iniz başarıyla devre dışı bırakıldı. Tüm verilerinizin &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Gizlilik Politikamız&lt;/a&gt; uyarınca silineceğini lütfen unutmayın.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1406,7 +1406,7 @@ Bağlantı yalnızca 7 gün boyunca geçerlidir.</value>
     <value>Şimdi katılın ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace devre dışı bırakıldı</value>
+    <value>${LetterLogoText} DocSpace silindi</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Kullanıcı hesabını sildi</value>
@@ -1917,6 +1917,78 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Geri bildiriminizi almaktan memnuniyetle duyarız. ${LetterLogoText} DocSpace’i kullanmayı bırakma sebebiniz nedir?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;${LetterLogoText} DocSpace’inizi kullanmaya devam etmek istiyorsanız, sadece giriş yapıp herhangi bir işlem yapmanız yeterlidir.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Hizmetlere git</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Cüzdan ayarlarına git</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+Satın aldığınız hizmet planınızın otomatik yenileme işlemi tamamlanamadığını bildirmek için sizinle iletişime geçiyoruz.
+
+Mevcut hizmet planınızı manuel olarak yenilemenizi (veya yeni bir plan satın almanızı) rica ediyoruz.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+Abonelik ödemenizin 3 gün içinde hesabınızdan otomatik olarak tahsil edileceğini bildirmek için sizinle iletişime geçiyoruz.
+
+İşlemin sorunsuz gerçekleşebilmesi için ödeme yönteminizde yeterli bakiye bulunduğundan emin olmanızı rica ediyoruz.
+
+Herhangi bir sorunuz varsa veya yardıma ihtiyaç duyarsanız, "destek ekibimizle":"${__SupportLink}" iletişime geçebilirsiniz.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+DocSpace Cüzdan bakiyesinin otomatik olarak yüklenmesinin başarısız olduğunu bildirmek için size ulaşıyoruz.
+
+Cüzdan bakiyenizi manuel olarak kontrol etmenizi ve güncellemenizi rica ediyoruz.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Eylem Gerekiyor: ${LetterLogoText} DocSpace alanınızdaki hizmet planınız otomatik olarak yenilenemedi</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace alanınız için yaklaşan abonelik ödemesi</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Eylem Gerekiyor: ${LetterLogoText} DocSpace cüzdan bakiyeniz otomatik olarak yüklenemedi</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Şifreniz başarıyla değiştirildi</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Açık DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Şifre başarıyla değiştirildi
+
+*$UserName*, *$UserEmail* hesabınızın şifresi, DocSpace'de *$Date* tarihinde başarıyla değiştirildi: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Cihaz: *$Device*
+#if($Location != "")
+Konum: *$Location*
+#end
+Tarayıcı: *$Browser*
+
+Bu işlem sizin tarafınızdan yapıldıysa, başka bir adım gerekmez. Bu değişiklik şüpheli görünüyorsa veya sizin tarafınızdan yetkilendirilmemişse, lütfen şifrenizi hemen sıfırlayın ve bu cihaz için DocSpace erişimini devre dışı bırakın.
+
+$OrangeButton
 
 $TrulyYours</value>
   </data>

@@ -106,6 +106,14 @@ public abstract class FileEntry : ICloneable
     public bool Shared { get; set; }
 
     /// <summary>
+    /// Indicates whether the parent entity is shared.
+    /// </summary>
+    public bool ParentShared { get; set; }
+
+    [JsonIgnore]
+    public bool FullShared { get => Shared || ParentShared; }
+    
+    /// <summary>
     /// The provider ID.
     /// </summary>
     public int ProviderId { get; set; }

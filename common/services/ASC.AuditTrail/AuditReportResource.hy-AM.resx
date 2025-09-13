@@ -195,9 +195,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Վրագրման կարգավորումները թարմացվել են</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Փաստաթղթեր</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Կարգավորումներ</value>
   </data>
@@ -468,9 +465,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Տեղափոխել</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Այլ</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Տնօրինողը փոխվել է: {0}</value>
   </data>
@@ -488,9 +482,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Գաղտնաբառի հզորության կարգավորումները թարմացվել ե</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Մարդիկ</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Հարթակ</value>
@@ -551,9 +542,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Աշխատաշրջանը սկսված է</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Կարգավորումներ</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO անջատված</value>
@@ -971,5 +959,41 @@
   </data>
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>Ֆայլ՝ {0}։ Հատուկ ֆիլտրը միացված է</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Հաստատման հղումը ակտիվացված է</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Հաճախորդի գործողությունը կատարվել է</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Հաճախորդի գործառնությունների հաշվետվությունը ներբեռնվել է</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Հաճախորդի բաժանորդագրությունը թարմացվել է՝ {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Հաճախորդի դրամապանակը լիցքավորվել է՝ {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Հաճախորդի դրամապանակի լիցքավորման կարգավորումները թարմացվեցին</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP նույնականացումը անջատված է</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP նույնականացումը միացված է</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP սինխրոնիզացիան ավարտվեց</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Լոկացիա</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Գովազդային պաստառների տեսանելիության կարգավորումները փոխվել են</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Հաճախորդի դրամապանակի միացված ծառայությունների կարգավորումները թարմացվել են</value>
   </data>
 </root>

@@ -135,4 +135,25 @@
   <data name="RestoreException" xml:space="preserve">
     <value>恢复备份时发生错误，请重试或联系技术支持。</value>
   </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>自动备份</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>临时存储</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>备份房间</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>本地文件</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>第三方存储</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>第三方资源</value>
+  </data>
 </root>

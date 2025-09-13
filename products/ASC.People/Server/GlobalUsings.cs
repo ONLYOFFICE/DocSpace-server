@@ -46,6 +46,7 @@ global using ASC.AuditTrail.Repositories;
 global using ASC.AuditTrail.Types;
 global using ASC.Common;
 global using ASC.Common.Caching;
+global using ASC.Common.Security.Authorizing;
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Utils;

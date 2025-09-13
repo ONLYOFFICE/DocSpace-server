@@ -164,7 +164,7 @@
     <value>새로운 소식</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>사용자 로그인 &amp; 작업 추적</value>
+    <value>로그인 및 작업 추적</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>최대 파일 크기</value>
@@ -179,7 +179,7 @@
     <value>관리자 수</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>자동 백업 &amp; 복구</value>
+    <value>데이터 복구</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>활성 방 수 무제한</value>
@@ -206,7 +206,7 @@
     <value>방 사용자:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>사용자 수 무제한</value>
+    <value>사용자 및 게스트 수 제한 없음</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>최대 사용자 수는 {0}입니다</value>
@@ -1080,5 +1080,86 @@
   </data>
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>Webhook URL을 이용할 수 없습니다. HEAD 요청은 200 http 상태에 대한 응답이 아닙니다.</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>크레딧</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>통화</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>날짜</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>수량</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>디스크 공간</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>잔액 충전</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>측정 단위</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>고객 작업 보고서({0}-{1})</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>해당 그룹을 찾지 못했습니다</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>추가 디스크 저장 공간</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>저장 공간을 필요한 용량으로 조정하세요.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>사용 저장 공간:</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>백업</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>백업</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>백업</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>자동 갱신</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>한 달 동안 무료 백업 횟수는 {0}회를 초과할 수 없습니다.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>DocSpace 백업을 활성화하세요. 비용은 자동으로 청구됩니다.</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>직불</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>접촉</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>거래 내역</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>자동 충전</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>결제가 필요합니다</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>전형</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>매달 {0}회 무료 백업</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>세부</value>
   </data>
 </root>

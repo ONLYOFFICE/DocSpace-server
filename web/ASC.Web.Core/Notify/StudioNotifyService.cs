@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AuditTrail.Models;
+
 using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
@@ -112,6 +114,36 @@ public class StudioNotifyService(
         var displayUserName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
 
         messageService.Send(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
+    }
+
+    public async Task SendUserPasswordChangedAsync(UserInfo userInfo, AuditEvent auditEvent)
+    {
+        var cultureInfo = GetCulture(userInfo);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonOpenDocSpace", cultureInfo);
+        var confirmationUrl = commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetConfirmationUrlRelative(userInfo.TenantId, userInfo.Email, ConfirmType.Auth, null, userInfo.Id));
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
+
+        var location = string.Empty;
+        if (!string.IsNullOrEmpty(auditEvent.Country) || !string.IsNullOrEmpty(auditEvent.City))
+        {
+            location = auditEvent.Country + ", " + auditEvent.City;
+        }
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(
+            Actions.PasswordChanged,
+            await studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false),
+            [EMailSenderName],
+            new TagValue(Tags.UserName, userInfo.FirstName.HtmlEncode()),
+            new TagValue(Tags.UserEmail, userInfo.Email),
+            new TagValue(Tags.Date, auditEvent.Date.ToShortDateString() + " " + auditEvent.Date.ToShortTimeString()),
+            new TagValue(Tags.Device, auditEvent.Platform),
+            new TagValue(Tags.Location, location),
+            new TagValue(Tags.Browser, auditEvent.Browser),
+            new TagValue(Tags.IP, auditEvent.IP),
+            TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+            new TagValue(CommonTags.Culture, cultureInfo.Name));
     }
 
     #endregion
@@ -1020,6 +1052,58 @@ public class StudioNotifyService(
     }
 
     #endregion
+
+
+    #region Wallet
+
+    public async Task SendTopUpWalletErrorAsync(UserInfo payer, UserInfo owner)
+    {
+        var users = (new UserInfo[] { payer, owner })
+            .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
+            .DistinctBy(user => user.Email);
+
+        foreach (var user in users)
+        {
+            var culture = GetCulture(user);
+            var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToWalletSettings", GetCulture(user));
+            var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+            await studioNotifyServiceHelper.SendNoticeToAsync(
+            Actions.TopUpWalletError,
+            await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false),
+            [EMailSenderName],
+            new TagValue(Tags.UserName, user.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.Culture, user.GetCulture().Name),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/wallet")),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours));
+        }
+    }
+
+    public async Task SendRenewSubscriptionErrorAsync(UserInfo payer, UserInfo owner)
+    {
+        var users = (new UserInfo[] { payer, owner })
+            .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
+            .DistinctBy(user => user.Email);
+
+        foreach (var user in users)
+        {
+            var culture = GetCulture(user);
+            var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToServices", culture);
+            var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+            await studioNotifyServiceHelper.SendNoticeToAsync(
+            Actions.RenewSubscriptionError,
+            await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false),
+            [EMailSenderName],
+            new TagValue(Tags.UserName, user.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.Culture, culture.Name),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/services")),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours));
+        }
+    }
+
+    #endregion
+
 
     #region Migration Personal to Docspace
 

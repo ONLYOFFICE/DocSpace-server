@@ -964,7 +964,7 @@
     <value>Startup</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Tracking user logins &amp; action</value>
+    <value>Tracking logins &amp; actions</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Max file size</value>
@@ -979,7 +979,7 @@
     <value>Number of admins</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Automatic backup &amp; recovery</value>
+    <value>Data recovery</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Unlimited number of active rooms</value>
@@ -1012,7 +1012,7 @@
     <value>Users in room:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Unlimited number of users</value>
+    <value>Unlimited number of users and guests</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>The number of users should not exceed {0}</value>
@@ -1144,13 +1144,10 @@
     <value>Currency</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Date and time</value>
+    <value>Date</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Quantity</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Service name</value>
   </data>
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Unit of Measurement</value>
@@ -1160,9 +1157,6 @@
   </data>
   <data name="AccountingCustomerOperationCredit" xml:space="preserve">
     <value>Credit</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Withdrawal</value>
   </data>
   <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
     <value>Additional disk storage</value>
@@ -1176,13 +1170,58 @@
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>The group could not be found</value>
   </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Description</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Disk space</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
     <value>Balance top-up</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Automatic renewal</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Enable backups for your DocSpace. Costs will be billed automatically.</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>The number of free backups should not exceed {0} within a month</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Payment required</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} free backups per month</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Automatic top up</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Transaction history</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debit</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>The number of plugins exceeds the limit</value>
   </data>
 </root>

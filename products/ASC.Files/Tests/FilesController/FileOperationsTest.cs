@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.Factory;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -46,10 +44,10 @@ public class FileOperationsTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var file = await CreateFile("file_for_download.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_for_download.docx", Initializer.Owner);
         
         // Act
-        var downloadUrl = (await _filesFilesApi.GetPresignedUriAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var downloadUrl = (await _filesApi.GetPresignedUriAsync(file.Id, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         downloadUrl.Should().NotBeNull();

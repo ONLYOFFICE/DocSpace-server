@@ -102,6 +102,22 @@ public class TenantQuotaFeatureCount(TenantQuota tenantQuota) : TenantQuotaFeatu
     }
 }
 
+public class TenantQuotaFeatureFixedCount(TenantQuota tenantQuota) : TenantQuotaFeature<int>(tenantQuota)
+{
+    public override int Default => default;
+
+    protected override bool TryParse(string s, out int result)
+    {
+        result = default;
+        var parts = s.Split([':'], 3, StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length == 3 && parts[2] == "fixed" && int.TryParse(parts[1], out result);
+    }
+
+    protected internal override void Multiply(int quantity)
+    {
+    }
+}
+
 public class TenantQuotaFeatureSize(TenantQuota tenantQuota) : TenantQuotaFeature<long>(tenantQuota)
 {
     public override long Default => long.MaxValue;

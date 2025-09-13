@@ -34,7 +34,7 @@ public class AuthorizationPolicyProvider(IOptions<AuthorizationOptions> options)
         var basePolicy = new AuthorizationPolicyBuilder()
                                 .RequireAuthenticatedUser();
 
-        basePolicy.AddRequirements(new ScopesRequirement(AuthConstants.Claim_ScopeRootWrite.Value));
+        basePolicy.AddRequirements(new ScopesRequirement(AuthConstants.Claim_ScopeGlobalWrite.Value));
 
         return Task.FromResult(basePolicy.Build());
     }

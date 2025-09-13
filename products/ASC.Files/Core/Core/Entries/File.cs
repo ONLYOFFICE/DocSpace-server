@@ -66,7 +66,7 @@ public enum FileStatus
 }
 
 /// <summary>
-/// The file parameters.
+/// Represents a file with associated metadata and operations.
 /// </summary>
 [Transient(GenericArguments = [typeof(int)])]
 [Transient(GenericArguments = [typeof(string)])]
@@ -147,7 +147,8 @@ public class File<T> : FileEntry<T>
                     return FilterType.MediaOnly;
                 case FileType.Pdf:
                     return this.IsForm ? FilterType.PdfForm : FilterType.Pdf;
-                   
+                case FileType.Diagram:
+                    return FilterType.DiagramsOnly;
             }
 
             return FilterType.None;
@@ -313,7 +314,12 @@ public class File<T> : FileEntry<T>
     /// The file force save type.
     /// </summary>
     public ForcesaveType Forcesave { get; set; }
-
+    
+    /// <summary>
+    /// Parent room title.
+    /// </summary>
+    public string Location { get; set; }
+    
     /// <summary>
     /// The file converted type.
     /// </summary>

@@ -61,6 +61,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Contact.
+        /// </summary>
+        public static string AccountingCustomerOperationContact {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationContact", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Credit.
         /// </summary>
         public static string AccountingCustomerOperationCredit {
@@ -79,7 +88,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Date and time.
+        ///   Looks up a localized string similar to Date.
         /// </summary>
         public static string AccountingCustomerOperationDate {
             get {
@@ -88,11 +97,20 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Description.
+        ///   Looks up a localized string similar to Debit.
         /// </summary>
-        public static string AccountingCustomerOperationDescription {
+        public static string AccountingCustomerOperationDebit {
             get {
-                return ResourceManager.GetString("AccountingCustomerOperationDescription", resourceCulture);
+                return ResourceManager.GetString("AccountingCustomerOperationDebit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Details.
+        /// </summary>
+        public static string AccountingCustomerOperationDetails {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationDetails", resourceCulture);
             }
         }
         
@@ -106,11 +124,11 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Service name.
+        ///   Looks up a localized string similar to Backup.
         /// </summary>
-        public static string AccountingCustomerOperationService {
+        public static string AccountingCustomerOperationServiceDesc_backup {
             get {
-                return ResourceManager.GetString("AccountingCustomerOperationService", resourceCulture);
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_backup", resourceCulture);
             }
         }
         
@@ -142,6 +160,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Backup.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_backup {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_backup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GB.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_disk_storage {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_disk-storage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Customer operations report ({0}-{1}).
         /// </summary>
         public static string AccountingCustomerOperationsReportName {
@@ -151,11 +187,20 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Withdrawal.
+        ///   Looks up a localized string similar to Transaction history.
         /// </summary>
-        public static string AccountingCustomerOperationWithdrawal {
+        public static string AccountingCustomerOperationsReportSheetName {
             get {
-                return ResourceManager.GetString("AccountingCustomerOperationWithdrawal", resourceCulture);
+                return ResourceManager.GetString("AccountingCustomerOperationsReportSheetName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type.
+        /// </summary>
+        public static string AccountingCustomerOperationType {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationType", resourceCulture);
             }
         }
         
@@ -201,6 +246,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string AdminMessageSent {
             get {
                 return ResourceManager.GetString("AdminMessageSent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Automatic renewal.
+        /// </summary>
+        public static string AutoRenewal {
+            get {
+                return ResourceManager.GetString("AutoRenewal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Automatic top up.
+        /// </summary>
+        public static string AutoTopUp {
+            get {
+                return ResourceManager.GetString("AutoTopUp", resourceCulture);
             }
         }
         
@@ -1996,6 +2059,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Payment required.
+        /// </summary>
+        public static string ErrorPaymentRequired {
+            get {
+                return ResourceManager.GetString("ErrorPaymentRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Request limit is exceeded.
         /// </summary>
         public static string ErrorRequestLimitExceeded {
@@ -2118,6 +2190,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string ErrorWebPluginForbiddenSystem {
             get {
                 return ResourceManager.GetString("ErrorWebPluginForbiddenSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of plugins exceeds the limit.
+        /// </summary>
+        public static string ErrorWebPluginMaxCount {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginMaxCount", resourceCulture);
             }
         }
         
@@ -2959,11 +3040,29 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tracking user logins &amp; action.
+        ///   Looks up a localized string similar to Tracking logins &amp; actions.
         /// </summary>
         public static string TariffsFeature_audit {
             get {
                 return ResourceManager.GetString("TariffsFeature_audit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Backup.
+        /// </summary>
+        public static string TariffsFeature_backup_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_backup_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable backups for your DocSpace. Costs will be billed automatically..
+        /// </summary>
+        public static string TariffsFeature_backup_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_backup_wallet_price_count", resourceCulture);
             }
         }
         
@@ -2995,6 +3094,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} free backups per month.
+        /// </summary>
+        public static string TariffsFeature_free_backup {
+            get {
+                return ResourceManager.GetString("TariffsFeature_free_backup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of free backups should not exceed {0} within a month.
+        /// </summary>
+        public static string TariffsFeature_free_backup_exception {
+            get {
+                return ResourceManager.GetString("TariffsFeature_free_backup_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The number of admins should not exceed {0}.
         /// </summary>
         public static string TariffsFeature_manager_exception {
@@ -3013,7 +3130,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Automatic backup &amp; recovery.
+        ///   Looks up a localized string similar to Data recovery.
         /// </summary>
         public static string TariffsFeature_restore {
             get {
@@ -3157,7 +3274,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unlimited number of users.
+        ///   Looks up a localized string similar to Unlimited number of users and guests.
         /// </summary>
         public static string TariffsFeature_users {
             get {

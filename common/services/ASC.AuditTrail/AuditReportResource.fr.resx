@@ -136,9 +136,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Paramètres de remplacement sont mis à jour</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Documents</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Paramètres</value>
   </data>
@@ -409,9 +406,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Déplacer</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Autre</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Propriétaire changé : {0}</value>
   </data>
@@ -429,9 +423,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Paramètres de robustesse de mot de passe mis à jour</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Personnes</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Plateforme</value>
@@ -492,9 +483,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Session a débuté</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Paramètres</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Authentification unique (SSO) désactivée</value>
@@ -924,5 +912,29 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>Synchronisation LDAP terminée</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Opération client effectuée</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Rapport sur les opérations clients téléchargé</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Abonnement client mis à jour : {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Wallet du client rechargé : {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Paramètres de recharge du wallet client mis à jour</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Localisation</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Paramètres de visibilité des bannières promotionnelles modifiés</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Paramètres des services activés via le wallet client mis à jour</value>
   </data>
 </root>

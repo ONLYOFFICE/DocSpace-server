@@ -31,8 +31,7 @@ namespace ASC.Files.Core.Core.History;
 [Scope]
 public class HistoryService(
     IDbContextFactory<MessagesContext> dbContextFactory, 
-    TenantManager tenantManager,
-    AuditInterpreter interpreter)
+    TenantManager tenantManager)
 {
     public static HashSet<MessageAction> TrackedActions => [
         MessageAction.FileCreated, 
@@ -123,7 +122,7 @@ public class HistoryService(
         (int)MessageAction.FormStopped
     ];
     
-    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(
+    public async IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> GetHistoryAsync(
         FileEntry<int> entry,
         int offset,
         int count,
@@ -140,9 +139,9 @@ public class HistoryService(
             ? messageDbContext.GetFilteredAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate) 
             : messageDbContext.GetAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, fromDate, toDate);
 
-        await foreach (var hEntry in events.SelectAwait(e => interpreter.ToHistoryAsync(e.Item1, e.Item2)).Where(x => x != null))
+        await foreach (var e in events)
         {
-            yield return hEntry;
+            yield return e;
         }
     }
 

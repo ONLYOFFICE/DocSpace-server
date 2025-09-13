@@ -6,10 +6,6 @@
     <subject resource="|subject_self_profile_updated|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_self_profile_updated|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
-  <pattern id="self_profile_updated" sender="messanger.sender">
-    <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_self_profile_updated|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
   <pattern id="self_profile_updated" sender="telegram.sender">
     <subject />
     <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_self_profile_updated_tg|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
@@ -20,10 +16,6 @@
     <subject resource="|subject_user_has_join|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"></subject>
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_user_has_join|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
-  <pattern id="user_has_join" sender="messanger.sender">
-    <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_user_has_join|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
   <pattern id="user_has_join" sender="telegram.sender">
     <subject />
     <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_user_has_join_tg|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
@@ -33,10 +25,6 @@
   <pattern id="for_admin_notify" sender="email.sender">
     <subject resource="|subject_for_admin_notify|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"></subject>
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_for_admin_notify|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-  <pattern id="for_admin_notify" sender="messanger.sender">
-    <subject resource="|subject_for_admin_notify|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"></subject>
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_for_admin_notify|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="for_admin_notify" sender="telegram.sender">
     <subject resource="|subject_for_admin_notify|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"></subject>
@@ -53,10 +41,6 @@
   <pattern id="profile_updated" sender="email.sender">
     <subject resource="|subject_profile_updated|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_profile_updated|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-  <pattern id="profile_updated" sender="messanger.sender">
-    <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_profile_updated|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="profile_updated" sender="telegram.sender">
     <subject />
@@ -78,46 +62,25 @@
     <subject resource="|subject_rooms_activity|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_rooms_activity|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
+  <pattern id="rooms_activity" sender="telegram.sender">
+    <subject resource="|subject_rooms_activity|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_rooms_activity|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
 
   <!-- send_whats_new -->
   <pattern id="send_whats_new" sender="email.sender">
     <subject resource="|subject_send_whats_new|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_send_whats_new|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
-  <pattern id="send_whats_new" sender="messanger.sender">
-    <subject resource="|subject_send_whats_new|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common">#foreach($activity in $Activities)
-$activity.Key
-
-#foreach($whatsNewActivity in $activity.Value)#foreach($b in $whatsNewActivity.BreadCrumbs) $b &gt; #end "$whatsNewActivity.Title":"$whatsNewActivity.URL"
-"$whatsNewActivity.UserName":"$whatsNewActivity.UserAbsoluteURL"    $whatsNewActivity.Date.ToShortTimeString()
-
-#end
-#end
-    </body>
-  </pattern>
   <pattern id="send_whats_new" sender="telegram.sender">
     <subject resource="|subject_send_whats_new|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-    <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common">
-		#foreach($activity in $Activities)
-		$activity.Key
-
-		#foreach($whatsNewActivity in $activity.Value)#foreach($b in $whatsNewActivity.BreadCrumbs)$b&#58; #end[$whatsNewActivity.Title]($whatsNewActivity.URL)
-		[$whatsNewActivity.UserName]($whatsNewActivity.UserAbsoluteURL)    $whatsNewActivity.Date.ToShortTimeString()
-
-		#end
-		#end
-	</body>
+    <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_send_whats_new|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   
   <!-- backup_created -->
   <pattern id="backup_created" sender="email.sender">
     <subject resource="|subject_backup_created|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_backup_created|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-  <pattern id="backup_created" sender="messanger.sender">
-    <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_backup_created|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="backup_created" sender="telegram.sender">
     <subject />
@@ -129,21 +92,25 @@ $activity.Key
     <subject resource="|subject_restore_started|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_restore_started|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
+  <pattern id="restore_started" sender="telegram.sender">
+    <subject resource="|subject_restore_started|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_restore_started|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+   </pattern>
   
   <!-- restore_completed_v115 -->
   <pattern id="restore_completed_v115" sender="email.sender">
     <subject resource="|subject_restore_completed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_restore_completed_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
+  <pattern id="restore_completed_v115" sender="telegram.sender">
+    <subject resource="|subject_restore_completed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_restore_completed_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
 
   <!-- portal_deactivate -->
   <pattern id="portal_deactivate" sender="email.sender">
     <subject resource="|subject_portal_deactivate|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_portal_deactivate|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-  <pattern id="portal_deactivate" sender="messanger.sender">
-    <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_portal_deactivate|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="portal_deactivate" sender="telegram.sender">
     <subject />
@@ -154,10 +121,6 @@ $activity.Key
   <pattern id="portal_delete" sender="email.sender">
     <subject resource="|subject_portal_delete|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_portal_delete|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-  <pattern id="portal_delete" sender="messanger.sender">
-    <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_portal_delete|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="portal_delete" sender="telegram.sender">
     <subject />
@@ -240,6 +203,12 @@ $activity.Key
   <pattern id="set_password">
     <subject resource="|subject_set_password|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_set_password|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- password_changed -->
+  <pattern id="password_changed">
+    <subject resource="|subject_password_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_password_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- change_phone -->
@@ -406,19 +375,11 @@ $activity.Key
     <subject resource="|subject_saas_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
-  <pattern id="saas_user_welcome_v1" sender="messanger.sender">
-    <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
 
   <!-- enterprise user welcome v1 for DocSpace -->
   <pattern id="enterprise_user_welcome_v1" sender="email.sender">
     <subject resource="|subject_enterprise_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-  <pattern id="enterprise_user_welcome_v1" sender="messanger.sender">
-    <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- enterprise whitelabel user welcome v1 for DocSpace-->
@@ -426,29 +387,17 @@ $activity.Key
     <subject resource="|subject_enterprise_whitelabel_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
-  <pattern id="enterprise_whitelabel_user_welcome_v1" sender="messanger.sender">
-    <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
 
   <!-- enterprise whitelabel user welcome custom mode v1 for DocSpace-->
   <pattern id="enterprise_whitelabel_user_welcome_custom_mode_v1" sender="email.sender">
     <subject resource="|subject_enterprise_whitelabel_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
-  <pattern id="enterprise_whitelabel_user_welcome_custom_mode_v1" sender="messanger.sender">
-    <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
 
   <!-- opensource user welcome v1 for DocSpace -->
   <pattern id="opensource_user_welcome_v1" sender="email.sender">
     <subject resource="|subject_opensource_user_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-  <pattern id="opensource_user_welcome_v1" sender="messanger.sender">
-    <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- saas guest activation v10 -->
@@ -480,19 +429,11 @@ $activity.Key
     <subject resource="|subject_saas_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
-  <pattern id="saas_guest_welcome_v1" sender="messanger.sender">
-    <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
 
   <!-- enterprise guest welcome v1 -->
   <pattern id="enterprise_guest_welcome_v1" sender="email.sender">
     <subject resource="|subject_enterprise_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-  <pattern id="enterprise_guest_welcome_v1" sender="messanger.sender">
-    <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- enterprise whitelabel guest welcome v1 -->
@@ -500,19 +441,11 @@ $activity.Key
     <subject resource="|subject_enterprise_whitelabel_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
-  <pattern id="enterprise_whitelabel_guest_welcome_v1" sender="messanger.sender">
-    <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
 
   <!-- opensource guest welcome v1 -->
   <pattern id="opensource_guest_welcome_v1" sender="email.sender">
     <subject resource="|subject_opensource_guest_welcome_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
-  </pattern>
-  <pattern id="opensource_guest_welcome_v1" sender="messanger.sender">
-    <subject />
-    <body styler="ASC.Notify.Textile.JabberStyler,ASC.Core.Common" resource="|pattern_saas_user_welcome_v3|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- docs tips -->
@@ -722,6 +655,18 @@ $activity.Key
   <pattern id="user_role_changed">
     <subject resource="|subject_user_role_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_user_role_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- top up wallet error -->
+  <pattern id="top_up_wallet_error">
+    <subject resource="|subject_top_up_wallet_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_top_up_wallet_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- renew subscription rror -->
+  <pattern id="renew_subscription_error">
+    <subject resource="|subject_renew_subscription_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_renew_subscription_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
 </patterns>

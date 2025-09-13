@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -130,18 +130,23 @@ module.exports = (io) => {
       const tenant = sess?.portal?.tenantId || "unknown";
       const user = sess?.user?.id || "unknown";
       const sessId = sess?.id;
+      const room = data.dump ? `restore` : getRoom("restore");
 
       logger.info(`WS: restore backup in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
 
-      if(data.dump)
-      {
-        var room = `restore`;
-      }
-      else
-      {
-        var room = getRoom("restore");
-      }
       socket.to(room).emit("restore-backup");
+    });
+
+    socket.on("storage-encryption", (data) => {
+      const sess = socket.handshake.session;
+      const tenant = sess?.portal?.tenantId || "unknown";
+      const user = sess?.user?.id || "unknown";
+      const sessId = sess?.id;
+      const room = `storage-encryption`;
+
+      logger.info(`WS: storage encryption in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
+
+      socket.to(room).emit("storage-encryption");
     });
 
     function changeSubscription(roomParts, individual, changeFunc) {
@@ -327,29 +332,29 @@ module.exports = (io) => {
     }
   }
 
-  function deleteFile({ id, room, userIds } = {}) {
+  function deleteFile({ id, room, data, userIds } = {}) {
     logger.info(`delete file ${id} in room ${room}`);
 
     if(userIds)
     {
-      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "file"));
+      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "file", data));
     }
     else
     {
-      modifyFolder(room, "delete", id, "file");
+      modifyFolder(room, "delete", id, "file", data);
     }
   }
 
-  function deleteFolder({ id, room, userIds } = {}) {
+  function deleteFolder({ id, room, data, userIds } = {}) {
     logger.info(`delete folder ${id} in room ${room}`);
     
     if(userIds)
     {
-      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "folder"));
+      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "folder", data));
     }
     else
     {
-      modifyFolder(room, "delete", id, "folder");
+      modifyFolder(room, "delete", id, "folder", data);
     }
   }
 
@@ -421,14 +426,17 @@ module.exports = (io) => {
 
   function backupProgress({ tenantId, dump, percentage } = {}) 
   {
+    var room;
+    
     if(dump)
     {
-      var room = `backup`;
+      room = `backup`;
     }
     else
     {
-      var room = `${tenantId}-backup`;
+      room = `${tenantId}-backup`;
     }
+    
     filesIO.to(room).emit("s:backup-progress", {progress: percentage});
   }
   
@@ -497,14 +505,16 @@ module.exports = (io) => {
 
   function endBackup({ tenantId, dump, result } = {})
   {
+
     if(dump)
-      {
-        var room = `backup`;
-      }
-      else
-      {
-        var room = `${tenantId}-backup`;
-      }
+    {
+      var room = `backup`;
+    }
+    else
+    {
+      var room = `${tenantId}-backup`;
+    }
+    
     filesIO.to(room).emit("s:backup-progress", result);
   }
 

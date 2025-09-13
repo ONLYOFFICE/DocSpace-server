@@ -110,8 +110,9 @@ public class RestoreDbModuleTask : PortalTaskBase
         await using var stream = _reader.GetEntry(KeyHelper.GetTableZipKey(_module, tableInfo.Name));
         if (stream == null)
         {
-            throw new InvalidOperationException(tableInfo.Name + " not found");
+            return;
         }
+        
         var lowImportanceRelations = _module
             .TableRelations
             .Where(r => string.Equals(r.ParentTable, tableInfo.Name, StringComparison.InvariantCultureIgnoreCase))

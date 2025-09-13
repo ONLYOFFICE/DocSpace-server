@@ -190,12 +190,12 @@ public class AuthenticationController(
 
         if (user == null || Equals(user, Constants.LostUser))
         {
-            throw new Exception(Resource.ErrorUserNotFound);
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         if (user.Status != EmployeeStatus.Active)
         {
-            throw new Exception(Resource.ErrorUserDisabled);
+            throw new InvalidOperationException(Resource.ErrorUserDisabled);
         }
 
         if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
@@ -226,7 +226,7 @@ public class AuthenticationController(
             
             if (tfaExpired || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
             {
-                var (urlActivation, keyActivation) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, ConfirmType.TfaActivation);
+                var (urlActivation, keyActivation) = commonLinkUtility.GetConfirmationUrlAndKey(user.Id, ConfirmType.TfaActivation);
                 await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyActivation, true, $"_{ConfirmType.TfaActivation}");
                 return new AuthenticationTokenDto
                 {
@@ -236,7 +236,7 @@ public class AuthenticationController(
                 };
             }
 
-            var (urlAuth, keyAuth) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, ConfirmType.TfaAuth);
+            var (urlAuth, keyAuth) = commonLinkUtility.GetConfirmationUrlAndKey(user.Id, ConfirmType.TfaAuth);
             await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyAuth, true, $"_{ConfirmType.TfaAuth}");
             return new AuthenticationTokenDto
             {
@@ -352,10 +352,15 @@ public class AuthenticationController(
 
         if (inDto.Type != ConfirmType.LinkInvite)
         {
-            return new ConfirmDto { Result = await emailValidationKeyModelHelper.ValidateAsync(inDto)};
+            var (validationResult, validationEmail) = await emailValidationKeyModelHelper.ValidateAsync(inDto);
+            return new ConfirmDto { Result = validationResult, Email = validationEmail };
         }
 
-        var result = await invitationService.ConfirmAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.RoomId, inDto.UiD);
+        var email = string.IsNullOrEmpty(inDto.Email) && !string.IsNullOrEmpty(inDto.EncEmail)
+            ? emailValidationKeyModelHelper.DecryptEmail(inDto.EncEmail)
+            : inDto.Email;
+
+        var result = await invitationService.ConfirmAsync(inDto.Key, email, inDto.EmplType ?? default, inDto.RoomId, inDto.UiD);
 
         return result.Map();
     }
@@ -430,8 +435,8 @@ public class AuthenticationController(
             if (inDto.ConfirmData != null)
             {
                 var email = inDto.ConfirmData.Email;
-                    
-                var checkKeyResult = await emailValidationKeyModelHelper.ValidateAsync(new EmailValidationKeyModel { Key = inDto.ConfirmData.Key, Email = email, Type = ConfirmType.Auth, First = inDto.ConfirmData.First.ToString() });
+
+                var (checkKeyResult, _) = await emailValidationKeyModelHelper.ValidateAsync(new EmailValidationKeyModel { Key = inDto.ConfirmData.Key, Email = email, Type = ConfirmType.Auth, First = inDto.ConfirmData.First.ToString() });
 
                 if (checkKeyResult == ValidationResult.Ok)
                 {

@@ -24,8 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Web.Services.Description;
+
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+
+using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
@@ -35,6 +39,52 @@ public class HideRouteDocumentFilter(string routeToHide) : IDocumentFilter
     public void Apply(OpenApiDocument document, DocumentFilterContext context)
     {
         document.Paths.Remove(routeToHide);
+    }
+}
+
+public class DerivedSchemaFilter : ISchemaFilter
+{
+    public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+    {
+        var baseType = context.Type;
+        var derivedTypes = baseType.GetCustomAttributes<JsonDerivedTypeAttribute>(true).Select(attr => attr.DerivedType).Where(t => t != null).Distinct().ToList();
+        if (derivedTypes.Count > 0)
+        {
+
+            schema.Extensions.Add("x-derived", new OpenApiBoolean(true));
+            var derivedArray = new OpenApiArray();
+            foreach (var type in derivedTypes)
+            {
+                var schemaId = CustomSchemaId(type);
+                derivedArray.Add(new OpenApiString(schemaId));
+            }
+
+            if (derivedArray.Any())
+            {
+                schema.Extensions["x-derived-types"] = derivedArray;
+            }
+        }
+    }
+
+    private static string CustomSchemaId(Type type)
+    {
+        var name = type.Name;
+
+        if (string.IsNullOrEmpty(name))
+        {
+            return name;
+        }
+
+        if (type.IsGenericType)
+        {
+            name = name.Split('`')[0];
+
+            var genericArgs = string.Join("", type.GenericTypeArguments.Select(CustomSchemaId));
+            name += genericArgs;
+        }
+        name = name.Replace("+", "_");
+        name = name.Replace("Int32", "Integer");
+        return name;
     }
 }
 

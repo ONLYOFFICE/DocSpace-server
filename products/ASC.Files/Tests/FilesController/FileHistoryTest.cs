@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.Factory;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -43,19 +41,19 @@ public class FileHistoryTest(
         await _filesClient.Authenticate(Initializer.Owner);
         
         // Create a file
-        var file = await CreateFile("file_with_versions.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_with_versions.docx", Initializer.Owner);
         
         // Add multiple versions by updating the file content
         await UpdateFileContent(file.Id, "Updated content 1");
         await UpdateFileContent(file.Id, "Updated content 2");
         
         // Act
-        var versions = (await _filesFilesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var versions = (await _filesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         versions.Should().NotBeNull();
         versions.Should().HaveCountGreaterThanOrEqualTo(3); // Original + 2 updates
-        versions.Should().BeInDescendingOrder(v => v.VarVersion);
+        versions.Should().BeInDescendingOrder(v => v.Version);
         
         // Check that each version has the correct properties
         foreach (var version in versions)
@@ -73,26 +71,26 @@ public class FileHistoryTest(
         await _filesClient.Authenticate(Initializer.Owner);
         
         // Create a file with multiple versions
-        var file = await CreateFile("version_history.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("version_history.docx",  Initializer.Owner);
         await UpdateFileContent(file.Id, "Updated content 1");
         await UpdateFileContent(file.Id, "Updated content 2");
         
         // Get the latest version
-        var versions = (await _filesFilesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
-        var latestVersion = versions.First().VarVersion;
+        var versions = (await _filesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var latestVersion = versions.First().Version;
         
         // Act
         var changeHistoryParams = new ChangeHistory(latestVersion, true);
-        var result = (await _filesFilesApi.ChangeVersionHistoryAsync(file.Id, changeHistoryParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.ChangeVersionHistoryAsync(file.Id, changeHistoryParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
         
         // Check that version groups have been updated
-        var updatedVersions = (await _filesFilesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var updatedVersions = (await _filesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
         var updatedLatestVersion = updatedVersions.First();
         
-        updatedLatestVersion.VarVersion.Should().Be(latestVersion);
+        updatedLatestVersion.Version.Should().Be(latestVersion);
         updatedLatestVersion.VersionGroup.Should().Be(latestVersion); // New version group starts at 1
     }
     
@@ -103,20 +101,20 @@ public class FileHistoryTest(
         await _filesClient.Authenticate(Initializer.Owner);
         
         // Create a file with multiple versions
-        var file = await CreateFile("file_versions.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_versions.docx",Initializer.Owner);
         await UpdateFileContent(file.Id, "Updated content 1");
         
         // Get the versions to identify the first version number
-        var versions = (await _filesFilesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
-        var firstVersion = versions.Last().VarVersion;
+        var versions = (await _filesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var firstVersion = versions.Last().Version;
         
         // Act
-        var specificVersion = (await _filesFilesApi.GetFileInfoAsync(file.Id, version: firstVersion, TestContext.Current.CancellationToken)).Response;
+        var specificVersion = (await _filesApi.GetFileInfoAsync(file.Id, version: firstVersion, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         specificVersion.Should().NotBeNull();
         specificVersion.Id.Should().Be(file.Id);
-        specificVersion.VarVersion.Should().Be(firstVersion);
+        specificVersion.Version.Should().Be(firstVersion);
     }
     
     private async Task UpdateFileContent(int fileId, string content)
@@ -132,6 +130,6 @@ public class FileHistoryTest(
         var fileName = "updated_file.docx";
         
         var fileData = new FileParameter(fileName, contentType, stream);
-        await _filesFilesApi.SaveEditingFileFromFormAsync(fileId, file: new FileParameter(fileName, contentType, stream), cancellationToken: TestContext.Current.CancellationToken);
+        await _filesApi.SaveEditingFileFromFormAsync(fileId, file: new FileParameter(fileName, contentType, stream), cancellationToken: TestContext.Current.CancellationToken);
     }
 }
