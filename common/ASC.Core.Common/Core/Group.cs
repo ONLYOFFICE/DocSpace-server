@@ -61,12 +61,12 @@ public static partial class GroupMapper
     public static partial IQueryable<Group> Project(this IQueryable<DbGroup> source);
     public static partial DbGroup Map(this Group source);
     public static partial Group Map(this GroupInfo source);
-    public static partial GroupInfo MapToGroupInfo(this DbGroup source);
     
     // Handle nullable Guid mapping
     private static Guid MapNullableGuid(Guid? source) => source ?? Guid.Empty;
 }
 
+[Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public partial class GroupInfoMapper
 {    

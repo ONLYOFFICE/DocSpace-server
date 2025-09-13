@@ -67,6 +67,7 @@ public class AdditionalWhiteLabelSettingsDto
     public bool IsDefault { get; set; }
 }
 
+[Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public partial class AdditionalWhiteLabelSettingsMapper(ExternalResourceSettingsHelper externalResourceSettingsHelper)
 {
