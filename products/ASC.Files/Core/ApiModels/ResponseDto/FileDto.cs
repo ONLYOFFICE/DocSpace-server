@@ -244,6 +244,11 @@ public class FileDtoHelper(
                 var folderId = query["folder"];
                 if (!string.IsNullOrEmpty(folderId))
                 {
+                    if (folderId == "@share")
+                    {
+                        folderId = await _globalFolderHelper.GetFolderShareAsync<string>();
+                    }
+                    
                     contextFolder = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync((T)Convert.ChangeType(folderId, typeof(T)));
                 }
             }
