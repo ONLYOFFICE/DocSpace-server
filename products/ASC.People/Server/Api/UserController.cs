@@ -2598,15 +2598,63 @@ public class UserControllerAdditional<T>(
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}")]
-    public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomShared(UsersWithRoomSharedRequestDto<T> inDto)
+    public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomShared(UsersWithFileEntitySharedRequestDto<T> inDto)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
 
-        if (!await fileSecurity.CanReadAsync(room))
+        await foreach (var p in GetUsers(inDto, room))
+        {
+            yield return p;
+        }
+    }
+    /// <summary>
+    /// Returns the users with the sharing settings in a folder with the ID specified in request.
+    /// </summary>
+    /// <short>
+    /// Get users with folder sharing settings
+    /// </short>
+    /// <path>api/2.0/people/folder/{id}</path>
+    [Tags("People / Search")]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("folder/{id}")]
+    public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithFoldersShared(UsersWithFileEntitySharedRequestDto<T> inDto)
+    {
+        var folder = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
+        
+        await foreach (var p in GetUsers(inDto, folder))
+        {
+            yield return p;
+        }
+    }
+    /// <summary>
+    /// Returns the users with the sharing settings in a file with the ID specified in request.
+    /// </summary>
+    /// <short>
+    /// Get users with file sharing settings
+    /// </short>
+    /// <path>api/2.0/people/file/{id}</path>
+    [Tags("People / Search")]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("file/{id}")]
+    public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithFilesShared(UsersWithFileEntitySharedRequestDto<T> inDto)
+    {
+        var file = (await daoFactory.GetFileDao<T>().GetFileAsync(inDto.Id)).NotFoundIfNull();
+
+        await foreach (var p in GetUsers(inDto, file))
+        {
+            yield return p;
+        }
+    }
+
+    private async IAsyncEnumerable<EmployeeFullDto> GetUsers(UsersWithFileEntitySharedRequestDto<T> inDto, FileEntry<T> fileEntry)
+    {        
+        if (!await fileSecurity.CanReadAsync(fileEntry))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
-
+        
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
         
         var offset = inDto.StartIndex;
@@ -2616,7 +2664,7 @@ public class UserControllerAdditional<T>(
 
         var securityDao = daoFactory.GetSecurityDao<T>();
 
-        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room,
+        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(fileEntry,
             filterValue,
             inDto.EmployeeStatus,
             inDto.ActivationStatus,
@@ -2631,7 +2679,7 @@ public class UserControllerAdditional<T>(
 
         apiContext.SetCount(Math.Min(Math.Max(totalUsers - offset, 0), count)).SetTotalCount(totalUsers);
 
-        await foreach (var u in securityDao.GetUsersWithSharedAsync(room, 
+        await foreach (var u in securityDao.GetUsersWithSharedAsync(fileEntry, 
                            filterValue,
                            inDto.EmployeeStatus,
                            inDto.ActivationStatus,

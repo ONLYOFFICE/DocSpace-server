@@ -436,20 +436,68 @@ public class GroupControllerAdditional<T>(
     GroupFullDtoHelper groupFullDtoHelper) : ControllerBase
 {
     /// <summary>
-    /// Returns groups with their sharing settings.
+    /// Returns groups with their sharing settings in a room with the ID specified in request.
     /// </summary>
-    /// <short>Get groups with sharing settings</short>
+    /// <short>Get groups with room sharing settings</short>
     /// <path>api/2.0/group/room/{id}</path>
     /// <collection>list</collection>
-    [Tags("Group / Rooms")]
+    [Tags("Group / Search")]
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<GroupDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}")]
-    public async IAsyncEnumerable<GroupDto> GetGroupsWithShared(GetGroupsWithSharedRequestDto<T> inDto)
+    public async IAsyncEnumerable<GroupDto> GetGroupsWithRoomsShared(GetGroupsWithSharedRequestDto<T> inDto)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
 
-        if (!await fileSecurity.CanEditAccessAsync(room))
+        await foreach (var p in GetGroups(inDto, room))
+        {
+            yield return p;
+        }
+    }
+    
+    /// <summary>
+    /// Returns groups with their sharing settings in a folder with the ID specified in request.
+    /// </summary>
+    /// <short>Get groups with folder sharing settings</short>
+    /// <path>api/2.0/group/folder/{id}</path>
+    /// <collection>list</collection>
+    [Tags("Group / Search")]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<GroupDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("folder/{id}")]
+    public async IAsyncEnumerable<GroupDto> GetGroupsWithFoldersShared(GetGroupsWithSharedRequestDto<T> inDto)
+    {
+        var folder = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
+
+        await foreach (var p in GetGroups(inDto, folder))
+        {
+            yield return p;
+        }
+    }
+    
+    /// <summary>
+    /// Returns groups with their sharing settings for a file with the ID specified in request.
+    /// </summary>
+    /// <short>Get groups with file sharing settings</short>
+    /// <path>api/2.0/group/file/{id}</path>
+    /// <collection>list</collection>
+    [Tags("Group / Search")]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<GroupDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("file/{id}")]
+    public async IAsyncEnumerable<GroupDto> GetGroupsWithFilesShared(GetGroupsWithSharedRequestDto<T> inDto)
+    {
+        var file = (await daoFactory.GetFileDao<T>().GetFileAsync(inDto.Id)).NotFoundIfNull();
+
+        await foreach (var p in GetGroups(inDto, file))
+        {
+            yield return p;
+        }
+    }
+
+    private async IAsyncEnumerable<GroupDto> GetGroups(GetGroupsWithSharedRequestDto<T> inDto, FileEntry<T> fileEntry)
+    {
+        if (!await fileSecurity.CanEditAccessAsync(fileEntry))
         {
             throw new SecurityException();
         }
@@ -460,11 +508,11 @@ public class GroupControllerAdditional<T>(
         
         var securityDao = daoFactory.GetSecurityDao<T>();
 
-        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(room, text, inDto.ExcludeShared ?? false);
+        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false);
 
         apiContext.SetCount(Math.Min(Math.Max(totalGroups - offset, 0), count)).SetTotalCount(totalGroups);
 
-        await foreach (var item in securityDao.GetGroupsWithSharedAsync(room, text, inDto.ExcludeShared ?? false, offset, count))
+        await foreach (var item in securityDao.GetGroupsWithSharedAsync(fileEntry, text, inDto.ExcludeShared ?? false, offset, count))
         {
             yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);
         }
