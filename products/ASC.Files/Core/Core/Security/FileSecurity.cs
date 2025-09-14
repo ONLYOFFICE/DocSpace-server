@@ -2574,7 +2574,7 @@ public class FileSecurity(
             }
         }
 
-        if (filterType != FilterType.FoldersOnly && withSubfolders)
+        if (filterType != FilterType.FoldersOnly && filterType != FilterType.None && withSubfolders)
         {
             IAsyncEnumerable<FileEntry<T>> filesInSharedFolders = fileDao.GetFilesAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
             filesInSharedFolders = FilterReadAsync(filesInSharedFolders);
