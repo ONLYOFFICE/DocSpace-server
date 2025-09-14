@@ -238,7 +238,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <short>Get the sharing rights</short>
     /// <path>api/2.0/files/share</path>
     /// <collection>list</collection>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of shared files and folders information", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpPost("share")]
@@ -261,7 +260,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Remove the sharing rights</short>
     /// <path>api/2.0/files/share</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpDelete("share")]
@@ -269,9 +267,9 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     {
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
-
-        await securityControllerHelper.RemoveSecurityInfoAsync(fileIntIds, folderIntIds);
-        await securityControllerHelper.RemoveSecurityInfoAsync(fileStringIds, folderStringIds);
+        
+        await fileStorageService.RemoveAceAsync(fileIntIds, folderIntIds);
+        await fileStorageService.RemoveAceAsync(fileStringIds, folderStringIds);
 
         return true;
     }

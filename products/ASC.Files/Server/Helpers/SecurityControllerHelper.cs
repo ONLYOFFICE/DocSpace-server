@@ -68,13 +68,6 @@ public class SecurityControllerHelper(
         }
     }
 
-    public async Task<bool> RemoveSecurityInfoAsync<T>(List<T> fileIds, List<T> folderIds)
-    {
-        await _fileStorageService.RemoveAceAsync(fileIds, folderIds);
-
-        return true;
-    }
-
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfoAsync<T>(List<T> fileIds, List<T> folderIds, List<FileShareParams> share, bool notify, string sharingMessage)
     {
         if (share != null && share.Count != 0)
