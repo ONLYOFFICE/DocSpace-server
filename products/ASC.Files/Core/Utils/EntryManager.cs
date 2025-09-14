@@ -88,16 +88,30 @@ public class BreadCrumbsManager(
         {
             return [];
         }
+        
+        List<FileEntry> breadCrumbs = [];
+        var i = 0;
+        var folderDaoInt = daoFactory.GetFolderDao<int>();
+        var parents = folderDao.GetParentFoldersAsync(folderId);
+        await foreach (var e in fileSecurity.CanReadAsync(parents.Where(f => f != null)))
+        {
+            if (e.Item2)
+            {
+                breadCrumbs.Add(e.Item1);
+            }
+            else if(i == 0 && e.Item1 is Folder<T> { FolderType: FolderType.USER } folder && folder.CreateBy != authContext.CurrentAccount.ID)
+            {
+                breadCrumbs.Add(await folderDaoInt.GetFolderAsync(await globalFolderHelper.FolderShareAsync));
+            }
 
-        var breadCrumbs = await fileSecurity.FilterReadAsync(folderDao.GetParentFoldersAsync(folderId)).Cast<FileEntry>().ToListAsync();
+            i++;
+        }
+
         var firstVisible = breadCrumbs.ElementAtOrDefault(0) as Folder<T>;
 
         var rootId = 0;
-        if (firstVisible == null)
-        {
-            rootId = await globalFolderHelper.FolderShareAsync;
-        }
-        else if (firstVisible.ProviderMapped && (firstVisible.RootFolderType is FolderType.VirtualRooms or FolderType.Archive))
+
+        if (firstVisible is { ProviderMapped: true, RootFolderType: FolderType.VirtualRooms or FolderType.Archive })
         {
             if (authContext.IsAuthenticated)
             {
@@ -108,9 +122,7 @@ public class BreadCrumbsManager(
                 
             breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
         }
-
-        var folderDaoInt = daoFactory.GetFolderDao<int>();
-
+        
         if (rootId != 0)
         {
             breadCrumbs.Insert(0, await folderDaoInt.GetFolderAsync(rootId));
