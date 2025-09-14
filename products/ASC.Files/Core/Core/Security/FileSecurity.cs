@@ -2553,7 +2553,7 @@ public class FileSecurity(
 
         if (filterType is FilterType.None or FilterType.FoldersOnly)
         {
-            IAsyncEnumerable<FileEntry<T>> folders = folderDao.GetFoldersAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, withSubfolders, false);
+            IAsyncEnumerable<FileEntry<T>> folders = folderDao.GetFoldersAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, withSubfolders && filterType == FilterType.FoldersOnly, false);
 
             if (withSubfolders)
             {
