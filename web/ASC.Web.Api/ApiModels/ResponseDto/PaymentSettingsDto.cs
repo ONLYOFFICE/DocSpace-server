@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ZstdSharp.Unsafe;
+
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
@@ -34,7 +36,7 @@ public class PaymentSettingsDto
     /// <summary>
     /// The email address for sales inquiries and support.
     /// </summary>
-    public string SalesEmail { get; set; }
+    public required string SalesEmail { get; set; }
 
     /// <summary>
     /// The URL for accessing the feedback and support resources.
@@ -44,22 +46,22 @@ public class PaymentSettingsDto
     /// <summary>
     /// The URL for purchasing or upgrading the product.
     /// </summary>
-    public string BuyUrl { get; set; }
+    public required string BuyUrl { get; set; }
 
     /// <summary>
     /// Indicates whether the system is running in standalone mode.
     /// </summary>
-    public bool Standalone { get; set; }
+    public required bool Standalone { get; set; }
 
     /// <summary>
     /// The current license information.
     /// </summary>
-    public CurrentLicenseInfo CurrentLicense { get; set; }
+    public required CurrentLicenseInfo CurrentLicense { get; set; }
 
     /// <summary>
     /// The maximum quota quantity.
     /// </summary>
-    public int Max { get; set; }
+    public required int Max { get; set; }
 }
 
 /// <summary>
@@ -70,10 +72,10 @@ public class CurrentLicenseInfo
     /// <summary>
     /// Specifies whether the license is trial or not.
     /// </summary>
-    public bool Trial { get; set; }
+    public required bool Trial { get; set; }
 
     /// <summary>
     /// The date when the license expires.
     /// </summary>
-    public DateTime DueDate { get; set; }
+    public required DateTime DueDate { get; set; }
 }

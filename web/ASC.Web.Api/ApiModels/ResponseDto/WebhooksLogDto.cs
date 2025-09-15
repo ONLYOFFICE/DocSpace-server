@@ -34,7 +34,7 @@ public class WebhooksLogDto : IMapFrom<DbWebhooksLog>
     /// <summary>
     /// The webhook log ID.
     /// </summary>
-    public int Id { get; set; }
+    public required int Id { get; set; }
 
     /// <summary>
     /// The webhook configuration name.

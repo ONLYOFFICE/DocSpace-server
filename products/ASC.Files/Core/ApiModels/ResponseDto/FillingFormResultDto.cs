@@ -34,7 +34,7 @@ public class FillingFormResultDto<T>
     /// <summary>
     /// The filling form number.
     /// </summary>
-    public int FormNumber { get; set; }
+    public required int FormNumber { get; set; }
 
     /// <summary>
     /// The file with the completed forms.
@@ -54,7 +54,7 @@ public class FillingFormResultDto<T>
     /// <summary>
     /// The room ID where filling the form.
     /// </summary>
-    public T RoomId { get; set; }
+    public required T RoomId { get; set; }
 
     /// <summary>
     /// Specifies if the manager who fills the form is a room member or not.

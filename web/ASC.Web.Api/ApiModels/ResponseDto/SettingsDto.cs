@@ -52,7 +52,7 @@ public class SettingsDto
     /// The language.
     /// </summary>
     [SwaggerSchemaCustom(Example = "en-US")]
-    public string Culture { get; set; }
+    public required string Culture { get; set; }
 
     /// <summary>
     /// The UTC offset in the TimeSpan format.
