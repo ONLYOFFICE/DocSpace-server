@@ -29,10 +29,10 @@ namespace ASC.AI.Models.RequestDto;
 public class VectorizationStartRequestDto
 {
     [FromBody]
-    public required VectorizationStartRequestBoy Body { get; init; }
+    public required VectorizationStartRequestBody Body { get; init; }
 }
 
-public class VectorizationStartRequestBoy
+public class VectorizationStartRequestBody
 {
     public required int FileId { get; init; }
 }

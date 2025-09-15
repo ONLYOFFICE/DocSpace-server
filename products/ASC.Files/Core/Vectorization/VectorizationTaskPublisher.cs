@@ -85,7 +85,7 @@ public class VectorizationTaskPublisher(
         {
             var tasks = await vectorizationTaskService.GetTasksAsync();
             var existingTask = tasks.FirstOrDefault(x => x.FileId == file.Id);
-            if (existingTask != null)
+            if (existingTask is { IsCompleted: false })
             {
                 return existingTask;
             }
