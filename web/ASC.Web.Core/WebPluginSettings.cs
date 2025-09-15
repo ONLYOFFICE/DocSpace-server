@@ -34,13 +34,21 @@ public class WebPluginConfigSettings
         configuration.GetSetting("plugins", this);
     }
 
+    private int _maxCount;
     private long _maxSize;
     private string _extension;
     private string[] _assetExtensions;
+    private int _assetMaxCount;
 
     public bool Enabled { get; set; }
     public bool Upload { get; set; }
     public bool Delete { get; set; }
+
+    public int MaxCount
+    {
+        get => _maxCount > 0 ? _maxCount : 10;
+        set => _maxCount = value;
+    }
 
     public long MaxSize
     {
@@ -58,6 +66,12 @@ public class WebPluginConfigSettings
     {
         get => _assetExtensions ?? [];
         set => _assetExtensions = value;
+    }
+
+    public int AssetMaxCount
+    {
+        get => _assetMaxCount > 0 ? _assetMaxCount : 10;
+        set => _assetMaxCount = value;
     }
 }
 

@@ -75,7 +75,10 @@ public class DbLoginEventsManager(
         (int)MessageAction.LoginSuccessViaSSO,
         (int)MessageAction.LoginSuccessViaApiSocialAccount,
         (int)MessageAction.LoginSuccesViaTfaApp,
-        (int)MessageAction.LoginSuccessViaApiTfa
+        (int)MessageAction.LoginSuccessViaApiTfa,
+        (int)MessageAction.LoginSuccessViaPassword,
+
+        (int)MessageAction.AuthLinkActivated
     ];
 
     public async Task<DbLoginEvent> GetByIdAsync(int tenantId, int id)

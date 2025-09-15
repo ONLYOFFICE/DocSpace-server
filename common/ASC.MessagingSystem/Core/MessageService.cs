@@ -73,9 +73,9 @@ public class MessageService(
         SendRequestMessage(action, loginName: loginName);
     }
 
-    public void SendLoginMessage(MessageAction action, string loginName, string d1)
+    public void SendLoginMessage(MessageAction action, string loginName, params string[] d)
     {
-        SendRequestMessage(action, loginName: loginName, description: d1);
+        SendRequestMessage(action, loginName: loginName, description: d);
     }
 
     #endregion
@@ -259,14 +259,14 @@ public class MessageService(
         _ = Sender.SendAsync(message);
     }
     
-    public async Task<int> SendLoginMessageAsync(MessageUserData userData, MessageAction action)
+    public async Task<int> SendLoginMessageAsync(MessageUserData userData, MessageAction action, string initiator, params string[] description)
     {
         if (Sender == null)
         {
             return 0;
         }
 
-        var message = messageFactory.Create(Request, userData, action);
+        var message = messageFactory.Create(Request, userData, action, initiator, description);
         if (!messagePolicy.Check(message))
         {
             return 0;

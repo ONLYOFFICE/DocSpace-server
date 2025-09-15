@@ -597,7 +597,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace on &lt;span style="color: #FF6F3D;"&gt;poistettu käytöstä&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace on &lt;span style="color: #FF6F3D;"&gt;poistettu&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;${LetterLogoText} DocSpacesi on onnistuneesti poistettu käytöstä. Ole hyvä ja huomioi, että kaikki tiedot poistetaan &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Tietosuojakäytäntömme&lt;/a&gt; mukaisesti.&lt;/td&gt;&lt;/tr&gt;
 
@@ -727,7 +727,7 @@ $TrulyYours</value>
     <value>Liity ${LetterLogoText} DocSpaceen</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace on poistettu käytöstä</value>
+    <value>${LetterLogoText} DocSpace on poistettu</value>
   </data>
   <data name="subject_for_sales_notify" xml:space="preserve">
     <value>Pyyntö myyntiosastolle</value>
@@ -1951,6 +1951,50 @@ Haluamme ilmoittaa, että tilausmaksusi veloitetaan automaattisesti tililtäsi 3
 Varmistaaksesi sujuvan maksutapahtuman, varmista, että maksutavallasi on riittävästi katetta.
 
 Jos sinulla on kysyttävää tai tarvitse apua, ota rohkeasti yhteyttä "tukitiimiimme":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Salasanasi vaihdettiin onnistuneesti</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Avaa DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Tuleva tilausmaksu ${LetterLogoText} DocSpace -tilistäsi</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Vaadittu toimenpide: ${LetterLogoText} DocSpace -lompakkosi saldon automaattinen täydentäminen ei onnistu.</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Tarvittava toimenpide: Palvelusuunnitelmaa ei voi uusia automaattisesti DocSpacessasi ${LetterLogoText}</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Salasanan vaihto onnistui
+
+Tilisi *$UserName*, *$UserEmail* salasana vaihdettiin onnistuneesti *$Date* DocSpacessa: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Laite: *$Device*
+#if($Location != "")
+Sijainti: *$Location*
+#end
+Selain: *$Browser*
+
+Jos teit tämän toimenpiteen itse, lisätoimenpiteitä ei tarvita. Jos tämä muutos näyttää epäilyttävältä tai et ole valtuuttanut sitä, palauta salasanasi välittömästi ja poista DocSpacen käyttöoikeus tältä laitteelta.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Hei, $UserName!
+
+Otamme sinuun yhteyttä ilmoittaaksemme, että DocSpace-lompakon saldon automaattinen lataus epäonnistui.
+
+Pyydämme sinua ystävällisesti tarkistamaan ja päivittämään lompakkosi saldon manuaalisesti.
+
+$OrangeButton
 
 $TrulyYours</value>
   </data>

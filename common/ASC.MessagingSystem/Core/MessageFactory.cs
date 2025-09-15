@@ -44,7 +44,7 @@ public class MessageFactory(
                 Date = dateTime ?? DateTime.UtcNow,
                 TenantId = tenantManager.GetCurrentTenantId(),
                 UserId = authContext.CurrentAccount.ID,
-                Page = MessageSettings.GetReferer(request),
+                Page = MessageSettings.GetReferer(request) ?? MessageSettings.GetRequestPath(request),
                 Action = action,
                 Description = description?.Select(s => s ?? "").ToArray(),
                 Target = target,
@@ -100,7 +100,7 @@ public class MessageFactory(
         }
     }
 
-    public EventMessage Create(HttpRequest request, MessageUserData userData, MessageAction action)
+    public EventMessage Create(HttpRequest request, MessageUserData userData, MessageAction action, string initiator, params string[] description)
     {
         try
         {
@@ -110,14 +110,16 @@ public class MessageFactory(
                 TenantId = userData?.TenantId ?? tenantManager.GetCurrentTenantId(),
                 UserId = userData?.UserId ?? authContext.CurrentAccount.ID,
                 Action = action,
-                Active = true
+                Active = true,
+                Initiator = initiator,
+                Description = description?.Select(s => s ?? "").ToArray(),
             };
 
             if (request != null)
             {
                 var ip = MessageSettings.GetIP(request);
                 var userAgent = MessageSettings.GetUAHeader(request);
-                var referer = MessageSettings.GetReferer(request);
+                var referer = MessageSettings.GetReferer(request) ?? MessageSettings.GetRequestPath(request);
 
                 message.Ip = ip;
                 message.UaHeader = userAgent;

@@ -928,4 +928,13 @@
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>客户钱包充值设置已更新</value>
   </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>促销横幅的可见性设置已变更</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>客户钱包已启用服务的设置已更新</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>位置</value>
+  </data>
 </root>

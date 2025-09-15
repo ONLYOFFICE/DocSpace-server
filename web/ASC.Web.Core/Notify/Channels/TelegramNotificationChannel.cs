@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,15 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.TelegramService.Log;
-internal static partial class TelegramHandlerLogger
+namespace ASC.Web.Core.Notify.Channels
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Couldn't find telegramId for user '{reciever}'")]
-    public static partial void DebugCouldntFind(this ILogger<TelegramHandler> logger, string reciever);
+    [Scope(typeof(INotificationChannel))]
+    public class TelegramNotificationChannel(TelegramLoginProvider loginProvider) : INotificationChannel
+    {
+        public string Name => ASC.Core.Configuration.Constants.NotifyTelegramSenderSysName;
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Couldn't send message for user '{reciever}'")]
-    public static partial void DebugCouldntSend(this ILogger<TelegramHandler> logger, string reciever, Exception exception);
-
-    [LoggerMessage(Level = LogLevel.Debug, Message = "TelegramListenerService background task is stopping.'")]
-    public static partial void DebugTelegramStopping(this ILogger<TelegramHandler> logger);
+        public bool IsEnabled => loginProvider.IsEnabled();
+    }
 }

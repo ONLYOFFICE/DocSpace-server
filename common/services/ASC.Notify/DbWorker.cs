@@ -26,6 +26,8 @@
 
 using System.Text.Json;
 
+using ASC.Core.Common.Notify.Model;
+
 namespace ASC.Notify;
 
 [Singleton]
