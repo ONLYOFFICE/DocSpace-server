@@ -98,6 +98,8 @@ public class MigrationContext : DbContext
     public DbSet<DbRoomSettings> RoomSettings { get; set; }
     public DbSet<ShortLink> ShortLink { get; set; }
     public DbSet<DbFilesAuditReference> FilesAuditReferences { get; set; }
+    public DbSet<DbFilesGroup> FilesGroup { get; set; }
+    public DbSet<DbFilesRoomGroup> FilesRoomGroup { get; set; }
 
 
     public DbSet<IdentityAuthorization> IdentityAuthorizations { get; set; }
@@ -167,6 +169,8 @@ public class MigrationContext : DbContext
             .AddDbFilesFormRoleMapping()
             .AddDbFilesTagLink()
             .AddDbFilesTag()
+            .AddDbFilesGroup()
+            .AddDbFilesRoomGroup()
             .AddDbDbFilesThirdpartyApp()
             .AddDbFilesLink()
             .AddDbFilesProperties()
