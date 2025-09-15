@@ -1015,6 +1015,7 @@ public class PortalController(
         var totalUsers = userQuota.Count;
         var portalUsers = userQuota.Where(u => Guid.TryParse(u.Key, out _)).Count();
         var externalUsers = totalUsers - portalUsers;
+        var licenseTypeByUsers = license != null && license.DSConnections == 0 && license.DSUsersCount > 0;
 
         return Ok(new
         {
@@ -1022,7 +1023,8 @@ public class PortalController(
             license,
             totalUsers,
             portalUsers,
-            externalUsers
+            externalUsers,
+            licenseTypeByUsers
         });
     }
 
