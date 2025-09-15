@@ -1546,6 +1546,51 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to WeChat.
+        /// </summary>
+        public static string ConsumersWeixin {
+            get {
+                return ResourceManager.GetString("ConsumersWeixin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client ID.
+        /// </summary>
+        public static string ConsumersWeixinClientId {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinClientId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client Secret.
+        /// </summary>
+        public static string ConsumersWeixinClientSecret {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinClientSecret", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a WeChat account..
+        /// </summary>
+        public static string ConsumersWeixinDescription {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a WeChat account..
+        /// </summary>
+        public static string ConsumersWeixinInstruction {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinInstruction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to WordPress.
         /// </summary>
         public static string ConsumersWordpress {

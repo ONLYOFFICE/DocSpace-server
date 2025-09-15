@@ -30,7 +30,7 @@ namespace ASC.FederatedLogin.Helpers;
 public class OAuth20TokenHelper(
     IHttpContextAccessor httpContextAccessor,
     ConsumerFactory consumerFactory,
-    RequestHelper requestHelper)
+    RequestHelper requestHelper) : IOAuth20TokenHelper
 {
     public string RequestCode<T>(string scope = null, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null)
         where T : Consumer, IOAuthProvider, new()
