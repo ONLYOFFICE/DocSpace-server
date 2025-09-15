@@ -1021,7 +1021,7 @@
     <value>Startup</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Праћење корисничких пријава и акција</value>
+    <value>Праћење пријава и радњи</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Максимална величина датотеке</value>
@@ -1036,7 +1036,7 @@
     <value>Број админа</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Аутоматска резервна копија и опоравак</value>
+    <value>Опоравак података</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Неограничен број активних соба</value>
@@ -1066,7 +1066,7 @@
     <value>Корисници у соби:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Неограничен број корисника</value>
+    <value>Неограничен број корисника и гостiju</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Број корисника не би требало да прекорачи {0}</value>
@@ -1147,22 +1147,16 @@
     <value>Валута</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Датум и време</value>
+    <value>Датум</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Колицина</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Назив услуге</value>
   </data>
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Јединица мере</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Извештај о корисничким операцијама ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Исплата</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>Група није пронађена</value>
@@ -1176,13 +1170,55 @@
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Складишни простор искоришћен:</value>
   </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Опис</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Простор на диску</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
     <value>Допуна стања</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} бесплатних бекaпа месечно</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Контакт</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Задужење</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Плаћање је обавезно</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Број бесплатних бекaпа не смe да прелази {0} у току месеца</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Омогући бекaпе за свој DocSpace. Трошкови ће бити наплаћени аутоматски.</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Историја трансакција</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Бекап</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Бекап</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Бекап</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>ГБ</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Аутоматска обнова</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Детаљи</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Тип</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Аутоматско допуњавање</value>
   </data>
 </root>

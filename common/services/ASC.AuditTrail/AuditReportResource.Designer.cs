@@ -340,6 +340,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Customer wallet enabled services settings updated.
+        /// </summary>
+        public static string CustomerWalletServicesSettingsUpdated {
+            get {
+                return ResourceManager.GetString("CustomerWalletServicesSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Customer wallet topped up: {0}.
         /// </summary>
         public static string CustomerWalletToppedUp {
@@ -516,15 +525,6 @@ namespace ASC.AuditTrail {
         public static string DocumentsOverwritingSettingsUpdated {
             get {
                 return ResourceManager.GetString("DocumentsOverwritingSettingsUpdated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Documents.
-        /// </summary>
-        public static string DocumentsProduct {
-            get {
-                return ResourceManager.GetString("DocumentsProduct", resourceCulture);
             }
         }
         
@@ -1249,6 +1249,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Location.
+        /// </summary>
+        public static string LocationCol {
+            get {
+                return ResourceManager.GetString("LocationCol", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Login Fail.
         /// </summary>
         public static string LoginFail {
@@ -1429,7 +1438,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Login Via Social Account Success.
+        ///   Looks up a localized string similar to Login Via Social Account Success: {0}.
         /// </summary>
         public static string LoginSuccessViaApiSocialAccount {
             get {
@@ -1443,6 +1452,24 @@ namespace ASC.AuditTrail {
         public static string LoginSuccessViaApiTfa {
             get {
                 return ResourceManager.GetString("LoginSuccessViaApiTfa", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successful Login via OAuth 2.0.
+        /// </summary>
+        public static string LoginSuccessViaOAuth {
+            get {
+                return ResourceManager.GetString("LoginSuccessViaOAuth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Login success via login and password.
+        /// </summary>
+        public static string LoginSuccessViaPassword {
+            get {
+                return ResourceManager.GetString("LoginSuccessViaPassword", resourceCulture);
             }
         }
         
@@ -1528,15 +1555,6 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Others.
-        /// </summary>
-        public static string OthersProduct {
-            get {
-                return ResourceManager.GetString("OthersProduct", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Owner Changed: {0}.
         /// </summary>
         public static string OwnerChanged {
@@ -1587,15 +1605,6 @@ namespace ASC.AuditTrail {
         public static string PasswordStrengthSettingsUpdated {
             get {
                 return ResourceManager.GetString("PasswordStrengthSettingsUpdated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to People.
-        /// </summary>
-        public static string PeopleProduct {
-            get {
-                return ResourceManager.GetString("PeopleProduct", resourceCulture);
             }
         }
         
@@ -2145,15 +2154,6 @@ namespace ASC.AuditTrail {
         public static string SessionStarted {
             get {
                 return ResourceManager.GetString("SessionStarted", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Settings.
-        /// </summary>
-        public static string SettingsProduct {
-            get {
-                return ResourceManager.GetString("SettingsProduct", resourceCulture);
             }
         }
         

@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Rezervë automatike</value>
+  </data>
   <data name="BackupException" xml:space="preserve">
     <value>Ndodhi një gabim gjatë krijimit të kopjes rezervë. Ju lutemi provoni ta krijoni përsëri ose kontaktoni suportin.</value>
   </data>
@@ -125,6 +128,24 @@
   </data>
   <data name="BackupNotFound" xml:space="preserve">
     <value>Skedari rezervë është i pavlefshëm. Ju lutemi përdorni skedarin e krijuar në të njëjtin portal.</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Ruajtja e përkohshme</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Dhoma rezervë</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Skedar lokal</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Ruajtja e palëve të treta</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Burim i palës së tretë</value>
   </data>
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Vendosni fjalëkalimin</value>

@@ -836,7 +836,7 @@
     <value>Брендинг и кастомизация</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Отслеживание входов в систему и действий пользователей</value>
+    <value>Отслеживание входов и действий</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Максимальный размер файла</value>
@@ -851,7 +851,7 @@
     <value>Количество администраторов</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Автоматическое резервное копирование и восстановление данных</value>
+    <value>Восстановление данных</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Неограниченное количество активных комнат</value>
@@ -878,7 +878,7 @@
     <value>Пользователей в комнате:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Неограниченное количество пользователей</value>
+    <value>Неограниченное количество пользователей и гостей</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Количество пользователей не должно превышать {0}</value>
@@ -1088,22 +1088,16 @@
     <value>Валюта</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Дата и время</value>
+    <value>Дата</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Количество</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Название услуги</value>
   </data>
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Единица измерения</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Отчет об операциях клиента ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Снятие</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>Группа не найдена</value>
@@ -1117,13 +1111,55 @@
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Используемое дисковое пространство:</value>
   </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Описание</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Место на диске</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
     <value>Пополнение баланса</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Автоматическое продление</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Количество бесплатных резервных копий не должно превышать {0} в течение месяца</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Включить резервное копирование для вашего DocSpace. Оплата будет списываться автоматически.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Резервное копирование</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Резервное копирование</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>Гб</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Резервное копирование</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Контакт</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Дебет</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Требуется оплата</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Автоматическое пополнение</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Тип</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Подробнее</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>История транзакций</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} бесплатных резервных копий в месяц</value>
   </data>
 </root>

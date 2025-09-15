@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
 import java.util.Map.Entry;
 import java.util.List;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.openapitools.codegen.model.OperationMap;
 import org.openapitools.codegen.model.OperationsMap;
@@ -17,10 +21,17 @@ import org.openapitools.codegen.languages.TypeScriptAxiosClientCodegen;
 import org.openapitools.codegen.CodegenOperation;
 import org.openapitools.codegen.SupportingFile;
 import org.openapitools.codegen.CodegenParameter;
+import org.openapitools.codegen.model.ApiInfoMap;
+import static org.openapitools.codegen.utils.StringUtils.camelize;
+import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.CodegenModel;
+import org.openapitools.codegen.CodegenProperty;
+import org.openapitools.codegen.utils.ModelUtils;
 
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
+import io.swagger.v3.oas.models.media.Schema;
 
 public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
 
@@ -84,35 +95,57 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
     }
 
     @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+        super.postProcessModels(objs);
+
+        for (ModelMap mo : objs.getModels()) {
+            CodegenModel model = mo.getModel();
+
+            if (model.getComposedSchemas() != null && model.getComposedSchemas().getAllOf() != null) {
+                model.getVendorExtensions().put("x-uses-allOf", true);
+                Set<String> localPropertyNames = new HashSet<>();
+                Schema modelSchema = this.openAPI.getComponents().getSchemas().get(model.schemaName);
+
+                if (ModelUtils.isAllOf(modelSchema)) {
+                    for (Object obj : modelSchema.getAllOf()) {
+                        if (obj instanceof Schema) {
+                            Schema allOfSchema = (Schema) obj;
+                            if ("object".equals(ModelUtils.getType(allOfSchema)) && allOfSchema.getProperties() != null) {
+                                localPropertyNames.addAll(allOfSchema.getProperties().keySet());
+                            }
+                        }
+                    }
+                }
+
+                List<CodegenProperty> localVars = new ArrayList<>();
+                for (CodegenProperty var : model.vars) {
+                    if (localPropertyNames.contains(var.baseName)) {
+                        localVars.add(var);
+                    }
+                }
+
+                model.getVendorExtensions().put("x-localVars", localVars);
+            }
+        }
+        
+        return objs;
+    }
+
+    @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
         objs = super.postProcessOperationsWithModels(objs, allModels);
         OperationMap vals = objs.getOperations();
         List<CodegenOperation> operations = vals.getOperation();
+        String className = vals.getClassname();
+        if (className != null && className.endsWith(apiNameSuffix)) {
+            className = className.substring(0, className.length() - 3);
+        }
+        TagParts tagParts = tagMap.get(className);
+        vals.put("x-folder", (tagParts.folderPart).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
+        vals.put("x-file", (tagParts.classPart + apiNameSuffix).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
+        vals.put("x-classname", tagParts.classPart + apiNameSuffix);
         if (operations != null) {
             for (CodegenOperation op : operations) {
-                if (op.tags != null && !op.tags.isEmpty()) {
-                    String operationTag = op.tags.get(0).getName();
-                    String cleanedTag = operationTag.trim().replaceAll("[^a-zA-Z0-9/]", "-").toLowerCase(Locale.ROOT);
-
-                    String[] tagParts = cleanedTag.split("/");
-
-                    String foldername = tagParts[0].isEmpty() ? "" : tagParts[0];
-                    foldername = foldername.endsWith("-") ? foldername.substring(0, foldername.length() - 1) : foldername;
-
-                    String filename = tagParts.length > 1 && !tagParts[1].isEmpty()
-                            ? tagParts[1] + "-api"
-                            : foldername + "-api";
-                    filename = filename.startsWith("-") ? filename.substring(1) : filename;
-
-                    String className = String.join("", 
-                        java.util.Arrays.stream(tagParts)
-                            .map(part -> part.substring(0, 1).toUpperCase() + part.substring(1))
-                            .collect(Collectors.toList()));
-
-                    op.vendorExtensions.put("x-classFoldername", foldername);
-                    op.vendorExtensions.put("x-classFilename", filename);
-                    op.vendorExtensions.put("x-className", className);
-                }
                 if (op.operationId != null) {
                     String dashedId = toDashCase(op.operationId);
                     String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";
@@ -152,6 +185,35 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
     public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
         super.postProcessSupportingFileData(objs);
 
+        ApiInfoMap apiInfo = (ApiInfoMap) objs.get("apiInfo");
+        Map<String, List<Map<String, Object>>> folderToApis = new LinkedHashMap<>();
+        for (OperationsMap api : apiInfo.getApis()) {
+
+            OperationMap operationMap = api.getOperations();
+            String className = operationMap.getClassname();
+            if (className != null && className.endsWith(apiNameSuffix)) {
+                className = className.substring(0, className.length() - 3);
+            }
+            TagParts tagParts = tagMap.get(camelize(className));
+            String folder = tagParts.folderPart;
+            String classname = tagParts.classPart + apiNameSuffix;
+
+            api.put("x-folder", folder);
+            api.put("x-classname", classname);
+
+            folderToApis.computeIfAbsent(folder, k -> new ArrayList<>()).add(api);
+        }
+
+        List<Map<String, Object>> customApis = new ArrayList<>();
+        for (Map.Entry<String, List<Map<String, Object>>> entry : folderToApis.entrySet()) {
+            Map<String, Object> folderEntry = new HashMap<>();
+            folderEntry.put("folder", entry.getKey());
+            folderEntry.put("apis", entry.getValue());
+            customApis.add(folderEntry);
+        }
+
+        objs.put("customApis", customApis);
+
         objs.put("x-authorizationUrl", "{{authBaseUrl}}/oauth2/authorize");
         objs.put("x-tokenUrl", "{{authBaseUrl}}/oauth2/token");
         objs.put("x-openIdConnectUrl", "{{authBaseUrl}}/.well-known/openid-configuration");
@@ -184,6 +246,56 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
         return "Generates a TypeScript client library using axios.";
     }
     
+    @Override
+    public String apiFilename(String templateName, String tag) {
+
+        String uniqueTag = uniqueCaseInsensitiveString(tag, seenApiFilenames);
+        String suffix = apiTemplateFiles().get(templateName);
+
+        TagParts tagParts = tagMap.get(camelize(uniqueTag));
+        if (tagParts == null) {
+            return apiFileFolder() + File.separator + toApiFilename(uniqueTag) + suffix;
+        }
+
+        String folderPath = apiFileFolder() + File.separator + tagParts.folderPart.replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT);
+        String filename = toApiFilename(tagParts.classPart) + suffix;
+
+        return folderPath + File.separator + filename;
+    }
+
+    private final Map<String, TagParts> tagMap = new HashMap<>();
+
+    @Override
+    public String sanitizeTag(String tag) {
+        String sanitized = super.sanitizeTag(tag);
+        if (!tagMap.containsKey(sanitized)) {
+            String[] parts = tag.split(" / ");
+            String folderPart = parts[0];
+            String classPart = (parts.length > 1) ? parts[1] : parts[0];
+
+            String folderPartSanitized = camelize(sanitizeName(folderPart));
+            final String classPartSanitized = camelize(sanitizeName(classPart));
+
+            boolean duplicate = tagMap.values().stream()
+                .anyMatch(tp -> tp.classPart.equals(classPartSanitized));
+
+            String finalClassPartSanitized = duplicate
+                ? folderPartSanitized + classPartSanitized
+                : classPartSanitized;
+
+            TagParts info = new TagParts(
+                tag,
+                folderPartSanitized,
+                finalClassPartSanitized
+            );
+
+            tagMap.put(sanitized, info);
+        }
+        return sanitized;
+    }
+
+    private final Map<String, String> seenApiFilenames = new HashMap<String, String>();
+
     private String uniqueCaseInsensitiveString(String value, Map<String, String> seenValues) {
         if (seenValues.keySet().contains(value)) {
             return seenValues.get(value);
@@ -205,90 +317,5 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
 
         seenValues.put(value, value);
         return value;
-    };
-
-    private final Map<String, String> seenApiFilenames = new HashMap<String, String>();
-    private String currentFolderName = null;
-    private static final java.util.Set<String> noSplitTags = new java.util.HashSet<>(java.util.Arrays.asList(
-        "ApiKeys", "ThirdParty"
-    ));
-    private String convertToHyphenatedFormat(String value) {
-        return value
-                .replaceAll("([a-z])([A-Z])", "$1-$2")
-                .replaceAll("([A-Za-z])([0-9])", "$1-$2")
-                .replaceAll("([0-9])([0-9])", "$1-$2") 
-                .toLowerCase(Locale.ROOT);
-    }
-    @Override
-    public String apiFilename(String templateName, String tag) {
-        String uniqueTag = uniqueCaseInsensitiveString(tag, seenApiFilenames);
-        String suffix = apiTemplateFiles().get(templateName);
-        String fileName;
-        if (noSplitTags.contains(uniqueTag)) {
-            currentFolderName = uniqueTag;
-            fileName = uniqueTag;
-        } else {
-            int splitIndex = findSplitIndex(uniqueTag);
-            if(splitIndex > 0)
-            {
-                currentFolderName = uniqueTag.substring(0, splitIndex);
-                fileName = uniqueTag.substring(splitIndex);
-            }
-            else {
-                fileName = uniqueTag;
-                currentFolderName = uniqueTag;
-            }
-        }
-        if (!"ThirdParty".equalsIgnoreCase(currentFolderName)) {
-            currentFolderName = convertToHyphenatedFormat(currentFolderName);
-        }
-        return apiFileFolder() + File.separator + toApiFilename(fileName) + suffix;
-    }
-
-    private static final List<String> customApiFilenames = Arrays.asList(
-        "AccessToDevTools",
-        "SMTPSettings",
-        "IPRestrictions",
-        "TFASettings",
-        "ThirdParty"
-    );
-
-    @Override
-    public String toApiFilename(String name) {
-        if (name.matches("^[A-Z0-9]+$")) {
-            name = name.toLowerCase(Locale.ROOT);
-        }
-        if (customApiFilenames.contains(name)) {
-            switch (name) {
-                case "AccessToDevTools":
-                    return "access-to-devtools-api";
-                case "SMTPSettings":
-                    return "smtp-settings-api";
-                case "IPRestrictions":
-                    return "ip-restrictions-api";
-                case "TFASettings":
-                    return "tfa-settings-api";
-                case "ThirdParty":
-                    return "thirdparty-api";
-                default:
-                    return super.toApiFilename(name).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT);
-            }
-        }
-        return super.toApiFilename(name).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT);
-    }
-    
-    @Override
-    public String apiFileFolder() {
-        return outputFolder + File.separator + apiPackage().replace('.', File.separatorChar)
-               + (currentFolderName == null || currentFolderName.isEmpty() ? "" : File.separator + currentFolderName.toLowerCase(Locale.ROOT));
-    }
-
-    private int findSplitIndex(String name) {
-        for (int i = 2; i < name.length(); i++) {
-            if (Character.isUpperCase(name.charAt(i))) {
-                return i;
-            }
-        }
-        return -1;
     }
 }

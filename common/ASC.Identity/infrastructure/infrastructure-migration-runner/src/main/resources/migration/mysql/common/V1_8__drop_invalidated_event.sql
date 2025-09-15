@@ -1,0 +1,1 @@
+DROP EVENT IF EXISTS identity_delete_invalidated_authorization;

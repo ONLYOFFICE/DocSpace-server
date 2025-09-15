@@ -42,6 +42,7 @@ public class EncryptionLoginProvider(
 
         var loginProfile = new LoginProfile
         {
+            Id = userId.ToString(),
             Provider = ProviderConstants.Encryption,
             Name = await instanceCrypto.EncryptAsync(keys)
         };

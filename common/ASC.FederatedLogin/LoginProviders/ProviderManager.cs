@@ -47,7 +47,8 @@ public class ProviderManager(ConsumerFactory consumerFactory)
         ProviderConstants.Facebook,
         ProviderConstants.Twitter,
         ProviderConstants.Microsoft,
-        ProviderConstants.AppleId
+        ProviderConstants.AppleId,
+        ProviderConstants.Weixin,
     ];
 
     public static readonly List<string> InviteExceptProviders =

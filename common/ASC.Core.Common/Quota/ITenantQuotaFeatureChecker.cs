@@ -43,7 +43,7 @@ public abstract class TenantQuotaFeatureChecker<T, T1>(ITenantQuotaFeatureStat<T
 
     public abstract string GetExceptionMessage(long size);
 
-    public async Task CheckUsed(TenantQuota quota)
+    public virtual async Task CheckUsed(TenantQuota quota)
     {
         var used = await _tenantQuotaFeatureStatistic.GetValueAsync();
         Check(quota, used);

@@ -118,40 +118,40 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; قام بانشاء مستند جديد: &lt;a href={1}&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بانشاء مستند جديد: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; قام بتعديل المستند: &lt;a href={1}&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بتعديل المستند: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; قام برفع مستند جديد: &lt;a href={1}&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام برفع مستند جديد: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; قام بإضافة تعليق جديد إلى نسخة المستند: &lt;a href={1}&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بإضافة تعليق جديد إلى نسخة المستند: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; في الغرفة: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; قام بنقل الغرفة: &lt;a href={1}&gt;{2}&lt;/a&gt; إلى الأرشيف - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بنقل الغرفة: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; إلى الأرشيف - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; قام بإنشاء غرفة جديدة: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; قام بإنشاء غرفة جديدة: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; قام بحذف الغرفة: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; أعاد تسمية الغرفة: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; أعاد تسمية الغرفة: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; تم تعيينه كـ &lt;b&gt;{1}&lt;/b&gt; iفي الغرفة: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; تم تعيينه كـ &lt;b&gt;{1}&lt;/b&gt; iفي الغرفة: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; تم إضافته للغرفة : &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; تم إضافته للغرفة : &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>تم إضافة مستخدم DocSpace جديد: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; تم إزالته من الغرفة: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; تم إزالته من الغرفة: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUsersUpdatedType" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; قام بتغير مستوى وصول المستخدمين &lt;b&gt;{1}&lt;/b&gt; to &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -382,7 +382,7 @@
     <value>حذف مدخل ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>تم إلغاء تنشيط ${LetterLogoText} DocSpace</value>
+    <value>تم حذف ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}.تغيير عنوان البوابة الإلكترونية</value>
@@ -1190,14 +1190,13 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>h1. ${LetterLogoText} DocSpace تم&lt;span style="color:#FF6F3D;"&gt;تعطيل&lt;/span&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace &lt;span style="color: #FF6F3D;"&gt;تم حذف &lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;تم إلغاء تنشيط DocSpace الخاص بك ${LetterLogoText} بنجاح. يرجى ملاحظة أنه سيتم حذف جميع بياناتك وفقا ل &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;سياسة الخصوصية&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
-تم إلغاء تنشيط DocSpace الخاص بك ${LetterLogoText} بنجاح. يرجى ملاحظة أنه سيتم حذف جميع بياناتك وفقا ل "سياسة الخصوصية":"$URL1". 
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;لماذا قررت المغادرة؟ شارك تجربتك معنا.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
-&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt; لماذا قررت المغادرة؟ شارك تجربتك معنا.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt; 
-
-*شكرا لك ونتمنى لك التوفيق!*
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 1.6em; Margin: 0; padding: 0px 180px 32px; vertical-align: top; text-align: center;"&gt;شكرا لك ونتمنى لك التوفيق!&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -2043,7 +2042,7 @@ $TrulyYours</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>مرحبًا!
 
-تم تعيين دور جديد لكم في غرفة "DocSpace "${RoomTitle}":"${RoomUrl}، والدور هو: ${UserRole}.
+تم تعيين دور جديد لكم في غرفة DocSpace "${RoomTitle}":"${RoomUrl}"، والدور هو: ${UserRole}.
 
 يمكنكم معرفة المزيد حول الأدوار والصلاحيات في الغرف من خلال "مركز المساعدة":"${HelpCenterUrl}".
 
@@ -2052,7 +2051,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>مرحبًا!
 
-تم تعيين نوع مستخدم جديد لكم في "DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}، والنوع هو: ${UserType}.
+تم تعيين نوع مستخدم جديد لكم في DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}"، والنوع هو: ${UserType}.
 
 يمكنكم معرفة المزيد حول أنواع المستخدمين والصلاحيات من خلال "مركز المساعدة":"${HelpCenterUrl}".
 
@@ -2118,5 +2117,29 @@ $TrulyYours</value>
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>افتح DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.تم تغيير كلمة المرور بنجاح
+
+تم تغيير كلمة المرور الخاصة بحسابك *$UserName* ، *$UserEmail* بنجاح في *$Date* في DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+الجهاز: *$Device*
+#if($Location != "")
+الموقع: *$Location*
+#end
+المتصفح: *$Browser*
+
+إذا تم اتخاذ هذا الإجراء من قبلك — لن تكون هناك حاجة إلى أي خطوات أخرى. إذا كان هذا التغيير يبدو مشبوهًا أو لم تتم الموافقة عليه من قبلك، فيرجى إعادة تعيين كلمة المرور الخاصة بك على الفور وتعطيل الوصول إلى DocSpace لهذا الجهاز.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>لقد تم تغيير كلمة المرور الخاصة بك بنجاح</value>
   </data>
 </root>

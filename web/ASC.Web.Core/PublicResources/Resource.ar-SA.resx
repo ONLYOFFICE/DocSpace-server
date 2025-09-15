@@ -967,7 +967,7 @@
     <value>شركة ناشئة</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>تتبع تسجيل دخول المستخدم والإجراء</value>
+    <value>تتبع عمليات تسجيل الدخول والإجراءات</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>الحد الأقصى لحجم الملف</value>
@@ -982,7 +982,7 @@
     <value>عدد الإداريين</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>النسخ الاحتياطي التلقائي والاسترداد</value>
+    <value>استعادة البيانات</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>عدد غير محدود من الغرف النشطة</value>
@@ -1009,7 +1009,7 @@
     <value>عدد المستخدمين في الغرفة:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>عدد غير محدود من المستخدمين</value>
+    <value>عدد غير محدود من المستخدمين والضيوف</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>يجب ألا يتجاوز عدد المستخدمين {0}</value>
@@ -1159,16 +1159,10 @@
     <value>عملة</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>التاريخ والوقت</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>الوصف</value>
+    <value>التاريخ</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>كمية</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>اسم الخدمة</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>مساحة القرص</value>
@@ -1182,7 +1176,49 @@
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>تقرير عمليات العملاء ({0}-{1})</value>
   </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>انسحاب</value>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>التجديد التلقائي</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>يجب ألا يتجاوز عدد النسخ الاحتياطية المجانية {0} خلال شهر واحد</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>تمكين النسخ الاحتياطية لـ DocSpace الخاص بك. سيتم تحصيل التكاليف تلقائيًا.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>دعم</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>دعم</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>دعم</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>الخصم</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>اتصال</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>تاريخ المعاملات</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>التعبئة التلقائية</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} نسخ احتياطية مجانية شهريًا</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>الدفع مطلوب</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>نوع</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>تفاصيل</value>
   </data>
 </root>

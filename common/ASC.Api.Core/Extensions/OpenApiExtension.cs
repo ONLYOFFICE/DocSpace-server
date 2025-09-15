@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,10 +51,19 @@ public static class OpenApiExtension
 
             c.CustomSchemaIds(CustomSchemaId);
 
-            c.SwaggerDoc("common", new OpenApiInfo { Title = "Api", Version = "3.2.0" });
+            c.SwaggerDoc("common", new OpenApiInfo
+            {
+                Title = "Api",
+                Version = "3.5.0",
+                Contact = new OpenApiContact
+                {
+                    Name = "API Support",
+                    Email = "support@onlyoffice.com",
+                    Url = new Uri("https://helpdesk.onlyoffice.com/hc/en-us")
+                }
+            });
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
             c.DocumentFilter<LowercaseDocumentFilter>();
-            c.OperationFilter<OneOfResponseFilter>();
             c.SchemaFilter<DerivedSchemaFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
@@ -62,6 +71,7 @@ public static class OpenApiExtension
             c.OperationFilter<ContentTypeOperationFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
             c.EnableAnnotations();
+            c.SchemaFilter<CustomInheritanceSchemaFilter>();
 
             var serverTemplate = configuration.GetValue<string>("openApi:server") ?? "";
 
@@ -212,7 +222,7 @@ public static class OpenApiExtension
         return app;
     }
 
-    private static string CustomSchemaId(Type type)
+    public static string CustomSchemaId(Type type)
     {
         var name = type.Name;
 
@@ -224,8 +234,7 @@ public static class OpenApiExtension
         if (type.IsGenericType)
         {
             name = name.Split('`')[0];
-
-            var genericArgs = string.Join("", type.GenericTypeArguments.Select(CustomSchemaId));
+            var genericArgs = string.Join("", type.GetGenericArguments().Select(CustomSchemaId));
             name += genericArgs;
         }
 
@@ -368,6 +377,102 @@ public static class OpenApiExtension
         public void Write(IOpenApiWriter writer, OpenApiSpecVersion specVersion)
         {
             writer.WriteValue(shortName);
+        }
+    }
+
+    private class CustomInheritanceSchemaFilter : ISchemaFilter
+    {
+        public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+        {
+            var type = context.Type;
+
+            if (type.IsEnum || !type.IsClass || type == typeof(object) || IsSystemType(type))
+            {
+                return;
+            }
+
+            var baseType = type.BaseType;
+            if (baseType == null || baseType == typeof(object) || IsSystemType(baseType) || baseType == typeof(BaseEntity))
+            {
+                return;
+            }
+
+            var baseProperties = GetAllBaseTypeProperties(type);
+            if(baseProperties.Count == 0)
+            {
+                return;
+            }
+
+            var baseTypeSchema = context.SchemaGenerator.GenerateSchema(baseType, context.SchemaRepository);
+
+            var schemaId = CustomSchemaId(baseType);
+
+            if (!context.SchemaRepository.Schemas.ContainsKey(schemaId))
+            {
+                context.SchemaRepository.Schemas.Add(schemaId, baseTypeSchema);
+            }
+
+            var baseSchemaRef = new OpenApiReference
+            {
+                Type = ReferenceType.Schema,
+                Id = schemaId
+            };
+
+            var originalProperties = schema.Properties;
+            var originalRequired = schema.Required;
+
+            var derivedPropertiesSchema = new OpenApiSchema
+            {
+                Type = "object",
+                Properties = new Dictionary<string, OpenApiSchema>(),
+                Required = new HashSet<string>(),
+            };
+
+            foreach (var prop in originalProperties)
+            {
+                if (!baseProperties.Contains(prop.Key.ToLowerInvariant()))
+                {
+                    derivedPropertiesSchema.Properties.Add(prop.Key, prop.Value);
+                    if (originalRequired?.Contains(prop.Key) == true)
+                    {
+                        derivedPropertiesSchema.Required.Add(prop.Key);
+                    }
+                }
+            }
+
+            schema.AllOf = new List<OpenApiSchema>
+            {
+                new OpenApiSchema { Reference = baseSchemaRef },
+                derivedPropertiesSchema
+            };
+
+            schema.Properties = null;
+            schema.Required = null;
+            schema.Type = null;
+        }
+
+        private HashSet<string> GetAllBaseTypeProperties(Type type)
+        {
+            var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var currentType = type.BaseType;
+
+            while (currentType != null && currentType != typeof(object))
+            {
+                foreach (var prop in currentType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+                {
+                    var propName = char.ToLowerInvariant(prop.Name[0]) + prop.Name.Substring(1);
+                    result.Add(propName);
+                }
+
+                currentType = currentType.BaseType;
+            }
+
+            return result;
+        }
+
+        private static bool IsSystemType(Type type)
+        {
+            return type.Namespace != null && type.Namespace.StartsWith("System");
         }
     }
 }

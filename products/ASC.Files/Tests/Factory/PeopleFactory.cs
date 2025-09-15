@@ -25,13 +25,14 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCPeople;
+using DocSpace.API.SDK.Api.People;
 
 namespace ASC.Files.Tests.Factory;
 
 public class PeopleFactory : WebApplicationFactory<PeopleProgram>, IAsyncLifetime
 {
     public HttpClient HttpClient { get; private set; } = null!;
-    public PeopleProfilesApi  PeopleProfilesApi { get; private set; } = null!;
+    public ProfilesApi  PeopleProfilesApi { get; private set; } = null!;
     
     protected override IHost CreateHost(IHostBuilder builder)
     {
@@ -48,7 +49,7 @@ public class PeopleFactory : WebApplicationFactory<PeopleProgram>, IAsyncLifetim
         HttpClient = CreateClient();
 
         var configuration = new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') };
-        PeopleProfilesApi = new PeopleProfilesApi(HttpClient, configuration);
+        PeopleProfilesApi = new ProfilesApi(HttpClient, configuration);
 
         return ValueTask.CompletedTask;
     }

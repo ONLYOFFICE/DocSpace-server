@@ -41,10 +41,10 @@ public class CopyFileTest(
         await _filesClient.Authenticate(Initializer.Owner);
         
         // Create a source file
-        var sourceFile = await CreateFile("source_document.docx", FolderType.USER, Initializer.Owner);
+        var sourceFile = await CreateFileInMy("source_document.docx", Initializer.Owner);
         
         // Create a target folder
-        var targetFolder = await CreateFolder("target_folder", FolderType.USER, Initializer.Owner);
+        var targetFolder = await CreateFolderInMy("target_folder", Initializer.Owner);
         
         // Act
         var copyParams = new CopyAsJsonElement(
@@ -72,7 +72,7 @@ public class CopyFileTest(
         await _filesClient.Authenticate(Initializer.Owner);
         
         // Create a source file
-        var sourceFile = await CreateFile("rename_source.docx", FolderType.USER, Initializer.Owner);
+        var sourceFile = await CreateFileInMy("rename_source.docx", Initializer.Owner);
         var newFileName = "renamed_copy.docx";
         
         // Get root folders to find a target folder
@@ -100,7 +100,7 @@ public class CopyFileTest(
         await _filesClient.Authenticate(Initializer.Owner);
         
         // Create a source file
-        var sourceFile = await CreateFile("file_to_move.docx", FolderType.USER, Initializer.Owner);
+        var sourceFile = await CreateFileInMy("file_to_move.docx", Initializer.Owner);
         
         // Create a target folder
         var targetFolder = await CreateFolder("target_folder", FolderType.USER, Initializer.Owner);
@@ -108,7 +108,7 @@ public class CopyFileTest(
         // Act
         var moveParams = new BatchRequestDto
         {
-            DestFolderId = new BatchRequestDtoDestFolderId(targetFolder.Id),
+            DestFolderId = new  BatchRequestDtoAllOfDestFolderId(targetFolder.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new(sourceFile.Id)],
             FolderIds = []

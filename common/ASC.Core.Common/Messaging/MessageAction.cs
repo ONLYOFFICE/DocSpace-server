@@ -118,7 +118,13 @@ public enum MessageAction
     SessionCompleted = 1017,
 
     [SwaggerEnum("Authorization link activated")]
-    AuthLinkActivated = 1027,  // last login
+    AuthLinkActivated = 1027,
+
+    [SwaggerEnum("Login success via OAuth 2.0")]
+    LoginSuccessViaOAuth = 1028,
+
+    [SwaggerEnum("Login success via login and password")]
+    LoginSuccessViaPassword = 1029,  // last login
 
     #endregion
 
@@ -551,6 +557,15 @@ public enum MessageAction
     [SwaggerEnum("File external link deleted")]
     FileExternalLinkDeleted = 5093,
 
+    [SwaggerEnum("Folder external link created")]
+    FolderExternalLinkCreated = 5122,
+
+    [SwaggerEnum("Folder external link updated")]
+    FolderExternalLinkUpdated = 5123,
+
+    [SwaggerEnum("Folder external link deleted")]
+    FolderExternalLinkDeleted = 5124,
+
     [SwaggerEnum("Room index export saved")]
     RoomIndexingEnabled = 5114,
 
@@ -821,6 +836,9 @@ public enum MessageAction
 
     [SwaggerEnum("Promotional banners visibility settings changed")]
     BannerSettingsChanged = 6066,
+
+    [SwaggerEnum("Customer wallet services settings updated")]
+    CustomerWalletServicesSettingsUpdated = 6067,
 
     #endregion
 

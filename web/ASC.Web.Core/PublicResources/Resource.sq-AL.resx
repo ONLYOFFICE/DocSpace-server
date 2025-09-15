@@ -1045,7 +1045,7 @@
     <value>Fillimi</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Ndjekja e hyrjeve dhe veprimeve të përdoruesve</value>
+    <value>Gjurmimi i hyrjeve dhe veprimeve</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding &amp; personalizim</value>
@@ -1063,7 +1063,7 @@
     <value>Numri i administratorëve</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Rezervimi dhe rikuperimi automatik</value>
+    <value>Rikuperimi i të dhënave</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Numri i pakufizuar i dhomave aktive</value>
@@ -1102,7 +1102,7 @@
     <value>Përdoruesit në dhomë:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Numri i pakufizuar i përdoruesve</value>
+    <value>Numri i pakufizuar përdoruesish dhe të ftuarish</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Numri i përdoruesve nuk duhet të kalojë {0}</value>
@@ -1142,5 +1142,83 @@
   </data>
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>URL-ja e Webhook nuk është e disponueshme. Kërkesa HEAD nuk ka kthyer një status 200 http.</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Kredit</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Monedha</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Sasia</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Hapësira në disk</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Rimbushje e balancës</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Njësia e matjes</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Raporti i operacioneve të klientit ({0}-{1})</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Hapësirë shtesë në disk</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Përshtatni hapësirën me saktësinë që kërkoni.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Hapësira e ruajtjes së përdorur:</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Rinovim automatik</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Numri i kopjeve rezervë falas nuk duhet të kalojë {0} brenda një muaji</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Aktivizoni kopjen rezervë për DocSpace-in tënd. Kostot do të faturohen automatikisht.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Kopje rezervë</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Kopje rezervë</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Kopje rezervë</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detaje</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debitim</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Kontakt</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Historiku i transaksioneve</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Kreditim automatik</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} kopje rezervë falas në muaj</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Kërkohet pagesë</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Lloji</value>
   </data>
 </root>

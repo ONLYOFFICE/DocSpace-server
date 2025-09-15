@@ -52,7 +52,6 @@ public partial class SettingsController(
     IFusionCache fusionCache,
     ProviderManager providerManager,
     FirstTimeTenantSettings firstTimeTenantSettings,
-    TelegramHelper telegramHelper,
     PasswordHasher passwordHasher,
     DnsSettings dnsSettings,
     CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
@@ -1074,58 +1073,6 @@ public partial class SettingsController(
             CurrentLicense = new CurrentLicenseInfo { Trial = currentQuota.Trial, DueDate = currentTariff.DueDate.Date },
             Max = maxQuotaQuantity
         };
-    }
-
-    /// <summary>
-    /// Returns a link that will connect TelegramBot to your account.
-    /// </summary>
-    /// <short>Get the Telegram link</short>
-    /// <path>api/2.0/settings/telegramlink</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Settings / Telegram")]
-    [SwaggerResponse(200, "Telegram link", typeof(object))]
-    [HttpGet("telegramlink")]
-    public async Task<string> GetTelegramLink()
-    {
-        var tenant = tenantManager.GetCurrentTenant();
-        var currentLink = telegramHelper.CurrentRegistrationLink(authContext.CurrentAccount.ID, tenant.Id);
-
-        if (string.IsNullOrEmpty(currentLink))
-        {
-            var url = await telegramHelper.RegisterUserAsync(authContext.CurrentAccount.ID, tenant.Id);
-            return url;
-        }
-
-        return currentLink;
-    }
-
-    /// <summary>
-    /// Checks if the user has connected to TelegramBot.
-    /// </summary>
-    /// <short>Check the Telegram connection</short>
-    /// <path>api/2.0/settings/telegramisconnected</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Settings / Telegram")]
-    [SwaggerResponse(200, "Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation", typeof(TelegramHelper.RegStatus))]
-    [HttpGet("telegramisconnected")]
-    public async Task<TelegramHelper.RegStatus> GetTelegramIsConnected()
-    {
-        var tenant = tenantManager.GetCurrentTenant();
-        return await telegramHelper.UserIsConnectedAsync(authContext.CurrentAccount.ID, tenant.Id);
-    }
-
-    /// <summary>
-    /// Unlinks TelegramBot from your account.
-    /// </summary>
-    /// <short>Unlink Telegram</short>
-    /// <path>api/2.0/settings/telegramdisconnect</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Settings / Telegram")]
-    [HttpDelete("telegramdisconnect")]
-    public async Task TelegramDisconnect()
-    {
-        var tenant = tenantManager.GetCurrentTenant();
-        await telegramHelper.DisconnectAsync(authContext.CurrentAccount.ID, tenant.Id);
     }
 
     /// <summary>

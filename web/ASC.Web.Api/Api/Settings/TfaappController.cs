@@ -119,9 +119,9 @@ public class TfaappController(
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         securityContext.Logout();
 
-        var result = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code);
+        var (result, _) = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code);
         await userSocketManager.UpdateUserAsync(userManager.GetUsers(authContext.CurrentAccount.ID));
-        
+
         var request = QueryHelpers.ParseQuery(Request.Headers["confirm"]);
         var type = request.TryGetValue("type", out var value) ? (string)value : "";
         cookiesManager.ClearCookies(CookiesType.ConfirmKey, $"_{type}");
@@ -158,7 +158,7 @@ public class TfaappController(
                 ? ConfirmType.TfaActivation
                 : ConfirmType.TfaAuth;
 
-            var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, confirmType);
+            var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Id, confirmType);
             await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{confirmType}");
             return url;
         }
@@ -424,7 +424,7 @@ public class TfaappController(
         await cookiesManager.ResetUserCookieAsync(user.Id);
         if (isMe)
         {
-            var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, ConfirmType.TfaActivation);
+            var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Id, ConfirmType.TfaActivation);
             await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{ConfirmType.TfaActivation}");
             return url;
         }

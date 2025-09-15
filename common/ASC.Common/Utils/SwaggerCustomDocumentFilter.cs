@@ -42,42 +42,6 @@ public class HideRouteDocumentFilter(string routeToHide) : IDocumentFilter
     }
 }
 
-public class OneOfResponseFilter : IOperationFilter
-{
-    public void Apply(OpenApiOperation operation, OperationFilterContext context)
-    {
-        var method = context.MethodInfo;
-        var responceAttribute = method.GetCustomAttributes<SwaggerResponseAttribute>().Where(attr => attr.StatusCode == 200 && attr.Type != null).ToList();
-        if (responceAttribute.Count > 1)
-        {
-            var OneOfSchema = responceAttribute.Select(attr => context.SchemaGenerator.GenerateSchema(attr.Type!, context.SchemaRepository)).ToList();
-
-            if (operation.Responses.TryGetValue("200", out var response))
-            {
-                foreach (var content in response.Content)
-                {
-                    var schema = content.Value.Schema;
-                    if (schema.Type == "array")
-                    {
-                        content.Value.Schema = new OpenApiSchema
-                        {
-                            OneOf = OneOfSchema,
-                            Type = "array"
-                        };
-                    }
-                    else
-                    {
-                        content.Value.Schema = new OpenApiSchema
-                        {
-                            OneOf = OneOfSchema
-                        };
-                    }
-                }
-            }
-        }
-    }
-}
-
 public class DerivedSchemaFilter : ISchemaFilter
 {
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
@@ -86,9 +50,41 @@ public class DerivedSchemaFilter : ISchemaFilter
         var derivedTypes = baseType.GetCustomAttributes<JsonDerivedTypeAttribute>(true).Select(attr => attr.DerivedType).Where(t => t != null).Distinct().ToList();
         if (derivedTypes.Count > 0)
         {
-            schema.OneOf = derivedTypes.Select(derivedType => context.SchemaGenerator.GenerateSchema(derivedType, context.SchemaRepository)).ToList();
-            schema.Properties = null; schema.Type = null;
+
+            schema.Extensions.Add("x-derived", new OpenApiBoolean(true));
+            var derivedArray = new OpenApiArray();
+            foreach (var type in derivedTypes)
+            {
+                var schemaId = CustomSchemaId(type);
+                derivedArray.Add(new OpenApiString(schemaId));
+            }
+
+            if (derivedArray.Any())
+            {
+                schema.Extensions["x-derived-types"] = derivedArray;
+            }
         }
+    }
+
+    private static string CustomSchemaId(Type type)
+    {
+        var name = type.Name;
+
+        if (string.IsNullOrEmpty(name))
+        {
+            return name;
+        }
+
+        if (type.IsGenericType)
+        {
+            name = name.Split('`')[0];
+
+            var genericArgs = string.Join("", type.GenericTypeArguments.Select(CustomSchemaId));
+            name += genericArgs;
+        }
+        name = name.Replace("+", "_");
+        name = name.Replace("Int32", "Integer");
+        return name;
     }
 }
 

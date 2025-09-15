@@ -33,6 +33,7 @@ using ASC.Core.Common.Quota.Features;
 using ASC.Core.Tenants;
 using ASC.Core.Users;
 using ASC.MessagingSystem.Core;
+using ASC.Web.Core.PublicResources;
 using ASC.Web.Core.Quota;
 using ASC.Web.Studio.Core.Notify;
 
@@ -189,7 +190,9 @@ public class RenewSubscriptionService(
             // TODO: support other currencies
             var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
 
-            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, ProductQuantityType.Renew, defaultCurrency, false);
+            var metadata = new Dictionary<string, string> { { BillingClient.MetadataDetails, Resource.AutoRenewal } };
+
+            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, ProductQuantityType.Renew, defaultCurrency, false, null, metadata);
 
             if (result)
             {

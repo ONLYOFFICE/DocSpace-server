@@ -164,7 +164,7 @@
     <value>O que há de novo</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Monitorização dos inícios de sessão e das ações dos utilizadores</value>
+    <value>Rastreio de logins e ações</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Tamanho máximo do ficheiro</value>
@@ -179,7 +179,7 @@
     <value>O número de administradores</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Cópia de Segurança automática e recuperação</value>
+    <value>Recuperação de dados</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Número ilimitado de salas ativas</value>
@@ -206,7 +206,7 @@
     <value>Utilizadores na sala:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Número ilimitado de utilizadores</value>
+    <value>Número ilimitado de utilizadores e convidados</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>O número de utilizadores não deve exceder {0}</value>
@@ -1091,16 +1091,10 @@
     <value>Moeda</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Data e hora</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Descrição</value>
+    <value>Data</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Quantidade</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Nome do serviço</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Espaço em disco</value>
@@ -1114,9 +1108,6 @@
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Relatório de operações do cliente ({0}-{1})</value>
   </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Retirada</value>
-  </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>O grupo não foi encontrado</value>
   </data>
@@ -1125,5 +1116,50 @@
   </data>
   <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
     <value>Ajuste o armazenamento para a quantidade exata que necessita.</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Cópia de segurança</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Cópia de segurança</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Cópia de segurança</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Débito</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contacto</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Histórico de transações</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Recarga automática</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} backups gratuitos por mês</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Pagamento requerido</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detalhes</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Renovação automática</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>O número de backups gratuitos não deve exceder {0} num mês</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Active os backups para o seu DocSpace. Os custos serão cobrados automaticamente.</value>
   </data>
 </root>

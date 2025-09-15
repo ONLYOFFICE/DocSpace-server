@@ -1,5 +1,6 @@
 com.example.codegen.MyTypeScriptAxiosCodegen
 com.example.codegen.MyPythonCodegen
+com.example.codegen.MyPostmanCollectionCodegen
 com.example.codegen.MyCSharpCodegen
 com.example.codegen.MyJavaScriptCodegen
 org.openapitools.codegen.languages.AdaCodegen

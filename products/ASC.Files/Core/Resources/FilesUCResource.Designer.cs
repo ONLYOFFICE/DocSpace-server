@@ -115,7 +115,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Documents.
+        ///   Looks up a localized string similar to My documents.
         /// </summary>
         public static string MyFiles {
             get {

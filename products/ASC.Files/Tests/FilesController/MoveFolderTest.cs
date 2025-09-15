@@ -50,7 +50,7 @@ public class MoveFolderTest(
         // Act
         var copyParams = new BatchRequestDto
         {
-            DestFolderId = new BatchRequestDtoDestFolderId(targetFolderId),
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolderId),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [],
             FolderIds = [new(sourceFolder.Id)]
@@ -94,7 +94,7 @@ public class MoveFolderTest(
         // Act
         var moveParams = new BatchRequestDto
         {
-            DestFolderId = new BatchRequestDtoDestFolderId(targetFolder.Id),
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolder.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [],
             FolderIds = [new(sourceFolder.Id)]

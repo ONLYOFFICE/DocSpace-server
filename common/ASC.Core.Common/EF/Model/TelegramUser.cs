@@ -31,6 +31,7 @@ public class TelegramUser : BaseEntity
     public Guid PortalUserId { get; set; }
     public int TenantId { get; set; }
     public long TelegramUserId { get; set; }
+    public string TelegramUsername { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -66,6 +67,9 @@ public static class TelegramUsersExtension
             entity.HasIndex(e => e.TelegramUserId)
                 .HasDatabaseName("tgId");
 
+            entity.HasIndex(e => e.TelegramUsername)
+                .HasDatabaseName("tgUsername");
+
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
             entity.Property(e => e.PortalUserId)
@@ -77,6 +81,12 @@ public static class TelegramUsersExtension
             entity.Property(e => e.TelegramUserId)
                 .HasColumnName("telegram_user_id")
                 .HasColumnType("int");
+
+            entity.Property(e => e.TelegramUsername)
+                .HasColumnName("telegram_username")
+                .HasColumnType("varchar(35)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
         });
     }
     public static void PgSqlAddTelegramUsers(this ModelBuilder modelBuilder)
@@ -91,6 +101,9 @@ public static class TelegramUsersExtension
             entity.HasIndex(e => e.TelegramUserId)
                 .HasDatabaseName("ix_telegram_user_id");
 
+            entity.HasIndex(e => e.TelegramUsername)
+                .HasDatabaseName("ix_telegram_username");
+
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
             entity.Property(e => e.PortalUserId)
@@ -100,6 +113,10 @@ public static class TelegramUsersExtension
             entity.Property(e => e.TelegramUserId)
                 .HasColumnName("telegram_user_id")
                 .HasColumnType("bigint");
+
+            entity.Property(e => e.TelegramUsername)
+                .HasColumnName("telegram_username")
+                .HasColumnType("char(35)");
         });
         
     }

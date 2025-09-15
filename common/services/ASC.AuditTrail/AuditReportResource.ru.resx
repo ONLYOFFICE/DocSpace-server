@@ -136,9 +136,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Обновлены настройки перезаписи файлов</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Документы</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Настройки</value>
   </data>
@@ -409,9 +406,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Перемещение</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Прочее</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Изменен владелец: {0}</value>
   </data>
@@ -429,9 +423,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Обновлены настройки надежности пароля</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Люди</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Платформа</value>
@@ -492,9 +483,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Сеанс начат</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Настройки</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Выключена возможность SSO</value>
@@ -939,5 +927,14 @@
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>Настройки пополнения кошелька клиента обновлены</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Изменены настройки видимости рекламных баннеров</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Размещение</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Обновлены настройки сервисов, подключенных через кошелек клиента</value>
   </data>
 </root>

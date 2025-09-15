@@ -136,9 +136,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Einstellungen vom Überschreiben wurden aktualisiert</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Dokumente</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Einstellungen</value>
   </data>
@@ -409,9 +406,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Verschieben</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Sonstiges</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Besitzer geändert: {0}</value>
   </data>
@@ -429,9 +423,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Einstellungen der Kennwortstärke sind aktualisiert</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Personen</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Plattform</value>
@@ -492,9 +483,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sitzung gestartet</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Einstellungen</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO deaktiviert</value>
@@ -939,5 +927,14 @@
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>Einstellungen für Kunden-Wallet-Aufladung aktualisiert</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Standort</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Sichtbarkeitseinstellungen für Werbebanner geändert</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Vom Kunden-Wallet aktivierte Serviceeinstellungen aktualisiert</value>
   </data>
 </root>

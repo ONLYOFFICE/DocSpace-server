@@ -124,9 +124,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Nadpisywane ustawienia zostały zaktualizowane</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Dokumenty</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Ustawienia</value>
   </data>
@@ -373,9 +370,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Rusz</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Inne</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Właściciel został zmieniony: {0}</value>
   </data>
@@ -393,9 +387,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Ustawienia siły haseł zostały zaktualizowane</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Ludzie</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platforma</value>
@@ -450,9 +441,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Uruchomienie sesji</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Ustawienia</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Wyłączona możliwość SSO</value>
@@ -939,5 +927,14 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>Synchronizacja LDAP zakończona</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Lokalizacja</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Zmieniono ustawienia widoczności banerów promocyjnych</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Zaktualizowano ustawienia usług obsługujących portfel klienta</value>
   </data>
 </root>

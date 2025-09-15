@@ -417,7 +417,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Spațiul ${LetterLogoText} DocSpace a &lt;span style="color: #FF6F3D;"&gt;fost activat&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Spațiul ${LetterLogoText} DocSpace a fost&lt;span style="color: #FF6F3D;"&gt;șters&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Spațiul dvs ${LetterLogoText} DocSpace a fost dezactivat cu succes. Va rugam sa rețineți că, datele dumneavoastră vor fi șterse în conformitate cu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;politica noastră de confidențialitate&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -485,37 +485,37 @@ Odată ce faceți clic pe linkul de invitație, setați o nouă parolă pentru c
 $TrulyYours</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a creat un document nou: &lt;a href={1}&gt;{2}&lt;/a&gt; în sală: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a creat un document nou: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; în sală: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a încărcat un document nou: &lt;a href={1}&gt;{2}&lt;/a&gt; în sală: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a încărcat un document nou: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; în sală: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a adăugat un comentariu nou documentului în versiunea: &lt;a href={1}&gt;{2}&lt;/a&gt; în sală: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a adăugat un comentariu nou documentului în versiunea: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; în sală: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a mutat sală: &lt;a href={1}&gt;{2}&lt;/a&gt;  în arhivă - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a mutat sală: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;  în arhivă - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a creat o sală nouă: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a creat o sală nouă: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; a șters sală: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a redenumit sală: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a redenumit sală: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; i-a fost atribuit rolul &lt;b&gt;{1}&lt;/b&gt; în sală: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; i-a fost atribuit rolul &lt;b&gt;{1}&lt;/b&gt; în sală: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a fost adăugat la sală: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a fost adăugat la sală: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Un nou utilizator DocSpace a fost adăugat: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a fost eliminat din sală: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a fost eliminat din sală: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUsersUpdatedType" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; s-a modificat nivelul de acces al utilizatorilor &lt;b&gt;{1}&lt;/b&gt; to &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -524,7 +524,7 @@ $TrulyYours</value>
     <value>Utilizatorul DocSpace a actualizat: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a modificat documentul: &lt;a href={1}&gt;{2}&lt;/a&gt; în sală: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a modificat documentul: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; în sală: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} notificarea privind modificarea profilului de portal</value>
@@ -782,7 +782,7 @@ Echipă de Asistență ${LetterLogoText}
 [$__AuthorName]($__AuthorUrl) s-a alăturat portalului dvs [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>Spațiul ${LetterLogoText} DocSpace a fost activat</value>
+    <value>${LetterLogoText} DocSpace a fost șters</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
     <value>Dezactivare cont</value>
@@ -2032,5 +2032,29 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Acțiune necesară: Problema de alimentare automată a contului de Portofel dvs din DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Parola a fost schimbată cu succes</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Deschidere DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Parola a fost schimbată cu succes
+
+Parola dvs pentru contul *$UserName*, *$UserEmail* a fost schimbată cu succes la data de *$Date* în spațiul DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Dispozitivul: *$Device*
+#if($Location != "")
+Locaţia: *$Location*
+#end
+Browser: *$Browser*
+
+Dacă această acţiune a fost întreprinsă de dumneavoastră, nu trebuie să faci nimic altceva. Dacă ați observat această activitate suspectă sau dacă nu recunoașteți această activitate, schimbați imediat parola și blocați accesul la DocSpace pentru acest dispozitiv.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>
