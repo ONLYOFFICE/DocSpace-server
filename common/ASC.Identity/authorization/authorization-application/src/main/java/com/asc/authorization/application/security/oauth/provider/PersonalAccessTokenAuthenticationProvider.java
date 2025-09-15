@@ -39,6 +39,7 @@ import com.asc.common.core.domain.value.enums.AuditCode;
 import com.asc.common.service.transfer.message.AuditMessage;
 import com.asc.common.service.transfer.message.LoginRegisteredEvent;
 import com.asc.common.utilities.HttpUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -75,6 +76,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Component
 @RequiredArgsConstructor
 public class PersonalAccessTokenAuthenticationProvider implements AuthenticationProvider {
+  private static final int LOGIN_REGISTERED_ACTION = 1028;
+
   @Value("${spring.application.name}")
   private String serviceName;
 
@@ -161,34 +164,7 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
       var accessToken = accessToken(authorizationBuilder, generatedAccessToken, tokenContext);
       authorizationService.save(authorizationBuilder.build());
 
-      var eventDate = ZonedDateTime.now();
-      authorizationLoginEventRegistrationService.registerLogin(
-          LoginRegisteredEvent.builder()
-              .login(patAuthentication.getUserEmail())
-              .active(false)
-              .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
-              .browser(httpUtils.getClientBrowser(request))
-              .platform(httpUtils.getClientOS(request))
-              .date(eventDate)
-              .tenantId(patAuthentication.getTenantId())
-              .userId(patAuthentication.getUserId())
-              .page(httpUtils.getFullURL(request))
-              .action(1028)
-              .build(),
-          AuditMessage.builder()
-              .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
-              .initiator(serviceName)
-              .target(registeredClient.getClientId())
-              .browser(httpUtils.getClientBrowser(request))
-              .platform(httpUtils.getClientOS(request))
-              .date(eventDate)
-              .tenantId(patAuthentication.getTenantId())
-              .userId(patAuthentication.getUserId())
-              .userEmail(patAuthentication.getUserEmail())
-              .userName(patAuthentication.getUserName())
-              .page(httpUtils.getFullURL(request))
-              .action(AuditCode.GENERATE_PERSONAL_ACCESS_TOKEN.getCode())
-              .build());
+      publishAudit(request, patAuthentication, registeredClient.getClientId());
 
       log.debug("Authentication successful for user: {}", patAuthentication.getUserId());
 
@@ -200,6 +176,52 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
     throw new AuthenticationProcessingException(
         AuthenticationError.AUTHENTICATION_NOT_SUPPORTED_ERROR,
         "Authentication type is not supported");
+  }
+
+  /**
+   * Publishes an audit log for the authentication attempt.
+   *
+   * @param request the {@link HttpServletRequest}.
+   * @param patAuthentication the {@link PersonalAccessTokenAuthenticationToken}.
+   * @param clientId oauth2 clientId.
+   */
+  private void publishAudit(
+      HttpServletRequest request,
+      PersonalAccessTokenAuthenticationToken patAuthentication,
+      String clientId) {
+    var eventDate = ZonedDateTime.now();
+    var clientIP = httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request));
+    var browser = httpUtils.getClientBrowser(request);
+    var platform = httpUtils.getClientOS(request);
+    var fullUrl = httpUtils.getFullURL(request);
+
+    authorizationLoginEventRegistrationService.registerLogin(
+        LoginRegisteredEvent.builder()
+            .login(patAuthentication.getUserEmail())
+            .active(false)
+            .ip(clientIP)
+            .browser(browser)
+            .platform(platform)
+            .date(eventDate)
+            .tenantId(patAuthentication.getTenantId())
+            .userId(patAuthentication.getUserId())
+            .page(fullUrl)
+            .action(LOGIN_REGISTERED_ACTION)
+            .build(),
+        AuditMessage.builder()
+            .ip(clientIP)
+            .initiator(serviceName)
+            .target(clientId)
+            .browser(browser)
+            .platform(platform)
+            .date(eventDate)
+            .tenantId(patAuthentication.getTenantId())
+            .userId(patAuthentication.getUserId())
+            .userEmail(patAuthentication.getUserEmail())
+            .userName(patAuthentication.getUserName())
+            .page(fullUrl)
+            .action(AuditCode.GENERATE_PERSONAL_ACCESS_TOKEN.getCode())
+            .build());
   }
 
   /**

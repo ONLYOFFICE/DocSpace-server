@@ -59,6 +59,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class AuthorizationSuccessResponseHandler implements AuthenticationSuccessHandler {
+  private static final int LOGIN_REGISTERED_ACTION = 1028;
+
   /** The name of the current service, used for audit logging. */
   @Value("${spring.application.name}")
   private String serviceName;
@@ -111,31 +113,36 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
    */
   private void publishAudit(HttpServletRequest request, BasicSignature signature, String clientId) {
     var eventDate = ZonedDateTime.now();
+    var clientIP = httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request));
+    var browser = httpUtils.getClientBrowser(request);
+    var platform = httpUtils.getClientOS(request);
+    var fullUrl = httpUtils.getFullURL(request);
+
     authorizationLoginEventRegistrationService.registerLogin(
         LoginRegisteredEvent.builder()
             .login(signature.getUserEmail())
             .active(false)
-            .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
-            .browser(httpUtils.getClientBrowser(request))
-            .platform(httpUtils.getClientOS(request))
+            .ip(clientIP)
+            .browser(browser)
+            .platform(platform)
             .date(eventDate)
             .tenantId(signature.getTenantId())
             .userId(signature.getUserId())
-            .page(httpUtils.getFullURL(request))
-            .action(1028)
+            .page(fullUrl)
+            .action(LOGIN_REGISTERED_ACTION)
             .build(),
         AuditMessage.builder()
-            .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
+            .ip(clientIP)
             .initiator(serviceName)
             .target(clientId)
-            .browser(httpUtils.getClientBrowser(request))
-            .platform(httpUtils.getClientOS(request))
+            .browser(browser)
+            .platform(platform)
             .date(eventDate)
             .tenantId(signature.getTenantId())
             .userId(signature.getUserId())
             .userEmail(signature.getUserEmail())
             .userName(signature.getUserName())
-            .page(httpUtils.getFullURL(request))
+            .page(fullUrl)
             .action(AuditCode.GENERATE_AUTHORIZATION_CODE_TOKEN.getCode())
             .build());
   }
