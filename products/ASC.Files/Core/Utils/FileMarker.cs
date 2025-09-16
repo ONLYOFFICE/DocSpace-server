@@ -1038,6 +1038,8 @@ public class FileMarker(
             return;
         }
 
+        totalTags = totalTags.Distinct().ToList();
+
         var shareFolder = await globalFolder.GetFolderShareAsync<T>(daoFactory);
         var parentFolderTag = Equals(shareFolder, parent.Id)
                                     ? await tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(shareFolder)).FirstOrDefaultAsync()
