@@ -861,6 +861,10 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.CompletedTask;
     }
     
+    public Task SetVectorizationStatusAsync(IEnumerable<string> fileIds, VectorizationStatus status, Func<Task> action = null)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 static file class Queries

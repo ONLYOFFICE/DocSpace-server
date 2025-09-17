@@ -37,8 +37,5 @@ public record VectorizationIntegrationEvent : IntegrationEvent
     public required string TaskId { get; set; }
     
     [ProtoMember(2)]
-    public int FileId { get; set; }
-    
-    [ProtoMember(3)]
-    public int RoomId { get; set; }
+    public List<int> FilesIds { get; set; }
 }

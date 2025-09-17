@@ -34,5 +34,5 @@ public class VectorizationStartRequestDto
 
 public class VectorizationStartRequestBody
 {
-    public required int FileId { get; init; }
+    public required HashSet<int> Files { get; init; }
 }

@@ -564,7 +564,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.IndexExport);
     }
 
-    public async Task<bool> CanRetryVectorizationAsync<T>(FileEntry<T> entry)
+    public async Task<bool> CanVectorizationAsync<T>(FileEntry<T> entry)
     {
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.Vectorization);
     }

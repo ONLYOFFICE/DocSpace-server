@@ -45,11 +45,14 @@ public class VectorizationIntegrationEventHandler(
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
+
+            var account = await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy);
+            await securityContext.AuthenticateMeWithoutCookieAsync(account);
             
             var task = serviceProvider.GetRequiredService<VectorizationTask>();
-            task.Init(@event.TaskId, @event.TenantId, @event.CreateBy, @event.FileId, @event.RoomId);
+            task.Init(@event.TaskId, @event.TenantId, @event.CreateBy, @event.FilesIds);
             
             await vectorizationTaskService.StartAsync(task);
         }

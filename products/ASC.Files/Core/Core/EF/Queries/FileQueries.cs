@@ -348,6 +348,12 @@ public partial class FilesDbContext
         return FileQueries.UpdateVectorizationStatusAsync(this, tenantId, fileId, status, DateTime.UtcNow);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, VectorizationStatus.Completed])]
+    public Task<int> UpdateVectorizationStatusesAsync(int tenantId, IEnumerable<int> fileIds, VectorizationStatus status)
+    {
+        return FileQueries.UpdateVectorizationStatusesAsync(this, tenantId, fileIds, status, DateTime.UtcNow);
+    }
+    
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> DeleteVectorizationStatusAsync(int tenantId, int fileId)
     {
@@ -555,7 +561,9 @@ static file class FileQueries
                                     ).Skip(1).FirstOrDefault()
                                 select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
                             select f.Order
-                        ).FirstOrDefault()
+                        ).FirstOrDefault(),
+                        VectorizationStatus = ctx.FileVectorization
+                            .FirstOrDefault(x => x.TenantId == r.TenantId && x.FileId == r.Id).Status
                     }));
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> FileIdsAsync =
@@ -1049,6 +1057,15 @@ static file class FileQueries
                 ctx.FileVectorization
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.FileId == fileId)
+                    .ExecuteUpdate(f => f
+                        .SetProperty(x => x.Status, status)
+                        .SetProperty(x => x.UpdatedOn, date)));
+    
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, VectorizationStatus, DateTime, Task<int>> UpdateVectorizationStatusesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> filesIds, VectorizationStatus status, DateTime date) =>
+                ctx.FileVectorization
+                    .Where(r => r.TenantId == tenantId && filesIds.Contains(r.FileId))
                     .ExecuteUpdate(f => f
                         .SetProperty(x => x.Status, status)
                         .SetProperty(x => x.UpdatedOn, date)));

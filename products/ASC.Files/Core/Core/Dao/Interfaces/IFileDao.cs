@@ -436,6 +436,8 @@ public interface IFileDao<T>
         string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location);
 
     Task SetVectorizationStatusAsync(T fileId, VectorizationStatus status);
+    
+    Task SetVectorizationStatusAsync(IEnumerable<T> fileIds, VectorizationStatus status, Func<Task> action = null);
 
     #endregion
 }

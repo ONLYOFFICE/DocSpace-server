@@ -1917,21 +1917,33 @@ internal class FileDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         await filesDbContext.UpdateVectorizationStatusAsync(tenantId, fileId, status);
     }
-
-    public async Task SetVectorizationStatusAsync(File<int> file, VectorizationStatus status)
+    
+    public async Task SetVectorizationStatusAsync(
+        IEnumerable<int> fileIds, 
+        VectorizationStatus status, 
+        Func<Task> action = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        await filesDbContext.AddOrUpdateAsync(
-            x => x.FileVectorization,
-            new DbFileVectorization
-            {
-                TenantId = tenantId, 
-                FileId = file.Id,
-                Status = status,
-                UpdatedOn = DateTime.UtcNow
-            });
+        if (action == null)
+        {
+            await filesDbContext.UpdateVectorizationStatusesAsync(tenantId, fileIds, status);
+            return;
+        }
+        
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+        
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tr = await context.Database.BeginTransactionAsync();
+
+            await context.UpdateVectorizationStatusesAsync(tenantId, fileIds, status);
+            await action();
+
+            await tr.CommitAsync();
+        });
     }
 
     public string GetUniqThumbnailPath(File<int> file, uint width, uint height)
