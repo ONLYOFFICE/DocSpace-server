@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,35 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Database;
+using ASC.AI.Core.WebSearch;
 
-public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDbContext(options)
+namespace ASC.AI.Api;
+
+[Scope]
+[DefaultRoute]
+[ApiController]
+[ControllerName("ai")]
+public class ConfigurationController(AiConfigurationService aiConfigurationService) : ControllerBase
 {
-    public DbSet<DbChat> Chats { get; set; }
-    public DbSet<DbChatMessage> Messages { get; set; }
-    public DbSet<DbAiProvider> Providers { get; set; }
-    public DbSet<DbRoomSettings> RoomSettings { get; set; }
-    public DbSet<DbMcpServer> McpServers { get; set; }
-    public DbSet<DbMcpServerState> McpServerStates { get; set; }
-    public DbSet<DbRoomMcpServer> RoomMcpServers { get; set; }
-    public DbSet<DbMcpServerSettings> RoomMcpServerSettings { get; set; }
-    public DbSet<DbUserChatSettings> UserChatSettings { get; set; }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    [HttpPut("config/web-search")]
+    public async Task<WebSearchSettings> SetWebSearchConfigAsync(SetWebSearchConfigRequestDto inDto)
     {
-        ModelBuilderWrapper.From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddUser()
-            .AddDbFolder()
-            .AddDbRoomSettings()
-            .AddDbAiProviders()
-            .AddDbChats()
-            .AddDbChatsMessages()
-            .AddDbMcpServers()
-            .AddDbMcpServerStates()
-            .AddDbMcpServerSettings()
-            .AddDbRoomMcpServers()
-            .AddDbUserChatSettings()
-            .AddDbFunctions();
+        var settings = await aiConfigurationService.SetWebSearchConfigAsync(inDto.Body.Type, inDto.Body.Settings);
+        return settings;
+    }
+    
+    [HttpGet("config/web-search")]
+    public async Task<WebSearchSettings> GetWebSearchConfigAsync()
+    {
+        return await aiConfigurationService.GetWebSearchConfigAsync();
     }
 }

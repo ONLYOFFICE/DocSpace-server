@@ -38,7 +38,6 @@ public class ChatController(
     ApiContext apiContext,
     IMapper mapper,
     MessageExporter exporter,
-    FileDtoHelper fileDtoHelper,
     McpService mcpService) : ControllerBase
 {
     [HttpPost("rooms/{roomId}/chats")]
@@ -134,6 +133,20 @@ public class ChatController(
     public async Task ProvidePermissionAsync(ToolDecisionRequestDto inDto)
     {
         await mcpService.ProvideMcpToolPermissionAsync(inDto.CallId, inDto.Body.Decision);
+    }
+
+    [HttpPut("rooms/{roomId}/chats/configuration")]
+    public async Task<UserChatConfigDto> SetUserChatsConfigAsync(SetUserChatsConfigRequestDto inDto)
+    {
+        var settings = await chatService.SetUserChatsSettingsAsync(inDto.RoomId, inDto.Body.WebSearchEnabled);
+        return mapper.Map<UserChatSettings, UserChatConfigDto>(settings);
+    }
+    
+    [HttpGet("rooms/{roomId}/chats/configuration")]
+    public async Task<UserChatConfigDto> GetUserChatsConfigAsync(GetUserChatsConfigRequestDto inDto)
+    {
+        var settings = await chatService.GetUserChatsSettingsAsync(inDto.RoomId);
+        return mapper.Map<UserChatSettings, UserChatConfigDto>(settings);
     }
     
     private async Task StreamSentEventAsync(

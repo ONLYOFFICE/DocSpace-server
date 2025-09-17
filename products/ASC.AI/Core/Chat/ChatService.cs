@@ -49,18 +49,7 @@ public class ChatService(
     
     public async IAsyncEnumerable<ChatSession> GetChatsAsync(int roomId, int offset, int limit)
     {
-        var folderDao = daoFactory.GetFolderDao<int>();
-        var room = await folderDao.GetFolderAsync(roomId);
-
-        if (room == null)
-        {
-            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
-        }
-
-        if (!await fileSecurity.CanUseChatsAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
-        }
+        await ThrowIfNotAccessAsync(roomId);
 
         await foreach (var chat in chatDao.GetChatsAsync(tenantManager.GetCurrentTenantId(), roomId, 
                            authContext.CurrentAccount.ID, offset, limit))
@@ -109,5 +98,51 @@ public class ChatService(
         }
         
         return chat;
+    }
+
+    public async Task<UserChatSettings> SetUserChatsSettingsAsync(int roomId, bool? webSearchEnabled = false)
+    {
+        await ThrowIfNotAccessAsync(roomId);
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
+        
+        var settings = await chatDao.GetUserChatSettingsAsync(tenantId, roomId, userId);
+        settings ??= new UserChatSettings();
+
+        if (webSearchEnabled.HasValue)
+        {
+            settings.WebSearchEnabled = webSearchEnabled.Value;
+        }
+        
+        return await chatDao.SetUserChatSettingsAsync(tenantId, roomId, userId, settings);
+    }
+
+    public async Task<UserChatSettings> GetUserChatsSettingsAsync(int roomId)
+    {
+        await ThrowIfNotAccessAsync(roomId);
+        
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
+        
+        var settings = await chatDao.GetUserChatSettingsAsync(tenantId, roomId, userId);
+        
+        return settings ?? new UserChatSettings();
+    }
+    
+    private async Task ThrowIfNotAccessAsync(int roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId);
+
+        if (room == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanUseChatsAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
+        }
     }
 }

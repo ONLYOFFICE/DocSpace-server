@@ -24,12 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Core.WebSearch;
+
 namespace ASC.AI.Core.Chat;
 
 [Scope]
 public class ChatTools(
     McpService mcpService,
-    KnowledgeSearchEngine searchEngine)
+    KnowledgeSearchEngine searchEngine,
+    AiConfigurationService configurationService, 
+    IHttpClientFactory httpClientFactory)
 {
     public async Task<ToolHolder> GetAsync(int roomId)
     {
@@ -37,6 +41,9 @@ public class ChatTools(
         
         var searchTool = MakeKnowledgeSearchTool(roomId);
         holder.AddTool(searchTool);
+        
+        // var webSearchTool = MakeWebSearchTool(roomId);
+        // holder.AddTool(webSearchTool);
         
         return holder;
     }
@@ -58,6 +65,40 @@ public class ChatTools(
             {
                 Name = searchTool.Name,
                 RoomId = roomId,
+                AutoInvoke = true
+            }
+        };
+    }
+
+    private ToolWrapper MakeWebSearchTool(int roomId)
+    {
+        var httpClient = httpClientFactory.CreateClient();
+        var settings = configurationService.GetWebSearchConfigAsync().Result;
+        var config = settings.Config as ExaConfig;
+        
+        var exaEngine = new ExaWebSearchEngine(httpClient, config!);
+        
+        var webSearchTool = AIFunctionFactory.Create([Description("Query to search")]async (string query) =>
+        {
+            var results = await exaEngine.SearchAsync(new SearchQuery { Query = query, MaxResults = 5 });
+            
+            var content = JsonSerializer.Serialize(results, AiUtils.ContentSerializerOptions);
+            
+            return new KnowledgeSearchResult { Content = [new TextContent(content)] };
+        },
+        new AIFunctionFactoryOptions
+        {
+            Name = "docspace_web_search",
+            Description = "Search in web"
+        });
+
+        return new ToolWrapper
+        {
+            Tool = webSearchTool,
+            Properties = new ToolProperties
+            {
+                Name = webSearchTool.Name, 
+                RoomId = roomId, 
                 AutoInvoke = true
             }
         };

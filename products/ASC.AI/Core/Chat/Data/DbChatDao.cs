@@ -239,4 +239,35 @@ public class DbChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         return await dbContext.GetMessagesTotalCountAsync(chatId);
     }
+
+    public async Task<UserChatSettings> SetUserChatSettingsAsync(int tenantId, int roomId, Guid userId,
+        UserChatSettings settings)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+            var dbSettings = new DbUserChatSettings
+            {
+                TenantId = tenantId,
+                RoomId = roomId,
+                UserId = userId,
+                WebSearchEnabled = settings.WebSearchEnabled
+            };
+
+            await context.UserChatSettings.AddOrUpdateAsync(dbSettings);
+        });
+        
+        return settings;
+    }
+
+    public async Task<UserChatSettings?> GetUserChatSettingsAsync(int tenantId, int roomId, Guid userId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        var settings = await dbContext.GetUserChatSettingsAsync(tenantId, userId, roomId);
+        return settings == null ? null : mapper.Map<UserChatSettings>(settings);
+    }
 }

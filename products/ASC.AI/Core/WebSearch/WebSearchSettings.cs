@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,35 +24,36 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Database;
+using ASC.Core.Common.Settings;
 
-public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDbContext(options)
+namespace ASC.AI.Core.WebSearch;
+
+public enum EngineType
 {
-    public DbSet<DbChat> Chats { get; set; }
-    public DbSet<DbChatMessage> Messages { get; set; }
-    public DbSet<DbAiProvider> Providers { get; set; }
-    public DbSet<DbRoomSettings> RoomSettings { get; set; }
-    public DbSet<DbMcpServer> McpServers { get; set; }
-    public DbSet<DbMcpServerState> McpServerStates { get; set; }
-    public DbSet<DbRoomMcpServer> RoomMcpServers { get; set; }
-    public DbSet<DbMcpServerSettings> RoomMcpServerSettings { get; set; }
-    public DbSet<DbUserChatSettings> UserChatSettings { get; set; }
+    None,
+    DocSpace,
+    Exa
+}
+
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+[JsonDerivedType(typeof(ExaConfig), "exa")]
+public abstract class EngineConfig;
+
+public class WebSearchSettings : ISettings<WebSearchSettings>
+{
+    [JsonIgnore]
+    public Guid ID => new("{B2FC4410-5538-46E0-959A-AF1BEEAC9E20}");
+    public EngineType Type { get; set; }
+    public EngineConfig? Config { get; set; }
     
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public WebSearchSettings GetDefault()
     {
-        ModelBuilderWrapper.From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddUser()
-            .AddDbFolder()
-            .AddDbRoomSettings()
-            .AddDbAiProviders()
-            .AddDbChats()
-            .AddDbChatsMessages()
-            .AddDbMcpServers()
-            .AddDbMcpServerStates()
-            .AddDbMcpServerSettings()
-            .AddDbRoomMcpServers()
-            .AddDbUserChatSettings()
-            .AddDbFunctions();
+        return new WebSearchSettings
+        {
+            Type = EngineType.None,
+            Config = null
+        };
     }
+
+    public DateTime LastModified { get; set; }
 }

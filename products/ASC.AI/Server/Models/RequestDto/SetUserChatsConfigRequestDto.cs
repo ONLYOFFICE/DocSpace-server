@@ -24,37 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Common.Threading;
+namespace ASC.AI.Models.RequestDto;
 
-namespace ASC.AI.Models.ResponseDto;
-
-public class VectorizationTaskDto
+public class SetUserChatsConfigRequestDto
 {
-    public required string Id { get; init; }
-    public int FileId { get; init; }
-    public int Percentage { get; init; }
-    public string? Error { get; init; }
-    public bool IsCompleted { get; init; }
-    public DistributedTaskStatus Status { get; init; }
+    [FromRoute(Name = "roomId")]
+    public int RoomId { get; init; }
+    
+    [FromBody]
+    public required SetUserChatSettingsRequestBody Body { get; init; }
 }
 
-public static class VectorizationTaskExtensions
+public class SetUserChatSettingsRequestBody
 {
-    public static VectorizationTaskDto? ToDto(this VectorizationTask? task)
-    {
-        if (task == null)
-        {
-            return null;
-        }
-        
-        return new VectorizationTaskDto
-        {
-            Id = task.Id,
-            Error = task.Exception?.Message,
-            Percentage = (int)task.Percentage,
-            IsCompleted = task.IsCompleted,
-            Status = task.Status,
-            FileId = task.FileId
-        };
-    }
+    public bool? WebSearchEnabled { get; init; }
 }

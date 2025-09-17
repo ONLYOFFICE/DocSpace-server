@@ -24,66 +24,41 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-#nullable enable
+using ASC.AI.Core.WebSearch;
+using ASC.Core.Common.Settings;
 
-namespace ASC.Files.Core.Vectorization;
+namespace ASC.AI.Core.Settings;
 
 [Scope]
-public class VectorizationTaskHolder(
-    VectorizationTaskService vectorizationTaskService)
+public class AiConfigurationService(
+    UserManager userManager,
+    AuthContext authContext,
+    SettingsManager settingsManager)
 {
-    public async Task<VectorizationTask?> GetAsync(string id)
+    public async Task<WebSearchSettings> SetWebSearchConfigAsync(EngineType type, EngineConfig? config)
     {
-        var task = await vectorizationTaskService.GetAsync(id);
-        if (task == null)
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
         {
-            throw new ItemNotFoundException("Task not found");
-        }
-
-        if (task.Status <= DistributedTaskStatus.Running)
-        {
-            return task;
-        }
-
-        if (task.IsCompleted && DateTime.UtcNow - task.LastModifiedOn >= TimeSpan.FromSeconds(10))
-        {
-            task.Percentage = 100;
-            await vectorizationTaskService.DeleteAsync(task.Id);
-        }
-
-        return task;
-    }
-
-    public async IAsyncEnumerable<VectorizationTask> GetAsync(int roomId)
-    {
-        var tasks = await vectorizationTaskService.GetTasksAsync();
-        
-        foreach (var task in tasks.Where(x => x.RoomId == roomId))
-        {
-            if (task.Status <= DistributedTaskStatus.Running)
-            {
-                yield return task;
-                continue;
-            }
-
-            if (task.IsCompleted && DateTime.UtcNow - task.LastModifiedOn >= TimeSpan.FromSeconds(10))
-            {
-                task.Percentage = 100;
-                await vectorizationTaskService.DeleteAsync(task.Id);
-            }
-
-            yield return task;
-        }
-    }
-
-    public async Task TerminateAsync(string id)
-    {
-        var task = await vectorizationTaskService.GetAsync(id);
-        if (task == null)
-        {
-            return;
+            throw new SecurityException();
         }
         
-        await vectorizationTaskService.DeleteAsync(task.Id);
+        var settings = await settingsManager.LoadAsync<WebSearchSettings>();
+        settings.Config = type == EngineType.None ? null : config;
+        
+        settings.Type = type;
+        
+        await settingsManager.SaveAsync(settings);
+        
+        return settings;
+    }
+
+    public async Task<WebSearchSettings> GetWebSearchConfigAsync()
+    {
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException();
+        }
+        
+        return await settingsManager.LoadAsync<WebSearchSettings>();
     }
 }
