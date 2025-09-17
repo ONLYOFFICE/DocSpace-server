@@ -431,7 +431,18 @@ public class FileSharingAceHelper(
         {
             if (file != null || (folder != null && folder.FoldersCount + folder.FilesCount > 0) || entry.ProviderEntry)
             {
-                await fileMarker.MarkAsNewAsync(entry, recipients.Keys.ToList());
+                var recipientIds = recipients.Keys.ToList();
+
+                await fileMarker.MarkAsNewAsync(entry, recipientIds);
+
+                if (file != null)
+                {
+                    await socketManager.AddFileToSharedAsync(file, users: recipientIds);
+                }
+                else if (folder != null)
+                {
+                    await socketManager.AddFolderToSharedAsync(folder, users: recipientIds);
+                }
             }
 
             if (notify)
@@ -443,6 +454,18 @@ public class FileSharingAceHelper(
         foreach (var userId in usersWithoutRight)
         {
             await fileMarker.RemoveMarkAsNewAsync(entry, userId);
+        }
+
+        if (usersWithoutRight.Count > 0 && entry.RootFolderType is FolderType.USER or FolderType.Privacy)
+        {
+            if (file != null)
+            {
+                await socketManager.RemoveFileFromSharedAsync(file, users: usersWithoutRight);
+            }
+            else if (folder != null)
+            {
+                await socketManager.RemoveFolderFromSharedAsync(folder, users: usersWithoutRight);
+            }
         }
 
         return new AceProcessingResult<T>(changed, warning, handledAces);

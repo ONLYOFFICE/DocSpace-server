@@ -180,7 +180,27 @@ public class SocketManager(
     {
         await MakeRequest("delete-favorites-folder", folder, true, users);
     }
-    
+
+    public async Task AddFileToSharedAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    {
+        await MakeRequest("add-shared-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
+    }
+
+    public async Task RemoveFileFromSharedAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    {
+        await MakeRequest("delete-shared-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
+    }
+
+    public async Task AddFolderToSharedAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
+    {
+        await MakeRequest("add-shared-folder", folder, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
+    }
+
+    public async Task RemoveFolderFromSharedAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
+    {
+        await MakeRequest("delete-shared-folder", folder, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
+    }
+
     private async Task<IEnumerable<Guid>> GetRecipientListForForm<T>(File<T> form)
     {
         List<Guid> users = null;
@@ -231,11 +251,13 @@ public class SocketManager(
         {
             case "add-recent-file":
             case "add-favorites-file":
+            case "add-shared-file":
                 method = "create-file";
                 entry.ParentId = folderIdDisplay;
                 break;
             case "delete-recent-file":
             case "delete-favorites-file":
+            case "delete-shared-file":
                 method = "delete-file";
                 entry.ParentId = folderIdDisplay;
                 break;
@@ -246,6 +268,14 @@ public class SocketManager(
             case "delete-favorites-folder":
                 method = "delete-folder";
                 entry.ParentId = entry.FolderIdDisplay;
+                break;
+            case "add-shared-folder":
+                method = "create-folder";
+                entry.ParentId = folderIdDisplay;
+                break;
+            case "delete-shared-folder":
+                method = "delete-folder";
+                entry.ParentId = folderIdDisplay;
                 break;
         }
 
