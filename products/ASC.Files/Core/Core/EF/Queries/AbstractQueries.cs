@@ -123,12 +123,6 @@ public partial class FilesDbContext
     {
         return AbstractQueries.DeleteChatsAsync(this, folderId);
     }
-    
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
-    public Task DeleteVectorizationStatusAsync(int tenantId, int fileId)
-    {
-        return AbstractQueries.DeleteVectorizationStatusAsync(this, tenantId, fileId);
-    }
 }
 
 static file class AbstractQueries
@@ -269,12 +263,5 @@ static file class AbstractQueries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int folderId) =>
             ctx.Chats
                 .Where(x => x.RoomId == folderId)
-                .ExecuteDelete());
-    
-    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteVectorizationStatusAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, int fileId) =>
-            ctx.FileVectorization
-                .Where(x => x.TenantId == tenantId)
-                .Where(x => x.FileId == fileId)
                 .ExecuteDelete());
 }

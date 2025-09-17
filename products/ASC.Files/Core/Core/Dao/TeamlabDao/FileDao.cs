@@ -936,13 +936,8 @@ internal class FileDao(
                 await factoryIndexer.DeleteAsync(d);
             }
 
-            var collection = vectorStore.GetCollection<VectorChunk>(VectorChunk.IndexName, null);
-            await collection.DeleteAsync(new VectorSearchOptions<VectorChunk>
-            {
-                Filter = x => x.TenantId == tenantId && x.FileId == fileId
-            });
-            
             await context.DeleteVectorizationStatusAsync(tenantId, fileId);
+            await DeleteVectorsAsync(tenantId, fileId);
 
             context.RemoveRange(toDeleteFiles);
 
@@ -1034,6 +1029,7 @@ internal class FileDao(
         var toUser = await _userManager.GetUsersAsync(toFolder.RootCreateBy);
         var fromUser = await _userManager.GetUsersAsync(fromFolder.RootCreateBy);
 
+        var needDeleteVectors = fromFolder.FolderType is FolderType.Knowledge;
 
         if (toRoomId != -1 && fromRoomId != toRoomId)
         {
@@ -1200,6 +1196,11 @@ internal class FileDao(
                     await filesDbContext.DeleteLinksAsync(tenantId, id, FileEntryType.File);
                 }
 
+                if (needDeleteVectors)
+                {
+                    await context.DeleteVectorizationStatusAsync(tenantId, fileId);
+                }
+
                 await tx.CommitAsync();
                 
                 foreach (var f in fromFolders)
@@ -1227,6 +1228,11 @@ internal class FileDao(
                 toUpdateFile.Folders = await context.DbFolderTreesAsync(toFolderId).ToListAsync();
 
                 _ = factoryIndexer.UpdateAsync(toUpdateFile, UpdateAction.Replace, w => w.Folders);
+            }
+
+            if (needDeleteVectors)
+            {
+                await DeleteVectorsAsync(tenantId, fileId);
             }
         });
 
@@ -2792,6 +2798,15 @@ internal class FileDao(
         }
 
         return query;
+    }
+    
+    private async ValueTask DeleteVectorsAsync(int tenantId, int fileId)
+    {
+        var collection = vectorStore.GetCollection<VectorChunk>(VectorChunk.IndexName, null);
+        await collection.DeleteAsync(new VectorSearchOptions<VectorChunk>
+        {
+            Filter = x => x.TenantId == tenantId && x.FileId == fileId
+        });
     }
 }
 
