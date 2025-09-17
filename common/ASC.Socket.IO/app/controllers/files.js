@@ -192,10 +192,5 @@ module.exports = (files) => {
     res.end();
   });
 
-  router.post("/start-vectorization", (req, res) => {
-    files.startVectorization(req.body);
-    res.end();
-  });
-
   return router;
 };
