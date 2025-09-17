@@ -270,7 +270,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.FillingStatus,
                     FilesSecurityActions.ResetFilling,
                     FilesSecurityActions.StopFilling,
-                    FilesSecurityActions.OpenForm
+                    FilesSecurityActions.OpenForm,
+                    FilesSecurityActions.Vectorization
                 }
             },
             {
@@ -561,6 +562,11 @@ public class FileSecurity(IDaoFactory daoFactory,
     public async Task<bool> CanIndexExportAsync<T>(FileEntry<T> entry)
     {
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.IndexExport);
+    }
+
+    public async Task<bool> CanRetryVectorizationAsync<T>(FileEntry<T> entry)
+    {
+        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.Vectorization);
     }
     
     public async Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry, bool includeLinks = false)
@@ -976,9 +982,20 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
         }
 
+        if (action is FilesSecurityActions.Vectorization && 
+            file is not { VectorizationStatus: VectorizationStatus.Failed })
+        {
+            return false;
+        }
+
         if (file != null && room is { FolderType: FolderType.AiRoom } && parentFolders.Any(x => x.FolderType == FolderType.Knowledge))
         {
             if (action is not (FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Delete))
+            {
+                return false;
+            }
+
+            if (action is FilesSecurityActions.Delete && file is { VectorizationStatus: VectorizationStatus.InProgress })
             {
                 return false;
             }
@@ -1992,6 +2009,20 @@ public class FileSecurity(IDaoFactory daoFactory,
                         break;
                 }
 
+                break;
+            case FilesSecurityActions.Vectorization:
+                switch (e.RootFolderType)
+                {
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access == FileShare.RoomManager && file is { VectorizationStatus: VectorizationStatus.Failed })
+                        {
+                            return true;
+                        }
+                        
+                        break;
+                }
                 break;
         }
 
@@ -3210,6 +3241,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         EditInternal,
         
         [Description("Edit expiration")]
-        EditExpiration
+        EditExpiration,
+        
+        [Description("Vectorization")]
+        Vectorization
     }
 }
