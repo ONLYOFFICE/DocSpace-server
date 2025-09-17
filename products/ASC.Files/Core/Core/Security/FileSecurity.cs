@@ -990,7 +990,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (file != null && room is { FolderType: FolderType.AiRoom } && parentFolders.Any(x => x.FolderType == FolderType.Knowledge))
         {
-            if (action is not (FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Delete))
+            if (action is not (FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Delete or FilesSecurityActions.Vectorization))
             {
                 return false;
             }
