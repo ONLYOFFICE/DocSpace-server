@@ -35,7 +35,8 @@ public class VectorizationTaskPublisher(
     VectorizationTaskService vectorizationTaskService,
     IDaoFactory daoFactory,
     IDistributedLockProvider distributedLockProvider,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity,
+    SocketManager socketManager)
 {
     public async Task<VectorizationTask> PublishAsync(int fileId)
     {
@@ -65,7 +66,14 @@ public class VectorizationTaskPublisher(
             throw new InvalidOperationException();
         }
         
-        return await PublishAsync(file);
+        var task = await PublishAsync(file);
+        
+        file.VectorizationStatus = VectorizationStatus.InProgress;
+        await fileDao.SaveFileAsync(file, null);
+        
+        await socketManager.UpdateFileAsync(file);
+        
+        return task;
     }
     
     public async Task<VectorizationTask> PublishAsync(File<int> file)

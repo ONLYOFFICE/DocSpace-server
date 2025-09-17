@@ -64,9 +64,14 @@ public class VectorizationTask : DistributedTaskProgress
 
     protected override async Task DoJob()
     {
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        
+        SocketManager socketManager = null;
+        VectorStoreCollection<Chunk> collection = null;
+        File<int> file = null;
+        
         try
         {
-            await using var scope = _serviceScopeFactory.CreateAsyncScope();
             _logger = scope.ServiceProvider.GetRequiredService<ILogger<VectorizationTask>>();
 
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
@@ -75,15 +80,13 @@ public class VectorizationTask : DistributedTaskProgress
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
             
-            var socketManager = scope.ServiceProvider.GetRequiredService<SocketManager>();
-
-            await socketManager.StartVectorization(RoomId, FileId, Id);
+            socketManager = scope.ServiceProvider.GetRequiredService<SocketManager>();
 
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
 
             _fileDao = daoFactory.GetFileDao<int>();
             
-            var file = await _fileDao.GetFileAsync(FileId);
+            file = await _fileDao.GetFileAsync(FileId);
             if (file == null)
             {
                 throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
@@ -115,7 +118,7 @@ public class VectorizationTask : DistributedTaskProgress
                 ChunkOverlap = vectorizationSettings.ChunkOverlap
             };
 
-            var collection = vectorStore.GetCollection<Chunk>(
+            collection = vectorStore.GetCollection<Chunk>(
                 Chunk.IndexName,
                 new VectorCollectionOptions
                 {
@@ -165,6 +168,13 @@ public class VectorizationTask : DistributedTaskProgress
             try
             {
                 await _fileDao.SetVectorizationStatusAsync(FileId, VectorizationStatus.Failed);
+                if (collection != null)
+                {
+                    await collection.DeleteAsync(new VectorSearchOptions<Chunk>
+                    {
+                        Filter = x => x.TenantId == _tenantId && x.FileId == FileId
+                    });
+                }
             }
             catch (Exception exception)
             {
@@ -179,6 +189,10 @@ public class VectorizationTask : DistributedTaskProgress
             try
             {
                 await PublishChanges();
+                if (socketManager != null && file != null)
+                {
+                    await socketManager.UpdateFileAsync(file);
+                }
             }
             catch (Exception e)
             {
