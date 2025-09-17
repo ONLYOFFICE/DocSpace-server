@@ -385,4 +385,18 @@ public class SettingsController(
         await filesSettingsHelper.SetOpenEditorInSameTabAsync(inDto.Set);
         return await filesSettingsHelper.GetOpenEditorInSameTabAsync();
     }
+
+    /// <summary>
+    /// Changes the setting that allows the user to organize the grouping of rooms.
+    /// </summary>
+    /// <short>Organize rooms grouping</short>
+    /// <path>api/2.0/settings/organizegrouping</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
+    [HttpPut("settings/organizegrouping")]
+    public async Task<bool> SetOrganizeRoomsGrouping(SettingsRequestDto inDto)
+    {
+        await filesSettingsHelper.SetOrganizeRoomsGroupingAsync(inDto.Set);
+        return await filesSettingsHelper.GetOrganizeRoomsGroupingAsync();
+    }
 }

@@ -322,6 +322,11 @@ public class FilesSettingsDto
     /// Specifies whether to open the editor in the same tab or not.
     /// </summary>
     public bool OpenEditorInSameTab { get; set; }
+
+    /// <summary>
+    /// Specifies whether the grouping of rooms is enabled or not.
+    /// </summary>
+    public bool OrganizeRoomsGrouping { get; set; }
 }
 
 
@@ -392,7 +397,8 @@ public class FilesSettingsDtoConverter(
             DefaultSharingAccessRights = await filesSettingsHelper.GetDefaultSharingAccessRights(),
             MaxUploadThreadCount = setupInfo.MaxUploadThreadCount,
             ChunkUploadSize = setupInfo.ChunkUploadSize,
-            OpenEditorInSameTab = await filesSettingsHelper.GetOpenEditorInSameTabAsync()
+            OpenEditorInSameTab = await filesSettingsHelper.GetOpenEditorInSameTabAsync(),
+            OrganizeRoomsGrouping = await filesSettingsHelper.GetOrganizeRoomsGroupingAsync()
         };
     }
 }

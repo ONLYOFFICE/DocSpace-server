@@ -170,6 +170,12 @@ public class FilesSettings : ISettings<FilesSettings>
     [JsonPropertyName("OpenEditorInSameTab")]
     public bool OpenEditorInSameTab { get; set; }
 
+    /// <summary>
+    /// Specifies whether the grouping of rooms is enabled or not.
+    /// </summary>
+    [JsonPropertyName("OrganizeRoomsGrouping")]
+    public bool OrganizeRoomsGrouping { get; set; }
+
     public FilesSettings GetDefault()
     {
         return new FilesSettings
@@ -191,7 +197,8 @@ public class FilesSettings : ISettings<FilesSettings>
             DownloadTarGzSetting = false,
             AutomaticallyCleanUpSetting = null,
             DefaultSharingAccessRightsSetting = null,
-            OpenEditorInSameTab = false
+            OpenEditorInSameTab = false,
+            OrganizeRoomsGrouping = false
         };
     }
     
@@ -432,6 +439,16 @@ public class FilesSettingsHelper(
     public async Task<bool> GetOpenEditorInSameTabAsync()
     {
         return (await LoadForCurrentUser()).OpenEditorInSameTab;
+    }
+    public async Task SetOrganizeRoomsGroupingAsync(bool value)
+    {
+        var setting = await LoadForCurrentUser();
+        setting.OrganizeRoomsGrouping = value;
+        await SaveForCurrentUser(setting);
+    }
+    public async Task<bool> GetOrganizeRoomsGroupingAsync()
+    {
+        return (await LoadForCurrentUser()).OrganizeRoomsGrouping;
     }
 
     public bool GetForcesave() => true;
