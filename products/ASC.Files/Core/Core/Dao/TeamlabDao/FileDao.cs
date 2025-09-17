@@ -2300,9 +2300,7 @@ internal class FileDao(
                 ).FirstOrDefault(),
                 VectorizationStatus = attachVectorizationStatus 
                     ? filesDbContext.FileVectorization
-                        .Where(x => x.TenantId == r.TenantId && x.FileId == r.Id)
-                        .Select(x => x.Status)
-                        .FirstOrDefault()
+                        .FirstOrDefault(x => x.TenantId == r.TenantId && x.FileId == r.Id).Status
                     : null
             });
     }
@@ -2370,9 +2368,7 @@ internal class FileDao(
                 ).FirstOrDefault(),
                 VectorizationStatus = attachVectorizationStatus 
                     ? filesDbContext.FileVectorization
-                        .Where(x => x.TenantId == r.TenantId && x.FileId == r.Id)
-                        .Select(x => x.Status)
-                        .FirstOrDefault()
+                        .FirstOrDefault(x => x.TenantId == r.TenantId && x.FileId == r.Id).Status
                     : null
             });
     }
