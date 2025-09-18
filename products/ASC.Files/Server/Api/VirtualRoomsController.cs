@@ -500,7 +500,7 @@ public abstract class VirtualRoomsController<T>(
 
         var aceCollection = new AceCollection<T> { Files = [], Folders = [inDto.Id], Aces = wrappers, Message = inDto.RoomInvitation.Message };
 
-        result.Warning = await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.RoomInvitation.Notify, inDto.RoomInvitation.Culture);
+        result.Warning = (await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.RoomInvitation.Notify, inDto.RoomInvitation.Culture)).Select(r=> r.Warning).FirstOrDefault();
         result.Members = await _fileStorageService.GetRoomSharedInfoAsync(inDto.Id, inDto.RoomInvitation.Invitations.Select(s => s.Id))
             .SelectAwait(async a => await fileShareDtoHelper.Get(a))
             .ToListAsync();

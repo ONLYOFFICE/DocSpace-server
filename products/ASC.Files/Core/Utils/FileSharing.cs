@@ -352,7 +352,7 @@ public class FileSharingAceHelper(
             }
 
             changed = true;
-            handledAces.Add(new ProcessedItem<T>(eventType, existedShare, w));
+            handledAces.Add(new ProcessedItem<T>(eventType, existedShare, w, file != null ? file : folder));
 
             if (emailInvite)
             {
@@ -1054,7 +1054,7 @@ public class FileSharing(
 }
 
 public record AceProcessingResult<T>(bool Changed, string Warning, List<ProcessedItem<T>> ProcessedItems);
-public record ProcessedItem<T>(EventType EventType, FileShareRecord<T> PastRecord, AceWrapper Ace);
+public record ProcessedItem<T>(EventType EventType, FileShareRecord<T> PastRecord, AceWrapper Ace, FileEntry<T> Entry);
 
 public enum EventType
 {

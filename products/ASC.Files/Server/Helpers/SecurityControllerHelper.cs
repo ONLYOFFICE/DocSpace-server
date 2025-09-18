@@ -83,13 +83,17 @@ public class SecurityControllerHelper(
             Folders = folderIds,
             Aces = fileShares,
             Message = sharingMessage
-        };
+        };         
 
-        await _fileStorageService.SetAceObjectAsync(aceCollection, notify);
+        var subjects = share.Select(s => s.ShareTo).Distinct().ToList();
+        var result = await _fileStorageService.SetAceObjectAsync(aceCollection, notify);
             
-        foreach (var fileShareDto in fileShares)
+        foreach (var r in result.SelectMany(a=> a.ProcessedItems))
         {
-            yield return await fileShareDtoHelper.Get(fileShareDto);
+            await foreach (var s in fileSharing.GetPureSharesAsync(r.Entry, subjects))
+            {
+                yield return await fileShareDtoHelper.Get(s);
+            }
         }
     }
 }

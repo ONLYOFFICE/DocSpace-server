@@ -3772,13 +3772,13 @@ public class FileStorageService //: IFileStorageService
         return link;
     }
 
-    public async Task<string> SetAceObjectAsync<T>(AceCollection<T> aceCollection, bool notify, string culture = null, bool socket = true, bool beforeOwnerChange = false)
+    public async Task<List<AceProcessingResult<T>>> SetAceObjectAsync<T>(AceCollection<T> aceCollection, bool notify, string culture = null, bool socket = true, bool beforeOwnerChange = false)
     {
+        List<AceProcessingResult<T>> results = [];
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
 
         var entries = new List<FileEntry<T>>();
-        string warning = null;
 
         foreach (var fileId in aceCollection.Files)
         {
@@ -3794,15 +3794,15 @@ public class FileStorageService //: IFileStorageService
         {
             try
             {
-                var result = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, culture, socket, beforeOwnerChange);
-                warning ??= result.Warning;
-
-                if (!result.Changed)
+                var resultSetAceObject = await fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, culture, socket, beforeOwnerChange);
+                results.Add(resultSetAceObject);
+                
+                if (!resultSetAceObject.Changed)
                 {
                     continue;
                 }
 
-                foreach (var (eventType, pastRecord, ace) in result.ProcessedItems)
+                foreach (var (eventType, pastRecord, ace, _) in resultSetAceObject.ProcessedItems)
                 {
                     if (ace.IsLink)
                     {
@@ -3882,7 +3882,7 @@ public class FileStorageService //: IFileStorageService
             }
         }
 
-        return warning;
+        return results;
     }
 
     public async Task RemoveAceAsync<T>(List<T> filesId, List<T> foldersId)
@@ -5069,7 +5069,7 @@ public class FileStorageService //: IFileStorageService
             return (await fileSharing.GetPureSharesAsync(entry, [linkId]).FirstOrDefaultAsync());
         }
 
-        var (eventType, previousRecord, ace) = result;
+        var (eventType, previousRecord, ace, _) = result;
 
         linkId = ace.Id;
 
