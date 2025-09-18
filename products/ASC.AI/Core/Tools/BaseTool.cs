@@ -24,9 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.WebSearch;
+namespace ASC.AI.Core.Tools;
 
-public interface IWebSearchEngine
+public abstract class BaseTool
 {
-    public Task<IEnumerable<WebSearchResult>> SearchAsync(SearchQuery query, CancellationToken cancellationToken = default);
+    private static readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web)
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+    };
+
+    private static readonly ToolResponse _emptyResponse = new() { Content = [], };
+    
+    protected static ToolResponse ToResponse<T>(T content)
+    {
+        if (content == null)
+        {
+            return _emptyResponse;
+        }
+        
+        var jsonContent = JsonSerializer.Serialize(content, _options);
+
+        return new ToolResponse { Content = [new TextContent(jsonContent)] };
+    }
 }

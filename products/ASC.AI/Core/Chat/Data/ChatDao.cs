@@ -27,7 +27,7 @@
 namespace ASC.AI.Core.Chat.Data;
 
 [Scope]
-public class DbChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper mapper)
+public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper mapper)
 {
     private static readonly JsonSerializerOptions _serializerOptions = new()
     {
@@ -240,7 +240,10 @@ public class DbChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper 
         return await dbContext.GetMessagesTotalCountAsync(chatId);
     }
 
-    public async Task<UserChatSettings> SetUserChatSettingsAsync(int tenantId, int roomId, Guid userId,
+    public async Task<UserChatSettings> SetUserChatSettingsAsync(
+        int tenantId, 
+        int roomId, 
+        Guid userId,
         UserChatSettings settings)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -258,16 +261,19 @@ public class DbChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper 
             };
 
             await context.UserChatSettings.AddOrUpdateAsync(dbSettings);
+            await context.SaveChangesAsync();
         });
         
         return settings;
     }
 
-    public async Task<UserChatSettings?> GetUserChatSettingsAsync(int tenantId, int roomId, Guid userId)
+    public async Task<UserChatSettings> GetUserChatSettingsAsync(int tenantId, int roomId, Guid userId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
         var settings = await dbContext.GetUserChatSettingsAsync(tenantId, userId, roomId);
-        return settings == null ? null : mapper.Map<UserChatSettings>(settings);
+        return settings == null 
+            ? new UserChatSettings() 
+            : mapper.Map<UserChatSettings>(settings);
     }
 }

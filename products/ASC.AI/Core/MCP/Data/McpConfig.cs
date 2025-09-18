@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,29 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat.Function;
+namespace ASC.AI.Core.MCP.Data;
 
-public interface IToolPermissionRequester
+public class McpConfig
 {
-    Task<ToolExecutionDecision> RequestPermissionAsync(CallData callData, CancellationToken cancellationToken);
-}
-
-public interface IToolPermissionProvider
-{
-    Task<CallData?> ProvidePermissionAsync(string callId, ToolExecutionDecision decision);
-}
-
-public enum ToolExecutionDecision
-{
-    Allow,
-    AlwaysAllow,
-    Deny
-}
-
-public class CallData
-{
-    public Guid ServerId { get; init; }
-    public int RoomId { get; init; }
-    public required string CallId { get; init; }
+    public Guid Id { get; init; }
     public required string Name { get; init; }
+    public string? Endpoint { get; init; }
+    public Dictionary<string, string>? Headers { get; init; }
 }

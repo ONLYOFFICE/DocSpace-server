@@ -29,7 +29,7 @@ using Role = ASC.Core.Common.EF.Model.Chat.Role;
 namespace ASC.AI.Core.Chat.History;
 
 [Scope]
-public class ChatHistory(DbChatDao chatDao)
+public class ChatHistory(ChatDao chatDao)
 {
     public Task<ChatSession> AddChatAsync(int tenantId, int roomId, Guid userId, string message, 
         List<AttachmentMessageContent> attachments)

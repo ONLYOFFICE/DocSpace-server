@@ -32,7 +32,7 @@ public class MessageExportTask(IServiceScopeFactory serviceScopeFactory)
 {
     protected override async IAsyncEnumerable<Message> GetMessages(IServiceProvider serviceProvider)
     {
-        var chatDao = serviceProvider.GetRequiredService<DbChatDao>();
+        var chatDao = serviceProvider.GetRequiredService<ChatDao>();
         var message = await chatDao.GetMessageAsync(Data.MessageId, UserId);
 
         yield return message ?? throw new Exception("Message not found");

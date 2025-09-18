@@ -24,41 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.WebSearch;
-using ASC.Core.Common.Settings;
+namespace ASC.AI.Models.ResponseDto;
 
-namespace ASC.AI.Core.Settings;
-
-[Scope]
-public class AiConfigurationService(
-    UserManager userManager,
-    AuthContext authContext,
-    SettingsManager settingsManager)
+public class UserChatSettingsDto : IMapFrom<UserChatSettings>
 {
-    public async Task<WebSearchSettings> SetWebSearchConfigAsync(EngineType type, EngineConfig? config)
-    {
-        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
-        {
-            throw new SecurityException();
-        }
-        
-        var settings = await settingsManager.LoadAsync<WebSearchSettings>();
-        settings.Config = type == EngineType.None ? null : config;
-        
-        settings.Type = type;
-        
-        await settingsManager.SaveAsync(settings);
-        
-        return settings;
-    }
-
-    public async Task<WebSearchSettings> GetWebSearchConfigAsync()
-    {
-        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
-        {
-            throw new SecurityException();
-        }
-        
-        return await settingsManager.LoadAsync<WebSearchSettings>();
-    }
+    public bool WebSearchEnabled { get; init; }
 }

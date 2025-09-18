@@ -24,36 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Common.Settings;
+namespace ASC.AI.Models.RequestDto;
 
-namespace ASC.AI.Core.WebSearch;
-
-public enum EngineType
+public class SetUserChatsSettingsRequestDto
 {
-    None,
-    DocSpace,
-    Exa
+    [FromRoute(Name = "roomId")]
+    public int RoomId { get; init; }
+    
+    [FromBody]
+    public required SetUserChatSettingsRequestBody Body { get; init; }
 }
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(ExaConfig), "exa")]
-public abstract class EngineConfig;
-
-public class WebSearchSettings : ISettings<WebSearchSettings>
+public class SetUserChatSettingsRequestBody
 {
-    [JsonIgnore]
-    public Guid ID => new("{B2FC4410-5538-46E0-959A-AF1BEEAC9E20}");
-    public EngineType Type { get; set; }
-    public EngineConfig? Config { get; set; }
-    
-    public WebSearchSettings GetDefault()
-    {
-        return new WebSearchSettings
-        {
-            Type = EngineType.None,
-            Config = null
-        };
-    }
-
-    public DateTime LastModified { get; set; }
+    public bool? WebSearchEnabled { get; init; }
 }

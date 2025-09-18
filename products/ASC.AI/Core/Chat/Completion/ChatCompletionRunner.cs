@@ -28,15 +28,12 @@ namespace ASC.AI.Core.Chat.Completion;
 
 [Scope]
 public class ChatCompletionRunner(
+    ChatExecutionContextBuilder contextBuilder,
     AuthContext authContext,
     ChatHistory chatHistory,
-    IDaoFactory daoFactory,
-    FileSecurity fileSecurity,
     TenantManager tenantManager,
-    ChatTools chatTools,
     ChatClientFactory chatClientFactory,
     ILogger<ChatCompletionGenerator> logger,
-    AiProviderService providerService,
     AttachmentHandler attachmentHandler,
     ChatSocketClient chatSocketClient)
 {
@@ -45,17 +42,18 @@ public class ChatCompletionRunner(
     {
         ArgumentException.ThrowIfNullOrEmpty(message);
         
-        var config = await GetRunConfigAsync(roomId);
+        var context = await contextBuilder.BuildContextAsync(roomId);
         
         var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
-        var toolTask = chatTools.GetAsync(roomId);
         
         var attachments = await attachmentsTask;
         var userMessage = FormatUserMessage(message, attachments);
+
+        var content = ChatPromptTemplate.GetPrompt(context.Instruction, context.ContextFolderId, context.Room.Id);
         
         var messages = new List<ChatMessage>
         {
-            new(ChatRole.System, ChatPromptTemplate.GetPrompt(config.Prompt, config.ContextFolderId, roomId)),
+            new(ChatRole.System, content),
             userMessage
         };
         
@@ -67,18 +65,16 @@ public class ChatCompletionRunner(
             attachments, 
             chatHistory);
         
-        var toolHolder = await toolTask;
-        
         var client = chatClientFactory.Create(new ChatClientOptions
         {
-            Endpoint = config.Url,
-            Key = config.Key,
-            Provider = config.ProviderType,
-            ModelId = config.ModelId,
-            ToolHolder = toolHolder
+            Endpoint = context.Url,
+            Key = context.Key,
+            Provider = context.ProviderType,
+            ModelId = context.ModelId,
+            Tools = context.Tools
         });
         
-        return new ChatCompletionGenerator(client, logger, chatSocketClient, messages, toolHolder, writerFactory);
+        return new ChatCompletionGenerator(client, logger, chatSocketClient, messages, context.Tools, writerFactory);
     }
 
     public async Task<ChatCompletionGenerator> StartChatAsync(
@@ -93,22 +89,22 @@ public class ChatCompletionRunner(
         {
             throw new ItemNotFoundException("Chat not found");
         }
-
-        var config = await GetRunConfigAsync(chat.RoomId);
+        
+        var context = await contextBuilder.BuildContextAsync(chat.RoomId);
         
         var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
-        var toolsTask = chatTools.GetAsync(chat.RoomId);
 
-        var historyAdapter = HistoryHelper.GetAdapter(config.ProviderType);
+        var historyAdapter = HistoryHelper.GetAdapter(context.ProviderType);
         var history = await chatHistory.GetMessagesAsync(chatId, historyAdapter).ToListAsync();
         
         var attachments = await attachmentsTask;
         
         var userMessage = FormatUserMessage(message, attachments);
+        var system = ChatPromptTemplate.GetPrompt(context.Instruction, context.ContextFolderId, context.Room.Id);
         
         var messages = new List<ChatMessage>(history.Count + 2)
         {
-            new(ChatRole.System, ChatPromptTemplate.GetPrompt(config.Prompt, config.ContextFolderId, chat.RoomId))
+            new(ChatRole.System, system)
         };
         
         messages.AddRange(history);
@@ -116,54 +112,16 @@ public class ChatCompletionRunner(
 
         var writerFactory = new ContinueHistoryWriterFactory(tenantId, chat, message, attachments, chatHistory);
         
-        var toolHolder = await toolsTask;
-        
         var client = chatClientFactory.Create(new ChatClientOptions
         {
-            Endpoint = config.Url,
-            Key = config.Key,
-            Provider = config.ProviderType,
-            ModelId = config.ModelId,
-            ToolHolder = toolHolder
+            Endpoint = context.Url,
+            Key = context.Key,
+            Provider = context.ProviderType,
+            ModelId = context.ModelId,
+            Tools = context.Tools
         });
 
-        return new ChatCompletionGenerator(client, logger, chatSocketClient, messages, toolHolder, writerFactory);
-    }
-
-    private async Task<ChatConfiguration> GetRunConfigAsync(int roomId)
-    {
-        var folderDao = daoFactory.GetFolderDao<int>();
-        
-        var room = await GetRoomAsync(folderDao, roomId);
-        var resultStorage = await folderDao.GetFoldersAsync(room.Id, FolderType.ResultStorage).FirstAsync();
-        
-        var provider = await providerService.GetProviderAsync(room.SettingsChatProviderId);
-
-        return new ChatConfiguration
-        {
-            Url = provider.Url,
-            Key = provider.Key,
-            ProviderType = provider.Type,
-            ModelId = room.SettingsChatParameters.ModelId,
-            Prompt = room.SettingsChatParameters.Prompt,
-            ContextFolderId = resultStorage.Id
-        };
-    }
-    
-    private async Task<Folder<int>> GetRoomAsync(IFolderDao<int> folderDao, int roomId)
-    {
-        var room = await folderDao.GetFolderAsync(roomId);
-        if (room == null)
-        {
-            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
-        }
-
-        if (!await fileSecurity.CanUseChatsAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
-        }
-
-        return room;
+        return new ChatCompletionGenerator(client, logger, chatSocketClient, messages, context.Tools, writerFactory);
     }
 
     private IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(IEnumerable<JsonElement>? files)
@@ -190,15 +148,5 @@ public class ChatCompletionRunner(
         contents.Add(new TextContent(message));
 
         return new ChatMessage { Role = ChatRole.User, Contents = contents };
-    }
-
-    private class ChatConfiguration
-    {
-        public ProviderType ProviderType { get; init; }
-        public required string Url { get; init; }
-        public required string Key { get; init; }
-        public required string ModelId { get; init; }
-        public string? Prompt { get; init; }
-        public int ContextFolderId { get; init; }
     }
 }

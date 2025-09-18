@@ -29,16 +29,18 @@ global using ASC.AI.Core.Database.Models;
 global using ASC.AI.Core.Chat.Data;
 global using ASC.AI.Core.Chat.Extensions;
 global using ASC.AI.Core.Chat.History;
-global using ASC.AI.Core.Knowledge;
 global using ASC.AI.Core.MCP;
 global using ASC.AI.Core.MCP.Auth;
 global using ASC.AI.Core.MCP.Data;
 global using ASC.AI.Core.MCP.Transport;
+global using ASC.AI.Core.Tools;
 global using ASC.AI.Core.Provider;
 global using ASC.AI.Core.Provider.Data;
 global using ASC.AI.Core.Provider.Model;
-global using ASC.AI.Core.Settings;
-global using ASC.AI.Core.Tool;
+global using ASC.AI.Core.Chat.Tool;
+global using ASC.AI.Core.Retrieval.Knowledge;
+global using ASC.AI.Core.Retrieval.Web;
+global using ASC.AI.Core.Retrieval.Web.Engine;
 
 global using ASC.Common;
 global using ASC.Common.Log;
@@ -52,6 +54,7 @@ global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.EF.Model.Chat;
+global using ASC.Core.Common.Settings;
 global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
@@ -75,6 +78,8 @@ global using ASC.Web.Files.Services.WCFService.FileOperations;
 global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Utility;
 
+global using ASC.ElasticSearch.VectorData;
+
 global using Anthropic.SDK;
 
 global using AutoMapper;
@@ -89,8 +94,6 @@ global using Microsoft.Extensions.Logging;
 
 global using OpenAI;
 
-global using ASC.ElasticSearch.VectorData;
-
 global using System.ClientModel;
 global using System.ClientModel.Primitives;
 global using System.ComponentModel;
@@ -100,9 +103,12 @@ global using System.Net.Http.Headers;
 global using System.Net.Http.Json;
 global using System.Runtime.CompilerServices;
 global using System.Security;
+global using System.Security.Cryptography;
 global using System.Text.Encodings.Web;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Threading.Channels;
 global using System.Web;
+
+global using ZiggyCreatures.Caching.Fusion;

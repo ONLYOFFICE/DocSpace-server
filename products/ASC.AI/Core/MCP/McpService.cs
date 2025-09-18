@@ -26,7 +26,8 @@
 
 using System.Text.RegularExpressions;
 
-using ASC.AI.Core.Chat.Function;
+using ASC.AI.Core.Chat.Tool;
+using ASC.AI.Core.Tools;
 
 namespace ASC.AI.Core.MCP;
 

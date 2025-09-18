@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,10 +24,35 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Settings;
+namespace ASC.AI.Core.Retrieval.Web;
 
-public class ProviderSettingsData
+public enum EngineType
 {
-    public ProviderType Type { get; init; }
-    public required string Url { get; init; }
+    None,
+    Exa
+}
+
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+[JsonDerivedType(typeof(ExaConfig), "exa")]
+public abstract class EngineConfig;
+
+public class WebSearchSettings : ISettings<WebSearchSettings>
+{
+    [JsonIgnore]
+    public Guid ID => new("{B2FC4410-5538-46E0-959A-AF1BEEAC9E20}");
+    public bool Enabled { get; set; }
+    public EngineType Type { get; set; }
+    public EngineConfig? Config { get; set; }
+    
+    public WebSearchSettings GetDefault()
+    {
+        return new WebSearchSettings
+        {
+            Enabled = false,
+            Type = EngineType.None,
+            Config = null
+        };
+    }
+
+    public DateTime LastModified { get; set; }
 }

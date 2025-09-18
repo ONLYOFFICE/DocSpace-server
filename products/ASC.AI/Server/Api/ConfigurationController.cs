@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.WebSearch;
+using ASC.AI.Core.Retrieval.Web;
 
 namespace ASC.AI.Api;
 
@@ -32,18 +32,22 @@ namespace ASC.AI.Api;
 [DefaultRoute]
 [ApiController]
 [ControllerName("ai")]
-public class ConfigurationController(AiConfigurationService aiConfigurationService) : ControllerBase
+public class ConfigurationController(AiSettingsService aiSettingsService) : ControllerBase
 {
     [HttpPut("config/web-search")]
-    public async Task<WebSearchSettings> SetWebSearchConfigAsync(SetWebSearchConfigRequestDto inDto)
+    public async Task<WebSearchSettings> SetWebSearchSettingsAsync(SetWebSearchConfigRequestDto inDto)
     {
-        var settings = await aiConfigurationService.SetWebSearchConfigAsync(inDto.Body.Type, inDto.Body.Settings);
+        var settings = await aiSettingsService.SetWebSearchSettingsAsync(
+            inDto.Body.Enabled, 
+            inDto.Body.Type, 
+            inDto.Body.Settings);
+        
         return settings;
     }
     
     [HttpGet("config/web-search")]
-    public async Task<WebSearchSettings> GetWebSearchConfigAsync()
+    public async Task<WebSearchSettings> GetWebSearchSettingsAsync()
     {
-        return await aiConfigurationService.GetWebSearchConfigAsync();
+        return await aiSettingsService.GetWebSearchSettingsAsync();
     }
 }

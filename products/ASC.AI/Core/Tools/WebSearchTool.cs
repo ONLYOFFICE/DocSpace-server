@@ -24,11 +24,31 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.WebSearch;
+using ASC.AI.Core.Retrieval.Web;
 
-public class WebSearchResult
+namespace ASC.AI.Core.Tools;
+
+[Scope]
+public class WebSearchTool(WebSearchEngineFactory searchEngineFactory) : BaseTool
 {
-    public string? Title { get; init; }
-    public string? Url { get; init; }
-    public required string Text { get; init; }
+    private const string Name = "docspace_web_search";
+    private const string Description = "Search in web";
+
+    public AIFunction Init(EngineConfig config)
+    {
+        var engine = searchEngineFactory.Create(config);
+
+        return AIFunctionFactory.Create(SearchFunction, Name, Description);
+        
+        async Task<ToolResponse> SearchFunction([Description("Query to search")] string query)
+        {
+            var results = await engine.SearchAsync(new SearchQuery
+            {
+                Query = query, 
+                MaxResults = 5
+            });
+
+            return ToResponse(results);
+        }
+    }
 }

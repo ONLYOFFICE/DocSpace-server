@@ -28,7 +28,7 @@ namespace ASC.AI.Core.Chat;
 
 [Scope]
 public class ChatService(
-    DbChatDao chatDao, 
+    ChatDao chatDao, 
     AuthContext authContext,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
@@ -108,7 +108,6 @@ public class ChatService(
         var userId = authContext.CurrentAccount.ID;
         
         var settings = await chatDao.GetUserChatSettingsAsync(tenantId, roomId, userId);
-        settings ??= new UserChatSettings();
 
         if (webSearchEnabled.HasValue)
         {
@@ -125,9 +124,7 @@ public class ChatService(
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
         
-        var settings = await chatDao.GetUserChatSettingsAsync(tenantId, roomId, userId);
-        
-        return settings ?? new UserChatSettings();
+        return await chatDao.GetUserChatSettingsAsync(tenantId, roomId, userId);
     }
     
     private async Task ThrowIfNotAccessAsync(int roomId)

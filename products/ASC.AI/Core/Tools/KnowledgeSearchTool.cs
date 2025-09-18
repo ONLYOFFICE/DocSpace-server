@@ -24,10 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.RequestDto;
+using ASC.AI.Core.Retrieval.Knowledge;
 
-public class GetUserChatsConfigRequestDto
+namespace ASC.AI.Core.Tools;
+
+[Scope]
+public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine) : BaseTool
 {
-    [FromRoute(Name = "roomId")]
-    public int RoomId { get; init; }
+    private const string Name = "docspace_knowledge_search";
+    private const string Description = "Search in knowledge base";
+
+    public AIFunction Init(int roomId)
+    {
+        return AIFunctionFactory.Create(Function, Name, Description);
+        
+        async Task<ToolResponse> Function([Description("Query to search")] string query)
+        {
+            var results = (await searchEngine.SearchAsync(roomId, query))
+                .Select(x => new
+                {
+                    fileId = x.FileId, 
+                    text = x.TextEmbedding
+                });
+
+            return ToResponse(results);
+        }
+    }
 }

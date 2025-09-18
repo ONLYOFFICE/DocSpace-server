@@ -24,9 +24,29 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.WebSearch;
+namespace ASC.AI.Core.Chat.Tool;
 
-public class ExaConfig : EngineConfig
+public interface IToolPermissionRequester
 {
-    public required string ApiKey { get; init; }
+    Task<ToolExecutionDecision> RequestPermissionAsync(CallData callData, CancellationToken cancellationToken);
+}
+
+public interface IToolPermissionProvider
+{
+    Task<CallData?> ProvidePermissionAsync(string callId, ToolExecutionDecision decision);
+}
+
+public enum ToolExecutionDecision
+{
+    Allow,
+    AlwaysAllow,
+    Deny
+}
+
+public class CallData
+{
+    public Guid ServerId { get; init; }
+    public int RoomId { get; init; }
+    public required string CallId { get; init; }
+    public required string Name { get; init; }
 }

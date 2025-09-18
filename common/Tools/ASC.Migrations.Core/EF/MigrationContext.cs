@@ -135,6 +135,7 @@ public class MigrationContext : DbContext
     public DbSet<DbRoomMcpServer> McpRoomServers { get; set; }
     
     public DbSet<DbFileVectorization> FileVectorization { get; set; }
+    public DbSet<DbUserChatSettings> UserChatSettings { get; set; }
 
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
@@ -217,6 +218,7 @@ public class MigrationContext : DbContext
             .AddDbMcpServerStates()
             .AddDbMcpServerSettings()
             .AddDbRoomMcpServers()
-            .AddDbFileVectorization();
+            .AddDbFileVectorization()
+            .AddDbUserChatSettings();
     }
 }

@@ -27,9 +27,7 @@
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 
-using ZiggyCreatures.Caching.Fusion;
-
-namespace ASC.AI.Core.Chat.Function;
+namespace ASC.AI.Core.Chat.Tool;
 
 public abstract class RedisToolPermissionResolverBase
 {

@@ -135,18 +135,18 @@ public class ChatController(
         await mcpService.ProvideMcpToolPermissionAsync(inDto.CallId, inDto.Body.Decision);
     }
 
-    [HttpPut("rooms/{roomId}/chats/configuration")]
-    public async Task<UserChatConfigDto> SetUserChatsConfigAsync(SetUserChatsConfigRequestDto inDto)
+    [HttpPut("rooms/{roomId}/chats/config")]
+    public async Task<UserChatSettingsDto> SetUserChatsSettingsAsync(SetUserChatsSettingsRequestDto inDto)
     {
         var settings = await chatService.SetUserChatsSettingsAsync(inDto.RoomId, inDto.Body.WebSearchEnabled);
-        return mapper.Map<UserChatSettings, UserChatConfigDto>(settings);
+        return mapper.Map<UserChatSettings, UserChatSettingsDto>(settings);
     }
     
-    [HttpGet("rooms/{roomId}/chats/configuration")]
-    public async Task<UserChatConfigDto> GetUserChatsConfigAsync(GetUserChatsConfigRequestDto inDto)
+    [HttpGet("rooms/{roomId}/chats/config")]
+    public async Task<UserChatSettingsDto> GetUserChatsSettingsAsync(GetUserChatsSettingsRequestDto inDto)
     {
         var settings = await chatService.GetUserChatsSettingsAsync(inDto.RoomId);
-        return mapper.Map<UserChatSettings, UserChatConfigDto>(settings);
+        return mapper.Map<UserChatSettings, UserChatSettingsDto>(settings);
     }
     
     private async Task StreamSentEventAsync(

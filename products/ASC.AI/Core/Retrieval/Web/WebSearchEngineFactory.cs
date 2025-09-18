@@ -24,9 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.AI.Core.Retrieval.Web;
 
-public class UserChatConfigDto : IMapFrom<UserChatSettings>
+[Singleton]
+public class WebSearchEngineFactory(IHttpClientFactory httpClientFactory)
 {
-    public bool WebSearchEnabled { get; init; }
+    public IWebSearchEngine Create(EngineConfig config)
+    {
+        if (config is ExaConfig exaConfig)
+        {
+            return new ExaWebSearchEngine(httpClientFactory.CreateClient(), exaConfig);
+        }
+        
+        throw new ArgumentException("Invalid engine config");
+    }
 }

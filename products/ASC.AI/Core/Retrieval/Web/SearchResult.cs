@@ -24,37 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Knowledge;
+namespace ASC.AI.Core.Retrieval.Web;
 
-[Scope]
-public class KnowledgeSearchEngine(
-    TenantManager tenantManager,
-    VectorStore vectorStore,
-    EmbeddingGeneratorFactory embeddingGeneratorFactory)
+public class WebSearchResult
 {
-    public async Task<KnowledgeSearchResult> SearchAsync(int roomId, string query)
-    {
-        var tenantId = tenantManager.GetCurrentTenantId();
-        
-        var generator = embeddingGeneratorFactory.Create();
-        var embedding = await generator.GenerateAsync(query);
-        
-        var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName, null);
-        var searchOptions = new VectorSearchOptions<Chunk>
-        {
-            Filter = x => x.TenantId == tenantId && x.RoomId == roomId
-        };
-        
-        var chunks = await collection.SearchAsync(
-            x => x.Embedding,
-            embedding.Vector.ToArray(),
-            5,
-            searchOptions).ToListAsync();
-
-        var content = chunks.Select(x => new { fileId = x.FileId, text = x.TextEmbedding });
-        
-        var json = JsonSerializer.Serialize(content, AiUtils.ContentSerializerOptions);
-
-        return new KnowledgeSearchResult { Content = [new TextContent(json)] };
-    }
+    public string? Title { get; init; }
+    public string? Url { get; init; }
+    public required string Text { get; init; }
 }

@@ -32,7 +32,7 @@ public class ChatExportTask(IServiceScopeFactory serviceScopeFactory)
 {
     protected override async IAsyncEnumerable<Message> GetMessages(IServiceProvider serviceProvider)
     {
-        var chatDao = serviceProvider.GetRequiredService<DbChatDao>();
+        var chatDao = serviceProvider.GetRequiredService<ChatDao>();
 
         var chat = await chatDao.GetChatAsync(TenantId, Data.ChatId);
         if (chat == null || chat.UserId != UserId)

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,15 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Chat.Tool;
+namespace ASC.AI.Core.Retrieval.Web;
 
-namespace ASC.AI.Models.ResponseDto;
-
-public class ToolContentDto : MessageContentDto, IMapFrom<ToolCallMessageContent>
+public interface IWebSearchEngine
 {
-    public override ContentType Type => ContentType.Tool;
-    public required string Name { get; init; }
-    public IDictionary<string, object?>? Arguments { get; init; }
-    public object? Result { get; init; }
-    public McpServerInfo? McpServerInfo { get; init; }
+    public Task<IEnumerable<WebSearchResult>> SearchAsync(SearchQuery query, CancellationToken cancellationToken = default);
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,32 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Settings;
+namespace ASC.AI.Core.Tools;
 
-[Singleton]
-public class ProviderSettings
+public class ToolResponse
 {
-    private readonly FrozenDictionary<ProviderType, ProviderSettingsData> _settings;
-
-    public ProviderSettings(IConfiguration configuration)
-    {
-        var section = configuration.GetSection("ai:providers");
-        var providers = section.Get<List<ProviderSettingsData>>() ?? [];
-        _settings = providers.ToFrozenDictionary(p => p.Type);
-    }
-
-    public ProviderSettingsData? Get(ProviderType type)
-    {
-        return _settings.GetValueOrDefault(type);
-    }
-
-    public IEnumerable<ProviderSettingsData> Get()
-    {
-        return _settings.Values;
-    }
-
-    public IEnumerable<ProviderSettingsData> GetAvailableProviders()
-    {
-        return _settings.Values;
-    }
+    public List<AIContent>? Content { get; init; }
 }

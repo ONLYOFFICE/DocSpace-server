@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Chat.Function;
-
 namespace ASC.AI.Core.Chat;
 
 [Scope]
@@ -71,11 +69,11 @@ public class ChatClientFactory(
             builder = chatClient.AsIChatClient().AsBuilder();
         }
 
-        if (options.ToolHolder?.Tools is { Count: > 0 })
+        if (options.Tools?.Tools is { Count: > 0 })
         {
             builder.ConfigureOptions(x =>
             {
-                x.Tools = options.ToolHolder.Tools;
+                x.Tools = options.Tools.Tools;
                 x.ToolMode = ChatToolMode.Auto;
             });
             
@@ -83,7 +81,7 @@ public class ChatClientFactory(
             {
                 var funcClient = new ManagedFunctionInvokingChatClient(
                     innerClient,
-                    options.ToolHolder,
+                    options.Tools,
                     toolPermissionRequester);
 
                 funcClient.MaximumIterationsPerRequest = 128;

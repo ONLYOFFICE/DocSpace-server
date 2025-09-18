@@ -75,7 +75,10 @@ public static class DbUserChatSettingsExtensions
                 .HasColumnName("room_id");
             
             entity.Property(e => e.UserId)
-                .HasColumnName("user_id");
+                .HasColumnName("user_id")
+                .HasColumnType("varchar(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
             
             entity.Property(e => e.WebSearchEnabled)
                 .HasColumnName("web_search_enabled")

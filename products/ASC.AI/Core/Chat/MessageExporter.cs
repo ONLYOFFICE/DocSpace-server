@@ -30,7 +30,7 @@ namespace ASC.AI.Core.Chat;
 
 [Scope]
 public class MessageExporter(
-    DbChatDao chatDao,
+    ChatDao chatDao,
     AuthContext authContext,
     TenantManager tenantManager,
     MessageExportTaskPublisher messageExport,

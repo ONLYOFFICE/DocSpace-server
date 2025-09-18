@@ -30,7 +30,7 @@ namespace ASC.AI.Api;
 [DefaultRoute]
 [ApiController]
 [ControllerName("ai")]
-public class MessageController(MessageExporter exporter, FileDtoHelper fileDtoHelper) : ControllerBase
+public class MessageController(MessageExporter exporter) : ControllerBase
 {
     [HttpPost("messages/{messageId}/export")]
     public async Task<FileDto<int>> ExportMessageAsync(ExportMessageRequestDto<int> inDto)

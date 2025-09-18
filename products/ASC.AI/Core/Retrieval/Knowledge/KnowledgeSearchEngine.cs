@@ -24,47 +24,38 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Tool;
+namespace ASC.AI.Core.Retrieval.Knowledge;
 
-public class McpServerInfo
+[Scope]
+public class KnowledgeSearchEngine(
+    TenantManager tenantManager,
+    VectorStore vectorStore,
+    EmbeddingGeneratorFactory embeddingGeneratorFactory)
 {
-    public Guid ServerId { get; init; }
-    public required string ServerName { get; init; }
-    public ServerType ServerType { get; init; }
-}
-
-public static class FunctionCallContentExtension
-{
-    public static void MarkAsManaged(this FunctionCallContent functionCallContent)
+    public async Task<IEnumerable<Chunk>> SearchAsync(int roomId, string query)
     {
-        functionCallContent.AdditionalProperties ??= new AdditionalPropertiesDictionary();
-        functionCallContent.AdditionalProperties.Add("managed", true);
-    }
-
-    public static bool IsManaged(this FunctionCallContent functionCallContent)
-    {
-        return functionCallContent.AdditionalProperties is not null && 
-            functionCallContent.AdditionalProperties.ContainsKey("managed");
-    }
-    
-    public static void AddMcpServerData(this FunctionCallContent functionCallContent, McpServerInfo mcpServerInfo)
-    {
-        functionCallContent.AdditionalProperties ??= new AdditionalPropertiesDictionary();
-        functionCallContent.AdditionalProperties.Add("mcpServerData", mcpServerInfo);
-    }
-
-    public static McpServerInfo? GetMcpServerInfo(this FunctionCallContent functionCallContent)
-    {
-        if (functionCallContent.AdditionalProperties is null)
+        try
         {
-            return null;
+            var tenantId = tenantManager.GetCurrentTenantId();
+
+            var generator = embeddingGeneratorFactory.Create();
+            var embedding = await generator.GenerateAsync(query);
+
+            var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName, null);
+            var searchOptions = new VectorSearchOptions<Chunk>
+            {
+                Filter = x => x.TenantId == tenantId && x.RoomId == roomId
+            };
+
+            return await collection.SearchAsync(
+                x => x.Embedding,
+                embedding.Vector.ToArray(),
+                5,
+                searchOptions).ToListAsync();
         }
-        
-        if (!functionCallContent.AdditionalProperties.TryGetValue("mcpServerData", out var mcpServerData))
+        catch
         {
-            return null;
+            return [];
         }
-        
-        return mcpServerData as McpServerInfo;
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,15 +24,39 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Chat.Tool;
+namespace ASC.AI.Core.Settings;
 
-namespace ASC.AI.Models.ResponseDto;
-
-public class ToolContentDto : MessageContentDto, IMapFrom<ToolCallMessageContent>
+[Scope]
+public class AiSettingsService(
+    UserManager userManager,
+    AuthContext authContext,
+    SettingsManager settingsManager)
 {
-    public override ContentType Type => ContentType.Tool;
-    public required string Name { get; init; }
-    public IDictionary<string, object?>? Arguments { get; init; }
-    public object? Result { get; init; }
-    public McpServerInfo? McpServerInfo { get; init; }
+    public async Task<WebSearchSettings> SetWebSearchSettingsAsync(bool enabled, EngineType type, EngineConfig? config)
+    {
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException();
+        }
+        
+        var settings = await settingsManager.LoadAsync<WebSearchSettings>();
+        
+        settings.Enabled = enabled;
+        settings.Config = type == EngineType.None ? null : config;
+        settings.Type = type;
+        
+        await settingsManager.SaveAsync(settings);
+        
+        return settings;
+    }
+
+    public async Task<WebSearchSettings> GetWebSearchSettingsAsync()
+    {
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException();
+        }
+        
+        return await settingsManager.LoadAsync<WebSearchSettings>();
+    }
 }
