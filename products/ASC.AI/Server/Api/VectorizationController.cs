@@ -34,9 +34,8 @@ public class VectorizationController(
     VectorizationTaskPublisher vectorizationTaskPublisher) : ControllerBase
 {
     [HttpPost("vectorization/tasks")]
-    public async Task<IActionResult> StartTaskAsync(VectorizationStartRequestDto inDto)
+    public async Task StartTaskAsync(VectorizationStartRequestDto inDto)
     {
         await vectorizationTaskPublisher.PublishAsync(inDto.Body.Files);
-        return Ok();
     }
 }
