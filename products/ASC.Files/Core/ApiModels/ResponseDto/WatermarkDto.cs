@@ -34,7 +34,7 @@ public class WatermarkDto
     /// <summary>
     /// Specifies whether to display in the watermark: username, user email, user ip-adress, current date, and room name.
     /// </summary>
-    public WatermarkAdditions Additions { get; set; }
+    public required WatermarkAdditions Additions { get; set; }
 
     /// <summary>
     /// The watermark text.

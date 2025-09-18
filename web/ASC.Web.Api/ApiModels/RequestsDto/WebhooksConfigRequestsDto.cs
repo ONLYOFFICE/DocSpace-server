@@ -79,5 +79,5 @@ public class UpdateWebhooksConfigRequestsDto: CreateWebhooksConfigRequestsDto
     /// <summary>
     /// The webhook configuration ID.
     /// </summary>
-    public int Id { get; set; }
+    public required int Id { get; set; }
 }

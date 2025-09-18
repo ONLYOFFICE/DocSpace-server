@@ -75,10 +75,10 @@ public class LogoCover
     /// <summary>
     /// The logo cover ID.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// The logo cover data.
     /// </summary>
-    public string Data { get; set; }
+    public required string Data { get; set; }
 }

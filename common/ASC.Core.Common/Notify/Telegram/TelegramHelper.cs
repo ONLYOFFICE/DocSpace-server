@@ -33,18 +33,6 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
     IHttpClientFactory httpClientFactory,
     ILogger<TelegramHelper> logger)
 {
-
-    /// <summary>
-    /// The registration Telegram status.
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum RegStatus
-    {
-        unlinked,
-        linked,
-        linking
-    }
-
     public async Task<string> RegisterUserAsync(Guid userId, int tenantId)
     {
         var token = GenerateToken(userId);
@@ -158,4 +146,14 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
 
         return new TelegramBotClient(token, httpClient);
     }
+}
+
+/// <summary>
+/// The registration Telegram status.
+/// </summary>
+public enum RegStatus
+{
+    unlinked,
+    linked,
+    linking
 }

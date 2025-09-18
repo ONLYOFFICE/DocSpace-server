@@ -396,7 +396,7 @@ public class ShareFolderTest(
         result.Should().AllSatisfy(r => r.SubjectType.Should().BeOneOf(SubjectType.Group, SubjectType.User));
         
         // Act
-        var securityInfos = (await _sharingApi.GetFolderSecurityInfoAsync(folder.Id, TestContext.Current.CancellationToken)).Response;
+        var securityInfos = (await _sharingApi.GetFolderSecurityInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
         securityInfos.Should().NotBeEmpty();
@@ -467,7 +467,7 @@ public class ShareFolderTest(
         result.Should().AllSatisfy(r => r.SubjectType.Should().BeOneOf(SubjectType.Group, SubjectType.User));
         
         // Act
-        var securityInfos = (await _sharingApi.GetFolderSecurityInfoAsync(folder.Id, TestContext.Current.CancellationToken)).Response;
+        var securityInfos = (await _sharingApi.GetFolderSecurityInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
         securityInfos.Should().NotBeEmpty();
@@ -537,7 +537,7 @@ public class ShareFolderTest(
         result.Should().AllSatisfy(r => r.SubjectType.Should().BeOneOf(SubjectType.Group, SubjectType.User));
 
         // Act
-        var securityInfos = (await _sharingApi.GetFolderSecurityInfoAsync(folder.Id, TestContext.Current.CancellationToken)).Response;
+        var securityInfos = (await _sharingApi.GetFolderSecurityInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
         securityInfos.Should().NotBeEmpty();

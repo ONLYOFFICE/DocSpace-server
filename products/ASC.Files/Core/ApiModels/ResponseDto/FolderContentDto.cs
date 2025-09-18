@@ -50,25 +50,25 @@ public class FolderContentDto<T>
     /// The folder path.
     /// </summary>
     [SwaggerSchemaCustom(Example = "{key = \"Key\", path = \"//path//to//folder\"}")]
-    public object PathParts { get; set; }
+    public required object PathParts { get; set; }
 
     /// <summary>
     /// The folder start index.
     /// </summary>
     [SwaggerSchemaCustom(Example = 0)]
-    public int StartIndex { get; set; }
+    public required int StartIndex { get; set; }
 
     /// <summary>
     /// The number of folder elements.
     /// </summary>
     [SwaggerSchemaCustom(Example = 4)]
-    public int Count { get; set; }
+    public required int Count { get; set; }
 
     /// <summary>
     /// The total number of elements in the folder.
     /// </summary>
     [SwaggerSchemaCustom(Example = 4)]
-    public int Total { get; set; }
+    public required int Total { get; set; }
 
     /// <summary>
     /// The new element index in the folder.

@@ -427,7 +427,7 @@
     <value>Login Success</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Login Via Social Account Success</value>
+    <value>Login Via Social Account Success: {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Successful login via social application</value>
@@ -995,5 +995,11 @@
   </data>
   <data name="LocationCol" xml:space="preserve">
     <value>Location</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Successful Login via OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Login success via login and password</value>
   </data>
 </root>

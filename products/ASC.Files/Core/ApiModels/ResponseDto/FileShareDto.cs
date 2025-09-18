@@ -62,37 +62,37 @@ public class FileShareDto
     /// Specifies if the access right is locked or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
-    public bool IsLocked { get; set; }
+    public required bool IsLocked { get; set; }
 
     /// <summary>
     /// Specifies if the user is an owner of the specified file or not.
     /// </summary>
-    public bool IsOwner { get; set; }
+    public required bool IsOwner { get; set; }
 
     /// <summary>
     /// Specifies if the user can edit the access to the specified file or not.
     /// </summary>
-    public bool CanEditAccess { get; set; }
+    public required bool CanEditAccess { get; set; }
 
     /// <summary>
     /// Indicates whether internal editing permissions are granted.
     /// </summary>
-    public bool CanEditInternal { get; set; }
+    public required bool CanEditInternal { get; set; }
 
     /// <summary>
     /// Determines whether the user has permission to modify the deny download setting for the file share.
     /// </summary>
-    public bool CanEditDenyDownload { get; set; }
+    public required bool CanEditDenyDownload { get; set; }
     
     /// <summary>
     /// Indicates whether the expiration date of access permissions can be edited.
     /// </summary>
-    public bool CanEditExpirationDate { get; set; }
+    public required bool CanEditExpirationDate { get; set; }
 
     /// <summary>
     /// The subject type.
     /// </summary>
-    public SubjectType SubjectType { get; set; }
+    public required SubjectType SubjectType { get; set; }
 }
 
 /// <summary>

@@ -34,28 +34,28 @@ public class ConfigurationDto<T>
     /// <summary>
     /// The document configuration.
     /// </summary>
-    public DocumentConfigDto Document { get; set; }
+    public required DocumentConfigDto Document { get; set; }
 
     /// <summary>
     /// The document type.
     /// </summary>
-    public string DocumentType { get; set; }
+    public required string DocumentType { get; set; }
 
     /// <summary>
     /// The editor configuration.
     /// </summary>
-    public EditorConfigurationDto EditorConfig { get; set; }
+    public required EditorConfigurationDto EditorConfig { get; set; }
 
     /// <summary>
     /// The editor type.
     /// </summary>
-    public EditorType EditorType { get; set; }
+    public required EditorType EditorType { get; set; }
 
     /// <summary>
     /// The editor URL.
     /// </summary>
     [Url]
-    public string EditorUrl { get; set; }
+    public required string EditorUrl { get; set; }
 
     /// <summary>
     /// The token of the file configuration.
@@ -152,12 +152,12 @@ public class EditorConfigurationDto
     /// <summary>
     /// The language of the editor configuration.
     /// </summary>
-    public string Lang { get; set; }
+    public required string Lang { get; set; }
 
     /// <summary>
     /// The mode of the editor configuration.
     /// </summary>
-    public string Mode { get; set; }
+    public required string Mode { get; set; }
 
     /// <summary>
     /// Specifies if the mode is write of the editor configuration.
@@ -182,7 +182,7 @@ public class EditorConfigurationDto
     /// <summary>
     /// The user configuration of the editor.
     /// </summary>
-    public UserConfig User { get; set; }
+    public required UserConfig User { get; set; }
 }
 
 /// <summary>

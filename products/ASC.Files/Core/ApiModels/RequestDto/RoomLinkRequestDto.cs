@@ -89,5 +89,5 @@ public class RoomLinkRequestDto<T>
     /// The room link parameters.
     /// </summary>
     [FromBody]
-    public RoomLinkRequest RoomLink { get; set; }
+    public required RoomLinkRequest RoomLink { get; set; }
 }

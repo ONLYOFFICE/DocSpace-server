@@ -34,7 +34,7 @@ public class CheckDocServiceUrlRequestDto
     /// <summary>
     /// The ONLYOFFICE Docs URL address.
     /// </summary>
-    public string DocServiceUrl { get; set; }
+    public required string DocServiceUrl { get; set; }
 
     /// <summary>
     /// The ONLYOFFICE Docs URL address in the local private network.

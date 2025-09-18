@@ -88,7 +88,7 @@ public partial class FilesDbContext
         return TagQueries.ThirdpartyAccountAsync(this, tenantId, folderType, subject);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, TagType.Custom, null, null])]
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, null, null])]
     public IAsyncEnumerable<TagLinkData> TagsAsync(int tenantId, IEnumerable<TagType> tagType, IEnumerable<string> filesId, IEnumerable<string> foldersId)
     {
         return TagQueries.TagsAsync(this, tenantId, tagType, filesId, foldersId);

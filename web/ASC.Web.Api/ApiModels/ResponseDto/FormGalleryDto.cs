@@ -39,30 +39,30 @@ public class FormGalleryDto : IMapFrom<OFormSettings>
     /// <summary>
     /// The form gallery domain.
     /// </summary>
-    public string Domain { get; set; }
+    public required string Domain { get; set; }
 
     /// <summary>
     /// The form gallery extension.
     /// </summary>
-    public string Ext { get; set; }
+    public required string Ext { get; set; }
 
     /// <summary>
     /// The form gallery upload path.
     /// </summary>
-    public string UploadPath { get; set; }
+    public required string UploadPath { get; set; }
 
     /// <summary>
     /// The form gallery upload domain.
     /// </summary>
-    public string UploadDomain { get; set; }
+    public required string UploadDomain { get; set; }
 
     /// <summary>
     /// The form gallery upload extension.
     /// </summary>
-    public string UploadExt { get; set; }
+    public required string UploadExt { get; set; }
 
     /// <summary>
     /// The form gallery upload dashboard.
     /// </summary>
-    public string UploadDashboard { get; set; }
+    public required string UploadDashboard { get; set; }
 }

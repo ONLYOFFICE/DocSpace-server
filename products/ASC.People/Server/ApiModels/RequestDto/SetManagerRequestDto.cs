@@ -52,5 +52,5 @@ public class SetManagerRequestDto
     /// The request for setting a group manager.
     /// </summary>
     [FromBody]
-    public SetManagerRequest SetManager { get; set; }
+    public required SetManagerRequest SetManager { get; set; }
 }

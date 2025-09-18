@@ -88,7 +88,6 @@ global using ASC.Core.Encryption;
 global using ASC.Core.Security.Authentication;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
-global using ASC.Data.Backup;
 global using ASC.Data.Backup.Contracts;
 global using ASC.Data.Backup.EF.Context;
 global using ASC.Data.Storage;
@@ -128,7 +127,6 @@ global using ASC.Web.Api.Mapping;
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
 global using ASC.Web.Core;
-global using ASC.Web.Core.Files;
 global using ASC.Web.Core.Helpers;
 global using ASC.Web.Core.Mobile;
 global using ASC.Web.Core.Notify;
@@ -158,8 +156,6 @@ global using Autofac;
 
 global using AutoMapper;
 
-global using CsvHelper.Configuration;
-
 global using Google.Authenticator;
 
 global using MailKit.Security;
@@ -167,7 +163,6 @@ global using MailKit.Security;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.WebUtilities;
-global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using MimeKit;

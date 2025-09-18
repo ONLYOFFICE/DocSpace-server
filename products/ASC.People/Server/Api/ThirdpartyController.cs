@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Common.Log;
+using ASC.Web.Studio.UserControls.Management;
 
 using Constants = ASC.Core.Configuration.Constants;
 
@@ -412,13 +413,10 @@ public class ThirdpartyController(
 
     private static string GetMeaningfulProviderName(string providerName)
     {
-        return providerName switch
-        {
-            "google" or "openid" => "Google",
-            "facebook" => "Facebook",
-            "twitter" => "Twitter",
-            "linkedin" => "LinkedIn",
-            _ => "Unknown Provider"
-        };
+        var result = string.IsNullOrEmpty(providerName)
+            ? null
+            : ConsumerExtension.GetResourceString(providerName == "openid" ? "Google" : providerName);
+
+        return result ?? "Unknown Provider";
     }
 }

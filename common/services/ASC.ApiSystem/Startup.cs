@@ -26,8 +26,6 @@
 
 using System.Threading.Channels;
 
-using ASC.Core.Notify.Socket;
-
 namespace ASC.ApiSystem;
 
 public class Startup
@@ -80,6 +78,7 @@ public class Startup
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddBaseDbContextPool<ApiKeysDbContext>();
 
         services.AddSession();
 
@@ -149,10 +148,14 @@ public class Startup
         services.AddScoped<AuthHandler>();
         services.AddScoped<ApiSystemAuthHandler>();
         services.AddScoped<ApiSystemBasicAuthHandler>();
-
+        services.AddScoped(_ => UrlEncoder.Default);
+        
         services.AddBillingHttpClient();
         services.AddAccountingHttpClient();
-
+        services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
+        
         services
             .AddAuthentication()
             .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })

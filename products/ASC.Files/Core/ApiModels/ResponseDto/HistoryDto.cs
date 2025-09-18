@@ -34,22 +34,22 @@ public record HistoryDto
     /// <summary>
     /// The action performed on the file.
     /// </summary>
-    public HistoryAction Action { get; init; }
+    public required HistoryAction Action { get; init; }
 
     /// <summary>
     /// The action initiator.
     /// </summary>
-    public EmployeeDto Initiator { get; init; }
+    public required EmployeeDto Initiator { get; init; }
 
     /// <summary>
     /// The date and time when an action on the file was performed.
     /// </summary>
-    public ApiDateTime Date { get; init; }
+    public required ApiDateTime Date { get; init; }
 
     /// <summary>
     /// The history data.
     /// </summary>
-    public HistoryData Data { get; init; }
+    public required HistoryData Data { get; init; }
 
     /// <summary>
     /// The list of related history.

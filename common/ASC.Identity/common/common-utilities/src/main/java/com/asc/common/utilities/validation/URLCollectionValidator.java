@@ -37,17 +37,17 @@ import org.springframework.stereotype.Component;
 
 /**
  * The URLCollectionValidator class is responsible for validating a collection of URLs using URI/URL
- * validation. Only HTTP and HTTPS protocols are allowed.
+ * validation. HTTP, HTTPS, and custom protocols like claude: are allowed.
  */
 @Slf4j
 @Component
 public class URLCollectionValidator
     implements ConstraintValidator<URLCollection, Collection<String>> {
-  private static final Set<String> ALLOWED_PROTOCOLS = Set.of("http", "https");
+  private static final Set<String> ALLOWED_PROTOCOLS = Set.of("http", "https", "claude");
 
   /**
-   * Validates the collection of URLs using URI/URL validation. Only HTTP and HTTPS protocols are
-   * allowed.
+   * Validates the collection of URLs using URI/URL validation. HTTP, HTTPS, and custom protocols
+   * like claude: are allowed.
    *
    * @param urls the collection of URLs to be validated
    * @param context the validation context
@@ -72,13 +72,18 @@ public class URLCollectionValidator
           return false;
         }
 
-        var validatedUrl = uri.toURL();
-        log.debug("URL is valid: {}", validatedUrl);
+        if ("http".equalsIgnoreCase(protocol) || "https".equalsIgnoreCase(protocol)) {
+          var validatedUrl = uri.toURL();
+          log.debug("URL is valid: {}", validatedUrl);
+        } else {
+          log.debug("Custom protocol URI is valid: {}", uri);
+        }
       } catch (Exception e) {
         log.warn("Invalid URL detected: {} - {}", url, e.getMessage());
         return false;
       }
     }
+
     return true;
   }
 }

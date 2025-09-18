@@ -57,5 +57,5 @@ public class CoverRequestDto<T>
     /// The request parameters to change the room cover.
     /// </summary>
     [FromBody]
-    public CoverRequestDto Cover { get; set; } = null;
+    public required CoverRequestDto Cover { get; set; } = null;
 }

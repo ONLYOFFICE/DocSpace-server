@@ -515,7 +515,7 @@ public class ShareFileTest(
         result.Should().AllSatisfy(r => r.SubjectType.Should().BeOneOf(SubjectType.Group, SubjectType.User));
         
         // Act
-        var securityInfos = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var securityInfos = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
         securityInfos.Should().NotBeEmpty();
@@ -589,7 +589,7 @@ public class ShareFileTest(
         result.Should().NotBeNull();
         result.Should().AllSatisfy(r => r.SubjectType.Should().BeOneOf(SubjectType.Group, SubjectType.User));
         // Act
-        var securityInfos = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var securityInfos = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
         securityInfos.Should().NotBeEmpty();

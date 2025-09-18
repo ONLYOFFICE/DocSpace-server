@@ -95,13 +95,13 @@ public class UserProductIdsRequestDto
     /// The ID of the product extracted from the query parameters.
     /// </summary>
     [FromQuery(Name = "productid")]
-    public Guid ProductId { get; set; }
+    public required Guid ProductId { get; set; }
 
     /// <summary>
     /// The user ID extracted from the query parameters.
     /// </summary>
     [FromQuery(Name = "userid")]
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 }
 
 /// <summary>

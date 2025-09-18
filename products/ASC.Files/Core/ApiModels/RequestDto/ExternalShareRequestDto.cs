@@ -52,5 +52,5 @@ public class ExternalShareRequestDto
     /// The external data share request parameters.
     /// </summary>
     [FromBody]
-    public ExternalShareRequestParam RequestParam { get; set; }
+    public required ExternalShareRequestParam RequestParam { get; set; }
 }

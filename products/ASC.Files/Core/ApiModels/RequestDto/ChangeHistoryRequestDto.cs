@@ -57,5 +57,5 @@ public class ChangeHistoryRequestDto<T>
     /// The parameters for changing version history.
     /// </summary>
     [FromBody]
-    public ChangeHistory File { get; set; }
+    public required ChangeHistory File { get; set; }
 }

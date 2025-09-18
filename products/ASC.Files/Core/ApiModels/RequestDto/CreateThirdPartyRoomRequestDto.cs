@@ -98,5 +98,5 @@ public class CreateThirdPartyRoomRequestDto
     /// The third-party room information.
     /// </summary>
     [FromBody]
-    public CreateThirdPartyRoom Room { get; set; }
+    public required CreateThirdPartyRoom Room { get; set; }
 }

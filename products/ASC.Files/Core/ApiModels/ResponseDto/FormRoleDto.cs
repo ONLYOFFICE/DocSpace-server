@@ -35,7 +35,7 @@ public class FormRoleDto
     /// <summary>
     /// The role name.
     /// </summary>
-    public string RoleName { get; set; }
+    public required string RoleName { get; set; }
     
     /// <summary>
     /// The role color.
@@ -50,12 +50,12 @@ public class FormRoleDto
     /// <summary>
     /// The role sequence.
     /// </summary>
-    public int Sequence { get; set; }
+    public required int Sequence { get; set; }
 
     /// <summary>
     /// Specifies if the role is submitted.
     /// </summary>
-    public bool Submitted { get; set; }
+    public required bool Submitted { get; set; }
 
     /// <summary>
     /// The user who stopped the role.
