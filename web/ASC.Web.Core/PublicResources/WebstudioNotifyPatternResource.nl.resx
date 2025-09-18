@@ -825,7 +825,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace is &lt;span style="color: #FF6F3D;"&gt;gedeactiveerd&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace is &lt;span style="color: #FF6F3D;"&gt;verwijderd&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Uw ${LetterLogoText} DocSpace is succesvol gedeactiveerd. Al uw gegevens worden verwijderd overeenkomstig ons &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Privacybeleid&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -964,7 +964,7 @@ $TrulyYours</value>
     <value>Aanmelden bij ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace is gedeactiveerd</value>
+    <value>${LetterLogoText} DocSpace is verwijderd</value>
   </data>
   <data name="subject_for_sales_notify" xml:space="preserve">
     <value>Aanvraag verkoopafdeling</value>
@@ -1973,5 +1973,29 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Actie vereist: het is niet mogelijk om het saldo van uw Wallet automatisch op te laden in uw ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Uw wachtwoord is succesvol gewijzigd</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>DocSpace openen</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Password succesvol gewijzigd
+
+Uw wachtwoord voor het account *$UserName*, *$UserEmail* is succesvol gewijzigd op *$Date* in DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Apparaat: *$Device*
+#if($Location != "")
+Locatie: *$Location*
+#end
+Browser: *$Browser*
+
+Als u deze actie heeft uitgevoerd, zijn er geen verdere stappen nodig. Als deze wijziging verdacht lijkt of niet door u is geautoriseerd, reset dan onmiddellijk uw wachtwoord en schakel de toegang tot DocSpace voor dit apparaat uit.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

@@ -499,7 +499,7 @@ public class Report
 
             if (Guid.TryParse(operation.ParticipantName, out var userId))
             {
-                var participantDisplayName = await displayUserSettingsHelper.GetFullUserNameAsync(userId);
+                var participantDisplayName = await displayUserSettingsHelper.GetFullUserNameAsync(userId, true, false);
                 participantDisplayNames.Add(operation.ParticipantName, participantDisplayName);
             }
         }

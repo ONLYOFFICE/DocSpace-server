@@ -928,4 +928,13 @@
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>Ajustes actualizados para recargar el monedero del cliente</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Ubicación</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Se ha actualizado la configuración de los servicios habilitados para el monedero del cliente</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Se ha modificado la configuración de visibilidad de los banners promocionales</value>
+  </data>
 </root>

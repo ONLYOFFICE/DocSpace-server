@@ -990,4 +990,10 @@
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>Cilësimet e rimbushjes së portofolit të klientit u përditësuan</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Vendndodhja</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Shërbimet e aktivizuara për portofolin e klientit</value>
+  </data>
 </root>

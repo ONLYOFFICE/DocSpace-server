@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,9 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.TelegramService.Log;
-internal static partial class CoreLogger
+namespace ASC.Web.Core.Notify.Channels
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Couldn't handle ({text}) message")]
-    public static partial void DebugCouldntHandle(this ILogger<CommandModule> logger, string text, Exception exception);
+    [Scope(typeof(INotificationChannel))]
+    public class TelegramNotificationChannel(TelegramLoginProvider loginProvider) : INotificationChannel
+    {
+        public string Name => ASC.Core.Configuration.Constants.NotifyTelegramSenderSysName;
+
+        public bool IsEnabled => loginProvider.IsEnabled();
+    }
 }

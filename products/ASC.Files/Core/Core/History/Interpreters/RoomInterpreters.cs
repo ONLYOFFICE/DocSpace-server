@@ -115,11 +115,16 @@ public class RoomGroupAddedInterpreter: ActionInterpreter
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var groupId = Guid.Parse(description[2]);
+        var isSystem = false;
+        if (description.Count == 5)
+        {
+            _ = bool.TryParse(description[3], out isSystem);
+        }
 
         return ValueTask.FromResult<HistoryData>(
             new GroupHistoryData
             {
-                Group = new GroupSummaryDto { Id = groupId, Name = description[0] }, 
+                Group = new GroupSummaryDto { Id = groupId, Name = description[0], IsSystem = isSystem }, 
                 Access = description[1]
             });
     }
@@ -130,11 +135,17 @@ public class RoomGroupAccessUpdatedInterpreter : ActionInterpreter
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var groupId = Guid.Parse(description[2]);
-
+        
+        var isSystem = false;
+        if (description.Count == 6)
+        {
+            _ = bool.TryParse(description[4], out isSystem);
+        }
+        
         return ValueTask.FromResult<HistoryData>(
             new GroupHistoryData
             {
-                Group = new GroupSummaryDto { Id = groupId, Name = description[0] }, 
+                Group = new GroupSummaryDto { Id = groupId, Name = description[0], IsSystem = isSystem }, 
                 Access = description[1],
                 OldAccess = description[3]
             });
@@ -146,11 +157,16 @@ public class RoomRemovedGroupInterpreter : ActionInterpreter
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var groupId = Guid.Parse(description[1]);
-
+        var isSystem = false;
+        if (description.Count == 4)
+        {
+            _ = bool.TryParse(description[2], out isSystem);
+        }
+        
         return ValueTask.FromResult<HistoryData>(
             new GroupHistoryData
             {
-                Group = new GroupSummaryDto { Id = groupId, Name = description[0] }
+                Group = new GroupSummaryDto { Id = groupId, Name = description[0], IsSystem = isSystem }
             });
     }
 }

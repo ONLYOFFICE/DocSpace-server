@@ -813,14 +813,15 @@ public class UserController(
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "GuestShareLink")]
     [HttpPost("guests/share/approve")]
-    public async Task<EmployeeFullDto> ApproveGuestShareLink(EmailMemberRequestDto inDto)
+    public async Task<EmployeeFullDto> ApproveGuestShareLink(EmailMemberRequestDto _)
     {
         await securityContext.AuthByClaimAsync();
 
         var model = emailValidationKeyModelHelper.GetModel();
-        var targetUser = await _userManager.GetUserByEmailAsync(inDto.Email);
+        var targetEmail = emailValidationKeyModelHelper.DecryptEmail(model.EncEmail);
+        var targetUser = await _userManager.GetUserByEmailAsync(targetEmail);
         
-        if (Equals(targetUser, Constants.LostUser) || model.UiD != targetUser.Id)
+        if (Equals(targetUser, Constants.LostUser))
         {
             throw new ItemNotFoundException("User not found");
         }

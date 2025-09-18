@@ -126,4 +126,7 @@
   <data name="TitleNewFileText" xml:space="preserve">
     <value>Dokument i ri</value>
   </data>
+  <data name="TitleNewFilePdfFormText" xml:space="preserve">
+    <value>Formular i ri PDF</value>
+  </data>
 </root>
