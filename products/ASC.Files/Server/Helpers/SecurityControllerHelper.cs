@@ -70,24 +70,26 @@ public class SecurityControllerHelper(
 
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfoAsync<T>(List<T> fileIds, List<T> folderIds, List<FileShareParams> share, bool notify, string sharingMessage)
     {
-        if (share != null && share.Count != 0)
+        if (share == null || share.Count == 0)
         {
-            var list = await share.ToAsyncEnumerable().SelectAwait(async s => await fileShareParamsHelper.ToAceObjectAsync(s)).ToListAsync();
-
-            var aceCollection = new AceCollection<T>
-            {
-                Files = fileIds,
-                Folders = folderIds,
-                Aces = list,
-                Message = sharingMessage
-            };
-
-            await _fileStorageService.SetAceObjectAsync(aceCollection, notify);
+            yield break;
         }
 
-        await foreach (var s in GetSecurityInfoAsync(fileIds, folderIds).Where(r => r.SubjectType is SubjectType.User or SubjectType.Group))
+        var fileShares = await share.ToAsyncEnumerable().SelectAwait(async s => await fileShareParamsHelper.ToAceObjectAsync(s)).ToListAsync();
+
+        var aceCollection = new AceCollection<T>
         {
-            yield return s;
+            Files = fileIds,
+            Folders = folderIds,
+            Aces = fileShares,
+            Message = sharingMessage
+        };
+
+        await _fileStorageService.SetAceObjectAsync(aceCollection, notify);
+            
+        foreach (var fileShareDto in fileShares)
+        {
+            yield return await fileShareDtoHelper.Get(fileShareDto);
         }
     }
 }
