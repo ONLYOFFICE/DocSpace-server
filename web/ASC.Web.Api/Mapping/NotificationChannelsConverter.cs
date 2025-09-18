@@ -24,18 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.Mapping
+namespace ASC.Web.Api.Mapping;
+
+[Scope]
+public class NotificationChannelsConverter
+    : ITypeConverter<IEnumerable<NotificationChannelStatus>, NotificationChannelStatusDto>
 {
-    [Scope]
-    public class NotificationChannelsConverter
-        : ITypeConverter<IEnumerable<NotificationChannelStatus>, NotificationChannelStatusDto>
+    public NotificationChannelStatusDto Convert(IEnumerable<NotificationChannelStatus> source, NotificationChannelStatusDto destination, ResolutionContext context)
     {
-        public NotificationChannelStatusDto Convert(IEnumerable<NotificationChannelStatus> source, NotificationChannelStatusDto destination, ResolutionContext context)
+        return new NotificationChannelStatusDto()
         {
-            return new NotificationChannelStatusDto()
-            {
-                Channels = [.. source.Select(c => new NotificationChannelDto() { Name = c.Name, IsEnabled = c.IsEnabled })]
-            };
-        }
+            Channels = [.. source.Select(c => new NotificationChannelDto() { Name = c.Name, IsEnabled = c.IsEnabled })]
+        };
     }
 }

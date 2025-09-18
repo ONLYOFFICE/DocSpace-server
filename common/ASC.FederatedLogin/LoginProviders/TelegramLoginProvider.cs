@@ -26,6 +26,7 @@
 
 namespace ASC.FederatedLogin.LoginProviders;
 
+[Scope]
 public class TelegramLoginProvider : Consumer, IValidateKeysProvider, ITelegramLoginProvider
 {
     public string TelegramBotToken => this["telegramBotToken"];

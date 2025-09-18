@@ -24,13 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.FederatedLogin.Helpers
+namespace ASC.FederatedLogin.Helpers;
+
+public interface IOAuth20TokenHelper
 {
-    public interface IOAuth20TokenHelper
-    {
-        OAuth20Token GetAccessToken<T>(string authCode) where T : Consumer, IOAuthProvider, new();
-        OAuth20Token RefreshToken(string requestUrl, OAuth20Token token);
-        OAuth20Token RefreshToken<T>(OAuth20Token token) where T : Consumer, IOAuthProvider, new();
-        string RequestCode<T>(string scope = null, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null) where T : Consumer, IOAuthProvider, new();
-    }
+    OAuth20Token GetAccessToken<T>(string authCode) where T : Consumer, IOAuthProvider, new();
+    OAuth20Token RefreshToken(string requestUrl, OAuth20Token token);
+    OAuth20Token RefreshToken<T>(OAuth20Token token) where T : Consumer, IOAuthProvider, new();
+    string RequestCode<T>(string scope = null, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null) where T : Consumer, IOAuthProvider, new();
 }
