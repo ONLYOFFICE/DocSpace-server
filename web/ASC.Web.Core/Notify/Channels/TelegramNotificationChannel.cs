@@ -27,9 +27,9 @@
 namespace ASC.Web.Core.Notify.Channels;
 
 [Scope(typeof(INotificationChannel))]
-public class TelegramNotificationChannel(TelegramLoginProvider loginProvider) : INotificationChannel
+public class TelegramNotificationChannel(ConsumerFactory consumerFactory) : INotificationChannel
 {
     public string Name => ASC.Core.Configuration.Constants.NotifyTelegramSenderSysName;
 
-    public bool IsEnabled => loginProvider.IsEnabled();
+    public bool IsEnabled => consumerFactory.Get<TelegramLoginProvider>().IsEnabled();
 }

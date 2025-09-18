@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Encodings.Web;
+
 using ASC.Data.Storage.Encryption;
 using ASC.Files.Core.RoomTemplates.Operations;
 using ASC.Files.Core.Services.NotifyService;
@@ -106,5 +108,7 @@ public class Startup : BaseWorkerStartup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);
         services.AddDocumentServiceHttpClient(Configuration);
+        
+        services.AddScoped(_ => UrlEncoder.Default);
     }
 }

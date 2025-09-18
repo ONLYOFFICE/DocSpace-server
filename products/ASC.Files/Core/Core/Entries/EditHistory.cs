@@ -198,7 +198,6 @@ class ChangesUserData
 /// <summary>
 /// The information about the file editing history author.
 /// </summary>
-[Transient]
 [DebuggerDisplay("{Id} {Name}")]
 public class EditHistoryAuthor(UserManager userManager, DisplayUserSettingsHelper displayUserSettingsHelper)
 {
