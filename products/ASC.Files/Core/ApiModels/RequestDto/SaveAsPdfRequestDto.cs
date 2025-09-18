@@ -58,5 +58,5 @@ public class SaveAsPdfRequestDto<T>
     /// The parameters for saving file as PDF.
     /// </summary>
     [FromBody]
-    public SaveAsPdf<T> File { get; set; }
+    public required SaveAsPdf<T> File { get; set; }
 }

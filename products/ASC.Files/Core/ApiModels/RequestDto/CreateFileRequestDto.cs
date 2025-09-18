@@ -68,5 +68,5 @@ public class CreateFileRequestDto<T>
     /// The parameters for creating a file.
     /// </summary>
     [FromBody]
-    public CreateFile<JsonElement> File { get; set; }
+    public required CreateFile<JsonElement> File { get; set; }
 }

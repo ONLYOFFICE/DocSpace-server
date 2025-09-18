@@ -88,5 +88,5 @@ public class WatermarkRequestDto<T>
     /// The watermark settings.
     /// </summary>
     [FromBody]
-    public WatermarkRequestDto Watermark { get; set; }
+    public required WatermarkRequestDto Watermark { get; set; }
 }

@@ -34,7 +34,7 @@ public class CheckFillFormDraft
     /// <summary>
     /// The file version of the form draft.
     /// </summary>
-    public int Version { get; set; }
+    public required int Version { get; set; }
 
     /// <summary>
     /// The action with the form draft.
@@ -68,5 +68,5 @@ public class CheckFillFormDraftRequestDto<T>
     /// The parameters for checking the form draft filling.
     /// </summary>
     [FromBody]
-    public CheckFillFormDraft File {  get; set; }
+    public required CheckFillFormDraft File {  get; set; }
 }

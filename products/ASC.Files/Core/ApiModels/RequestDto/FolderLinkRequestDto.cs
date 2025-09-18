@@ -89,5 +89,5 @@ public class FolderLinkRequestDto<T>
     /// The folder link parameters.
     /// </summary>
     [FromBody]
-    public FolderLinkRequest FolderLink { get; set; }
+    public required FolderLinkRequest FolderLink { get; set; }
 }

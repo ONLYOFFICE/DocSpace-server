@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -83,7 +83,7 @@ public class MemberBaseByIdRequestDto
     /// The request parameters for the user generic information.
     /// </summary>
     [FromBody]
-    public MemberBaseRequestDto MemberBase { get; set; }
+    public required MemberBaseRequestDto MemberBase { get; set; }
 }
 
 /// <summary>
@@ -308,7 +308,7 @@ public class UpdateMemberByIdRequestDto
     /// The request parameters for updating the user information.
     /// </summary>
     [FromBody]
-    public UpdateMemberRequestDto UpdateMember { get; set; }
+    public required UpdateMemberRequestDto UpdateMember { get; set; }
 }
 
 /// <summary>
@@ -378,7 +378,7 @@ public class UpdatePhotoMemberRequestDto
     /// The request parameters for updating a photo.
     /// </summary>
     [FromBody]
-    public UpdatePhotoMemberRequest UpdatePhoto { get; set; }
+    public required UpdatePhotoMemberRequest UpdatePhoto { get; set; }
 }
 
 
@@ -487,7 +487,7 @@ public class ContactsRequestDto
     /// The contacts request.
     /// </summary>
     [FromBody]
-    public ContactsRequest Contacts { get; set; }
+    public required ContactsRequest Contacts { get; set; }
 }
 
 /// <summary>

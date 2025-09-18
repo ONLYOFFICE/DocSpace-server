@@ -100,5 +100,5 @@ public class UpdateRoomRequestDto<T>
     /// The request parameters for updating a room.
     /// </summary>
     [FromBody]
-    public UpdateRoomRequest UpdateRoom { get; set; }
+    public required UpdateRoomRequest UpdateRoom { get; set; }
 }

@@ -205,7 +205,7 @@ public class EditHistoryAuthor(UserManager userManager, DisplayUserSettingsHelpe
     /// <summary>
     /// The author ID.
     /// </summary>
-    public string Id { get; init; }
+    public required string Id { get; init; }
 
     private readonly string _name;
 
