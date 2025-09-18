@@ -82,6 +82,7 @@ public abstract class SecurityController<T>(
         }
 
         apiContext.SetCount(counter);
+        apiContext.SetTotalCount(await fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.File, ShareFilterType.UserOrGroup, null));
     }
 
     /// <summary>
@@ -105,6 +106,7 @@ public abstract class SecurityController<T>(
         }
 
         apiContext.SetCount(counter);
+        apiContext.SetTotalCount(await fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, null));
     }
 
     /// <summary>
