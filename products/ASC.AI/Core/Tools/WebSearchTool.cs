@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Retrieval.Web;
-
 namespace ASC.AI.Core.Tools;
 
 [Scope]
@@ -42,13 +40,20 @@ public class WebSearchTool(WebSearchEngineFactory searchEngineFactory) : BaseToo
         
         async Task<ToolResponse> SearchFunction([Description("Query to search")] string query)
         {
-            var results = await engine.SearchAsync(new SearchQuery
+            try
             {
-                Query = query, 
-                MaxResults = 5
-            });
+                var results = await engine.SearchAsync(new SearchQuery
+                {
+                    Query = query, 
+                    MaxResults = 5
+                });
 
-            return ToResponse(results);
+                return ToResponse(results);
+            }
+            catch (Exception e)
+            {
+                return ToResponse(e.Message);
+            }
         }
     }
 }

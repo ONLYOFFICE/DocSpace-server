@@ -34,28 +34,21 @@ public class KnowledgeSearchEngine(
 {
     public async Task<IEnumerable<Chunk>> SearchAsync(int roomId, string query)
     {
-        try
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var generator = embeddingGeneratorFactory.Create();
+        var embedding = await generator.GenerateAsync(query);
+
+        var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName, null);
+        var searchOptions = new VectorSearchOptions<Chunk>
         {
-            var tenantId = tenantManager.GetCurrentTenantId();
+            Filter = x => x.TenantId == tenantId && x.RoomId == roomId
+        };
 
-            var generator = embeddingGeneratorFactory.Create();
-            var embedding = await generator.GenerateAsync(query);
-
-            var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName, null);
-            var searchOptions = new VectorSearchOptions<Chunk>
-            {
-                Filter = x => x.TenantId == tenantId && x.RoomId == roomId
-            };
-
-            return await collection.SearchAsync(
-                x => x.Embedding,
-                embedding.Vector.ToArray(),
-                5,
-                searchOptions).ToListAsync();
-        }
-        catch
-        {
-            return [];
-        }
+        return await collection.SearchAsync(
+            x => x.Embedding,
+            embedding.Vector.ToArray(),
+            5,
+            searchOptions).ToListAsync();
     }
 }

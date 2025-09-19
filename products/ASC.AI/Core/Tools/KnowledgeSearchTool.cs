@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Retrieval.Knowledge;
-
 namespace ASC.AI.Core.Tools;
 
 [Scope]
@@ -40,14 +38,17 @@ public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine) : BaseTool
         
         async Task<ToolResponse> Function([Description("Query to search")] string query)
         {
-            var results = (await searchEngine.SearchAsync(roomId, query))
-                .Select(x => new
-                {
-                    fileId = x.FileId, 
-                    text = x.TextEmbedding
-                });
+            try
+            {
+                var results = (await searchEngine.SearchAsync(roomId, query))
+                    .Select(x => new { fileId = x.FileId, text = x.TextEmbedding });
 
-            return ToResponse(results);
+                return ToResponse(results);
+            }
+            catch (Exception e)
+            {
+                return ToResponse(e.Message);
+            }
         }
     }
 }
