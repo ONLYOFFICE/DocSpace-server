@@ -39,7 +39,8 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         ProviderManager providerManager,
         SettingsManager settingsManager,
         ILogger<CapabilitiesController> logger,
-        CommonLinkUtility commonLinkUtility)
+        CommonLinkUtility commonLinkUtility,
+        GeolocationHelper geolocationHelper)
     : ControllerBase
 {
     private readonly ILogger _log = logger;
@@ -90,7 +91,9 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         {
             if (result.OauthEnabled)
             {
-                result.Providers = ProviderManager.AuthProviders.Where(loginProvider =>
+                var geoInfoKey = (await geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key;
+
+                result.Providers = ProviderManager.GetSortedAuthProviders(geoInfoKey).Where(loginProvider =>
                 {
                     if (loginProvider is ProviderConstants.Facebook or ProviderConstants.AppleId
                                                                     && coreBaseSettings.Standalone && HttpContext.Request.MobileApp())
