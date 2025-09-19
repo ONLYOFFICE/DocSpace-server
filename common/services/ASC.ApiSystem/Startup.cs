@@ -126,7 +126,8 @@ public class Startup
                 .AddEventBus(_configuration)
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(_configuration)
-                .AddDistributedLock(_configuration);
+                .AddDistributedLock(_configuration)
+                .AddHeartBeat(_configuration);
 
         services.RegisterFeature();
         services.RegisterQuotaFeature();
