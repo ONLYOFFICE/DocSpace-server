@@ -112,9 +112,9 @@ public class DocumentServiceLicense(ICache cache,
         return response ?? new LicenseValidationResult(false, "Failure after several attempts");
     }
 
-    public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync()
+    public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync(bool useCache = true)
     {
-        var commandResponse = await GetDocumentServiceLicenseAsync(true);
+        var commandResponse = await GetDocumentServiceLicenseAsync(useCache);
         return commandResponse == null ? 
             (null, null) : 
             (commandResponse.Quota?.Users?.ToDictionary(r=> r.UserId, r=> r.Expire), commandResponse.License);
