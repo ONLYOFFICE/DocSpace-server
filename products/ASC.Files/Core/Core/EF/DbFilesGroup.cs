@@ -35,6 +35,8 @@ public class DbFilesGroup : BaseEntity
     [MaxLength(50)]
     public string Icon { get; set; }
 
+    public Guid UserId { get; set; }
+
     public DbTenant Tenant { get; set; }
 
     public override object[] GetKeys()
@@ -67,6 +69,11 @@ public static class DbFilesGroupExtension
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
+            entity.Property(e => e.UserId)
+                .HasColumnName("user_id")
+                .HasColumnType("char(36)")
+                .IsRequired();
+
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasColumnName("name")
@@ -90,13 +97,15 @@ public static class DbFilesGroupExtension
 
             entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasColumnType("integer");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant")
                 .HasColumnType("integer");
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("user_id")
+                .HasColumnType("uuid")
+                .IsRequired();
 
             entity.Property(e => e.Name)
                 .IsRequired()
@@ -104,10 +113,8 @@ public static class DbFilesGroupExtension
                 .HasColumnType("varchar(128)");
 
             entity.Property(e => e.Icon)
-                .IsRequired()
-                .HasColumnName("name")
+                .HasColumnName("icon")
                 .HasColumnType("varchar(50)");
-
         });
     }
 }
