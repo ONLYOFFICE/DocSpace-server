@@ -74,4 +74,12 @@ public class AiSettingsService(
         
         return await webSearchSettingsStore.GetSettingsAsync();
     }
+
+    public async Task<AiSettings> GetAiSettingsAsync()
+    {
+        return new AiSettings
+        {
+            WebSearchEnabled = await webSearchSettingsStore.IsEnabledAsync(),
+        };
+    }
 }

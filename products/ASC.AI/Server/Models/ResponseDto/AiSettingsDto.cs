@@ -24,36 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Api;
+namespace ASC.AI.Models.ResponseDto;
 
-[Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("ai")]
-public class SettingsController(AiSettingsService aiSettingsService, IMapper mapper) : ControllerBase
+public class AiSettingsDto : IMapFrom<AiSettings>
 {
-    [HttpPut("config/web-search")]
-    public async Task<WebSearchSettingsDto> SetWebSearchSettingsAsync(SetWebSearchConfigRequestDto inDto)
-    {
-        var settings = await aiSettingsService.SetWebSearchSettingsAsync(
-            inDto.Body.Enabled, 
-            inDto.Body.Type, 
-            inDto.Body.Key);
-        
-        return settings.ToDto();
-    }
-    
-    [HttpGet("config/web-search")]
-    public async Task<WebSearchSettingsDto> GetWebSearchSettingsAsync()
-    {
-        var settings = await aiSettingsService.GetWebSearchSettingsAsync();
-        return settings.ToDto();
-    }
-    
-    [HttpGet("config")]
-    public async Task<AiSettingsDto> GetAiSettingsAsync()
-    {
-        var settings = await aiSettingsService.GetAiSettingsAsync();
-        return mapper.Map<AiSettings, AiSettingsDto>(settings);
-    }
+    public bool WebSearchEnabled { get; init; }
 }

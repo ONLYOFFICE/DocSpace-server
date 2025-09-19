@@ -68,4 +68,11 @@ public class WebSearchSettingsStore(
 
         return webSearchSettings;
     }
+
+    public async Task<bool> IsEnabledAsync()
+    {
+        var webSearchSettingsRaw = await settingsManager.LoadAsync<WebSearchSettingsRaw>();
+        
+        return webSearchSettingsRaw.Enabled && webSearchSettingsRaw.Type != EngineType.None;
+    }
 }
