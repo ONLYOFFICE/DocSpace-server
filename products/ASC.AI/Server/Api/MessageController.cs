@@ -33,9 +33,8 @@ namespace ASC.AI.Api;
 public class MessageController(MessageExporter exporter) : ControllerBase
 {
     [HttpPost("messages/{messageId}/export")]
-    public async Task<FileDto<int>> ExportMessageAsync(ExportMessageRequestDto<int> inDto)
+    public async Task ExportMessageAsync(ExportMessageRequestDto<int> inDto)
     {
         await exporter.ExportMessageAsync(inDto.Body.FolderId, inDto.Body.Title, inDto.MessageId);
-        return null;
     }
 }
