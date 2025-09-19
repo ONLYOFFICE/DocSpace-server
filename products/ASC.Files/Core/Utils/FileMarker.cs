@@ -262,6 +262,10 @@ public class FileMarker(
                             if (userEntriesData.TryGetValue(id, out var value))
                             {
                                 value.Entries.Add(rootFolder);
+                                if (rootFolder == folderShare)
+                                {
+                                    value.RootId = rootFolder.Id.ToString();
+                                }
                             }
                             else
                             {
@@ -1037,6 +1041,8 @@ public class FileMarker(
         {
             return;
         }
+
+        totalTags = totalTags.Distinct().ToList();
 
         var shareFolder = await globalFolder.GetFolderShareAsync<T>(daoFactory);
         var parentFolderTag = Equals(shareFolder, parent.Id)
