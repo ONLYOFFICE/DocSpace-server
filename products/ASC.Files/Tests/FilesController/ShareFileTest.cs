@@ -626,4 +626,110 @@ public class ShareFileTest(
         sharedFolderAsUser2.Should().NotBeNull();
         sharedFolderAsUser2.Files.Should().Contain(r => r.Title == file.Title && r.Access == FileShare.Comment);
     }
+
+    [Fact]
+    public async Task MixingAccessRights_ExternalLinkRead_SecurityEdit_ChecksReadAccessViaLink()
+    {
+        // Step 1: Authenticate as user1
+        await _filesClient.Authenticate(Initializer.Owner);
+        var user1 = Initializer.Owner;
+        var user2 = await Initializer.InviteContact(EmployeeType.User);
+
+        // Step 2: Create file in "My Documents"
+        var file = await CreateFileInMy("file_mixed_access.docx", user1);
+
+        // Step 3: Set File External Link with read rights
+        var readLinkRequest = new FileLinkRequest(access: FileShare.Read);
+        var readLinkResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, readLinkRequest, TestContext.Current.CancellationToken)).Response;
+        var readLinkToken = readLinkResponse.SharedLink.RequestToken;
+
+        // Step 4: Set File Security with edit rights to user2
+        var shareInfo = new List<FileShareParams>
+        {
+            new() { ShareTo = user2.Id, Access = FileShare.Editing }
+        };
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = shareInfo
+        };
+        var securityResult = (await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest, TestContext.Current.CancellationToken)).Response;
+        securityResult.Should().NotBeNull();
+        securityResult.Should().AllSatisfy(r => r.Access.Should().Be(FileShare.Editing));
+
+        // Step 5: Authenticate as user2
+        await _filesClient.Authenticate(user2);
+
+        // Step 6: Get File Info by link (using read-only external link)
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, readLinkToken);
+        var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        // Step 7: Check rights are read-only (not edit)
+        fileInfo.Should().NotBeNull();
+        fileInfo.Access.Should().Be(FileShare.Read);
+        fileInfo.Security.Read.Should().BeTrue();
+        fileInfo.Security.Edit.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task SharedFolder_NewItemsCount_IncreasesAfterSharingFiles()
+    {
+        // Step 1: Authenticate as user1
+        await _filesClient.Authenticate(Initializer.Owner);
+        var user1 = Initializer.Owner;
+        var user2 = await Initializer.InviteContact(EmployeeType.User);
+
+        // Step 2: Create file1 and file2 in "My Documents"
+        var file1 = await CreateFileInMy("file_new_item_1.docx", user1);
+        var file2 = await CreateFileInMy("file_new_item_2.docx", user1);
+
+        // Step 3: Set File Security with read rights for file1 to user2
+        var shareInfo1 = new List<FileShareParams>
+        {
+            new() { ShareTo = user2.Id, Access = FileShare.Read }
+        };
+        var securityRequest1 = new SecurityInfoSimpleRequestDto
+        {
+            Share = shareInfo1
+        };
+        var result1 = (await _sharingApi.SetFileSecurityInfoAsync(file1.Id, securityRequest1, TestContext.Current.CancellationToken)).Response;
+        result1.Should().NotBeNull();
+
+        // Step 5: Authenticate as user2
+        await _filesClient.Authenticate(user2);
+
+        // Step 6: Get Folder with type FolderType.SHARE
+        var sharedFolderId = await GetFolderIdAsync(FolderType.SHARE, user2);
+        var sharedFolder = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Step 7: Check New for equality 1
+        sharedFolder.Should().NotBeNull();
+        sharedFolder.New.Should().Be(1);
+
+        // Step 8: Authenticate as user1
+        await _filesClient.Authenticate(user1);
+
+        // Step 9: Set File Security with read rights for file2 to user2
+        var shareInfo2 = new List<FileShareParams>
+        {
+            new() { ShareTo = user2.Id, Access = FileShare.Read }
+        };
+        var securityRequest2 = new SecurityInfoSimpleRequestDto
+        {
+            Share = shareInfo2
+        };
+        var result2 = (await _sharingApi.SetFileSecurityInfoAsync(file2.Id, securityRequest2, TestContext.Current.CancellationToken)).Response;
+        result2.Should().NotBeNull();
+
+        // Step 10: Authenticate as user2
+        await _filesClient.Authenticate(user2);
+
+        // Step 11: Get Folder with type FolderType.SHARE
+        var sharedFolderId2 = await GetFolderIdAsync(FolderType.SHARE, user2);
+        var sharedFolder2 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderId2, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Step 12: Check New for equality 2
+        sharedFolder2.Should().NotBeNull();
+        sharedFolder2.New.Should().Be(2);
+    }
 }
