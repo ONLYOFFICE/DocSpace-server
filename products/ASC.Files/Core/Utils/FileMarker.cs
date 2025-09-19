@@ -262,6 +262,10 @@ public class FileMarker(
                             if (userEntriesData.TryGetValue(id, out var value))
                             {
                                 value.Entries.Add(rootFolder);
+                                if (rootFolder == folderShare)
+                                {
+                                    value.RootId = rootFolder.Id.ToString();
+                                }
                             }
                             else
                             {
