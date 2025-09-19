@@ -38,6 +38,7 @@ global using ASC.AI.Core.MCP;
 global using ASC.AI.Core.MCP.Data;
 global using ASC.AI.Core.Settings;
 global using ASC.AI.Core.Retrieval.Web;
+global using ASC.AI.Core.Retrieval.Web.Engine;
 
 global using ASC.Common;
 global using ASC.Common.Mapping;

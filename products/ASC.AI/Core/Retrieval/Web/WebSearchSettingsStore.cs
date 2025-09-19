@@ -24,31 +24,48 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.AI.Core.Retrieval.Web;
 
-public class WebSearchSettingsDto
+[Scope]
+public class WebSearchSettingsStore(
+    SettingsManager settingsManager,
+    InstanceCrypto instanceCrypto)
 {
-    public bool Enabled { get; init; }
-    public EngineType Type { get; init; }
-    public string? Key { get; set; }
-}
-
-public static class WebSearchSettingsExtensions
-{
-    public static WebSearchSettingsDto ToDto(this WebSearchSettings settingsRaw)
+    public async Task SetSettingsAsync(WebSearchSettings webSearchSettings)
     {
-        var dto = new WebSearchSettingsDto
+        var webSearchSettingsRaw = new WebSearchSettingsRaw
         {
-            Enabled = settingsRaw.Enabled, 
-            Type = settingsRaw.Type
+            Enabled = webSearchSettings.Enabled, 
+            Type = webSearchSettings.Type
         };
 
-        if (settingsRaw is { Type: EngineType.Exa, Config: ExaConfig exaConfig })
+        if (webSearchSettings.Config != null)
         {
-            dto.Key = exaConfig.ApiKey;
+            var jsonConfig = JsonSerializer.Serialize(webSearchSettings.Config);
+            webSearchSettingsRaw.Config = await instanceCrypto.EncryptAsync(jsonConfig);
         }
         
-        return dto;
+        await settingsManager.SaveAsync(webSearchSettingsRaw);
+    }
+
+    public async Task<WebSearchSettings> GetSettingsAsync()
+    {
+        var webSearchSettingsRaw = await settingsManager.LoadAsync<WebSearchSettingsRaw>();
+
+        var webSearchSettings = new WebSearchSettings
+        {
+            Enabled = webSearchSettingsRaw.Enabled, 
+            Type = webSearchSettingsRaw.Type
+        };
+
+        if (webSearchSettingsRaw.Config == null)
+        {
+            return webSearchSettings;
+        }
+
+        var jsonConfig = await instanceCrypto.DecryptAsync(webSearchSettingsRaw.Config);
+        webSearchSettings.Config = JsonSerializer.Deserialize<EngineConfig>(jsonConfig);
+
+        return webSearchSettings;
     }
 }
-

@@ -24,31 +24,35 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.AI.Core.Retrieval.Web;
 
-public class WebSearchSettingsDto
+public enum EngineType
 {
-    public bool Enabled { get; init; }
-    public EngineType Type { get; init; }
-    public string? Key { get; set; }
+    None,
+    Exa
 }
 
-public static class WebSearchSettingsExtensions
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+[JsonDerivedType(typeof(ExaConfig), "exa")]
+public abstract class EngineConfig;
+
+public class WebSearchSettingsRaw : ISettings<WebSearchSettingsRaw>
 {
-    public static WebSearchSettingsDto ToDto(this WebSearchSettings settingsRaw)
+    [JsonIgnore]
+    public Guid ID => new("{B2FC4410-5538-46E0-959A-AF1BEEAC9E20}");
+    public bool Enabled { get; set; }
+    public EngineType Type { get; set; }
+    public string? Config { get; set; }
+    
+    public WebSearchSettingsRaw GetDefault()
     {
-        var dto = new WebSearchSettingsDto
+        return new WebSearchSettingsRaw
         {
-            Enabled = settingsRaw.Enabled, 
-            Type = settingsRaw.Type
+            Enabled = false,
+            Type = EngineType.None,
+            Config = null
         };
-
-        if (settingsRaw is { Type: EngineType.Exa, Config: ExaConfig exaConfig })
-        {
-            dto.Key = exaConfig.ApiKey;
-        }
-        
-        return dto;
     }
-}
 
+    public DateTime LastModified { get; set; }
+}

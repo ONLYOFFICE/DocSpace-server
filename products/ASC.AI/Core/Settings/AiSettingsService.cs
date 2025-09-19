@@ -30,7 +30,7 @@ namespace ASC.AI.Core.Settings;
 public class AiSettingsService(
     UserManager userManager,
     AuthContext authContext,
-    SettingsManager settingsManager)
+    WebSearchSettingsStore webSearchSettingsStore)
 {
     public async Task<WebSearchSettings> SetWebSearchSettingsAsync(
         bool enabled, 
@@ -42,7 +42,7 @@ public class AiSettingsService(
             throw new SecurityException();
         }
         
-        var settings = await settingsManager.LoadAsync<WebSearchSettings>();
+        var settings = await webSearchSettingsStore.GetSettingsAsync();
         settings.Enabled = enabled;
         settings.Type = type;
 
@@ -60,7 +60,7 @@ public class AiSettingsService(
                 break;
         }
         
-        await settingsManager.SaveAsync(settings);
+        await webSearchSettingsStore.SetSettingsAsync(settings);
         
         return settings;
     }
@@ -72,6 +72,6 @@ public class AiSettingsService(
             throw new SecurityException();
         }
         
-        return await settingsManager.LoadAsync<WebSearchSettings>();
+        return await webSearchSettingsStore.GetSettingsAsync();
     }
 }

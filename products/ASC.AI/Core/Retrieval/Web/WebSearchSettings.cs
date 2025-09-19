@@ -26,33 +26,9 @@
 
 namespace ASC.AI.Core.Retrieval.Web;
 
-public enum EngineType
+public class WebSearchSettings
 {
-    None,
-    Exa
-}
-
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(ExaConfig), "exa")]
-public abstract class EngineConfig;
-
-public class WebSearchSettings : ISettings<WebSearchSettings>
-{
-    [JsonIgnore]
-    public Guid ID => new("{B2FC4410-5538-46E0-959A-AF1BEEAC9E20}");
     public bool Enabled { get; set; }
     public EngineType Type { get; set; }
     public EngineConfig? Config { get; set; }
-    
-    public WebSearchSettings GetDefault()
-    {
-        return new WebSearchSettings
-        {
-            Enabled = false,
-            Type = EngineType.None,
-            Config = null
-        };
-    }
-
-    public DateTime LastModified { get; set; }
 }

@@ -31,7 +31,7 @@ public class ChatTools(
     McpService mcpService,
     WebSearchTool webSearchTool,
     KnowledgeSearchTool knowledgeSearchTool,
-    SettingsManager settingsManager)
+    WebSearchSettingsStore webSearchSettingsStore)
 {
     public async Task<ToolHolder> GetAsync(int roomId, UserChatSettings chatSettings)
     {
@@ -46,7 +46,7 @@ public class ChatTools(
             return holder;
         }
 
-        var settings = await settingsManager.LoadAsync<WebSearchSettings>();
+        var settings = await webSearchSettingsStore.GetSettingsAsync();
         if (settings is not { Enabled: true, Type: not EngineType.None, Config: not null })
         {
             return holder;
