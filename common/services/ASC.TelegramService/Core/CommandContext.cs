@@ -24,17 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.TelegramService.Core
-{
-    public abstract class CommandContext
-    {
-        public ITelegramBotClient Client { get; set; }
-        public TelegramCommand Context { get; set; }
-        public int TenantId { get; set; }
+namespace ASC.TelegramService.Core;
 
-        protected async Task ReplyAsync(string message)
-        {
-            _ = await Client.SendMessage(Context.Chat, message);
-        }
+public abstract class CommandContext
+{
+    public ITelegramBotClient Client { get; set; }
+    public TelegramCommand Context { get; set; }
+    public int TenantId { get; set; }
+
+    protected async Task ReplyAsync(string message)
+    {
+        _ = await Client.SendMessage(Context.Chat, message);
     }
 }

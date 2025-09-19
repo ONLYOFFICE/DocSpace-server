@@ -34,7 +34,7 @@ public class CreateWordpressPostRequestDto
     /// <summary>
     /// The WordPress post title.
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// The WordPress post contents.

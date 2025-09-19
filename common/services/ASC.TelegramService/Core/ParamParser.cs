@@ -24,21 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.TelegramService.Core
+namespace ASC.TelegramService.Core;
+
+public abstract class ParamParser(Type type)
 {
-    public abstract class ParamParser(Type type)
-    {
-        protected Type _type = type;
+    protected Type _type = type;
 
-        public abstract object FromString(string arg);
-        public abstract string ToString(object arg);
-    }
+    public abstract object FromString(string arg);
+    public abstract string ToString(object arg);
+}
 
-    public abstract class ParamParser<T> : ParamParser
-    {
-        protected ParamParser() : base(typeof(T)) { }
+public abstract class ParamParser<T> : ParamParser
+{
+    protected ParamParser() : base(typeof(T)) { }
 
-        public abstract override object FromString(string arg);
-        public abstract override string ToString(object arg);
-    }
+    public abstract override object FromString(string arg);
+    public abstract override string ToString(object arg);
 }

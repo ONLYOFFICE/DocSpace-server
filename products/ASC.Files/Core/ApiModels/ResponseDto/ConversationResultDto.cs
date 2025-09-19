@@ -34,19 +34,19 @@ public class ConversationResultDto
     /// <summary>
     /// The conversion operation ID.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// The conversion operation type.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Move")]
     [JsonPropertyName("Operation")]
-    public FileOperationType OperationType { get; set; }
+    public required FileOperationType OperationType { get; set; }
 
     /// <summary>
     /// The conversion operation progress.
     /// </summary>
-    public int Progress { get; set; }
+    public required int Progress { get; set; }
 
     /// <summary>
     /// The source file for the conversion.

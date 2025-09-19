@@ -61,7 +61,7 @@ public class SignupAccountRequestDto
     /// The user email address.
     /// </summary>
     [EmailAddress]
-    public string Email { get; set; }
+    public required string Email { get; set; }
 
     /// <summary>
     /// The user password hash.
@@ -71,7 +71,7 @@ public class SignupAccountRequestDto
     /// <summary>
     /// The user link key.
     /// </summary>
-    public string Key { get; set; }
+    public required string Key { get; set; }
 
     /// <summary>
     /// The user culture code.
@@ -81,5 +81,5 @@ public class SignupAccountRequestDto
     /// <summary>
     /// Third-party profile in the serialized format
     /// </summary>
-    public string SerializedProfile { get; set; }
+    public required string SerializedProfile { get; set; }
 }

@@ -34,7 +34,7 @@ public class PasswordSettingsRequestsDto
     /// <summary>
     /// The minimum number of characters required for valid passwords.
     /// </summary>
-    public int MinLength { get; set; }
+    public required int MinLength { get; set; }
 
     /// <summary>
     /// Specifies whether the password should contain the uppercase letters or not.
