@@ -492,6 +492,17 @@ public class FileSharingAceHelper(
         }
 
         await fileMarker.RemoveMarkAsNewAsync(entry);
+        if (entry.RootFolderType is FolderType.USER or FolderType.Privacy)
+        {
+            if (entry is File<T> file)
+            {
+                await socketManager.RemoveFileFromSharedAsync(file, users: [authContext.CurrentAccount.ID]);
+            }
+            else if (entry is Folder<T> folder)
+            {
+                await socketManager.RemoveFolderFromSharedAsync(folder, users: [authContext.CurrentAccount.ID]);
+            }
+        }
     }
 }
 
