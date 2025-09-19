@@ -477,9 +477,15 @@ public class FileSharingAceHelper(
         }
 
         await fileMarker.RemoveMarkAsNewAsync(entry);
+
+        var currentId = authContext.CurrentAccount.ID;
+        await daoFactory.GetTagDao<T>().RemoveTagsAsync([Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry)]);
+        await socketManager.RemoveFromFavoritesAsync(entry, [currentId]);
+        await socketManager.RemoveFromRecentAsync(entry, [currentId]);
+        
         if (entry.RootFolderType is FolderType.USER or FolderType.Privacy)
         { 
-            await socketManager.RemoveFromSharedAsync(entry, users: [authContext.CurrentAccount.ID]);
+            await socketManager.RemoveFromSharedAsync(entry, users: [currentId]);
         }
     }
 }
