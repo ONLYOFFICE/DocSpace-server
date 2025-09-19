@@ -53,20 +53,20 @@ public class ChatTools(
         }
 
         var webTool = webSearchTool.Init(settings.Config);
-        var webWrapperTool = ToWrapper(roomId, webTool);
-        holder.AddTool(webWrapperTool);
+        var webWrapper = ToWrapper(roomId, webTool);
+        holder.AddTool(webWrapper);
 
         return holder;
     }
 
-    private static ToolWrapper ToWrapper(int roomId, AIFunction func)
+    private static ToolWrapper ToWrapper(int roomId, AIFunction tool)
     {
         return new ToolWrapper
         {
-            Tool = func, 
+            Tool = tool, 
             Properties = new ToolProperties
             {
-                Name = func.Name, 
+                Name = tool.Name, 
                 RoomId = roomId, 
                 AutoInvoke = true
             }

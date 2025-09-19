@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Retrieval.Web;
-
 namespace ASC.AI.Models.RequestDto;
 
 public class SetWebSearchConfigRequestDto
@@ -38,5 +36,5 @@ public class SetWebSearchSettingsRequestBody
 {
     public bool Enabled { get; init; }
     public EngineType Type { get; init; }
-    public EngineConfig? Settings { get; init; }
+    public string? Key { get; init; }
 }

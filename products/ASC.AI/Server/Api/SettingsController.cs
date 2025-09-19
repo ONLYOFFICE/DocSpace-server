@@ -24,30 +24,29 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Retrieval.Web;
-
 namespace ASC.AI.Api;
 
 [Scope]
 [DefaultRoute]
 [ApiController]
 [ControllerName("ai")]
-public class ConfigurationController(AiSettingsService aiSettingsService) : ControllerBase
+public class SettingsController(AiSettingsService aiSettingsService) : ControllerBase
 {
     [HttpPut("config/web-search")]
-    public async Task<WebSearchSettings> SetWebSearchSettingsAsync(SetWebSearchConfigRequestDto inDto)
+    public async Task<WebSearchSettingsDto> SetWebSearchSettingsAsync(SetWebSearchConfigRequestDto inDto)
     {
         var settings = await aiSettingsService.SetWebSearchSettingsAsync(
             inDto.Body.Enabled, 
             inDto.Body.Type, 
-            inDto.Body.Settings);
+            inDto.Body.Key);
         
-        return settings;
+        return settings.ToDto();
     }
     
     [HttpGet("config/web-search")]
-    public async Task<WebSearchSettings> GetWebSearchSettingsAsync()
+    public async Task<WebSearchSettingsDto> GetWebSearchSettingsAsync()
     {
-        return await aiSettingsService.GetWebSearchSettingsAsync();
+        var settings = await aiSettingsService.GetWebSearchSettingsAsync();
+        return settings.ToDto();
     }
 }

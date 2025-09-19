@@ -32,7 +32,10 @@ public class AiSettingsService(
     AuthContext authContext,
     SettingsManager settingsManager)
 {
-    public async Task<WebSearchSettings> SetWebSearchSettingsAsync(bool enabled, EngineType type, EngineConfig? config)
+    public async Task<WebSearchSettings> SetWebSearchSettingsAsync(
+        bool enabled, 
+        EngineType type,
+        string? key)
     {
         if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
         {
@@ -40,10 +43,22 @@ public class AiSettingsService(
         }
         
         var settings = await settingsManager.LoadAsync<WebSearchSettings>();
-        
         settings.Enabled = enabled;
-        settings.Config = type == EngineType.None ? null : config;
         settings.Type = type;
+
+        switch (type)
+        {
+            case EngineType.Exa:
+                ArgumentException.ThrowIfNullOrEmpty(key);
+                settings.Config = new ExaConfig
+                {
+                    ApiKey = key
+                };
+                break;
+            case EngineType.None:
+                settings.Config = null;
+                break;
+        }
         
         await settingsManager.SaveAsync(settings);
         
