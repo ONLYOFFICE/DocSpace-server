@@ -3532,16 +3532,7 @@ public class FileStorageService //: IFileStorageService
 
         foreach (var entry in entries)
         {
-            switch (entry)
-            {
-                case File<T> file:
-                    await socketManager.AddFileToFavoritesAsync(file, [authContext.CurrentAccount.ID]);
-                    break;
-                case Folder<T> folder:
-                    await socketManager.AddFolderToFavoritesAsync(folder, [authContext.CurrentAccount.ID]);
-                    break;
-            }
-
+            await socketManager.AddToFavoritesAsync(entry, [authContext.CurrentAccount.ID]);
             await filesMessageService.SendAsync(MessageAction.FileMarkedAsFavorite, entry, entry.Title);
         }
         
@@ -3570,16 +3561,7 @@ public class FileStorageService //: IFileStorageService
         
         foreach (var entry in entries)
         {
-            switch (entry)
-            {
-                case File<T> file:
-                    await socketManager.RemoveFileFromFavoritesAsync(file, [authContext.CurrentAccount.ID]);
-                    break;
-                case Folder<T> folder:
-                    await socketManager.RemoveFolderFromFavoritesAsync(folder, [authContext.CurrentAccount.ID]);
-                    break;
-            }
-
+            await socketManager.RemoveFromFavoritesAsync(entry, [authContext.CurrentAccount.ID]);
             await filesMessageService.SendAsync(MessageAction.FileRemovedFromFavorite, entry, entry.Title);
         }
     }
@@ -3650,7 +3632,7 @@ public class FileStorageService //: IFileStorageService
             switch (e)
             {
                 case File<T> file:
-                    tasks.Add(socketManager.RemoveFileFromRecentAsync(file, users));
+                    tasks.Add(socketManager.RemoveFromRecentAsync(file, users));
                     break;
                 case Folder<T> folder:
                     tasks.Add(socketManager.DeleteFolder(folder, users: users));

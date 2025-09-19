@@ -1851,7 +1851,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var marked = await fileMarker.MarkAsRecentByLink(file, linkId.Value);
             if (marked != MarkResult.NotMarked)
             {
-                await socketManager.AddFileToRecentAsync(file, [userId]);
+                await socketManager.AddToRecentAsync(file, [userId]);
             }
         }
         else
@@ -1862,7 +1862,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             await tagDao.SaveTagsAsync(tag, userId);
             
-            await socketManager.AddFileToRecentAsync(file, [userId]);
+            await socketManager.AddToRecentAsync(file, [userId]);
         }
     }
 
@@ -2092,7 +2092,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     await fileMarker.RemoveMarkAsNewForAllAsync(file);
                     await linkDao.DeleteAllLinkAsync(file.Id);
                     
-                    await socketManager.RemoveFileFromRecentAsync(file, [authContext.CurrentAccount.ID]);
+                    await socketManager.RemoveFromRecentAsync(file, [authContext.CurrentAccount.ID]);
                     
                     if (!result.Encrypted && !result.ProviderEntry && await fileSecurity.CanReadAsync(result))
                     {

@@ -434,15 +434,7 @@ public class FileSharingAceHelper(
                 var recipientIds = recipients.Keys.ToList();
 
                 await fileMarker.MarkAsNewAsync(entry, recipientIds);
-
-                if (file != null)
-                {
-                    await socketManager.AddFileToSharedAsync(file, users: recipientIds);
-                }
-                else if (folder != null)
-                {
-                    await socketManager.AddFolderToSharedAsync(folder, users: recipientIds);
-                }
+                await socketManager.AddToSharedAsync(entry, users: recipientIds);
             }
 
             if (notify)
@@ -458,14 +450,7 @@ public class FileSharingAceHelper(
 
         if (usersWithoutRight.Count > 0 && entry.RootFolderType is FolderType.USER or FolderType.Privacy)
         {
-            if (file != null)
-            {
-                await socketManager.RemoveFileFromSharedAsync(file, users: usersWithoutRight);
-            }
-            else if (folder != null)
-            {
-                await socketManager.RemoveFolderFromSharedAsync(folder, users: usersWithoutRight);
-            }
+            await socketManager.RemoveFromSharedAsync(entry, users: usersWithoutRight);
         }
 
         return new AceProcessingResult<T>(changed, warning, handledAces);
@@ -493,15 +478,8 @@ public class FileSharingAceHelper(
 
         await fileMarker.RemoveMarkAsNewAsync(entry);
         if (entry.RootFolderType is FolderType.USER or FolderType.Privacy)
-        {
-            if (entry is File<T> file)
-            {
-                await socketManager.RemoveFileFromSharedAsync(file, users: [authContext.CurrentAccount.ID]);
-            }
-            else if (entry is Folder<T> folder)
-            {
-                await socketManager.RemoveFolderFromSharedAsync(folder, users: [authContext.CurrentAccount.ID]);
-            }
+        { 
+            await socketManager.RemoveFromSharedAsync(entry, users: [authContext.CurrentAccount.ID]);
         }
     }
 }
@@ -513,7 +491,6 @@ public class FileSharingHelper(
     FileSecurity fileSecurity,
     AuthContext authContext,
     UserManager userManager)
-
 {
     public async Task<bool> CanSetAccessAsync<T>(FileEntry<T> entry)
     {

@@ -150,54 +150,34 @@ public class SocketManager(
         await MakeRequest("end-restore", new { tenantId, dump, result });
     }
     
-    public async Task AddFileToRecentAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    public async Task AddToRecentAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("add-recent-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderRecentAsync<T>());
+        await MakeRequest($"add-recent-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderRecentAsync<T>());
     }
     
-    public async Task RemoveFileFromRecentAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    public async Task RemoveFromRecentAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("delete-recent-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderRecentAsync<T>());
-    }
-
-    public async Task AddFileToFavoritesAsync<T>(File<T> file, IEnumerable<Guid> users = null)
-    {
-        await MakeRequest("add-favorites-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderFavoritesAsync<T>());
+        await MakeRequest($"delete-recent-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderRecentAsync<T>());
     }
     
-    public async Task RemoveFileFromFavoritesAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    public async Task AddToFavoritesAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("delete-favorites-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderFavoritesAsync<T>());
+        await MakeRequest($"add-favorites-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderFavoritesAsync<T>());
     }
     
-    public async Task AddFolderToFavoritesAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
+    public async Task RemoveFromFavoritesAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("add-favorites-folder", folder, true, users, folderIdDisplay: await globalFolderHelper.GetFolderFavoritesAsync<T>());
+        await MakeRequest($"delete-favorites-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderFavoritesAsync<T>());
     }
     
-    public async Task RemoveFolderFromFavoritesAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
+    public async Task AddToSharedAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("delete-favorites-folder", folder, true, users, folderIdDisplay: await globalFolderHelper.GetFolderFavoritesAsync<T>());
+        await MakeRequest($"add-shared-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
     }
-
-    public async Task AddFileToSharedAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    
+    public async Task RemoveFromSharedAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("add-shared-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
-    }
-
-    public async Task RemoveFileFromSharedAsync<T>(File<T> file, IEnumerable<Guid> users = null)
-    {
-        await MakeRequest("delete-shared-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
-    }
-
-    public async Task AddFolderToSharedAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
-    {
-        await MakeRequest("add-shared-folder", folder, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
-    }
-
-    public async Task RemoveFolderFromSharedAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
-    {
-        await MakeRequest("delete-shared-folder", folder, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
+        await MakeRequest($"delete-shared-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
     }
 
     private async Task<IEnumerable<Guid>> GetRecipientListForForm<T>(File<T> form)
