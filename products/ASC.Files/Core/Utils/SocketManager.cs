@@ -157,28 +157,27 @@ public class SocketManager(
     
     public async Task RemoveFileFromRecentAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("delete-recent-file", file, true, users);
         await MakeRequest("delete-recent-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderRecentAsync<T>());
     }
 
     public async Task AddFileToFavoritesAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("add-favorites-file", file, true, users);
+        await MakeRequest("add-favorites-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderFavoritesAsync<T>());
     }
     
     public async Task RemoveFileFromFavoritesAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("delete-favorites-file", file, true, users);
+        await MakeRequest("delete-favorites-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderFavoritesAsync<T>());
     }
     
     public async Task AddFolderToFavoritesAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("add-favorites-folder", folder, true, users);
+        await MakeRequest("add-favorites-folder", folder, true, users, folderIdDisplay: await globalFolderHelper.GetFolderFavoritesAsync<T>());
     }
     
     public async Task RemoveFolderFromFavoritesAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("delete-favorites-folder", folder, true, users);
+        await MakeRequest("delete-favorites-folder", folder, true, users, folderIdDisplay: await globalFolderHelper.GetFolderFavoritesAsync<T>());
     }
 
     public async Task AddFileToSharedAsync<T>(File<T> file, IEnumerable<Guid> users = null)
@@ -262,17 +261,11 @@ public class SocketManager(
                 entry.ParentId = folderIdDisplay;
                 break;
             case "add-favorites-folder":
-                method = "create-folder";
-                entry.ParentId = entry.FolderIdDisplay;
-                break;
-            case "delete-favorites-folder":
-                method = "delete-folder";
-                entry.ParentId = entry.FolderIdDisplay;
-                break;
             case "add-shared-folder":
                 method = "create-folder";
                 entry.ParentId = folderIdDisplay;
                 break;
+            case "delete-favorites-folder":
             case "delete-shared-folder":
                 method = "delete-folder";
                 entry.ParentId = folderIdDisplay;

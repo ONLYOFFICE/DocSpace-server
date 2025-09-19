@@ -3535,11 +3535,9 @@ public class FileStorageService //: IFileStorageService
             switch (entry)
             {
                 case File<T> file:
-                    file.FolderIdDisplay = await globalFolderHelper.GetFolderFavoritesAsync<T>();
                     await socketManager.AddFileToFavoritesAsync(file, [authContext.CurrentAccount.ID]);
                     break;
                 case Folder<T> folder:
-                    folder.FolderIdDisplay = await globalFolderHelper.GetFolderFavoritesAsync<T>();
                     await socketManager.AddFolderToFavoritesAsync(folder, [authContext.CurrentAccount.ID]);
                     break;
             }
@@ -3569,19 +3567,15 @@ public class FileStorageService //: IFileStorageService
         var tags = entries.Select(entry => Tag.Favorite(authContext.CurrentAccount.ID, entry));
 
         await tagDao.RemoveTagsAsync(tags);
-
-        var folderIdFavorites = await globalFolderHelper.GetFolderFavoritesAsync<T>();
         
         foreach (var entry in entries)
         {
             switch (entry)
             {
                 case File<T> file:
-                    file.FolderIdDisplay = folderIdFavorites;
                     await socketManager.RemoveFileFromFavoritesAsync(file, [authContext.CurrentAccount.ID]);
                     break;
                 case Folder<T> folder:
-                    folder.FolderIdDisplay = folderIdFavorites;
                     await socketManager.RemoveFolderFromFavoritesAsync(folder, [authContext.CurrentAccount.ID]);
                     break;
             }
