@@ -2984,7 +2984,7 @@ public class FileSecurity(
         var linkId = await externalShare.GetLinkIdAsync();
         if (linkId != Guid.Empty)
         {
-            result.Add(linkId);
+            result.Insert(0, linkId);
         }
 
         if (includeAvailableLinks)
