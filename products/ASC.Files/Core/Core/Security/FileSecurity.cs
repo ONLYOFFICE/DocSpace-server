@@ -78,8 +78,8 @@ public class FileSecurity(
         { FolderType.USER, 
             new Dictionary<SubjectType, HashSet<FileShare>>
             {
-                { SubjectType.User, DefaultFileAccess },
-                { SubjectType.Group, DefaultFileAccess },
+                { SubjectType.User, [..DefaultFileAccess, FileShare.ReadWrite] },
+                { SubjectType.Group, [..DefaultFileAccess, FileShare.ReadWrite] },
                 { SubjectType.ExternalLink, DefaultFileAccess },
                 { SubjectType.PrimaryExternalLink, DefaultFileAccess }
             }.ToFrozenDictionary() 
@@ -2808,10 +2808,11 @@ public class FileSecurity(
             file.Security[FilesSecurityActions.Edit] = false;
         }
     }
-
-    public async Task<IDictionary<string, bool>> GetFileAccesses<T>(File<T> file, SubjectType subjectType)
+    
+    
+    public async Task<IDictionary<SubjectType, IEnumerable<FileShare>>> GetAccesses<T>(File<T> file)
     {
-        var result = new Dictionary<string, bool>();
+        var result = new Dictionary<SubjectType, IEnumerable<FileShare>>();
         
         var mustConvert = fileUtility.MustConvert(file.Title);
         var canEdit = fileUtility.CanWebEdit(file.Title);
@@ -2831,52 +2832,53 @@ public class FileSecurity(
                 parentRoomType = room.FolderType;
             }
         }
-        
-        if (!parentRoomType.HasValue ||
-            !_availableRoomFileAccesses.TryGetValue(parentRoomType.Value, out var subjectShares) ||
-            !subjectShares.TryGetValue(subjectType, out var shares))
+
+        foreach (var subjectType in Enum.GetValues<SubjectType>())
         {
-            return null;
-        }
-        
-        foreach (var s in shares)
-        {
-            if (s is FileShare.Restrict or FileShare.None || (s is FileShare.Read && !file.IsForm))
+            if (!parentRoomType.HasValue ||
+                !_availableRoomFileAccesses.TryGetValue(parentRoomType.Value, out var subjectShares) ||
+                !subjectShares.TryGetValue(subjectType, out var shares))
             {
-                result.Add(s.ToStringFast(), true);
                 continue;
+            }
+
+            List<FileShare> sharesToAdd = [];
+            
+            foreach (var s in shares)
+            {
+                if (s is FileShare.Restrict or FileShare.None || (s is FileShare.Read && !file.IsForm))
+                {
+                    sharesToAdd.Add(s);
+                    continue;
+                }
+
+                if (mustConvert)
+                {
+                    continue;
+                }
+
+                switch (s)
+                {
+                    case FileShare.Editing when (file.IsForm && parentRoomType != FolderType.FillingFormsRoom || !file.IsForm) && canEdit:
+                    case FileShare.FillForms when file.IsForm:
+                    case FileShare.CustomFilter when !file.IsForm && canCustomFiltering:
+                    case FileShare.Comment when !file.IsForm && canComment:
+                    case FileShare.Review when !file.IsForm && canReview:
+                    case FileShare.ReadWrite:
+                        sharesToAdd.Add(s);
+                        break;
+                }
             }
             
-            if (mustConvert)
-            {
-                result.Add(s.ToStringFast(), false);
-                continue;
-            }
-
-            switch (s)
-            {
-                case FileShare.Editing when (file.IsForm && parentRoomType != FolderType.FillingFormsRoom || !file.IsForm) && canEdit:
-                case FileShare.FillForms when file.IsForm:
-                case FileShare.CustomFilter when !file.IsForm && canCustomFiltering:
-                case FileShare.Comment when !file.IsForm && canComment:
-                case FileShare.Review when !file.IsForm && canReview:
-                    result.Add(s.ToStringFast(), true);
-                    break;
-                default:
-                    if (!file.IsForm)
-                    {
-                        result.Add(s.ToStringFast(), false);
-                    }
-
-                    break;
-            }
+            result.Add(subjectType, sharesToAdd);
         }
 
         return result;
     }
 
-    public async Task<IDictionary<string, bool>> GetFolderAccesses<T>(Folder<T> folder, SubjectType subjectType)
-    {
+    public async Task<IDictionary<SubjectType, IEnumerable<FileShare>>> GetAccesses<T>(Folder<T> folder)
+    { 
+        var result = new Dictionary<SubjectType, IEnumerable<FileShare>>();
         var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
         var room = isRoom ? folder : null;
         
@@ -2894,15 +2896,21 @@ public class FileSecurity(
                 parentRoomType = room.FolderType;
             }
         }
-        
-        if (!parentRoomType.HasValue ||
-            !_availableRoomFileAccesses.TryGetValue(parentRoomType.Value, out var subjectShares) ||
-            !subjectShares.TryGetValue(subjectType, out var shares))
+
+        foreach (var subjectType in Enum.GetValues<SubjectType>())
         {
-            return null;
+            if (!parentRoomType.HasValue ||
+                !_availableRoomFileAccesses.TryGetValue(parentRoomType.Value, out var subjectShares) ||
+                !subjectShares.TryGetValue(subjectType, out var shares))
+            {
+                continue;
+            }
+            
+            result.Add(subjectType,  shares.Where(r => parentRoomType == FolderType.FillingFormsRoom || r != FileShare.FillForms));
         }
+
+        return result;
         
-        return shares.ToDictionary(r => r.ToStringFast(), r => parentRoomType == FolderType.FillingFormsRoom || r != FileShare.FillForms);
     }
     
     public async Task<int> GetLinksSettings<T>(FileEntry<T> fileEntry, SubjectType subjectType)

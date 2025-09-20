@@ -132,12 +132,11 @@ public class FileSharingAceHelper(
                     continue;
                 }
 
-                var fileAccesses = await fileSecurity.GetFileAccesses(file, w.SubjectType);
-                if (fileAccesses == null || !fileAccesses.Contains(new KeyValuePair<string,bool>(w.Access.ToStringFast(), true)))
+                var fileAccesses = await fileSecurity.GetAccesses(file);
+                if (fileAccesses == null || !fileAccesses.TryGetValue(w.SubjectType, out var access) || !access.Contains(w.Access))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
-
             }
             
             if (room != null)
@@ -167,8 +166,9 @@ public class FileSharingAceHelper(
                 }
             } 
             else if(folder != null)
-            {
-                if (!(await fileSecurity.GetFolderAccesses(folder, w.SubjectType)).Contains(new KeyValuePair<string,bool>(w.Access.ToStringFast(), true)))
+            {  
+                var folderAccesses = await fileSecurity.GetAccesses(folder);
+                if (folderAccesses == null || !folderAccesses.TryGetValue(w.SubjectType, out var access) || !access.Contains(w.Access))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }

@@ -201,22 +201,26 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// Specifies if the file entry can be shared or not.
     /// </summary>
     public bool CanShare { get; set; }
-
-
+    
     /// <summary>
     /// A dictionary representing the sharing settings for the file entry.
     /// </summary>
     public IDictionary<SubjectType, int> ShareSettings { get; set; }
 
     /// <summary>
-    /// The actions that can be perforrmed with the file entry.
+    /// The actions that can be performed with the file entry.
     /// </summary>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     /// <summary>
     /// The available external rights of the file entry.
     /// </summary>
-    public IDictionary<string, bool> AvailableExternalRights { get; set; }
+    public IDictionary<string, bool> AvailableExternalRights { get; set; }//TODO: remove
+    
+    /// <summary>
+    /// The available external rights of the file entry.
+    /// </summary>
+    public IDictionary<SubjectType, IEnumerable<string>> AvailableShareRights { get; set; }
 
     /// <summary>
     /// The request token of the file entry.

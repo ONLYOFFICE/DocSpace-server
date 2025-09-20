@@ -278,11 +278,8 @@ public class FolderDtoHelper(
         }
 
         result.Lifetime = mapper.Map<RoomDataLifetime, RoomDataLifetimeDto>(folder.SettingsLifetime);
-
-        if (result.CanShare)
-        {
-            result.AvailableExternalRights = await _fileSecurity.GetFolderAccesses(folder, SubjectType.ExternalLink);
-        }
+        result.AvailableShareRights =  (await _fileSecurity.GetAccesses(folder)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
+        result.AvailableExternalRights = result.AvailableShareRights.Where(r => r.Key == SubjectType.ExternalLink).SelectMany(r => r.Value).ToDictionary(r=> r, _ => true);
 
         if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })
         {
