@@ -78,8 +78,8 @@ public class FileSecurity(
         { FolderType.USER, 
             new Dictionary<SubjectType, HashSet<FileShare>>
             {
-                { SubjectType.User, [..DefaultFileAccess, FileShare.Restrict, FileShare.ReadWrite] },
-                { SubjectType.Group, [..DefaultFileAccess, FileShare.Restrict, FileShare.ReadWrite] },
+                { SubjectType.User, [FileShare.ReadWrite, ..DefaultFileAccess, FileShare.Restrict] },
+                { SubjectType.Group, [FileShare.ReadWrite, ..DefaultFileAccess, FileShare.Restrict] },
                 { SubjectType.ExternalLink, DefaultFileAccess },
                 { SubjectType.PrimaryExternalLink, DefaultFileAccess }
             }.ToFrozenDictionary() 
