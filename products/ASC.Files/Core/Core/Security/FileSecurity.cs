@@ -64,7 +64,7 @@ public class FileSecurity(
     public readonly FileShare DefaultRoomTemplatesShare = FileShare.Restrict;
 
     public static readonly HashSet<FileShare> PaidShares = [FileShare.RoomManager];
-    private static HashSet<FileShare> DefaultFileAccess => [FileShare.Editing, FileShare.FillForms, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None];
+    private static HashSet<FileShare> DefaultFileAccess => [FileShare.Editing, FileShare.FillForms, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None];
     private static readonly FrozenDictionary<SubjectType, HashSet<FileShare>> _defaultFileShareDictionary = new Dictionary<SubjectType, HashSet<FileShare>>
     {
         { SubjectType.ExternalLink, DefaultFileAccess },
@@ -78,8 +78,8 @@ public class FileSecurity(
         { FolderType.USER, 
             new Dictionary<SubjectType, HashSet<FileShare>>
             {
-                { SubjectType.User, [..DefaultFileAccess, FileShare.ReadWrite] },
-                { SubjectType.Group, [..DefaultFileAccess, FileShare.ReadWrite] },
+                { SubjectType.User, [..DefaultFileAccess, FileShare.Restrict, FileShare.ReadWrite] },
+                { SubjectType.Group, [..DefaultFileAccess, FileShare.Restrict, FileShare.ReadWrite] },
                 { SubjectType.ExternalLink, DefaultFileAccess },
                 { SubjectType.PrimaryExternalLink, DefaultFileAccess }
             }.ToFrozenDictionary() 
