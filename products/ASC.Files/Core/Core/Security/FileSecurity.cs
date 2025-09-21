@@ -2101,7 +2101,7 @@ public class FileSecurity(
     public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var securityDao = daoFactory.GetSecurityDao<string>();
-        var subjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID);
+        var subjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID, true);
         List<FileShareRecord<int>> recordsInternal = [];
         List<FileShareRecord<string>> recordsThirdParty = [];
         
