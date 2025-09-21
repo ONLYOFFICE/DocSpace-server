@@ -3619,7 +3619,7 @@ public class FileStorageService //: IFileStorageService
             entries.AddRange(items);
         }
 
-        var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Recent, TagType.RecentByLink], entries).ToListAsync();
+        var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Recent], entries).ToListAsync();
 
         await tagDao.RemoveTagsAsync(tags);
 

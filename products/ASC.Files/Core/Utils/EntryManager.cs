@@ -409,7 +409,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var userId = authContext.CurrentAccount.ID;
 
             total = 0;
-            var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent, TagType.RecentByLink], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, new OrderBy(SortedByType.LastOpened, false), from, count);
+            var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, new OrderBy(SortedByType.LastOpened, false), from, count);
             
             await foreach (var e in fileSecurity.CanReadAsync(files).Where(r=> r.Item2).Select(t=> t.Item1))
             {
@@ -1848,22 +1848,16 @@ public class EntryManager(IDaoFactory daoFactory,
         var userId = authContext.CurrentAccount.ID;
         if (linkId != Guid.Empty && file.CreateBy != userId)
         {
-            var marked = await fileMarker.MarkAsRecentByLink(file, linkId.Value);
-            if (marked != MarkResult.NotMarked)
-            {
-                await socketManager.AddToRecentAsync(file, [userId]);
-            }
+            await fileMarker.MarkAsRecentByLink(file, linkId.Value);
         }
-        else
-        {
-            var tagDao = daoFactory.GetTagDao<T>();
 
-            var tag = Tag.Recent(userId, file);
+        var tagDao = daoFactory.GetTagDao<T>();
 
-            await tagDao.SaveTagsAsync(tag, userId);
-            
-            await socketManager.AddToRecentAsync(file, [userId]);
-        }
+        var tag = Tag.Recent(userId, file);
+
+        await tagDao.SaveTagsAsync(tag, userId);
+        
+        await socketManager.AddToRecentAsync(file, [userId]);
     }
 
     private async Task InitFormFillingFolders<T>(File<T> file, Folder<T> folder, EntryProperties<T> properties, IFolderDao<T> folderDao, IFileDao<T> fileDao, Guid createBy) {
