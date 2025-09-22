@@ -154,7 +154,7 @@ public class ReassignController(
 
         if (inDto.Type is EmployeeType.Guest && !result)
         {
-            result = (await fileStorageService.GetSharedFilesAsync(inDto.UserId)).Any();
+            result = (await fileStorageService.GetSharedEntriesAsync(inDto.UserId)).Count > 0;
         }
 
         return result;

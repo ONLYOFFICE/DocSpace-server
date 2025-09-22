@@ -519,6 +519,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.CompletedTask;
     }
 
+    public Task ReassignFoldersAsync(Guid newOwnerId, IEnumerable<string> folderIds)
+    {
+        return Task.CompletedTask;
+    }
+
     public IAsyncEnumerable<Folder<string>> SearchFoldersAsync(string text, bool bunch)
     {
         return null;

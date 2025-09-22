@@ -114,7 +114,7 @@ public class RemoveProgressItem : DistributedTaskProgress
 
             var wrapper = await GetUsageSpace(webItemManagerSecurity);
 
-            await fileStorageService.MoveSharedFilesAsync(UserId, _currentUserId);
+            await fileStorageService.MoveSharedEntriesAsync(UserId, _currentUserId);
             Percentage = 30;
             await PublishChanges();
 

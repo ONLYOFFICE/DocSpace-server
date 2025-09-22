@@ -268,6 +268,13 @@ public interface IFolderDao<T>
 
 
     /// <summary>
+    /// Set created by
+    /// </summary>
+    /// <param name="newOwnerId"></param>
+    /// <param name="folderIds"></param>
+    Task ReassignFoldersAsync(Guid newOwnerId, IEnumerable<T> folderIds);
+
+    /// <summary>
     /// Search the list of folders containing text in title
     /// Only in TMFolderDao
     /// </summary>

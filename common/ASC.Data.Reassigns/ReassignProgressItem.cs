@@ -103,7 +103,7 @@ public class ReassignProgressItem : DistributedTaskProgress
 
             if (_deleteProfile)
             {
-                await fileStorageService.MoveSharedFilesAsync(FromUser, ToUser);
+                await fileStorageService.MoveSharedEntriesAsync(FromUser, ToUser);
 
                 await SetPercentageAndCheckCancellationAsync(20, true);
                 await fileStorageService.DeletePersonalDataAsync(FromUser);

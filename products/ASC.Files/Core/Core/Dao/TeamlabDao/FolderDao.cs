@@ -1347,7 +1347,14 @@ internal class FolderDao(
             await filesDbContext.ReassignFoldersPartiallyAsync(tenantId, oldOwnerId, newOwnerId, exceptFolderIds);
         }
     }
-    
+
+    public async Task ReassignFoldersAsync(Guid newOwnerId, IEnumerable<int> folderIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await filesDbContext.ReassignSpecificFoldersAsync(tenantId, folderIds, newOwnerId);
+    }
+
     public async Task ReassignRoomFoldersAsync(Guid oldOwnerId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -1743,11 +1750,11 @@ internal class FolderDao(
                     ).FirstOrDefault(),
                 Shared = filesDbContext.Security.Any(x => 
                     x.TenantId == r.TenantId && 
-                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                    ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder))),
+                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink || x.SubjectType == SubjectType.User || x.SubjectType == SubjectType.Group) &&
+                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder),
                 ParentShared = filesDbContext.Security.Any(x => 
                     x.TenantId == r.TenantId && 
-                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink || x.SubjectType == SubjectType.User || x.SubjectType == SubjectType.Group) &&
                     x.EntryType == FileEntryType.Folder && 
                     filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                 Order = (
