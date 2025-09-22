@@ -61,6 +61,7 @@ global using ASC.EventBus.Extensions.Logger;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
 global using ASC.MessagingSystem.EF.Context;
+global using ASC.Notify.Engine;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Core;
 global using ASC.Web.Core.Helpers;

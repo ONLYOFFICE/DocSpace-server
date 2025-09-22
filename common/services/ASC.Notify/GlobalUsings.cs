@@ -39,7 +39,6 @@ global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Hosting;
 global using ASC.Core.Common.Notify.IntegrationEvents.Events;
-global using ASC.Core.Common.Settings;
 global using ASC.Core.Notify.Senders;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Log;
@@ -50,7 +49,6 @@ global using ASC.Notify.IntegrationEvents.EventHandling;
 global using ASC.Notify.Log;
 global using ASC.Notify.Messages;
 global using ASC.Notify.Services;
-global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Studio.Core.Notify;
 global using Autofac;
 

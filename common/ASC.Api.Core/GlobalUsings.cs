@@ -27,7 +27,6 @@
 global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using System.IdentityModel.Tokens.Jwt;
-global using System.Linq.Expressions;
 global using System.Net;
 global using System.Reflection;
 global using System.Runtime.InteropServices;
@@ -36,7 +35,6 @@ global using System.Security;
 global using System.Security.Authentication;
 global using System.Security.Claims;
 global using System.Security.Cryptography;
-global using System.Security.Principal;
 global using System.Text;
 global using System.Text.Encodings.Web;
 global using System.Text.Json;

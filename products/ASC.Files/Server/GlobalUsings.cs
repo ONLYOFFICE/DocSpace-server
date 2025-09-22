@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.Net;
 global using System.Globalization;
 global using System.Security;
 global using System.Text;
@@ -46,6 +45,8 @@ global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
+global using ASC.Data.Backup.Core.Quota;
+global using ASC.Data.Backup.EF.Context;
 global using ASC.EventBus.Abstractions;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;

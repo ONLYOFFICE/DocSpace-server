@@ -10,6 +10,13 @@ function processNode(node, parentNode = null) {
   }
 
   for (const key in node) {
+
+    if (key === 'summary' && typeof node[key] === 'string') {
+      node[key] = node[key].replace(/"/g, "");
+    }
+    if (key === 'description' && typeof node[key] === 'string') {
+      node[key] = node[key].replace(/"/g, "");
+    }
     if (node[key] && typeof node[key] === 'object') {
       if ((key === 'anyOf' || key === 'oneOf') && Array.isArray(node[key])) {
         const integerEnum = node[key].find(item => item.type === 'integer' && Array.isArray(item.enum));

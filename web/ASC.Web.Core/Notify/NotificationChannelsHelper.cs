@@ -27,22 +27,21 @@
 using ASC.Core.Common.Notify.Model;
 using ASC.Web.Core.Notify.Channels;
 
-namespace ASC.Web.Core.Notify
+namespace ASC.Web.Core.Notify;
+
+public class NotificationChannelStatus
 {
-    public class NotificationChannelStatus
-    {
-        public string Name { get; set; }
-        public bool IsEnabled { get; set; }
-    }
+    public string Name { get; set; }
+    public bool IsEnabled { get; set; }
+}
 
-    [Scope]
-    public class NotificationChannelsHelper(IConfiguration configuration, IEnumerable<INotificationChannel> channels)
+[Scope]
+public class NotificationChannelsHelper(IConfiguration configuration, IEnumerable<INotificationChannel> channels)
+{
+    public IEnumerable<INotificationChannel> GetNotificationChannels()
     {
-        public IEnumerable<INotificationChannel> GetNotificationChannels()
-        {
-            var config = configuration.GetSection("notify").Get<NotifyServiceCfg>();
+        var config = configuration.GetSection("notify").Get<NotifyServiceCfg>();
 
-            return channels.Where(channel => config.Senders.Any(sender => sender.Name == channel.Name));
-        }
+        return channels.Where(channel => config.Senders.Any(sender => sender.Name == channel.Name));
     }
 }

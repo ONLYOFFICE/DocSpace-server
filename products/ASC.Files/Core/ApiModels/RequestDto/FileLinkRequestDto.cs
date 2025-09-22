@@ -90,5 +90,5 @@ public class FileLinkRequestDto<T>
     /// The file external link parameters.
     /// </summary>
     [FromBody]
-    public FileLinkRequest File { get; set; }
+    public required FileLinkRequest File { get; set; }
 }

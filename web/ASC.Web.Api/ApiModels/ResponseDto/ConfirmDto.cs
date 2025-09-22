@@ -34,7 +34,7 @@ public class ConfirmDto
     /// <summary>
     /// The confirmation result.
     /// </summary>
-    public ValidationResult Result { get; set; }
+    public required ValidationResult Result { get; set; }
 
     /// <summary>
     /// The confirmation room ID.

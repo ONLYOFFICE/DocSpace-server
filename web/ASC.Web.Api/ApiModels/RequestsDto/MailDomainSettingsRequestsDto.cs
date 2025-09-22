@@ -44,7 +44,7 @@ public class MailDomainSettingsRequestsDto
     /// <summary>
     /// Specifies the default permission level for the invited users (visitors or not).
     /// </summary>
-    public bool InviteUsersAsVisitors { get; set; }
+    public required bool InviteUsersAsVisitors { get; set; }
 }
 
 /// <summary>

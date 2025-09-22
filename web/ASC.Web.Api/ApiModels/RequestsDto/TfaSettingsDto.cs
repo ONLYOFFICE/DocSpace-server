@@ -34,12 +34,12 @@ public class TfaSettingsDto
     /// <summary>
     /// The ID of the TFA configuration.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// The display name or description of the TFA configuration.
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// Indicates whether the TFA configuration is currently active.

@@ -24,13 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Core.Notify.Channels
-{
-    [Scope(typeof(INotificationChannel))]
-    public class TelegramNotificationChannel(TelegramLoginProvider loginProvider) : INotificationChannel
-    {
-        public string Name => ASC.Core.Configuration.Constants.NotifyTelegramSenderSysName;
+namespace ASC.Web.Core.Notify.Channels;
 
-        public bool IsEnabled => loginProvider.IsEnabled();
-    }
+[Scope(typeof(INotificationChannel))]
+public class TelegramNotificationChannel(ConsumerFactory consumerFactory) : INotificationChannel
+{
+    public string Name => ASC.Core.Configuration.Constants.NotifyTelegramSenderSysName;
+
+    public bool IsEnabled => consumerFactory.Get<TelegramLoginProvider>().IsEnabled();
 }

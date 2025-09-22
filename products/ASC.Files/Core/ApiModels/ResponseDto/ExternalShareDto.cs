@@ -36,12 +36,12 @@ public class ExternalShareDto
     /// <summary>
     /// The external data status.
     /// </summary>
-    public Status Status { get; set; }
+    public required Status Status { get; set; }
 
     /// <summary>
     /// The external data ID.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// The external data title.
@@ -56,17 +56,17 @@ public class ExternalShareDto
     /// <summary>
     /// The tenant ID.
     /// </summary>
-    public int TenantId { get; set; }
+    public required int TenantId { get; set; }
 
     /// <summary>
     /// The unique identifier of the shared entity.
     /// </summary>
-    public string EntityId { get; set; }
+    public required string EntityId { get; set; }
    
     /// <summary>
     /// The title of the shared entity.
     /// </summary>
-    public string EntityTitle { get; set; }
+    public required string EntityTitle { get; set; }
 
     /// <summary>
     /// The entry type of the external data.
@@ -81,12 +81,12 @@ public class ExternalShareDto
     /// <summary>
     /// Specifies whether to share the external data or not.
     /// </summary>
-    public bool Shared { get; set; }
+    public required bool Shared { get; set; }
 
     /// <summary>
     /// The link ID of the external data.
     /// </summary>
-    public Guid LinkId { get; set; }
+    public required Guid LinkId { get; set; }
     
     /// <summary>
     /// Specifies whether the user is authenticated or not.

@@ -34,7 +34,7 @@ public class BackupRestoreDto
     /// <summary>
     /// The backup ID.
     /// </summary>
-    public string BackupId { get; set; }
+    public required string BackupId { get; set; }
 
     /// <summary>
     /// The backup storage type.

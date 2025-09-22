@@ -34,19 +34,19 @@ public class FileOperationDto
     /// <summary>
     /// The file operation ID.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// The file operation type.
     /// </summary>
     [JsonPropertyName("Operation")]
-    public FileOperationType OperationType { get; init; }
+    public required FileOperationType OperationType { get; init; }
 
     /// <summary>
     /// The file operation progress in percentage.
     /// </summary>
     [SwaggerSchemaCustom(Example = 100)]
-    public int Progress { get; set; }
+    public required int Progress { get; set; }
 
     /// <summary>
     /// The file operation error message.

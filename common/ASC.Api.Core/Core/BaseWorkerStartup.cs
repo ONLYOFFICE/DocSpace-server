@@ -91,10 +91,7 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         DIHelper.Configure(services);
         DIHelper.Scan();
         
-        services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
-        services.AddHostedService<NotifySenderService>();
+        services.ConfigureNotificationServices();
         
         services.AddSingleton(Channel.CreateUnbounded<SocketData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);

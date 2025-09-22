@@ -34,12 +34,12 @@ public class TenantUserInvitationSettingsDto
     /// <summary>
     /// Allow invite new DocSpace members through the Contacts section.
     /// </summary>
-    public bool AllowInvitingMembers { get; init; }
+    public required bool AllowInvitingMembers { get; init; }
 
     /// <summary>
     /// Allow all DocSpace members to invite external guests to rooms.
     /// </summary>
-    public bool AllowInvitingGuests { get; init; }
+    public required bool AllowInvitingGuests { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]

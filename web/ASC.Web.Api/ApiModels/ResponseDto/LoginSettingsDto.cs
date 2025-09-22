@@ -34,17 +34,17 @@ public class LoginSettingsDto
     /// <summary>
     /// The maximum number of consecutive failed login attempts allowed before triggering account suspension.
     /// </summary>
-    public int AttemptCount { get; set; }
+    public required int AttemptCount { get; set; }
 
     /// <summary>
     /// The duration (in minutes) for which an account remains suspended after exceeding maximum login attempts.
     /// </summary>
-    public int BlockTime { get; set; }
+    public required int BlockTime { get; set; }
 
     /// <summary>
     /// The maximum time (in seconds) allowed for server to process and respond to login requests.
     /// </summary>
-    public int CheckPeriod { get; set; }
+    public required int CheckPeriod { get; set; }
 
     /// <summary>
     /// Specifies if these settings are default or not
@@ -52,7 +52,7 @@ public class LoginSettingsDto
     /// <summary>
     /// Specifies whether the login settings are default or not.
     /// </summary>
-    public bool IsDefault { get; set; }
+    public required bool IsDefault { get; set; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]

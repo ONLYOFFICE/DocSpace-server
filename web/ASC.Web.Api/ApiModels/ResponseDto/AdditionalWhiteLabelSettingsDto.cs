@@ -34,37 +34,37 @@ public class AdditionalWhiteLabelSettingsDto
     /// <summary>
     /// Specifies if the sample documents are displayed or hidden.
     /// </summary>
-    public bool StartDocsEnabled { get; set; }
+    public required bool StartDocsEnabled { get; set; }
 
     /// <summary>
     /// Specifies if the Help Center link is available or not.
     /// </summary>
-    public bool HelpCenterEnabled { get; set; }
+    public required bool HelpCenterEnabled { get; set; }
 
     /// <summary>
     /// Specifies if the "Feedback &amp; Support" link is available or not.
     /// </summary>
-    public bool FeedbackAndSupportEnabled { get; set; }
+    public required bool FeedbackAndSupportEnabled { get; set; }
 
     /// <summary>
     /// Specifies if the user forum is available or not.
     /// </summary>
-    public bool UserForumEnabled { get; set; }
+    public required bool UserForumEnabled { get; set; }
 
     /// <summary>
     /// Specifies if the Video Guides link is available or not.
     /// </summary>
-    public bool VideoGuidesEnabled { get; set; }
+    public required bool VideoGuidesEnabled { get; set; }
 
     /// <summary>
     /// Specifies if the License Agreements link is available or not.
     /// </summary>
-    public bool LicenseAgreementsEnabled { get; set; }
+    public required bool LicenseAgreementsEnabled { get; set; }
 
     /// <summary>
     /// Specifies if the additional white label settings are default or not.
     /// </summary>
-    public bool IsDefault { get; set; }
+    public required bool IsDefault { get; set; }
 }
 
 [Scope]
