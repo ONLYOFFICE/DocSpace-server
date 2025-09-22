@@ -55,7 +55,7 @@ public class VectorizationSettings
             ChunkOverlap = 0.2f,
             ChunksBatchSize = 10,
             MaxContentLengthBytes = 10485760,
-            SupportedFormats = [".txt", ".docx", ".xlsx", ".csv", ".html", ".odt", ".rtf", ".epub", ".json", ".pdf"]
+            SupportedFormats = [".txt", ".docx", ".xlsx", ".csv", ".pdf"]
         };
     }
 }
