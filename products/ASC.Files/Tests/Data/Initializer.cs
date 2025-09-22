@@ -197,11 +197,13 @@ public static class Initializer
             client.DefaultRequestHeaders.Authorization = null;
             return;
         }
+
+        user.PasswordHash ??= _passwordHasher.GetClientPassword(user.Password);
         
         var authMe = await _apiFactory.AuthenticationApi.AuthenticateMeAsync(new AuthRequestsDto
         {
             UserName = user.Email,
-            PasswordHash = _passwordHasher.GetClientPassword(user.Password)
+            PasswordHash =  user.PasswordHash
         }, TestContext.Current.CancellationToken);
         
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authMe.Response.Token);
