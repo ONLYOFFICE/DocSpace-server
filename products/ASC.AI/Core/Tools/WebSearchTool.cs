@@ -30,7 +30,7 @@ namespace ASC.AI.Core.Tools;
 public class WebSearchTool(WebSearchEngineFactory searchEngineFactory) : BaseTool
 {
     private const string Name = "docspace_web_search";
-    private const string Description = "Search in web";
+    private const string Description = "Search the web - performs real-time web searches and can scrape content from specific URLs.";
 
     public AIFunction Init(EngineConfig config)
     {
@@ -38,7 +38,7 @@ public class WebSearchTool(WebSearchEngineFactory searchEngineFactory) : BaseToo
 
         return AIFunctionFactory.Create(SearchFunction, Name, Description);
         
-        async Task<ToolResponse> SearchFunction([Description("Query to search")] string query)
+        async Task<ToolResponse> SearchFunction([Description("Search query")] string query)
         {
             try
             {

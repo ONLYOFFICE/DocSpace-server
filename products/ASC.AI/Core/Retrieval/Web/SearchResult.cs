@@ -30,5 +30,5 @@ public class WebSearchResult
 {
     public string? Title { get; init; }
     public string? Url { get; init; }
-    public required List<string> Contents { get; init; }
+    public required string Text { get; init; }
 }

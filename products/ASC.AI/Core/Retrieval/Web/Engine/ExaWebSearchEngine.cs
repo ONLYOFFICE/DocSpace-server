@@ -41,8 +41,11 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
             NumResults = query.MaxResults,
             Contents = new Contents
             {
-                Text = false,
-                Highlights = true
+                Text = new Text
+                {
+                    MaxCharacters = 3000
+                },
+                Livecrawl = "preferred"
             }
         };
 
@@ -69,7 +72,7 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
         {
             Title = x.Title,
             Url = x.Url,
-            Contents = x.Highlights
+            Text = x.Text
         });
     }
 }
@@ -84,18 +87,24 @@ class ExaSearchRequest
 
 class Contents
 {
-    public bool Text { get; init; }
-    public bool Highlights { get; init; } 
+    public required Text Text { get; init; }
+    public string? Livecrawl { get; init; } = "preferred";
+}
+
+class Text
+{
+    public int? MaxCharacters { get; init; }
 }
 
 class ExaSearchResponse
 {
     public required List<ExaSearchResult> Results { get; init; } = [];
+    public string? Context { get; init; }
 }
 
 class ExaSearchResult
 {
     public string? Title { get; init; }
     public string? Url { get; init; }
-    public required List<string> Highlights { get; init; }
+    public required string Text { get; init; }
 }
