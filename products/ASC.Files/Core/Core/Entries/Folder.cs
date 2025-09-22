@@ -115,6 +115,16 @@ public interface IFolder
     public FolderType FolderType { get; set; }
     
     /// <summary>
+    /// The root folder type of the folder.
+    /// </summary>
+    public FolderType RootFolderType { get; set; }
+    
+    /// <summary>
+    /// The ID of the user who created the root folder of the folder.
+    /// </summary>
+    public Guid RootCreateBy { get; set; }
+    
+    /// <summary>
     /// The number of files in the folder.
     /// </summary>
     public int FilesCount { get; set; }

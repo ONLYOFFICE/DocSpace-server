@@ -314,6 +314,7 @@ public class FileDtoHelper(
                     result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
                     break;
                 case { FolderType: FolderType.SHARE }:
+                case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, authContext.CurrentAccount.ID):
                     result.RootFolderType = FolderType.SHARE;
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
                     break;
