@@ -41,7 +41,8 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
             NumResults = query.MaxResults,
             Contents = new Contents
             {
-                Text = true
+                Text = false,
+                Highlights = true
             }
         };
 
@@ -68,7 +69,7 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
         {
             Title = x.Title,
             Url = x.Url,
-            Text = x.Text
+            Contents = x.Highlights
         });
     }
 }
@@ -84,6 +85,7 @@ class ExaSearchRequest
 class Contents
 {
     public bool Text { get; init; }
+    public bool Highlights { get; init; } 
 }
 
 class ExaSearchResponse
@@ -95,5 +97,5 @@ class ExaSearchResult
 {
     public string? Title { get; init; }
     public string? Url { get; init; }
-    public required string Text { get; init; }
+    public required List<string> Highlights { get; init; }
 }
