@@ -428,15 +428,16 @@ public class FileSharingAceHelper(
         }
 
         if (recipients.Count > 0 && entry.RootFolderType is FolderType.USER or FolderType.Privacy)
-        {
+        {                
+            var recipientIds = recipients.Keys.ToList();
+            
             if (file != null || (folder != null && folder.FoldersCount + folder.FilesCount > 0) || entry.ProviderEntry)
             {
-                var recipientIds = recipients.Keys.ToList();
-
                 await fileMarker.MarkAsNewAsync(entry, recipientIds);
-                await socketManager.AddToSharedAsync(entry, users: recipientIds);
             }
-
+            
+            await socketManager.AddToSharedAsync(entry, users: recipientIds);
+            
             if (notify)
             {
                 await notifyClient.SendShareNoticeAsync(entry, recipients, message, culture);
