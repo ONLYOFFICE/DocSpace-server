@@ -30,6 +30,7 @@ namespace ASC.AI.Core.Chat;
 public class ChatTools(
     McpService mcpService,
     WebSearchTool webSearchTool,
+    WebCrawlingTool webCrawlingTool,
     KnowledgeSearchTool knowledgeSearchTool,
     WebSearchSettingsStore webSearchSettingsStore)
 {
@@ -55,6 +56,15 @@ public class ChatTools(
         var webTool = webSearchTool.Init(settings.Config);
         var webWrapper = ToWrapper(roomId, webTool);
         holder.AddTool(webWrapper);
+
+        if (!settings.Config.CrawlingSupported())
+        {
+            return holder;
+        }
+
+        var crawlTool = webCrawlingTool.Init(settings.Config);
+        var crawlWrapper = ToWrapper(roomId, crawlTool);
+        holder.AddTool(crawlWrapper);
 
         return holder;
     }

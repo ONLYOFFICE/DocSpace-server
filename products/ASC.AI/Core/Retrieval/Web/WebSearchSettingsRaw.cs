@@ -34,7 +34,10 @@ public enum EngineType
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(ExaConfig), "exa")]
-public abstract class EngineConfig;
+public abstract class EngineConfig
+{
+    public abstract bool CrawlingSupported();
+}
 
 public class WebSearchSettingsRaw : ISettings<WebSearchSettingsRaw>
 {

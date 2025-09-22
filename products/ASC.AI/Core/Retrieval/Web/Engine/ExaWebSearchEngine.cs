@@ -29,6 +29,11 @@ namespace ASC.AI.Core.Retrieval.Web.Engine;
 public class ExaConfig : EngineConfig
 {
     public required string ApiKey { get; init; }
+    
+    public override bool CrawlingSupported()
+    {
+        return true;
+    }
 }
 
 public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebSearchEngine
@@ -75,6 +80,47 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
             Text = x.Text
         });
     }
+
+    public async Task<PageContentResult?> GetPageContentAsync(PageContentQuery query, CancellationToken cancellationToken = default)
+    {
+        var requestBody = new ExaCrawlRequest 
+        { 
+            Urls = [query.Url], 
+            Contents = new Contents
+            {
+                Text = new Text
+                {
+                    MaxCharacters = query.MaxCharacters
+                },
+                Livecrawl = "preferred"
+            }
+        };
+        
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://api.exa.ai/contents")
+        {
+            Content = new StringContent(
+                JsonSerializer.Serialize(requestBody, JsonSerializerOptions.Web), 
+                Encoding.UTF8, 
+                "application/json")
+        };
+        
+        request.Headers.Add("x-api-key", config.ApiKey);
+        
+        var response = await httpClient.SendAsync(request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        
+        var responseContent = await response.Content.ReadFromJsonAsync<ExaSearchResponse>(cancellationToken: cancellationToken);
+        if (responseContent == null || responseContent.Results.Count == 0)
+        {
+            return null;
+        }
+        
+        var result = responseContent.Results[0];
+        return new PageContentResult
+        {
+            Text = result.Text
+        };
+    }
 }
 
 class ExaSearchRequest
@@ -107,4 +153,11 @@ class ExaSearchResult
     public string? Title { get; init; }
     public string? Url { get; init; }
     public required string Text { get; init; }
+}
+
+class ExaCrawlRequest
+{
+    public required List<string> Urls { get; init; }
+    public required Contents Contents { get; init; }
+    public string? Livecrawl { get; init; }
 }

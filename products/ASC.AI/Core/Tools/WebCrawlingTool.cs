@@ -24,16 +24,38 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Retrieval.Web;
+namespace ASC.AI.Core.Tools;
 
-public class SearchQuery
+[Scope]
+public class WebCrawlingTool(WebSearchEngineFactory searchEngineFactory) : BaseTool
 {
-    public required string Query { get; init; }
-    public int MaxResults { get; init; }
-}
+    private const string Name = "docspace_web_crawling";
+    private const string Description = "Extract and crawl content from specific URLs - retrieves full text content, metadata, and structured information from web pages. Ideal for extracting detailed content from known URLs.";
 
-public class PageContentQuery
-{
-    public required string Url { get; init; }
-    public int MaxCharacters { get; init; } = 3000;
+    public AIFunction Init(EngineConfig config)
+    {
+        var engine = searchEngineFactory.Create(config);
+        
+        return AIFunctionFactory.Create(Function, Name, Description);
+        
+        async Task<ToolResponse> Function(
+            [Description("URL to crawl and extract content from")] string url,
+            [Description("Maximum characters to extract (default: 3000)")] int? maxCharacters)
+        {
+            try
+            {
+                var result = await engine.GetPageContentAsync(new PageContentQuery
+                {
+                    Url = url,
+                    MaxCharacters = maxCharacters ?? 3000
+                });
+
+                return ToResponse(result);
+            }
+            catch (Exception e)
+            {
+                return ToResponse(e.Message);
+            }
+        }
+    }
 }
