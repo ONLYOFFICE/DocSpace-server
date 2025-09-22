@@ -1605,7 +1605,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        return false;
+                        return e.Access == FileShare.ReadWrite;
                     default:
                         if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
                         {
@@ -1620,7 +1620,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access == FileShare.Editing)
+                        if (e.Access is FileShare.Editing or FileShare.ReadWrite)
                         {
                             return true;
                         }
@@ -1649,7 +1649,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        return false;
+                        return e.Access == FileShare.ReadWrite && e.CreateBy == authContext.CurrentAccount.ID;
                     default:
                         if (e.Access == FileShare.RoomManager ||
                             (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
@@ -1687,7 +1687,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access is FileShare.Editing or FileShare.CustomFilter)
+                        if (e.Access is FileShare.Editing or FileShare.CustomFilter or FileShare.ReadWrite)
                         {
                             return true;
                         }

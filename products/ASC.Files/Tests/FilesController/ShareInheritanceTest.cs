@@ -825,7 +825,7 @@ public class ShareInheritanceTest(
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFileInMy("File in VDR Room.pdf", Initializer.Owner);
+        var file = await CreateFileInMy("File in My.pdf", Initializer.Owner);
         
         // Get the primary external link
         await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
@@ -833,6 +833,6 @@ public class ShareInheritanceTest(
         var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         fileInfo.AvailableExternalRights.Should().HaveCount(4);
-        fileInfo.AvailableExternalRights.Where(r => r.Value).Should().ContainKeys(nameof(FileShare.Editing), nameof(FileShare.FillForms), nameof(FileShare.Restrict), nameof(FileShare.None));
+        fileInfo.AvailableExternalRights.Where(r => r.Value).Should().ContainKeys(nameof(FileShare.ReadWrite), nameof(FileShare.Editing), nameof(FileShare.FillForms), nameof(FileShare.Restrict), nameof(FileShare.None));
     }
 }
