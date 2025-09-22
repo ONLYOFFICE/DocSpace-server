@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "7.14.0"
+  },
+  "generatorName": "my-k6",
+  "inputSpec": "./tools/api-docs.json",
+  "outputDir": "k6"
+}
