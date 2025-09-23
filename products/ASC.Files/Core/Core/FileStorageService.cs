@@ -2408,17 +2408,14 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task<IEnumerable<KeyValuePair<DateTime, IEnumerable<FileEntry>>>> GetNewRoomFilesAsync<T>(T folderId)
+    public async Task<IEnumerable<KeyValuePair<DateTime, IEnumerable<FileEntry>>>> GetNewRoomFilesAsync<T>(Folder<T> folder)
     {
         try
         {
-            var folderDao = daoFactory.GetFolderDao<T>();
-            var folder = await folderDao.GetFolderAsync(folderId);
-
-            var newFiles = await fileMarker.MarkedItemsAsync(folder).Where(e => e.FileEntryType == FileEntryType.File).ToListAsync();
+            var newFiles = await fileMarker.MarkedItemsAsync(folder).ToListAsync();
             if (newFiles.Count == 0)
             {
-                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(folderId)], []);
+                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(folder.Id)], []);
             }
 
             return newFiles
@@ -2441,7 +2438,7 @@ public class FileStorageService //: IFileStorageService
             var folderDao = daoFactory.GetFolderDao<T>();
             var folder = await folderDao.GetFolderAsync(folderId);
 
-            var result = await fileMarker.MarkedItemsAsync(folder).Where(e => e.FileEntryType == FileEntryType.File).ToListAsync();
+            var result = await fileMarker.MarkedItemsAsync(folder).ToListAsync();
 
             result = [..await entryManager.SortEntries<T>(result, new OrderBy(SortedByType.DateAndTime, false))];
 

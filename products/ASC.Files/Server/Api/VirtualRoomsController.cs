@@ -48,7 +48,8 @@ public class VirtualRoomsInternalController(
     TenantManager tenantManager,
     IEventBus eventBus,
     RoomTemplatesWorker roomTemplatesWorker,
-    UserManager userManager)
+    UserManager userManager,
+    IDaoFactory daoFactory)
     : VirtualRoomsController<int>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
@@ -65,7 +66,8 @@ public class VirtualRoomsInternalController(
         filesMessageService,
         settingsManager,
         apiDateTimeHelper,
-        userManager)
+        userManager, 
+        daoFactory)
 {
     /// <summary>
     /// Creates a room in the "Rooms" section.
@@ -213,7 +215,8 @@ public class VirtualRoomsThirdPartyController(
     FilesMessageService filesMessageService,
     SettingsManager settingsManager,
     ApiDateTimeHelper apiDateTimeHelper,
-    UserManager userManager)
+    UserManager userManager,
+    IDaoFactory daoFactory)
     : VirtualRoomsController<string>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
@@ -230,7 +233,8 @@ public class VirtualRoomsThirdPartyController(
         filesMessageService,
         settingsManager,
         apiDateTimeHelper,
-        userManager)
+        userManager, 
+        daoFactory)
 {
     /// <summary>
     /// Creates a room in the "Rooms" section stored in a third-party storage.
@@ -266,7 +270,8 @@ public abstract class VirtualRoomsController<T>(
     FilesMessageService filesMessageService,
     SettingsManager settingsManager,
     ApiDateTimeHelper apiDateTimeHelper,
-    UserManager userManager)
+    UserManager userManager,
+    IDaoFactory daoFactory)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     protected readonly FileStorageService _fileStorageService = fileStorageService;
@@ -795,7 +800,10 @@ public abstract class VirtualRoomsController<T>(
     [HttpGet("{id}/news")]
     public async Task<List<NewItemsDto<FileEntryBaseDto>>> GetNewRoomItems(RoomIdRequestDto<T> inDto)
     {
-        var newItems = await _fileStorageService.GetNewRoomFilesAsync(inDto.Id);
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(inDto.Id);
+        
+        var newItems = await _fileStorageService.GetNewRoomFilesAsync(folder);
         var result = new List<NewItemsDto<FileEntryBaseDto>>();
 
         foreach (var (date, entries) in newItems)
@@ -805,7 +813,7 @@ public abstract class VirtualRoomsController<T>(
 
             foreach (var en in entries)
             {
-                items.Add(await GetFileEntryWrapperAsync(en));
+                items.Add(await GetFileEntryWrapperAsync(en, folder));
             }
 
             result.Add(new NewItemsDto<FileEntryBaseDto> { Date = apiDateTime, Items = items });
