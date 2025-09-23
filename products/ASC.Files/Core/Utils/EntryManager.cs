@@ -2291,8 +2291,8 @@ public class EntryManager(IDaoFactory daoFactory,
         var folderDao = daoFactory.GetFolderDao<T>();
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, file.Id, TagType.Recent, TagType.RecentByLink).ToDictionaryAsync(k => k.EntryId, v => v);
-        if (tags.Any(r => r.Value.Type == TagType.RecentByLink))
+        var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, file.Id, TagType.Recent, TagType.RecentByLink).ToListAsync();
+        if (tags.Any(r => Equals(r.EntryId, file.Id) && r.Type == TagType.RecentByLink))
         {
             return;
         }
