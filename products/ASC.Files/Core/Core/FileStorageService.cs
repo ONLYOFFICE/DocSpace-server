@@ -3221,6 +3221,7 @@ public class FileStorageService //: IFileStorageService
 
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
+        var tagDao = daoFactory.GetTagDao<int>();
 
         var sharedEntries = await GetSharedEntriesAsync(user);
         if (sharedEntries.Count > 0)
@@ -3248,7 +3249,8 @@ public class FileStorageService //: IFileStorageService
                 }
             }
 
-            await DeleteFromRecentAsync(folderIds, fileIds);
+            var tags = await tagDao.GetTagsAsync(user, [TagType.Recent, TagType.Favorite], sharedEntries).ToListAsync();
+            await tagDao.RemoveTagsAsync(tags);
 
             await fileDao.ReassignFilesAsync(toUser, fileIds);
             await folderDao.ReassignFoldersAsync(toUser, folderIds);
