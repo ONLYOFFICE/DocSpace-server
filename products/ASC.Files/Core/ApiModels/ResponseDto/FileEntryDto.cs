@@ -211,11 +211,6 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// The actions that can be performed with the file entry.
     /// </summary>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
-
-    /// <summary>
-    /// The available external rights of the file entry.
-    /// </summary>
-    public IDictionary<string, bool> AvailableExternalRights { get; set; }//TODO: remove
     
     /// <summary>
     /// The available external rights of the file entry.

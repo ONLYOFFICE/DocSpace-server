@@ -229,9 +229,7 @@ public class FileDtoHelper(
         result.FolderId = file.ParentId;
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableShareRights =  (await _fileSecurity.GetAccesses(file)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
-        result.AvailableExternalRights = result.AvailableShareRights.Where(r => r.Key == SubjectType.ExternalLink).SelectMany(r=> r.Value).ToDictionary(r=> r, _ => true);
         
-
         if (contextFolder == null)
         {
             var referer = httpContextAccessor.HttpContext?.Request.Headers.Referer.FirstOrDefault();
