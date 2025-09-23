@@ -309,16 +309,14 @@ public class FileDtoHelper(
             {
                 case { FolderType: FolderType.Recent }:
                     result.RootFolderType = FolderType.Recent;
-                    if (result.ParentRoomType == FolderType.Recent)
-                    {
-                        result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
-                    }
+                    result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
 
                     break;
                 case { FolderType: FolderType.SHARE }:
                 case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, authContext.CurrentAccount.ID):
                     result.RootFolderType = FolderType.SHARE;
-                    if (result.ParentRoomType == FolderType.USER)
+                    var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.FolderId);
+                    if (!await _fileSecurity.CanReadAsync(parent))
                     {
                         result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
                     }
