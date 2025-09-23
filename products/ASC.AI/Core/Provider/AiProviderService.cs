@@ -99,7 +99,11 @@ public class AiProviderService(
 
     public async IAsyncEnumerable<AiProvider> GetProvidersAsync(int offset, int limit)
     {
-        await ThrowIfNotAccessAsync();
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is not (EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin))
+        {
+            throw new SecurityException("Access denied");       
+        }
 
         await foreach (var provider in providerDao.GetProvidersAsync(tenantManager.GetCurrentTenantId(), offset, limit))
         {
@@ -109,8 +113,6 @@ public class AiProviderService(
 
     public async Task<int> GetProvidersTotalCountAsync()
     {
-        await ThrowIfNotAccessAsync();
-
         return await providerDao.GetProvidersTotalCountAsync(tenantManager.GetCurrentTenantId());
     }
 
