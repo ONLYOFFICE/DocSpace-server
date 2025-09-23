@@ -844,6 +844,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Files [{0}]. Access Updated for {1}: {2}.
+        /// </summary>
+        public static string FileUpdatedAccessFor {
+            get {
+                return ResourceManager.GetString("FileUpdatedAccessFor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Files [{0}]. Revision {1}. Comment Updated.
         /// </summary>
         public static string FileUpdatedRevisionComment {
@@ -984,6 +993,15 @@ namespace ASC.AuditTrail {
         public static string FolderUpdatedAccess {
             get {
                 return ResourceManager.GetString("FolderUpdatedAccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folders [{0}]. Access Updated for {1}: {2}.
+        /// </summary>
+        public static string FolderUpdatedAccessFor {
+            get {
+                return ResourceManager.GetString("FolderUpdatedAccessFor", resourceCulture);
             }
         }
         

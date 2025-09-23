@@ -268,6 +268,13 @@ public interface IFolderDao<T>
 
 
     /// <summary>
+    /// Set created by
+    /// </summary>
+    /// <param name="newOwnerId"></param>
+    /// <param name="folderIds"></param>
+    Task ReassignFoldersAsync(Guid newOwnerId, IEnumerable<T> folderIds);
+
+    /// <summary>
     /// Search the list of folders containing text in title
     /// Only in TMFolderDao
     /// </summary>
@@ -430,7 +437,11 @@ public interface IFolderDao<T>
         string searchText, bool excludeSubject, Location? location, OrderBy orderBy, int offset = 0, int count = -1);
     Task<int> GetFoldersByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, bool excludeSubject, Location? location);
-    
+
+    Task<int> GetSharedFoldersCountAsync(T parentId);
+
+    IAsyncEnumerable<Folder<T>> GetSharedFoldersAsync(T parentId, int offset = 0, int count = -1);
+
     #endregion
 }
 

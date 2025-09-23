@@ -291,6 +291,37 @@ internal class FolderDao(
             yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
         }
     }
+
+    public async Task<int> GetSharedFoldersCountAsync(int parentId)
+    {
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var q = GetSharedFoldersQuery(parentId, filesDbContext);
+
+        return await q.CountAsync();
+    }
+
+    public async IAsyncEnumerable<Folder<int>> GetSharedFoldersAsync(int parentId, int offset = 0, int count = -1)
+    {
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var q = GetSharedFoldersQuery(parentId, filesDbContext);
+
+        q = q.Skip(offset);
+
+        if (count > 0)
+        {
+            q = q.Take(count);
+        }
+
+        var result = FromQuery(filesDbContext, q);
+
+        await foreach (var e in result.AsAsyncEnumerable())
+        {
+            yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
+        }
+    }
+
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
         var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms, FolderType.RoomTemplates };
@@ -1347,7 +1378,14 @@ internal class FolderDao(
             await filesDbContext.ReassignFoldersPartiallyAsync(tenantId, oldOwnerId, newOwnerId, exceptFolderIds);
         }
     }
-    
+
+    public async Task ReassignFoldersAsync(Guid newOwnerId, IEnumerable<int> folderIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await filesDbContext.ReassignSpecificFoldersAsync(tenantId, folderIds, newOwnerId);
+    }
+
     public async Task ReassignRoomFoldersAsync(Guid oldOwnerId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -2143,6 +2181,25 @@ internal class FolderDao(
     public async Task<string> GetBackupExtensionAsync(int folderId)
     {
         return (await globalStore.GetStoreAsync()).GetBackupExtension();
+    }
+
+    private IQueryable<DbFolder> GetSharedFoldersQuery(int parentId, FilesDbContext filesDbContext)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        var q = GetFolderQuery(filesDbContext)
+                .Join(filesDbContext.Tree, folder => folder.Id, tree => tree.FolderId, (folder, tree) => new { folder, tree })
+                .Where(r => r.tree.ParentId == parentId && r.tree.Level != 0)
+                .Join(filesDbContext.Security, r => r.folder.Id.ToString(), security => security.EntryId, (r, security) => new { r.folder, security })
+                .Where(r => r.security.TenantId == tenantId
+                    && r.security.EntryType == FileEntryType.Folder
+                    && (r.security.SubjectType == SubjectType.ExternalLink
+                        || r.security.SubjectType == SubjectType.PrimaryExternalLink
+                        || r.security.SubjectType == SubjectType.User
+                        || r.security.SubjectType == SubjectType.Group))
+                .Select(r => r.folder);
+
+        return q;
     }
 }
 

@@ -1002,4 +1002,10 @@
   <data name="LoginSuccessViaPassword" xml:space="preserve">
     <value>Login success via login and password</value>
   </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Files [{0}]. Access Updated for {1}: {2}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Folders [{0}]. Access Updated for {1}: {2}</value>
+  </data>
 </root>

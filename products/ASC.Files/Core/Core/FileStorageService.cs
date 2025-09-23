@@ -3190,7 +3190,24 @@ public class FileStorageService //: IFileStorageService
         await ChangeOwnerAsync(thirdIds, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
     }
 
-    public async Task<IEnumerable<FileEntry>> GetSharedFilesAsync(Guid user)
+    public async Task<int> GetSharedEntriesCountAsync(Guid user)
+    {
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        var my = await folderDao.GetFolderIDUserAsync(false, user);
+        if (my == 0)
+        {
+            return 0;
+        }
+
+        var sharedFilesCount = await fileDao.GetSharedFilesCountAsync(my);
+        var sharedFoldersCount = await folderDao.GetSharedFoldersCountAsync(my);
+
+        return sharedFilesCount + sharedFoldersCount;
+    }
+
+    public async Task<List<FileEntry<int>>> GetSharedEntriesAsync(Guid user)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
@@ -3200,40 +3217,57 @@ public class FileStorageService //: IFileStorageService
         {
             return [];
         }
-        var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true, withShared: true).Where(q => q.Shared).ToListAsync();
 
-        return shared;
+        var sharedFiles = await fileDao.GetSharedFilesAsync(my).ToListAsync();
+        var sharedFolders = await folderDao.GetSharedFoldersAsync(my).ToListAsync();
+
+        var result = new List<FileEntry<int>>();
+
+        result.AddRange(sharedFiles);
+        result.AddRange(sharedFolders);
+
+        return result;
     }
 
-    public async Task MoveSharedFilesAsync(Guid user, Guid toUser)
+    public async Task MoveSharedEntriesAsync(Guid user, Guid toUser)
     {
         var initUser = securityContext.CurrentAccount.ID;
 
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
+        var tagDao = daoFactory.GetTagDao<int>();
 
-        var my = await folderDao.GetFolderIDUserAsync(false, user);
-        if (my == 0)
-        {
-            return;
-        }
-
-        var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true, withShared: true).Where(q => q.Shared).ToListAsync();
-
-        await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
-        if (shared.Count > 0)
+        var sharedEntries = await GetSharedEntriesAsync(user);
+        if (sharedEntries.Count > 0)
         {
             await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
             var userInfo = await userManager.GetUsersAsync(user, false);
-            var folder = await CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"Documents of user {userInfo.FirstName} {userInfo.LastName}");
-            foreach (var file in shared)
+            var destinationFolder = await CreateFolderAsync(await globalFolderHelper.FolderMyAsync, string.Format(FilesCommonResource.FolderNameForReassignedData, userInfo.FirstName, userInfo.LastName));
+
+            var fileIds = new List<int>();
+            var folderIds = new List<int>();
+
+            foreach (var fileEntry in sharedEntries)
             {
-                await socketManager.DeleteFileAsync(file, action: async () => await fileDao.MoveFileAsync(file.Id, folder.Id));
-                await socketManager.CreateFileAsync(file);
+                if (fileEntry is File<int> file)
+                {
+                    fileIds.Add(file.Id);
+                    await socketManager.DeleteFileAsync(file, action: async () => await fileDao.MoveFileAsync(file.Id, destinationFolder.Id));
+                    await socketManager.CreateFileAsync(file);
+                }
+                else if (fileEntry is Folder<int> folder)
+                {
+                    folderIds.Add(folder.Id);
+                    await socketManager.DeleteFolder(folder, action: async () => await folderDao.MoveFolderAsync(folder.Id, destinationFolder.Id, null));
+                    await socketManager.CreateFolderAsync(folder);
+                }
             }
-            var ids = shared.Select(s => s.Id).ToList();
-            await DeleteFromRecentAsync([], ids);
-            await fileDao.ReassignFilesAsync(toUser, ids);
+
+            var tags = await tagDao.GetTagsAsync(user, [TagType.Recent, TagType.Favorite], sharedEntries).ToListAsync();
+            await tagDao.RemoveTagsAsync(tags);
+
+            await fileDao.ReassignFilesAsync(toUser, fileIds);
+            await folderDao.ReassignFoldersAsync(toUser, folderIds);
         }
 
         await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
@@ -3842,6 +3876,12 @@ public class FileStorageService //: IFileStorageService
                                                 FileShareExtensions.GetAccessString(pastRecord.Share, true), isSystem.ToString(CultureInfo.InvariantCulture));
                                             break;
                                     }
+                                }
+                                else
+                                {
+                                    await filesMessageService.SendAsync(
+                                        entry.FileEntryType == FileEntryType.Folder ? MessageAction.FolderUpdatedAccessFor : MessageAction.FileUpdatedAccessFor, entry,
+                                        entry.Title, group.Name, FileShareExtensions.GetAccessString(ace.Access));
                                 }
 
                                 break;
