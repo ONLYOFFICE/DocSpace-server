@@ -707,6 +707,36 @@ internal class FileDao(
         return await q.CountAsync();
     }
 
+    public async Task<int> GetSharedFilesCountAsync(int parentId)
+    {
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var q = GetSharedFilesQuery(parentId, filesDbContext);
+
+        return await q.CountAsync();
+    }
+
+    public async IAsyncEnumerable<File<int>> GetSharedFilesAsync(int parentId, int offset = 0, int count = -1)
+    {
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var q = GetSharedFilesQuery(parentId, filesDbContext);
+
+        q = q.Skip(offset);
+
+        if (count > 0)
+        {
+            q = q.Take(count);
+        }
+
+        var result = FromQuery(filesDbContext, q);
+
+        await foreach (var e in result.AsAsyncEnumerable())
+        {
+            yield return mapper.Map<DbFileQuery, File<int>>(e);
+        }
+    }
+
     public async Task<File<int>> ReplaceFileVersionAsync(File<int> file, Stream fileStream)
     {
         ArgumentNullException.ThrowIfNull(file);
@@ -2258,11 +2288,11 @@ internal class FileDao(
                     ).FirstOrDefault(),
                 Shared = filesDbContext.Security.Any(x => 
                     x.TenantId == r.TenantId && 
-                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink || x.SubjectType == SubjectType.User || x.SubjectType == SubjectType.Group) &&
+                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                     x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
                 ParentShared = filesDbContext.Security.Any(x => 
                     x.TenantId == r.TenantId && 
-                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink || x.SubjectType == SubjectType.User || x.SubjectType == SubjectType.Group) &&
+                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                     x.EntryType == FileEntryType.Folder && 
                     filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                 Order = (
@@ -2700,6 +2730,25 @@ internal class FileDao(
         }
 
         return query;
+    }
+
+    private IQueryable<DbFile> GetSharedFilesQuery(int parentId, FilesDbContext filesDbContext)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        var q = GetFileQuery(filesDbContext, file => file.CurrentVersion)
+                .Join(filesDbContext.Tree, file => file.ParentId, tree => tree.FolderId, (file, tree) => new { file, tree })
+                .Where(r => r.tree.ParentId == parentId)
+                .Join(filesDbContext.Security, r => r.file.Id.ToString(), security => security.EntryId, (r, security) => new { r.file, security })
+                .Where(r => r.security.TenantId == tenantId
+                    && r.security.EntryType == FileEntryType.File
+                    && (r.security.SubjectType == SubjectType.ExternalLink
+                        || r.security.SubjectType == SubjectType.PrimaryExternalLink
+                        || r.security.SubjectType == SubjectType.User
+                        || r.security.SubjectType == SubjectType.Group))
+                .Select(r => r.file);
+
+        return q;
     }
 }
 

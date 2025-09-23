@@ -3193,6 +3193,23 @@ public class FileStorageService //: IFileStorageService
         await ChangeOwnerAsync(thirdIds, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
     }
 
+    public async Task<int> GetSharedEntriesCountAsync(Guid user)
+    {
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        var my = await folderDao.GetFolderIDUserAsync(false, user);
+        if (my == 0)
+        {
+            return 0;
+        }
+
+        var sharedFilesCount = await fileDao.GetSharedFilesCountAsync(my);
+        var sharedFoldersCount = await folderDao.GetSharedFoldersCountAsync(my);
+
+        return sharedFilesCount + sharedFoldersCount;
+    }
+
     public async Task<List<FileEntry<int>>> GetSharedEntriesAsync(Guid user)
     {
         var fileDao = daoFactory.GetFileDao<int>();
@@ -3204,8 +3221,8 @@ public class FileStorageService //: IFileStorageService
             return [];
         }
 
-        var sharedFiles = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true, withShared: true).Where(q => q.Shared).ToListAsync();
-        var sharedFolders = await folderDao.GetFoldersAsync(my, null, default, false, Guid.Empty, string.Empty, true).Where(q => q.Shared).ToListAsync();
+        var sharedFiles = await fileDao.GetSharedFilesAsync(my).ToListAsync();
+        var sharedFolders = await folderDao.GetSharedFoldersAsync(my).ToListAsync();
 
         var result = new List<FileEntry<int>>();
 
