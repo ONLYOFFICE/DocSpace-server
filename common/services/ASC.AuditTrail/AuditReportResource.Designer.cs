@@ -691,6 +691,33 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Files [{0}]. External link created: {1}: {2}.
+        /// </summary>
+        public static string FileExternalLinkCreated {
+            get {
+                return ResourceManager.GetString("FileExternalLinkCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Files [{0}]. External link deleted: {1}.
+        /// </summary>
+        public static string FileExternalLinkDeleted {
+            get {
+                return ResourceManager.GetString("FileExternalLinkDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Files [{0}]. External link updated: {1}: {2}.
+        /// </summary>
+        public static string FileExternalLinkUpdated {
+            get {
+                return ResourceManager.GetString("FileExternalLinkUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Folders [{0}]. File Imported: {1}. Provider: {2}.
         /// </summary>
         public static string FileImported {
@@ -921,6 +948,33 @@ namespace ASC.AuditTrail {
         public static string FolderDeleted {
             get {
                 return ResourceManager.GetString("FolderDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folders [{0}]. External link created: {1}: {2}.
+        /// </summary>
+        public static string FolderExternalLinkCreated {
+            get {
+                return ResourceManager.GetString("FolderExternalLinkCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folders [{0}]. External link deleted: {1}.
+        /// </summary>
+        public static string FolderExternalLinkDeleted {
+            get {
+                return ResourceManager.GetString("FolderExternalLinkDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folders [{0}]. External link updated: {1}: {2}.
+        /// </summary>
+        public static string FolderExternalLinkUpdated {
+            get {
+                return ResourceManager.GetString("FolderExternalLinkUpdated", resourceCulture);
             }
         }
         

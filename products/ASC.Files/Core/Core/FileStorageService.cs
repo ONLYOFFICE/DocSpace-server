@@ -5129,12 +5129,12 @@ public class FileStorageService //: IFileStorageService
 
         if (eventType != EventType.Remove)
         {
-            await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, ace.FileShareOptions?.Title,
+            await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, entry.Title, ace.FileShareOptions?.Title,
                 FileShareExtensions.GetAccessString(ace.Access, isRoom), ace.Id.ToString());
         }
         else
         {
-            await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, ace.FileShareOptions?.Title);
+            await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, entry.Title, ace.FileShareOptions?.Title);
         }
 
         if (entry is Folder<T> folderEntry)

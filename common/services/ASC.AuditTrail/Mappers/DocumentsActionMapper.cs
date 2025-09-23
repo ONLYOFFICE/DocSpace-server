@@ -51,8 +51,7 @@ internal class FilesActionMapper : ILocationActionMapper
             {
                 EntryType.File, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Create, [MessageAction.FileCreated, MessageAction.FileCreatedVersion, MessageAction.FileRestoreVersion, MessageAction.FileConverted
-                        ]
+                    { ActionType.Create, [MessageAction.FileCreated, MessageAction.FileCreatedVersion, MessageAction.FileRestoreVersion, MessageAction.FileConverted, MessageAction.FileExternalLinkCreated]
                     },
                     {
                         ActionType.Update, [
@@ -60,11 +59,11 @@ internal class FilesActionMapper : ILocationActionMapper
                             MessageAction.FileLocked, MessageAction.FileUnlocked, MessageAction.FileOpenedForChange, MessageAction.FileMarkedAsFavorite,
                             MessageAction.FormStartedToFill, MessageAction.FormPartiallyFilled, MessageAction.FormCompletelyFilled, MessageAction.FormStopped,
                             MessageAction.FileRemovedFromFavorite, MessageAction.FileMarkedAsRead, MessageAction.FileReaded, MessageAction.FormSubmit, MessageAction.FormOpenedForFilling,
-                            MessageAction.FileIndexChanged, MessageAction.FolderIndexReordered, MessageAction.FileCustomFilterEnabled, MessageAction.FileCustomFilterDisabled
+                            MessageAction.FileIndexChanged, MessageAction.FolderIndexReordered, MessageAction.FileCustomFilterEnabled, MessageAction.FileCustomFilterDisabled,
+                            MessageAction.FileExternalLinkUpdated
                         ]
                     },
-                    { ActionType.Delete, [MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied, MessageAction.FileVersionRemoved
-                        ]
+                    { ActionType.Delete, [MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied, MessageAction.FileVersionRemoved, MessageAction.FileExternalLinkDeleted]
                     },
                     { ActionType.UpdateAccess, [MessageAction.FileUpdatedAccess, MessageAction.FileUpdatedAccessFor, MessageAction.FileRemovedFromList, MessageAction.FileExternalLinkAccessUpdated
                         ]
@@ -108,10 +107,10 @@ internal class FoldersActionMapper : ILocationActionMapper
             {
                 EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Update, [MessageAction.FolderRenamed, MessageAction.FolderMarkedAsRead, MessageAction.FolderIndexChanged] },
-                    { ActionType.UpdateAccess, [MessageAction.FolderUpdatedAccess, MessageAction.FolderUpdatedAccessFor, MessageAction.FolderRemovedFromList
-                        ]
-                    }
+                    { ActionType.Create, [MessageAction.FolderExternalLinkCreated] },
+                    { ActionType.Update, [MessageAction.FolderRenamed, MessageAction.FolderMarkedAsRead, MessageAction.FolderIndexChanged, MessageAction.FolderExternalLinkUpdated] },
+                    { ActionType.UpdateAccess, [MessageAction.FolderUpdatedAccess, MessageAction.FolderUpdatedAccessFor, MessageAction.FolderRemovedFromList] },
+                    { ActionType.Delete, [MessageAction.FolderExternalLinkDeleted] }
                 },
                 new Dictionary<ActionType, MessageAction>
                 {
