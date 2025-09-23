@@ -515,7 +515,7 @@ public class FileDtoHelper(
             
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, file.Order) : file.Order.ToString();
         }
-
+        
         try
         {
             var externalMediaAccess = file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink };
@@ -523,6 +523,8 @@ public class FileDtoHelper(
             if (externalMediaAccess)
             {
                 result.RequestToken = await _externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
+                result.External = true;
+                result.ExpirationDate = _apiDateTimeHelper.Get(file.ShareRecord?.Options?.ExpirationDate);
             }
             
             result.ViewUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);

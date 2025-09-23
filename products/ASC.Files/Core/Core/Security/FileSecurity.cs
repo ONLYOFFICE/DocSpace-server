@@ -571,16 +571,18 @@ public class FileSecurity(
 
     private async Task<IEnumerable<Guid>> WhoCanAsync<T>(FileEntry<T> entry, FilesSecurityActions action, bool includeLinks = false)
     {
-        var shares = await GetSharesAsync(entry);
+        var sharesFromDb = await GetSharesAsync(entry);
         
         if (!includeLinks)
         {
-            shares = shares.Where(r => !r.IsLink);
+            sharesFromDb = sharesFromDb.Where(r => !r.IsLink);
         }
-        
+
+        var shares = sharesFromDb.ToList();
+            
         var linksUsersTask = includeLinks ? 
             GetLinksUsersAsync(shares.Where(r => r.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)) 
-            : Task.FromResult(Enumerable.Empty<Guid>());
+            : Task.FromResult(new List<Guid>(0));
 
         var tenantId = tenantManager.GetCurrentTenantId();
         var copyShares = shares.GroupBy(k => k.Subject).ToDictionary(k => k.Key);
@@ -635,7 +637,7 @@ public class FileSecurity(
                     }
                 ];
 
-                if (!shares.Any())
+                if (shares.Count == 0)
                 {
                     return new List<Guid>
                     {
@@ -659,7 +661,7 @@ public class FileSecurity(
                     }
                 ];
 
-                if (!shares.Any())
+                if (shares.Count == 0)
                 {
                     return new List<Guid>
                     {
@@ -730,13 +732,9 @@ public class FileSecurity(
                 defaultRecords = null;
                 break;
         }
+        
 
-        if (defaultRecords != null)
-        {
-            shares = shares.Concat(defaultRecords);
-        }
-
-        var manyShares = shares.ToAsyncEnumerable().SelectManyAwait(async x => await ToGuidAsync(x)).Distinct();
+        var manyShares = shares.Concat(defaultRecords ?? []).ToAsyncEnumerable().SelectManyAwait(async x => await ToGuidAsync(x)).Distinct();
 
         var result = new List<Guid>();
 
@@ -760,20 +758,15 @@ public class FileSecurity(
         }
 
         var linkUsers = await linksUsersTask;
-        if (linkUsers.Any())
+        if (linkUsers.Count != 0)
         {
             result.AddRange(linkUsers);
         }
 
         return result;
 
-        async Task<IEnumerable<Guid>> GetLinksUsersAsync(IEnumerable<FileShareRecord<T>> linksRecords)
+        async Task<List<Guid>> GetLinksUsersAsync(IEnumerable<FileShareRecord<T>> linksRecords)
         {
-            if (!linksRecords.Any())
-            {
-                return [];
-            }
-            
             var tagDao = daoFactory.GetTagDao<T>();
             var users = new List<Guid>();
 

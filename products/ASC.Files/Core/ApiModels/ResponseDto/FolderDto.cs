@@ -133,12 +133,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// How much folder space is used (counter).
     /// </summary>
     public long? UsedSpace { get; set; }
-
-    /// <summary>
-    /// Specifies if the folder can be accessed via an external link or not.
-    /// </summary>
-    public bool? External { get; set; }
-
+    
     /// <summary>
     /// Specifies if the folder is password protected or not.
     /// </summary>
@@ -249,19 +244,20 @@ public class FolderDtoHelper(
             }
             
             result.Watermark = watermarkHelper.Get(folder.SettingsWatermark);
-
-            if (folder.ShareRecord is { IsLink: true })
-            {
-                result.External = true;
-                result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) && 
-                                           folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && 
-                                           !canRead;
-
-                result.Expired = folder.ShareRecord.Options?.IsExpired;
-                result.RequestToken = await _externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
-            }
         }
+        
+        if (folder.ShareRecord is { IsLink: true })
+        {
+            result.External = true;
+            result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) && 
+                                       folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && 
+                                       !canRead;
 
+            result.Expired = folder.ShareRecord.Options?.IsExpired;
+            result.RequestToken = await _externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
+            result.ExpirationDate = apiDateTimeHelper.Get(folder.ShareRecord?.Options?.ExpirationDate);
+        }
+        
         if (folder.Order != 0)
         {
             if (string.IsNullOrEmpty(order) && (contextFolder == null || !DocSpaceHelper.IsRoom(contextFolder.FolderType)))

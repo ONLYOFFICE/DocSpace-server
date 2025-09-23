@@ -221,7 +221,17 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// The request token of the file entry.
     /// </summary>
     public string RequestToken { get; set; }
-
+    
+    /// <summary>
+    /// Specifies if the folder can be accessed via an external link or not.
+    /// </summary>
+    public bool? External { get; set; }
+    
+    /// <summary>
+    /// Represents the expiration date of the file entry.
+    /// </summary>
+    public ApiDateTime ExpirationDate { get; set; }
+    
     protected FileEntryDto(FileEntry<T> entry)
         : base(entry)
     {
