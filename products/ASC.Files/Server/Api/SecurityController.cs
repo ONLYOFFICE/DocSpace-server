@@ -120,7 +120,7 @@ public abstract class SecurityController<T>(
     [HttpPut("file/{fileId}/share")]
     public IAsyncEnumerable<FileShareDto> SetFileSecurityInfo(FileSecurityInfoSimpleRequestDto<T> inDto)
     {
-        return securityControllerHelper.SetSecurityInfoAsync([inDto.FileId], [], inDto.SecurityInfoSimpe.Share, inDto.SecurityInfoSimpe.Notify, inDto.SecurityInfoSimpe.SharingMessage);
+        return securityControllerHelper.SetSecurityInfoAsync([inDto.FileId], [], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, inDto.SecurityInfoSimple.SharingMessage);
     }
 
     /// <summary>
@@ -134,7 +134,7 @@ public abstract class SecurityController<T>(
     [HttpPut("folder/{folderId}/share")]
     public IAsyncEnumerable<FileShareDto> SetFolderSecurityInfo(FolderSecurityInfoSimpleRequestDto<T> inDto)
     {
-        return securityControllerHelper.SetSecurityInfoAsync([], [inDto.FolderId], inDto.SecurityInfoSimpe.Share, inDto.SecurityInfoSimpe.Notify, inDto.SecurityInfoSimpe.SharingMessage);
+        return securityControllerHelper.SetSecurityInfoAsync([], [inDto.FolderId], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, inDto.SecurityInfoSimple.SharingMessage);
     }
 
     /// <summary>
