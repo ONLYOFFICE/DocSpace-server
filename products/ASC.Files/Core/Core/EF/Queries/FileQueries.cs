@@ -368,11 +368,11 @@ static file class FileQueries
                             ).FirstOrDefault(),
                         Shared = ctx.Security.Any(x => 
                             x.TenantId == r.TenantId && 
-                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink || x.SubjectType == SubjectType.User || x.SubjectType == SubjectType.Group) &&
                             x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
                         ParentShared = ctx.Security.Any(x => 
                             x.TenantId == r.TenantId && 
-                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink || x.SubjectType == SubjectType.User || x.SubjectType == SubjectType.Group) &&
                             x.EntryType == FileEntryType.Folder && 
                             ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                         Order = (
@@ -418,11 +418,11 @@ static file class FileQueries
                             ).FirstOrDefault(),
                         Shared = ctx.Security.Any(x => 
                             x.TenantId == r.TenantId && 
-                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink || x.SubjectType == SubjectType.User || x.SubjectType == SubjectType.Group) &&
                             x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
                         ParentShared = ctx.Security.Any(x => 
                             x.TenantId == r.TenantId && 
-                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink || x.SubjectType == SubjectType.User || x.SubjectType == SubjectType.Group) &&
                             x.EntryType == FileEntryType.Folder && 
                             ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                         LastOpened = ctx.TagLink
