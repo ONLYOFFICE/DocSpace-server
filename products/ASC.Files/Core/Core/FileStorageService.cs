@@ -3880,6 +3880,12 @@ public class FileStorageService //: IFileStorageService
                                             break;
                                     }
                                 }
+                                else
+                                {
+                                    await filesMessageService.SendAsync(
+                                        entry.FileEntryType == FileEntryType.Folder ? MessageAction.FolderUpdatedAccessFor : MessageAction.FileUpdatedAccessFor, entry,
+                                        entry.Title, group.Name, FileShareExtensions.GetAccessString(ace.Access));
+                                }
 
                                 break;
                             }
