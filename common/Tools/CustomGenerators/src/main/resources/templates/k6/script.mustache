@@ -1,0 +1,49 @@
+{{>licenseInfo}}
+
+import http from "k6/http";
+import { check } from "k6";
+import { addTagsDefault } from '../../config/scenarios.js';
+import { url } from '../../config/params.js';
+
+const BASE_URL = url;
+
+{{#requestGroups}}
+
+{{#requests}}
+// Operation Id - {{{operationId}}}
+{{#body}}// Body parameters:{{=<% %>=}}<%#parameters%>
+// <%& key%>- <%& value%><%^-last%><%/-last%><%/parameters%><%={{ }}=%>{{/body}}
+export function {{{operationId}}}(params{{#body}}, payload{{/body}}{{#variables}}, {{{key}}}{{^-last}}{{/-last}}{{/variables}}) {
+    let url = BASE_URL + `{{{path}}}{{=<% %>=}}<%#query%><%#-first%>?<%/-first%><%& key%>=<%& value%><%^-last%>&<%/-last%><%/query%><%={{ }}=%>`;
+
+    {{#isDelete}}
+    // this is a DELETE method request - if params are also set, empty body must be passed
+    let request = http.{{method}}(url{{#body}}, payload{{/body}}, {
+        headers: params.headers,
+        tags: addTagsDefault(false, '{{{operationId}}}', '{{{path}}}')
+    } );
+
+    {{/isDelete}}
+    {{^isDelete}}
+    let request = http.{{method}}(url{{#body}}, payload{{/body}}, {
+        headers: params.headers,
+        tags: addTagsDefault(false, '{{{operationId}}}', '{{{path}}}')
+    } );
+    {{/isDelete}}
+    
+    {{#k6Checks}}
+    {{=<% %>=}}
+    check(request, {
+        "<%& description%>": (r) => r.status === <%& status%>
+    });
+    <%={{ }}=%>
+    {{/k6Checks}}
+    {{#dataExtract}}
+
+    {{{paramName}}} = JSON.parse(request.body).{{{valuePath}}}; // extract data for subsequent use
+    {{/dataExtract}}
+    
+    return request;
+}
+{{/requests}}
+{{/requestGroups}}

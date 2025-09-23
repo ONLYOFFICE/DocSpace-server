@@ -1798,6 +1798,60 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Date.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaDate {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaEmail {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to First name.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaFirstName {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaFirstName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Id.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaId {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Last name.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaLastName {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaLastName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Document Service Quota ({0}).
+        /// </summary>
+        public static string DocumentServerLicenseQuotaReportName {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaReportName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Incorrect Instance id..
         /// </summary>
         public static string EmailAndPasswordIncorrectAmiId {

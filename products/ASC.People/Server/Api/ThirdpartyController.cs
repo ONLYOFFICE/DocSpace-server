@@ -57,7 +57,8 @@ public class ThirdpartyController(
     LoginProfileTransport loginProfileTransport,
     EmailValidationKeyModelHelper emailValidationKeyModelHelper,
     UserSocketManager socketManager,
-    UserWebhookManager webhookManager)
+    UserWebhookManager webhookManager,
+    GeolocationHelper geolocationHelper)
     : ApiControllerBase
     {
 
@@ -85,7 +86,9 @@ public class ThirdpartyController(
 
         inDto.FromOnly = string.IsNullOrWhiteSpace(inDto.FromOnly) ? string.Empty : inDto.FromOnly.ToLower();
 
-        foreach (var provider in ProviderManager.AuthProviders.Where(provider => string.IsNullOrEmpty(inDto.FromOnly) || inDto.FromOnly == provider || (provider == "google" && inDto.FromOnly == "openid")))
+        var geoInfoKey = (await geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key;
+
+        foreach (var provider in ProviderManager.GetSortedAuthProviders(geoInfoKey).Where(provider => string.IsNullOrEmpty(inDto.FromOnly) || inDto.FromOnly == provider || (provider == "google" && inDto.FromOnly == "openid")))
         {
             if (inDto.InviteView && ProviderManager.InviteExceptProviders.Contains(provider))
             {

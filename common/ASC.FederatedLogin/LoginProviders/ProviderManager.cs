@@ -57,6 +57,17 @@ public class ProviderManager(ConsumerFactory consumerFactory)
         ProviderConstants.AppleId
     ];
 
+    public static List<string> GetSortedAuthProviders(string geoInfoKey)
+    {
+        if (geoInfoKey == "CN")
+        {
+            var result = new List<string>() { ProviderConstants.Weixin };
+            result.AddRange(AuthProviders.Where(x => x != ProviderConstants.Weixin));
+            return result;
+        }
+        return AuthProviders;
+    }
+
     public ILoginProvider GetLoginProvider(string providerType)
     {
         return consumerFactory.GetByKey(providerType) as ILoginProvider;

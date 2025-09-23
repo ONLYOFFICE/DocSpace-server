@@ -1221,11 +1221,6 @@ public class FileSecurity(
                 }
                 break;
             case FolderType.VirtualRooms:
-                if (action == FilesSecurityActions.Delete && isRoom)
-                {
-                    return false;
-                }
-                
                 if (isDocSpaceAdmin)
                 {
                     if (action == FilesSecurityActions.Download)

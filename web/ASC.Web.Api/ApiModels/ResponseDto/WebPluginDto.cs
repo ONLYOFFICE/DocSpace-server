@@ -42,14 +42,9 @@ public class WebPluginDto: IMapFrom<WebPlugin>
     public required string Version { get; set; }
 
     /// <summary>
-    /// The Plugin SDK version the current plugin is developed with.
+    /// The minimum version of DocSpace with which the plugin is guaranteed to work.
     /// </summary>
-    public string SdkVersion { get; set; }
-
-    /// <summary>
-    /// The list of supported DocSpace versions that current plugin is guaranteed to work with.
-    /// </summary>
-    public string DocspaceVersions { get; set; }
+    public string MinDocSpaceVersion { get; set; }
 
     /// <summary>
     /// The web plugin description.

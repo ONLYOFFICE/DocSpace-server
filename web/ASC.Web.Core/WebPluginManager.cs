@@ -32,8 +32,7 @@ public class WebPlugin
 {
     public string Name { get; set; }
     public string Version { get; set; }
-    public string SdkVersion { get; set; }
-    public string DocspaceVersions { get; set; }
+    public string MinDocSpaceVersion { get; set; }
     public string Description { get; set; }
     public string License { get; set; }
     public string Author { get; set; }

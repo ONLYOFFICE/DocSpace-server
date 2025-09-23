@@ -24,10 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Socket;
+
 namespace ASC.TelegramService.Commands;
 
 [Scope]
-public class UserCommands(TelegramDao telegramDao, IDistributedCache distributedCache)
+public class UserCommands(
+    TelegramDao telegramDao,
+    IDistributedCache distributedCache,
+    UserSocketManager socketManager)
     : CommandContext
 {
     [Command("start")]
@@ -60,8 +65,8 @@ public class UserCommands(TelegramDao telegramDao, IDistributedCache distributed
             if (tenantId == TenantId)
             {
                 await telegramDao.RegisterUserAsync(portalUserId, tenantId, telegramUserId, telegramUsername);
-
                 await ReplyAsync("Ok!");
+                await socketManager.UpdateTelegram(tenantId, portalUserId, telegramUsername);
 
                 return;
             }

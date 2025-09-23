@@ -490,6 +490,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:delete-guest", guestId);
   }
 
+  function updateTelegram({ tenantId, userId, username } = {}) {
+    var room = `${tenantId}-telegram-${userId}`;
+    filesIO.to(room).emit("s:update-telegram", username);
+  }
+
   function restoreProgress({ tenantId, dump, percentage } = {})
   {
     if(dump)
@@ -563,6 +568,7 @@ module.exports = (io) => {
     addGuest,
     updateGuest,
     deleteGuest,
+    updateTelegram,
     backupProgress,
     restoreProgress,
     endBackup,
