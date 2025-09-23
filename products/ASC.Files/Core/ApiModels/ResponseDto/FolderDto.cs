@@ -329,12 +329,20 @@ public class FolderDtoHelper(
             {
                 case { FolderType: FolderType.Recent }:
                     result.RootFolderType = FolderType.Recent;
-                    result.ParentId = await _globalFolderHelper.GetFolderRecentAsync<T>();
+                    if (result.ParentRoomType == FolderType.Recent)
+                    {
+                        result.ParentId = await _globalFolderHelper.GetFolderRecentAsync<T>();
+                    }
+
                     break;
                 case { FolderType: FolderType.SHARE }:
                 case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, authContext.CurrentAccount.ID):
                     result.RootFolderType = FolderType.SHARE;
-                    result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                    if (result.ParentRoomType == FolderType.USER)
+                    {
+                        result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                    }
+
                     break;
             }
         }
