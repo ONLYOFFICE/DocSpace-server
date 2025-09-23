@@ -293,7 +293,7 @@ public class AuthenticationController(
 
             var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session, initiator, description);
 
-            if (!string.IsNullOrEmpty(inDto.Culture))
+            if (!string.IsNullOrEmpty(inDto.Culture) && user.CultureName != inDto.Culture)
             {
                 await userManager.ChangeUserCulture(user, inDto.Culture);
                 messageService.Send(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
