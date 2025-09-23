@@ -115,19 +115,25 @@ public class RemoveProgressItem : DistributedTaskProgress
             var wrapper = await GetUsageSpace(webItemManagerSecurity);
 
             await fileStorageService.MoveSharedEntriesAsync(UserId, _currentUserId);
+
             Percentage = 30;
             await PublishChanges();
 
             await fileStorageService.DeletePersonalDataAsync(UserId);
 
-            Percentage = 50;
+            Percentage = 45;
+            await PublishChanges();
+
+            await fileStorageService.ReassignProvidersAsync(UserId, _currentUserId);
+
+            Percentage = 60;
             await PublishChanges();
 
             await fileStorageService.ReassignRoomsFilesAsync(UserId);
-                
+
             Percentage = 70;
             await PublishChanges();
-                
+
             await fileStorageService.ReassignRoomsFoldersAsync(UserId);
 
             Percentage = 95;
