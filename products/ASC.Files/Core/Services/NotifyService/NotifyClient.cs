@@ -140,6 +140,11 @@ public class NotifyClient(WorkContext notifyContext,
 
         foreach (var recipientPair in recipients)
         {
+            if (!await studioNotifyHelper.IsSubscribedToNotifyAsync(recipientPair.Key, Actions.RoomsActivity))
+            {
+                continue;
+            }
+
             var u = await userManager.GetUsersAsync(recipientPair.Key);
             CultureInfo userCulture;
 
