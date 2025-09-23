@@ -1872,8 +1872,20 @@ internal class FileDao(
         return await storage.GetReadStreamAsync(string.Empty, path, 0);
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, OrderBy orderBy, int offset = 0, int count = -1)
+    public async IAsyncEnumerable<File<int>> GetFilesByTagAsync(Guid tagOwner,
+        IEnumerable<TagType> tagType,
+        FilterType filterType,
+        bool subjectGroup,
+        Guid subjectId,
+        string searchText,
+        string[] extension,
+        bool searchInContent,
+        bool excludeSubject,
+        Location? location,
+        int trashId,
+        OrderBy orderBy,
+        int offset,
+        int count)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -1882,7 +1894,7 @@ internal class FileDao(
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         
-        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location);
+        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId);
 
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
@@ -1922,8 +1934,17 @@ internal class FileDao(
         }
     }
 
-    public async Task<int> GetFilesByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location)
+    public async Task<int> GetFilesByTagCountAsync(Guid tagOwner,
+        IEnumerable<TagType> tagType,
+        FilterType filterType,
+        bool subjectGroup,
+        Guid subjectId,
+        string searchText,
+        string[] extension,
+        bool searchInContent,
+        bool excludeSubject,
+        Location? location, 
+        int trashId)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -1932,7 +1953,7 @@ internal class FileDao(
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         
-        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location);
+        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId);
         
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
@@ -2599,7 +2620,7 @@ internal class FileDao(
         return q;
     }
     
-    private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location)
+    private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         
@@ -2623,6 +2644,11 @@ internal class FileDao(
                 f => f.Id,
                 (x, f) => new { f, x.l, x.t })
             .Where(x => x.f.CurrentVersion);
+
+        if (trashId != 0)
+        {
+            initQuery = initQuery.Where(r => r.f.ParentId != trashId);
+        }
         
         var query = initQuery.Select(x => new FileByTagQuery
         {

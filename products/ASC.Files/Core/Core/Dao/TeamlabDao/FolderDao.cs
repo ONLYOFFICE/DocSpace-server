@@ -613,7 +613,7 @@ internal class FolderDao(
         return room;
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, OrderBy orderBy, int offset = 0, int count = -1)
+    public async IAsyncEnumerable<Folder<int>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, OrderBy orderBy, int offset, int count)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -622,7 +622,7 @@ internal class FolderDao(
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         
-        var q = GetFoldersByTagQuery(filesDbContext, tagOwner, tagType, location);
+        var q = GetFoldersByTagQuery(filesDbContext, tagOwner, tagType, location, trashId);
 
         q = await GetFoldersQueryWithFilters(q, subjectGroup, subjectId, searchText, excludeSubject);
 
@@ -661,7 +661,7 @@ internal class FolderDao(
         }
     }
     
-    public async Task<int> GetFoldersByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location)
+    public async Task<int> GetFoldersByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -670,14 +670,14 @@ internal class FolderDao(
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         
-        var q = GetFoldersByTagQuery(filesDbContext, tagOwner, tagType, location);
+        var q = GetFoldersByTagQuery(filesDbContext, tagOwner, tagType, location, trashId);
 
         q = await GetFoldersQueryWithFilters(q, subjectGroup, subjectId, searchText, excludeSubject);
 
         return await q.CountAsync();
     }
     
-    private IQueryable<FolderByTagQuery> GetFoldersByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location)
+    private IQueryable<FolderByTagQuery> GetFoldersByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         
@@ -700,6 +700,11 @@ internal class FolderDao(
                 x => Convert.ToInt32(x.l.EntryId),
                 f => f.Id,
                 (x, f) => new { f, x.l, x.t });
+        
+        if (trashId != 0)
+        {
+            initQuery = initQuery.Where(r => r.f.ParentId != trashId);
+        }
         
         var query = initQuery.Select(x => new FolderByTagQuery
         {
