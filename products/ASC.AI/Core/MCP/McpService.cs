@@ -497,7 +497,7 @@ public partial class McpService(
     {
         var room = await GetRoomAsync(roomId);
 
-        if (!await fileSecurity.CanUseChatsAsync(room))
+        if (!await fileSecurity.CanUseChatAsync(room))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }

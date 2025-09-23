@@ -206,9 +206,9 @@ public class FileSecurity(IDaoFactory daoFactory,
                 FolderType.AiRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] },
-                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] }
+                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.Read, FileShare.None] },
+                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.Read, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
             }
         }.ToFrozenDictionary();
@@ -299,7 +299,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.CopyLink,
                     FilesSecurityActions.Embed,
                     FilesSecurityActions.ChangeOwner,
-                    FilesSecurityActions.IndexExport
+                    FilesSecurityActions.IndexExport,
+                    FilesSecurityActions.UseChat
                 }
             }
     }.ToFrozenDictionary();
@@ -569,6 +570,11 @@ public class FileSecurity(IDaoFactory daoFactory,
     public async Task<bool> CanVectorizationAsync<T>(FileEntry<T> entry)
     {
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.Vectorization);
+    }
+
+    public async Task<bool> CanUseChatAsync<T>(FileEntry<T> entry)
+    {
+        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.UseChat);
     }
     
     public async Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry, bool includeLinks = false)
@@ -984,6 +990,11 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
         }
 
+        if (action is FilesSecurityActions.UseChat && folder is not { FolderType: FolderType.AiRoom })
+        {
+            return false;
+        }
+
         if (action is FilesSecurityActions.AscAi &&
             (file == null || !vectorizationSettings.IsSupportedContentExtraction(file.Title)))
         {
@@ -1271,7 +1282,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
                 
-                if (isDocSpaceAdmin)
+                if (isDocSpaceAdmin && (folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge)))
                 {
                     if (action == FilesSecurityActions.Download)
                     {
@@ -1463,7 +1474,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
                 
-                if (isDocSpaceAdmin)
+                if (isDocSpaceAdmin && (folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge)))
                 {
                     if (action == FilesSecurityActions.Download)
                     {
@@ -1584,6 +1595,11 @@ public class FileSecurity(IDaoFactory daoFactory,
             case FilesSecurityActions.Pin:
             case FilesSecurityActions.Mute:
             case FilesSecurityActions.CopyLink:
+                if (e is Folder<T> { FolderType: FolderType.Knowledge, Access: FileShare.Read or FileShare.None })
+                {
+                    return false;
+                }
+                
                 return e.Access != FileShare.Restrict;
             case FilesSecurityActions.Comment:
                 switch (e.RootFolderType)
@@ -2034,6 +2050,20 @@ public class FileSecurity(IDaoFactory daoFactory,
                 break;
             case FilesSecurityActions.AscAi:
                 return e.Access != FileShare.Restrict;
+            case FilesSecurityActions.UseChat:
+                switch (e.RootFolderType)
+                {
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
+                        {
+                            return true;
+                        }
+                        
+                        break;
+                }
+                break;
         }
 
         if (e.Access != FileShare.Restrict &&
@@ -3257,6 +3287,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         Vectorization,
         
         [Description("Asc AI")]
-        AscAi
+        AscAi,
+        
+        [Description("Use chat")]
+        UseChat
     }
 }

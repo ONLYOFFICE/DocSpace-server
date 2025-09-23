@@ -137,7 +137,7 @@ public class ChatService(
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        if (!await fileSecurity.CanUseChatsAsync(room))
+        if (!await fileSecurity.CanUseChatAsync(room))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
