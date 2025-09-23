@@ -42,6 +42,12 @@ public class VectorizationSettings
         MaxContentLength = settings.MaxContentLengthBytes;
         SupportedFormats = settings.SupportedFormats;
     }
+
+    public bool IsSupportedContentExtraction(string fileTitle)
+    {
+        var ext = FileUtility.GetFileExtension(fileTitle);
+        return SupportedFormats.Contains(ext);
+    }
     
     private class Settings
     {

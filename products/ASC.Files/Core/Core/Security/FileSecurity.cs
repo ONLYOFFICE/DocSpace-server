@@ -51,7 +51,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         StudioNotifyHelper studioNotifyHelper,
         BadgesSettingsHelper badgesSettingsHelper,
         ExternalShare externalShare,
-        AuthManager authManager)
+        AuthManager authManager,
+        VectorizationSettings vectorizationSettings)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -271,7 +272,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.ResetFilling,
                     FilesSecurityActions.StopFilling,
                     FilesSecurityActions.OpenForm,
-                    FilesSecurityActions.Vectorization
+                    FilesSecurityActions.Vectorization,
+                    FilesSecurityActions.AscAi
                 }
             },
             {
@@ -980,6 +982,12 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
             }
+        }
+
+        if (action is FilesSecurityActions.AscAi &&
+            (file == null || !vectorizationSettings.IsSupportedContentExtraction(file.Title)))
+        {
+            return false;
         }
 
         if (action is FilesSecurityActions.Vectorization && 
@@ -2024,6 +2032,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                         break;
                 }
                 break;
+            case FilesSecurityActions.AscAi:
+                return e.Access != FileShare.Restrict;
         }
 
         if (e.Access != FileShare.Restrict &&
@@ -3244,6 +3254,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         EditExpiration,
         
         [Description("Vectorization")]
-        Vectorization
+        Vectorization,
+        
+        [Description("Asc AI")]
+        AscAi
     }
 }
