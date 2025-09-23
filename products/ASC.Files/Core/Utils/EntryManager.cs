@@ -1849,6 +1849,7 @@ public class EntryManager(IDaoFactory daoFactory,
         if (linkId != Guid.Empty && file.CreateBy != userId)
         {
             await fileMarker.MarkAsRecentByLink(file, linkId.Value);
+            await socketManager.AddToSharedAsync(file, [userId]);
         }
 
         var tagDao = daoFactory.GetTagDao<T>();
