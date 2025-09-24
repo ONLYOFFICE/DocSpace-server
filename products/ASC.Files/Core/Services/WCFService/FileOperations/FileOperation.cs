@@ -269,6 +269,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
     protected ITagDao<TId> TagDao { get; private set; }
     protected ILinkDao<TId> LinkDao { get; private set; }
     protected IProviderDao ProviderDao { get; private set; }
+    protected IRoomGroupDao RoomGroupDao { get; private set; }
     protected ILogger Logger { get; private set; }
     protected internal List<TId> Folders { get; }
     protected internal List<TId> Files { get; }

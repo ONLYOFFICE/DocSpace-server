@@ -29,7 +29,7 @@ namespace ASC.Files.Core;
 public interface IDaoFactory
 {
     IProviderDao ProviderDao { get; }
-
+    IRoomGroupDao RoomGroupDao { get; }
     IFolderDao<T> GetFolderDao<T>();
     IFolderDao<T> GetCacheFolderDao<T>();
     IFileDao<T> GetFileDao<T>();

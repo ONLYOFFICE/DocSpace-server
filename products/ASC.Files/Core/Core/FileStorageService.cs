@@ -5000,6 +5000,34 @@ public class FileStorageService //: IFileStorageService
         await socketManager.UpdateFileAsync(form);
     }
 
+    public async Task<RoomGroup> SaveRoomGroupAsync(RoomGroup roomGroup)
+    {
+        var newGroup = await daoFactory.RoomGroupDao.SaveRoomGroupAsync(roomGroup);
+       // await socketManager.CreateRoomGroupAsync(newGroup);
+        return newGroup;
+    }
+    public async Task AddRoomToGroupAsync(int roomId, int groupId)
+    {
+        await CheckRoomAvailability(roomId);
+        await daoFactory.RoomGroupDao.AddInternalRoomToGroupAsync(roomId, groupId);
+    }
+
+    public async Task AddRoomToGroupAsync(string roomId, int groupId)
+    {
+        await CheckRoomAvailability(roomId);
+        await daoFactory.RoomGroupDao.AddThirdpartyRoomToGroupAsync(roomId, groupId);
+    }
+
+    private async Task CheckRoomAvailability<T>(T roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var room = await folderDao.GetFolderAsync(roomId);
+
+        if (!DocSpaceHelper.IsRoom(room.FolderType) || !await fileSecurity.CanReadAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+        }
+    }
 
     private async Task ValidateChangeRolesPermission<T>(File<T> form)
     {

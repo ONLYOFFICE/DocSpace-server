@@ -26,13 +26,12 @@
 
 namespace ASC.Files.Core.EF;
 
-public class DbFilesRoomGroup : BaseEntity
+public class DbFilesRoomGroup : BaseEntity, IMapFrom<RoomGroupRef>
 {
     public int Id { get; set; }
     public int TenantId { get; set; }
     public int GroupId { get; set; }
     public int? InternalRoomId { get; set; }
-    [MaxLength(255)]
     public string ThirdpartyRoomId { get; set; }
 
     public DbTenant Tenant { get; set; }
