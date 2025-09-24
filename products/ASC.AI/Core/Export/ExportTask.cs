@@ -81,11 +81,6 @@ public abstract class ExportTask<T>(IServiceScopeFactory serviceScopeFactory) : 
 
             var messages = GetMessages(scope.ServiceProvider);
 
-            if (!await messages.AnyAsync())
-            {
-                throw new Exception("Messages not found");
-            }
-
             var builder = new StringBuilder();
             var tenantUtil = scope.ServiceProvider.GetRequiredService<TenantUtil>();
 
@@ -95,6 +90,11 @@ public abstract class ExportTask<T>(IServiceScopeFactory serviceScopeFactory) : 
                 content = CutThink(content);
                 _ = builder.Append(content)
                     .Append("---\n\n");
+            }
+
+            if (builder.Length == 0)
+            {
+                throw new Exception("Messages not found");
             }
 
             var pathProvider = scope.ServiceProvider.GetRequiredService<PathProvider>();
@@ -131,10 +131,10 @@ public abstract class ExportTask<T>(IServiceScopeFactory serviceScopeFactory) : 
         }
     }
 
-    private string CutThink(string content)
+    private static string CutThink(string content)
     {
-        var start = content.IndexOf("<think>");
-        var end = content.IndexOf("</think>") + "</think>".Length + 1;
+        var start = content.IndexOf("<think>", StringComparison.Ordinal);
+        var end = content.IndexOf("</think>", StringComparison.Ordinal) + "</think>".Length + 1;
 
         return start < 0 || end < 0
             ? content
