@@ -175,7 +175,7 @@ public abstract class SecurityController<T>(
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<GroupMemberSecurityRequestDto>))]
     [HttpGet("folder/{folderId}/group/{groupId:guid}/share")]
-    public async IAsyncEnumerable<GroupMemberSecurityRequestDto> GetGroupsMembersWithFolderSecurity(GroupMemberSecurityRequestDto<T> inDto)
+    public async IAsyncEnumerable<GroupMemberSecurityRequestDto> GetGroupsMembersWithFolderSecurity(GroupMemberSecurityFolderRequestDto<T> inDto)
     {
         var offset = inDto.StartIndex;
         var count = inDto.Count;
@@ -187,6 +187,39 @@ public abstract class SecurityController<T>(
         apiContext.SetCount(Math.Min(Math.Max(totalCount - offset, 0), count)).SetTotalCount(totalCount);
 
         await foreach (var memberSecurity in fileSharing.GetGroupMembersAsync(folder, inDto.GroupId, text, offset, count))
+        {
+            yield return new GroupMemberSecurityRequestDto
+            {
+                User = await employeeFullDtoHelper.GetFullAsync(memberSecurity.User),
+                GroupAccess = memberSecurity.GroupShare,
+                CanEditAccess = memberSecurity.CanEditAccess,
+                UserAccess = memberSecurity.UserShare,
+                Overridden = memberSecurity.UserShare.HasValue,
+                Owner = memberSecurity.Owner
+            };
+        }
+    }
+
+    /// <summary>
+    /// Returns the group members with their file security information.
+    /// </summary>
+    /// <short>Get group members with security information</short>
+    /// <path>api/2.0/files/file/{fileId}/group/{groupId}/share</path>
+    [Tags("Files / Sharing")]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<GroupMemberSecurityRequestDto>))]
+    [HttpGet("file/{fileId}/group/{groupId:guid}/share")]
+    public async IAsyncEnumerable<GroupMemberSecurityRequestDto> GetGroupsMembersWithFileSecurity(GroupMemberSecurityFileRequestDto<T> inDto)
+    {
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
+        var text = inDto.Text;
+        
+        var file = await daoFactory.GetFileDao<T>().GetFileAsync(inDto.FileId);
+        var totalCount = await fileSharing.GetGroupMembersCountAsync(file, inDto.GroupId, text);
+
+        apiContext.SetCount(Math.Min(Math.Max(totalCount - offset, 0), count)).SetTotalCount(totalCount);
+
+        await foreach (var memberSecurity in fileSharing.GetGroupMembersAsync(file, inDto.GroupId, text, offset, count))
         {
             yield return new GroupMemberSecurityRequestDto
             {
