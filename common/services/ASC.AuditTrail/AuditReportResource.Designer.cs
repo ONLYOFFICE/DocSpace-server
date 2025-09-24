@@ -718,6 +718,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File Marked As Favorite: {0}.
+        /// </summary>
+        public static string FileMarkedAsFavorite {
+            get {
+                return ResourceManager.GetString("FileMarkedAsFavorite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Files [{0}]. Moved From Folder &quot;{1}&quot; To Folder: &quot;{2}&quot;.
         /// </summary>
         public static string FileMoved {
@@ -750,6 +759,15 @@ namespace ASC.AuditTrail {
         public static string FileOpenedForChange {
             get {
                 return ResourceManager.GetString("FileOpenedForChange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File Removed From Favorite: {0}.
+        /// </summary>
+        public static string FileRemovedFromFavorite {
+            get {
+                return ResourceManager.GetString("FileRemovedFromFavorite", resourceCulture);
             }
         }
         

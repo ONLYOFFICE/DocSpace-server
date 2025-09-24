@@ -1002,4 +1002,10 @@
   <data name="LoginSuccessViaPassword" xml:space="preserve">
     <value>Login success via login and password</value>
   </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>File Marked As Favorite: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>File Removed From Favorite: {0}</value>
+  </data>
 </root>
