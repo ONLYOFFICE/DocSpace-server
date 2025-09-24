@@ -27,18 +27,25 @@
 namespace ASC.AI.Core.Tools;
 
 [Scope]
-public class WebSearchTool(WebSearchEngineFactory searchEngineFactory) : BaseTool
+public class WebSearchTool(WebSearchEngineFactory searchEngineFactory)
 {
     private const string Name = "docspace_web_search";
     private const string Description = "Search the web - performs real-time web searches and can scrape content from specific URLs.";
+
+    private static AIFunctionFactoryOptions FactoryOptions => new()
+    {
+        Name = Name, 
+        Description = Description, 
+        MarshalResult = ((o, _, _) => ValueTask.FromResult(o))
+    };
 
     public AIFunction Init(EngineConfig config)
     {
         var engine = searchEngineFactory.Create(config);
 
-        return AIFunctionFactory.Create(SearchFunction, Name, Description);
+        return AIFunctionFactory.Create(Function, FactoryOptions);
         
-        async Task<ToolResponse> SearchFunction([Description("Search query")] string query)
+        async Task<ToolResponse<List<WebSearchResult>>> Function([Description("Search query")] string query)
         {
             try
             {
@@ -48,11 +55,13 @@ public class WebSearchTool(WebSearchEngineFactory searchEngineFactory) : BaseToo
                     MaxResults = 5
                 });
 
-                return ToResponse(results);
+                var response = results.ToList();
+
+                return new ToolResponse<List<WebSearchResult>> { Data = response };
             }
             catch (Exception e)
             {
-                return ToResponse(e.Message);
+                return new ToolResponse<List<WebSearchResult>> { Error = e.Message };
             }
         }
     }

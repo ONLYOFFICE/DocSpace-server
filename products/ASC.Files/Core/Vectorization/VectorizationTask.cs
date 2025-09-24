@@ -155,6 +155,7 @@ public class VectorizationTask : DistributedTaskProgress
                                 Id = Guid.NewGuid(),
                                 TenantId = _tenantId,
                                 RoomId = room.Id,
+                                Title = file.Title,
                                 FileId = file.Id,
                                 TextEmbedding = text,
                                 Embedding = embeddings[index].Vector.ToArray()

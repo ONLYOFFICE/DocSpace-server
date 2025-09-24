@@ -30,10 +30,6 @@ public class WebSearchResult
 {
     public string? Title { get; init; }
     public string? Url { get; init; }
-    public required string Text { get; init; }
-}
-
-public class PageContentResult
-{
+    public string? FaviconUrl { get; init; }
     public required string Text { get; init; }
 }

@@ -30,5 +30,5 @@ public interface IWebSearchEngine
 {
     public Task<IEnumerable<WebSearchResult>> SearchAsync(SearchQuery query, CancellationToken cancellationToken = default);
 
-    public Task<PageContentResult?> GetPageContentAsync(PageContentQuery query, CancellationToken cancellationToken = default);
+    public Task<WebSearchResult?> GetPageContentAsync(PageContentQuery query, CancellationToken cancellationToken = default);
 }

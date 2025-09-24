@@ -27,27 +27,39 @@
 namespace ASC.AI.Core.Tools;
 
 [Scope]
-public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine) : BaseTool
+public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine)
 {
     private const string Name = "docspace_knowledge_search";
     private const string Description = "Search in knowledge base";
+    
+    private static AIFunctionFactoryOptions FactoryOptions => new()
+    {
+        Name = Name, 
+        Description = Description, 
+        MarshalResult = ((o, _, _) => ValueTask.FromResult(o))
+    };
 
     public AIFunction Init(int roomId)
     {
-        return AIFunctionFactory.Create(Function, Name, Description);
+        return AIFunctionFactory.Create(Function, FactoryOptions);
         
-        async Task<ToolResponse> Function([Description("Query to search")] string query)
+        async Task<ToolResponse<List<KnowledgeSearchResult>>> Function([Description("Search query")] string query)
         {
             try
             {
-                var results = (await searchEngine.SearchAsync(roomId, query))
-                    .Select(x => new { fileId = x.FileId, text = x.TextEmbedding });
-
-                return ToResponse(results);
+                var results = await searchEngine.SearchAsync(roomId, query);
+                
+                return new ToolResponse<List<KnowledgeSearchResult>>
+                {
+                    Data = results
+                };
             }
             catch (Exception e)
             {
-                return ToResponse(e.Message);
+                return new ToolResponse<List<KnowledgeSearchResult>>
+                {
+                    Error = e.Message
+                };
             }
         }
     }

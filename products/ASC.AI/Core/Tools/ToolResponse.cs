@@ -26,7 +26,8 @@
 
 namespace ASC.AI.Core.Tools;
 
-public class ToolResponse
+public class ToolResponse<T>
 {
-    public List<AIContent>? Content { get; init; }
+    public T? Data { get; init; }
+    public string? Error { get; init; }
 }

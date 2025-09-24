@@ -40,6 +40,11 @@ public class ChatController(
     MessageExporter exporter,
     McpService mcpService) : ControllerBase
 {
+    private static readonly JsonSerializerOptions _streamSerializerOptions = new(JsonSerializerDefaults.Web)
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+    
     [HttpPost("rooms/{roomId}/chats")]
     public async Task<IActionResult> StartNewChatAsync(StartNewChatRequestDto inDto)
     {
@@ -202,7 +207,7 @@ public class ChatController(
                 await Response.WriteAsync($"event: {content.GetEventName()}\n", cancellationToken: cancellationToken);
             
                 await Response.WriteAsync("data: ", cancellationToken: cancellationToken);
-                await JsonSerializer.SerializeAsync(Response.Body, content, JsonSerializerOptions.Web, cancellationToken: cancellationToken);
+                await JsonSerializer.SerializeAsync(Response.Body, content, _streamSerializerOptions, cancellationToken: cancellationToken);
             
                 await Response.WriteAsync("\n\n", cancellationToken: cancellationToken);
             }

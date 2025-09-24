@@ -27,18 +27,25 @@
 namespace ASC.AI.Core.Tools;
 
 [Scope]
-public class WebCrawlingTool(WebSearchEngineFactory searchEngineFactory) : BaseTool
+public class WebCrawlingTool(WebSearchEngineFactory searchEngineFactory)
 {
     private const string Name = "docspace_web_crawling";
     private const string Description = "Extract and crawl content from specific URLs - retrieves full text content, metadata, and structured information from web pages. Ideal for extracting detailed content from known URLs.";
+    
+    private static AIFunctionFactoryOptions FactoryOptions => new()
+    {
+        Name = Name, 
+        Description = Description, 
+        MarshalResult = ((o, _, _) => ValueTask.FromResult(o))
+    };
 
     public AIFunction Init(EngineConfig config)
     {
         var engine = searchEngineFactory.Create(config);
         
-        return AIFunctionFactory.Create(Function, Name, Description);
+        return AIFunctionFactory.Create(Function, FactoryOptions);
         
-        async Task<ToolResponse> Function(
+        async Task<ToolResponse<WebSearchResult>> Function(
             [Description("URL to crawl and extract content from")] string url,
             [Description("Maximum characters to extract (default: 3000)")] int? maxCharacters)
         {
@@ -50,11 +57,11 @@ public class WebCrawlingTool(WebSearchEngineFactory searchEngineFactory) : BaseT
                     MaxCharacters = maxCharacters ?? 3000
                 });
 
-                return ToResponse(result);
+                return new ToolResponse<WebSearchResult> { Data = result };
             }
             catch (Exception e)
             {
-                return ToResponse(e.Message);
+                return new ToolResponse<WebSearchResult> { Error = e.Message };
             }
         }
     }

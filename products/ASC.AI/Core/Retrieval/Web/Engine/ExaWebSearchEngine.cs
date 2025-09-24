@@ -77,11 +77,12 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
         {
             Title = x.Title,
             Url = x.Url,
+            FaviconUrl = x.Favicon,
             Text = x.Text
         });
     }
 
-    public async Task<PageContentResult?> GetPageContentAsync(PageContentQuery query, CancellationToken cancellationToken = default)
+    public async Task<WebSearchResult?> GetPageContentAsync(PageContentQuery query, CancellationToken cancellationToken = default)
     {
         var requestBody = new ExaCrawlRequest 
         { 
@@ -116,8 +117,11 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
         }
         
         var result = responseContent.Results[0];
-        return new PageContentResult
+        return new WebSearchResult
         {
+            Title = result.Title,
+            Url = result.Url,
+            FaviconUrl = result.Favicon,
             Text = result.Text
         };
     }
@@ -152,6 +156,7 @@ class ExaSearchResult
 {
     public string? Title { get; init; }
     public string? Url { get; init; }
+    public string? Favicon { get; init; }
     public required string Text { get; init; }
 }
 
@@ -159,5 +164,4 @@ class ExaCrawlRequest
 {
     public required List<string> Urls { get; init; }
     public required Contents Contents { get; init; }
-    public string? Livecrawl { get; init; }
 }
