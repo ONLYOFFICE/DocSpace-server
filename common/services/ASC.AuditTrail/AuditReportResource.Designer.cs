@@ -691,7 +691,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Files [{0}]. External link created: {1}: {2}.
+        ///   Looks up a localized string similar to Files [{0}]. External link created: {1}. Role: {2}.
         /// </summary>
         public static string FileExternalLinkCreated {
             get {
@@ -709,7 +709,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Files [{0}]. External link updated: {1}: {2}.
+        ///   Looks up a localized string similar to Files [{0}]. External link updated: {1}. Role: {2}.
         /// </summary>
         public static string FileExternalLinkUpdated {
             get {
@@ -871,7 +871,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Files [{0}]. Access Updated for {1}: {2}.
+        ///   Looks up a localized string similar to Files [{0}]. Access Updated for {1}. Role: {2}.
         /// </summary>
         public static string FileUpdatedAccessFor {
             get {
@@ -952,7 +952,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Folders [{0}]. External link created: {1}: {2}.
+        ///   Looks up a localized string similar to Folders [{0}]. External link created: {1}. Role: {2}.
         /// </summary>
         public static string FolderExternalLinkCreated {
             get {
@@ -970,7 +970,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Folders [{0}]. External link updated: {1}: {2}.
+        ///   Looks up a localized string similar to Folders [{0}]. External link updated: {1}. Role: {2}.
         /// </summary>
         public static string FolderExternalLinkUpdated {
             get {
@@ -1051,7 +1051,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Folders [{0}]. Access Updated for {1}: {2}.
+        ///   Looks up a localized string similar to Folders [{0}]. Access Updated for {1}. Role: {2}.
         /// </summary>
         public static string FolderUpdatedAccessFor {
             get {
@@ -1983,6 +1983,15 @@ namespace ASC.AuditTrail {
         public static string RoomExternalLinkDeleted {
             get {
                 return ResourceManager.GetString("RoomExternalLinkDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to External link revoked: {1}.
+        /// </summary>
+        public static string RoomExternalLinkRevoked {
+            get {
+                return ResourceManager.GetString("RoomExternalLinkRevoked", resourceCulture);
             }
         }
         

@@ -5069,13 +5069,6 @@ public class FileStorageService //: IFileStorageService
             options.Password = password;
         }
 
-        var actions = entry.FileEntryType switch
-        {
-            FileEntryType.File => _fileMessageActions,
-            FileEntryType.Folder => _folderMessageActions,
-            _ => _roomMessageActions
-        };
-
         var result = await SetAceLinkAsync(entry, primary ? SubjectType.PrimaryExternalLink : SubjectType.ExternalLink, linkId, share, options);
         if (result == null)
         {
@@ -5089,11 +5082,13 @@ public class FileStorageService //: IFileStorageService
         var folder = entry as Folder<T>;
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
 
+        var actions = folder == null ? _fileMessageActions : isRoom ? _roomMessageActions : _folderMessageActions;
+
         if (folder != null && !isRoom || entry is File<T>)
         {
             folder = await daoFactory.GetCacheFolderDao<T>().GetFirstParentTypeFromFileEntryAsync(entry);
         }
-        
+
         if (eventType == EventType.Remove && ace.SubjectType == SubjectType.PrimaryExternalLink &&
             (folder is { FolderType: FolderType.PublicRoom or FolderType.FillingFormsRoom }))
         {
@@ -5129,12 +5124,27 @@ public class FileStorageService //: IFileStorageService
 
         if (eventType != EventType.Remove)
         {
-            await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, entry.Title, ace.FileShareOptions?.Title,
-                FileShareExtensions.GetAccessString(ace.Access, isRoom), ace.Id.ToString());
+            if (isRoom)
+            {
+                await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, ace.FileShareOptions?.Title,
+                    FileShareExtensions.GetAccessString(ace.Access, isRoom), ace.Id.ToString());
+            }
+            else
+            {
+                await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, entry.Title, ace.FileShareOptions?.Title,
+                    FileShareExtensions.GetAccessString(ace.Access, isRoom), ace.Id.ToString());
+            }
         }
         else
         {
-            await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, entry.Title, ace.FileShareOptions?.Title);
+            if (isRoom)
+            {
+                await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, ace.FileShareOptions?.Title);
+            }
+            else
+            {
+                await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, entry.Title, ace.FileShareOptions?.Title);
+            }
         }
 
         if (entry is Folder<T> folderEntry)

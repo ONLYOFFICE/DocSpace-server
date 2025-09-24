@@ -164,6 +164,7 @@ internal class RoomsActionMapper : ILocationActionMapper
                             MessageAction.RoomExternalLinkCreated,
                             MessageAction.RoomExternalLinkUpdated,
                             MessageAction.RoomExternalLinkDeleted,
+                            MessageAction.RoomExternalLinkRevoked,
                             MessageAction.RoomGroupAdded,
                             MessageAction.RoomUpdateAccessForGroup,
                             MessageAction.RoomGroupRemove,
