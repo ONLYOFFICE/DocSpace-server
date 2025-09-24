@@ -816,8 +816,8 @@ public class ShareInheritanceTest(
         
         var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
-        fileInfo.AvailableExternalRights.Should().HaveCount(2);
-        fileInfo.AvailableExternalRights.Where(r => r.Value).Should().ContainKeys(nameof(FileShare.FillForms), nameof(FileShare.None));
+        fileInfo.AvailableShareRights.ExternalLink.Should().HaveCount(2);
+        fileInfo.AvailableShareRights.ExternalLink.Should().Contain(nameof(FileShare.FillForms), nameof(FileShare.None));
     }
 
     [Fact]
@@ -832,7 +832,7 @@ public class ShareInheritanceTest(
         
         var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
-        fileInfo.AvailableExternalRights.Should().HaveCount(3);
-        fileInfo.AvailableExternalRights.Where(r => r.Value).Should().ContainKeys(nameof(FileShare.Editing), nameof(FileShare.FillForms), nameof(FileShare.None));
+        fileInfo.AvailableShareRights.ExternalLink.Should().HaveCount(3);
+        fileInfo.AvailableShareRights.ExternalLink.Should().Contain(nameof(FileShare.Editing), nameof(FileShare.FillForms), nameof(FileShare.None));
     }
 }
