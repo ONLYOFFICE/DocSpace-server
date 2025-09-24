@@ -29,4 +29,7 @@ namespace ASC.AI.Models.ResponseDto;
 public class AiSettingsDto : IMapFrom<AiSettings>
 {
     public bool WebSearchEnabled { get; init; }
+    public required string KnowledgeSearchToolName { get; init; }
+    public required string WebSearchToolName { get; init; }
+    public required string WebCrawlingToolName { get; init; }
 }

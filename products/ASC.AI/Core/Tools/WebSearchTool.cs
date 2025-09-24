@@ -29,7 +29,7 @@ namespace ASC.AI.Core.Tools;
 [Scope]
 public class WebSearchTool(WebSearchEngineFactory searchEngineFactory)
 {
-    private const string Name = "docspace_web_search";
+    public const string Name = "docspace_web_search";
     private const string Description = "Search the web - performs real-time web searches and can scrape content from specific URLs.";
 
     private static AIFunctionFactoryOptions FactoryOptions => new()

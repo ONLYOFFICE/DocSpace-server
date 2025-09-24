@@ -29,7 +29,7 @@ namespace ASC.AI.Core.Tools;
 [Scope]
 public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine)
 {
-    private const string Name = "docspace_knowledge_search";
+    public const string Name = "docspace_knowledge_search";
     private const string Description = "Search in knowledge base";
     
     private static AIFunctionFactoryOptions FactoryOptions => new()
