@@ -35,8 +35,7 @@ public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine)
     private static AIFunctionFactoryOptions FactoryOptions => new()
     {
         Name = Name, 
-        Description = Description, 
-        MarshalResult = ((o, _, _) => ValueTask.FromResult(o))
+        Description = Description
     };
 
     public AIFunction Init(int roomId)
