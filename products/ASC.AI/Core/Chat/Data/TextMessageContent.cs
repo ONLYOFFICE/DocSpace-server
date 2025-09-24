@@ -31,9 +31,4 @@ public sealed class TextMessageContent(string? text = null) : MessageContent
     public string? Text { get; init; } = text;
     
     public override string ToString() => this.Text ?? string.Empty;
-    
-    public override string ToMarkdown()
-    {
-        return this.Text ?? string.Empty;
-    }
 }

@@ -42,7 +42,12 @@ public class Message(int id, Role role, List<MessageContent> contents, DateTime 
         
         foreach (var content in Contents)
         {
-            builder.Append($"{content.ToMarkdown()}");
+            if (content is not TextMessageContent textMessageContent)
+            {
+                continue;
+            }
+
+            builder.Append($"{textMessageContent.Text ?? string.Empty}");
             builder.Append("\n\n");
         }
         

@@ -40,45 +40,4 @@ public class ToolCallMessageContent(
     public IDictionary<string, object?>? Arguments { get; } = arguments;
     public object? Result { get; set; } = result;
     public McpServerInfo? McpServerInfo { get; } = mcpServerInfo;
-
-    private static readonly JsonSerializerOptions _options = 
-        new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-
-    public override string ToMarkdown()
-    {
-        var builder = new StringBuilder();
-        builder.Append($"### Tool Call: *{Name}*\n\n");
-        
-        if (Arguments != null)
-        {
-            builder.Append("**Arguments:**\n");
-            foreach (var argument in Arguments)
-            {
-                builder.Append($"- {argument.Key}: {argument.Value}\n");
-            }
-        }
-
-        if (Result == null)
-        {
-            return builder.ToString();
-        }
-
-        builder.Append('\n');
-        builder.Append("**Result:**\n\n");
-        builder.Append($"{FormatResult(Result)}");
-
-        return builder.ToString();
-    }
-
-    private static string? FormatResult(object value)
-    {
-        try
-        {
-            return JsonSerializer.Serialize(value, options: _options);
-        }
-        catch
-        {
-            return value.ToString();
-        }
-    }
 }

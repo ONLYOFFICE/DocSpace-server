@@ -30,7 +30,4 @@ namespace ASC.AI.Core.Chat.Data;
 [JsonDerivedType(typeof(TextMessageContent), "text")]
 [JsonDerivedType(typeof(ToolCallMessageContent), "tool")]
 [JsonDerivedType(typeof(AttachmentMessageContent), "attachment")]
-public abstract class MessageContent
-{
-    public abstract string ToMarkdown();
-}
+public abstract class MessageContent;
