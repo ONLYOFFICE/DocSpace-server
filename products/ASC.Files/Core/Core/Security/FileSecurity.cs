@@ -566,20 +566,32 @@ public class FileSecurity(
     
     public async Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry, bool includeLinks = false)
     {
-        return await WhoCanAsync(entry, FilesSecurityActions.Read, includeLinks);
+        var (directAccess, sharedAccess) = await WhoCanAsync(entry, FilesSecurityActions.Read, includeLinks);
+
+        return directAccess.Concat(sharedAccess).Distinct();
     }
 
-    private async Task<IEnumerable<Guid>> WhoCanAsync<T>(FileEntry<T> entry, FilesSecurityActions action, bool includeLinks = false)
+    public async Task<(IEnumerable<Guid> directAccess, IEnumerable<Guid> sharedAccess)> WhoCanReadSeparatelyAsync<T>(FileEntry<T> entry)
     {
+        return await WhoCanAsync(entry, FilesSecurityActions.Read, true);
+    }
+
+    private async Task<(IEnumerable<Guid> directAccess, IEnumerable<Guid> sharedAccess)> WhoCanAsync<T>(FileEntry<T> entry, FilesSecurityActions action, bool includeLinks = false)
+    {
+        List<Guid> directAccess = [];
+        List<Guid> sharedAccess = [];
+
+        var sharedAsDirect = true;
+
         var sharesFromDb = await GetSharesAsync(entry);
-        
+
         if (!includeLinks)
         {
             sharesFromDb = sharesFromDb.Where(r => !r.IsLink);
         }
 
         var shares = sharesFromDb.ToList();
-            
+
         var linksUsersTask = includeLinks ? 
             GetLinksUsersAsync(shares.Where(r => r.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)) 
             : Task.FromResult(new List<Guid>(0));
@@ -613,16 +625,18 @@ public class FileSecurity(
                     if (defaultShareRecord != null &&((defaultShareRecord.Share == FileShare.Read && action == FilesSecurityActions.Read) ||
                         (defaultShareRecord.Share == FileShare.ReadWrite)))
                     {
-                        return (await userManager.GetUsersByGroupAsync(defaultShareRecord.Subject))
-                                          .Where(x => x.Status == EmployeeStatus.Active).Select(y => y.Id).Distinct();
+                        return ((await userManager.GetUsersByGroupAsync(defaultShareRecord.Subject))
+                                    .Where(x => x.Status == EmployeeStatus.Active).Select(y => y.Id).Distinct(), sharedAccess);
                     }
 
-                    return [];
+                    return (directAccess, sharedAccess);
                 }
 
                 break;
 
             case FolderType.USER:
+                sharedAsDirect = false;
+
                 defaultRecords =
                 [
                     new FileShareRecord<T>
@@ -639,10 +653,7 @@ public class FileSecurity(
 
                 if (shares.Count == 0)
                 {
-                    return new List<Guid>
-                    {
-                        entry.RootCreateBy
-                    };
+                    return ([entry.RootCreateBy], sharedAccess);
                 }
                 break;
 
@@ -663,10 +674,7 @@ public class FileSecurity(
 
                 if (shares.Count == 0)
                 {
-                    return new List<Guid>
-                    {
-                        entry.RootCreateBy
-                    };
+                    return ([entry.RootCreateBy], sharedAccess);
                 }
                 break;
 
@@ -683,7 +691,7 @@ public class FileSecurity(
 
                         if (adapter != null)
                         {
-                            return await adapter.WhoCanReadAsync(entry);
+                            return (await adapter.WhoCanReadAsync(entry), sharedAccess);
                         }
                     }
                 }
@@ -716,14 +724,12 @@ public class FileSecurity(
 
                 if (!shares.Any())
                 {
-                    var users = new List<Guid>();
-
                     foreach (var defaultRecord in defaultRecords)
                     {
-                        users.AddRange((await userManager.GetUsersByGroupAsync(defaultRecord.Subject)).Where(x => x.Status == EmployeeStatus.Active).Select(y => y.Id));
+                        directAccess.AddRange((await userManager.GetUsersByGroupAsync(defaultRecord.Subject)).Where(x => x.Status == EmployeeStatus.Active).Select(y => y.Id));
                     }
 
-                    return users.Distinct();
+                    return (directAccess, sharedAccess);
                 }
 
                 break;
@@ -732,38 +738,42 @@ public class FileSecurity(
                 defaultRecords = null;
                 break;
         }
-        
 
-        var manyShares = shares.Concat(defaultRecords ?? []).ToAsyncEnumerable().SelectManyAwait(async x => await ToGuidAsync(x)).Distinct();
 
-        var result = new List<Guid>();
+        var defaultAccessUsers = (defaultRecords ?? []).ToAsyncEnumerable().SelectManyAwait(async x => await ToGuidAsync(x)).Distinct();
+
+        await foreach (var userId in defaultAccessUsers)
+        {
+            if (await CheckAccessAsync(userId, action))
+            {
+                directAccess.Add(userId);
+            }
+        }
+
+        var manyShares = shares.ToAsyncEnumerable().SelectManyAwait(async x => await ToGuidAsync(x)).Distinct();
 
         await foreach (var userId in manyShares)
         {
-            var userSubjects = await GetUserSubjectsAsync(userId);
-            var userShares = new List<FileShareRecord<T>>();
-
-            foreach (var subject in userSubjects)
+            if (await CheckAccessAsync(userId, action))
             {
-                if (copyShares.TryGetValue(subject, out var value))
+                if (sharedAsDirect)
                 {
-                    userShares.AddRange(value);
+                    directAccess.Add(userId);
                 }
-            }
-            
-            if (await CanAsync(entry, userId, action, userShares, false))
-            {
-                result.Add(userId);
+                else
+                {
+                    sharedAccess.Add(userId);
+                }
             }
         }
 
         var linkUsers = await linksUsersTask;
         if (linkUsers.Count != 0)
         {
-            result.AddRange(linkUsers);
+            sharedAccess.AddRange(linkUsers);
         }
 
-        return result;
+        return (directAccess, sharedAccess);
 
         async Task<List<Guid>> GetLinksUsersAsync(IEnumerable<FileShareRecord<T>> linksRecords)
         {
@@ -786,6 +796,22 @@ public class FileSecurity(
             }
 
             return users;
+        }
+
+        async Task<bool> CheckAccessAsync(Guid userId, FilesSecurityActions action)
+        {
+            var userSubjects = await GetUserSubjectsAsync(userId);
+            var userShares = new List<FileShareRecord<T>>();
+
+            foreach (var subject in userSubjects)
+            {
+                if (copyShares.TryGetValue(subject, out var value))
+                {
+                    userShares.AddRange(value);
+                }
+            }
+
+            return await CanAsync(entry, userId, action, userShares, false);
         }
     }
 
