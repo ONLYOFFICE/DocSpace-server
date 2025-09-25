@@ -438,11 +438,6 @@ internal class SharePointFileDao(
         return moved;
     }
 
-    public Task<File<int>> CopyFileAsync(string fileId, int toFolderId, VectorizationStatus vectorizationStatus)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<File<string>> CopyFileAsync(string fileId, string toFolderId)
     {
         return SharePointProviderInfo.ToFile(await SharePointProviderInfo.CopyFileAsync(fileId, toFolderId));
@@ -537,12 +532,7 @@ internal class SharePointFileDao(
         return Task.CompletedTask;
     }
 
-    public Task SetVectorizationStatusAsync(string fileId, VectorizationStatus status)
-    {
-        return Task.CompletedTask;
-    }
-    
-    public Task SetVectorizationStatusAsync(IEnumerable<string> fileIds, VectorizationStatus status, Func<Task> action = null)
+    public Task SetVectorizationStatusAsync(string fileId, VectorizationStatus status, Func<Task> action = null)
     {
         return Task.CompletedTask;
     }

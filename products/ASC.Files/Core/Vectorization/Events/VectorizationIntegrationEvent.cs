@@ -34,8 +34,5 @@ public record VectorizationIntegrationEvent : IntegrationEvent
     public VectorizationIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId) { }
     
     [ProtoMember(1)]
-    public required string TaskId { get; set; }
-    
-    [ProtoMember(2)]
-    public List<int> FilesIds { get; set; }
+    public int  FileId { get; set; }
 }

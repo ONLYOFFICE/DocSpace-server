@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,34 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Files.Services.WCFService.FileOperations;
+#nullable enable
+namespace ASC.Files.Core.Vectorization;
 
-[ProtoContract]
-[ProtoInclude(100, typeof(FileConverterOperationResult))]
-public class FileOperationResult
+[Singleton]
+public class VectorizationTaskQueue(IDistributedTaskQueueFactory queueFactory) 
 {
-    [ProtoMember(1)]
-    public string Id { get; init; }
+    private readonly DistributedTaskQueue<VectorizationTask> _queue = queueFactory.CreateQueue<VectorizationTask>();
 
-    [JsonPropertyName("operation")]
-    [ProtoMember(2)]
-    public FileOperationType OperationType { get; init; }
-
-    [ProtoMember(3)]
-    public int Progress { get; set; }
-
-    [ProtoMember(4)]
-    public string Source { get; init; }
-
-    [ProtoMember(5)]
-    public string Result { get; set; }
-
-    [ProtoMember(6)]
-    public string Error { get; set; }
-
-    [ProtoMember(7)]
-    public string Processed { get; set; }
-
-    [ProtoMember(8)]
-    public bool Finished { get; init; }
+    public Task PushAsync(VectorizationTask task)
+    {
+        return _queue.EnqueueTask(task);
+    }
 }

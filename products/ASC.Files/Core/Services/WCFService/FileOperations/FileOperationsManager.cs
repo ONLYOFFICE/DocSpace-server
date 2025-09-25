@@ -75,8 +75,7 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
                     Processed = Convert.ToString(o.Process),
                     Result = o.Result,
                     Error = o.Err,
-                    Finished = o.Finish,
-                    SpawnedOperations = o.SpawnedOperations
+                    Finished = o.Finish
                 });
             }
         }

@@ -1265,18 +1265,6 @@ internal class FileDao(
 
         throw new NotImplementedException();
     }
-    
-    public async Task<File<int>> CopyFileAsync(int fileId, int toFolderId, VectorizationStatus vectorizationStatus)
-    {
-        var file = await GetFileAsync(fileId);
-        if (file == null)
-        {
-            return null;
-        }
-
-        file.VectorizationStatus = vectorizationStatus;
-        return await CopyFileAsync(file, toFolderId);
-    }
 
     private async Task<File<int>> CopyFileAsync(File<int> file, int toFolderId)
     {
@@ -1911,24 +1899,14 @@ internal class FileDao(
         await filesDbContext.UpdateThumbnailStatusAsync(tenantId, file.Id, file.Version, status);
     }
     
-    public async Task SetVectorizationStatusAsync(int fileId, VectorizationStatus status)
-    {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        await filesDbContext.UpdateVectorizationStatusAsync(tenantId, fileId, status);
-    }
-    
-    public async Task SetVectorizationStatusAsync(
-        IEnumerable<int> fileIds, 
-        VectorizationStatus status, 
-        Func<Task> action = null)
+    public async Task SetVectorizationStatusAsync(int fileId, VectorizationStatus status,  Func<Task> action = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         if (action == null)
         {
-            await filesDbContext.UpdateVectorizationStatusesAsync(tenantId, fileIds, status);
+            await filesDbContext.UpdateVectorizationStatusAsync(tenantId, fileId, status);
             return;
         }
         
@@ -1939,7 +1917,7 @@ internal class FileDao(
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tr = await context.Database.BeginTransactionAsync();
 
-            await context.UpdateVectorizationStatusesAsync(tenantId, fileIds, status);
+            await filesDbContext.UpdateVectorizationStatusAsync(tenantId, fileId, status);
             await action();
 
             await tr.CommitAsync();

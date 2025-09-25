@@ -552,18 +552,6 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
         return Dao.ToFile(newFile);
     }
-    
-    public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId, VectorizationStatus vectorizationStatus)
-    {
-        var thirdPartyFile = await Dao.GetFileAsync(fileId);
-        var file = Dao.ToFile(thirdPartyFile);
-        file.VectorizationStatus = vectorizationStatus;
-        
-        return await crossDao.PerformCrossDaoFileCopyAsync(
-            file, this, daoSelector.ConvertId,
-            toFolderId, fileDao, r => r,
-            false);
-    }
 
     public Task<File<int>> CopyFileAsync(string fileId, int toFolderId)
     {
@@ -856,12 +844,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.FromResult(0);
     }
     
-    public Task SetVectorizationStatusAsync(string fileId, VectorizationStatus status)
-    {
-        return Task.CompletedTask;
-    }
-    
-    public Task SetVectorizationStatusAsync(IEnumerable<string> fileIds, VectorizationStatus status, Func<Task> action = null)
+    public Task SetVectorizationStatusAsync(string fileId, VectorizationStatus status, Func<Task> action = null)
     {
         return Task.CompletedTask;
     }

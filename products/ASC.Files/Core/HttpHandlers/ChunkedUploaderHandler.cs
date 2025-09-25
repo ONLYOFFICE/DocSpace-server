@@ -196,8 +196,6 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         : MessageAction.FileUploaded, session.File, session.File.Title);
 
                     await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, session.File);
-
-                    var vectorizationTaskId = string.Empty;
                     
                     if (session.File.Version <= 1)
                     {
@@ -220,15 +218,14 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                             if (session.RequiredVectorization && session.File is File<int> file)
                             {
-                                var task = await vectorizationTaskPublisher.PublishAsync(file);
-                                vectorizationTaskId = task.Id;
+                                await vectorizationTaskPublisher.PublishAsync(file);
                             }
                         }
                     }
 
                     await socketManager.CreateFileAsync(session.File);
                     
-                    await WriteSuccess(context, await ToResponseObject(session.File, vectorizationTaskId), (int)HttpStatusCode.Created);
+                    await WriteSuccess(context, await ToResponseObject(session.File), (int)HttpStatusCode.Created);
 
                     return;
             }
@@ -300,7 +297,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         }));
     }
 
-    private async Task<object> ToResponseObject<T>(File<T> file, string taskId = null)
+    private async Task<object> ToResponseObject<T>(File<T> file)
     {
         return new
         {
@@ -310,8 +307,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
             title = file.Title,
             provider_key = file.ProviderKey,
             uploaded = true,
-            file = await filesWrapperHelper.GetAsync(file),
-            vectorizationTaskId = taskId
+            file = await filesWrapperHelper.GetAsync(file)
         };
     }
 }

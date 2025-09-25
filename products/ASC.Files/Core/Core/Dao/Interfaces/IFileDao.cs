@@ -252,7 +252,6 @@ public interface IFileDao<T>
     Task<File<TTo>> CopyFileAsync<TTo>(T fileId, TTo toFolderId);
     Task<File<string>> CopyFileAsync(T fileId, string toFolderId);
     Task<File<int>> CopyFileAsync(T fileId, int toFolderId);
-    Task<File<int>> CopyFileAsync(T fileId, int toFolderId, VectorizationStatus vectorizationStatus);
 
     /// <summary>
     ///   Rename file
@@ -435,9 +434,7 @@ public interface IFileDao<T>
     Task<int> GetFilesByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location);
 
-    Task SetVectorizationStatusAsync(T fileId, VectorizationStatus status);
-    
-    Task SetVectorizationStatusAsync(IEnumerable<T> fileIds, VectorizationStatus status, Func<Task> action = null);
+    Task SetVectorizationStatusAsync(T fileId, VectorizationStatus status, Func<Task> action = null);
 
     #endregion
 }

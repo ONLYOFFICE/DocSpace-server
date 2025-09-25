@@ -44,8 +44,6 @@ public abstract class FileOperation : DistributedTaskProgress
     
     public bool Finish { get; set; }
     public bool Hold { get; set; }
-
-    public List<SpawnedOperation> SpawnedOperations { get; set; }
     
     protected readonly IPrincipal _principal;
     protected readonly string _culture;
@@ -201,20 +199,6 @@ public abstract class ComposeFileOperation<T1, T2> : FileOperation
         {
             progress /= 2;
         }
-        
-        var spawnedOperations = new List<SpawnedOperation>();
-
-        if (DaoOperation.SpawnedOperations != null)
-        {
-            spawnedOperations.AddRange(DaoOperation.SpawnedOperations);
-        }
-
-        if (ThirdPartyOperation.SpawnedOperations != null)
-        {
-            spawnedOperations.AddRange(ThirdPartyOperation.SpawnedOperations);
-        }
-        
-        SpawnedOperations = spawnedOperations;
 
         Progress = progress < 100 ? progress : 100;
         await PublishChanges();

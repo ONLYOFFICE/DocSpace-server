@@ -35,7 +35,7 @@ public class VectorizationIntegrationEventHandler(
     TenantManager tenantManager,
     SecurityContext securityContext,
     AuthManager authManager,
-    VectorizationTaskService vectorizationTaskService,
+    VectorizationTaskQueue vectorizationTaskQueue,
     IServiceProvider serviceProvider) 
     : IIntegrationEventHandler<VectorizationIntegrationEvent>
 {
@@ -52,9 +52,9 @@ public class VectorizationIntegrationEventHandler(
             await securityContext.AuthenticateMeWithoutCookieAsync(account);
             
             var task = serviceProvider.GetRequiredService<VectorizationTask>();
-            task.Init(@event.TaskId, @event.TenantId, @event.CreateBy, @event.FilesIds);
+            task.Init(@event.TenantId, @event.CreateBy, @event.FileId);
             
-            await vectorizationTaskService.StartAsync(task);
+            await vectorizationTaskQueue.PushAsync(task);
         }
     }
 }

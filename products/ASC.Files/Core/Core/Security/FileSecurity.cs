@@ -52,7 +52,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         BadgesSettingsHelper badgesSettingsHelper,
         ExternalShare externalShare,
         AuthManager authManager,
-        VectorizationSettings vectorizationSettings)
+        VectorizationSettings vectorizationSettings,
+        VectorizationHelper vectorizationHelper)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -1001,10 +1002,14 @@ public class FileSecurity(IDaoFactory daoFactory,
             return false;
         }
 
-        if (action is FilesSecurityActions.Vectorization && 
-            file is not { VectorizationStatus: VectorizationStatus.Failed })
+        if (action == FilesSecurityActions.Vectorization && file is { VectorizationStatus: not null })
         {
-            return false;
+            switch (file.VectorizationStatus)
+            {
+                case VectorizationStatus.Completed:
+                case VectorizationStatus.InProgress when await vectorizationHelper.InProcessAsync(file.Id):
+                    return false;
+            }
         }
 
         if (file != null && room is { FolderType: FolderType.AiRoom } && parentFolders.Any(x => x.FolderType == FolderType.Knowledge))
@@ -1014,7 +1019,9 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
-            if (action is FilesSecurityActions.Delete && file is { VectorizationStatus: VectorizationStatus.InProgress })
+            if (action is FilesSecurityActions.Delete && 
+                file is { VectorizationStatus: VectorizationStatus.InProgress } && 
+                await vectorizationHelper.InProcessAsync(file.Id))
             {
                 return false;
             }

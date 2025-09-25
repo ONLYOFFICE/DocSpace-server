@@ -31,11 +31,13 @@ namespace ASC.Files.Core.Vectorization;
 [Transient]
 public class VectorizationTask : DistributedTaskProgress
 {
-    public List<int> FilesIds { get; set; }
-
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private int _tenantId;
     private Guid _userId;
+    private int _fileId;
+    
+    private static TimeSpan Timeout => TimeSpan.FromMinutes(3);
+    private static TimeSpan PulseInterval => Timeout / 3;
 
     public VectorizationTask() { }
 
@@ -44,37 +46,42 @@ public class VectorizationTask : DistributedTaskProgress
         _serviceScopeFactory = serviceScopeFactory;
     }
 
-    public void Init(int tenantId, Guid userId, List<int> filesIds)
+    public void Init(int tenantId, Guid userId, int fileId)
     {
         _tenantId = tenantId;
         _userId = userId;
-        FilesIds = filesIds;
+        _fileId = fileId;
     }
-
-    public void Init(string taskId, int tenantId, Guid userId, List<int> filesIds)
-    {
-        Id = taskId;
-        Init(tenantId, userId, filesIds);
-    }
-
+    
     protected override async Task DoJob()
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<VectorizationTask>>();
+        
+        SocketManager socketManager = null;
+        IFileDao<int> fileDao = null;
+        IHeartBeat heartBeat = null;
+        VectorStoreCollection<Chunk> collection = null;
+        
+        File<int> file = null;
 
         try
         {
+            var heartBeatFactory = scope.ServiceProvider.GetRequiredService<IHeartBeatFactory>();
+            
+            var key = VectorizationHelper.GetVectorizationKey(_fileId);
+            heartBeat = await heartBeatFactory.CreateAsync(key, Timeout, PulseInterval, CancellationToken);
+
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             await tenantManager.SetCurrentTenantAsync(_tenantId);
 
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
 
-            var socketManager = scope.ServiceProvider.GetRequiredService<SocketManager>();
-
+            socketManager = scope.ServiceProvider.GetRequiredService<SocketManager>();
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
-            var fileDao = daoFactory.GetFileDao<int>();
-            var cachedFolderDao = daoFactory.GetCacheFolderDao<int>();
+            fileDao = daoFactory.GetFileDao<int>();
+            var folderDao = daoFactory.GetFolderDao<int>();
 
             var vectorStore = scope.ServiceProvider.GetRequiredService<VectorStore>();
             var generatorFactory = scope.ServiceProvider.GetRequiredService<EmbeddingGeneratorFactory>();
@@ -87,119 +94,100 @@ public class VectorizationTask : DistributedTaskProgress
                 ChunkOverlap = vectorizationSettings.ChunkOverlap
             };
 
-            var collection = vectorStore.GetCollection<Chunk>(
+            collection = vectorStore.GetCollection<Chunk>(
                 Chunk.IndexName,
                 new VectorCollectionOptions
                 {
-                    Dimension = generatorFactory.Model.Dimension, 
-                    ModelId = generatorFactory.Model.Id
+                    Dimension = generatorFactory.Model.Dimension, ModelId = generatorFactory.Model.Id
                 });
 
-            List<File<int>> files = [];
-            IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator;
+            file = await fileDao.GetFileAsync(_fileId);
+            if (file == null)
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            }
+
+            await collection.EnsureCollectionExistsAsync(CancellationToken);
+            var embeddingGenerator = generatorFactory.Create();
+
+            var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
+            if (!parents.Exists(x => x.FolderType == FolderType.Knowledge))
+            {
+                throw new InvalidOperationException("File is not in knowledge folder");
+            }
+
+            var room = parents.FirstOrDefault(x => x.FolderType == FolderType.AiRoom);
+            if (room == null)
+            {
+                throw new InvalidOperationException("File is not in ai room");
+            }
+
+            var textChunks = await fileProcessor.GetTextChunksAsync(file, splitterSettings);
+
+            foreach (var batch in textChunks.Chunk(vectorizationSettings.ChunksBatchSize))
+            {
+                var embeddings = await embeddingGenerator.GenerateAsync(batch, cancellationToken: CancellationToken);
+                var chunks = batch.Select((text, index) =>
+                    new Chunk
+                    {
+                        Id = Guid.NewGuid(),
+                        TenantId = _tenantId,
+                        RoomId = room.Id,
+                        Title = file.Title,
+                        FileId = file.Id,
+                        TextEmbedding = text,
+                        Embedding = embeddings[index].Vector.ToArray()
+                    }).ToList();
+
+                await collection.UpsertAsync(chunks, CancellationToken);
+                await PublishChanges();
+            }
+
+            await fileDao.SetVectorizationStatusAsync(file.Id, VectorizationStatus.Completed);
 
             try
             {
-                files = await fileDao.GetFilesAsync(FilesIds).ToListAsync();
-                await collection.EnsureCollectionExistsAsync(CancellationToken);
-                embeddingGenerator = generatorFactory.Create();
+                await socketManager.UpdateFileAsync(file);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                try
-                {
-                    await fileDao.SetVectorizationStatusAsync(FilesIds, VectorizationStatus.Failed);
-                    foreach (var file in files)
-                    {
-                        await socketManager.UpdateFileAsync(file);
-                    }
-                }
-                catch (Exception exception)
-                {
-                    logger.ErrorWithException(exception);
-                }
-
-                throw;
+                logger.ErrorWithException(e);
             }
-
-            foreach (var file in files)
-            {
-                try
-                {
-                    var parents = await cachedFolderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
-                    if (!parents.Exists(x => x.FolderType == FolderType.Knowledge))
-                    {
-                        continue;
-                    }
-
-                    var room = parents.FirstOrDefault(x => x.FolderType == FolderType.AiRoom);
-                    if (room == null)
-                    {
-                        continue;
-                    }
-
-                    if (file.VectorizationStatus is VectorizationStatus.Completed)
-                    {
-                        continue;
-                    }
-
-                    var textChunks = await fileProcessor.GetTextChunksAsync(file, splitterSettings);
-
-                    foreach (var batch in textChunks.Chunk(vectorizationSettings.ChunksBatchSize))
-                    {
-                        var embeddings =
-                            await embeddingGenerator.GenerateAsync(batch, cancellationToken: CancellationToken);
-                        var chunks = batch.Select((text, index) =>
-                            new Chunk
-                            {
-                                Id = Guid.NewGuid(),
-                                TenantId = _tenantId,
-                                RoomId = room.Id,
-                                Title = file.Title,
-                                FileId = file.Id,
-                                TextEmbedding = text,
-                                Embedding = embeddings[index].Vector.ToArray()
-                            }).ToList();
-
-                        await collection.UpsertAsync(chunks, CancellationToken);
-                        await PublishChanges();
-                    }
-
-                    await fileDao.SetVectorizationStatusAsync(file.Id, VectorizationStatus.Completed);
-
-                    try
-                    {
-                        await socketManager.UpdateFileAsync(file);
-                    }
-                    catch (Exception e)
-                    {
-                        logger.ErrorWithException(e);
-                    }
-                }
-                catch (Exception e)
-                {
-                    logger.ErrorWithException(e);
-
-                    try
-                    {
-                        await fileDao.SetVectorizationStatusAsync(file.Id, VectorizationStatus.Failed);
-                        await collection.DeleteAsync(new VectorSearchOptions<Chunk>
-                        {
-                            Filter = x => x.TenantId == _tenantId && x.FileId == file.Id
-                        });
-                    }
-                    catch (Exception exception)
-                    {
-                        logger.ErrorWithException(exception);
-                    }
-                }
-            }
+        }
+        catch (HeartBeatExistsException)
+        {
+            throw;
         }
         catch (Exception e)
         {
             logger.ErrorWithException(e);
             Exception = e;
             Status = DistributedTaskStatus.Failted;
+
+            try
+            {
+                if (fileDao != null)
+                {
+                    await fileDao.SetVectorizationStatusAsync(_fileId, VectorizationStatus.Failed);
+                }
+
+                if (collection != null)
+                {
+                    await collection.DeleteAsync(new VectorSearchOptions<Chunk>
+                    {
+                        Filter = x => x.TenantId == _tenantId && x.FileId == _fileId
+                    });
+                }
+                
+                if (file != null && socketManager != null)
+                {
+                    await socketManager.UpdateFileAsync(file);
+                }
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorWithException(exception);
+            }
         }
         finally
         {
@@ -209,6 +197,10 @@ public class VectorizationTask : DistributedTaskProgress
             try
             {
                 await PublishChanges();
+                if (heartBeat != null)
+                {
+                    await heartBeat.StopAsync();
+                }
             }
             catch (Exception e)
             {

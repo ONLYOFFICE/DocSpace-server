@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,36 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-#nullable enable
 namespace ASC.Files.Core.Vectorization;
 
 [Singleton]
-public class VectorizationTaskService(IDistributedTaskQueueFactory queueFactory) 
+public class VectorizationHelper(IHeartBeatMonitor heartBeatMonitor)
 {
-    private readonly DistributedTaskQueue<VectorizationTask> _queue = queueFactory.CreateQueue<VectorizationTask>();
-
-    public Task StartAsync(VectorizationTask task)
+    public async Task<bool> InProcessAsync<T>(T fileId)
     {
-        return _queue.EnqueueTask(task);
-    }
-
-    public Task<string> StoreAsync(VectorizationTask task)
-    {
-        return _queue.PublishTask(task);
-    }
-
-    public async Task<VectorizationTask?> GetAsync(string id)
-    {
-        return await _queue.PeekTask(id);
-    }
-
-    public async Task<List<VectorizationTask>> GetTasksAsync()
-    {
-        return await _queue.GetAllTasks();
+        return await heartBeatMonitor.IsAliveAsync(GetVectorizationKey(fileId));
     }
     
-    public async Task DeleteAsync(string id)
+    public static string GetVectorizationKey<T>(T fileId)
     {
-        await _queue.DequeueTask(id);
+        return $"vectorization_{fileId}";
     }
 }

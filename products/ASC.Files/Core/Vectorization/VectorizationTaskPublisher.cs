@@ -30,9 +30,7 @@ namespace ASC.Files.Core.Vectorization;
 public class VectorizationTaskPublisher(
     TenantManager tenantManager,
     AuthContext authContext,
-    IServiceProvider serviceProvider,
     IEventBus eventBus,
-    VectorizationTaskService vectorizationTaskService,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     SocketManager socketManager)
@@ -48,69 +46,46 @@ public class VectorizationTaskPublisher(
         var userId = authContext.CurrentAccount.ID;
         
         var fileDao = daoFactory.GetFileDao<int>();
-
-        var files = await fileDao.GetFilesAsync(filesIds).ToListAsync();
-        foreach (var file in files)
+        
+        await foreach (var file in fileDao.GetFilesAsync(filesIds))
         {
             if (!await fileSecurity.CanVectorizationAsync(file))
             {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+                continue;
             }
             
             file.VectorizationStatus = VectorizationStatus.InProgress;
-        }
-
-        var processedFiles = files.Select(x => x.Id).ToList();
-        
-        var task = serviceProvider.GetRequiredService<VectorizationTask>();
-        
-        task.Init(tenantId, userId, processedFiles);
-        
-        await fileDao.SetVectorizationStatusAsync(files.Select(x => x.Id), VectorizationStatus.InProgress, async () =>
-        {
-            await vectorizationTaskService.StoreAsync(task);
-            await eventBus.PublishAsync(new VectorizationIntegrationEvent(userId, tenantId)
+            
+            await fileDao.SetVectorizationStatusAsync(file.Id, VectorizationStatus.InProgress, async () =>
             {
-                TaskId = task.Id,
-                FilesIds = processedFiles
+                await eventBus.PublishAsync(new VectorizationIntegrationEvent(userId, tenantId)
+                {
+                    FileId = file.Id
+                });
             });
-        });
-
-        foreach (var file in files)
-        {
+            
             await socketManager.UpdateFileAsync(file);
         }
     }
     
-    public async Task<VectorizationTask> PublishAsync(File<int> file)
+    public async Task PublishAsync(File<int> file)
     {
         if (file == null)
         {
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        var room = await DocSpaceHelper.GetParentRoom(file, daoFactory.GetFolderDao<int>());
-        if (room is not { FolderType: FolderType.AiRoom })
+        if (!await fileSecurity.CanVectorizationAsync(file))
         {
-            throw new InvalidOperationException();
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
         
-        var task = serviceProvider.GetRequiredService<VectorizationTask>();
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
-            
-        var filesIds = new List<int> { file.Id };
-        
-        task.Init(tenantId, userId, filesIds);
-        
-        var taskId = await vectorizationTaskService.StoreAsync(task);
         
         await eventBus.PublishAsync(new VectorizationIntegrationEvent(userId, tenantId)
         {
-            TaskId = taskId,
-            FilesIds = filesIds
+            FileId = file.Id
         });
-            
-        return (await vectorizationTaskService.GetAsync(taskId))!;
     }
 }
