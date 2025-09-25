@@ -27,6 +27,7 @@
 using System.ComponentModel;
 
 using Actions = ASC.Web.Studio.Core.Notify.Actions;
+using Folder = DocuSign.eSign.Model.Folder;
 
 namespace ASC.Files.Core.Security;
 
@@ -2570,8 +2571,9 @@ public class FileSecurity(
         }
 
         var data = entries.Where(f =>
-                f.RootFolderType is FolderType.USER or FolderType.VirtualRooms// show users files
-                && f.RootCreateBy != authContext.CurrentAccount.ID // don't show my files
+                f.RootFolderType is FolderType.USER or FolderType.VirtualRooms && 
+                (f is File<T> || f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)) &&
+                f.RootCreateBy != authContext.CurrentAccount.ID
         );
 
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
