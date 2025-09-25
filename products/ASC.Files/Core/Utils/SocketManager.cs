@@ -212,11 +212,14 @@ public class SocketManager(
     }
     private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null, T folderIdDisplay = default)
     {
+        var defaultFolder = false;
+
         if (Equals(folderIdDisplay, default(T)))
         {
             folderIdDisplay = entry.FolderIdDisplay;
+            defaultFolder = true;
         }
-        
+
         var room = FolderRoom(folderIdDisplay);
         var whoCanRead = users ?? await WhoCanRead(entry);
 
@@ -269,7 +272,34 @@ public class SocketManager(
                 userIds
             });
         }
-        
+
+        if (defaultFolder && entry.RootFolderType == FolderType.USER)
+        {
+            var sharedFolder = await globalFolderHelper.GetFolderShareAsync<T>();
+
+            if (!EqualityComparer<T>.Default.Equals(folderIdDisplay, sharedFolder))
+            {
+                room = FolderRoom(sharedFolder);
+
+                if (withData)
+                {
+                    entry.ParentId = sharedFolder;
+                    data = await Serialize(entry);
+                }
+
+                foreach (var userIds in whoCanRead.Where(x => x != entry.RootCreateBy).Chunk(1000))
+                {
+                    await base.MakeRequest(method, new
+                    {
+                        room,
+                        entry.Id,
+                        data,
+                        userIds
+                    });
+                }
+            }
+        }
+
         entry.ParentId = parentId;
     }
 
@@ -327,10 +357,10 @@ public class SocketManager(
     private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
     {
         var whoCanReadTask = fileSecurity.WhoCanReadAsync(entry, true);
-        var adminsTask = Admins();
+        var adminsTask = entry.RootFolderType == FolderType.USER ? Task.FromResult<IEnumerable<Guid>>([]) : Admins();
 
         var whoCanRead = await Task.WhenAll(whoCanReadTask, adminsTask);
-        
+
         var userIds = whoCanRead
             .SelectMany(r => r)
             .Concat([entry.CreateBy])
