@@ -30,7 +30,7 @@ namespace ASC.AI.Core.Tools;
 public class WebSearchTool(WebSearchEngineFactory searchEngineFactory)
 {
     public const string Name = "docspace_web_search";
-    private const string Description = "Search the web - performs real-time web searches and can scrape content from specific URLs.";
+    private const string Description = "Search the web - performs real-time web searches and can scrape content from specific URLs. In the text, leave links to the resources you refer to when generating in md format. Example: [Short link text](https://example.com)";
 
     private static AIFunctionFactoryOptions FactoryOptions => new()
     {
