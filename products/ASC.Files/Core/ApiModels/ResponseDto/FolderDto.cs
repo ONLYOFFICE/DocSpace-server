@@ -174,11 +174,9 @@ public class FolderDtoHelper(
     SecurityContext securityContext,
     UserManager userManager,
     IUrlShortener urlShortener,
-    EntryStatusManager entryStatusManager
-    )
+    EntryStatusManager entryStatusManager)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
 {
-
     public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null)
     {
         var result = await GetFolderWrapperAsync(folder);
@@ -255,7 +253,13 @@ public class FolderDtoHelper(
 
             result.Expired = folder.ShareRecord.Options?.IsExpired;
             result.RequestToken = await _externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
-            result.ExpirationDate = apiDateTimeHelper.Get(folder.ShareRecord?.Options?.ExpirationDate);
+            result.ExpirationDate = _apiDateTimeHelper.Get(folder.ShareRecord?.Options?.ExpirationDate);
+            result.RootFolderType = FolderType.SHARE;
+            var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.ParentId);
+            if (!await _fileSecurity.CanReadAsync(parent))
+            {
+                result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
+            }
         }
         
         if (folder.Order != 0)

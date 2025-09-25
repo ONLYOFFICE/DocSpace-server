@@ -2107,9 +2107,9 @@ public class FileSecurity(
         
         
         var firstTask = GetSharesForMeAsync(recordsInternal, subjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
-        var secondTask = GetSharesForMeAsync(recordsThirdParty, subjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+        //var secondTask = GetSharesForMeAsync(recordsThirdParty, subjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
 
-        foreach (var items in await Task.WhenAll(firstTask.AsTask(), secondTask.AsTask()))
+        foreach (var items in await Task.WhenAll(firstTask.AsTask()))
         {
             foreach (var item in items)
             {
@@ -2150,7 +2150,7 @@ public class FileSecurity(
         }
 
         var currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects)
-            .Where(x => x.EntryType == FileEntryType.Folder)
+            .Where(x => x.EntryType == FileEntryType.Folder && x.SubjectType != SubjectType.ExternalLink && x.SubjectType != SubjectType.PrimaryExternalLink)
             .ToListAsync();
 
         var internalRoomsRecords = new Dictionary<int, FileShareRecord<int>>();
@@ -2570,7 +2570,7 @@ public class FileSecurity(
         }
 
         var data = entries.Where(f =>
-                f.RootFolderType == FolderType.USER // show users files
+                f.RootFolderType is FolderType.USER or FolderType.VirtualRooms// show users files
                 && f.RootCreateBy != authContext.CurrentAccount.ID // don't show my files
         );
 

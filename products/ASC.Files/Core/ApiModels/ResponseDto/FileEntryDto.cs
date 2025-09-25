@@ -262,7 +262,8 @@ public class FileEntryDtoHelper(
     protected readonly IDaoFactory _daoFactory = daoFactory;
     protected readonly ExternalShare _externalShare = externalShare;
     protected readonly IUrlShortener _urlShortener = urlShortener;
-
+    protected readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
+    
     protected async Task<T> GetAsync<T, TId>(FileEntry<TId> entry) where T : FileEntryDto<TId>, new()
     {
         if (entry.Security == null)
@@ -338,9 +339,9 @@ public class FileEntryDtoHelper(
             Shared = entry.Shared,
             ParentShared = entry.ParentShared,
             ShortWebUrl = shortWebUrl,
-            Created = apiDateTimeHelper.Get(entry.CreateOn),
+            Created = _apiDateTimeHelper.Get(entry.CreateOn),
             CreatedBy = await employeeWrapperHelper.GetAsync(entry.CreateBy),
-            Updated = apiDateTimeHelper.Get(entry.ModifiedOn),
+            Updated = _apiDateTimeHelper.Get(entry.ModifiedOn),
             UpdatedBy = await employeeWrapperHelper.GetAsync(entry.ModifiedBy),
             RootFolderType = entry.RootFolderType,
             ParentRoomType = entry.ParentRoomType,
@@ -355,7 +356,7 @@ public class FileEntryDtoHelper(
             OriginTitle = entry.OriginTitle,
             OriginRoomId = entry.OriginRoomId,
             OriginRoomTitle = entry.OriginRoomTitle, 
-            AutoDelete = permanentlyDeletedOn != default ? apiDateTimeHelper.Get(permanentlyDeletedOn) : null
+            AutoDelete = permanentlyDeletedOn != default ? _apiDateTimeHelper.Get(permanentlyDeletedOn) : null
         };
     }
 

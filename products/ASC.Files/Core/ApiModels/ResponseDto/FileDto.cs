@@ -220,8 +220,6 @@ public class FileDtoHelper(
     IUrlShortener urlShortener)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener) 
 {
-    private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
-
     public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null)
     {
         var result = await GetFileWrapperAsync(file, order, expiration, contextFolder);
@@ -523,6 +521,12 @@ public class FileDtoHelper(
                 result.RequestToken = await _externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
                 result.External = true;
                 result.ExpirationDate = _apiDateTimeHelper.Get(file.ShareRecord?.Options?.ExpirationDate);
+                result.RootFolderType = FolderType.SHARE;
+                var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.FolderId);
+                if (!await _fileSecurity.CanReadAsync(parent))
+                {
+                    result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                }
             }
             
             result.ViewUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
