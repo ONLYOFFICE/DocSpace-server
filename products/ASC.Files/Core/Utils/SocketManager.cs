@@ -273,7 +273,7 @@ public class SocketManager(
             });
         }
 
-        if (defaultFolder)
+        if (defaultFolder && entry.RootFolderType == FolderType.USER)
         {
             var sharedFolder = await globalFolderHelper.GetFolderShareAsync<T>();
 
@@ -287,7 +287,7 @@ public class SocketManager(
                     data = await Serialize(entry);
                 }
 
-                foreach (var userIds in whoCanRead.Chunk(1000))
+                foreach (var userIds in whoCanRead.Where(x => x != entry.RootCreateBy).Chunk(1000))
                 {
                     await base.MakeRequest(method, new
                     {
@@ -357,10 +357,10 @@ public class SocketManager(
     private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
     {
         var whoCanReadTask = fileSecurity.WhoCanReadAsync(entry, true);
-        var adminsTask = Admins();
+        var adminsTask = entry.RootFolderType == FolderType.USER ? Task.FromResult<IEnumerable<Guid>>([]) : Admins();
 
         var whoCanRead = await Task.WhenAll(whoCanReadTask, adminsTask);
-        
+
         var userIds = whoCanRead
             .SelectMany(r => r)
             .Concat([entry.CreateBy])
