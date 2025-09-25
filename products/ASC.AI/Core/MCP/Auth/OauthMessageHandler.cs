@@ -66,7 +66,7 @@ public class OauthMessageHandler : DelegatingHandler
         
         var response = await base.SendAsync(request, cancellationToken);
         
-        if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden or HttpStatusCode.BadRequest 
+        if (response.StatusCode is not (HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden or HttpStatusCode.BadRequest)
             || !await TryRefreshTokenAsync())
         {
             return response;
