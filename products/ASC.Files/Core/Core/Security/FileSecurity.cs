@@ -2108,9 +2108,9 @@ public class FileSecurity(
         
         
         var firstTask = GetSharesForMeAsync(recordsInternal, subjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
-        //var secondTask = GetSharesForMeAsync(recordsThirdParty, subjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+        var secondTask = GetSharesForMeAsync(recordsThirdParty, subjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
 
-        foreach (var items in await Task.WhenAll(firstTask.AsTask()))
+        foreach (var items in await Task.WhenAll(firstTask.AsTask(), secondTask.AsTask()))
         {
             foreach (var item in items)
             {
