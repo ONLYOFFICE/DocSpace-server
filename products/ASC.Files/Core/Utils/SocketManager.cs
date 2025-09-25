@@ -26,8 +26,6 @@
 
 using System.Threading.Channels;
 
-using ASC.Core.Billing;
-
 namespace ASC.Web.Files.Utils;
 
 public class SocketManager(
@@ -212,16 +210,19 @@ public class SocketManager(
     }
     private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null, T folderIdDisplay = default)
     {
-        var defaultFolder = false;
-
         if (Equals(folderIdDisplay, default(T)))
         {
             folderIdDisplay = entry.FolderIdDisplay;
-            defaultFolder = true;
         }
 
         var room = FolderRoom(folderIdDisplay);
-        var whoCanRead = users ?? await WhoCanRead(entry);
+
+        IEnumerable<Guid> sharedUsers = null;
+
+        if (users == null)
+        {
+            (users, sharedUsers) = await WhoCanRead(entry);
+        }
 
         if (action != null)
         {
@@ -262,7 +263,7 @@ public class SocketManager(
             data = await Serialize(entry);
         }
 
-        foreach (var userIds in whoCanRead.Chunk(1000))
+        foreach (var userIds in users.Chunk(1000))
         {
             await base.MakeRequest(method, new
             {
@@ -273,7 +274,7 @@ public class SocketManager(
             });
         }
 
-        if (defaultFolder && entry.RootFolderType == FolderType.USER)
+        if (sharedUsers != null)
         {
             var sharedFolder = await globalFolderHelper.GetFolderShareAsync<T>();
 
@@ -287,7 +288,7 @@ public class SocketManager(
                     data = await Serialize(entry);
                 }
 
-                foreach (var userIds in whoCanRead.Where(x => x != entry.RootCreateBy).Chunk(1000))
+                foreach (var userIds in sharedUsers.Chunk(1000))
                 {
                     await base.MakeRequest(method, new
                     {
@@ -354,22 +355,23 @@ public class SocketManager(
         };
     }
 
-    private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
+    private async Task<(IEnumerable<Guid> directAccess, IEnumerable<Guid> sharedAccess)> WhoCanRead<T>(FileEntry<T> entry)
     {
-        var whoCanReadTask = fileSecurity.WhoCanReadAsync(entry, true);
-        var adminsTask = entry.RootFolderType == FolderType.USER ? Task.FromResult<IEnumerable<Guid>>([]) : Admins();
+        var (direct, shared) = await fileSecurity.WhoCanReadSeparatelyAsync(entry);
 
-        var whoCanRead = await Task.WhenAll(whoCanReadTask, adminsTask);
+        if (entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+        {
+            var admins = await Admins();
+            direct = direct.Concat(admins);
+        }
 
-        var userIds = whoCanRead
-            .SelectMany(r => r)
-            .Concat([entry.CreateBy])
-            .Distinct()
-            .ToList();
+        direct = direct.Concat([entry.CreateBy]).Distinct();
 
-        return userIds;
+        shared = shared.Where(x => !direct.Contains(x));
+
+        return (direct, shared);
     }
-    
+
     private List<Guid> _admins;
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
