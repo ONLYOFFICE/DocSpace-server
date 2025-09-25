@@ -726,7 +726,7 @@ public class FileSecurity(
                 {
                     foreach (var defaultRecord in defaultRecords)
                     {
-                        directAccess.AddRange((await userManager.GetUsersByGroupAsync(defaultRecord.Subject)).Where(x => x.Status == EmployeeStatus.Active).Select(y => y.Id));
+                        directAccess.AddRange((await userManager.GetUsersByGroupAsync(defaultRecord.Subject)).Where(x => x.Status == EmployeeStatus.Active).Select(y => y.Id).Distinct());
                     }
 
                     return (directAccess, sharedAccess);
