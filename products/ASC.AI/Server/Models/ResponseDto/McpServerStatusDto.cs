@@ -32,5 +32,5 @@ public class McpServerStatusDto : IMapFrom<McpServerStatus>
     public required string Name { get; init; }
     public ServerType ServerType { get; init; }
     public bool Connected { get; init; }
-    public string? AuthorizationEndpoint { get; init; }
+    public Icon? Icon { get; init; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,16 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.AI.Core.MCP.Data;
 
-public class McpServerDto : IMapFrom<McpServer>
+public class IconParams
 {
-    public Guid Id { get; init; }
-    public string? Name { get; init; }
-    public string? Description { get; init; }
-    public string? Endpoint { get; init; }
-    public ServerType ServerType { get; init; }
-    public IDictionary<string, string>? Headers { get; init; }
-    public bool Enabled { get; init; }
-    public Icon? Icon { get; init; }
+    public required string ImageBase64 { get; init; }
+    public int X { get; init; }
+    public int Y { get; init; }
+    public uint Width { get; init; }
+    public uint Height { get; init; }
 }

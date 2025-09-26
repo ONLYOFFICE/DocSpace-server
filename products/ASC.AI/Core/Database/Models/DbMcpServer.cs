@@ -39,35 +39,14 @@ public class DbMcpServer : BaseEntity
     public required string Endpoint { get; set; }
     public string? Headers { get; set; }
     public ConnectionType ConnectionType { get; set; }
+    public bool HasIcon { get; set; }
+    public DateTime ModifiedOn { get; set; }
 
     public DbTenant Tenant { get; set; } = null!;
 
     public override object[] GetKeys()
     {
         return [Id];
-    }
-
-    public async Task<McpServer> ToMcpServerAsync(InstanceCrypto crypto)
-    {
-        var options = new McpServer
-        {
-            Id = Id, 
-            TenantId = TenantId, 
-            Name = Name,
-            Description = Description,
-            Endpoint = Endpoint,
-            ConnectionType = ConnectionType
-        };
-
-        if (Headers == null)
-        {
-            return options;
-        }
-
-        var headersJson = await crypto.DecryptAsync(Headers);
-        options.Headers = JsonSerializer.Deserialize<Dictionary<string, string>>(headersJson);
-
-        return options;
     }
 }
 
@@ -132,6 +111,14 @@ public static class DbMcpServerOptionsExtensions
 
             entity.Property(e => e.ConnectionType)
                 .HasColumnName("connection_type");
+            
+            entity.Property(e => e.HasIcon)
+                .HasColumnName("has_icon");
+            
+            entity.Property(e => e.ModifiedOn)
+                .HasColumnName("modified_on")
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
     }
 }

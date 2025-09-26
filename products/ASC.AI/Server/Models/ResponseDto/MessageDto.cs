@@ -36,20 +36,39 @@ public class MessageDto(int id,Role role, IEnumerable<MessageContentDto> content
 
 public static class MessageDtoExtensions
 {
-    public static MessageDto ToMessageDto(this Message message, IMapper mapper, ApiDateTimeHelper dateTimeHelper)
+    public async static Task<MessageDto> ToMessageDtoAsync(
+        this Message message, 
+        IMapper mapper, 
+        ApiDateTimeHelper dateTimeHelper,
+        McpIconStore iconStore)
     {
         var createdOn = dateTimeHelper.Get(message.CreatedOn);
+        var contents = new List<MessageContentDto>();
 
-        var contents = message.Contents.Select(x =>
+        foreach (var content in message.Contents)
         {
-            return x switch
+            switch (content)
             {
-                TextMessageContent text => mapper.Map<TextContentDto>(text),
-                ToolCallMessageContent tool => mapper.Map<ToolContentDto>(tool) as MessageContentDto,
-                AttachmentMessageContent attachment => mapper.Map<AttachmentContentDto>(attachment),
-                _ => throw new ArgumentOutOfRangeException(nameof(x))
-            };
-        });
+                case TextMessageContent text:
+                    contents.Add(mapper.Map<TextContentDto>(text));
+                    break;
+                case ToolCallMessageContent tool:
+                    var toolContentDto = mapper.Map<ToolContentDto>(tool);
+                    if (toolContentDto.McpServerInfo != null)
+                    {
+                        toolContentDto.McpServerInfo.Icon = 
+                            await iconStore.GetAsync(toolContentDto.McpServerInfo.ServerId, DateTime.UtcNow);
+                        
+                        contents.Add(toolContentDto);
+                    }
+                    break;
+                case AttachmentMessageContent attachment:
+                    contents.Add(mapper.Map<AttachmentContentDto>(attachment));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(content));
+            }
+        }
         
         return new MessageDto(message.Id, message.Role, contents, createdOn);
     }

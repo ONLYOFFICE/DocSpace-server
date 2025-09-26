@@ -54,7 +54,8 @@ public partial class McpService(
         string endpoint, 
         string name,
         string description,
-        Dictionary<string, string>? headers)
+        Dictionary<string, string>? headers,
+        IconParams? icon)
     {
         await ThrowIfNotAccessAsync();
         
@@ -79,7 +80,7 @@ public partial class McpService(
         
         await ThrowIfNotConnectAsync(transport);
         
-        return await mcpDao.AddServerAsync(tenantId, endpoint, name, headers, description, ConnectionType.Direct);
+        return await mcpDao.AddServerAsync(tenantId, endpoint, name, headers, description, ConnectionType.Direct, icon);
     }
 
     public async Task<McpServer> UpdateCustomServerAsync(
@@ -87,7 +88,9 @@ public partial class McpService(
         string? url, 
         string? name, 
         Dictionary<string, string>? headers, 
-        string? description)
+        string? description,
+        bool updateIcon,
+        IconParams? icon)
     {
         await ThrowIfNotAccessAsync();
         
@@ -121,6 +124,11 @@ public partial class McpService(
             needConnect = true;
         }
 
+        if (updateIcon)
+        {
+            server.HasIcon = icon != null;
+        }
+
         if (!string.IsNullOrEmpty(description))
         {
             server.Description = description;
@@ -128,7 +136,7 @@ public partial class McpService(
 
         if (!needConnect)
         {
-            return await mcpDao.UpdateServerAsync(server);
+            return await mcpDao.UpdateServerAsync(server, updateIcon, icon);
         }
 
         var options = new SseClientTransportOptions
@@ -137,14 +145,14 @@ public partial class McpService(
             Endpoint = new Uri(server.Endpoint),
             AdditionalHeaders = server.Headers,
             TransportMode = HttpTransportMode.AutoDetect,
-            ConnectionTimeout = TimeSpan.FromSeconds(15)
+            ConnectionTimeout = TimeSpan.FromSeconds(30)
         };
             
         var transport = new SseClientTransport(options, httpClientFactory.CreateClient());
             
         await ThrowIfNotConnectAsync(transport);
 
-        return await mcpDao.UpdateServerAsync(server);
+        return await mcpDao.UpdateServerAsync(server, updateIcon, icon);
     }
     
     public async Task<McpServer> SetServerStateAsync(Guid serverId, bool enabled)
@@ -546,7 +554,8 @@ public partial class McpService(
                         {
                             ServerId = connection.ServerId,
                             ServerName = connection.Name,
-                            ServerType = connection.ServerType
+                            ServerType = connection.ServerType,
+                            Icon = connection.Icon
                         },
                         Name = tool.Name,
                         RoomId = connection.RoomId,

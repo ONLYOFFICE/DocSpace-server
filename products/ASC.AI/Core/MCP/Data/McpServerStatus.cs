@@ -32,7 +32,7 @@ public class McpServerStatus
     public required string Name { get; init; }
     public ServerType ServerType { get; init; }
     public bool Connected { get; set; }
-    public string? AuthorizationEndpoint { get; set; }
+    public Icon? Icon { get; init; }
 }
 
 public static class McpServerStatusExtensions
@@ -44,26 +44,9 @@ public static class McpServerStatusExtensions
             Id = connection.ServerId,
             Name = connection.Name,
             ServerType = connection.ServerType,
-            Connected = connection.Connected
+            Connected = connection.Connected,
+            Icon = connection.Icon
         };
-
-        if (connection.ConnectionType is not ConnectionType.OAuth || connection.OauthProvider is not { IsEnabled: true })
-        {
-            return serverStatus;
-        }
-
-        var provider = connection.OauthProvider;
-                    
-        var builder = new UriBuilder(provider.CodeUrl);
-                        
-        var queryString = HttpUtility.ParseQueryString(string.Empty);
-        queryString.Add("client_id", provider.ClientID);
-        queryString.Add("redirect_uri", provider.RedirectUri);
-        queryString.Add("response_type", "code");
-                        
-        builder.Query = queryString.ToString();
-                        
-        serverStatus.AuthorizationEndpoint = builder.ToString();
 
         return serverStatus;
     }

@@ -31,4 +31,5 @@ public class McpServerShortDto : IMapFrom<McpServer>
     public Guid Id { get; init; }
     public string? Name { get; init; }
     public ServerType ServerType { get; init; }
+    public Icon? Icon { get; init; }
 }

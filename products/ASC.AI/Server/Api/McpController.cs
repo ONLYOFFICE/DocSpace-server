@@ -36,7 +36,11 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     public async Task<McpServerDto> AddServerAsync(AddServerRequestDto inDto)
     {
         var server = await mcpService.AddCustomServerAsync(
-            inDto.Body.Endpoint, inDto.Body.Name, inDto.Body.Description, inDto.Body.Headers);
+            inDto.Body.Endpoint, 
+            inDto.Body.Name, 
+            inDto.Body.Description, 
+            inDto.Body.Headers,
+            inDto.Body.Icon);
         
         return mapper.Map<McpServer, McpServerDto>(server);
     }
@@ -44,8 +48,14 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     [HttpPut("servers/{id}")]
     public async Task<McpServerDto> UpdateServerAsync(UpdateServerRequestDto inDto)
     {
-        var server = await mcpService.UpdateCustomServerAsync(inDto.Id, inDto.Body.Endpoint, inDto.Body.Name, 
-            inDto.Body.Headers, inDto.Body.Description);
+        var server = await mcpService.UpdateCustomServerAsync(
+            inDto.Id,
+            inDto.Body.Endpoint, 
+            inDto.Body.Name, 
+            inDto.Body.Headers, 
+            inDto.Body.Description,
+            inDto.Body.UpdateIcon,
+            inDto.Body.Icon);
         
         return mapper.Map<McpServer, McpServerDto>(server);
     }
@@ -116,7 +126,11 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
         var tools = await mcpService.SetToolsAsync(inDto.RoomId, inDto.ServerId, 
             inDto.Body.DisabledTools);
         
-        return tools.Select(x => new McpToolDto { Name = x.Key, Enabled = x.Value }).ToList();
+        return tools.Select(x => new McpToolDto
+        {
+            Name = x.Key, 
+            Enabled = x.Value
+        }).ToList();
     }
 
     [HttpGet("rooms/{roomId}/servers/{serverId}/tools")]
@@ -124,7 +138,11 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     {
         var tools = await mcpService.GetToolsAsync(inDto.RoomId, inDto.ServerId);
         
-        return tools.Select(x => new McpToolDto { Name = x.Key, Enabled = x.Value }).ToList();
+        return tools.Select(x => new McpToolDto
+        {
+            Name = x.Key, 
+            Enabled = x.Value
+        }).ToList();
     }
 
     [HttpPost("rooms/{roomId}/servers/{serverId}/connect")]

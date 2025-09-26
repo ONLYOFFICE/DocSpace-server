@@ -36,13 +36,18 @@ public class McpServer
     public Dictionary<string, string>? Headers { get; set; }
     public ServerType ServerType { get; init; }
     public ConnectionType ConnectionType { get; init; }
-    public bool Internal { get; init; }
     public bool Enabled { get; set; }
+    public bool HasIcon { get; set; }
+    public Icon? Icon { get; set; }
+    public DateTime ModifiedOn { get; set; }
 }
 
 public static class McpServerExtensions
 {
-    public static async Task<McpServer> ToMcpServerAsync(this DbMcpServerUnit dbMcpUnit, InstanceCrypto crypto)
+    public static async Task<McpServer> ToMcpServerAsync(
+        this DbMcpServerUnit dbMcpUnit, 
+        InstanceCrypto crypto,
+        McpIconStore iconStore)
     {
         var server = new McpServer
         {
@@ -52,7 +57,9 @@ public static class McpServerExtensions
             Description = dbMcpUnit.Server.Description,
             Endpoint = dbMcpUnit.Server.Endpoint,
             ConnectionType = dbMcpUnit.Server.ConnectionType,
-            Enabled = dbMcpUnit.State?.Enabled ?? false
+            Enabled = dbMcpUnit.State?.Enabled ?? false,
+            HasIcon = dbMcpUnit.Server.HasIcon,
+            ModifiedOn = dbMcpUnit.Server.ModifiedOn
         };
 
         if (dbMcpUnit.Server.Headers == null)
@@ -62,6 +69,12 @@ public static class McpServerExtensions
 
         var headersJson = await crypto.DecryptAsync(dbMcpUnit.Server.Headers);
         server.Headers = JsonSerializer.Deserialize<Dictionary<string, string>>(headersJson);
+        
+        if (server.HasIcon)
+        {
+            server.Icon = await iconStore.GetAsync(
+                dbMcpUnit.Server.TenantId, dbMcpUnit.Server.Id, dbMcpUnit.Server.ModifiedOn);
+        }
 
         return server;
     }

@@ -79,11 +79,17 @@ public class ChatHistory(ChatDao chatDao)
                         }
                     case FunctionCallContent functionCallContent:
                         {
+                            var mcpServerInfo = functionCallContent.GetMcpServerInfo();
+                            if (mcpServerInfo is { Icon: not null })
+                            {
+                                mcpServerInfo.Icon = null;
+                            }
+                            
                             var toolCall = new ToolCallMessageContent(
                                 functionCallContent.CallId, 
                                 functionCallContent.Name, 
                                 functionCallContent.Arguments,
-                                mcpServerInfo: functionCallContent.GetMcpServerInfo());
+                                mcpServerInfo: mcpServerInfo);
                     
                             toolCalls.Add(functionCallContent.CallId, toolCall);
                             continue;

@@ -46,7 +46,7 @@ public class UpdateServerRequestBody
     [Url]
     public string? Endpoint { get; init; }
     
-    public bool? Enabled { get; init; }
-    
     public Dictionary<string, string>? Headers { get; init; }
+    public bool UpdateIcon { get; init; }
+    public IconParams? Icon { get; init; }
 }

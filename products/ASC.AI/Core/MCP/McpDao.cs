@@ -24,14 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.MCP.Data;
+namespace ASC.AI.Core.MCP;
 
 [Scope]
 public class McpDao(
     IDbContextFactory<AiDbContext> dbContextFactory,
     SystemMcpConfig systemMcpConfig,
     InstanceCrypto crypto,
-    ConsumerFactory consumerFactory)
+    ConsumerFactory consumerFactory,
+    McpIconStore iconStore)
 {
     public async Task<McpServer> AddServerAsync(
         int tenantId, 
@@ -39,7 +40,8 @@ public class McpDao(
         string name, 
         Dictionary<string, string>? headers,
         string description,
-        ConnectionType connectionType)
+        ConnectionType connectionType,
+        IconParams? iconParams)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -51,7 +53,9 @@ public class McpDao(
             Name = name,
             Endpoint = endpoint,
             Description = description,
-            ConnectionType = connectionType
+            ConnectionType = connectionType,
+            HasIcon = iconParams != null,
+            ModifiedOn = DateTime.UtcNow
         };
 
         if (headers is { Count: > 0 })
@@ -75,6 +79,11 @@ public class McpDao(
             await context.McpServers.AddAsync(server);
             await context.McpServerStates.AddAsync(state);
             
+            if (iconParams != null)
+            {
+                await iconStore.SaveAsync(tenantId, server.Id, iconParams);
+            }
+            
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
         });
@@ -87,7 +96,10 @@ public class McpDao(
             Description = server.Description,
             Endpoint = server.Endpoint,
             Headers = headers,
-            Enabled = true
+            Enabled = true,
+            HasIcon = server.HasIcon,
+            Icon = server.HasIcon ? await iconStore.GetAsync(tenantId, server.Id, server.ModifiedOn) : null,
+            ModifiedOn = server.ModifiedOn
         };
     }
     
@@ -108,7 +120,7 @@ public class McpDao(
             return null;
         }
 
-        return await server.ToMcpServerAsync(crypto);
+        return await server.ToMcpServerAsync(crypto, iconStore);
     }
     
     public async Task<List<McpServer>> GetServersAsync(int tenantId, HashSet<Guid> ids)
@@ -134,7 +146,7 @@ public class McpDao(
         }
 
         var dbServers = await dbContext.GetServersAsync(tenantId, ids)
-            .SelectAwait(async x => await x.ToMcpServerAsync(crypto))
+            .SelectAwait(async x => await x.ToMcpServerAsync(crypto, iconStore))
             .ToListAsync();
         
         servers.AddRange(dbServers);
@@ -151,7 +163,7 @@ public class McpDao(
         var dbTotalCount = await dbContext.GetActiveServersTotalCountAsync(tenantId);
         
         var dbServers = await dbContext.GetActiveServersAsync(tenantId, offset, count)
-            .SelectAwait(async x => await x.ToMcpServerAsync(crypto))
+            .SelectAwait(async x => await x.ToMcpServerAsync(crypto, iconStore))
             .ToListAsync();
         
         servers.AddRange(dbServers);
@@ -210,7 +222,7 @@ public class McpDao(
         var dbTotalCount = await dbContext.GetServersCountAsync(tenantId);
         
         var dbServers = await dbContext.GetServersAsync(tenantId, offset, count)
-            .SelectAwait(async x => await x.ToMcpServerAsync(crypto))
+            .SelectAwait(async x => await x.ToMcpServerAsync(crypto, iconStore))
             .ToListAsync();
         
         servers.AddRange(dbServers);
@@ -283,42 +295,66 @@ public class McpDao(
         });
     }
 
-    public async Task<McpServer> UpdateServerAsync(McpServer options)
+    public async Task<McpServer> UpdateServerAsync(McpServer server, bool updateIcon, IconParams? iconParams)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
 
-        var serverUnit = await dbContext.GetServerAsync(options.TenantId, options.Id);
+        var serverUnit = await dbContext.GetServerAsync(server.TenantId, server.Id);
         if (serverUnit == null)
         {
-            return options;
+            return server;
         }
 
-        var server = serverUnit.Server;
+        var dbServer = serverUnit.Server;
+        
+        server.ModifiedOn = DateTime.UtcNow;
+
+        if (updateIcon)
+        {
+            switch (server.HasIcon)
+            {
+                case true when iconParams != null:
+                    await iconStore.SaveAsync(server.TenantId, server.Id, iconParams);
+                    break;
+                case false:
+                    await iconStore.DeleteAsync(dbServer.TenantId, dbServer.Id);
+                    server.Icon = null;
+                    break;
+            }
+        }
         
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
             
-            server.Name = options.Name;
-            server.Endpoint = options.Endpoint;
-            server.Description = options.Description;
+            dbServer.Name = server.Name;
+            dbServer.Endpoint = server.Endpoint;
+            dbServer.Description = server.Description;
+            dbServer.HasIcon = server.HasIcon;
+            dbServer.ModifiedOn = server.ModifiedOn;
         
-            if (options.Headers is { Count: > 0 })
+            if (server.Headers is { Count: > 0 })
             {
-                var headersJson = JsonSerializer.Serialize(options.Headers);
-                server.Headers = await crypto.EncryptAsync(headersJson);
+                var headersJson = JsonSerializer.Serialize(server.Headers);
+                dbServer.Headers = await crypto.EncryptAsync(headersJson);
             }
             else
             {
-                server.Headers = null;
+                dbServer.Headers = null;
             }
             
-            context.McpServers.Update(server);
+            context.McpServers.Update(dbServer);
+            
             await context.SaveChangesAsync();
         });
 
-        return options;
+        if (server.HasIcon)
+        {
+            server.Icon = await iconStore.GetAsync(dbServer.TenantId, dbServer.Id, server.ModifiedOn);
+        }
+
+        return server;
     }
     
     public async Task DeleteServersAsync(int tenantId, List<Guid> ids)
@@ -335,6 +371,11 @@ public class McpDao(
             await context.DeleteRoomServersAsync(tenantId, ids);
             await context.DeleteSettingsAsync(tenantId, ids);
             await context.DeleteServersStatesAsync(tenantId, ids);
+            
+            foreach (var id in ids)
+            {
+                await iconStore.DeleteAsync(tenantId, id);
+            }
             
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -382,7 +423,7 @@ public class McpDao(
             item.SystemServer = systemServer;
         }
             
-        return await item.ToMcpRoomServerAsync(crypto, consumerFactory);
+        return await item.ToMcpRoomServerAsync(crypto, consumerFactory, iconStore);
     }
     
     public async IAsyncEnumerable<McpServerConnection> GetServerConnectionAsync(int tenantId, int roomId, Guid userId)
@@ -400,7 +441,7 @@ public class McpDao(
                 item.SystemServer = systemServer;
             }
             
-            yield return await item.ToMcpRoomServerAsync(crypto, consumerFactory);
+            yield return await item.ToMcpRoomServerAsync(crypto, consumerFactory, iconStore);
         }
     }
     

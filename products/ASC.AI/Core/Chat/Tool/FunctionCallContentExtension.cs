@@ -31,6 +31,7 @@ public class McpServerInfo
     public Guid ServerId { get; init; }
     public required string ServerName { get; init; }
     public ServerType ServerType { get; init; }
+    public Icon? Icon { get; set; }
 }
 
 public static class FunctionCallContentExtension
