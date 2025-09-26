@@ -849,7 +849,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             TenantId = -12,
                             Features = "backup",
                             Name = "backup",
-                            Price = 12m,
+                            Price = 10m,
                             ProductId = "10006",
                             Visible = false,
                             Wallet = true

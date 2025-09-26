@@ -52,7 +52,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 columns: new[] { "tenant", "description", "features", "name", "price", "product_id", "wallet" },
                 values: new object[,]
                 {
-                    { -12, null, "backup", "backup", 12m, "10006", true }
+                    { -12, null, "backup", "backup", 10m, "10006", true }
                 });
         }
 

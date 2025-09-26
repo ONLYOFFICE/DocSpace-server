@@ -174,7 +174,7 @@ public static class DbQuotaExtension
                     Name = "backup",
                     Description = null,
                     Features = "backup",
-                    Price = 12,
+                    Price = 10,
                     ProductId = "10006",
                     Visible = false,
                     Wallet = true
