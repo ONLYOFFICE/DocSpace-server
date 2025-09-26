@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+#pragma warning disable CS0612 // Type or member is obsolete
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
@@ -39,7 +40,23 @@ public class FileShareDto
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
+    [Obsolete]
     public object SharedTo { get; set; }
+    
+    /// <summary>
+    /// The user who has the access to the specified file.
+    /// </summary>
+    public EmployeeFullDto SharedToUser { get; set; }
+    
+    /// <summary>
+    /// The user who has the access to the specified file.
+    /// </summary>
+    public GroupSummaryDto SharedToGroup { get; set; }
+    
+    /// <summary>
+    /// The user who has the access to the specified file.
+    /// </summary>
+    public FileShareLink SharedLink { get; set; }
 
     /// <summary>
     /// Specifies if the access right is locked or not.
@@ -155,11 +172,16 @@ public enum LinkType
 public class FileShareDtoHelper(
     GroupSummaryDtoHelper groupSummaryDtoHelper,
     UserManager userManager,
-    EmployeeFullDtoHelper employeeWraperFullHelper,
+    EmployeeFullDtoHelper employeeWrapperFullHelper,
     ApiDateTimeHelper apiDateTimeHelper)
 {
     public async Task<FileShareDto> Get(AceWrapper aceWrapper)
     {
+        if (aceWrapper == null)
+        {
+            return null;
+        }
+        
         var result = new FileShareDto
         {
             IsOwner = aceWrapper.Owner,
@@ -178,7 +200,7 @@ public class FileShareDtoHelper(
                 var date = aceWrapper.FileShareOptions?.ExpirationDate;
                 var expired = aceWrapper.FileShareOptions?.IsExpired;
 
-                result.SharedTo = new FileShareLink
+                result.SharedLink = new FileShareLink
                 {
                     Id = aceWrapper.Id,
                     Title = aceWrapper.FileShareOptions?.Title,
@@ -198,16 +220,18 @@ public class FileShareDtoHelper(
                     Internal = aceWrapper.FileShareOptions?.Internal,
                     RequestToken = aceWrapper.RequestToken
                 };
+                result.SharedTo = result.SharedLink;
             }
             else
             {
-                //Shared to group
-                result.SharedTo = await groupSummaryDtoHelper.GetAsync(await userManager.GetGroupInfoAsync(aceWrapper.Id));
+                result.SharedToGroup = await groupSummaryDtoHelper.GetAsync(await userManager.GetGroupInfoAsync(aceWrapper.Id));
+                result.SharedTo = result.SharedToGroup;
             }
         }
         else
         {
-            result.SharedTo = await employeeWraperFullHelper.GetFullAsync(await userManager.GetUsersAsync(aceWrapper.Id));
+            result.SharedToUser = await employeeWrapperFullHelper.GetFullAsync(await userManager.GetUsersAsync(aceWrapper.Id));
+            result.SharedTo = result.SharedToUser;
         }
 
         result.Access = aceWrapper.Access;

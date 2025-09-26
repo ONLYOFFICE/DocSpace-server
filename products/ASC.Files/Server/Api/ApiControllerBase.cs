@@ -40,32 +40,20 @@ public abstract class ApiControllerBase(FolderDtoHelper folderDtoHelper, FileDto
     protected readonly FolderDtoHelper _folderDtoHelper = folderDtoHelper;
     protected readonly FileDtoHelper _fileDtoHelper = fileDtoHelper;
 
-    protected async Task<FileEntryBaseDto> GetFileEntryWrapperAsync(FileEntry r)
+    protected async Task<FileEntryBaseDto> GetFileEntryWrapperAsync(FileEntry r, IFolder contextFolder = null)
     {
-        FileEntryBaseDto wrapper = null;
-        if (r.FileEntryType == FileEntryType.Folder)
-        {
-            if (r is Folder<int> fol1)
+       return r.FileEntryType == FileEntryType.Folder
+            ? r switch
             {
-                wrapper = await _folderDtoHelper.GetAsync(fol1);
+                Folder<int> fol1 => await _folderDtoHelper.GetAsync(fol1, contextFolder: contextFolder),
+                Folder<string> fol2 => await _folderDtoHelper.GetAsync(fol2, contextFolder: contextFolder),
+                _ => null
             }
-            else if (r is Folder<string> fol2)
+            : r switch
             {
-                wrapper = await _folderDtoHelper.GetAsync(fol2);
-            }
-        }
-        else
-        {
-            if (r is File<int> file1)
-            {
-                wrapper = await _fileDtoHelper.GetAsync(file1);
-            }
-            else if (r is File<string> file2)
-            {
-                wrapper = await _fileDtoHelper.GetAsync(file2);
-            }
-        }
-
-        return wrapper;
+                File<int> file1 => await _fileDtoHelper.GetAsync(file1, contextFolder: contextFolder),
+                File<string> file2 => await _fileDtoHelper.GetAsync(file2, contextFolder: contextFolder),
+                _ => null
+            };
     }
 }

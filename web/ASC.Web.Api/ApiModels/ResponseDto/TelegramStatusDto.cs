@@ -28,6 +28,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class TelegramStatusDto
 {
-    public TelegramHelper.RegStatus Status { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter<RegStatus>))]
+    public RegStatus Status { get; set; }
     public string Username { get; set; }
 }

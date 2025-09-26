@@ -30,7 +30,6 @@ using ASC.Data.Storage.Encryption;
 using ASC.Files.Core.RoomTemplates.Operations;
 using ASC.Files.Core.Services.NotifyService;
 using ASC.Files.Service.Services;
-using ASC.Files.Service.Services.Thumbnail;
 using ASC.Web.Files.Configuration;
 
 namespace ASC.Files.Service;

@@ -519,6 +519,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.CompletedTask;
     }
 
+    public Task ReassignFoldersAsync(Guid newOwnerId, IEnumerable<string> folderIds)
+    {
+        return Task.CompletedTask;
+    }
+
     public IAsyncEnumerable<Folder<string>> SearchFoldersAsync(string text, bool bunch)
     {
         return null;
@@ -664,6 +669,16 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
     {
         throw new NotImplementedException();
+    }
+
+    public Task<int> GetSharedFoldersCountAsync(string parentId)
+    {
+        return Task.FromResult(0);
+    }
+
+    public IAsyncEnumerable<Folder<string>> GetSharedFoldersAsync(string parentId, int offset = 0, int count = -1)
+    {
+        return AsyncEnumerable.Empty<Folder<string>>();
     }
 
     Task<IDictionary<string, string>> IFolderDao<string>.CanMoveOrCopyAsync<TTo>(IEnumerable<string> folderIds, TTo to)

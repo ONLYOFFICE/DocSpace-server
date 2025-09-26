@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Common;
-using ASC.Files.Service.Services.Thumbnail;
 
 namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 

@@ -777,6 +777,16 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
 
+    public Task<int> GetSharedFilesCountAsync(string parentId)
+    {
+        return Task.FromResult(0);
+    }
+
+    public IAsyncEnumerable<File<string>> GetSharedFilesAsync(string parentId, int offset = 0, int count = -1)
+    {
+        return AsyncEnumerable.Empty<File<string>>();
+    }
+
     public Task<int> SetCustomOrder(string fileId, string parentFolderId, int order)
     {
         return Task.FromResult(0);

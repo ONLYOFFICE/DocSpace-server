@@ -1006,6 +1006,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Documents of user {0} {1}.
+        /// </summary>
+        public static string FolderNameForReassignedData {
+            get {
+                return ResourceManager.GetString("FolderNameForReassignedData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Form number.
         /// </summary>
         public static string FormNumber {

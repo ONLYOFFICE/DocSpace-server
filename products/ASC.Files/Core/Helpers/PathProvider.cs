@@ -78,6 +78,9 @@ public class PathProvider(WebImageSupplier webImageSupplier,
             case FolderType.Archive:
                 result = string.Format($"rooms/archived/filter?folder={urlPathEncode}");
                 break;
+            case FolderType.SHARE:
+                result = string.Format($"shared-with-me/filter?folder={urlPathEncode}");
+                break;
             case FolderType.VirtualRooms:
             case FolderType.RoomTemplates:
                 result = string.Format($"rooms/shared/{urlPathEncode}/filter?folder={urlPathEncode}");

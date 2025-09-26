@@ -255,18 +255,10 @@ public class ExternalLinkHelper(
 
     private async Task<bool> MarkAsync<T>(Folder<T> room, Guid linkId, Guid userId)
     {
-        var result = await fileMarker.MarkAsRecentByLink(room, linkId);
-        switch (result)
-        {
-            case MarkResult.NotMarked:
-                return false;
-            case MarkResult.Marked:
-                room.FolderIdDisplay = IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync);
-                await socketManager.CreateFolderAsync(room, [userId]);
-                return true;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+        await fileMarker.MarkAsRecentByLink(room, linkId);
+        room.FolderIdDisplay = IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync);
+        await socketManager.CreateFolderAsync(room, [userId]);
+        return true;
     }
 
     private async Task<bool> IsSharedAsync<T>(FileEntry<T> entry, Guid userId, bool isDocSpaceAdmin)

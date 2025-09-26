@@ -53,7 +53,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// Specifies if the folder can be shared or not.
     /// </summary>
     public bool? IsShareable { get; set; }
-
+    
     /// <summary>
     /// The new element index in the folder.
     /// </summary>
@@ -133,12 +133,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// How much folder space is used (counter).
     /// </summary>
     public long? UsedSpace { get; set; }
-
-    /// <summary>
-    /// Specifies if the folder can be accessed via an external link or not.
-    /// </summary>
-    public bool? External { get; set; }
-
+    
     /// <summary>
     /// Specifies if the folder is password protected or not.
     /// </summary>
@@ -178,11 +173,9 @@ public class FolderDtoHelper(
     SecurityContext securityContext,
     UserManager userManager,
     IUrlShortener urlShortener,
-    EntryStatusManager entryStatusManager
-    )
+    EntryStatusManager entryStatusManager)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
-    {
-
+{
     public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null)
     {
         var result = await GetFolderWrapperAsync(folder);
@@ -248,19 +241,26 @@ public class FolderDtoHelper(
             }
             
             result.Watermark = watermarkHelper.Get(folder.SettingsWatermark);
+        }
+        
+        if (folder.ShareRecord is { IsLink: true })
+        {
+            result.External = true;
+            result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) && 
+                                       folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && 
+                                       !canRead;
 
-            if (folder.ShareRecord is { IsLink: true })
+            result.Expired = folder.ShareRecord.Options?.IsExpired;
+            result.RequestToken = await _externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
+            result.ExpirationDate = _apiDateTimeHelper.Get(folder.ShareRecord?.Options?.ExpirationDate);
+            result.RootFolderType = FolderType.SHARE;
+            var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.ParentId);
+            if (!await _fileSecurity.CanReadAsync(parent))
             {
-                result.External = true;
-                result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) && 
-                                           folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && 
-                                           !canRead;
-
-                result.Expired = folder.ShareRecord.Options?.IsExpired;
-                result.RequestToken = await _externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
+                result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
             }
         }
-
+        
         if (folder.Order != 0)
         {
             if (string.IsNullOrEmpty(order) && (contextFolder == null || !DocSpaceHelper.IsRoom(contextFolder.FolderType)))
@@ -277,11 +277,7 @@ public class FolderDtoHelper(
         }
 
         result.Lifetime = folder.SettingsLifetime.MapToDto();
-        
-        if (result.CanShare)
-        {
-            result.AvailableExternalRights = await _fileSecurity.GetFolderAccesses(folder, SubjectType.ExternalLink);
-        }
+        result.AvailableShareRights =  (await _fileSecurity.GetAccesses(folder)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
 
         if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })
         {
@@ -325,6 +321,27 @@ public class FolderDtoHelper(
             }
         }
         
+        if (folder.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID))
+        {
+            switch (contextFolder)
+            {
+                case { FolderType: FolderType.Recent }:
+                    result.RootFolderType = FolderType.Recent;
+                    result.ParentId = await _globalFolderHelper.GetFolderRecentAsync<T>();
+                    break;
+                case { FolderType: FolderType.SHARE }:
+                case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, authContext.CurrentAccount.ID):
+                    result.RootFolderType = FolderType.SHARE;
+                    var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.ParentId);
+                    if (!await _fileSecurity.CanReadAsync(parent))
+                    {
+                        result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                    }
+
+                    break;
+            }
+        }
+        
         return result;
     }
     
@@ -357,14 +374,14 @@ public class FolderDtoHelper(
                 newBadges = 0;
             }
         }
-
+        
         var result = await GetAsync<FolderDto<T>, T>(folder);
         if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates)
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;
         }
-
+        
         await entryStatusManager.SetIsFavoriteFolderAsync(folder);
         
         result.IsShareable = folder.Shareable.NullIfDefault();
