@@ -511,11 +511,6 @@ public abstract class BaseStartup
         services.AddTransient<DistributedTaskProgress>();
     }
 
-    public static IEnumerable<Assembly> GetAutoMapperProfileAssemblies()
-    {
-        return AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GetName().Name.StartsWith("ASC."));
-    }
-
     public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app.UseForwardedHeaders();

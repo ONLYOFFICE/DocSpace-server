@@ -103,11 +103,6 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddAccountingHttpClient();
     }
 
-    protected IEnumerable<Assembly> GetAutoMapperProfileAssemblies()
-    {
-        return AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GetName().Name.StartsWith("ASC."));
-    }
-
     public virtual void Configure(IApplicationBuilder app)
     {
         app.UseExceptionHandler();

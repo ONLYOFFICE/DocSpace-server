@@ -66,10 +66,10 @@ public static partial class GroupMapper
     private static Guid MapNullableGuid(Guid? source) => source ?? Guid.Empty;
 }
 
-[Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public partial class GroupInfoMapper
+public static partial class GroupInfoMapper
 {    
-    public partial GroupInfo MapToGroupInfo(DbGroup source);
+    public static partial GroupInfo MapToGroupInfo(this DbGroup source);
     
+    private static Guid MapNullableGuid(Guid? source) => source ?? Guid.Empty;
 }

@@ -43,7 +43,6 @@ internal abstract class SecurityBaseDao<T>(
     AuthContext authContext,
     IServiceProvider serviceProvider,
     SecurityTreeRecordMapper mapper,
-    GroupInfoMapper groupInfoMapper,
     IDistributedLockProvider distributedLockProvider)
     : AbstractDao(dbContextFactory,
         userManager,
@@ -641,7 +640,7 @@ internal abstract class SecurityBaseDao<T>(
 
             foreach (var r in await q.ToListAsync())
             {
-                result.Add(new GroupInfoWithShared { GroupInfo = groupInfoMapper.MapToGroupInfo(r.Group), Shared = r.Shared });
+                result.Add(new GroupInfoWithShared { GroupInfo = r.Group.MapToGroupInfo(), Shared = r.Shared });
             }
 
         });
@@ -1190,9 +1189,8 @@ internal class SecurityDao(
         AuthContext authContext,
         IServiceProvider serviceProvider,
         SecurityTreeRecordMapper mapper,
-        IDistributedLockProvider distributedLockProvider,
-        GroupInfoMapper groupInfoMapper)
-    : SecurityBaseDao<int>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper, groupInfoMapper, distributedLockProvider), ISecurityDao<int>
+        IDistributedLockProvider distributedLockProvider)
+    : SecurityBaseDao<int>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper, distributedLockProvider), ISecurityDao<int>
 {
     public async Task<IEnumerable<FileShareRecord<int>>> GetSharesAsync(FileEntry<int> entry, IEnumerable<Guid> subjects = null)
     {
@@ -1300,10 +1298,9 @@ internal class ThirdPartySecurityDao(
         AuthContext authContext,
         IServiceProvider serviceProvider,
         SecurityTreeRecordMapper mapper,
-        GroupInfoMapper groupInfoMapper,
         SelectorFactory selectorFactory,
         IDistributedLockProvider distributedLockProvider)
-    : SecurityBaseDao<string>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper, groupInfoMapper, distributedLockProvider), ISecurityDao<string>
+    : SecurityBaseDao<string>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper, distributedLockProvider), ISecurityDao<string>
 {
     public async Task<IEnumerable<FileShareRecord<string>>> GetSharesAsync(FileEntry<string> entry, IEnumerable<Guid> subjects = null)
     {

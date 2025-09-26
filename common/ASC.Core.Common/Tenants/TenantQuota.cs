@@ -644,31 +644,8 @@ public partial class TenantQuotaMapper(IServiceProvider provider)
     public TenantQuota MapDbQuotaToTenantQuota(DbQuota quota)
     {
         var dto = Map(quota);
-        dto.Price = ResolvePrice(quota);
-        dto.PriceCurrencySymbol = ResolvePriceCurrencySymbol(quota);
-        dto.PriceISOCurrencySymbol = ResolveISOCurrencySymbol(quota);
+        (dto.Price, dto.PriceCurrencySymbol, dto.PriceISOCurrencySymbol) = Resolve(quota);
         return dto;
-    }
-    
-    private string ResolvePriceCurrencySymbol(DbQuota source)
-    {
-        var (_, currencySymbol, _) = Resolve(source);
-
-        return currencySymbol;
-    }
-    
-    private string ResolveISOCurrencySymbol(DbQuota source)
-    {
-        var (_, _, isoCurrencySymbol) = Resolve(source);
-
-        return isoCurrencySymbol;
-    }
-    
-    private decimal ResolvePrice(DbQuota source)
-    {
-        var (price, _, _) = Resolve(source);
-
-        return price;
     }
     
     private (decimal, string, string) Resolve(DbQuota source)

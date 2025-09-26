@@ -175,7 +175,7 @@ public class DbTenantService(
 
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        return(await tenantDbContext.TenantByDomainAsync(domain)).Map();
+        return (await tenantDbContext.TenantByDomainAsync(domain)).Map();
     }
     
     public Tenant GetTenant(string domain)
