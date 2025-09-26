@@ -173,10 +173,12 @@ public class VectorizationTask : DistributedTaskProgress
 
                 if (collection != null)
                 {
-                    await collection.DeleteAsync(new VectorSearchOptions<Chunk>
-                    {
-                        Filter = x => x.TenantId == _tenantId && x.FileId == _fileId
-                    });
+                    await collection.DeleteAsync(
+                        new VectorSearchOptions<Chunk> 
+                        {
+                            Filter = x => x.TenantId == _tenantId && x.FileId == _fileId 
+                        },
+                        true);
                 }
                 
                 if (file != null && socketManager != null)
