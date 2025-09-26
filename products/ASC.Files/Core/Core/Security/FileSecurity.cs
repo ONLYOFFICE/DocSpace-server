@@ -27,7 +27,6 @@
 using System.ComponentModel;
 
 using Actions = ASC.Web.Studio.Core.Notify.Actions;
-using Folder = DocuSign.eSign.Model.Folder;
 
 namespace ASC.Files.Core.Security;
 
