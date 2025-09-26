@@ -66,11 +66,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.DeleteData(
                 table: "tenants_quota",
                 keyColumn: "tenant",
-                keyValue: -13);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
                 keyValue: -12);
 
             migrationBuilder.UpdateData(
