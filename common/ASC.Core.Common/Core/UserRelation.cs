@@ -26,9 +26,17 @@
 
 namespace ASC.Core.Common.Core;
 
-public class UserRelation : IMapFrom<DbUserRelation>
+public class UserRelation
 {
     public int TenantId { get; set; }
     public Guid SourceUserId { get; set; }
     public Guid TargetUserId { get; set; }
+}
+
+[Mapper]
+public static partial class UserRelationMapper
+{
+    [MapperIgnoreSource(nameof(DbUserRelation.Tenant))]
+    public static partial UserRelation Map(this DbUserRelation source);
+    
 }

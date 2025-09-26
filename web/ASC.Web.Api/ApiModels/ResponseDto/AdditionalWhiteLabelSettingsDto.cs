@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The additional white label settings parameters.
 /// </summary>
-public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSettings>
+public class AdditionalWhiteLabelSettingsDto
 {
     /// <summary>
     /// Specifies if the sample documents are displayed or hidden.
@@ -65,10 +65,26 @@ public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSetti
     /// Specifies if the additional white label settings are default or not.
     /// </summary>
     public required bool IsDefault { get; set; }
+}
 
-    public void Mapping(Profile profile)
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class AdditionalWhiteLabelSettingsMapper(ExternalResourceSettingsHelper externalResourceSettingsHelper)
+{
+    [MapPropertyFromSource(nameof(AdditionalWhiteLabelSettingsDto.IsDefault), Use = nameof(MapIsDefault))]
+    public partial AdditionalWhiteLabelSettingsDto Map(AdditionalWhiteLabelSettings source);
+
+    private bool MapIsDefault(AdditionalWhiteLabelSettings source)
     {
-        profile.CreateMap<AdditionalWhiteLabelSettings, AdditionalWhiteLabelSettingsDto>()
-            .ConvertUsing<AdditionalWhiteLabelSettingsConverter>();
-    }
+        source.ExternalResourceSettingsHelper ??= externalResourceSettingsHelper;
+
+        var defaultSettings = source.GetDefault();
+
+        return source.StartDocsEnabled == defaultSettings.StartDocsEnabled &&
+                           source.HelpCenterEnabled == defaultSettings.HelpCenterEnabled &&
+                           source.FeedbackAndSupportEnabled == defaultSettings.FeedbackAndSupportEnabled &&
+                           source.UserForumEnabled == defaultSettings.UserForumEnabled &&
+                           source.VideoGuidesEnabled == defaultSettings.VideoGuidesEnabled &&
+                           source.LicenseAgreementsEnabled == defaultSettings.LicenseAgreementsEnabled;
+    } 
 }

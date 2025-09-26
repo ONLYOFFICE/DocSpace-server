@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Mapping;
+
 using User = ASC.Core.Common.EF.User;
 
 namespace ASC.Files.Core.Data;
@@ -40,7 +42,7 @@ internal abstract class SecurityBaseDao<T>(
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
-    IMapper mapper,
+    SecurityTreeRecordMapper mapper,
     IDistributedLockProvider distributedLockProvider)
     : AbstractDao(dbContextFactory,
         userManager,
@@ -148,7 +150,7 @@ internal abstract class SecurityBaseDao<T>(
         }
         else
         {
-            var toInsert = mapper.Map<FileShareRecord<T>, DbFilesSecurity>(r);
+            var toInsert = mapper.MapFileShareRecordToDbFilesSecurity(r);
             toInsert.EntryId = await mapping.MappingIdAsync(r.EntryId, true);
 
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -311,119 +313,119 @@ internal abstract class SecurityBaseDao<T>(
 
         text = GetSearchText(text);
         var tenantId = _tenantManager.GetCurrentTenantId();
-        
+
         var result = 0;
         await using var ctx = await _dbContextFactory.CreateDbContextAsync();
         var strategy = ctx.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
             var everyoneGroup = GetEveryoneGroup(tenantId);
             await filesDbContext.Groups.AddAsync(everyoneGroup);
             await filesDbContext.SaveChangesAsync();
-            var q = await GetPureSharesQuery(tenantId, entry, filterType, filesDbContext);
-            var textSearch = !string.IsNullOrEmpty(text);
+        var q = await GetPureSharesQuery(tenantId, entry, filterType, filesDbContext);
+        var textSearch = !string.IsNullOrEmpty(text);
 
-            if (filterType is not (ShareFilterType.User or ShareFilterType.Group or ShareFilterType.UserOrGroup))
-            {
+        if (filterType is not (ShareFilterType.User or ShareFilterType.Group or ShareFilterType.UserOrGroup))
+        {
                 result = await q.CountAsync();
                 return;
-            }
+        }
 
-            switch (filterType)
-            {
-                case ShareFilterType.UserOrGroup:
+        switch (filterType)
+        {
+            case ShareFilterType.UserOrGroup:
+                {
+                    var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
+                        (security, user) => new { security, user });
+
+                    var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
+                        (security, group) => new { security, group });
+
+                    if (textSearch)
                     {
-                        var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
-                            (security, user) => new { security, user });
+                        userQuery = userQuery.Where(r =>
+                            !r.user.Removed && (r.user.FirstName.ToLower().Contains(text) || r.user.LastName.ToLower().Contains(text) || r.user.Email.ToLower().Contains(text)));
+                        groupQuery = groupQuery.Where(r => r.group.Name.ToLower().Contains(text));
+                    }
 
-                        var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
-                            (security, group) => new { security, group });
+                    var userQuery1 = userQuery.GroupJoin(filesDbContext.UserGroup,
+                            x => new
+                            {
+                                TenantId = tenantId,
+                                Userid = x.user.Id,
+                                UserGroupId = Constants.GroupGuest.ID,
+                                RefType = UserGroupRefType.Contains,
+                                Removed = false
+                            },
+                            ug => new
+                            {
+                                ug.TenantId,
+                                ug.Userid,
+                                ug.UserGroupId,
+                                ug.RefType,
+                                ug.Removed
+                            },
+                            (x, ug) => new { x.security, x.user, ug })
+                        .SelectMany(
+                            x => x.ug.DefaultIfEmpty(),
+                            (x, ug) => new { x.security, x.user, ug });
 
-                        if (textSearch)
-                        {
-                            userQuery = userQuery.Where(r =>
-                                !r.user.Removed && (r.user.FirstName.ToLower().Contains(text) || r.user.LastName.ToLower().Contains(text) || r.user.Email.ToLower().Contains(text)));
-                            groupQuery = groupQuery.Where(r => r.group.Name.ToLower().Contains(text));
-                        }
-
-                        var userQuery1 = userQuery.GroupJoin(filesDbContext.UserGroup,
-                                x => new
-                                {
-                                    TenantId = tenantId,
-                                    Userid = x.user.Id,
-                                    UserGroupId = Constants.GroupGuest.ID,
-                                    RefType = UserGroupRefType.Contains,
-                                    Removed = false
-                                },
-                                ug => new
-                                {
-                                    ug.TenantId,
-                                    ug.Userid,
-                                    ug.UserGroupId,
-                                    ug.RefType,
-                                    ug.Removed
-                                },
-                                (x, ug) => new { x.security, x.user, ug })
-                            .SelectMany(
-                                x => x.ug.DefaultIfEmpty(),
-                                (x, ug) => new { x.security, x.user, ug });
-
-                        var userQuery2 = userQuery1.Select(r => new SecurityOrderRecord
-                        {
-                            Security = r.security,
-                            Order = r.user.ActivationStatus == EmployeeActivationStatus.Pending
-                                ? 4
-                                : r.ug != null
-                                    ? 3
-                                    : r.security.Share == FileShare.RoomManager
-                                        ? 0
-                                        : 2,
-                            Name = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? r.user.Email : r.user.FirstName
-                        });
+                    var userQuery2 = userQuery1.Select(r => new SecurityOrderRecord
+                    {
+                        Security = r.security,
+                        Order = r.user.ActivationStatus == EmployeeActivationStatus.Pending
+                            ? 4
+                            : r.ug != null
+                                ? 3
+                                : r.security.Share == FileShare.RoomManager
+                                    ? 0
+                                    : 2,
+                        Name = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? r.user.Email : r.user.FirstName
+                    });
 
                         var groupQuery1 = groupQuery.Select(r => new SecurityOrderRecord { Security = r.security, Order = 1, Name = r.group.Name });
 
-                        q = userQuery2.Concat(groupQuery1)
-                            .Select(r => r.Security);
+                    q = userQuery2.Concat(groupQuery1)
+                        .Select(r => r.Security);
 
-                        break;
-                    }
-                case ShareFilterType.User:
+                    break;
+                }
+            case ShareFilterType.User:
+                {
+                    var q1 = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
+                        (s, u) => new SecurityUserRecord { Security = s, User = u }).Where(r => !r.User.Removed);
+
+                    if (textSearch)
                     {
-                        var q1 = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
-                            (s, u) => new SecurityUserRecord { Security = s, User = u }).Where(r => !r.User.Removed);
-
-                        if (textSearch)
-                        {
-                            q1 = q1.Where(r => r.User.FirstName.ToLower().Contains(text) || r.User.LastName.ToLower().Contains(text) || r.User.Email.ToLower().Contains(text));
-                        }
-
-                        if (status.HasValue)
-                        {
-                            q1 = q1.Where(s => s.User.ActivationStatus == status.Value);
-                        }
-
-                        q = q1.Select(r => r.Security);
-                        break;
+                        q1 = q1.Where(r => r.User.FirstName.ToLower().Contains(text) || r.User.LastName.ToLower().Contains(text) || r.User.Email.ToLower().Contains(text));
                     }
-                case ShareFilterType.Group:
+
+                    if (status.HasValue)
                     {
-                        var q1 = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
+                        q1 = q1.Where(s => s.User.ActivationStatus == status.Value);
+                    }
+
+                    q = q1.Select(r => r.Security);
+                    break;
+                }
+            case ShareFilterType.Group:
+                {
+                    var q1 = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
                             (security, group) => new SecurityOrderRecord { Security = security, Order = 0, Name = group.Name });
 
-                        if (textSearch)
-                        {
-                            q1 = q1.Where(r => r.Name.ToLower().Contains(text));
-                        }
-
-                        q = q1.Select(r => r.Security);
-                        break;
+                    if (textSearch)
+                    {
+                        q1 = q1.Where(r => r.Name.ToLower().Contains(text));
                     }
-            }
+                    
+                    q = q1.Select(r => r.Security);
+                    break;
+                }
+        }
 
             result = await q.CountAsync();
         });
@@ -437,7 +439,7 @@ internal abstract class SecurityBaseDao<T>(
         {
             yield break;
         }
-        
+
         text = GetSearchText(text);
 
         var searchByText = !string.IsNullOrEmpty(text);
@@ -456,141 +458,141 @@ internal abstract class SecurityBaseDao<T>(
             await filesDbContext.Groups.AddAsync(everyoneGroup);
             await filesDbContext.SaveChangesAsync();
 
-            var q = await GetPureSharesQuery(tenantId, entry, filterType, filesDbContext);
+        var q = await GetPureSharesQuery(tenantId, entry, filterType, filesDbContext);
 
-            switch (filterType)
-            {
-                case ShareFilterType.User when (entry is IFolder folder && DocSpaceHelper.IsRoom(folder.FolderType)):
+        switch (filterType)
+        {
+            case ShareFilterType.User when (entry is IFolder folder && DocSpaceHelper.IsRoom(folder.FolderType)):
+                {
+                    var predicate = ShareCompareHelper.GetCompareExpression<SecurityUserRecord>(s => s.Security.Share, entry.RootFolderType);
+
+                    var q1 = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
+                        (security, user) => new SecurityUserRecord { Security = security, User = user })
+                        .Where(r => !r.User.Removed);
+
+                    if (searchByText)
                     {
-                        var predicate = ShareCompareHelper.GetCompareExpression<SecurityUserRecord>(s => s.Security.Share, entry.RootFolderType);
-
-                        var q1 = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
-                                (security, user) => new SecurityUserRecord { Security = security, User = user })
-                            .Where(r => !r.User.Removed);
-
-                        if (searchByText)
-                        {
-                            q1 = q1.Where(r => r.User.FirstName.ToLower().Contains(text) || r.User.LastName.ToLower().Contains(text) || r.User.Email.ToLower().Contains(text));
-                        }
-
-                        if (status.HasValue)
-                        {
-                            q1 = q1.Where(r => r.User.ActivationStatus == status.Value);
-                        }
-
-                        q = q1.OrderBy(r => r.User.ActivationStatus)
-                            .ThenBy(predicate)
-                            .ThenBy(r => r.User.FirstName)
-                            .Select(r => r.Security);
-                        break;
+                        q1 = q1.Where(r => r.User.FirstName.ToLower().Contains(text) || r.User.LastName.ToLower().Contains(text) || r.User.Email.ToLower().Contains(text));
                     }
-                case ShareFilterType.Group:
+
+                    if (status.HasValue)
                     {
-                        var q1 = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
+                        q1 = q1.Where(r => r.User.ActivationStatus == status.Value);
+                    }
+
+                    q = q1.OrderBy(r => r.User.ActivationStatus)
+                        .ThenBy(predicate)
+                        .ThenBy(r => r.User.FirstName)
+                        .Select(r => r.Security);
+                    break;
+                }
+            case ShareFilterType.Group:
+                {
+                    var q1 = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
                             (security, group) => new SecurityOrderRecord { Security = security, Order = 0, Name = group.Name });
-
-                        if (searchByText)
-                        {
-                            q1 = q1.Where(r => r.Name.ToLower().Contains(text));
-                        }
-
-                        var predicate = ShareCompareHelper.GetCompareExpression<SecurityOrderRecord>(s => s.Security.Share, entry.RootFolderType);
-
-                        q = q1.OrderBy(predicate)
-                            .ThenBy(r => r.Name)
-                            .Select(r => r.Security);
-                        break;
-                    }
-                case ShareFilterType.UserOrGroup:
+                    
+                    if (searchByText)
                     {
-                        var predicate = ShareCompareHelper.GetCompareExpression<SecurityOrderRecord>(r => r.Security.Share, entry.RootFolderType);
+                        q1 = q1.Where(r => r.Name.ToLower().Contains(text));
+                    }
 
-                        var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
-                            (security, user) => new { security, user });
+                    var predicate = ShareCompareHelper.GetCompareExpression<SecurityOrderRecord>(s => s.Security.Share, entry.RootFolderType);
+                    
+                    q = q1.OrderBy(predicate)
+                        .ThenBy(r => r.Name)
+                        .Select(r => r.Security);
+                    break;
+                }
+            case ShareFilterType.UserOrGroup:
+                {
+                    var predicate = ShareCompareHelper.GetCompareExpression<SecurityOrderRecord>(r => r.Security.Share, entry.RootFolderType);
 
-                        var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
-                            (security, group) => new { security, group });
+                    var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
+                        (security, user) => new { security, user });
 
-                        if (searchByText)
-                        {
-                            userQuery = userQuery.Where(r =>
-                                !r.user.Removed && (r.user.FirstName.ToLower().Contains(text) || r.user.LastName.ToLower().Contains(text) || r.user.Email.ToLower().Contains(text)));
-                            groupQuery = groupQuery.Where(r => r.group.Name.ToLower().Contains(text));
-                        }
+                    var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
+                        (security, group) => new { security, group });
 
-                        var userQuery1 = userQuery.GroupJoin(filesDbContext.UserGroup,
-                                x => new
-                                {
-                                    TenantId = tenantId,
-                                    Userid = x.user.Id,
-                                    UserGroupId = Constants.GroupGuest.ID,
-                                    RefType = UserGroupRefType.Contains,
-                                    Removed = false
-                                },
-                                ug => new
-                                {
-                                    ug.TenantId,
-                                    ug.Userid,
-                                    ug.UserGroupId,
-                                    ug.RefType,
-                                    ug.Removed
-                                },
-                                (x, ug) => new { x.security, x.user, ug })
-                            .SelectMany(
-                                x => x.ug.DefaultIfEmpty(),
-                                (x, ug) => new { x.security, x.user, ug });
+                    if (searchByText)
+                    {
+                        userQuery = userQuery.Where(r =>
+                            !r.user.Removed && (r.user.FirstName.ToLower().Contains(text) || r.user.LastName.ToLower().Contains(text) || r.user.Email.ToLower().Contains(text)));
+                        groupQuery = groupQuery.Where(r => r.group.Name.ToLower().Contains(text));
+                    }
 
-                        var userQuery2 = userQuery1.Select(r => new SecurityOrderRecord
-                        {
-                            Security = r.security,
-                            Order = r.user.ActivationStatus == EmployeeActivationStatus.Pending
-                                ? 4
-                                : r.ug != null
-                                    ? 3
-                                    : r.security.Share == FileShare.RoomManager
-                                        ? 0
-                                        : 2,
-                            Name = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? r.user.Email : r.user.FirstName
-                        });
+                    var userQuery1 = userQuery.GroupJoin(filesDbContext.UserGroup,
+                            x => new
+                            {
+                                TenantId = tenantId,
+                                Userid = x.user.Id,
+                                UserGroupId = Constants.GroupGuest.ID,
+                                RefType = UserGroupRefType.Contains,
+                                Removed = false
+                            },
+                            ug => new
+                            {
+                                ug.TenantId,
+                                ug.Userid,
+                                ug.UserGroupId,
+                                ug.RefType,
+                                ug.Removed
+                            },
+                            (x, ug) => new { x.security, x.user, ug })
+                        .SelectMany(
+                            x => x.ug.DefaultIfEmpty(),
+                            (x, ug) => new { x.security, x.user, ug });
+                    
+                    var userQuery2 = userQuery1.Select(r => new SecurityOrderRecord
+                            {
+                                Security = r.security, 
+                        Order = r.user.ActivationStatus == EmployeeActivationStatus.Pending 
+                            ? 4 
+                            : r.ug != null 
+                                ? 3 
+                                : r.security.Share == FileShare.RoomManager 
+                                    ? 0 
+                                    : 2,
+                        Name = r.user.ActivationStatus == EmployeeActivationStatus.Pending ? r.user.Email : r.user.FirstName
+                            });
 
                         var groupQuery1 = groupQuery.Select(r => new SecurityOrderRecord { Security = r.security, Order = 1, Name = r.group.Name });
 
-                        q = userQuery2.Concat(groupQuery1)
-                            .OrderBy(r => r.Order)
-                            .ThenBy(predicate)
-                            .ThenBy(r => r.Name)
-                            .Select(r => r.Security);
+                    q = userQuery2.Concat(groupQuery1)
+                        .OrderBy(r => r.Order)
+                        .ThenBy(predicate)
+                        .ThenBy(r => r.Name)
+                        .Select(r => r.Security);
 
-                        break;
-                    }
-                case ShareFilterType.ExternalLink:
-                    {
-                        var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
-                        q = q.OrderByDescending(x => x.SubjectType).ThenBy(predicate);
-                        break;
-                    }
-                default:
-                    {
-                        var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
-                        q = q.OrderBy(predicate);
-                        break;
-                    }
-            }
+                    break;
+                }
+            case ShareFilterType.ExternalLink:
+                {
+                    var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
+                    q = q.OrderByDescending(x => x.SubjectType).ThenBy(predicate);
+                    break;
+                }
+            default:
+                {
+                    var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
+                    q = q.OrderBy(predicate);
+                    break;
+                }
+        }
 
-            if (offset > 0)
-            {
-                q = q.Skip(offset);
-            }
+        if (offset > 0)
+        {
+            q = q.Skip(offset);
+        }
 
-            if (count > 0)
-            {
-                q = q.Take(count);
-            }
+        if (count > 0)
+        {
+            q = q.Take(count);
+        }
 
-            var records = q.ToAsyncEnumerable().SelectAwait(async r => await ToFileShareRecordAsync(r));
-            
-            await foreach (var r in DeleteExpiredAsync(records, filesDbContext))
-            {
+        var records = q.ToAsyncEnumerable().SelectAwait(async r => await ToFileShareRecordAsync(r));
+
+        await foreach (var r in DeleteExpiredAsync(records, filesDbContext))
+        {
                 result.Add(r);
             }
         });
@@ -607,7 +609,7 @@ internal abstract class SecurityBaseDao<T>(
         {
             yield break;
         }
-        
+
         List<GroupInfoWithShared> result = [];
         
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -619,11 +621,11 @@ internal abstract class SecurityBaseDao<T>(
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await filesDbContext.Database.BeginTransactionAsync();
-            
+
             var everyoneGroup = GetEveryoneGroup(tenantId);
             await filesDbContext.Groups.AddAsync(everyoneGroup);
             await filesDbContext.SaveChangesAsync();
-            
+
             var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext);
 
             if (offset > 0)
@@ -638,13 +640,13 @@ internal abstract class SecurityBaseDao<T>(
 
             foreach (var r in await q.ToListAsync())
             {
-                result.Add(new GroupInfoWithShared { GroupInfo = mapper.Map<DbGroup, GroupInfo>(r.Group), Shared = r.Shared });
+                result.Add(new GroupInfoWithShared { GroupInfo = r.Group.MapToGroupInfo(), Shared = r.Shared });
             }
-           
+
         });
 
         foreach (var r in result)
-        {
+        { 
             yield return r;
         }
     }
@@ -664,7 +666,7 @@ internal abstract class SecurityBaseDao<T>(
         
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
             var everyoneGroup = GetEveryoneGroup(tenantId);
@@ -673,9 +675,9 @@ internal abstract class SecurityBaseDao<T>(
 
             await filesDbContext.SaveChangesAsync();
 
-            var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
+        var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
 
-            var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext);
+        var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext);
 
             count = await q.CountAsync();
         });
@@ -748,7 +750,7 @@ internal abstract class SecurityBaseDao<T>(
 
         await foreach (var r in q1.ToAsyncEnumerable())
         {
-            yield return new UserInfoWithShared { UserInfo = mapper.Map<User, UserInfo>(r.User), Shared = r.Shared };
+            yield return new UserInfoWithShared { UserInfo = r.User.Map(), Shared = r.Shared };
         }
     }
 
@@ -1091,14 +1093,14 @@ internal abstract class SecurityBaseDao<T>(
 
     private async Task<FileShareRecord<T>> ToFileShareRecordAsync(DbFilesSecurity r)
     {
-        var result = mapper.Map<DbFilesSecurity, FileShareRecord<T>>(r);
+        var result = mapper.MapDbFilesSecurityToDbFilesSecurity<T>(r);
         result.EntryId = (T)Convert.ChangeType(await daoFactory.GetMapping<T>().MappingIdAsync(result.EntryId), typeof(T));
         return result;
     }
 
     protected FileShareRecord<T> ToFileShareRecord(SecurityTreeRecord r)
     {
-        var result = mapper.Map<SecurityTreeRecord, FileShareRecord<T>>(r);
+        var result = mapper.MapSecurityTreeRecordToFileShareRecord<T>(r);
 
         if (r.FolderId != 0)
         {
@@ -1186,7 +1188,7 @@ internal class SecurityDao(
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider,
-        IMapper mapper,
+        SecurityTreeRecordMapper mapper,
         IDistributedLockProvider distributedLockProvider)
     : SecurityBaseDao<int>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper, distributedLockProvider), ISecurityDao<int>
 {
@@ -1295,7 +1297,7 @@ internal class ThirdPartySecurityDao(
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider,
-        IMapper mapper,
+        SecurityTreeRecordMapper mapper,
         SelectorFactory selectorFactory,
         IDistributedLockProvider distributedLockProvider)
     : SecurityBaseDao<string>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper, distributedLockProvider), ISecurityDao<string>
@@ -1396,7 +1398,7 @@ internal class ThirdPartySecurityDao(
         }
     }
 } 
-internal class SecurityTreeRecord
+public class SecurityTreeRecord
 {
     public int TenantId { get; set; }
     public string EntryId { get; set; }
@@ -1410,6 +1412,89 @@ internal class SecurityTreeRecord
     public int FolderId { get; init; }
     public int ParentId { get; set; }
     public int Level { get; set; }
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class SecurityTreeRecordMapper(FilesMappingAction filesMappingAction)
+{
+    private partial FileShareRecord<string> MapToThirdParty(SecurityTreeRecord source);
+    private partial FileShareRecord<int> MapToInternal(SecurityTreeRecord source);
+    
+    public FileShareRecord<T> MapSecurityTreeRecordToFileShareRecord<T>(SecurityTreeRecord securityTreeRecord)
+    {
+        if (typeof(T) == typeof(int))
+        {
+            return (FileShareRecord<T>)Convert.ChangeType(MapToInternal(securityTreeRecord), typeof(FileShareRecord<T>));
+        }
+
+        if (typeof(T) == typeof(string))
+        {
+            return (FileShareRecord<T>)Convert.ChangeType(MapToThirdParty(securityTreeRecord), typeof(FileShareRecord<T>));
+        }
+
+        return null;
+    }
+
+    private partial FileShareRecord<string> MapToThirdParty(DbFilesSecurity source);
+    public partial FileShareRecord<int> MapToInternal(DbFilesSecurity source);
+    
+    public FileShareRecord<T> MapDbFilesSecurityToDbFilesSecurity<T>(DbFilesSecurity filesSecurity)
+    {
+        if (typeof(T) == typeof(int))
+        {
+            return (FileShareRecord<T>)Convert.ChangeType(MapToInternal(filesSecurity), typeof(FileShareRecord<T>));
+        }
+
+        if (typeof(T) == typeof(string))
+        {
+            return (FileShareRecord<T>)Convert.ChangeType(MapToThirdParty(filesSecurity), typeof(FileShareRecord<T>));
+        }
+        return null;
+    }
+    
+    [MapValue(nameof(DbFilesSecurity.TimeStamp), Use = nameof(GetForSecurity))]
+    private partial DbFilesSecurity MapFromThirdParty(FileShareRecord<string> source);
+    
+    [MapValue(nameof(DbFilesSecurity.TimeStamp), Use = nameof(GetForSecurity))]
+    private partial DbFilesSecurity MapFromInternal(FileShareRecord<int> source);
+    
+
+    public DbFilesSecurity MapFileShareRecordToDbFilesSecurity<T>(FileShareRecord<T> fileShareRecord)
+    {
+        if (fileShareRecord is FileShareRecord<int> internalFileShareRecord)
+        {
+            return MapFileShareRecordInternalToDbFilesSecurity(internalFileShareRecord);
+        }
+
+        if (fileShareRecord is FileShareRecord<string> thirdPartyFileShareRecord)
+        {
+            return MapFileShareRecordThirdPartyToDbFilesSecurity(thirdPartyFileShareRecord);
+        }
+
+        return null;
+    }
+    
+    [UserMapping(Default = true)]
+    private DbFilesSecurity MapFileShareRecordInternalToDbFilesSecurity(FileShareRecord<int> fileShareRecord)
+    {
+        var result = MapFromInternal(fileShareRecord);
+        filesMappingAction.Process(fileShareRecord, result);
+        return result;
+    }
+    
+    [UserMapping(Default = true)]
+    private DbFilesSecurity MapFileShareRecordThirdPartyToDbFilesSecurity(FileShareRecord<string> fileShareRecord)
+    {
+        var result = MapFromThirdParty(fileShareRecord);
+        filesMappingAction.Process(fileShareRecord, result);
+        return result;
+    }
+    
+    private static DateTime GetForSecurity()
+    {
+        return DateTime.UtcNow;
+    }
 }
 
 public class SecurityUserRecord

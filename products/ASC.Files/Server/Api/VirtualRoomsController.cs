@@ -38,7 +38,6 @@ public class VirtualRoomsInternalController(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileShareDtoHelper fileShareDtoHelper,
-    IMapper mapper,
     SocketManager socketManager,
     ApiContext apiContext,
     FilesMessageService filesMessageService,
@@ -60,7 +59,6 @@ public class VirtualRoomsInternalController(
         folderDtoHelper,
         fileDtoHelper,
         fileShareDtoHelper,
-        mapper,
         socketManager,
         apiContext,
         filesMessageService,
@@ -79,7 +77,7 @@ public class VirtualRoomsInternalController(
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoom(CreateRoomRequestDto inDto)
     {
-        var lifetime = _mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto.Lifetime);
+        var lifetime = inDto.Lifetime.Map();
         if (lifetime != null)
         {
             lifetime.StartDate = DateTime.UtcNow;
@@ -209,7 +207,6 @@ public class VirtualRoomsThirdPartyController(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileShareDtoHelper fileShareDtoHelper,
-    IMapper mapper,
     SocketManager socketManager,
     ApiContext apiContext,
     FilesMessageService filesMessageService,
@@ -227,7 +224,6 @@ public class VirtualRoomsThirdPartyController(
         folderDtoHelper,
         fileDtoHelper,
         fileShareDtoHelper,
-        mapper,
         socketManager,
         apiContext,
         filesMessageService,
@@ -264,7 +260,6 @@ public abstract class VirtualRoomsController<T>(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileShareDtoHelper fileShareDtoHelper,
-    IMapper mapper,
     SocketManager socketManager,
     ApiContext apiContext,
     FilesMessageService filesMessageService,
@@ -275,7 +270,6 @@ public abstract class VirtualRoomsController<T>(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     protected readonly FileStorageService _fileStorageService = fileStorageService;
-    protected readonly IMapper _mapper = mapper;
 
     /// <summary>
     /// Returns the room information.
@@ -501,7 +495,7 @@ public abstract class VirtualRoomsController<T>(
             }
         }
 
-        var wrappers = _mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.RoomInvitation.Invitations);
+        var wrappers = inDto.RoomInvitation.Invitations.Map();
 
         var aceCollection = new AceCollection<T> { Files = [], Folders = [inDto.Id], Aces = wrappers, Message = inDto.RoomInvitation.Message };
 

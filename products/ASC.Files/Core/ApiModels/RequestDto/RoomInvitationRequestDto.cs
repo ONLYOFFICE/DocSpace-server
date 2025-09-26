@@ -35,7 +35,7 @@ public class RoomInvitationRequest
     /// The collection of invitation parameters.
     /// </summary>
     [MaxEmailInvitations]
-    public IEnumerable<RoomInvitation> Invitations { get; set; }
+    public List<RoomInvitation> Invitations { get; set; }
 
     /// <summary>
     /// Specifies whether to notify users about the shared room or not.

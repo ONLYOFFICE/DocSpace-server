@@ -168,7 +168,6 @@ public class FolderDtoHelper(
     BreadCrumbsManager breadCrumbsManager,
     TenantManager tenantManager,
     WatermarkDtoHelper watermarkHelper,
-    IMapper mapper,
     ExternalShare externalShare,
     FileSecurityCommon fileSecurityCommon,
     SecurityContext securityContext,
@@ -277,7 +276,7 @@ public class FolderDtoHelper(
             result.Type = folder.FolderType;
         }
 
-        result.Lifetime = mapper.Map<RoomDataLifetime, RoomDataLifetimeDto>(folder.SettingsLifetime);
+        result.Lifetime = folder.SettingsLifetime.MapToDto();
         result.AvailableShareRights =  (await _fileSecurity.GetAccesses(folder)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
 
         if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })

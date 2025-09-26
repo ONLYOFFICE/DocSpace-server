@@ -29,7 +29,6 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="ARSoft.Tools.NetStandard.DXSdata" Version="1.0.0" />
     <PackageReference Include="Autofac.Configuration" Version="7.0.0" />
-    <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="AWS.Logger.NLog" Version="3.3.4" />
     <PackageReference Include="Bogus" Version="35.6.3" />
     <PackageReference Include="Confluent.Kafka" Version="2.11.1" />
@@ -59,6 +58,7 @@
     <PackageReference Include="NLog.Targets.Syslog" Version="7.0.0" />
     <PackageReference Include="NVelocity" Version="1.2.0" />
     <PackageReference Include="protobuf-net" Version="3.2.56" />
+    <PackageReference Include="Riok.Mapperly" Version="4.2.1" />
     <PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
     <PackageReference Include="StackExchange.Redis" Version="2.9.11" />
     <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="11.0.0" />

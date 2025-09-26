@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Threading.Channels;
-
 namespace ASC.ApiSystem;
 
 public class Startup
@@ -126,11 +124,11 @@ public class Startup
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(_configuration)
                 .AddDistributedLock(_configuration);
+        
 
+        
         services.RegisterFeature();
         services.RegisterQuotaFeature();
-
-        services.AddAutoMapper(BaseStartup.GetAutoMapperProfileAssemblies());
         
         if (_configuration.GetValue<bool>("openApi:enable"))
         {
@@ -149,13 +147,13 @@ public class Startup
         services.AddScoped<ApiSystemAuthHandler>();
         services.AddScoped<ApiSystemBasicAuthHandler>();
         services.AddScoped(_ => UrlEncoder.Default);
-        
+
         services.AddBillingHttpClient();
         services.AddAccountingHttpClient();
         services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
-        
+
         services
             .AddAuthentication()
             .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })

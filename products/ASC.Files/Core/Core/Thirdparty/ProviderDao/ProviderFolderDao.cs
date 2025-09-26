@@ -741,13 +741,13 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return folderDao.DeleteLifetimeSettings(room);
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, OrderBy orderBy, int offset = 0, int count = -1)
+    public IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, OrderBy orderBy, int offset, int count)
     {
         throw new NotImplementedException();
     }
 
     public Task<int> GetFoldersByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, bool excludeSubject, Location? location)
+        string searchText, bool excludeSubject, Location? location, int trashId)
     {
         throw new NotImplementedException();
     }

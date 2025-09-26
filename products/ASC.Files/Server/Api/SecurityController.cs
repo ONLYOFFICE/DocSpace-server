@@ -239,8 +239,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         BruteForceLoginManager bruteForceLoginManager,
-        ExternalLinkHelper externalLinkHelper,
-        IMapper mapper)
+        ExternalLinkHelper externalLinkHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -347,7 +346,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     {
         var validationInfo = await externalLinkHelper.ValidateAsync(inDto.Key, fileId: inDto.FileId, folderId: inDto.FolderId);
 
-        return mapper.Map<ValidationInfo, ExternalShareDto>(validationInfo);
+        return validationInfo.Map();
     }
 
     /// <summary>
@@ -374,6 +373,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
             await bruteForceLoginManager.DecrementAsync(inDto.Key, ip);
         }
 
-        return mapper.Map<ValidationInfo, ExternalShareDto>(validationInfo);
+        return validationInfo.Map();
     }
 }

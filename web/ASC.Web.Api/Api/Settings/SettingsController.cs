@@ -59,7 +59,6 @@ public partial class SettingsController(
     TenantDomainValidator tenantDomainValidator,
     TenantLogoManager tenantLogoManager,
     ExternalShare externalShare,
-    IMapper mapper,
     UserFormatter userFormatter,
     IDistributedLockProvider distributedLockProvider,
     UsersQuotaSyncOperation usersQuotaSyncOperation,
@@ -175,7 +174,7 @@ public partial class SettingsController(
             }
 
             var formGallerySettings = configuration.GetSection("files:oform").Get<OFormSettings>();
-            settings.FormGallery = mapper.Map<FormGalleryDto>(formGallerySettings);
+            settings.FormGallery = formGallerySettings.Map();
 
             settings.InvitationLimit = await userInvitationLimitHelper.GetLimit();
             settings.MaxImageUploadSize = setupInfo.MaxImageUploadSize;
@@ -1183,7 +1182,7 @@ public partial class SettingsController(
 
         return HttpContext.TryGetFromCache(settings.LastModified)
             ? null
-            : mapper.Map<TenantUserInvitationSettings, TenantUserInvitationSettingsDto>(settings);
+            : settings.Map();
     }
 
 
@@ -1207,6 +1206,6 @@ public partial class SettingsController(
 
         _ = await settingsManager.SaveAsync(settings);
 
-        return mapper.Map<TenantUserInvitationSettings, TenantUserInvitationSettingsDto>(settings);
+        return settings.Map();
     }
 }

@@ -29,7 +29,7 @@ namespace ASC.IPSecurity;
 /// <summary>
 /// The IP restiction parameters.
 /// </summary>
-public class IPRestriction : IpRestrictionBase, IMapFrom<TenantIpRestrictions>
+public class IPRestriction : IpRestrictionBase
 {
     /// <summary>
     /// The IP restiction ID.
@@ -56,4 +56,11 @@ public class IpRestrictionBase
     /// Specifies if the IP address is for administrator users only or not.
     /// </summary>
     public bool ForAdmin { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class IPRestrictionMapper
+{
+    public static partial IPRestriction Map(this TenantIpRestrictions source);
+    public static partial IQueryable<IPRestriction> Project(this IQueryable<TenantIpRestrictions> source);
 }

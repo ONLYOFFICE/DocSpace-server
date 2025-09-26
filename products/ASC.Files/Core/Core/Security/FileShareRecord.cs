@@ -206,3 +206,9 @@ public static class ShareCompareHelper
         return predicate;
     }
 }
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class FileShareRecordMapper
+{    
+    public static partial FileShareRecord<int> MapToFileShareRecordInternal(this FileShareRecord<string> source);
+}

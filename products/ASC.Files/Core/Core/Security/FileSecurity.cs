@@ -53,8 +53,7 @@ public class FileSecurity(
     StudioNotifyHelper studioNotifyHelper,
     BadgesSettingsHelper badgesSettingsHelper,
     ExternalShare externalShare,
-    AuthManager authManager,
-    IMapper mapper)
+    AuthManager authManager)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -2124,7 +2123,7 @@ public class FileSecurity(
         {
             if (int.TryParse(r.EntryId, out _))
             {
-                recordsInternal.Add(mapper.Map<FileShareRecord<int>>(r));
+                recordsInternal.Add(r.MapToFileShareRecordInternal());
             }
             else
             {
