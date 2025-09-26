@@ -178,6 +178,11 @@ public class SocketManager(
         await MakeRequest($"delete-shared-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
     }
 
+    public async Task UpdateAccessRightsAsync<T>(FileEntry<T> fileEntry)
+    {
+        await MakeRequest($"update-accessrights-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true);
+    }
+
     private async Task<IEnumerable<Guid>> GetRecipientListForForm<T>(File<T> form)
     {
         List<Guid> users = null;

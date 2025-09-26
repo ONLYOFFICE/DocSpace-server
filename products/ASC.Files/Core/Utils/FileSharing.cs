@@ -477,6 +477,8 @@ public class FileSharingAceHelper(
             await documentServiceHelper.CheckUsersForDropAsync((File<T>)entry);
         }
 
+        await socketManager.UpdateAccessRightsAsync(entry);
+
         await fileMarker.RemoveMarkAsNewAsync(entry);
 
         var currentId = authContext.CurrentAccount.ID;

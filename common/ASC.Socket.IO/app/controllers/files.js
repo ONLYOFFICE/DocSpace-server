@@ -192,5 +192,15 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/update-accessrights-file", (req, res) => {
+    files.updateAccessRightsForFile(req.body);
+    res.end();
+  });
+
+  router.post("/update-accessrights-folder", (req, res) => {
+    files.updateAccessRightsForFolder(req.body);
+    res.end();
+  });
+
   return router;
 };
