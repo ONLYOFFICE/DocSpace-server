@@ -60,10 +60,10 @@ global using ASC.Common.Utils;
 global using ASC.Security.Cryptography;
 global using Autofac;
 global using Autofac.Configuration;
-global using AutoMapper;
 global using Confluent.Kafka;
 global using JWT;
 global using JWT.Algorithms;
+
 global using Medallion.Threading;
 global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 global using Microsoft.AspNetCore.Http;

@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The confirmation parameters.
 /// </summary>
-public class ConfirmDto : IMapFrom<Validation>
+public class ConfirmDto
 {
     /// <summary>
     /// The confirmation result.
@@ -50,4 +50,10 @@ public class ConfirmDto : IMapFrom<Validation>
     /// The confirmation email.
     /// </summary>
     public string Email { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class ConfirmDtoMapper
+{       
+    public static partial ConfirmDto Map(this Validation source);
 }

@@ -26,7 +26,7 @@
 
 namespace ASC.Core;
 
-public class AzRecord : IMapFrom<Acl>
+public class AzRecord
 {
     public Guid Subject { get; set; }
     
@@ -72,3 +72,12 @@ public class AzRecord : IMapFrom<Acl>
             AceType.GetHashCode();
     }
 }
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class AzRecordMapper
+{
+    public static partial AzRecord Map(this Acl source);
+    public static partial IQueryable<AzRecord> Project(this IQueryable<Acl> source);
+    public static partial Acl Map(this AzRecord source);
+}
+

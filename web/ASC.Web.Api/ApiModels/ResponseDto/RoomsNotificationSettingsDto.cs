@@ -29,10 +29,17 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The rooms notification settings.
 /// </summary>
-public class RoomsNotificationSettingsDto : IMapFrom<RoomsNotificationSettings>
+public class RoomsNotificationSettingsDto
 {
     /// <summary>
     /// The list of rooms with the disabled notifications.
     /// </summary>
     public List<object> DisabledRooms { get; set; }
+}
+
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class RoomsNotificationSettingsDtoMapper
+{       
+    public static partial RoomsNotificationSettingsDto Map(this RoomsNotificationSettings source);
 }

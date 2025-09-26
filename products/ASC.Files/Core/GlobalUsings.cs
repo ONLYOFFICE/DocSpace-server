@@ -136,6 +136,7 @@ global using ASC.Files.Thirdparty.GoogleDrive;
 global using ASC.Files.Thirdparty.OneDrive;
 global using ASC.Files.Thirdparty.SharePoint;
 global using ASC.Files.ThumbnailBuilder;
+global using ASC.IPSecurity;
 global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
@@ -174,8 +175,6 @@ global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
 global using ASC.Webhooks.Core;
-
-global using AutoMapper;
 
 global using Box.V2;
 global using Box.V2.Auth;
@@ -233,6 +232,8 @@ global using Polly.Retry;
 global using Polly.Timeout;
 
 global using ProtoBuf;
+
+global using Riok.Mapperly.Abstractions;
 
 global using WebDav;
 

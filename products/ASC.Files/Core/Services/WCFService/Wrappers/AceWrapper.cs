@@ -60,7 +60,7 @@ public class AceCollection<T>
 /// <summary>
 /// The parameters of the access rights.
 /// </summary>
-public class AceWrapper : IMapFrom<RoomInvitation>
+public class AceWrapper
 {
     /// <summary>
     /// The user ID.
@@ -152,6 +152,14 @@ public class AceWrapper : IMapFrom<RoomInvitation>
     /// </summary>
     [JsonIgnore] 
     public bool IsLink => (SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) || !string.IsNullOrEmpty(Link);
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class RoomInvitationMapper
+{       
+    public static partial AceWrapper Map(this RoomInvitation source);
+    public static partial List<AceWrapper> Map(this List<RoomInvitation> source);
+    
 }
 
 /// <summary>

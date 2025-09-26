@@ -31,7 +31,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// <summary>
 /// The external sharing information and validation data.
 /// </summary>
-public class ExternalShareDto : IMapFrom<ValidationInfo>
+public class ExternalShareDto
 {
     /// <summary>
     /// The external data status.
@@ -47,7 +47,7 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     /// The external data title.
     /// </summary>
     public string Title { get; set; }
-    
+
     /// <summary>
     /// The type of the external data.
     /// </summary>
@@ -97,4 +97,11 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     /// The room ID of the external data.
     /// </summary>
     public bool IsRoomMember { get; set; }
+}
+
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class ExternalShareDtoMapper
+{
+    public static partial ExternalShareDto Map(this ValidationInfo source);
 }

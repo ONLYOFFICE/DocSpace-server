@@ -53,7 +53,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// Specifies if the folder can be shared or not.
     /// </summary>
     public bool? IsShareable { get; set; }
-    
+
     /// <summary>
     /// The new element index in the folder.
     /// </summary>
@@ -173,7 +173,6 @@ public class FolderDtoHelper(
     BreadCrumbsManager breadCrumbsManager,
     TenantManager tenantManager,
     WatermarkDtoHelper watermarkHelper,
-    IMapper mapper,
     ExternalShare externalShare,
     FileSecurityCommon fileSecurityCommon,
     SecurityContext securityContext,
@@ -182,7 +181,7 @@ public class FolderDtoHelper(
     EntryStatusManager entryStatusManager
     )
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
-{
+    {
 
     public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null)
     {
@@ -277,8 +276,8 @@ public class FolderDtoHelper(
             result.Type = folder.FolderType;
         }
 
-        result.Lifetime = mapper.Map<RoomDataLifetime, RoomDataLifetimeDto>(folder.SettingsLifetime);
-
+        result.Lifetime = folder.SettingsLifetime.MapToDto();
+        
         if (result.CanShare)
         {
             result.AvailableExternalRights = await _fileSecurity.GetFolderAccesses(folder, SubjectType.ExternalLink);
@@ -358,14 +357,14 @@ public class FolderDtoHelper(
                 newBadges = 0;
             }
         }
-        
+
         var result = await GetAsync<FolderDto<T>, T>(folder);
         if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates)
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;
         }
-        
+
         await entryStatusManager.SetIsFavoriteFolderAsync(folder);
         
         result.IsShareable = folder.Shareable.NullIfDefault();

@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF;
 
-public class DbGroup : BaseEntity, IMapFrom<Group>
+public class DbGroup : BaseEntity
 {
     public int TenantId { get; set; }
     public Guid Id { get; set; }

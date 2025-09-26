@@ -36,11 +36,12 @@ public class WhitelabelController(
     CoreBaseSettings coreBaseSettings,
     CommonLinkUtility commonLinkUtility,
     IFusionCache fusionCache,
-    IMapper mapper,
     CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper,
     TenantManager tenantManager,
     TenantExtra tenantExtra,
-    StorageFactory storageFactory)
+    StorageFactory storageFactory,
+    AdditionalWhiteLabelSettingsMapper additionalWhiteLabelSettingsMapper,
+    CompanyWhiteLabelSettingsDtoMapper companyWhiteLabelSettingsDtoMapper)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     #region Logos
@@ -576,7 +577,7 @@ public class WhitelabelController(
     {
         var settings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>(HttpContext.GetIfModifiedSince());
         
-        return HttpContext.TryGetFromCache(settings.LastModified) ? null :   mapper.Map<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>(settings);
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null : companyWhiteLabelSettingsDtoMapper.Map(settings);
     }
 
     /// <summary>
@@ -641,7 +642,7 @@ public class WhitelabelController(
     {
         var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
 
-        return mapper.Map<AdditionalWhiteLabelSettings, AdditionalWhiteLabelSettingsDto>(settings);
+        return additionalWhiteLabelSettingsMapper.Map(settings);
     }
 
     /// <summary>
@@ -707,7 +708,7 @@ public class WhitelabelController(
     {
         var settings = await settingsManager.LoadForDefaultTenantAsync<MailWhiteLabelSettings>();
 
-        return mapper.Map<MailWhiteLabelSettings, MailWhiteLabelSettingsDto>(settings);
+        return settings.MapToDto();
     }
 
     /// <summary>

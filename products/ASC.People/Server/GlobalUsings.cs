@@ -104,12 +104,12 @@ global using ASC.Web.Studio.Utility;
 global using ASC.Webhooks.Core;
 global using Autofac;
 
-global using AutoMapper;
-
 global using Microsoft.AspNetCore.Http.Extensions;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.Hosting.WindowsServices;
+
+global using Riok.Mapperly.Abstractions;
 
 global using Swashbuckle.AspNetCore.Annotations;
 

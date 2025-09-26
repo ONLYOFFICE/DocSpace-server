@@ -2777,7 +2777,6 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public async Task<IDictionary<string, bool>> GetFileAccesses<T>(File<T> file, SubjectType subjectType)
     {        
-        var room = new Folder<T>();
         var result = new Dictionary<string, bool>();
 
         var mustConvert = fileUtility.MustConvert(file.Title);
@@ -2791,7 +2790,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (parentRoomType == null)
         {
-            room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+            var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
             
             if (room != null)
             {

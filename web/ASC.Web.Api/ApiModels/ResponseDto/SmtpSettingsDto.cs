@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 /// <summary>
 /// The SMTP settings parameters.
 /// </summary>
-public class SmtpSettingsDto : IMapFrom<SmtpSettings>
+public class SmtpSettingsDto
 {
     /// <summary>
     /// The SMTP host.
@@ -94,9 +94,10 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsDefaultSettings { get; set; }
+}
 
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<SmtpSettings, SmtpSettingsDto>();
-    }
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class SmtpSettingsDtoMapper
+{       
+    public static partial SmtpSettingsDto MapToDto(this SmtpSettings source);
 }
