@@ -1956,7 +1956,7 @@ public class FileSecurity(
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access == FileShare.RoomManager || (e.Access != FileShare.Restrict && e.Shared))
+                        if (e.Access == FileShare.RoomManager || (e.Access != FileShare.Restrict && e.Shared  && ace is { IsLink: true}))
                         {
                             return true;
                         }

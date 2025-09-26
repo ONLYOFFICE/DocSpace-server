@@ -98,7 +98,8 @@ public class FileStorageService //: IFileStorageService
     IMapper mapper,
     ICacheNotify<ClearMyFolderItem> notifyMyFolder,
     FormRoleDtoHelper formRoleDtoHelper,
-    WebhookManager webhookManager)
+    WebhookManager webhookManager,
+    FileSharingHelper fileSharingHelper)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -3754,6 +3755,11 @@ public class FileStorageService //: IFileStorageService
                 _ => share
             };
 
+            if (!await fileSharingHelper.CanSetAccessAsync(entry))
+            {
+                return null;
+            }
+            
             return await SetExternalLinkAsync(
                 entry,
                 Guid.NewGuid(),
