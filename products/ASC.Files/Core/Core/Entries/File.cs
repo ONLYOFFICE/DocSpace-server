@@ -75,6 +75,13 @@ public class File<T> : FileEntry<T>
 {
     private FileStatus _status;
     
+    protected File() : base(null)
+    {
+        Version = 1;
+        VersionGroup = 1;
+        FileEntryType = FileEntryType.File;
+    }
+    
     public File(IServiceProvider provider) : base(provider)
     {
         Version = 1;
