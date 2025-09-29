@@ -139,7 +139,7 @@ public class BillingClient
         return customerInfo;
     }
 
-    public async Task<bool> TopUpDepositAsync(string portalId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null)
+    public async Task<bool> TopUpDepositAsync(string portalId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata = null)
     {
         var parameters = new List<Tuple<string, string>>
         {
@@ -150,6 +150,11 @@ public class BillingClient
         if (!string.IsNullOrEmpty(customerParticipantName))
         {
             parameters.Add(Tuple.Create("CustomerParticipantName", customerParticipantName));
+        }
+
+        if (!string.IsNullOrEmpty(siteName))
+        {
+            parameters.Add(Tuple.Create("SiteName", siteName));
         }
 
         if (metadata != null)

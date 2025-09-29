@@ -42,6 +42,7 @@ namespace ASC.Web.Api.Controllers;
 [AllowNotPayment]
 [ControllerName("portal")]
 public class PaymentController(
+    CoreSettings coreSettings,
     UserManager userManager,
     TenantManager tenantManager,
     SettingsManager settingsManager,
@@ -718,7 +719,9 @@ public class PaymentController(
 
         await DemandPayerAsync(customerInfo);
 
-        var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), null, true);
+        var siteName = tenant.GetTenantDomain(coreSettings);
+
+        var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), siteName, null, true);
 
         if (result)
         {
