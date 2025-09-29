@@ -332,7 +332,7 @@ public class UserManager(
 
         var (name, value) = ("", -1);
 
-        if (!await IsUserInGroupAsync(oldUserData.Id, Constants.GroupGuest.ID) &&
+        if (await IsPaidUserAsync(oldUserData) &&
             oldUserData.Status != u.Status && notifyWebSocket)
         {
             (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
