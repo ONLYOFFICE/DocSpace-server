@@ -37,7 +37,6 @@ internal class FileDao(
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
-        TenantLogoManager tenantLogoManager,
         TenantUtil tenantUtil,
         SetupInfo setupInfo,
         MaxTotalSizeStatistic maxTotalSizeStatistic,
@@ -632,9 +631,7 @@ internal class FileDao(
                                 var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
                                 await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
 
-                                var logoText = await tenantLogoManager.GetLogoTextAsync();
-
-                                throw new Exception(string.Format(FilesCommonResource.ErrorMessage_UploadToFormRoom, logoText));
+                                throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                             }
                         }
                         }
@@ -2823,7 +2820,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
-        TenantLogoManager tenantLogoManager,
         TenantUtil tenantUtil,
         SetupInfo setupInfo,
         MaxTotalSizeStatistic maxTotalSizeStatistic,
@@ -2863,7 +2859,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
     fileUtility,
     dbContextManager,
     tenantManager,
-    tenantLogoManager,
     tenantUtil,
     setupInfo,
     maxTotalSizeStatistic,

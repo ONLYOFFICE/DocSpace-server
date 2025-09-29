@@ -191,21 +191,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             {
                 if (Folders.Count > 0)
                 {
-                    var tenantLogoManager = scope.ServiceProvider.GetService<TenantLogoManager>();
-                    var logoText = await tenantLogoManager.GetLogoTextAsync();
-
-                    Err = string.Format(FilesCommonResource.ErrorMessage_FolderMoveFormFillingError, logoText);
-
+                    Err = FilesCommonResource.ErrorMessage_FolderMoveFormFillingError;
                     return;
                 }
 
                 if (Files.Count > 1)
                 {
-                    var tenantLogoManager = scope.ServiceProvider.GetService<TenantLogoManager>();
-                    var logoText = await tenantLogoManager.GetLogoTextAsync();
-
-                    Err = string.Format(FilesCommonResource.ErrorMessage_FilesMoveFormFillingError, logoText);
-
+                    Err = FilesCommonResource.ErrorMessage_FilesMoveFormFillingError;
                     return;
                 }
             }

@@ -527,19 +527,19 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
     <value>Odpri datoteko</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Datoteke ni mogoče naložiti v to sobo. Poskusite naložiti obrazec {0} PDF.</value>
+    <value>Datoteke ni mogoče naložiti v to sobo. Poskusite naložiti obrazec ONLYOFFICE PDF.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Povezava za izpolnitev</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Premikanje več datotek hkrati v prostor za izpolnjevanje obrazcev ni podprto. Premaknite po en obrazec {0} PDF hkrati.</value>
+    <value>Premikanje več datotek hkrati v prostor za izpolnjevanje obrazcev ni podprto. Premaknite po en obrazec ONLYOFFICE PDF hkrati.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Premikanje map v sobo za izpolnjevanje obrazcev ni podprto. Premaknite samo en obrazec {0} PDF hkrati.</value>
+    <value>Premikanje map v sobo za izpolnjevanje obrazcev ni podprto. Premaknite samo en obrazec ONLYOFFICE PDF hkrati.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Datoteke ni mogoče premakniti v to sobo. Poskusite premakniti obrazec {0} PDF.</value>
+    <value>Datoteke ni mogoče premakniti v to sobo. Poskusite premakniti obrazec ONLYOFFICE PDF.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Številka obrazca</value>

@@ -46,8 +46,7 @@ public class UploadControllerHelper(
     FileChecker fileChecker,
     WebhookManager webhookManager,
     IEventBus eventBus,
-    AuthContext authContext,
-    TenantLogoManager tenantLogoManager)
+    AuthContext authContext)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -84,9 +83,7 @@ public class UploadControllerHelper(
         }
         if (toFolder.FolderType == FolderType.FillingFormsRoom && toFolder.RootFolderType == FolderType.RoomTemplates && filesTitle.Any(r => FileUtility.GetFileExtension(r) != ".pdf"))
         { 
-            var logoText = await tenantLogoManager.GetLogoTextAsync();
-
-            throw new Exception(string.Format(FilesCommonResource.ErrorMessage_UploadToFormRoom, logoText));
+            throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
         }
 
         var result = new List<string>();

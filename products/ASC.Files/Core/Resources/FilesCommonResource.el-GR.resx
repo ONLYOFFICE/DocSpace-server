@@ -469,19 +469,19 @@
     <value>Άνοιγμα αρχείου</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Το αρχείο δεν μπορεί να μεταφορτωθεί σε αυτό το δωμάτιο. Προσπαθήστε να μεταφορτώσετε τη φόρμα PDF του {0}.</value>
+    <value>Το αρχείο δεν μπορεί να μεταφορτωθεί σε αυτό το δωμάτιο. Προσπαθήστε να μεταφορτώσετε τη φόρμα PDF του ONLYOFFICE.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Σύνδεσμος για συμπλήρωση</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Η μετακίνηση πολλών αρχείων στο δωμάτιο Συμπλήρωσης Φορμών δεν υποστηρίζεται. Μετακινήστε μία φόρμα PDF του {0} κάθε φορά.</value>
+    <value>Η μετακίνηση πολλών αρχείων στο δωμάτιο Συμπλήρωσης Φορμών δεν υποστηρίζεται. Μετακινήστε μία φόρμα PDF του ONLYOFFICE κάθε φορά.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Η μετακίνηση φακέλων στο δωμάτιο Συμπλήρωσης Φορμών δεν υποστηρίζεται. Μετακινήστε μία φόρμα PDF του {0} κάθε φορά.</value>
+    <value>Η μετακίνηση φακέλων στο δωμάτιο Συμπλήρωσης Φορμών δεν υποστηρίζεται. Μετακινήστε μία φόρμα PDF του ONLYOFFICE κάθε φορά.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Το αρχείο δεν μπορεί να μετακινηθεί σε αυτό το δωμάτιο. Προσπαθήστε να μετακινήσετε τη φόρμα PDF του {0}.</value>
+    <value>Το αρχείο δεν μπορεί να μετακινηθεί σε αυτό το δωμάτιο. Προσπαθήστε να μετακινήσετε τη φόρμα PDF του ONLYOFFICE.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Αριθμός φόρμας</value>
