@@ -299,6 +299,10 @@ public class FileDtoHelper(
             {
                 result.OriginRoomTitle = result.OriginTitle;
             }
+            else if(result.RootFolderType == FolderType.USER)
+            {
+                result.OriginRoomTitle = FilesUCResource.SharedForMe;
+            }
         }
         
         if (file.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
