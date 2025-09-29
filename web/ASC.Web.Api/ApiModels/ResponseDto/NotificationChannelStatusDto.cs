@@ -30,7 +30,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The notification channel settings.
 /// </summary>
-public class NotificationChannelStatusDto : IMapFrom<IEnumerable<NotificationChannelStatus>>
+public class NotificationChannelStatusDto
 {
     /// <summary>
     /// The list of notification channels.
