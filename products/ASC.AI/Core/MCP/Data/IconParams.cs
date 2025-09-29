@@ -28,7 +28,7 @@ namespace ASC.AI.Core.MCP.Data;
 
 public class IconParams
 {
-    public required string ImageBase64 { get; init; }
+    public required string Image { get; init; }
     public int X { get; init; }
     public int Y { get; init; }
     public uint Width { get; init; }

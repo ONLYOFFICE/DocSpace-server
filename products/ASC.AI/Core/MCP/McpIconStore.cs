@@ -57,7 +57,7 @@ public class McpIconStore(StorageFactory storageFactory, SetupInfo setupInfo, Te
     {
         var store = await InitStoreAsync(tenantId);
         
-        var imageData = Convert.FromBase64String(iconParams.ImageBase64);
+        var imageData = Convert.FromBase64String(iconParams.Image);
         
         imageData = await UserPhotoThumbnailManager.TryParseImage(imageData, setupInfo.MaxImageUploadSize, _masterIconSize.Geometry);
         if (imageData == null)
