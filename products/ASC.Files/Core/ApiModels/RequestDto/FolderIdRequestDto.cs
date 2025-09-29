@@ -27,24 +27,24 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for the folder ID.
+/// The request parameters for accessing a folder by its ID.
 /// </summary>
 public class FolderIdRequestDto<T>
 {
     /// <summary>
-    /// The request folder ID.
+    /// The folder unique identifier.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 }
 
 /// <summary>
-/// The request parameters for the folder primary ID.
+/// The request parameters for accessing a folder by its primary ID.
 /// </summary>
 public class FolderPrimaryIdRequestDto<T>
 {
     /// <summary>
-    /// The request folder ID.
+    /// The folder unique identifier.
     /// </summary>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }

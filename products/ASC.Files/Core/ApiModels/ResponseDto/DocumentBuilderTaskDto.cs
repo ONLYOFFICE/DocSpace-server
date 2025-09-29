@@ -29,22 +29,22 @@ using ASC.Files.Core.Services.DocumentBuilderService;
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The document builder task parameters.
+/// The Document Builder task parameters.
 /// </summary>
 public class DocumentBuilderTaskDto
 {
     /// <summary>
-    /// The document builder ID.
+    /// The Document Builder task ID.
     /// </summary>
     public required string Id { get; set; }
 
     /// <summary>
-    /// The error message occured while the document building process.
+    /// The error message occurred during the document building process.
     /// </summary>
     public string Error { get; set; }
 
     /// <summary>
-    /// The percentage of the progress of the document building process.
+    /// The progress percentage of the document building process.
     /// </summary>
     public required int Percentage { get; set; }
 

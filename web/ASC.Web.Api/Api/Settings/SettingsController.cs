@@ -1114,10 +1114,10 @@ public partial class SettingsController(
     }
 
     /// <summary>
-    /// Returns the promotional banners visibility settings settings for the portal.
+    /// Returns the visibility settings of the promotional banners in the portal.
     /// </summary>
     /// <short>
-    /// Get the promotional banners visibility settings
+    /// Get the banners visibility
     /// </short>
     /// <path>api/2.0/settings/banner</path>
     [Tags("Settings / Banners visibility")]
@@ -1129,10 +1129,10 @@ public partial class SettingsController(
     }
 
     /// <summary>
-    /// Sets the promotional banners visibility settings settings for the portal.
+    /// Sets the visibility settings of the promotional banners in the portal.
     /// </summary>
     /// <short>
-    /// Set the promotional banners visibility settings
+    /// Set the banners visibility
     /// </short>
     /// <path>api/2.0/settings/banner</path>
     [Tags("Security / Banners visibility")]

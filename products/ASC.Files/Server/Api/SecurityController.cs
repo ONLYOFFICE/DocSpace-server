@@ -151,10 +151,11 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     }
 
     /// <summary>
-    /// Returns the group memebers with their folder security information.
+    /// Returns the group members with their folder security information.
     /// </summary>
     /// <short>Get group members with security information</short>
     /// <path>api/2.0/files/folder/{folderId}/group/{groupId}/share</path>
+    /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<GroupMemberSecurityRequestDto>))]

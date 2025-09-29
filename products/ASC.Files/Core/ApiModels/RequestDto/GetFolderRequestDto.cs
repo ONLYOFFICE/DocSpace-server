@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The folder request parameters.
+/// The request parameters for getting a folder.
 /// </summary>
 public class GetFolderRequestDto<T>
 {
     /// <summary>
-    /// The folder ID of the request.
+    /// The folder ID.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
@@ -62,7 +62,7 @@ public class GetFolderRequestDto<T>
     public bool? ExcludeSubject { get; set; }
 
     /// <summary>
-    /// Specifies whether to return only files, only folders or all elements from the specified folder.
+    /// Specifies whether to return only files, only folders, or all elements from the specified folder.
     /// </summary>
     [FromQuery(Name = "applyFilterOption")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
@@ -105,7 +105,7 @@ public class GetFolderRequestDto<T>
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// Specifies the property used for sorting the folder request results.
+    /// The property used for sorting the folder request results.
     /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
@@ -123,14 +123,14 @@ public class GetFolderRequestDto<T>
     public string Text { get; set; }
     
     /// <summary>
-    /// Represents the location context of the request, specifying the area
+    /// The location context of the request, specifying the area
     /// where the operation is performed, such as a room, documents, or a link.
     /// </summary>
     public Location? Location { get; set; }
 }
 
 /// <summary>
-/// The "Common" folder request parameters.
+/// The request parameters for getting the "Common" folder.
 /// </summary>
 public class GetCommonFolderRequestDto
 {
@@ -179,7 +179,7 @@ public class GetCommonFolderRequestDto
 }
 
 /// <summary>
-/// The "My trash" folder request parameters.
+/// The request parameters for getting the "My trash" folder.
 /// </summary>
 public class GetMyTrashFolderRequestDto
 {
@@ -234,7 +234,7 @@ public class GetMyTrashFolderRequestDto
 }
 
 /// <summary>
-/// The root folder request parameters.
+/// The request parameters for getting the root folder.
 /// </summary>
 public class GetRootFolderRequestDto
 {
@@ -289,7 +289,7 @@ public class GetRootFolderRequestDto
 }
 
 /// <summary>
-/// The "Recent" folder request parameters.
+/// The request parameters for getting the "Recent" folder request parameters.
 /// </summary>
 public class GetRecentFolderRequestDto
 {

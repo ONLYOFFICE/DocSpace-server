@@ -86,24 +86,24 @@ public static class ConsumerExtension
 }
 
 /// <summary>
-/// The authentication key parameters.
+/// The authorization key parameters.
 /// </summary>
 [DebuggerDisplay("({Name},{Value})")]
 public class AuthKey
 {
     /// <summary>
-    /// The authentication key name.
+    /// The authorization key name.
     /// </summary>
     public string Name { get; init; }
 
     /// <summary>
-    /// The authentication key value.
+    /// The authorization key value.
     /// </summary>
     [StringLength(255)]
     public string Value { get; init; }
 
     /// <summary>
-    /// The authentication key title.
+    /// The authorization key title.
     /// </summary>
     public string Title { get; set; }
 }

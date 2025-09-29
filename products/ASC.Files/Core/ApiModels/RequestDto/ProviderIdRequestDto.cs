@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The provider request parameters.
+/// The request parameters for accessing a provider by its ID.
 /// </summary>
 public class ProviderIdRequestDto
 {

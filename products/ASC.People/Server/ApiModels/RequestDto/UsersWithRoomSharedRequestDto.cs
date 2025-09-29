@@ -27,12 +27,12 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for the user with the room sharing settings.
+/// The request parameters for the users with the room sharing settings.
 /// </summary>
 public class UsersWithRoomSharedRequestDto<T>
 {
     /// <summary>
-    /// The user ID.
+    /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
