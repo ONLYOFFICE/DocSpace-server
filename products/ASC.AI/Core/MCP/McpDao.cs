@@ -509,14 +509,14 @@ public class McpDao(
             var tokenJson = token.ToJson();
             var encryptedToken = await crypto.EncryptAsync(tokenJson);
             
-            await context.UpdateOauthCredentials(tenantId, roomId, userId, serverId, encryptedToken);
+            await context.UpdateOauthCredentialsAsync(tenantId, roomId, userId, serverId, encryptedToken);
         });
     }
 
-    public async Task<bool> ServerNameIsExistsAsync(int tenantId, string name)
+    public async Task<McpServerShort?> GetServerByNameAsync(int tenantId, string name)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
-        return await dbContext.ServerNameIsExistsAsync(tenantId, name);
+        return await dbContext.GetServerByNameAsync(tenantId, name);
     }
 }

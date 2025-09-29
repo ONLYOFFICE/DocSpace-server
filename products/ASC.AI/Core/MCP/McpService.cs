@@ -106,7 +106,7 @@ public partial class McpService(
         
         if (!string.IsNullOrEmpty(name) && name != server.Name)
         {
-            await ThrowIfServerNameNotValid(tenantId, name);
+            await ThrowIfServerNameNotValid(tenantId, name, server.Id);
             
             server.Name = name;
         }
@@ -589,7 +589,7 @@ public partial class McpService(
     [GeneratedRegex("^[a-zA-Z0-9_-]+$")]
     private static partial Regex ServerNameRegex();
 
-    private async Task ThrowIfServerNameNotValid(int tenantId, string name)
+    private async Task ThrowIfServerNameNotValid(int tenantId, string name, Guid serverId = default)
     {
         if (!_serverNameRegex.IsMatch(name))
         {
@@ -598,12 +598,13 @@ public partial class McpService(
 
         if (systemMcpConfig.ReservedServerNames.Contains(name))
         {
-            throw new ArgumentException("Invalid MCP server name. MCP server name is not allowed.");
+            throw new ArgumentException("MCP server name is not allowed.");
         }
 
-        if (await mcpDao.ServerNameIsExistsAsync(tenantId, name))
+        var server = await mcpDao.GetServerByNameAsync(tenantId, name);
+        if (server != null && server.Id != serverId)
         {
-            throw new ArgumentException("Invalid MCP server name. MCP server name is already exists.");
+            throw new ArgumentException("MCP server name is already exists.");
         }
     }
 }
