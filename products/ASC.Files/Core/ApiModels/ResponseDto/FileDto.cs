@@ -302,6 +302,7 @@ public class FileDtoHelper(
             else if(result.RootFolderType == FolderType.USER)
             {
                 result.OriginRoomTitle = FilesUCResource.SharedForMe;
+                
             }
         }
         
@@ -310,10 +311,6 @@ public class FileDtoHelper(
             switch (contextFolder)
             {
                 case { FolderType: FolderType.Recent }:
-                    result.RootFolderType = FolderType.Recent;
-                    result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
-
-                    break;
                 case { FolderType: FolderType.SHARE }:
                 case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, authContext.CurrentAccount.ID):
                     result.RootFolderType = FolderType.SHARE;
