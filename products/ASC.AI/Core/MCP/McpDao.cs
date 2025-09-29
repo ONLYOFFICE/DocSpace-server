@@ -519,4 +519,14 @@ public class McpDao(
         
         return await dbContext.GetServerByNameAsync(tenantId, name);
     }
+    
+    public async IAsyncEnumerable<McpIconState> GetIconStatesAsync(int tenantId, IEnumerable<Guid> ids)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        await foreach (var iconState in dbContext.GetIconStatesAsync(tenantId, ids))
+        {
+            yield return iconState;
+        }
+    }
 }

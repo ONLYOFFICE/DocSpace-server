@@ -141,6 +141,12 @@ public partial class AiDbContext
     {
         return McpQueries.GetServerByNameAsync(this, tenantId, name);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public IAsyncEnumerable<McpIconState> GetIconStatesAsync(int tenantId, IEnumerable<Guid> ids)
+    {
+        return McpQueries.GetIconStatesAsync(this, tenantId, ids);
+    }
 }
 
 static file class McpQueries
@@ -325,6 +331,17 @@ static file class McpQueries
                 .Where(x => x.TenantId == tenantId && x.Name == name)
                 .Select(x => new McpServerShort { Id = x.Id, Name = x.Name })
                 .FirstOrDefault());
+    
+    public static readonly Func<AiDbContext, int, IEnumerable<Guid>, IAsyncEnumerable<McpIconState>> GetIconStatesAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
+            ctx.McpServers
+                .Where(x => x.TenantId == tenantId && ids.Contains(x.Id))
+                .Select(x => new McpIconState
+                    {
+                      ServerId  = x.Id,
+                      HasIcon = x.HasIcon,
+                      ModifiedOn = x.ModifiedOn
+                    }));
 }
 
 public class DbRoomServerUnit

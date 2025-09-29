@@ -458,6 +458,11 @@ public partial class McpService(
         
         await mcpDao.SaveSettingsAsync(tenantId, callData.RoomId, userId, callData.ServerId, settings);
     }
+
+    public IAsyncEnumerable<McpIconState> GetIconStatesAsync(IEnumerable<Guid> servers)
+    {
+        return mcpDao.GetIconStatesAsync(tenantManager.GetCurrentTenantId(), servers);
+    }
     
     private async Task<IReadOnlyDictionary<string, bool>> GetToolsAsync(McpServerConnection connection)
     {

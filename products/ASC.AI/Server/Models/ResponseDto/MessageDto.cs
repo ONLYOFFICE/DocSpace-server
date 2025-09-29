@@ -34,42 +34,73 @@ public class MessageDto(int id,Role role, IEnumerable<MessageContentDto> content
     public ApiDateTime CreatedOn { get; } = createdOn;
 }
 
-public static class MessageDtoExtensions
+[Scope]
+public class MessageDtoConverter(
+    TenantManager tenantManager,
+    ApiDateTimeHelper dateTimeHelper,
+    McpService mcpService,
+    McpIconStore iconStore, 
+    IMapper mapper)
 {
-    public async static Task<MessageDto> ToMessageDtoAsync(
-        this Message message, 
-        IMapper mapper, 
-        ApiDateTimeHelper dateTimeHelper,
-        McpIconStore iconStore)
+    public async Task<MessageDto> ConvertAsync(Message message)
     {
         var createdOn = dateTimeHelper.Get(message.CreatedOn);
-        var contents = new List<MessageContentDto>();
+        var contents = new List<MessageContentDto>(message.Contents.Count);
+        var mcpToolCalls = new Dictionary<Guid, List<ToolContentDto>>();
 
         foreach (var content in message.Contents)
         {
             switch (content)
             {
+                case ToolCallMessageContent toolCall:
+                    {
+                        var toolDto = mapper.Map<ToolContentDto>(toolCall);
+                        contents.Add(toolDto);
+
+                        if (toolCall.McpServerInfo != null)
+                        {
+                            if (mcpToolCalls.TryGetValue(toolCall.McpServerInfo.ServerId, out var toolCalls))
+                            {
+                                toolCalls.Add(toolDto);
+                            }
+                            else
+                            {
+                                mcpToolCalls.Add(toolCall.McpServerInfo.ServerId, [toolDto]);
+                            }
+                        }
+                
+                        continue;
+                    }
+                case AttachmentMessageContent attachment:
+                    contents.Add(mapper.Map<AttachmentContentDto>(attachment));
+                    continue;
                 case TextMessageContent text:
                     contents.Add(mapper.Map<TextContentDto>(text));
                     break;
-                case ToolCallMessageContent tool:
-                    var toolContentDto = mapper.Map<ToolContentDto>(tool);
-                    if (toolContentDto.McpServerInfo != null)
-                    {
-                        toolContentDto.McpServerInfo.Icon = 
-                            await iconStore.GetAsync(toolContentDto.McpServerInfo.ServerId, DateTime.UtcNow);
-                        
-                        contents.Add(toolContentDto);
-                    }
-                    break;
-                case AttachmentMessageContent attachment:
-                    contents.Add(mapper.Map<AttachmentContentDto>(attachment));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(content));
             }
         }
-        
+
+        if (mcpToolCalls.Count <= 0)
+        {
+            return new MessageDto(message.Id, message.Role, contents, createdOn);
+        }
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+            
+        await foreach(var iconState in mcpService.GetIconStatesAsync(mcpToolCalls.Keys))
+        {
+            if (!iconState.HasIcon || !mcpToolCalls.TryGetValue(iconState.ServerId, out var toolCalls))
+            {
+                continue;
+            }
+
+            foreach (var toolCall in toolCalls)
+            {
+                toolCall.McpServerInfo!.Icon =
+                    await iconStore.GetAsync(tenantId, iconState.ServerId, iconState.ModifiedOn);
+            }
+        }
+
         return new MessageDto(message.Id, message.Role, contents, createdOn);
     }
 }
