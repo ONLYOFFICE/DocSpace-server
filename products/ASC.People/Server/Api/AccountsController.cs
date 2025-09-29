@@ -61,7 +61,7 @@ public class AccountsController<T>(
     UserManager userManager) : ControllerBase
 {
     /// <summary>
-    /// Returns the account entries with their sharing settings.
+    /// Returns the account entries with their sharing settings in a room with the ID specified in request.
     /// </summary>
     /// <short>Get account entries</short>
     /// <path>api/2.0/accounts/room/{id}/search</path>
@@ -70,11 +70,57 @@ public class AccountsController<T>(
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<object>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}/search")]
-    public async IAsyncEnumerable<object> GetAccountsEntriesWithShared(AccountsEntriesRequestDto<T> inDto)
+    public async IAsyncEnumerable<object> GetAccountsEntriesWithRoomsShared(AccountsEntriesRequestDto<T> inDto)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
 
-        if (!await fileSecurity.CanEditAccessAsync(room))
+        await foreach (var p in GetAccounts(inDto, room))
+        {
+            yield return p;
+        }
+    }
+    /// <summary>
+    /// Returns the account entries with their sharing settings in a folder with the ID specified in request.
+    /// </summary>
+    /// <short>Get account entries with folder sharing settings</short>
+    /// <path>api/2.0/accounts/folder/{id}/search</path>
+    /// <collection>list</collection>
+    [Tags("People / Search")]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<object>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("folder/{id}/search")]
+    public async IAsyncEnumerable<object> GetAccountsEntriesWithFoldersShared(AccountsEntriesRequestDto<T> inDto)
+    {
+        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
+
+        await foreach (var p in GetAccounts(inDto, room))
+        {
+            yield return p;
+        }
+    }
+    /// <summary>
+    /// Returns the account entries with their sharing settings for a file with the ID specified in request.
+    /// </summary>
+    /// <short>Get account entries with file sharing settings</short>
+    /// <path>api/2.0/accounts/file/{id}/search</path>
+    /// <collection>list</collection>
+    [Tags("People / Search")]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<object>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("file/{id}/search")]
+    public async IAsyncEnumerable<object> GetAccountsEntriesWithFilesShared(AccountsEntriesRequestDto<T> inDto)
+    {
+        var room = (await daoFactory.GetFileDao<T>().GetFileAsync(inDto.Id)).NotFoundIfNull();
+
+        await foreach (var p in GetAccounts(inDto, room))
+        {
+            yield return p;
+        }
+    }
+
+    private async IAsyncEnumerable<object> GetAccounts(AccountsEntriesRequestDto<T> inDto, FileEntry<T> fileEntry)
+    {
+        if (!await fileSecurity.CanEditAccessAsync(fileEntry))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -94,8 +140,8 @@ public class AccountsController<T>(
 
         var securityDao = daoFactory.GetSecurityDao<T>();
 
-        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(room, text, inDto.ExcludeShared ?? false);
-        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room,
+        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false);
+        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(fileEntry,
             text,
             inDto.EmployeeStatus,
             inDto.ActivationStatus,
@@ -114,7 +160,7 @@ public class AccountsController<T>(
 
         var groupsCount = 0;
 
-        await foreach (var item in securityDao.GetGroupsWithSharedAsync(room, text, inDto.ExcludeShared ?? false, offset, count))
+        await foreach (var item in securityDao.GetGroupsWithSharedAsync(fileEntry, text, inDto.ExcludeShared ?? false, offset, count))
         {
             groupsCount++;
             yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);
@@ -123,7 +169,7 @@ public class AccountsController<T>(
         var usersCount = count - groupsCount;
         var usersOffset = Math.Max(groupsCount > 0 ? 0 : offset - totalGroups, 0);
 
-        await foreach (var item in securityDao.GetUsersWithSharedAsync(room,
+        await foreach (var item in securityDao.GetUsersWithSharedAsync(fileEntry,
                            text,
                            inDto.EmployeeStatus,
                            inDto.ActivationStatus,

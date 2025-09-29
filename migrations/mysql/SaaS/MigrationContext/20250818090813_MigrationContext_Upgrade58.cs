@@ -52,7 +52,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 columns: new[] { "tenant", "description", "features", "name", "price", "product_id", "wallet" },
                 values: new object[,]
                 {
-                    { -12, null, "backup", "backup", 12m, "10006", true }
+                    { -12, null, "backup", "backup", 10m, "10006", true }
                 });
         }
 
@@ -62,11 +62,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.DropColumn(
                 name: "paid",
                 table: "backup_backup");
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -13);
 
             migrationBuilder.DeleteData(
                 table: "tenants_quota",

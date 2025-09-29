@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Json;
-
 using ASC.Core.Common.Notify.Model;
 
 namespace ASC.Notify;
@@ -38,9 +36,6 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, ConfigureNotifyS
     public async Task SaveMessageAsync(NotifyMessage m)
     {
         using var scope = serviceScopeFactory.CreateScope();
-
-        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-
         await using var context = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
         var strategy = context.Database.CreateExecutionStrategy();
@@ -49,7 +44,7 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, ConfigureNotifyS
         {
             await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
             await using var tx = await dbContext.Database.BeginTransactionAsync();
-            var notifyQueue = mapper.Map<NotifyMessage, NotifyQueue>(m);
+            var notifyQueue = m.Map();
             notifyQueue.Attachments = JsonSerializer.Serialize(m.Attachments);
 
             notifyQueue = (await dbContext.NotifyQueue.AddAsync(notifyQueue)).Entity;
@@ -79,8 +74,6 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, ConfigureNotifyS
         {
             using var scope = serviceScopeFactory.CreateScope();
 
-            var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-
             await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
             var q = dbContext.NotifyQueue
@@ -96,7 +89,7 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, ConfigureNotifyS
                     r => r.queue.NotifyId,
                     r =>
                     {
-                        var res = mapper.Map<NotifyQueue, NotifyMessage>(r.queue);
+                        var res = r.queue.Map();
 
                         try
                         {

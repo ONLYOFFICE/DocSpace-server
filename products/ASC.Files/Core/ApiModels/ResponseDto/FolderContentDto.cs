@@ -146,7 +146,7 @@ public class FolderContentDtoHelper(
         }
         
         
-        var currentTask = GetFolderDto(folderItems.FolderInfo);
+        var currentTask = GetFolderDto(folderItems.FolderInfo, contextFolder: folderItems.FolderInfo);
         var isEnableBadges = badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
         result.PathParts = folderItems.FolderPathParts;

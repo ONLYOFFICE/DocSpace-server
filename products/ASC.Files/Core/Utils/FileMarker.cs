@@ -262,6 +262,10 @@ public class FileMarker(
                             if (userEntriesData.TryGetValue(id, out var value))
                             {
                                 value.Entries.Add(rootFolder);
+                                if (rootFolder == folderShare)
+                                {
+                                    value.RootId = rootFolder.Id.ToString();
+                                }
                             }
                             else
                             {
@@ -1038,6 +1042,8 @@ public class FileMarker(
             return;
         }
 
+        totalTags = totalTags.Distinct().ToList();
+
         var shareFolder = await globalFolder.GetFolderShareAsync<T>(daoFactory);
         var parentFolderTag = Equals(shareFolder, parent.Id)
                                     ? await tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(shareFolder)).FirstOrDefaultAsync()
@@ -1192,14 +1198,8 @@ public class FileMarker(
         }
     }
     
-    public async Task<MarkResult> MarkAsRecentByLink<T>(FileEntry<T> entry, Guid linkId)
+    public async Task MarkAsRecentByLink<T>(FileEntry<T> entry, Guid linkId)
     {
-        switch (entry)
-        {
-            case Folder<T> folder when !DocSpaceHelper.IsRoom(folder.FolderType):
-                return MarkResult.NotMarked;
-        }
-
         var tagDao = daoFactory.GetTagDao<T>();
         var userId = authContext.CurrentAccount.ID;
         var linkIdString = linkId.ToString();
@@ -1216,8 +1216,6 @@ public class FileMarker(
         
         var tag = Tag.RecentByLink(userId, linkId, entry);
         await tagDao.SaveTagsAsync(tag, userId);
-
-        return MarkResult.Marked;
     }
 
     private async Task InsertToCache(object folderId, int count)
@@ -1310,10 +1308,4 @@ public class AsyncTaskData<T> : DistributedTask
             _logger.ErrorExecMarkFileAsNew(e);
         }
     }
-}
-
-public enum MarkResult
-{
-    Marked,
-    NotMarked
 }

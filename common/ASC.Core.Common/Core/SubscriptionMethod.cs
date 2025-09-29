@@ -24,12 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core;
 
 [ProtoContract]
-public class SubscriptionMethod : IMapFrom<DbSubscriptionMethod>
+public class SubscriptionMethod
 {
     [ProtoMember(1)]
     public int Tenant { get; set; }
@@ -69,10 +67,19 @@ public class SubscriptionMethod : IMapFrom<DbSubscriptionMethod>
             RecipientId = cache.Recipient
         };
     }
+}
 
-    public void Mapping(Profile profile)
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class SubscriptionMethodMapper
+{
+    private static readonly char[] _separator = ['|'];
+
+    [MapProperty(nameof(DbSubscriptionMethod.TenantId), nameof(SubscriptionMethod.Tenant))]
+    [MapProperty(nameof(DbSubscriptionMethod.Sender), nameof(SubscriptionMethod.Methods), Use = nameof(MapSenderToMethods))]
+    public static partial SubscriptionMethod Map(this DbSubscriptionMethod source);
+
+    public static string[] MapSenderToMethods(string sender)
     {
-        profile.CreateMap<DbSubscriptionMethod, SubscriptionMethod>()
-            .ForMember(dest => dest.Methods, opt => opt.MapFrom(src => src.Sender.Split(_separator, StringSplitOptions.RemoveEmptyEntries)));
+        return sender.Split(_separator, StringSplitOptions.RemoveEmptyEntries);
     }
 }

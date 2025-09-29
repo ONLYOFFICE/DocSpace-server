@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The login settings parameters.
 /// </summary>
-public class LoginSettingsDto : IMapFrom<LoginSettings>
+public class LoginSettingsDto
 {
     /// <summary>
     /// The maximum number of consecutive failed login attempts allowed before triggering account suspension.
@@ -53,4 +53,10 @@ public class LoginSettingsDto : IMapFrom<LoginSettings>
     /// Specifies whether the login settings are default or not.
     /// </summary>
     public required bool IsDefault { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class LoginSettingsDtoMapper
+{       
+    public static partial LoginSettingsDto Map(this LoginSettings source);
 }

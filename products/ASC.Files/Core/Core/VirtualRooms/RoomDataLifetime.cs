@@ -29,7 +29,7 @@ namespace ASC.Files.Core.VirtualRooms;
 /// <summary>
 /// The room data lifetime information.
 /// </summary>
-public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataLifetimeDto>
+public class RoomDataLifetime
 {
     /// <summary>
     /// Specifies whether to delete the room data lifetime permanently or not.
@@ -100,6 +100,14 @@ public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataL
     {
         return HashCode.Combine(DeletePermanently, (int)Period, Value);
     }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class RoomDataLifetimeMapper
+{       
+    public static partial RoomDataLifetime Map(this RoomDataLifetimeDto source);
+    public static partial RoomDataLifetime Map(this DbRoomDataLifetime source);
+    public static partial DbRoomDataLifetime Map(this RoomDataLifetime source);
 }
 
 /// <summary>

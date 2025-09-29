@@ -30,8 +30,7 @@ namespace ASC.Files.Service.Services;
 internal class CleanupLifetimeExpiredService(
     IServiceScopeFactory scopeFactory,
     IConfiguration configuration,
-    ILogger<CleanupLifetimeExpiredService> logger,
-    IMapper mapper)
+    ILogger<CleanupLifetimeExpiredService> logger)
     : ActivePassiveBackgroundService<CleanupLifetimeExpiredService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
@@ -64,7 +63,7 @@ internal class CleanupLifetimeExpiredService(
 
                 foreach (var room in lifetimeEnabledRooms)
                 {
-                    var lifetime = mapper.Map<DbRoomDataLifetime, RoomDataLifetime>(room.Lifetime);
+                    var lifetime = room.Lifetime.Map();
 
                     var expiration = lifetime.GetExpirationUtc();
 

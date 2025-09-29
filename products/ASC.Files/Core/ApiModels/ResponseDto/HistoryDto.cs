@@ -113,7 +113,7 @@ public class HistoryApiHelper(
     FileSecurity fileSecurity,
     TenantUtil tenantUtil,
     AuditInterpreter interpreter,
-    IMapper mapper)
+    AuditEventMapper mapper)
 {
     public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId, ApiDateTime fromDate, ApiDateTime toDate, int offset, int count)
     {
@@ -226,7 +226,7 @@ public class HistoryApiHelper(
                 UserData = await historyDtoHelper.GetAsync(e.Item1.UserId)
             };
 
-            yield return mapper.Map<AuditEventQuery, AuditEvent>(query);
+            yield return mapper.ToAuditEvent(query);
         }
     }
 }

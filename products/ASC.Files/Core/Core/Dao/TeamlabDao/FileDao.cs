@@ -37,7 +37,6 @@ internal class FileDao(
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
-        TenantLogoManager tenantLogoManager,
         TenantUtil tenantUtil,
         SetupInfo setupInfo,
         MaxTotalSizeStatistic maxTotalSizeStatistic,
@@ -52,7 +51,7 @@ internal class FileDao(
         SelectorFactory selectorFactory,
         CrossDao crossDao,
         Settings settings,
-        IMapper mapper,
+        FileMapper mapper,
         ThumbnailSettings thumbnailSettings,
         IQuotaService quotaService,
         EmailValidationKeyProvider emailValidationKeyProvider,
@@ -102,7 +101,7 @@ internal class FileDao(
 
         var dbFile = await filesDbContext.DbFileQueryAsync(tenantId, userId, fileId);
 
-        return mapper.Map<DbFileQuery, File<int>>(dbFile);
+        return mapper.MapDbFileQueryToDbFileInternal(dbFile);
     }
 
     public async Task<File<int>> GetFileAsync(int fileId, int fileVersion)
@@ -114,7 +113,7 @@ internal class FileDao(
 
         var dbFile = await filesDbContext.DbFileQueryByFileVersionAsync(tenantId, userId, fileId, fileVersion);
 
-        return mapper.Map<DbFileQuery, File<int>>(dbFile);
+        return mapper.MapDbFileQueryToDbFileInternal(dbFile);
     }
 
     public async Task<File<int>> GetFileAsync(int parentId, string title)
@@ -127,7 +126,7 @@ internal class FileDao(
 
         var dbFile = await filesDbContext.DbFileQueryByTitleAsync(tenantId, title, parentId);
 
-        return mapper.Map<DbFileQuery, File<int>>(dbFile);
+        return mapper.MapDbFileQueryToDbFileInternal(dbFile);
     }
 
     public async Task<File<int>> GetFileStableAsync(int fileId, int fileVersion = -1)
@@ -139,7 +138,7 @@ internal class FileDao(
 
         var dbFile = await filesDbContext.DbFileQueryFileStableAsync(tenantId, userId, fileId, fileVersion);
 
-        return mapper.Map<DbFileQuery, File<int>>(dbFile);
+        return mapper.MapDbFileQueryToDbFileInternal(dbFile);
     }
 
     public async IAsyncEnumerable<File<int>> GetFileHistoryAsync(int fileId)
@@ -150,7 +149,7 @@ internal class FileDao(
 
         await foreach (var e in filesDbContext.DbFileQueriesAsync(tenantId, fileId))
         {
-            yield return mapper.Map<DbFileQuery, File<int>>(e);
+            yield return mapper.MapDbFileQueryToDbFileInternal(e);
         }
     }
 
@@ -167,7 +166,7 @@ internal class FileDao(
 
         await foreach (var e in filesDbContext.DbFileQueriesByFileIdsAsync(tenantId, fileIds))
         {
-            yield return mapper.Map<DbFileQuery, File<int>>(e);
+            yield return mapper.MapDbFileQueryToDbFileInternal(e);
         }
     }
 
@@ -259,7 +258,7 @@ internal class FileDao(
 
         await foreach (var e in FromQuery(filesDbContext, query).AsAsyncEnumerable())
         {
-            yield return mapper.Map<DbFileQuery, File<int>>(e);
+            yield return mapper.MapDbFileQueryToDbFileInternal(e);
         }
     }
 
@@ -307,7 +306,7 @@ internal class FileDao(
 
         await foreach (var e in result.AsAsyncEnumerable())
         {
-            yield return mapper.Map<DbFileQuery, File<int>>(e);
+            yield return mapper.MapDbFileQueryToDbFileInternal(e);
         }
     }
 
@@ -632,9 +631,7 @@ internal class FileDao(
                                 var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
                                 await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
 
-                                var logoText = await tenantLogoManager.GetLogoTextAsync();
-
-                                throw new Exception(string.Format(FilesCommonResource.ErrorMessage_UploadToFormRoom, logoText));
+                                throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                             }
                         }
                         }
@@ -705,6 +702,36 @@ internal class FileDao(
         }
 
         return await q.CountAsync();
+    }
+
+    public async Task<int> GetSharedFilesCountAsync(int parentId)
+    {
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var q = GetSharedFilesQuery(parentId, filesDbContext);
+
+        return await q.CountAsync();
+    }
+
+    public async IAsyncEnumerable<File<int>> GetSharedFilesAsync(int parentId, int offset = 0, int count = -1)
+    {
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var q = GetSharedFilesQuery(parentId, filesDbContext);
+
+        q = q.Skip(offset);
+
+        if (count > 0)
+        {
+            q = q.Take(count);
+        }
+
+        var result = FromQuery(filesDbContext, q);
+
+        await foreach (var e in result.AsAsyncEnumerable())
+        {
+            yield return mapper.MapDbFileQueryToDbFileInternal(e);
+        }
     }
 
     public async Task<File<int>> ReplaceFileVersionAsync(File<int> file, Stream fileStream)
@@ -1736,7 +1763,7 @@ internal class FileDao(
 
         await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
         {
-            yield return mapper.Map<DbFileQuery, File<int>>(e);
+            yield return mapper.MapDbFileQueryToDbFileInternal(e);
         }
     }
 
@@ -1750,7 +1777,7 @@ internal class FileDao(
         if (success)
         {
             var files = filesDbContext.DbFileQueriesByFileIdsAsync(tenantId, ids)
-                .Select(mapper.Map<DbFileQuery, File<int>>)
+                .Select(mapper.MapDbFileQueryToDbFileInternal)
                 .Where(
                     f =>
                     bunch
@@ -1764,7 +1791,7 @@ internal class FileDao(
         else
         {
             var files = filesDbContext.DbFileQueriesByTextAsync(tenantId, GetSearchText(searchText))
-                .Select(mapper.Map<DbFileQuery, File<int>>)
+                .Select(mapper.MapDbFileQueryToDbFileInternal)
                 .Where(f =>
                        bunch
                             ? f.RootFolderType == FolderType.BUNCH
@@ -1930,7 +1957,7 @@ internal class FileDao(
 
         await foreach (var file in FromQuery(filesDbContext, q).AsAsyncEnumerable())
         {
-            yield return mapper.Map<DbFileQuery, File<int>>(file);
+            yield return mapper.MapDbFileQueryToDbFileInternal(file);
         }
     }
 
@@ -2727,6 +2754,25 @@ internal class FileDao(
 
         return query;
     }
+
+    private IQueryable<DbFile> GetSharedFilesQuery(int parentId, FilesDbContext filesDbContext)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        var q = GetFileQuery(filesDbContext, file => file.CurrentVersion)
+                .Join(filesDbContext.Tree, file => file.ParentId, tree => tree.FolderId, (file, tree) => new { file, tree })
+                .Where(r => r.tree.ParentId == parentId)
+                .Join(filesDbContext.Security, r => r.file.Id.ToString(), security => security.EntryId, (r, security) => new { r.file, security })
+                .Where(r => r.security.TenantId == tenantId
+                    && r.security.EntryType == FileEntryType.File
+                    && (r.security.SubjectType == SubjectType.ExternalLink
+                        || r.security.SubjectType == SubjectType.PrimaryExternalLink
+                        || r.security.SubjectType == SubjectType.User
+                        || r.security.SubjectType == SubjectType.Group))
+                .Select(r => r.file);
+
+        return q;
+    }
 }
 
 public class DbFileQuery
@@ -2774,7 +2820,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
-        TenantLogoManager tenantLogoManager,
         TenantUtil tenantUtil,
         SetupInfo setupInfo,
         MaxTotalSizeStatistic maxTotalSizeStatistic,
@@ -2789,7 +2834,7 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         SelectorFactory selectorFactory,
         CrossDao crossDao,
         Settings settings,
-        IMapper mapper,
+        FileMapper mapper,
         ThumbnailSettings thumbnailSettings,
         IQuotaService quotaService,
         EmailValidationKeyProvider emailValidationKeyProvider,
@@ -2814,7 +2859,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
     fileUtility,
     dbContextManager,
     tenantManager,
-    tenantLogoManager,
     tenantUtil,
     setupInfo,
     maxTotalSizeStatistic,

@@ -24,13 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core;
 
 [DebuggerDisplay("{UserId} - {GroupId}")]
 [ProtoContract]
-public class UserGroupRef : IMapFrom<UserGroup>
+public class UserGroupRef
 {
     [ProtoMember(1)]
     public Guid UserId { get; set; }
@@ -78,10 +76,14 @@ public class UserGroupRef : IMapFrom<UserGroup>
     {
         return obj is UserGroupRef r && r.TenantId == TenantId && r.UserId == UserId && r.GroupId == GroupId && r.RefType == RefType;
     }
+}
 
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<UserGroup, UserGroupRef>()
-            .ForMember(dest => dest.GroupId, opt => opt.MapFrom(src => src.UserGroupId));
-    }
+[Mapper(PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class UserGroupRefMapper
+{
+    [MapperIgnoreSource(nameof(UserGroup.Tenant))]
+    [MapProperty(nameof(UserGroup.UserGroupId), nameof(UserGroupRef.GroupId))]
+    public static partial UserGroupRef Map(this UserGroup source);
+    public static partial IQueryable<UserGroupRef> Project(this IQueryable<UserGroup> source);
+    public static partial List<UserGroupRef> Map(this List<UserGroup> source);
 }

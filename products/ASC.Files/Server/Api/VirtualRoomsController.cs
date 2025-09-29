@@ -38,7 +38,6 @@ public class VirtualRoomsInternalController(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileShareDtoHelper fileShareDtoHelper,
-    IMapper mapper,
     SocketManager socketManager,
     ApiContext apiContext,
     FilesMessageService filesMessageService,
@@ -48,7 +47,8 @@ public class VirtualRoomsInternalController(
     TenantManager tenantManager,
     IEventBus eventBus,
     RoomTemplatesWorker roomTemplatesWorker,
-    UserManager userManager)
+    UserManager userManager,
+    IDaoFactory daoFactory)
     : VirtualRoomsController<int>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
@@ -59,13 +59,13 @@ public class VirtualRoomsInternalController(
         folderDtoHelper,
         fileDtoHelper,
         fileShareDtoHelper,
-        mapper,
         socketManager,
         apiContext,
         filesMessageService,
         settingsManager,
         apiDateTimeHelper,
-        userManager)
+        userManager, 
+        daoFactory)
 {
     /// <summary>
     /// Creates a room in the "Rooms" section.
@@ -77,7 +77,7 @@ public class VirtualRoomsInternalController(
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoom(CreateRoomRequestDto inDto)
     {
-        var lifetime = _mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto.Lifetime);
+        var lifetime = inDto.Lifetime.Map();
         if (lifetime != null)
         {
             lifetime.StartDate = DateTime.UtcNow;
@@ -207,13 +207,13 @@ public class VirtualRoomsThirdPartyController(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileShareDtoHelper fileShareDtoHelper,
-    IMapper mapper,
     SocketManager socketManager,
     ApiContext apiContext,
     FilesMessageService filesMessageService,
     SettingsManager settingsManager,
     ApiDateTimeHelper apiDateTimeHelper,
-    UserManager userManager)
+    UserManager userManager,
+    IDaoFactory daoFactory)
     : VirtualRoomsController<string>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
@@ -224,13 +224,13 @@ public class VirtualRoomsThirdPartyController(
         folderDtoHelper,
         fileDtoHelper,
         fileShareDtoHelper,
-        mapper,
         socketManager,
         apiContext,
         filesMessageService,
         settingsManager,
         apiDateTimeHelper,
-        userManager)
+        userManager, 
+        daoFactory)
 {
     /// <summary>
     /// Creates a room in the "Rooms" section stored in a third-party storage.
@@ -260,17 +260,16 @@ public abstract class VirtualRoomsController<T>(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileShareDtoHelper fileShareDtoHelper,
-    IMapper mapper,
     SocketManager socketManager,
     ApiContext apiContext,
     FilesMessageService filesMessageService,
     SettingsManager settingsManager,
     ApiDateTimeHelper apiDateTimeHelper,
-    UserManager userManager)
+    UserManager userManager,
+    IDaoFactory daoFactory)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     protected readonly FileStorageService _fileStorageService = fileStorageService;
-    protected readonly IMapper _mapper = mapper;
 
     /// <summary>
     /// Returns the room information.
@@ -496,11 +495,11 @@ public abstract class VirtualRoomsController<T>(
             }
         }
 
-        var wrappers = _mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.RoomInvitation.Invitations);
+        var wrappers = inDto.RoomInvitation.Invitations.Map();
 
         var aceCollection = new AceCollection<T> { Files = [], Folders = [inDto.Id], Aces = wrappers, Message = inDto.RoomInvitation.Message };
 
-        result.Warning = await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.RoomInvitation.Notify, inDto.RoomInvitation.Culture);
+        result.Warning = (await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.RoomInvitation.Notify, inDto.RoomInvitation.Culture)).Select(r=> r.Warning).FirstOrDefault();
         result.Members = await _fileStorageService.GetRoomSharedInfoAsync(inDto.Id, inDto.RoomInvitation.Invitations.Select(s => s.Id))
             .SelectAwait(async a => await fileShareDtoHelper.Get(a))
             .ToListAsync();
@@ -565,9 +564,9 @@ public abstract class VirtualRoomsController<T>(
 
         var result = await fileShareDtoHelper.Get(linkAce);
 
-        if (inDto.RoomLink.LinkId != Guid.Empty && linkAce.Id != inDto.RoomLink.LinkId && result.SharedTo is FileShareLink link)
+        if (inDto.RoomLink.LinkId != Guid.Empty && linkAce.Id != inDto.RoomLink.LinkId  && result.SharedLink != null)
         {
-            link.RequestToken = null;
+            result.SharedLink.RequestToken = null;
         }
 
         return result;
@@ -795,7 +794,10 @@ public abstract class VirtualRoomsController<T>(
     [HttpGet("{id}/news")]
     public async Task<List<NewItemsDto<FileEntryBaseDto>>> GetNewRoomItems(RoomIdRequestDto<T> inDto)
     {
-        var newItems = await _fileStorageService.GetNewRoomFilesAsync(inDto.Id);
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(inDto.Id);
+        
+        var newItems = await _fileStorageService.GetNewRoomFilesAsync(folder);
         var result = new List<NewItemsDto<FileEntryBaseDto>>();
 
         foreach (var (date, entries) in newItems)
@@ -805,7 +807,7 @@ public abstract class VirtualRoomsController<T>(
 
             foreach (var en in entries)
             {
-                items.Add(await GetFileEntryWrapperAsync(en));
+                items.Add(await GetFileEntryWrapperAsync(en, folder));
             }
 
             result.Add(new NewItemsDto<FileEntryBaseDto> { Date = apiDateTime, Items = items });

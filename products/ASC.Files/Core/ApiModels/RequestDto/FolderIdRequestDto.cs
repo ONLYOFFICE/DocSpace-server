@@ -48,4 +48,17 @@ public class FolderPrimaryIdRequestDto<T>
     /// </summary>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
+    
+    /// <summary>
+    /// The number of items to retrieve in the request.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting index for the query results.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }

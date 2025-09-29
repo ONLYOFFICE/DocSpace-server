@@ -41,7 +41,7 @@ internal class FolderDao(
         IDaoFactory daoFactory,
         SelectorFactory selectorFactory,
         CrossDao crossDao,
-        IMapper mapper,
+        FolderMapper mapper,
         GlobalStore globalStore,
     GlobalFolder globalFolder,
     IDistributedLockProvider distributedLockProvider,
@@ -78,7 +78,7 @@ internal class FolderDao(
 
         var dbFolder = await filesDbContext.DbFolderQueryWithSharedAsync(tenantId, folderId);
 
-        return mapper.Map<DbFolderQuery, Folder<int>>(dbFolder);
+        return mapper.MapDbFolderQueryToDbFolderInternal(dbFolder);
     }
     public async Task<WatermarkSettings> GetWatermarkSettings(Folder<int> room)
     {
@@ -88,7 +88,7 @@ internal class FolderDao(
 
         var roomSettings = await filesDbContext.RoomSettingsAsync(tenantId, room.Id);
 
-        return mapper.Map<DbRoomWatermark, WatermarkSettings>(roomSettings.Watermark);
+        return roomSettings.Watermark.Map();
     }
     public async Task<Folder<int>> GetFolderAsync(string title, int parentId)
     {
@@ -100,7 +100,7 @@ internal class FolderDao(
 
         var dbFolder = await filesDbContext.DbFolderQueryByTitleAndParentIdAsync(tenantId, title, parentId);
 
-        return mapper.Map<DbFolderQuery, Folder<int>>(dbFolder);
+        return mapper.MapDbFolderQueryToDbFolderInternal(dbFolder);
     }
 
     public async Task<Folder<int>> GetRootFolderAsync(int folderId)
@@ -113,7 +113,7 @@ internal class FolderDao(
 
         var dbFolder = await filesDbContext.DbFolderQueryAsync(tenantId, id);
 
-        return mapper.Map<DbFolderQuery, Folder<int>>(dbFolder);
+        return mapper.MapDbFolderQueryToDbFolderInternal(dbFolder);
     }
 
     public async Task<Folder<int>> GetRootFolderByFileAsync(int fileId)
@@ -126,7 +126,7 @@ internal class FolderDao(
 
         var dbFolder = await filesDbContext.DbFolderQueryAsync(tenantId, id);
 
-        return mapper.Map<DbFolderQuery, Folder<int>>(dbFolder);
+        return mapper.MapDbFolderQueryToDbFolderInternal(dbFolder);
     }
 
     public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, FolderType type)
@@ -139,7 +139,7 @@ internal class FolderDao(
 
         await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
         {
-            yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
+            yield return mapper.MapDbFolderQueryToDbFolderInternal(e);
         }
 
     }
@@ -187,7 +187,7 @@ internal class FolderDao(
 
         await foreach (var e in (FromQuery(filesDbContext, q)).AsAsyncEnumerable())
         {
-            yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
+            yield return mapper.MapDbFolderQueryToDbFolderInternal(e);
         }
     }
 
@@ -231,7 +231,7 @@ internal class FolderDao(
 
         await foreach (var e in (FromQuery(filesDbContext, q)).AsAsyncEnumerable())
         {
-            yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
+            yield return mapper.MapDbFolderQueryToDbFolderInternal(e);
         }
     }
 
@@ -288,9 +288,40 @@ internal class FolderDao(
 
         await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
         {
-            yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
+            yield return mapper.MapDbFolderQueryToDbFolderInternal(e);
         }
     }
+
+    public async Task<int> GetSharedFoldersCountAsync(int parentId)
+    {
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var q = GetSharedFoldersQuery(parentId, filesDbContext);
+
+        return await q.CountAsync();
+    }
+
+    public async IAsyncEnumerable<Folder<int>> GetSharedFoldersAsync(int parentId, int offset = 0, int count = -1)
+    {
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var q = GetSharedFoldersQuery(parentId, filesDbContext);
+
+        q = q.Skip(offset);
+
+        if (count > 0)
+        {
+            q = q.Take(count);
+        }
+
+        var result = FromQuery(filesDbContext, q);
+
+        await foreach (var e in result.AsAsyncEnumerable())
+        {
+            yield return mapper.MapDbFolderQueryToDbFolderInternal(e);
+        }
+    }
+
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
         var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms, FolderType.RoomTemplates };
@@ -382,7 +413,7 @@ internal class FolderDao(
 
         await foreach (var e in FromQuery(filesDbContext, q).Distinct().AsAsyncEnumerable())
         {
-            yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
+            yield return mapper.MapDbFolderQueryToDbFolderInternal(e);
         }
     }
 
@@ -396,7 +427,7 @@ internal class FolderDao(
 
         await foreach (var e in query)
         {
-            yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
+            yield return mapper.MapDbFolderQueryToDbFolderInternal(e);
         }
     }
 
@@ -474,9 +505,9 @@ internal class FolderDao(
                     Cover = folder.SettingsCover,
                     Indexing = folder.SettingsIndexing,
                     DenyDownload = folder.SettingsDenyDownload,
-                    Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(folder.SettingsWatermark),
+                    Watermark = folder.SettingsWatermark.Map(),
                     Quota = folder.SettingsQuota,
-                    Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
+                    Lifetime = folder.SettingsLifetime.Map()
                 };
             }
 
@@ -517,9 +548,9 @@ internal class FolderDao(
                     Cover = folder.SettingsCover,
                     Indexing = folder.SettingsIndexing,
                     DenyDownload = folder.SettingsDenyDownload,
-                    Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(folder.SettingsWatermark),
+                    Watermark = folder.SettingsWatermark.Map(),
                     Quota = folder.SettingsQuota,
-                    Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
+                    Lifetime = folder.SettingsLifetime.Map()
                 };
             }
             
@@ -567,9 +598,9 @@ internal class FolderDao(
 
         if (roomSettings != null)
         {
-            roomSettings.Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(watermarkSettings);
+            roomSettings.Watermark = watermarkSettings.Map();
             filesDbContext.Update(roomSettings);
-        await filesDbContext.SaveChangesAsync();
+            await filesDbContext.SaveChangesAsync();
         }
 
         return room.Id;
@@ -657,7 +688,7 @@ internal class FolderDao(
 
         await foreach (var folder in FromQuery(filesDbContext, q).AsAsyncEnumerable())
         {
-            yield return mapper.Map<DbFolderQuery, Folder<int>>(folder);
+            yield return mapper.MapDbFolderQueryToDbFolderInternal(folder);
         }
     }
     
@@ -1124,8 +1155,8 @@ internal class FolderDao(
             if (conflict != 0)
             {
                 result[folderId] = "";
-                }
-                }
+            }
+        }
 
         return result;
     }
@@ -1156,7 +1187,7 @@ internal class FolderDao(
                 Indexing = folder.SettingsIndexing,
                 DenyDownload = folder.SettingsDenyDownload,
                 Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue,
-                Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
+                Lifetime = folder.SettingsLifetime.Map()
             };
         }
         
@@ -1193,11 +1224,11 @@ internal class FolderDao(
             }
             else
             {
-                toUpdate.Settings.Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(lifeTime);
+                toUpdate.Settings.Lifetime = lifeTime.Map();
             }
         }
 
-        toUpdate.Settings.Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(watermark);
+        toUpdate.Settings.Watermark = watermark.Map();
 
         if (color != null)
         {
@@ -1352,7 +1383,14 @@ internal class FolderDao(
             await filesDbContext.ReassignFoldersPartiallyAsync(tenantId, oldOwnerId, newOwnerId, exceptFolderIds);
         }
     }
-    
+
+    public async Task ReassignFoldersAsync(Guid newOwnerId, IEnumerable<int> folderIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await filesDbContext.ReassignSpecificFoldersAsync(tenantId, folderIds, newOwnerId);
+    }
+
     public async Task ReassignRoomFoldersAsync(Guid oldOwnerId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -1396,7 +1434,7 @@ internal class FolderDao(
         {
             await foreach (var e in filesDbContext.DbFolderQueriesByIdsAsync(tenantId, ids))
             {
-                yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
+                yield return mapper.MapDbFolderQueryToDbFolderInternal(e);
             }
 
             yield break;
@@ -1404,7 +1442,7 @@ internal class FolderDao(
 
         await foreach (var e in filesDbContext.DbFolderQueriesByTextAsync(tenantId, GetSearchText(text)))
         {
-            yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
+            yield return mapper.MapDbFolderQueryToDbFolderInternal(e);
         }
     }
 
@@ -1828,7 +1866,7 @@ internal class FolderDao(
 
         var parentFolder = await filesDbContext.ParentIdTypePairAsync(folderId);
         
-        return mapper.Map<DbFolderQuery, Folder<int>>(parentFolder);
+        return mapper.MapDbFolderQueryToDbFolderInternal(parentFolder);
     }
 
     public Task<(int RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<int> entry)
@@ -2149,6 +2187,25 @@ internal class FolderDao(
     {
         return (await globalStore.GetStoreAsync()).GetBackupExtension();
     }
+
+    private IQueryable<DbFolder> GetSharedFoldersQuery(int parentId, FilesDbContext filesDbContext)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        var q = GetFolderQuery(filesDbContext)
+                .Join(filesDbContext.Tree, folder => folder.Id, tree => tree.FolderId, (folder, tree) => new { folder, tree })
+                .Where(r => r.tree.ParentId == parentId && r.tree.Level != 0)
+                .Join(filesDbContext.Security, r => r.folder.Id.ToString(), security => security.EntryId, (r, security) => new { r.folder, security })
+                .Where(r => r.security.TenantId == tenantId
+                    && r.security.EntryType == FileEntryType.Folder
+                    && (r.security.SubjectType == SubjectType.ExternalLink
+                        || r.security.SubjectType == SubjectType.PrimaryExternalLink
+                        || r.security.SubjectType == SubjectType.User
+                        || r.security.SubjectType == SubjectType.Group))
+                .Select(r => r.folder);
+
+        return q;
+    }
 }
 
 public class DbFolderQuery
@@ -2175,12 +2232,6 @@ public class FolderByTagQuery : IQueryResult<DbFolder>
     public DbFolder OriginRoom { get; set; }
     public DateTime? LastOpened { get; set; }
     public DbFilesSecurity Security { get; set; }
-}
-
-public class DbFolderQueryWithSecurity
-{
-    public DbFolderQuery DbFolderQuery { get; init; }
-    public DbFilesSecurity Security { get; init; }
 }
 
 public class ParentIdTitlePair
@@ -2223,7 +2274,7 @@ internal class CacheFolderDao(
     IDaoFactory daoFactory,
     SelectorFactory selectorFactory,
     CrossDao crossDao,
-    IMapper mapper,
+    FolderMapper mapper,
     GlobalStore globalStore,
     GlobalFolder globalFolder,
     IDistributedLockProvider distributedLockProvider,

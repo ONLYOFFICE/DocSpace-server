@@ -52,8 +52,8 @@ public partial class FilesDbContext
         return TagQueries.TmpShareFolderTagsAsync(this, tenantId, subject, folderType);
     }
     
-    //[PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
-    public IAsyncEnumerable<TagLinkData> TmpShareSBoxTagsAsync(int tenantId, Guid subject, IEnumerable<string> selectorsIds)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
+    public IAsyncEnumerable<TagLinkData> TmpShareSBoxTagsAsync(int tenantId, Guid subject, List<string> selectorsIds)
     {
         return TagQueries.TmpShareSBoxTagsAsync(this, tenantId, subject, selectorsIds);
     }
@@ -300,26 +300,22 @@ static file class TagQueries
                     .Select(r => r.tagLink)
                     .Distinct());
 
-    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<string>, IAsyncEnumerable<TagLinkData>> TmpShareSBoxTagsAsync =
+    public static readonly Func<FilesDbContext, int, Guid, List<string>, IAsyncEnumerable<TagLinkData>> TmpShareSBoxTagsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<string> selectorsIds) =>
+            (FilesDbContext ctx, int tenantId, Guid subject, List<string> selectorsIds) =>
                 ctx.Tag
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => subject == Guid.Empty || r.Owner == subject)
                     .Where(r => r.Type == TagType.New)
-                    .Join(ctx.TagLink, r => r.Id, l => l.TagId, 
-                        (tag, link) => new TagLinkData { Tag = tag, Link = link })
+                    .Join(ctx.TagLink, r => r.Id, l => l.TagId, (tag, link) => new TagLinkData { Tag = tag, Link = link })
                     .Where(r => r.Link.TenantId == r.Tag.TenantId)
-                    .Where(r => ctx.Security.Any(a => 
-                        a.TenantId == tenantId && a.EntryId == r.Link.EntryId && a.EntryType == r.Link.EntryType))
-                    .Join(ctx.ThirdpartyIdMapping, r => r.Link.EntryId, r => r.HashId, 
-                        (tagLink, mapping) => new { tagLink, mapping })
+                    .Where(r => ctx.Security.Any(a => a.TenantId == tenantId && a.EntryId == r.Link.EntryId && a.EntryType == r.Link.EntryType))
+                    .Join(ctx.ThirdpartyIdMapping, r => r.Link.EntryId, r => r.HashId, (tagLink, mapping) => new { tagLink, mapping })
                     .Where(r => r.mapping.TenantId == r.tagLink.Link.TenantId)
-                    .Join(ctx.ThirdpartyAccount, r => r.mapping.TenantId, r => r.TenantId, 
-                        (tagLinkMapping, account) => new { tagLinkMapping.tagLink, tagLinkMapping.mapping, account })
+                    .Join(ctx.ThirdpartyAccount, r => r.mapping.TenantId, r => r.TenantId, (tagLinkMapping, account) => new { tagLinkMapping.tagLink, tagLinkMapping.mapping, account })
                     .Where(r => r.account.UserId != subject && 
                                 r.account.FolderType == FolderType.USER && 
-                                selectorsIds.Any(id => r.mapping.Id.StartsWith($"{id}-" + r.account.Id)))
+                                selectorsIds.Any(id => r.mapping.Id.StartsWith(id + "-" + r.account.Id)))
                     .Select(r => r.tagLink)
                     .Distinct());
 
@@ -453,7 +449,7 @@ static file class TagQueries
                 ctx.Tag.Where(r => r.TenantId == tenantId)
                     .Join(ctx.TagLink, r => r.Id, l => l.TagId, (tag, link) => new TagLinkData { Tag = tag, Link = link })
                     .Where(r => r.Link.TenantId == r.Tag.TenantId)
-                    .Where(r => (r.Tag.Type == TagType.New || r.Tag.Type == TagType.Recent || r.Tag.Type == TagType.RecentByLink) && r.Link.CreateOn <= date)
+                    .Where(r => (r.Tag.Type == TagType.New || r.Tag.Type == TagType.Recent) && r.Link.CreateOn <= date)
                     .Select(r=> r.Link)
                     .ExecuteDelete());
 

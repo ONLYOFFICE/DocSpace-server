@@ -126,10 +126,9 @@ global using ASC.Security.Cryptography;
 global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Studio.Utility;
 global using Autofac;
-global using AutoMapper;
-global using AutoMapper.QueryableExtensions;
 global using Google.Apis.Auth.OAuth2;
 global using MailKit.Security;
+
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;
@@ -151,6 +150,9 @@ global using Polly.Registry;
 global using Polly.Retry;
 
 global using ProtoBuf;
+
+global using Riok.Mapperly.Abstractions;
+
 global using Telegram.Bot;
 global using Textile;
 global using Textile.Blocks;

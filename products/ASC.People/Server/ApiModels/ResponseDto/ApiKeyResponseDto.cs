@@ -24,14 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Common.Mapping;
-
 namespace ASC.People.ApiModels.ResponseDto;
 
 /// <summary>
 /// The response data for the API key operations.
 /// </summary>
-public class ApiKeyResponseDto : IMapFrom<ApiKey>
+public class ApiKeyResponseDto 
 {
     /// <summary>
     /// The API key unique identifier.
@@ -82,36 +80,25 @@ public class ApiKeyResponseDto : IMapFrom<ApiKey>
     /// Indicates whether the API key is active or not.
     /// </summary>
     public bool IsActive { get; set; } = true;
-    
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<ApiKey, ApiKeyResponseDto>()
-            .ConvertUsing<ApiKeyConverter>();
-    }
 }
 
 [Scope]
-public class ApiKeyConverter(ApiDateTimeHelper apiDateTimeHelper,
-                             EmployeeDtoHelper employeeWrapperHelper): ITypeConverter<ApiKey, ApiKeyResponseDto>
-{
-    public ApiKeyResponseDto Convert(ApiKey source, ApiKeyResponseDto destination, ResolutionContext context)
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class ApiKeyMapper(ApiDateTimeHelper apiDateTimeHelper, EmployeeDtoHelper employeeWrapperHelper)
+{       
+    [MapperIgnoreTarget(nameof(ApiKeyResponseDto.LastUsed))]
+    [MapperIgnoreTarget(nameof(ApiKeyResponseDto.CreateOn))]
+    [MapperIgnoreTarget(nameof(ApiKeyResponseDto.CreateBy))]
+    [MapperIgnoreTarget(nameof(ApiKeyResponseDto.ExpiresAt))]
+    private partial ApiKeyResponseDto Map(ApiKey source);
+    
+    public async Task<ApiKeyResponseDto> MapManual(ApiKey source)
     {
-        if (source.Id == Guid.Empty) return new ApiKeyResponseDto();
-              
-        var result = new ApiKeyResponseDto
-        {
-            Id = source.Id,
-            Name = source.Name,
-            Key = source.Key,
-            KeyPostfix = source.KeyPostfix,
-            Permissions = source.Permissions,
-            LastUsed = source.LastUsed.HasValue ? apiDateTimeHelper.Get(source.LastUsed.Value) : null,
-            CreateOn = apiDateTimeHelper.Get(source.CreateOn),
-            CreateBy =  employeeWrapperHelper.GetAsync(source.CreateBy).GetAwaiter().GetResult(),
-            ExpiresAt = source.ExpiresAt.HasValue ? apiDateTimeHelper.Get(source.ExpiresAt.Value) : null,
-            IsActive = source.IsActive,
-        };
-
+        var result = Map(source);
+        result.LastUsed = source.LastUsed.HasValue ? apiDateTimeHelper.Get(source.LastUsed.Value) : null;
+        result.CreateOn = apiDateTimeHelper.Get(source.CreateOn);
+        result.CreateBy =  await employeeWrapperHelper.GetAsync(source.CreateBy);
+        result.ExpiresAt = source.ExpiresAt.HasValue ? apiDateTimeHelper.Get(source.ExpiresAt.Value) : null;
         return result;
     }
 }

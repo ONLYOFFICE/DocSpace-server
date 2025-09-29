@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The user invitation settings.
 /// </summary>
-public class TenantUserInvitationSettingsDto : IMapFrom<TenantUserInvitationSettings>
+public class TenantUserInvitationSettingsDto
 {
     /// <summary>
     /// Specifies whether to allow inviting new DocSpace members through the Contacts section.
@@ -40,4 +40,10 @@ public class TenantUserInvitationSettingsDto : IMapFrom<TenantUserInvitationSett
     /// Specifies whether to allow all DocSpace members to invite external guests to the rooms.
     /// </summary>
     public required bool AllowInvitingGuests { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class TenantUserInvitationSettingsDtoMapper
+{       
+    public static partial TenantUserInvitationSettingsDto Map(this TenantUserInvitationSettings source);
 }

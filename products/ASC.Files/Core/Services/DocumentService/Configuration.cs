@@ -941,7 +941,7 @@ public class CustomizationConfig<T>(
         }
         
         Folder<T> parent;
-        var folderDao = daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetCacheFolderDao<T>();
         var (shareRight, key) = await CheckLinkAsync(file);
         
         if (!authContext.IsAuthenticated)
@@ -960,11 +960,14 @@ public class CustomizationConfig<T>(
         {
 
             parent = await folderDao.GetFolderAsync(file.ParentId);
-            if (file.RootFolderType == FolderType.USER && 
-                !Equals(file.RootId, await globalFolderHelper.FolderMyAsync) && 
-                !await fileSecurity.CanReadAsync(parent))
+            if (file.RootFolderType == FolderType.USER && !Equals(file.RootId, await globalFolderHelper.FolderMyAsync))
             {
-                if (await fileSecurity.CanReadAsync(file))
+                if (!await fileSecurity.CanReadAsync(file))
+                {
+                    return null;
+                }
+
+                if (!string.IsNullOrEmpty(key))
                 {
                     return new GobackConfig
                     {
@@ -972,7 +975,23 @@ public class CustomizationConfig<T>(
                     };
                 }
 
-                return null;
+                string url;
+
+                if (parent.FolderType != FolderType.USER)
+                {
+                    parent.RootFolderType = FolderType.SHARE;
+                    url = pathProvider.GetFolderUrl(parent, key);
+                    parent.RootFolderType = FolderType.USER;
+                }
+                else
+                {
+                    url = pathProvider.GetFolderUrl(await folderDao.GetFolderAsync((T)Convert.ChangeType(await globalFolderHelper.FolderShareAsync, typeof(T))), key);
+                }
+                
+                return new GobackConfig
+                {
+                    Url = url
+                };
             }
 
             if (file.Encrypted && 

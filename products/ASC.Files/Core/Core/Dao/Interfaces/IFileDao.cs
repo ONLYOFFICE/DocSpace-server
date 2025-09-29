@@ -434,6 +434,10 @@ public interface IFileDao<T>
     Task<int> GetFilesByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId);
 
+    Task<int> GetSharedFilesCountAsync(T parentId);
+
+    IAsyncEnumerable<File<T>> GetSharedFilesAsync(T parentId, int offset = 0, int count = -1);
+
     #endregion
 }
 public interface ICacheFileDao<T> : IFileDao<T>;

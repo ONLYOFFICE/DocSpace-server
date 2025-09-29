@@ -162,7 +162,7 @@ public static class Initializer
         
         var fakeMember = _fakerMember.Generate();
         
-        var createMemberResponse = await _peopleFactory.PeopleProfilesApi.AddMemberWithHttpInfoAsync(new DocSpace.API.SDK.Model.MemberRequestDto
+        var createMemberResponse = await _peopleFactory.ProfilesApi.AddMemberWithHttpInfoAsync(new DocSpace.API.SDK.Model.MemberRequestDto
         {
             FromInviteLink = true,
             CultureName = "en-US",
@@ -197,11 +197,13 @@ public static class Initializer
             client.DefaultRequestHeaders.Authorization = null;
             return;
         }
+
+        user.PasswordHash ??= _passwordHasher.GetClientPassword(user.Password);
         
         var authMe = await _apiFactory.AuthenticationApi.AuthenticateMeAsync(new AuthRequestsDto
         {
             UserName = user.Email,
-            PasswordHash = _passwordHasher.GetClientPassword(user.Password)
+            PasswordHash =  user.PasswordHash
         }, TestContext.Current.CancellationToken);
         
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authMe.Response.Token);

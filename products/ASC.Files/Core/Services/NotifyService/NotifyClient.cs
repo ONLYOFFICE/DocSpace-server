@@ -140,6 +140,11 @@ public class NotifyClient(WorkContext notifyContext,
 
         foreach (var recipientPair in recipients)
         {
+            if (!await studioNotifyHelper.IsSubscribedToNotifyAsync(recipientPair.Key, Actions.RoomsActivity))
+            {
+                continue;
+            }
+
             var u = await userManager.GetUsersAsync(recipientPair.Key);
             CultureInfo userCulture;
 
@@ -164,7 +169,7 @@ public class NotifyClient(WorkContext notifyContext,
                 new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(url)),
                 new TagValue(NotifyConstants.TagDocumentExtension, fileExtension),
                 new TagValue(NotifyConstants.TagAccessRights, aceString),
-                new TagValue(NotifyConstants.TagMessage, message.HtmlEncode()),
+                new TagValue(NotifyConstants.TagMessage, message == null ? string.Empty : message.HtmlEncode()),
                 new TagValue(NotifyConstants.TagFolderID, folder.Id),
                 new TagValue(NotifyConstants.TagFolderParentId, folder.RootId),
                 new TagValue(NotifyConstants.TagFolderRootFolderType, folder.RootFolderType),

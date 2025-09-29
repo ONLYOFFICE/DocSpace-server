@@ -88,16 +88,30 @@ public class BreadCrumbsManager(
         {
             return [];
         }
+        
+        List<FileEntry> breadCrumbs = [];
+        var i = 0;
+        var folderDaoInt = daoFactory.GetFolderDao<int>();
+        var parents = folderDao.GetParentFoldersAsync(folderId);
+        await foreach (var e in fileSecurity.CanReadAsync(parents.Where(f => f != null)))
+        {
+            if (e.Item2)
+            {
+                breadCrumbs.Add(e.Item1);
+            }
+            else if(i == 0 && e.Item1 is Folder<T> { FolderType: FolderType.USER } folder && folder.CreateBy != authContext.CurrentAccount.ID)
+            {
+                breadCrumbs.Add(await folderDaoInt.GetFolderAsync(await globalFolderHelper.FolderShareAsync));
+            }
 
-        var breadCrumbs = await fileSecurity.FilterReadAsync(folderDao.GetParentFoldersAsync(folderId)).Cast<FileEntry>().ToListAsync();
+            i++;
+        }
+
         var firstVisible = breadCrumbs.ElementAtOrDefault(0) as Folder<T>;
 
         var rootId = 0;
-        if (firstVisible == null)
-        {
-            rootId = await globalFolderHelper.FolderShareAsync;
-        }
-        else if (firstVisible.ProviderMapped && (firstVisible.RootFolderType is FolderType.VirtualRooms or FolderType.Archive))
+
+        if (firstVisible is { ProviderMapped: true, RootFolderType: FolderType.VirtualRooms or FolderType.Archive })
         {
             if (authContext.IsAuthenticated)
             {
@@ -108,9 +122,7 @@ public class BreadCrumbsManager(
                 
             breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
         }
-
-        var folderDaoInt = daoFactory.GetFolderDao<int>();
-
+        
         if (rootId != 0)
         {
             breadCrumbs.Insert(0, await folderDaoInt.GetFolderAsync(rootId));
@@ -142,11 +154,13 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsTask = tagDao.GetTagsAsync([TagType.Locked, TagType.Favorite], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync());
+        var tagsTask = tagDao.GetTagsAsync([TagType.Locked], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync());
+        var tagsFavoriteTask = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Favorite], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync());
         var tagsNewTask = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, files).ToListAsync();
 
         var tags = await tagsTask;
         var tagsNew = await tagsNewTask;
+        var tagsFavorite = await tagsFavoriteTask;
 
         var spreadsheets = files.Where(file =>
             file.RootFolderType == FolderType.VirtualRooms &&
@@ -159,26 +173,20 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         foreach (var file in files)
         {
-            var fileTags = await tags.GetValueOrDefault(file.Id);
-
-            if (fileTags != null)
+            var fileLockedTags = await tags.GetValueOrDefault(file.Id);
+            var lockedTag = fileLockedTags?.FirstOrDefault(r => r.Type == TagType.Locked);
+            if (lockedTag != null)
             {
-                if (fileTags.Any(r => r.Type == TagType.Favorite))
-                {
-                    file.IsFavorite = true;
-                }
-
-                var lockedTag = fileTags.FirstOrDefault(r => r.Type == TagType.Locked);
-                if (lockedTag != null)
-                {
-                    var lockedBy = lockedTag.Owner;
-                    file.Locked = lockedBy != Guid.Empty;
-                    file.LockedBy = lockedBy != Guid.Empty && lockedBy != authContext.CurrentAccount.ID
-                        ? await global.GetUserNameAsync(lockedBy)
-                        : null;
-                }
+                var lockedBy = lockedTag.Owner;
+                file.Locked = lockedBy != Guid.Empty;
+                file.LockedBy = lockedBy != Guid.Empty && lockedBy != authContext.CurrentAccount.ID
+                    ? await global.GetUserNameAsync(lockedBy)
+                    : null;
             }
-
+            
+            var fileFavoriteTags = await tagsFavorite.GetValueOrDefault(file.Id);
+            file.IsFavorite = fileFavoriteTags?.FirstOrDefault(r => r.Type == TagType.Favorite) != null;
+            
             if (tagsNew.Exists(r => r.EntryId.Equals(file.Id)))
             {
                 file.IsNew = true;
@@ -401,7 +409,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var userId = authContext.CurrentAccount.ID;
 
             total = 0;
-            var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent, TagType.RecentByLink], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, 0, new OrderBy(SortedByType.LastOpened, false), from, count);
+            var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, 0, new OrderBy(SortedByType.LastOpened, false), from, count);
             
             await foreach (var e in fileSecurity.CanReadAsync(files).Where(r=> r.Item2).Select(t=> t.Item1))
             {
@@ -420,7 +428,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var folderDao = daoFactory.GetFolderDao<T>();
             var fileDao = daoFactory.GetFileDao<T>();
             var userId = authContext.CurrentAccount.ID;
-
+            
             var trashId = await globalFolderHelper.FolderTrashAsync;
             var allFoldersCountTask = await folderDao.GetFoldersByTagCountAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId);
             var allFilesCountTask = await fileDao.GetFilesByTagCountAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId);
@@ -1841,22 +1849,17 @@ public class EntryManager(IDaoFactory daoFactory,
         var userId = authContext.CurrentAccount.ID;
         if (linkId != Guid.Empty && file.CreateBy != userId)
         {
-            var marked = await fileMarker.MarkAsRecentByLink(file, linkId.Value);
-            if (marked != MarkResult.NotMarked)
-            {
-                await socketManager.AddFileToRecentAsync(file, [userId]);
-            }
+            await fileMarker.MarkAsRecentByLink(file, linkId.Value);
+            await socketManager.AddToSharedAsync(file, [userId]);
         }
-        else
-        {
-            var tagDao = daoFactory.GetTagDao<T>();
 
-            var tag = Tag.Recent(userId, file);
+        var tagDao = daoFactory.GetTagDao<T>();
 
-            await tagDao.SaveTagsAsync(tag, userId);
-            
-            await socketManager.AddFileToRecentAsync(file, [userId]);
-        }
+        var tag = Tag.Recent(userId, file);
+
+        await tagDao.SaveTagsAsync(tag, userId);
+        
+        await socketManager.AddToRecentAsync(file, [userId]);
     }
 
     private async Task InitFormFillingFolders<T>(File<T> file, Folder<T> folder, EntryProperties<T> properties, IFolderDao<T> folderDao, IFileDao<T> fileDao, Guid createBy) {
@@ -2085,7 +2088,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     await fileMarker.RemoveMarkAsNewForAllAsync(file);
                     await linkDao.DeleteAllLinkAsync(file.Id);
                     
-                    await socketManager.RemoveFileFromRecentAsync(file, [authContext.CurrentAccount.ID]);
+                    await socketManager.RemoveFromRecentAsync(file, [authContext.CurrentAccount.ID]);
                     
                     if (!result.Encrypted && !result.ProviderEntry && await fileSecurity.CanReadAsync(result))
                     {
@@ -2290,8 +2293,8 @@ public class EntryManager(IDaoFactory daoFactory,
         var folderDao = daoFactory.GetFolderDao<T>();
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, file.Id, TagType.Recent, TagType.RecentByLink).ToDictionaryAsync(k => k.EntryId, v => v);
-        if (tags.Any(r => r.Value.Type == TagType.RecentByLink))
+        var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, file.Id, TagType.Recent, TagType.RecentByLink).ToListAsync();
+        if (tags.Any(r => Equals(r.EntryId, file.Id) && r.Type == TagType.RecentByLink))
         {
             return;
         }

@@ -93,7 +93,7 @@ public class FileSecurityInfoSimpleRequestDto<T>
     /// The parameters of the security information simple request.
     /// </summary>
     [FromBody]
-    public required SecurityInfoSimpleRequestDto SecurityInfoSimpe { get; set; }
+    public required SecurityInfoSimpleRequestDto SecurityInfoSimple { get; set; }
 }
 
 /// <summary>
@@ -111,5 +111,5 @@ public class FolderSecurityInfoSimpleRequestDto<T>
     /// The parameters of the security information simple request.
     /// </summary>
     [FromBody]
-    public required SecurityInfoSimpleRequestDto SecurityInfoSimpe { get; set; }
+    public required SecurityInfoSimpleRequestDto SecurityInfoSimple { get; set; }
 }

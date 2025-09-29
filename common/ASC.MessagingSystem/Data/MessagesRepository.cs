@@ -30,7 +30,8 @@ namespace ASC.MessagingSystem.Data;
 public class MessagesRepository(
     IServiceScopeFactory serviceScopeFactory,
     ILogger<MessagesRepository> logger,
-    IMapper mapper,
+    DbLoginEventMapper loginEventMapper,
+    DbAuditEventMapper auditEventMapper,
     IEventBus eventBus)
 {
     private static readonly HashSet<MessageAction> _forceSaveAuditActions = 
@@ -103,7 +104,7 @@ public class MessagesRepository(
 
     private async Task<int> AddLoginEventAsync(EventMessage message, MessagesContext dbContext)
     {
-        var loginEvent = mapper.Map<EventMessage, DbLoginEvent>(message);
+        var loginEvent = loginEventMapper.MapManual(message);
 
         await dbContext.LoginEvents.AddAsync(loginEvent);
         await dbContext.SaveChangesAsync();
@@ -113,7 +114,7 @@ public class MessagesRepository(
 
     private async Task<int> AddAuditEventAsync(EventMessage message, MessagesContext dbContext, HistorySocketManager historySocketManager)
     {
-        var auditEvent = mapper.Map<EventMessage, DbAuditEvent>(message);
+        var auditEvent = auditEventMapper.MapManual(message);
 
         await dbContext.AuditEvents.AddAsync(auditEvent);
         await dbContext.SaveChangesAsync();
@@ -173,10 +174,11 @@ public class EventDataIntegrationEventHandler : IIntegrationEventHandler<EventDa
 
 public class MessageSenderService(
     IServiceScopeFactory serviceScopeFactory, 
-    ILogger<MessagesRepository> logger, 
-    IMapper mapper,
+    ILogger<MessagesRepository> logger,
     ChannelReader<EventData> channelReader,
-    IConfiguration configuration
+    IConfiguration configuration,
+    DbLoginEventMapper loginEventMapper,
+    DbAuditEventMapper auditEventMapper
 ) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -229,12 +231,12 @@ public class MessageSenderService(
                                 // messages with action code < 2000 are related to login-history
                                 if ((int)message.Action < 2000)
                                 {
-                                    var loginEvent = mapper.Map<EventMessage, DbLoginEvent>(message);
+                                    var loginEvent = loginEventMapper.MapManual(message);
                                     await ef.LoginEvents.AddAsync(loginEvent, stoppingToken);
                                 }
                                 else
                                 {
-                                    var auditEvent = mapper.Map<EventMessage, DbAuditEvent>(message);
+                                    var auditEvent = auditEventMapper.MapManual(message);
                                     await ef.AuditEvents.AddAsync(auditEvent, stoppingToken);
                                     
                                     if (auditEvent.FilesReferences is { Count: > 0 })

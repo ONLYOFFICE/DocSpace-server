@@ -70,7 +70,7 @@ public class ConfigurationDto<T>
     /// <summary>
     /// The file parameters.
     /// </summary>
-    public FileDto<T> File { get; set; }
+    public required FileDto<T> File { get; set; }
 
     /// <summary>
     /// The error message.
@@ -476,6 +476,7 @@ public class ConfigurationConverter<T>(
             return null;
         }
 
+        var fileDto = await fileDtoHelper.GetAsync(file);
         var result = new ConfigurationDto<T>
         {
             Document = await documentConfigConverter.Convert(source.Document, file),
@@ -483,7 +484,8 @@ public class ConfigurationConverter<T>(
             EditorConfig = await editorConfigurationConverter.Convert(source, file),
             EditorType = source.EditorType,
             EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl),
-            ErrorMessage = source.Error
+            ErrorMessage = source.Error,
+            File = fileDto
         };
         
         result.EditorUrl = FilesLinkUtility.AddQueryString(result.EditorUrl, new Dictionary<string, string> {
@@ -491,7 +493,6 @@ public class ConfigurationConverter<T>(
         });
 
         result.Token = documentServiceHelper.GetSignature(result);
-        result.File = await fileDtoHelper.GetAsync(file);
         result.Type = source.Type;
 
         if (source.EditorType == EditorType.Embedded)

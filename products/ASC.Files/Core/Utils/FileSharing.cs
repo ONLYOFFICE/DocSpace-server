@@ -132,11 +132,11 @@ public class FileSharingAceHelper(
                     continue;
                 }
 
-                if (!(await fileSecurity.GetFileAccesses(file, w.SubjectType)).Contains(new KeyValuePair<string,bool>(w.Access.ToStringFast(), true)))
+                var fileAccesses = await fileSecurity.GetAccesses(file);
+                if (fileAccesses == null || !fileAccesses.TryGetValue(w.SubjectType, out var access) || !access.Contains(w.Access))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
-
             }
             
             if (room != null)
@@ -166,8 +166,9 @@ public class FileSharingAceHelper(
                 }
             } 
             else if(folder != null)
-            {
-                if (!(await fileSecurity.GetFolderAccesses(folder, w.SubjectType)).Contains(new KeyValuePair<string,bool>(w.Access.ToStringFast(), true)))
+            {  
+                var folderAccesses = await fileSecurity.GetAccesses(folder);
+                if (folderAccesses == null || !folderAccesses.TryGetValue(w.SubjectType, out var access) || !access.Contains(w.Access))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
@@ -351,7 +352,7 @@ public class FileSharingAceHelper(
             }
 
             changed = true;
-            handledAces.Add(new ProcessedItem<T>(eventType, existedShare, w));
+            handledAces.Add(new ProcessedItem<T>(eventType, existedShare, w, file != null ? file : folder));
 
             if (emailInvite)
             {
@@ -426,10 +427,18 @@ public class FileSharingAceHelper(
             await documentServiceHelper.CheckUsersForDropAsync((File<T>)entry);
         }
 
-        if (recipients.Count > 0)
-        {
-            if (entry.RootFolderType is FolderType.USER or FolderType.Privacy
-                && notify)
+        if (recipients.Count > 0 && entry.RootFolderType is FolderType.USER or FolderType.Privacy)
+        {                
+            var recipientIds = recipients.Keys.ToList();
+            
+            if (file != null || (folder != null && folder.FoldersCount + folder.FilesCount > 0) || entry.ProviderEntry)
+            {
+                await fileMarker.MarkAsNewAsync(entry, recipientIds);
+            }
+            
+            await socketManager.AddToSharedAsync(entry, users: recipientIds);
+            
+            if (notify)
             {
                 await notifyClient.SendShareNoticeAsync(entry, recipients, message, culture);
             }
@@ -438,6 +447,11 @@ public class FileSharingAceHelper(
         foreach (var userId in usersWithoutRight)
         {
             await fileMarker.RemoveMarkAsNewAsync(entry, userId);
+        }
+
+        if (usersWithoutRight.Count > 0 && entry.RootFolderType is FolderType.USER or FolderType.Privacy)
+        {
+            await socketManager.RemoveFromSharedAsync(entry, users: usersWithoutRight);
         }
 
         return new AceProcessingResult<T>(changed, warning, handledAces);
@@ -464,6 +478,16 @@ public class FileSharingAceHelper(
         }
 
         await fileMarker.RemoveMarkAsNewAsync(entry);
+
+        var currentId = authContext.CurrentAccount.ID;
+        await daoFactory.GetTagDao<T>().RemoveTagsAsync([Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry)]);
+        await socketManager.RemoveFromFavoritesAsync(entry, [currentId]);
+        await socketManager.RemoveFromRecentAsync(entry, [currentId]);
+        
+        if (entry.RootFolderType is FolderType.USER or FolderType.Privacy)
+        { 
+            await socketManager.RemoveFromSharedAsync(entry, users: [currentId]);
+        }
     }
 }
 
@@ -474,7 +498,6 @@ public class FileSharingHelper(
     FileSecurity fileSecurity,
     AuthContext authContext,
     UserManager userManager)
-
 {
     public async Task<bool> CanSetAccessAsync<T>(FileEntry<T> entry)
     {
@@ -846,7 +869,7 @@ public class FileSharing(
 
     public async Task<List<AceShortWrapper>> GetSharedInfoShortFileAsync<T>(File<T> file)
     {
-        var aces = await GetSharedInfoAsync(new List<T> { file.Id }, new List<T>());
+        var aces = await GetSharedInfoAsync([file.Id], []);
         var inRoom = file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive;
         
         return
@@ -1026,7 +1049,7 @@ public class FileSharing(
 }
 
 public record AceProcessingResult<T>(bool Changed, string Warning, List<ProcessedItem<T>> ProcessedItems);
-public record ProcessedItem<T>(EventType EventType, FileShareRecord<T> PastRecord, AceWrapper Ace);
+public record ProcessedItem<T>(EventType EventType, FileShareRecord<T> PastRecord, AceWrapper Ace, FileEntry<T> Entry);
 
 public enum EventType
 {
