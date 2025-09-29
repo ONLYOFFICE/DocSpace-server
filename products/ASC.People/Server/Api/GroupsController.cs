@@ -55,7 +55,7 @@ public class GroupController(
     /// <remarks>
     /// This method returns partial group information.
     /// </remarks>
-    /// <path>api/2.0/groups</path>
+    /// <path>api/2.0/group</path>
     /// <collection>list</collection>
     [Tags("Group")]
     [SwaggerResponse(200, "List of groups", typeof(IAsyncEnumerable<GroupDto>))]
@@ -95,7 +95,7 @@ public class GroupController(
     /// <remarks>
     /// This method returns full group information.
     /// </remarks>
-    /// <path>api/2.0/groups/{id}</path>
+    /// <path>api/2.0/group/{id}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [SwaggerResponse(404, "Group not found")]
@@ -113,7 +113,7 @@ public class GroupController(
     /// <short>
     /// Get user groups
     /// </short>
-    /// <path>api/2.0/groups/user/{userid}</path>
+    /// <path>api/2.0/group/user/{userid}</path>
     /// <collection>list</collection>
     [Tags("Group")]
     [SwaggerResponse(200, "List of groups", typeof(IEnumerable<GroupSummaryDto>))]
@@ -138,7 +138,7 @@ public class GroupController(
     /// <short>
     /// Add a new group
     /// </short>
-    /// <path>api/2.0/groups</path>
+    /// <path>api/2.0/group</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Newly created group with the detailed information", typeof(GroupDto))]
     [HttpPost]
@@ -175,7 +175,7 @@ public class GroupController(
     /// <short>
     /// Update a group
     /// </short>
-    /// <path>api/2.0/groups/{id}</path>
+    /// <path>api/2.0/group/{id}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Updated group with the detailed information", typeof(GroupDto))]
     [SwaggerResponse(404, "Group not found")]
@@ -224,7 +224,7 @@ public class GroupController(
     /// <short>
     /// Delete a group
     /// </short>
-    /// <path>api/2.0/groups/{id}</path>
+    /// <path>api/2.0/group/{id}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "No content", typeof(NoContentResult))]
     [SwaggerResponse(404, "Group not found")]
@@ -253,7 +253,7 @@ public class GroupController(
     /// <short>
     /// Move group members
     /// </short>
-    /// <path>api/2.0/groups/{fromId}/members/{toId}</path>
+    /// <path>api/2.0/group/{fromId}/members/{toId}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [SwaggerResponse(404, "Group not found")]
@@ -281,7 +281,7 @@ public class GroupController(
     /// <short>
     /// Replace group members
     /// </short>
-    /// <path>api/2.0/groups/{id}/members</path>
+    /// <path>api/2.0/group/{id}/members</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [HttpPost("{id:guid}/members")]
@@ -299,7 +299,7 @@ public class GroupController(
     /// <short>
     /// Add group members
     /// </short>
-    /// <path>api/2.0/groups/{id}/members</path>
+    /// <path>api/2.0/group/{id}/members</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [SwaggerResponse(404, "Group not found")]
@@ -324,7 +324,7 @@ public class GroupController(
     /// <short>
     /// Set a group manager
     /// </short>
-    /// <path>api/2.0/groups/{id}/manager</path>
+    /// <path>api/2.0/group/{id}/manager</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [SwaggerResponse(404, "User not found")]
@@ -351,7 +351,7 @@ public class GroupController(
     /// <short>
     /// Remove group members
     /// </short>
-    /// <path>api/2.0/groups/{id}/members</path>
+    /// <path>api/2.0/group/{id}/members</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [SwaggerResponse(404, "Group not found")]
