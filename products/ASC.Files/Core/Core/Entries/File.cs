@@ -316,11 +316,6 @@ public class File<T> : FileEntry<T>
     public ForcesaveType Forcesave { get; set; }
     
     /// <summary>
-    /// Parent room title.
-    /// </summary>
-    public string Location { get; set; }
-    
-    /// <summary>
     /// The file converted type.
     /// </summary>
     public string ConvertedType { get; set; }

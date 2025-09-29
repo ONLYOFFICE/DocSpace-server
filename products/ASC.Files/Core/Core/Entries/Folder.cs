@@ -296,6 +296,8 @@ public class Folder<T> : FileEntry<T>, IFolder
 public partial class FolderMapper(IServiceProvider serviceProvider, TenantDateTimeConverter tenantDateTimeConverter, FilesMappingAction filesMappingAction)
 {
     private partial Folder<int> Map(DbFolderQuery source);
+    
+    [MapperIgnoreSource(nameof(DbFolder.Settings))]
     private partial void ApplyChanges(DbFolder source, Folder<int> target);
     
     [UserMapping(Default = true)]
