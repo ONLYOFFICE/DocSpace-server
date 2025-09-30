@@ -430,22 +430,40 @@ public class EntryManager(IDaoFactory daoFactory,
             var userId = authContext.CurrentAccount.ID;
             
             var trashId = await globalFolderHelper.FolderTrashAsync;
-            var allFoldersCountTask = await folderDao.GetFoldersByTagCountAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId);
-            var allFilesCountTask = await fileDao.GetFilesByTagCountAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId);
+            total = 0;
+
+            var allFoldersCountTask = 0;
+            var foldersFromDb = folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, orderBy, from, count);
+            List<Folder<T>> folders = [];
             
-            var folders = await folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, orderBy, from, count).ToListAsync();
+            await foreach (var e in fileSecurity.CanReadAsync(foldersFromDb).Where(r=> r.Item2).Select(t=> t.Item1))
+            {
+                total++;
+                allFoldersCountTask++;
+                
+                if (total > from && total <= from + count)
+                {
+                    folders.Add((Folder<T>)e);
+                    entries.Add(e);
+                }
+            }
             
             var filesCount = count - folders.Count;
             var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - allFoldersCountTask, 0);
+
+            var filesFromDb = fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, orderBy, filesOffset, filesCount);
+            List<File<T>> files = [];
             
-            var files = await fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, orderBy, filesOffset, filesCount).ToListAsync();
-            
-            entries = new List<FileEntry>(folders.Count + files.Count);
-            entries.AddRange(folders);
-            entries.AddRange(files);
-            
-            total = allFoldersCountTask + allFilesCountTask;
-            CalculateTotal();
+            await foreach (var e in fileSecurity.CanReadAsync(filesFromDb).Where(r=> r.Item2).Select(t=> t.Item1))
+            {
+                total++;
+
+                if (total > from && total <= from + count)
+                {                    
+                    files.Add((File<T>)e);
+                    entries.Add(e);
+                }
+            }
             
             var setFilesStatus = entryStatusManager.SetFileStatusAsync(files);
             var setFavorites = entryStatusManager.SetIsFavoriteFoldersAsync(folders);
