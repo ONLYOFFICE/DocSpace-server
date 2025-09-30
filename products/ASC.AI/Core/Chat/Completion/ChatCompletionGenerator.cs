@@ -29,7 +29,7 @@ namespace ASC.AI.Core.Chat.Completion;
 public class ChatCompletionGenerator(
     IChatClient client,
     ILogger<ChatCompletionGenerator> logger,
-    ChatSocketClient chatSocketClient,
+    SocketManager socketManager,
     List<ChatMessage> messages,
     ChatHistory chatHistory,
     ChatNameGenerator chatNameGenerator,
@@ -40,8 +40,10 @@ public class ChatCompletionGenerator(
         var responses = new List<ChatResponseUpdate>();
         var enumerator = client.GetStreamingResponseAsync(messages, cancellationToken: cancellationToken)
             .GetAsyncEnumerator(cancellationToken);
+
+        var started = false;
         
-        Task<string?>? titleGenerationTask = null;
+        Task? titleUpdateTask = null;
         
         while (true)
         {
@@ -80,12 +82,28 @@ public class ChatCompletionGenerator(
                         context.Message!,
                         context.Attachments);
                     
-                    titleGenerationTask = chatNameGenerator.GenerateAsync(context);
-                    
+                    titleUpdateTask = Task.Run(async () =>
+                    {
+                        var title = await chatNameGenerator.GenerateAsync(context);
+                        if (!string.IsNullOrEmpty(title))
+                        {
+                            await chatHistory.UpdateChatTitleAsync(context.TenantId, context.Chat.Id, title);
+                            
+                            context.Chat.Title = title;
+                            
+                            await socketManager.UpdateChatAsync(context.Room, context.Chat.Id, title, context.UserId);
+                        }
+                    }, cancellationToken: CancellationToken.None);
+                }
+
+                if (!started)
+                {
                     yield return new MessageStartCompletion
                     {
                         ChatId = context.Chat.Id
                     };
+                    
+                    started = true;
                 }
 
                 responses.Add(response);
@@ -138,19 +156,15 @@ public class ChatCompletionGenerator(
         var chatResponse = responses.ToChatResponse();
 
         var messageId = await chatHistory.AddAssistantMessagesAsync(context.Chat!.Id, chatResponse.Messages);
-        if (titleGenerationTask != null)
-        {
-            var title = await titleGenerationTask;
-            if (!string.IsNullOrEmpty(title))
-            {
-                await chatHistory.UpdateChatTitleAsync(context.TenantId, context.Chat.Id, title);
-                context.Chat.Title = title;
-            }
-        }
         
         if (messageId > 0)
         {
-            await chatSocketClient.CommitMessageAsync(context.Chat.Id, messageId);
+            await socketManager.CommitMessageAsync(context.Chat.Id, messageId);
+        }
+        
+        if (titleUpdateTask != null)
+        {
+            await titleUpdateTask;
         }
 
         yield return new MessageStopCompletion
