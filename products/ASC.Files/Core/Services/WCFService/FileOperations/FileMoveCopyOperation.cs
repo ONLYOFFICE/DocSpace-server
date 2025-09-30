@@ -958,7 +958,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     await fileDao.SaveProperties(newFile.Id, properties);
                                 }
                                 
-                                await entryManager.MarkAsRecent(newFile);
+                                //await entryManager.MarkAsRecent(newFile);
                                 await socketManager.CreateFileAsync(newFile);
 
                                 if (ProcessedFile(fileId))
@@ -998,10 +998,10 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 await filesMessageService.SendMoveMessageAsync(newFile, parentFolder, toFolder, toParentFolders, false, _headers, [file.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
                                 await webhookManager.PublishAsync(parentFolder.FolderType == FolderType.TRASH ? WebhookTrigger.FileRestored : WebhookTrigger.FileMoved, newFile);
                                 
-                                if (newFile.RootFolderType != FolderType.TRASH)
-                                {
-                                    await entryManager.MarkAsRecent(newFile);
-                                }
+                                // if (newFile.RootFolderType != FolderType.TRASH)
+                                // {
+                                //     await entryManager.MarkAsRecent(newFile);
+                                // }
                                 
                                 if (file.RootFolderType == FolderType.TRASH && newFile.ThumbnailStatus == Thumbnail.NotRequired)
                                 {
@@ -1158,7 +1158,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 }
 
                                 await socketManager.CreateFileAsync(newFile);
-                                await entryManager.MarkAsRecent(newFile);
+                                //await entryManager.MarkAsRecent(newFile);
                                 
                                 if (copy)
                                 {

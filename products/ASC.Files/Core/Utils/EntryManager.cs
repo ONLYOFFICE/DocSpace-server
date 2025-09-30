@@ -2090,10 +2090,10 @@ public class EntryManager(IDaoFactory daoFactory,
                     
                     await socketManager.RemoveFromRecentAsync(file, [authContext.CurrentAccount.ID]);
                     
-                    if (!result.Encrypted && !result.ProviderEntry && await fileSecurity.CanReadAsync(result))
-                    {
-                        await MarkAsRecent(result);
-                    }
+                    // if (!result.Encrypted && !result.ProviderEntry && await fileSecurity.CanReadAsync(result))
+                    // {
+                    //     await MarkAsRecent(result);
+                    // }
                 }
             }
             catch (Exception ex)
