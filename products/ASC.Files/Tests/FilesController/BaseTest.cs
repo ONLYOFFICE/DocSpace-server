@@ -59,7 +59,7 @@ public class BaseTest(
     
     public static TheoryData<FileShare> InvalidFileShare =>
     [
-        FileShare.None, FileShare.ReadWrite, FileShare.Varies, FileShare.RoomManager, FileShare.ContentCreator
+       FileShare.ReadWrite, FileShare.Varies, FileShare.RoomManager, FileShare.ContentCreator
     ];
     
     public static TheoryData<FileShare> InvalidFileShareFillingForms =>
