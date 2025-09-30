@@ -63,7 +63,7 @@ public class ChatNameGenerator(
     public async Task<string?> GenerateAsync(ChatExecutionContext context)
     {
         ArgumentNullException.ThrowIfNull(context.UserMessage);
-        ArgumentException.ThrowIfNullOrEmpty(context.Message);
+        ArgumentException.ThrowIfNullOrEmpty(context.RawMessage);
         
         try
         {

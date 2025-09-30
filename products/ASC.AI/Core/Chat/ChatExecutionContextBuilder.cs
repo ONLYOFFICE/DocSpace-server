@@ -104,7 +104,7 @@ public class ChatExecutionContext : IAsyncDisposable
     public required UserChatSettings ChatSettings { get; init; }
     public required ToolHolder Tools { get; init; }
     public ChatMessage? UserMessage { get; set; }
-    public string? Message { get; set; }
+    public string RawMessage { get; set; } = string.Empty;
     public List<AttachmentMessageContent> Attachments { get; set; } = [];
     public ChatSession? Chat { get; set; }
 

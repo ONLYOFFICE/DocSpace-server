@@ -72,32 +72,42 @@ public class ChatCompletionGenerator(
 
             if (!errorCaptured)
             {
-                if (context.Chat == null)
-                {
-                    context.Chat = await chatHistory.AddChatAsync(
-                        context.TenantId,
-                        context.Room.Id,
-                        context.UserId,
-                        chatNameGenerator.Generate(context.Message!),
-                        context.Message!,
-                        context.Attachments);
-                    
-                    titleUpdateTask = Task.Run(async () =>
-                    {
-                        var title = await chatNameGenerator.GenerateAsync(context);
-                        if (!string.IsNullOrEmpty(title))
-                        {
-                            await chatHistory.UpdateChatTitleAsync(context.TenantId, context.Chat.Id, title);
-                            
-                            context.Chat.Title = title;
-                            
-                            await socketManager.UpdateChatAsync(context.Room, context.Chat.Id, title, context.UserId);
-                        }
-                    }, cancellationToken: CancellationToken.None);
-                }
-
                 if (!started)
                 {
+                    if (context.Chat == null)
+                    {
+                        var tempTitle = chatNameGenerator.Generate(context.RawMessage);
+                    
+                        context.Chat = await chatHistory.AddChatAsync(
+                            context.TenantId,
+                            context.Room.Id,
+                            context.UserId,
+                            tempTitle,
+                            context.RawMessage,
+                            context.Attachments);
+                    
+                        titleUpdateTask = Task.Run(async () =>
+                        {
+                            var title = await chatNameGenerator.GenerateAsync(context);
+                            if (!string.IsNullOrEmpty(title))
+                            {
+                                await chatHistory.UpdateChatTitleAsync(context.TenantId, context.Chat.Id, title);
+                            
+                                context.Chat.Title = title;
+                            
+                                await socketManager.UpdateChatAsync(context.Room, context.Chat.Id, title, context.UserId);
+                            }
+                        }, cancellationToken: CancellationToken.None);
+                    }
+                    else
+                    {
+                        await chatHistory.UpdateChatAsync(
+                            context.TenantId, 
+                            context.Chat.Id, 
+                            context.RawMessage, 
+                            context.Attachments);
+                    }
+                    
                     yield return new MessageStartCompletion
                     {
                         ChatId = context.Chat.Id

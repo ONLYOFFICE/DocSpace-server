@@ -59,7 +59,7 @@ public class ChatCompletionRunner(
         };
         
         context.UserMessage = userMessage;
-        context.Message = message;
+        context.RawMessage = message;
         
         var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
         
@@ -92,7 +92,7 @@ public class ChatCompletionRunner(
         var userMessage = FormatUserMessage(message, attachments);
         
         context.UserMessage = userMessage;
-        context.Message = message;
+        context.RawMessage = message;
         
         var system = ChatPromptTemplate.GetPrompt(context.Instruction, context.ContextFolderId, context.Room.Id);
         
