@@ -970,6 +970,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Folder Downloaded: {0}.
+        /// </summary>
+        public static string FolderDownloaded {
+            get {
+                return ResourceManager.GetString("FolderDownloaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Folders [{0}]. External link created: {1}. Role: {2}.
         /// </summary>
         public static string FolderExternalLinkCreated {
