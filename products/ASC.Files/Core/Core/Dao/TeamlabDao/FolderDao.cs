@@ -1784,11 +1784,13 @@ internal class FolderDao(
                         where f.TenantId == r.TenantId
                         select f
                     ).FirstOrDefault(),
-                Shared = filesDbContext.Security.Any(x => 
-                    x.TenantId == r.TenantId && 
-                    ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder))),
+                UserShared = filesDbContext.Security.Where(x => 
+                        x.TenantId == r.TenantId && 
+                        x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder)
+                    .Select(s => s.SubjectType).ToList(),
                 ParentShared = filesDbContext.Security.Any(x => 
                     x.TenantId == r.TenantId && 
+                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                     x.EntryType == FileEntryType.Folder && 
                     filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                 Order = (
@@ -2211,7 +2213,7 @@ public class DbFolderQuery
     public DbFolder Folder { get; init; }
     public DbFolder Root { get; set; }
     public DbRoomSettings Settings { get; set; }
-    public bool Shared { get; set; }
+    public List<SubjectType> UserShared { get; set; }
     public bool ParentShared { get; set; }
     public int Order { get; set; }
     

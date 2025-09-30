@@ -313,6 +313,13 @@ public partial class FolderMapper(IServiceProvider serviceProvider, TenantDateTi
         result.CreateOn = tenantDateTimeConverter.Convert(dbFolderQuery.Folder.CreateOn);
         result.ModifiedOn = tenantDateTimeConverter.Convert(dbFolderQuery.Folder.ModifiedOn);
         filesMappingAction.Process(result);
+        
+        if (dbFolderQuery.UserShared != null)
+        {
+            result.Shared = dbFolderQuery.UserShared.Any(r => r is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
+            result.SharedForUser = dbFolderQuery.UserShared.Any(r => r is SubjectType.Group or SubjectType.User);
+        }
+
         return result;
     }
     

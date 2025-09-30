@@ -2304,11 +2304,13 @@ internal class FileDao(
                         where f.TenantId == r.TenantId
                         select f
                     ).FirstOrDefault(),
-                Shared = filesDbContext.Security.Any(x => 
+                UserShared = filesDbContext.Security.Where(x => 
                     x.TenantId == r.TenantId && 
-                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
+                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File)
+                    .Select(s => s.SubjectType).ToList(),
                 ParentShared = filesDbContext.Security.Any(x => 
                     x.TenantId == r.TenantId && 
+                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                     x.EntryType == FileEntryType.Folder && 
                     filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                 Order = (
@@ -2777,10 +2779,10 @@ public class DbFileQuery
 {
     public DbFile File { get; init; }
     public DbFolder Root { get; set; }
-    public bool Shared { get; set; }
     public bool ParentShared { get; set; }
     public int Order { get; set; }
-    
+   
+    public List<SubjectType> UserShared { get; set; }
     public DbFolder Origin { get; set; }
     public DbFolder OriginRoom { get; set; }
     public DbFilesSecurity SharedRecord { get; set; }
