@@ -368,11 +368,9 @@ static file class FileQueries
                             ).FirstOrDefault(),
                         Shared = ctx.Security.Any(x => 
                             x.TenantId == r.TenantId && 
-                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                             x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
                         ParentShared = ctx.Security.Any(x => 
                             x.TenantId == r.TenantId && 
-                            (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                             x.EntryType == FileEntryType.Folder && 
                             ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                         Order = (

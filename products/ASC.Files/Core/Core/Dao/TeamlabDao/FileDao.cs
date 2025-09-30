@@ -2306,11 +2306,9 @@ internal class FileDao(
                     ).FirstOrDefault(),
                 Shared = filesDbContext.Security.Any(x => 
                     x.TenantId == r.TenantId && 
-                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                     x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
                 ParentShared = filesDbContext.Security.Any(x => 
                     x.TenantId == r.TenantId && 
-                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                     x.EntryType == FileEntryType.Folder && 
                     filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                 Order = (
