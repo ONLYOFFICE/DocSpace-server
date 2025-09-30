@@ -110,7 +110,10 @@ public enum FolderType
     Knowledge = 32,
     
     [SwaggerEnum(Description = "Result storage")]
-    ResultStorage = 33
+    ResultStorage = 33,
+
+    [SwaggerEnum(Description = "AI Agents")]
+    AiAgents = 34,
 }
 
 /// <summary>

@@ -401,6 +401,14 @@ public interface IFolderDao<T>
     Task<T> GetFolderIDArchive(bool createIfNotExists);
 
     /// <summary>
+    /// Returns id folder "AiAgents"
+    /// Only in TMFolderDao
+    /// </summary>
+    /// <param name="createIfNotExists"></param>
+    /// <returns></returns>
+    Task<T> GetFolderIDAiAgentsAsync(bool createIfNotExists);
+
+    /// <summary>
     /// Return id of related object
     /// Only in TMFolderDao
     /// </summary>

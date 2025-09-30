@@ -69,6 +69,7 @@ internal class FolderDao(
     private const string VirtualRooms = "virtualrooms";
     private const string RoomTemplates = "roomtemplates";
     private const string Archive = "archive";
+    private const string AiAgents = "aiagents";
 
     public virtual async Task<Folder<int>> GetFolderAsync(int folderId)
     {
@@ -293,7 +294,7 @@ internal class FolderDao(
     }
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
-        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms, FolderType.RoomTemplates };
+        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms, FolderType.RoomTemplates, FolderType.AiAgents };
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenantId = _tenantManager.GetCurrentTenantId();
         var result = new FilesStatisticsResultDto();
@@ -1520,6 +1521,10 @@ internal class FolderDao(
                         folder.FolderType = FolderType.Archive;
                         folder.Title = Archive;
                         break;
+                    case AiAgents:
+                        folder.FolderType = FolderType.AiAgents;
+                        folder.Title = AiAgents;
+                        break;
                     default:
                         folder.FolderType = FolderType.BUNCH;
                         folder.Title = key;
@@ -1637,6 +1642,10 @@ internal class FolderDao(
                     folder.FolderType = FolderType.Archive;
                     folder.Title = Archive;
                     break;
+                case AiAgents:
+                    folder.FolderType = FolderType.AiAgents;
+                    folder.Title = AiAgents;
+                    break;
                 default:
                     folder.FolderType = FolderType.BUNCH;
                     folder.Title = key;
@@ -1734,6 +1743,11 @@ internal class FolderDao(
     public async Task<int> GetFolderIDArchive(bool createIfNotExists)
     {
         return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, Archive, null, createIfNotExists);
+    }
+
+    public async Task<int> GetFolderIDAiAgentsAsync(bool createIfNotExists)
+    {
+        return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, AiAgents, null, createIfNotExists);
     }
 
     public async IAsyncEnumerable<OriginData> GetOriginsDataAsync(IEnumerable<int> entriesIds)
@@ -1866,7 +1880,8 @@ internal class FolderDao(
     {
         var rootFolderType = entry.RootFolderType;
 
-        if (rootFolderType != FolderType.VirtualRooms && rootFolderType != FolderType.RoomTemplates && rootFolderType != FolderType.Archive)
+        if (rootFolderType != FolderType.VirtualRooms && rootFolderType != FolderType.RoomTemplates
+            && rootFolderType != FolderType.Archive && rootFolderType != FolderType.AiAgents)
         {
             return Task.FromResult((-1, ""));
         }

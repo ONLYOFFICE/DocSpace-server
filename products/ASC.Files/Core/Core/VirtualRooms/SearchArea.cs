@@ -50,5 +50,8 @@ public enum SearchArea
     Knowledge,
     
     [SwaggerEnum("Result storage")]
-    ResultStorage
+    ResultStorage,
+
+    [SwaggerEnum("AiAgents")]
+    AiAgents,
 }
