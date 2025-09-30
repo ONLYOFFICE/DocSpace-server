@@ -313,11 +313,13 @@ public class FileDtoHelper(
                 case { FolderType: FolderType.Recent }:
                 case { FolderType: FolderType.SHARE }:
                 case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, authContext.CurrentAccount.ID):
+                    var folderShareAsync = await _globalFolderHelper.GetFolderShareAsync<T>();
                     result.RootFolderType = FolderType.SHARE;
+                    result.RootFolderId = folderShareAsync;
                     var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.FolderId);
                     if (!await _fileSecurity.CanReadAsync(parent))
                     {
-                        result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                        result.FolderId = folderShareAsync;
                     }
 
                     break;
