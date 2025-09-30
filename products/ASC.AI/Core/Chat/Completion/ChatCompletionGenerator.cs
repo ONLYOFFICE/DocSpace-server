@@ -31,16 +31,17 @@ public class ChatCompletionGenerator(
     ILogger<ChatCompletionGenerator> logger,
     ChatSocketClient chatSocketClient,
     List<ChatMessage> messages,
-    ToolHolder toolHolder,
-    IHistoryWriterFactory historyWriterFactory)
+    ChatHistory chatHistory,
+    ChatNameGenerator chatNameGenerator,
+    ChatExecutionContext context)
 {
     public async IAsyncEnumerable<ChatCompletion> GenerateCompletionAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        HistoryWriter? historyWriter = null;
-        
         var responses = new List<ChatResponseUpdate>();
         var enumerator = client.GetStreamingResponseAsync(messages, cancellationToken: cancellationToken)
             .GetAsyncEnumerator(cancellationToken);
+        
+        Task<string?>? titleGenerationTask = null;
         
         while (true)
         {
@@ -69,15 +70,24 @@ public class ChatCompletionGenerator(
 
             if (!errorCaptured)
             {
-                if (historyWriter == null)
+                if (context.Chat == null)
                 {
-                    historyWriter = await historyWriterFactory.CreateAsync();
+                    context.Chat = await chatHistory.AddChatAsync(
+                        context.TenantId,
+                        context.Room.Id,
+                        context.UserId,
+                        chatNameGenerator.Generate(context.Message!),
+                        context.Message!,
+                        context.Attachments);
+                    
+                    titleGenerationTask = chatNameGenerator.GenerateAsync(context);
+                    
                     yield return new MessageStartCompletion
                     {
-                        ChatId = historyWriter.Chat.Id
+                        ChatId = context.Chat.Id
                     };
                 }
-                    
+
                 responses.Add(response);
             }
 
@@ -125,25 +135,30 @@ public class ChatCompletionGenerator(
             }
         }
         
-        await enumerator.DisposeAsync();
-        await toolHolder.DisposeAsync();
-        
         var chatResponse = responses.ToChatResponse();
 
-        if (historyWriter == null)
+        var messageId = await chatHistory.AddAssistantMessagesAsync(context.Chat!.Id, chatResponse.Messages);
+        if (titleGenerationTask != null)
         {
-            yield break;
+            var title = await titleGenerationTask;
+            if (!string.IsNullOrEmpty(title))
+            {
+                await chatHistory.UpdateChatTitleAsync(context.TenantId, context.Chat.Id, title);
+                context.Chat.Title = title;
+            }
         }
-
-        var messageId = await historyWriter.WriteAsync(chatResponse.Messages);
+        
         if (messageId > 0)
         {
-            await chatSocketClient.CommitMessageAsync(historyWriter.Chat.Id, messageId);
+            await chatSocketClient.CommitMessageAsync(context.Chat.Id, messageId);
         }
 
         yield return new MessageStopCompletion
         {
             MessageId = messageId
         };
+        
+        await enumerator.DisposeAsync();
+        await context.DisposeAsync();
     }
 }

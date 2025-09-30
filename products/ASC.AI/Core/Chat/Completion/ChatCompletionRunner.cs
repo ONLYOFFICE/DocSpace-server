@@ -35,14 +35,15 @@ public class ChatCompletionRunner(
     ChatClientFactory chatClientFactory,
     ILogger<ChatCompletionGenerator> logger,
     AttachmentHandler attachmentHandler,
-    ChatSocketClient chatSocketClient)
+    ChatSocketClient chatSocketClient,
+    ChatNameGenerator chatNameGenerator)
 {
     public async Task<ChatCompletionGenerator> StartNewChatAsync(
         int roomId, string message, IEnumerable<JsonElement>? files = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(message);
         
-        var context = await contextBuilder.BuildContextAsync(roomId);
+        var context = await contextBuilder.BuildAsync(roomId);
         
         var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
         
@@ -57,24 +58,12 @@ public class ChatCompletionRunner(
             userMessage
         };
         
-        var writerFactory = new StartHistoryWriterFactory(
-            tenantManager.GetCurrentTenantId(), 
-            roomId, 
-            authContext.CurrentAccount.ID, 
-            message, 
-            attachments, 
-            chatHistory);
+        context.UserMessage = userMessage;
+        context.Message = message;
         
-        var client = chatClientFactory.Create(new ChatClientOptions
-        {
-            Endpoint = context.Url,
-            Key = context.Key,
-            Provider = context.ProviderType,
-            ModelId = context.ModelId,
-            Tools = context.Tools
-        });
+        var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
         
-        return new ChatCompletionGenerator(client, logger, chatSocketClient, messages, context.Tools, writerFactory);
+        return new ChatCompletionGenerator(client, logger, chatSocketClient, messages, chatHistory, chatNameGenerator, context);
     }
 
     public async Task<ChatCompletionGenerator> StartChatAsync(
@@ -90,16 +79,21 @@ public class ChatCompletionRunner(
             throw new ItemNotFoundException("Chat not found");
         }
         
-        var context = await contextBuilder.BuildContextAsync(chat.RoomId);
+        var context = await contextBuilder.BuildAsync(chat.RoomId);
+        context.Chat = chat;
         
         var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
 
-        var historyAdapter = HistoryHelper.GetAdapter(context.ProviderType);
+        var historyAdapter = HistoryHelper.GetAdapter(context.ClientOptions.Provider);
         var history = await chatHistory.GetMessagesAsync(chatId, historyAdapter).ToListAsync();
         
         var attachments = await attachmentsTask;
         
         var userMessage = FormatUserMessage(message, attachments);
+        
+        context.UserMessage = userMessage;
+        context.Message = message;
+        
         var system = ChatPromptTemplate.GetPrompt(context.Instruction, context.ContextFolderId, context.Room.Id);
         
         var messages = new List<ChatMessage>(history.Count + 2)
@@ -109,19 +103,10 @@ public class ChatCompletionRunner(
         
         messages.AddRange(history);
         messages.Add(userMessage);
-
-        var writerFactory = new ContinueHistoryWriterFactory(tenantId, chat, message, attachments, chatHistory);
         
-        var client = chatClientFactory.Create(new ChatClientOptions
-        {
-            Endpoint = context.Url,
-            Key = context.Key,
-            Provider = context.ProviderType,
-            ModelId = context.ModelId,
-            Tools = context.Tools
-        });
+        var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
 
-        return new ChatCompletionGenerator(client, logger, chatSocketClient, messages, context.Tools, writerFactory);
+        return new ChatCompletionGenerator(client, logger, chatSocketClient, messages, chatHistory, chatNameGenerator, context);
     }
 
     private IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(IEnumerable<JsonElement>? files)

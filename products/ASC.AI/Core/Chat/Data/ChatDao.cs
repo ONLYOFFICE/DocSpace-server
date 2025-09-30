@@ -102,6 +102,12 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper ma
             await transaction.CommitAsync();
         });
     }
+    
+    public async Task UpdateChatTitleAsync(int tenantId, Guid chatId, string title)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        await dbContext.UpdateChatTitleAsync(tenantId, chatId, title);
+    }
 
     public async Task UpdateChatAsync(ChatSession chatSession)
     {

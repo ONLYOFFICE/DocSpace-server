@@ -93,6 +93,12 @@ public partial class AiDbContext
     {
         return Queries.GetUserChatSettingsAsync(this, tenantId, userId, roomId);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
+    public Task UpdateChatTitleAsync(int tenantId, Guid chatId, string title)
+    {
+        return Queries.UpdateChatTitleAsync(this, tenantId, chatId, title);
+    }
 }
 
 static file class Queries
@@ -165,4 +171,10 @@ static file class Queries
     public static readonly Func<AiDbContext, int, Guid, int, Task<DbUserChatSettings?>> GetUserChatSettingsAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, Guid userId, int roomId) => 
             ctx.UserChatSettings.FirstOrDefault(x => x.TenantId == tenantId && x.UserId == userId && x.RoomId == roomId));
+    
+    public static readonly Func<AiDbContext, int, Guid, string, Task<int>> UpdateChatTitleAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, Guid chatId, string title) =>
+            ctx.Chats.Where(x => x.TenantId == tenantId && x.Id == chatId)
+                .ExecuteUpdate(x =>
+                    x.SetProperty(y => y.Title, title)));
 }
