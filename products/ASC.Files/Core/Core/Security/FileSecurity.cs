@@ -1735,7 +1735,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        return false;
+                        return e.Access == FileShare.ReadWrite;
                     default:
                         if (e.Access == FileShare.RoomManager ||
                             (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
