@@ -3,7 +3,7 @@
 echo [2/4] Building openapi Documentation
 cd ..\..\ASC.Api.Documentation
 call dotnet build ASC.Api.Documentation.sln
-cd ASC.Api.Documentation\bin\Debug\net8.0
+cd ASC.Api.Documentation\bin\Debug\net9.0
 call redocly join asc.web.api.swagger.json asc.people.swagger.json asc.files.swagger.json asc.data.backup.swagger.json ..\..\..\..\..\CustomGenerators\tools\oauth.json -o ..\..\..\..\..\CustomGenerators\tools\api-docs.json
 cd ..\..\..\..\..\CustomGenerators\tools
 
