@@ -916,6 +916,11 @@ public class FileSecurity(
 
     private async Task<bool> CanAsync<T>(FileEntry<T> entry, Guid userId, FilesSecurityActions action, IEnumerable<FileShareRecord<T>> shares = null, bool setEntryAccess = true)
     {
+        if (entry == null)
+        {
+            return false;
+        }
+        
         if (entry.Security != null && entry.Security.TryGetValue(action, out var result))
         {
             return result;
