@@ -30,7 +30,7 @@ namespace ASC.AI.Core.Tools;
 public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine)
 {
     public const string Name = "docspace_knowledge_search";
-    private const string Description = "Search in knowledge base";
+    private const string Description = "Search in knowledge base. In the text, leave links to the resources you refer to when generating in md format. Example: [file title without extension](relative URL)";
     
     private static AIFunctionFactoryOptions FactoryOptions => new()
     {
