@@ -1840,7 +1840,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access != FileShare.Restrict && isAuthenticated && !isGuest)
+                        if (e.Access != FileShare.Restrict && isAuthenticated && !isGuest && ace?.Options is not { DenyDownload: true })
                         {
                             return true;
                         }
