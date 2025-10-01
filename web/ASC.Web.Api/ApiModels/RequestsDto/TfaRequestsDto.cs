@@ -35,12 +35,12 @@ public class TfaRequestsDto
     /// The two-factor authentication type.
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TfaRequestsDtoType Type { get; set; }
+    public required TfaRequestsDtoType Type { get; set; }
 
     /// <summary>
     /// The ID of the user for whom the TFA settings are being configured.
     /// </summary>
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
     /// The list of IP addresses that bypass TFA verification.

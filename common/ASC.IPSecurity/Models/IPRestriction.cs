@@ -50,7 +50,7 @@ public class IpRestrictionBase
     /// <summary>
     /// The IP address.
     /// </summary>
-    public string Ip { get; set; }
+    public required string Ip { get; set; }
 
     /// <summary>
     /// Specifies if the IP address is for administrator users only or not.

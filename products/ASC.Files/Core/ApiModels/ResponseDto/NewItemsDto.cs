@@ -34,12 +34,12 @@ public class NewItemsDto<TItem>
     /// <summary>
     /// The date and time when the new item was created.
     /// </summary>
-    public ApiDateTime Date { get; init; }
+    public required ApiDateTime Date { get; init; }
 
     /// <summary>
     /// The list of items.
     /// </summary>
-    public IEnumerable<TItem> Items { get; init; }
+    public required IEnumerable<TItem> Items { get; init; }
 }
 
 /// <summary>

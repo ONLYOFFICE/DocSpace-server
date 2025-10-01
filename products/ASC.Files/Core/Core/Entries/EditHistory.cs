@@ -271,7 +271,7 @@ public class EditHistoryDataDto
     /// <summary>
     /// The document identifier used to unambiguously identify the document file.
     /// </summary>
-    public string Key { get; set; }
+    public required string Key { get; set; }
 
     /// <summary>
     /// The object of the previous version of the document.
@@ -287,17 +287,17 @@ public class EditHistoryDataDto
     /// The URL address of the current document version.
     /// </summary>
     [Url]
-    public string Url { get; set; }
+    public required string Url { get; set; }
 
     /// <summary>
     /// The document version number.
     /// </summary>
-    public int Version { get; init; }
+    public required int Version { get; init; }
 
     /// <summary>
     /// The document extension.
     /// </summary>
-    public string FileType { get; set; }
+    public required string FileType { get; set; }
 }
 
 /// <summary>

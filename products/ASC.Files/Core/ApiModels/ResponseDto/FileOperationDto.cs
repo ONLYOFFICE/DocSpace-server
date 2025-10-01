@@ -52,18 +52,18 @@ public class FileOperationDto
     /// The file operation error message.
     /// </summary>
     [SwaggerSchemaCustom(Example = "")]
-    public string Error { get; set; }
+    public required string Error { get; set; }
 
     /// <summary>
     /// The file operation processing status.
     /// </summary>
     [SwaggerSchemaCustom(Example = "1")]
-    public string Processed { get; set; }
+    public required string Processed { get; set; }
 
     /// <summary>
     /// Specifies if the file operation is finished or not.
     /// </summary>
-    public bool Finished { get; set; }
+    public required bool Finished { get; set; }
 
     /// <summary>
     /// The file operation URL.
