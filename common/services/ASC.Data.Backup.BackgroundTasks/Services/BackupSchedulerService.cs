@@ -58,7 +58,7 @@ public sealed class BackupSchedulerService(
         var backupService = serviceScope.ServiceProvider.GetRequiredService<BackupService>();
         var backupSchedule = serviceScope.ServiceProvider.GetRequiredService<Schedule>();
         var tenantManager = serviceScope.ServiceProvider.GetRequiredService<TenantManager>();
-        var settingsManager = serviceScope.ServiceProvider.GetRequiredService<SettingsManager>();
+        var notifyHelper = serviceScope.ServiceProvider.GetRequiredService<NotifyHelper>();
         var distributedLockProvider = serviceScope.ServiceProvider.GetRequiredService<IDistributedLockProvider>();
         var freeBackupsChecker = serviceScope.ServiceProvider.GetRequiredService<CountFreeBackupChecker>();
 
@@ -141,10 +141,12 @@ public sealed class BackupSchedulerService(
                 || ex is BillingException)
             {
                 logger.DebugHaveNotAccess(schedule.TenantId, ex.Message);
+                await notifyHelper.SendAboutScheduledBackupFailedAsync(schedule.TenantId, ex.Message);
             }
             catch (Exception error)
             {
                 logger.ErrorBackups(error);
+                await notifyHelper.SendAboutScheduledBackupFailedAsync(schedule.TenantId, error.Message);
             }
             finally
             {
