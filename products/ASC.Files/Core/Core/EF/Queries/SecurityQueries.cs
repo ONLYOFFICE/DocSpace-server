@@ -28,10 +28,10 @@ namespace ASC.Files.Core.EF;
 
 public partial class FilesDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File, PreCompileQuery.DefaultGuid])]
-    public IAsyncEnumerable<DbFilesSecurity> ForDeleteShareRecordsAsync(int tenantId, FileEntryType entryType, Guid subject)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File, PreCompileQuery.DefaultGuid, null])]
+    public IAsyncEnumerable<DbFilesSecurity> ForDeleteShareRecordsAsync(int tenantId, FileEntryType entryType, Guid subject, string entryId)
     {
-        return SecurityQueries.ForDeleteShareRecordsAsync(this, tenantId, entryType, subject);
+        return SecurityQueries.ForDeleteShareRecordsAsync(this, tenantId, entryType, subject, entryId);
     }
     
     [PreCompileQuery([null])]
@@ -103,9 +103,9 @@ public partial class FilesDbContext
 
 static file class SecurityQueries
 {
-    public static readonly Func<FilesDbContext, int, FileEntryType, Guid, IAsyncEnumerable<DbFilesSecurity>> ForDeleteShareRecordsAsync = 
+    public static readonly Func<FilesDbContext, int, FileEntryType, Guid, string, IAsyncEnumerable<DbFilesSecurity>> ForDeleteShareRecordsAsync = 
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, FileEntryType entryType, Guid subject) =>
+            (FilesDbContext ctx, int tenantId, FileEntryType entryType, Guid subject, string entryId) =>
                 ctx.Security
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.EntryType == entryType)
