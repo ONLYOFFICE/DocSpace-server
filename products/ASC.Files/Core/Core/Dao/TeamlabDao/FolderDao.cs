@@ -269,8 +269,12 @@ internal class FolderDao(
         }
 
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
+        var currentUserId = _authContext.CurrentAccount.ID;
+        
         var q = await GetFoldersQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, withSubfolders, excludeSubject, roomId, filesDbContext);
+        
+        q = q.Where(r => !filesDbContext.Security.Any(x => x.TenantId == r.TenantId && x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder && x.Share == FileShare.Restrict && x.Subject == currentUserId));
+        
         if (containingMyFiles)
         {
             q = ApplyAdditionalFolderFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.MyFilesAndFolders);
