@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -419,9 +419,9 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:update-history", { id, type });
   }
 
-  function logoutSession({ room, loginEventId } = {}) {
-    logger.info(`logout user ${room} session ${loginEventId}`);
-    filesIO.to(room).emit("s:logout-session", loginEventId);
+  function logoutSession({ room, loginEventId, redirectUrl } = {}) {
+    logger.info(`logout user ${room} session ${loginEventId}, redirectUrl ${redirectUrl}`);
+    filesIO.to(room).emit("s:logout-session", { loginEventId, redirectUrl });
   }
 
   function backupProgress({ tenantId, dump, percentage } = {}) 
