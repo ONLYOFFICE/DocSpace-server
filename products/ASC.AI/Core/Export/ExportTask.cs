@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 using ASC.Common.Threading;
 using ASC.Web.Files.Classes;
@@ -35,7 +36,7 @@ using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.AI.Core.Export;
 
-public abstract class ExportTask<T>(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public abstract partial class ExportTask<T>(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
     where T : ExportTaskData
 {
     protected T Data { get; private set; } = null!;
@@ -82,14 +83,79 @@ public abstract class ExportTask<T>(IServiceScopeFactory serviceScopeFactory) : 
             var messages = GetMessages(scope.ServiceProvider);
 
             var builder = new StringBuilder();
-            var tenantUtil = scope.ServiceProvider.GetRequiredService<TenantUtil>();
+            
+            var counter = 1;
+            var urlToIndex = new Dictionary<string, int>();
+            var sources = new List<(int, string)>();
 
             await foreach (var message in messages)
             {
-                var content = message.ToMarkdown(tenantUtil);
-                content = CutThink(content);
-                _ = builder.Append(content)
-                    .Append("---\n\n");
+                if (message.Role == Role.User)
+                {
+                    builder.Append("# ");
+
+                    foreach (var content in message.Contents)
+                    {
+                        if (content is TextMessageContent textContent)
+                        {
+                            builder.Append(textContent.Text);
+                        }
+                    }
+                    
+                    builder.AppendLine();
+                    
+                    continue;
+                }
+
+                foreach (var content in message.Contents)
+                {
+                    if (content is not TextMessageContent textContent || 
+                        string.IsNullOrEmpty(textContent.Text))
+                    {
+                        continue;
+                    }
+                    
+                    var processedText = CutThink(textContent.Text);
+
+                    var sourceProcessedText = MdLinksRegex().Replace(processedText, evaluator: match => 
+                    { 
+                        try
+                        {
+                            var title = match.Groups[1].Value;
+                            var url = match.Groups[2].Value;
+
+                            var isRelativeUrl = Uri.IsWellFormedUriString(url, UriKind.Relative);
+                            if (isRelativeUrl)
+                            {
+                                url = commonLinkUtility.GetFullAbsolutePath(url);
+                            }
+
+                            if (urlToIndex.TryAdd(url, counter))
+                            {
+                                sources.Add((counter, url));
+                                counter++;
+                            }
+
+                            return isRelativeUrl ? $"[{title}]({url})" : match.Value;
+                        }
+                        catch
+                        {
+                            return match.Value;
+                        }
+                    });
+
+                    builder.AppendLine(sourceProcessedText);
+                }
+
+                builder.AppendLine();
+            }
+
+            if (sources.Count > 0)
+            {
+                foreach (var (index, url) in sources)
+                {
+                    builder.AppendLine($"{index}. {url}");
+                }
             }
 
             if (builder.Length == 0)
@@ -197,4 +263,7 @@ public abstract class ExportTask<T>(IServiceScopeFactory serviceScopeFactory) : 
             _ = await fileConverter.SaveConvertedFileAsync(Folder, fileUri, fileType, title, updateIfExists);
         }
     }
+
+    [GeneratedRegex(@"\[([^\]]+)\]\(([^)]+)\)", RegexOptions.Compiled)]
+    private static partial Regex MdLinksRegex();
 }
