@@ -1981,13 +1981,13 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Dear $UserName,
+        ///   Looks up a localized string similar to Hello, $UserName,
         ///
-        ///The process of scheduled backup of your &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal has ben failed.
+        ///The scheduled backup process for your DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; has failed.
         ///
-        ///Exception message: $Message
+        ///We recommend checking the &quot;Backup&quot;:&quot;${__VirtualRootPath}/portal-settings/backup/data-backup&quot; and &quot;Services&quot;:&quot;${__VirtualRootPath}/portal-settings/services&quot; settings.
         ///
-        ///If you have any questions or need assistance please feel free to contact us at &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;
+        ///If you have any questions or need assistance, please don’t hesitate to contact us via &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;
         ///
         ///$TrulyYours.
         /// </summary>
@@ -1998,15 +1998,13 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [${__VirtualRootPath}](${__VirtualRootPath}) portal backup created
+        ///   Looks up a localized string similar to Hello, $UserName,
         ///
-        ///Dear $UserName,
+        ///The scheduled backup process for your DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) has failed.
         ///
-        ///The process of scheduled backup of your [${__VirtualRootPath}](${__VirtualRootPath}) portal has ben failed.
+        ///We recommend checking the [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) and [Services](${__VirtualRootPath}/portal-settings/services) settings.
         ///
-        ///Exception message: $Message
-        ///
-        ///If you have any questions or need assistance please feel free to contact us at [${__SupportLink}](${__SupportLink})
+        ///If you have any questions or need assistance, please don’t hesitate to contact us via [${__SupportLink}](${__SupportLink})
         ///
         ///Best regards,
         ///${LetterLogoText} Support Team
@@ -3034,7 +3032,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText}. ${__VirtualRootHost} scheduled backup failed.
+        ///   Looks up a localized string similar to Auto backup for your DocSpace failed.
         /// </summary>
         public static string subject_scheduled_backup_failed {
             get {

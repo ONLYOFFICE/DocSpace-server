@@ -2586,32 +2586,30 @@ $TrulyYours</value>
     <value>Your password was changed successfully</value>
   </data>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
-    <value>Dear $UserName,
+    <value>Hello, $UserName,
 
-The process of scheduled backup of your "${__VirtualRootPath}":"${__VirtualRootPath}" portal has ben failed.
+The scheduled backup process for your DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" has failed.
 
-Exception message: $Message
+We recommend checking the "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" and "Services":"${__VirtualRootPath}/portal-settings/services" settings.
 
-If you have any questions or need assistance please feel free to contact us at "${__SupportLink}":"${__SupportLink}"
+If you have any questions or need assistance, please don’t hesitate to contact us via "${__SupportLink}":"${__SupportLink}"
 
 $TrulyYours</value>
   </data>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
-    <value>[${__VirtualRootPath}](${__VirtualRootPath}) portal backup created
+    <value>Hello, $UserName,
 
-Dear $UserName,
+The scheduled backup process for your DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) has failed.
 
-The process of scheduled backup of your [${__VirtualRootPath}](${__VirtualRootPath}) portal has ben failed.
+We recommend checking the [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) and [Services](${__VirtualRootPath}/portal-settings/services) settings.
 
-Exception message: $Message
-
-If you have any questions or need assistance please feel free to contact us at [${__SupportLink}](${__SupportLink})
+If you have any questions or need assistance, please don’t hesitate to contact us via [${__SupportLink}](${__SupportLink})
 
 Best regards,
 ${LetterLogoText} Support Team
 [${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
-    <value>${LetterLogoText}. ${__VirtualRootHost} scheduled backup failed</value>
+    <value>Auto backup for your DocSpace failed</value>
   </data>
 </root>
