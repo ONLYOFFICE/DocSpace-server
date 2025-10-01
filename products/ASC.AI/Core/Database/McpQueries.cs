@@ -131,15 +131,21 @@ public partial class AiDbContext
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, null])]
-    public Task<int> UpdateOauthCredentials(int tenantId, int roomId, Guid userId, Guid serverId, string token)
+    public Task<int> UpdateOauthCredentialsAsync(int tenantId, int roomId, Guid userId, Guid serverId, string token)
     {
         return McpQueries.UpdateOauthCredentials(this, tenantId, roomId, userId, serverId, token);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
-    public Task<bool> ServerNameIsExistsAsync(int tenantId, string name)
+    public Task<McpServerShort?> GetServerByNameAsync(int tenantId, string name)
     {
-        return McpQueries.ServerNameIsExistsAsync(this, tenantId, name);
+        return McpQueries.GetServerByNameAsync(this, tenantId, name);
+    }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public IAsyncEnumerable<McpIconState> GetIconStatesAsync(int tenantId, IEnumerable<Guid> ids)
+    {
+        return McpQueries.GetIconStatesAsync(this, tenantId, ids);
     }
 }
 
@@ -319,9 +325,23 @@ static file class McpQueries
                 .ExecuteUpdate(x => 
                     x.SetProperty(y => y.OauthCredentials, token)));
 
-    public static readonly Func<AiDbContext, int, string, Task<bool>> ServerNameIsExistsAsync =
+    public static readonly Func<AiDbContext, int, string, Task<McpServerShort?>> GetServerByNameAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, string name) =>
-            ctx.McpServers.Any(x => x.TenantId == tenantId && x.Name == name));
+            ctx.McpServers
+                .Where(x => x.TenantId == tenantId && x.Name == name)
+                .Select(x => new McpServerShort { Id = x.Id, Name = x.Name })
+                .FirstOrDefault());
+    
+    public static readonly Func<AiDbContext, int, IEnumerable<Guid>, IAsyncEnumerable<McpIconState>> GetIconStatesAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
+            ctx.McpServers
+                .Where(x => x.TenantId == tenantId && ids.Contains(x.Id))
+                .Select(x => new McpIconState
+                    {
+                      ServerId  = x.Id,
+                      HasIcon = x.HasIcon,
+                      ModifiedOn = x.ModifiedOn
+                    }));
 }
 
 public class DbRoomServerUnit

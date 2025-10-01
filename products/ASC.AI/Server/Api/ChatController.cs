@@ -38,7 +38,8 @@ public class ChatController(
     ApiContext apiContext,
     IMapper mapper,
     MessageExporter exporter,
-    McpService mcpService) : ControllerBase
+    McpService mcpService,
+    MessageDtoConverter dtoConverter) : ControllerBase
 {
     private static readonly JsonSerializerOptions _streamSerializerOptions = new(JsonSerializerDefaults.Web)
     {
@@ -106,7 +107,8 @@ public class ChatController(
         var totalCountTask = chatService.GetMessagesTotalCountAsync(inDto.ChatId);
         
         var messages = chatService.GetMessagesAsync(inDto.ChatId, inDto.StartIndex, inDto.Count);
-        var messagesDto = await messages.Select(x => x.ToMessageDto(mapper, apiDateTimeHelper)).ToListAsync();
+        var messagesDto = await messages.SelectAwait(
+            async x => await dtoConverter.ConvertAsync(x)).ToListAsync();
         
         apiContext.SetCount(messagesDto.Count).SetTotalCount(await totalCountTask);
         

@@ -40,13 +40,13 @@ global using ASC.AI.Core.Settings;
 global using ASC.AI.Core.Retrieval.Web;
 global using ASC.AI.Core.Retrieval.Web.Engine;
 
+global using ASC.Core;
+
 global using ASC.Common;
 global using ASC.Common.Mapping;
 
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model.Chat;
-
-global using ASC.Files.Core.ApiModels.ResponseDto;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Vectorization;

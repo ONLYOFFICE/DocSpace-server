@@ -30,7 +30,8 @@ namespace ASC.AI.Core.Retrieval.Knowledge;
 public class KnowledgeSearchEngine(
     TenantManager tenantManager,
     VectorStore vectorStore,
-    EmbeddingGeneratorFactory embeddingGeneratorFactory)
+    EmbeddingGeneratorFactory embeddingGeneratorFactory,
+    FilesLinkUtility filesLinkUtility)
 {
     public async Task<List<KnowledgeSearchResult>> SearchAsync(int roomId, string query)
     {
@@ -54,7 +55,8 @@ public class KnowledgeSearchEngine(
             {
                 FileId = x.FileId,
                 Title = x.Title,
-                Text = x.TextEmbedding
+                Text = x.TextEmbedding,
+                RelativeUrl = filesLinkUtility.GetFileWebEditorUrl(x.FileId)
             })
             .ToListAsync();
     }
@@ -65,4 +67,5 @@ public class KnowledgeSearchResult
     public int FileId { get; init; }
     public required string Title { get; init; }
     public required string Text { get; init; }
+    public required string RelativeUrl { get; init; }
 }

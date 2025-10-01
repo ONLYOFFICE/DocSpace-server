@@ -31,7 +31,7 @@ public class ChatClientFactory(
     IHttpClientFactory httpClientFactory,
     IToolPermissionRequester toolPermissionRequester)
 {
-    public IChatClient Create(ChatClientOptions options)
+    public IChatClient Create(ChatClientOptions options, ToolHolder? toolHolder = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         
@@ -69,11 +69,11 @@ public class ChatClientFactory(
             builder = chatClient.AsIChatClient().AsBuilder();
         }
 
-        if (options.Tools?.Tools is { Count: > 0 })
+        if (toolHolder?.Tools is { Count: > 0 })
         {
             builder.ConfigureOptions(x =>
             {
-                x.Tools = options.Tools.Tools;
+                x.Tools = toolHolder.Tools;
                 x.ToolMode = ChatToolMode.Auto;
             });
             
@@ -81,7 +81,7 @@ public class ChatClientFactory(
             {
                 var funcClient = new ManagedFunctionInvokingChatClient(
                     innerClient,
-                    options.Tools,
+                    toolHolder,
                     toolPermissionRequester);
 
                 funcClient.MaximumIterationsPerRequest = 128;

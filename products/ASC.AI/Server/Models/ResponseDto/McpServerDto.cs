@@ -35,4 +35,5 @@ public class McpServerDto : IMapFrom<McpServer>
     public ServerType ServerType { get; init; }
     public IDictionary<string, string>? Headers { get; init; }
     public bool Enabled { get; init; }
+    public Icon? Icon { get; init; }
 }

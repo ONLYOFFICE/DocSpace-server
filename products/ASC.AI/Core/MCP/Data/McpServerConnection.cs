@@ -41,6 +41,7 @@ public class McpServerConnection
     public OauthProvider? OauthProvider { get; init; }
     public McpServerSettings? Settings { get; set; }
     public bool Connected => ConnectionType is ConnectionType.Direct || Settings?.OauthCredentials != null;
+    public Icon? Icon { get; set; }
 }
 
 public static class McpRoomServerExtensions
@@ -48,7 +49,8 @@ public static class McpRoomServerExtensions
     public static async Task<McpServerConnection> ToMcpRoomServerAsync(
         this DbRoomServerUnit item,
         InstanceCrypto crypto, 
-        ConsumerFactory consumerFactory)
+        ConsumerFactory consumerFactory,
+        McpIconStore iconStore)
     {
         McpServerConnection serverConnection = null!;
         
@@ -71,6 +73,12 @@ public static class McpRoomServerExtensions
             {
                 var headersJson = await crypto.DecryptAsync(item.Server.Headers);
                 serverConnection.Headers = JsonSerializer.Deserialize<Dictionary<string, string>>(headersJson);
+            }
+
+            if (item.Server.HasIcon)
+            {
+                serverConnection.Icon = await iconStore.GetAsync(
+                    item.Server.TenantId, item.Server.Id, item.Server.ModifiedOn);
             }
         }
         else if (item.SystemServer != null)

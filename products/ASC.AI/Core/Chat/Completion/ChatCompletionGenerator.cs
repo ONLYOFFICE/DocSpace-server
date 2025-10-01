@@ -29,18 +29,21 @@ namespace ASC.AI.Core.Chat.Completion;
 public class ChatCompletionGenerator(
     IChatClient client,
     ILogger<ChatCompletionGenerator> logger,
-    ChatSocketClient chatSocketClient,
+    SocketManager socketManager,
     List<ChatMessage> messages,
-    ToolHolder toolHolder,
-    IHistoryWriterFactory historyWriterFactory)
+    ChatHistory chatHistory,
+    ChatNameGenerator chatNameGenerator,
+    ChatExecutionContext context)
 {
     public async IAsyncEnumerable<ChatCompletion> GenerateCompletionAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        HistoryWriter? historyWriter = null;
-        
         var responses = new List<ChatResponseUpdate>();
         var enumerator = client.GetStreamingResponseAsync(messages, cancellationToken: cancellationToken)
             .GetAsyncEnumerator(cancellationToken);
+
+        var started = false;
+        
+        Task? titleUpdateTask = null;
         
         while (true)
         {
@@ -69,15 +72,50 @@ public class ChatCompletionGenerator(
 
             if (!errorCaptured)
             {
-                if (historyWriter == null)
+                if (!started)
                 {
-                    historyWriter = await historyWriterFactory.CreateAsync();
+                    if (context.Chat == null)
+                    {
+                        var tempTitle = chatNameGenerator.Generate(context.RawMessage);
+                    
+                        context.Chat = await chatHistory.AddChatAsync(
+                            context.TenantId,
+                            context.Room.Id,
+                            context.UserId,
+                            tempTitle,
+                            context.RawMessage,
+                            context.Attachments);
+                    
+                        titleUpdateTask = Task.Run(async () =>
+                        {
+                            var title = await chatNameGenerator.GenerateAsync(context);
+                            if (!string.IsNullOrEmpty(title))
+                            {
+                                await chatHistory.UpdateChatTitleAsync(context.TenantId, context.Chat.Id, title);
+                            
+                                context.Chat.Title = title;
+                            
+                                await socketManager.UpdateChatAsync(context.Room, context.Chat.Id, title, context.UserId);
+                            }
+                        }, cancellationToken: CancellationToken.None);
+                    }
+                    else
+                    {
+                        await chatHistory.UpdateChatAsync(
+                            context.TenantId, 
+                            context.Chat.Id, 
+                            context.RawMessage, 
+                            context.Attachments);
+                    }
+                    
                     yield return new MessageStartCompletion
                     {
-                        ChatId = historyWriter.Chat.Id
+                        ChatId = context.Chat.Id
                     };
-                }
                     
+                    started = true;
+                }
+
                 responses.Add(response);
             }
 
@@ -125,25 +163,26 @@ public class ChatCompletionGenerator(
             }
         }
         
-        await enumerator.DisposeAsync();
-        await toolHolder.DisposeAsync();
-        
         var chatResponse = responses.ToChatResponse();
 
-        if (historyWriter == null)
-        {
-            yield break;
-        }
-
-        var messageId = await historyWriter.WriteAsync(chatResponse.Messages);
+        var messageId = await chatHistory.AddAssistantMessagesAsync(context.Chat!.Id, chatResponse.Messages);
+        
         if (messageId > 0)
         {
-            await chatSocketClient.CommitMessageAsync(historyWriter.Chat.Id, messageId);
+            await socketManager.CommitMessageAsync(context.Chat.Id, messageId);
+        }
+        
+        if (titleUpdateTask != null)
+        {
+            await titleUpdateTask;
         }
 
         yield return new MessageStopCompletion
         {
             MessageId = messageId
         };
+        
+        await enumerator.DisposeAsync();
+        await context.DisposeAsync();
     }
 }

@@ -180,6 +180,19 @@ public class SocketManager(
     {
         await MakeRequest("delete-favorites-folder", folder, true, users);
     }
+
+    public async Task UpdateChatAsync<T>(Folder<T> folder, Guid chatId, string chatTitle, Guid userId)
+    {
+        var room = FolderRoom(folder.Id);
+        
+        await base.MakeRequest("update-chat", new { room, chatId, chatTitle, userId });
+    }
+    
+    public async Task CommitMessageAsync(Guid chatId, int messageId)
+    {
+        var room = ChatRoom(chatId);
+        await MakeRequest("commit-chat-message", new { room, messageId });
+    }
     
     private async Task<IEnumerable<Guid>> GetRecipientListForForm<T>(File<T> form)
     {
@@ -282,6 +295,11 @@ public class SocketManager(
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         return $"{tenantId}-DIR-{folderId}";
+    }
+    
+    private string ChatRoom(Guid chatId)
+    {
+        return $"{_tenantManager.GetCurrentTenantId()}-CHAT-{chatId}";
     }
 
     private async Task<string> Serialize<T>(FileEntry<T> entry)

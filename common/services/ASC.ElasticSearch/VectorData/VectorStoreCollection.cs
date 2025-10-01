@@ -30,6 +30,8 @@ namespace ASC.ElasticSearch.VectorData;
 public class VectorStoreCollection<TRecord>(
     OpenSearchClient openSearchClient,
     VectorCollectionOptions options,
+    TaskScheduler scheduler,
+    ILogger<VectorStore> logger,
     string name) where TRecord: class
 {
     // ReSharper disable once StaticMemberInGenericType
@@ -115,7 +117,31 @@ public class VectorStoreCollection<TRecord>(
         }
     }
 
-    public async Task DeleteAsync(VectorSearchOptions<TRecord>? searchOptions = null, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(VectorSearchOptions<TRecord>? searchOptions = null, bool immediate = false,
+        CancellationToken cancellationToken = default)
+    {
+        if (immediate)
+        {
+            await DeleteAsync(searchOptions, cancellationToken);
+            return;
+        }
+        
+        var task = new Task(async void () =>
+        {
+            try
+            {
+                await DeleteAsync(searchOptions, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException("Failed to delete file vector data", e);
+            }
+        }, cancellationToken, TaskCreationOptions.LongRunning);
+        
+        task.Start(scheduler);
+    }
+
+    private async Task DeleteAsync(VectorSearchOptions<TRecord>? searchOptions = null, CancellationToken cancellationToken = default)
     {
         var request = new DeleteByQueryRequest(name);
         

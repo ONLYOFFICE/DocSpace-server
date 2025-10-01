@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,55 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat.History;
+namespace ASC.AI.Core.MCP.Data;
 
-public interface IHistoryWriterFactory
+public class Icon
 {
-    public Task<HistoryWriter> CreateAsync();
-}
-
-public class HistoryWriter(ChatSession chat, ChatHistory chatHistory, bool isNew)
-{
-    public ChatSession Chat => chat;
-    public bool IsNew => isNew;
-    
-    public async Task<int> WriteAsync(IList<ChatMessage> messages)
-    {
-        if (messages.Count > 0)
-        {
-            return await chatHistory.AddAssistantMessagesAsync(chat.Id, messages);
-        }
-
-        return 0;
-    }
-}
-
-public class StartHistoryWriterFactory(
-    int tenantId,
-    int roomId,
-    Guid userId,
-    string message,
-    List<AttachmentMessageContent> attachments,
-    ChatHistory chatHistory) : IHistoryWriterFactory
-{
-    public async Task<HistoryWriter> CreateAsync()
-    {
-        var chat = await chatHistory.AddChatAsync(tenantId, roomId, userId, message, attachments);
-        return new HistoryWriter(chat, chatHistory, true);
-    }
-}
-
-public class ContinueHistoryWriterFactory(
-    int tenantId,
-    ChatSession chat,
-    string message,
-    List<AttachmentMessageContent> attachments,
-    ChatHistory chatHistory) : IHistoryWriterFactory
-{
-    
-    public async Task<HistoryWriter> CreateAsync()
-    {
-        await chatHistory.UpdateChatAsync(tenantId, chat.Id, message, attachments);
-        return new HistoryWriter(chat, chatHistory, false);
-    }
+    public required string IconOrig { get; init; }
+    public required string Icon48 { get; init; }
+    public required string Icon32 { get; init; }
+    public required string Icon24 { get; init; }
+    public required string Icon16 { get; init; }
 }

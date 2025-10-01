@@ -192,5 +192,10 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/update-chat", (req, res) => {
+    files.updateChat(req.body);
+    res.end();
+  });
+
   return router;
 };

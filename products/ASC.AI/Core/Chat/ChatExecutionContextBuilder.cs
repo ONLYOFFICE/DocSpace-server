@@ -36,7 +36,7 @@ public class ChatExecutionContextBuilder(
     AiProviderDao providerDao,
     ChatTools chatTools)
 {
-    public async Task<ChatExecutionContext> BuildContextAsync(int roomId)
+    public async Task<ChatExecutionContext> BuildAsync(int roomId)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         
@@ -73,11 +73,16 @@ public class ChatExecutionContextBuilder(
 
         var context = new ChatExecutionContext
         {
+            TenantId = tenantId,
+            UserId = userId,
             Room = room,
-            ProviderType = provider.Type,
-            Url = provider.Url,
-            Key = provider.Key,
-            ModelId = room.SettingsChatParameters.ModelId,
+            ClientOptions = new ChatClientOptions
+            {
+                Provider = provider.Type,
+                Endpoint= provider.Url,
+                Key = provider.Key,
+                ModelId = room.SettingsChatParameters.ModelId,
+            },
             Instruction = room.SettingsChatParameters.Prompt,
             ContextFolderId = resultStorage.Id,
             ChatSettings = chatSettings,
@@ -88,15 +93,23 @@ public class ChatExecutionContextBuilder(
     }
 }
 
-public class ChatExecutionContext
+public class ChatExecutionContext : IAsyncDisposable
 {
+    public int TenantId { get; init; }
+    public Guid UserId { get; init; }
     public required Folder<int> Room { get; init; }
-    public ProviderType ProviderType { get; init; }
-    public required string Url { get; init; }
-    public required string Key { get; init; }
-    public required string ModelId { get; init; }
+    public required ChatClientOptions ClientOptions { get; init; }
     public string? Instruction { get; init; }
     public int ContextFolderId { get; init; }
     public required UserChatSettings ChatSettings { get; init; }
     public required ToolHolder Tools { get; init; }
+    public ChatMessage? UserMessage { get; set; }
+    public string RawMessage { get; set; } = string.Empty;
+    public List<AttachmentMessageContent> Attachments { get; set; } = [];
+    public ChatSession? Chat { get; set; }
+
+    public async ValueTask DisposeAsync()
+    {
+        await Tools.DisposeAsync();
+    }
 }

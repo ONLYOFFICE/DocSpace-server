@@ -31,18 +31,14 @@ namespace ASC.AI.Core.Chat.History;
 [Scope]
 public class ChatHistory(ChatDao chatDao)
 {
-    public Task<ChatSession> AddChatAsync(int tenantId, int roomId, Guid userId, string message, 
+    public Task<ChatSession> AddChatAsync(
+        int tenantId, 
+        int roomId, 
+        Guid userId,
+        string title,
+        string message, 
         List<AttachmentMessageContent> attachments)
     {
-        const string suffix = "...";
-        const int maxTitleLength = 50;
-
-        var title = message.Replace("\n", " ").Replace("\r", " ").Trim();
-        if (title.Length > maxTitleLength)
-        {
-            title = title[..(maxTitleLength - suffix.Length)].TrimEnd() + suffix;
-        }
-
         var contents = new List<MessageContent>(attachments) { new TextMessageContent(message) };
 
         return chatDao.AddChatAsync(tenantId, roomId, userId, title,
@@ -54,6 +50,11 @@ public class ChatHistory(ChatDao chatDao)
         var contents = new List<MessageContent>(attachments) { new TextMessageContent(message) };
         
         return chatDao.UpdateChatAsync(tenantId, chatId, new Message(0, Role.User, contents, DateTime.UtcNow));
+    }
+    
+    public Task UpdateChatTitleAsync(int tenantId, Guid chatId, string title)
+    {
+        return chatDao.UpdateChatTitleAsync(tenantId, chatId, title);
     }
 
     public Task<ChatSession?> GetChatAsync(int tenantId, Guid chatId)
@@ -79,11 +80,17 @@ public class ChatHistory(ChatDao chatDao)
                         }
                     case FunctionCallContent functionCallContent:
                         {
+                            var mcpServerInfo = functionCallContent.GetMcpServerInfo();
+                            if (mcpServerInfo is { Icon: not null })
+                            {
+                                mcpServerInfo.Icon = null;
+                            }
+                            
                             var toolCall = new ToolCallMessageContent(
                                 functionCallContent.CallId, 
                                 functionCallContent.Name, 
                                 functionCallContent.Arguments,
-                                mcpServerInfo: functionCallContent.GetMcpServerInfo());
+                                mcpServerInfo: mcpServerInfo);
                     
                             toolCalls.Add(functionCallContent.CallId, toolCall);
                             continue;
