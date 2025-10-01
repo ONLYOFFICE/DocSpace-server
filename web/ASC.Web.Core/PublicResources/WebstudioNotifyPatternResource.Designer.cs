@@ -1981,6 +1981,44 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dear $UserName,
+        ///
+        ///The process of scheduled backup of your &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal has ben failed.
+        ///
+        ///Exception message: $Message
+        ///
+        ///If you have any questions or need assistance please feel free to contact us at &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_scheduled_backup_failed {
+            get {
+                return ResourceManager.GetString("pattern_scheduled_backup_failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [${__VirtualRootPath}](${__VirtualRootPath}) portal backup created
+        ///
+        ///Dear $UserName,
+        ///
+        ///The process of scheduled backup of your [${__VirtualRootPath}](${__VirtualRootPath}) portal has ben failed.
+        ///
+        ///Exception message: $Message
+        ///
+        ///If you have any questions or need assistance please feel free to contact us at [${__SupportLink}](${__SupportLink})
+        ///
+        ///Best regards,
+        ///${LetterLogoText} Support Team
+        ///[${__SiteLink}](${__SiteLink}).
+        /// </summary>
+        public static string pattern_scheduled_backup_failed_tg {
+            get {
+                return ResourceManager.GetString("pattern_scheduled_backup_failed_tg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1.&quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal profile change notification
         ///
         ///&quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has changed his/her profile details at the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal.
@@ -2992,6 +3030,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_saas_video_guides_v1 {
             get {
                 return ResourceManager.GetString("subject_saas_video_guides_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ${LetterLogoText}. ${__VirtualRootHost} scheduled backup failed.
+        /// </summary>
+        public static string subject_scheduled_backup_failed {
+            get {
+                return ResourceManager.GetString("subject_scheduled_backup_failed", resourceCulture);
             }
         }
         

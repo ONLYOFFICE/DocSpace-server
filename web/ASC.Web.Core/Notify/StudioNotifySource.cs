@@ -45,6 +45,7 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.JoinUsers,
                 Actions.SendWhatsNew,
                 Actions.BackupCreated,
+                Actions.ScheduledBackupFailed,
                 Actions.RestoreStarted,
                 Actions.RestoreCompletedV115,
                 Actions.PortalDeactivate,
