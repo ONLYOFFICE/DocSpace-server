@@ -141,12 +141,12 @@ public sealed class BackupSchedulerService(
                 || ex is BillingException)
             {
                 logger.DebugHaveNotAccess(schedule.TenantId, ex.Message);
-                await notifyHelper.SendAboutScheduledBackupFailedAsync(schedule.TenantId, ex.Message);
+                //await notifyHelper.SendAboutScheduledBackupFailedAsync(schedule.TenantId, ex.Message);
             }
             catch (Exception error)
             {
                 logger.ErrorBackups(error);
-                await notifyHelper.SendAboutScheduledBackupFailedAsync(schedule.TenantId, error.Message);
+                //await notifyHelper.SendAboutScheduledBackupFailedAsync(schedule.TenantId, error.Message);
             }
             finally
             {
