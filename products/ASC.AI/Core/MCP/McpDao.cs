@@ -41,7 +41,7 @@ public class McpDao(
         Dictionary<string, string>? headers,
         string description,
         ConnectionType connectionType,
-        IconParams? iconParams)
+        string? iconBase64)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -54,7 +54,7 @@ public class McpDao(
             Endpoint = endpoint,
             Description = description,
             ConnectionType = connectionType,
-            HasIcon = iconParams != null,
+            HasIcon = !string.IsNullOrEmpty(iconBase64),
             ModifiedOn = DateTime.UtcNow
         };
 
@@ -79,9 +79,9 @@ public class McpDao(
             await context.McpServers.AddAsync(server);
             await context.McpServerStates.AddAsync(state);
             
-            if (iconParams != null)
+            if (server.HasIcon)
             {
-                await iconStore.SaveAsync(tenantId, server.Id, iconParams);
+                await iconStore.SaveAsync(tenantId, server.Id, iconBase64);
             }
             
             await context.SaveChangesAsync();
@@ -295,7 +295,7 @@ public class McpDao(
         });
     }
 
-    public async Task<McpServer> UpdateServerAsync(McpServer server, bool updateIcon, IconParams? iconParams)
+    public async Task<McpServer> UpdateServerAsync(McpServer server, bool updateIcon, string? iconBase64)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -314,8 +314,8 @@ public class McpDao(
         {
             switch (server.HasIcon)
             {
-                case true when iconParams != null:
-                    await iconStore.SaveAsync(server.TenantId, server.Id, iconParams);
+                case true when !string.IsNullOrEmpty(iconBase64):
+                    await iconStore.SaveAsync(server.TenantId, server.Id, iconBase64);
                     break;
                 case false:
                     await iconStore.DeleteAsync(dbServer.TenantId, dbServer.Id);

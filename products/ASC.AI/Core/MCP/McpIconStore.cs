@@ -26,7 +26,6 @@
 
 using ASC.Data.Storage;
 using ASC.Web.Core.Users;
-using ASC.Web.Core.WhiteLabel;
 using ASC.Web.Studio.Core;
 
 using ImageMagick;
@@ -36,14 +35,11 @@ using NetEscapades.EnumGenerators;
 namespace ASC.AI.Core.MCP;
 
 [Scope]
-public class McpIconStore(StorageFactory storageFactory, SetupInfo setupInfo, TenantManager tenantManager)
+public class McpIconStore(StorageFactory storageFactory, SetupInfo setupInfo)
 {
     private const string IconModuleName = "mcp_icons";
     private const string IconPathTemplate = "{0}_{1}.png";
     private IDataStore? _iconStore;
-    
-    private static readonly (IconSize Size, IMagickGeometry Geometry) _masterIconSize = 
-        (IconSize.Icon1280, new MagickGeometry(1280, 1280));
     
     private static readonly FrozenDictionary<IconSize, IMagickGeometry> _iconSizes = new Dictionary<IconSize, IMagickGeometry> 
     {
@@ -53,51 +49,58 @@ public class McpIconStore(StorageFactory storageFactory, SetupInfo setupInfo, Te
         { IconSize.Icon16, new MagickGeometry(16, 16) }
     }.ToFrozenDictionary();
     
-    public async Task SaveAsync(int tenantId, Guid serverId, IconParams iconParams)
+    public async Task SaveAsync(int tenantId, Guid serverId, string imageBase64)
     {
         var store = await InitStoreAsync(tenantId);
         
-        var imageData = Convert.FromBase64String(iconParams.Image);
+        var imageData = Convert.FromBase64String(imageBase64);
         
-        imageData = await UserPhotoThumbnailManager.TryParseImage(imageData, setupInfo.MaxImageUploadSize, _masterIconSize.Geometry);
-        if (imageData == null)
+        if (imageData is not { Length: > 0 })
         {
-            return;
+            throw new UnknownImageFormatException();
+        }
+
+        if (setupInfo.MaxImageUploadSize != -1 && imageData.Length > setupInfo.MaxImageUploadSize)
+        {
+            throw new ImageSizeLimitException();
         }
         
         var serverIdStr = serverId.ToString("N");
-
-        using (var masterImageStream = new MemoryStream(imageData))
-        {
-            await store.SaveAsync(GetFilePath(serverIdStr, _masterIconSize.Size), masterImageStream);
-        }
         
         try
         {
-            var position = new Point(iconParams.X, iconParams.Y);
-            var cropSize = new MagickGeometry(iconParams.Width, iconParams.Height);
-            
             using var imgStream = new MemoryStream(imageData);
             using var img = new MagickImage(imgStream);
+
+            if (img is { Width: < 48, Height: < 48 })
+            {
+                throw new ImageSizeLimitException();
+            }
             
             foreach (var size in _iconSizes)
             {
                 if (size.Value.Width != img.Width || size.Value.Height != img.Height)
                 {
-                    using var img2 = UserPhotoThumbnailManager.GetImage(
-                        img, size.Value, new UserPhotoThumbnailSettings(position, cropSize));
+                    using var processedImg = img.CloneAndMutate(a => 
+                        a.Colorize(MagickColors.White, new Percentage()));
                     
-                    imageData = await CommonPhotoManager.SaveToBytes(img2);
+                    processedImg.Resize(size.Value.Width, size.Value.Height);
+                    
+                    using var memoryStream = new MemoryStream();
+                    await processedImg.WriteAsync(memoryStream, MagickFormat.Png);
+                    
+                    var fileName = GetFilePath(serverIdStr, size.Key);
+                    await store.SaveAsync(fileName, memoryStream);
                 }
                 else
                 {
-                    imageData = await CommonPhotoManager.SaveToBytes(img);
+                    using var memoryStream = new MemoryStream();
+                    await img.WriteAsync(memoryStream, MagickFormat.Png);
+                    
+                    var fileName = GetFilePath(serverIdStr, size.Key);
+                    
+                    await store.SaveAsync(fileName, memoryStream);
                 }
-
-                var fileName = GetFilePath(serverIdStr, size.Key);
-
-                using var processedImgStream = new MemoryStream(imageData);
-                await store.SaveAsync(fileName, processedImgStream);
             }
         }
         catch (ArgumentException error)
@@ -113,7 +116,6 @@ public class McpIconStore(StorageFactory storageFactory, SetupInfo setupInfo, Te
         
         return new Icon
         {
-            IconOrig = await GetIconPathAsync(IconSize.Icon1280),
             Icon48 = await GetIconPathAsync(IconSize.Icon48),
             Icon32 = await GetIconPathAsync(IconSize.Icon32),
             Icon24 = await GetIconPathAsync(IconSize.Icon24),
@@ -131,12 +133,6 @@ public class McpIconStore(StorageFactory storageFactory, SetupInfo setupInfo, Te
             
             return uri + "?hash=" + Math.Abs(modifiedOn.GetHashCode());
         }
-    }
-    
-    public async Task<Icon> GetAsync(Guid serverId, DateTime modifiedOn)
-    {
-        var tenantId = tenantManager.GetCurrentTenantId();
-        return await GetAsync(tenantId, serverId, modifiedOn);
     }
     
     public async Task DeleteAsync(int tenantId, Guid serverId)
@@ -167,7 +163,6 @@ public class McpIconStore(StorageFactory storageFactory, SetupInfo setupInfo, Te
 [EnumExtensions]
 public enum IconSize
 {
-    Icon1280,
     Icon48,
     Icon32,
     Icon24,

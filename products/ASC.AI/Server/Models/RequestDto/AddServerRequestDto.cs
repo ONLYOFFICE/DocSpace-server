@@ -43,5 +43,5 @@ public class AddMcpServerRequestBody
     [Url]
     public required string Endpoint { get; init; }
     public Dictionary<string, string>? Headers { get; init; }
-    public IconParams? Icon { get; init; }
+    public string? Icon { get; init; }
 }
