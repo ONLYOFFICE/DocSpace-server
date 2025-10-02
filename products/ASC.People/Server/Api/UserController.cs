@@ -1467,7 +1467,16 @@ public class UserController(
 
         result.Theme = (await settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>()).Theme;
 
-        result.LoginEventId = cookieStorage.GetLoginEventIdFromCookie(cookiesManager.GetCookies(CookiesType.AuthKey));
+        var (loginEventId, expiration) = cookieStorage.GetLoginEventIdFromCookie(cookiesManager.GetCookies(CookiesType.AuthKey));
+
+        result.LoginEventId = loginEventId;
+
+        var lifetime = expiration - DateTime.UtcNow;
+
+        if (lifetime < TimeSpan.FromDays(1) || (await settingsManager.LoadForCurrentUserAsync<TenantCookieSettings>()).Enabled)
+        {
+            result.AuthCookieLifetime = lifetime.TotalSeconds;
+        }
 
         if (result.IsVisitor) 
         {

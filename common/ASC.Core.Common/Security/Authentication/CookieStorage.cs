@@ -99,12 +99,14 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
     }
 
 
-    public int GetLoginEventIdFromCookie(string cookie)
+    public (int loginEventId, DateTime expiration) GetLoginEventIdFromCookie(string cookie)
     {
         var loginEventId = 0;
+        var expiration = DateTime.MaxValue;
+
         if (string.IsNullOrEmpty(cookie))
         {
-            return loginEventId;
+            return (loginEventId, expiration);
         }
 
         try
@@ -114,13 +116,15 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
             if (8 < s.Length)
             {
                 loginEventId = !string.IsNullOrEmpty(s[8]) ? int.Parse(s[8]) : 0;
+                expiration = DateTime.ParseExact(s[6], DateTimeFormat, CultureInfo.InvariantCulture);
             }
         }
         catch (Exception err)
         {
             logger.ErrorLoginEvent(cookie, loginEventId, err);
         }
-        return loginEventId;
+
+        return (loginEventId, expiration);
     }
 
     public async Task<string> EncryptCookieAsync(int tenant, Guid userid, int loginEventId)

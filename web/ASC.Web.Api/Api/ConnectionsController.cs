@@ -302,7 +302,7 @@ public class ConnectionsController(
     private int GetLoginEventIdFromCookie()
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
-        var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
+        var (loginEventId, _) = cookieStorage.GetLoginEventIdFromCookie(cookie);
         return loginEventId;
     }
 }

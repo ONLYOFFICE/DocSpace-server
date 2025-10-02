@@ -357,7 +357,7 @@ public class AuthenticationController(
     public async Task<string> Logout()
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
-        var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
+        var (loginEventId, _) = cookieStorage.GetLoginEventIdFromCookie(cookie);
         var tenantId = tenantManager.GetCurrentTenantId();
         await dbLoginEventsManager.LogOutEventAsync(tenantId, loginEventId);
         await quotaSocketManager.LogoutSession(securityContext.CurrentAccount.ID, loginEventId);

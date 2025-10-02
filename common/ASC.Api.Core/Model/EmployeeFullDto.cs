@@ -209,6 +209,11 @@ public class EmployeeFullDto : EmployeeDto
     public int? LoginEventId { get; set; }
 
     /// <summary>
+    /// The auth cookie lifetime in seconds.
+    /// </summary>
+    public double? AuthCookieLifetime { get; set; }
+
+    /// <summary>
     /// The user who created the current user.
     /// </summary>
     public EmployeeDto CreatedBy { get; set; }
