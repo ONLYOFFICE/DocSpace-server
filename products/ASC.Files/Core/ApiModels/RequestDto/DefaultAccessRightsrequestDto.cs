@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The default access rights request parameters.
+/// The request parameters for changing the default access rights.
 /// </summary>
 public class DefaultAccessRightsrequestDto
 {

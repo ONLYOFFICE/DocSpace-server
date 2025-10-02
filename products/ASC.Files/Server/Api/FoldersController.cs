@@ -198,7 +198,7 @@ public abstract class FoldersController<T>(
     }
 
     /// <summary>
-    /// Sets the file order in the folder with ID specified in the request.
+    /// Sets the order of a folder with ID specified in the request.
     /// </summary>
     /// <short>
     /// Set folder order

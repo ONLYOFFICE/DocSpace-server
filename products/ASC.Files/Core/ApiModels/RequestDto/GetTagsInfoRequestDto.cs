@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The request parameters for getting the custom room tags.
+/// </summary>
 public class GetTagsInfoRequestDto
 {
     /// <summary>

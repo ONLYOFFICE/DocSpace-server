@@ -27,7 +27,7 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The detailed information request parameters.
+/// The request parameters for getting the detailed group information.
 /// </summary>
 public class DetailedInformationRequestDto
 {

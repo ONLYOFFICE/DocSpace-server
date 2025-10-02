@@ -27,7 +27,7 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The user ID request parameters.
+/// The request parameters for accessing a user by their ID.
 /// </summary>
 public class UserIdRequestDto
 {

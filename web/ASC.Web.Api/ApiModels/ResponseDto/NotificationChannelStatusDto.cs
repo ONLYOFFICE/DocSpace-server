@@ -27,13 +27,29 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The notification channel settings.
+/// </summary>
 public class NotificationChannelStatusDto
 {
+    /// <summary>
+    /// The list of notification channels.
+    /// </summary>
     public List<NotificationChannelDto> Channels { get; set; } = [];
 }
 
+/// <summary>
+/// The notification channel information.
+/// </summary>
 public class NotificationChannelDto
 {
+    /// <summary>
+    /// The notification channel name.
+    /// </summary>
     public required string Name { get; set; }
+
+    /// <summary>
+    /// Specifies whether the notification channel is enabled.
+    /// </summary>
     public required bool IsEnabled { get; set; }
 }

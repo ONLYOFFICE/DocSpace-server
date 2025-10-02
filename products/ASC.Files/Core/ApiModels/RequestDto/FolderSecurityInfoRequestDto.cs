@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The folder security request parameters.
+/// The request parameters for getting access rights to the folder.
 /// </summary>
 public class FolderSecurityInfoRequestDto<T>
 {

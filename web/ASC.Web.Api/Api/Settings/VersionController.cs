@@ -53,7 +53,7 @@ public class VersionController(
     }
 
     /// <summary>
-    /// Returns a list of the available portal versions including the current version.
+    /// Returns a list of the available portal versions, including the current version.
     /// </summary>
     /// <short>
     /// Get the portal versions

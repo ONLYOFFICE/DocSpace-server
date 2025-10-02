@@ -32,7 +32,7 @@ namespace ASC.People.ApiModels.ResponseDto;
 public class ApiKeyResponseDto 
 {
     /// <summary>
-    /// The unique identifier of the API key.
+    /// The API key unique identifier.
     /// </summary>
     public required Guid Id { get; set; }
 

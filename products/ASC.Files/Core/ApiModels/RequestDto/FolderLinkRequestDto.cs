@@ -75,7 +75,7 @@ public class FolderLinkRequest
 }
 
 /// <summary>
-/// The generic folder link request parameters.
+/// The request parameters for accessing the folder link.
 /// </summary>
 public class FolderLinkRequestDto<T>
 {
