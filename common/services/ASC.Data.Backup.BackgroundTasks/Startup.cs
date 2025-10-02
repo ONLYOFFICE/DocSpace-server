@@ -59,5 +59,7 @@ public class Startup : BaseStartup
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
         services.RegisterFreeBackupQuotaFeature();
+
+        services.AddBackupSchedulerServiceResiliencePipeline();
     }
 }
