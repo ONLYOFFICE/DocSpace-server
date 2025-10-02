@@ -45,7 +45,6 @@ public partial class SettingsController(
     SetupInfo setupInfo,
     ExternalResourceSettings externalResourceSettings,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
-    GeolocationHelper geolocationHelper,
     ConsumerFactory consumerFactory,
     TimeZoneConverter timeZoneConverter,
     CustomNamingPeople customNamingPeople,
@@ -199,9 +198,7 @@ public partial class SettingsController(
 
             settings.ThirdpartyEnable = setupInfo.ThirdPartyAuthEnabled && providerManager.IsNotEmpty;
 
-            var country = (await geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key;
-
-            settings.RecaptchaType = country == "CN" ? RecaptchaType.hCaptcha : RecaptchaType.Default;
+            settings.RecaptchaType = !string.IsNullOrEmpty(setupInfo.HcaptchaPublicKey) ? RecaptchaType.hCaptcha : RecaptchaType.Default;
 
             settings.RecaptchaPublicKey = settings.RecaptchaType is RecaptchaType.hCaptcha ? setupInfo.HcaptchaPublicKey : setupInfo.RecaptchaPublicKey;
         }
