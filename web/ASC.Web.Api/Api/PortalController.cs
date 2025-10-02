@@ -521,8 +521,8 @@ public class PortalController(
                                 baseUrl,
                                 commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth, messageDate.ToString(CultureInfo.InvariantCulture)));
 
-        var users = (await userManager.GetUsersAsync())
-                .Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated) && u.Id != user.Id);
+        var users = (await userManager.GetUsersAsync(EmployeeStatus.Active))
+                .Where(u => u.Id != user.Id);
 
         foreach (var u in users)
         {
