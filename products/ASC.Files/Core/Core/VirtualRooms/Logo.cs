@@ -34,22 +34,22 @@ public class Logo
     /// <summary>
     /// The original logo.
     /// </summary>
-    public string Original { get; set; }
+    public required string Original { get; set; }
 
     /// <summary>
     /// The large logo.
     /// </summary>
-    public string Large { get; set; }
+    public required string Large { get; set; }
 
     /// <summary>
     /// The medium logo.
     /// </summary>
-    public string Medium { get; set; }
+    public required string Medium { get; set; }
 
     /// <summary>
     /// The small logo.
     /// </summary>
-    public string Small { get; set; }
+    public required string Small { get; set; }
 
     /// <summary>
     /// The logo color.

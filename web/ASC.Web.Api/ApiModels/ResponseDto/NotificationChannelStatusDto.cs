@@ -34,6 +34,6 @@ public class NotificationChannelStatusDto
 
 public class NotificationChannelDto
 {
-    public string Name { get; set; }
-    public bool IsEnabled { get; set; }
+    public required string Name { get; set; }
+    public required bool IsEnabled { get; set; }
 }

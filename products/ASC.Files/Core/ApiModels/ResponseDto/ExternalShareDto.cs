@@ -46,7 +46,7 @@ public class ExternalShareDto
     /// <summary>
     /// The external data title.
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// The type of the external data.
@@ -61,12 +61,12 @@ public class ExternalShareDto
     /// <summary>
     /// The unique identifier of the shared entity.
     /// </summary>
-    public required string EntityId { get; set; }
+    public string EntityId { get; set; }
    
     /// <summary>
     /// The title of the shared entity.
     /// </summary>
-    public required string EntityTitle { get; set; }
+    public string EntityTitle { get; set; }
 
     /// <summary>
     /// The entry type of the external data.
@@ -91,7 +91,7 @@ public class ExternalShareDto
     /// <summary>
     /// Specifies whether the user is authenticated or not.
     /// </summary>
-    public bool IsAuthenticated { get; set; }
+    public required bool IsAuthenticated { get; set; }
     
     /// <summary>
     /// The room ID of the external data.

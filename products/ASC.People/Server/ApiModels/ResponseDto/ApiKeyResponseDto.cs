@@ -34,17 +34,17 @@ public class ApiKeyResponseDto
     /// <summary>
     /// The unique identifier of the API key.
     /// </summary>
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
     /// The API key name.
     /// </summary>
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     /// <summary>
     /// The full API key value (only returned when creating a new key).
     /// </summary>
-    public string Key { get; set; }
+    public required string Key { get; set; }
 
     /// <summary>
     /// The API key postfix (used for identification).
@@ -54,7 +54,7 @@ public class ApiKeyResponseDto
     /// <summary>
     /// The list of permissions granted to the API key.
     /// </summary>
-    public List<string> Permissions { get; set; }
+    public required List<string> Permissions { get; set; }
 
     /// <summary>
     /// The date and time when the API key was last used.
@@ -79,7 +79,7 @@ public class ApiKeyResponseDto
     /// <summary>
     /// Indicates whether the API key is active or not.
     /// </summary>
-    public bool IsActive { get; set; } = true;
+    public required bool IsActive { get; set; } = true;
 }
 
 [Scope]

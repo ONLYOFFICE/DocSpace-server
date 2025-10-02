@@ -34,7 +34,7 @@ public class FormGalleryDto
     /// <summary>
     /// The form gallery path.
     /// </summary>
-    public string Path { get; set; }
+    public required string Path { get; set; }
 
     /// <summary>
     /// The form gallery domain.

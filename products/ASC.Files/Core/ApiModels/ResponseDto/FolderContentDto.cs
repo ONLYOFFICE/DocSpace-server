@@ -56,13 +56,13 @@ public class FolderContentDto<T>
     /// The folder start index.
     /// </summary>
     [SwaggerSchemaCustom(Example = 0)]
-    public required int StartIndex { get; set; }
+    public int StartIndex { get; set; }
 
     /// <summary>
     /// The number of folder elements.
     /// </summary>
     [SwaggerSchemaCustom(Example = 4)]
-    public required int Count { get; set; }
+    public int Count { get; set; }
 
     /// <summary>
     /// The total number of elements in the folder.

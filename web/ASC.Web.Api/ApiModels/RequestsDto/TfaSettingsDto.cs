@@ -44,12 +44,12 @@ public class TfaSettingsDto
     /// <summary>
     /// Indicates whether the TFA configuration is currently active.
     /// </summary>
-    public bool Enabled { get; set; }
+    public required bool Enabled { get; set; }
 
     /// <summary>
     /// Indicates whether the TFA configuration can be used.
     /// </summary>
-    public bool Avaliable { get; set; }
+    public required bool Avaliable { get; set; }
 
     /// <summary>
     /// The list of IP addresses that are exempt from TFA requirements.
