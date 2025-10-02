@@ -253,11 +253,11 @@ public class FolderDtoHelper(
             result.Expired = folder.ShareRecord.Options?.IsExpired;
             result.RequestToken = await _externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
             result.ExpirationDate = _apiDateTimeHelper.Get(folder.ShareRecord?.Options?.ExpirationDate);
-            result.RootFolderType = FolderType.SHARE;
             var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.ParentId);
             if (!await _fileSecurity.CanReadAsync(parent))
             {
                 result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                result.RootFolderType = FolderType.SHARE;
             }
         }
         
