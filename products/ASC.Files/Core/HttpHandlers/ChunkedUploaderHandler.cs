@@ -177,8 +177,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                         var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, section.Body, context.Request.ContentLength.Value - headersLength - boundaryLength * 2 - 6, request.ChunkNumber);
                         await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
-                        await WriteSuccess(context,
-                            await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
+                        await WriteSuccess(context, await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
                         return;
                     }
                 case ChunkedRequestType.Finalize:

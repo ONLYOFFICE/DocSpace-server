@@ -75,7 +75,7 @@ public class File<T> : FileEntry<T>
 {
     private FileStatus _status;
     
-    protected File() : base(null)
+    protected File()
     {
         Version = 1;
         VersionGroup = 1;
