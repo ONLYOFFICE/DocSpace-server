@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Buffers;
+
 using ASC.Data.Storage;
 using ASC.Web.Core.Users;
 using ASC.Web.Studio.Core;
@@ -52,43 +54,54 @@ public class McpIconStore(StorageFactory storageFactory, SetupInfo setupInfo)
     public async Task SaveAsync(int tenantId, Guid serverId, string imageBase64)
     {
         var store = await InitStoreAsync(tenantId);
-        
-        var imageData = Convert.FromBase64String(imageBase64);
-        
-        if (imageData is not { Length: > 0 })
-        {
-            throw new UnknownImageFormatException();
-        }
 
-        if (setupInfo.MaxImageUploadSize != -1 && imageData.Length > setupInfo.MaxImageUploadSize)
-        {
-            throw new ImageSizeLimitException();
-        }
-        
-        var serverIdStr = serverId.ToString("N");
-        
+        byte[]? buffer = null;
+
         try
         {
-            using var imgStream = new MemoryStream(imageData);
+            var index = imageBase64.IndexOf(',');
+            var base64Span = imageBase64.AsSpan(index + 1);
+
+            buffer = ArrayPool<byte>.Shared.Rent(base64Span.Length);
+            
+            if (!Convert.TryFromBase64Chars(base64Span, buffer, out var bytesWritten))
+            {
+                throw new UnknownImageFormatException();
+            }
+            
+            using var imgStream = new MemoryStream(buffer, 0, bytesWritten, writable: false);
+
+            if (imgStream is not { Length: > 0 })
+            {
+                throw new UnknownImageFormatException();
+            }
+
+            if (setupInfo.MaxImageUploadSize != -1 && imgStream.Length > setupInfo.MaxImageUploadSize)
+            {
+                throw new ImageSizeLimitException();
+            }
+
+            var serverIdStr = serverId.ToString("N");
+            
             using var img = new MagickImage(imgStream);
 
             if (img is { Width: < 48, Height: < 48 })
             {
                 throw new ImageSizeLimitException();
             }
-            
+
             foreach (var size in _iconSizes)
             {
                 if (size.Value.Width != img.Width || size.Value.Height != img.Height)
                 {
-                    using var processedImg = img.CloneAndMutate(a => 
+                    using var processedImg = img.CloneAndMutate(a =>
                         a.Colorize(MagickColors.White, new Percentage()));
-                    
+
                     processedImg.Resize(size.Value.Width, size.Value.Height);
-                    
+
                     using var memoryStream = new MemoryStream();
                     await processedImg.WriteAsync(memoryStream, MagickFormat.Png);
-                    
+
                     var fileName = GetFilePath(serverIdStr, size.Key);
                     await store.SaveAsync(fileName, memoryStream);
                 }
@@ -96,9 +109,9 @@ public class McpIconStore(StorageFactory storageFactory, SetupInfo setupInfo)
                 {
                     using var memoryStream = new MemoryStream();
                     await img.WriteAsync(memoryStream, MagickFormat.Png);
-                    
+
                     var fileName = GetFilePath(serverIdStr, size.Key);
-                    
+
                     await store.SaveAsync(fileName, memoryStream);
                 }
             }
@@ -106,6 +119,13 @@ public class McpIconStore(StorageFactory storageFactory, SetupInfo setupInfo)
         catch (ArgumentException error)
         {
             throw new UnknownImageFormatException(error);
+        }
+        finally
+        {
+            if (buffer != null)
+            {
+                ArrayPool<byte>.Shared.Return(buffer, true);
+            }
         }
     }
 
