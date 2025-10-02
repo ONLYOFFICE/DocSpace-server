@@ -224,6 +224,37 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper ma
             message.CreatedOn);
     }
 
+    public async Task<MessagePair?> GetMessagePairAsync(int assistantMessageId, Guid userId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        var assistantMessage = await dbContext.GetMessageAsync(assistantMessageId, userId);
+        if (assistantMessage == null)
+        {
+            return null;
+        }
+        
+        var userMessage = await dbContext.GetUserMessageByAssistantMessageIdAsync(assistantMessageId, assistantMessage.ChatId);
+        if (userMessage == null)
+        {
+            return null;
+        }
+
+        return new MessagePair
+        {
+            AssistantMessage = new Message(
+                assistantMessage.Id,
+                assistantMessage.Role,
+                JsonSerializer.Deserialize<List<MessageContent>>(assistantMessage.Content, _serializerOptions)!,
+                assistantMessage.CreatedOn),
+            UserMessage = new Message(
+                userMessage.Id,
+                userMessage.Role,
+                JsonSerializer.Deserialize<List<MessageContent>>(userMessage.Content, _serializerOptions)!,
+                userMessage.CreatedOn)
+        };
+    }
+
     public async IAsyncEnumerable<Message> GetMessagesAsync(Guid chatId, int offset, int limit)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();

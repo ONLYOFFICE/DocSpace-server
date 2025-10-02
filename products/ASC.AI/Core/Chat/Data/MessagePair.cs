@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,10 +26,8 @@
 
 namespace ASC.AI.Core.Chat.Data;
 
-public class Message(int id, Role role, List<MessageContent> contents, DateTime createdOn)
+public class MessagePair
 {
-    public int Id { get; } = id;
-    public Role Role { get; } = role;
-    public List<MessageContent> Contents { get; } = contents;
-    public DateTime CreatedOn { get; } = createdOn;
+    public required Message UserMessage { get; init; }
+    public required Message AssistantMessage { get; init; }
 }

@@ -99,6 +99,12 @@ public partial class AiDbContext
     {
         return Queries.UpdateChatTitleAsync(this, tenantId, chatId, title);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
+    public Task<DbChatMessage?> GetUserMessageByAssistantMessageIdAsync(int assistantMessageId, Guid chatId)
+    {
+        return Queries.GetUserMessageByAssistantMessageIdAsync(this, assistantMessageId, chatId);
+    }
 }
 
 static file class Queries
@@ -177,4 +183,10 @@ static file class Queries
             ctx.Chats.Where(x => x.TenantId == tenantId && x.Id == chatId)
                 .ExecuteUpdate(x =>
                     x.SetProperty(y => y.Title, title)));
+    
+    public static readonly Func<AiDbContext, int, Guid, Task<DbChatMessage?>> GetUserMessageByAssistantMessageIdAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int assistantMessageId, Guid chatId) =>
+            ctx.Messages.Where(x => x.ChatId == chatId && x.Role == Role.User && x.Id < assistantMessageId)
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefault());
 }
