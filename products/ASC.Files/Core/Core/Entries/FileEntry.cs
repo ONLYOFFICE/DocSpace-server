@@ -101,9 +101,14 @@ public abstract class FileEntry : ICloneable
     public FileShare Access { get; set; }
 
     /// <summary>
-    /// Specifies if the file entry shared or not.
+    /// Specifies if the file entry shared via link or not.
     /// </summary>
     public bool Shared { get; set; }
+    
+    /// <summary>
+    /// Specifies if the file entry shared for user or not.
+    /// </summary>
+    public bool SharedForUser { get; set; }
 
     /// <summary>
     /// Indicates whether the parent entity is shared.

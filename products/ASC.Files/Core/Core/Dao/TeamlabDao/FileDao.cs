@@ -2304,10 +2304,10 @@ internal class FileDao(
                         where f.TenantId == r.TenantId
                         select f
                     ).FirstOrDefault(),
-                Shared = filesDbContext.Security.Any(x => 
+                UserShared = filesDbContext.Security.Where(x => 
                     x.TenantId == r.TenantId && 
-                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
+                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File)
+                    .Select(s => s.SubjectType).ToList(),
                 ParentShared = filesDbContext.Security.Any(x => 
                     x.TenantId == r.TenantId && 
                     (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
@@ -2412,9 +2412,12 @@ internal class FileDao(
         FilesDbContext filesDbContext,
         FormsItemDto formsItemDto)
     {
-        var tenantId = _tenantManager.GetCurrentTenantId();        
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var currentUserId = _authContext.CurrentAccount.ID;
         var q = GetFileQuery(filesDbContext, r => r.ParentId == parentId && r.CurrentVersion);
-        
+
+        q = q.Where(r => !filesDbContext.Security.Any(x => x.TenantId == r.TenantId && x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File && x.Share == FileShare.Restrict && x.Subject == currentUserId));
+            
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
 
@@ -2456,8 +2459,8 @@ internal class FileDao(
                 Expression<Func<Selector<DbFormsItemDataSearch>, Selector<DbFormsItemDataSearch>>> expressionSearchText = s => funcForSearchInFormsData(s);
 
                 (success, var resultForm) = await factoryIndexerFormData.TrySelectIdsAsync(expressionSearchText);
-            if (success)
-            {
+                if (success)
+                {
                     searchIds = searchIds.Intersect(resultForm).ToList();
                 }
             }
@@ -2779,10 +2782,10 @@ public class DbFileQuery
 {
     public DbFile File { get; init; }
     public DbFolder Root { get; set; }
-    public bool Shared { get; set; }
     public bool ParentShared { get; set; }
     public int Order { get; set; }
-    
+   
+    public List<SubjectType> UserShared { get; set; }
     public DbFolder Origin { get; set; }
     public DbFolder OriginRoom { get; set; }
     public DbFilesSecurity SharedRecord { get; set; }

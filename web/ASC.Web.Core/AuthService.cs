@@ -94,16 +94,16 @@ public class AuthKey
     /// <summary>
     /// The authorization key name.
     /// </summary>
-    public string Name { get; init; }
+    public required string Name { get; init; }
 
     /// <summary>
     /// The authorization key value.
     /// </summary>
     [StringLength(255)]
-    public string Value { get; init; }
+    public required string Value { get; init; }
 
     /// <summary>
     /// The authorization key title.
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
 }

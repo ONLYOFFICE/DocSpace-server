@@ -65,11 +65,11 @@ public class QuotaSocketManager(
         await MakeRequest("change-invitation-limit-value", new { room, value });
     }
 
-    public async Task LogoutSession(Guid userId, int loginEventId = 0)
+    public async Task LogoutSession(Guid userId, int loginEventId = 0, string redirectUrl = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
-        await MakeRequest("logout-session", new { room = $"{tenantId}-{userId}", loginEventId });
+        await MakeRequest("logout-session", new { room = $"{tenantId}-{userId}", loginEventId, redirectUrl });
     }
 
     public async Task EncryptionProgressAsync(int percentage, string error)

@@ -326,12 +326,10 @@ public class FolderDtoHelper(
             switch (contextFolder)
             {
                 case { FolderType: FolderType.Recent }:
-                    result.RootFolderType = FolderType.Recent;
-                    result.ParentId = await _globalFolderHelper.GetFolderRecentAsync<T>();
-                    break;
                 case { FolderType: FolderType.SHARE }:
                 case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, authContext.CurrentAccount.ID):
                     result.RootFolderType = FolderType.SHARE;
+                    result.RootFolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
                     var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.ParentId);
                     if (!await _fileSecurity.CanReadAsync(parent))
                     {

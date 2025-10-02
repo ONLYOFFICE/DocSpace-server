@@ -40,7 +40,7 @@ public class WebPluginRequests
     /// The JSON-formatted configuration settings for the web plugin.
     /// </summary>
     [StringLength(255)]
-    public string Settings { get; set; }
+    public required string Settings { get; set; }
 }
 
 /// <summary>

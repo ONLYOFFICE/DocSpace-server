@@ -1035,4 +1035,7 @@
   <data name="FileRemovedFromFavorite" xml:space="preserve">
     <value>File Removed From Favorite: {0}</value>
   </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Folder Downloaded: {0}</value>
+  </data>
 </root>

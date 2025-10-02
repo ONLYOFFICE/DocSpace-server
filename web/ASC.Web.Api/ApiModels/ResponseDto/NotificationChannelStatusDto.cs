@@ -46,10 +46,10 @@ public class NotificationChannelDto
     /// <summary>
     /// The notification channel name.
     /// </summary>
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     /// <summary>
     /// Specifies whether the notification channel is enabled.
     /// </summary>
-    public bool IsEnabled { get; set; }
+    public required bool IsEnabled { get; set; }
 }

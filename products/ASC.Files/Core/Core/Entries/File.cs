@@ -392,7 +392,7 @@ public partial class FileMapper(IServiceProvider serviceProvider, TenantDateTime
     
     [MapProperty(nameof(DbFile.Title), nameof(File<int>.PureTitle))]
     private partial void ApplyChanges(DbFile source, File<int> target);
-    
+
     [UserMapping(Default = true)]
     public File<int> MapDbFileQueryToDbFileInternal(DbFileQuery dbFileQuery)
     {
@@ -400,13 +400,20 @@ public partial class FileMapper(IServiceProvider serviceProvider, TenantDateTime
         {
             return null;
         }
-        
+
         var result = Map(dbFileQuery);
         ApplyChanges(dbFileQuery.File, result);
         result.CreateOn = tenantDateTimeConverter.Convert(dbFileQuery.File.CreateOn);
         result.ModifiedOn = tenantDateTimeConverter.Convert(dbFileQuery.File.ModifiedOn);
         result.LastOpened = tenantDateTimeConverter.Convert(dbFileQuery.LastOpened);
         result.ShareRecord = treeRecordMapper.MapToInternal(dbFileQuery.SharedRecord);
+        
+        if (dbFileQuery.UserShared != null)
+        {
+            result.Shared = dbFileQuery.UserShared.Any(r => r is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
+            result.SharedForUser = dbFileQuery.UserShared.Any(r => r is SubjectType.Group or SubjectType.User);
+        }
+
         return result;
     }
     

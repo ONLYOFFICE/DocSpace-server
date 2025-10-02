@@ -41,7 +41,7 @@ public class DocumentBuilderTaskDto
     /// <summary>
     /// The error message occurred during the document building process.
     /// </summary>
-    public string Error { get; set; }
+    public required string Error { get; set; }
 
     /// <summary>
     /// The progress percentage of the document building process.
@@ -61,17 +61,17 @@ public class DocumentBuilderTaskDto
     /// <summary>
     /// The result file ID.
     /// </summary>
-    public object ResultFileId { get; set; }
+    public required object ResultFileId { get; set; }
 
     /// <summary>
     /// The result file name.
     /// </summary>
-    public string ResultFileName { get; set; }
+    public required string ResultFileName { get; set; }
 
     /// <summary>
     /// The result file URL.
     /// </summary>
-    public string ResultFileUrl { get; set; }
+    public required string ResultFileUrl { get; set; }
 
     public static DocumentBuilderTaskDto Get<TId, TData>(DocumentBuilderTask<TId, TData> task)
     {

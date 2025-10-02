@@ -43,6 +43,6 @@ public class Startup : BaseStartup
         var services = builder.Services;
         await base.ConfigureServices(builder);
 
-        services.AddHostedService<TelegramListenerService>();
+        services.AddActivePassiveHostedService<TelegramListenerService>(_configuration);
     }
 }
