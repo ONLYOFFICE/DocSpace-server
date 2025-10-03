@@ -50,7 +50,12 @@ public class ChatCompletionRunner(
         var attachments = await attachmentsTask;
         var userMessage = FormatUserMessage(message, attachments);
 
-        var content = ChatPromptTemplate.GetPrompt(context.Instruction, context.ContextFolderId, context.Room.Id);
+        var content = ChatPromptTemplate.GetPrompt(
+            context.Instruction, 
+            context.ContextFolderId, 
+            context.Room.Id,
+            context.User.FirstName,
+            context.User.Email);
         
         var messages = new List<ChatMessage>
         {
@@ -84,7 +89,13 @@ public class ChatCompletionRunner(
         
         var attachments = await GetAttachmentsAsync(files).ToListAsync();
         
-        var systemPrompt = ChatPromptTemplate.GetPrompt(context.Instruction, context.ContextFolderId, context.Room.Id);
+        var systemPrompt = ChatPromptTemplate.GetPrompt(
+            context.Instruction, 
+            context.ContextFolderId, 
+            context.Room.Id,
+            context.User.FirstName,
+            context.User.Email);
+        
         var systemMessage = new ChatMessage(ChatRole.System, systemPrompt);
         
         var userMessage = FormatUserMessage(message, attachments);

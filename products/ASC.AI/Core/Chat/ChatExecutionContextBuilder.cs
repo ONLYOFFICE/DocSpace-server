@@ -34,7 +34,8 @@ public class ChatExecutionContextBuilder(
     TenantManager tenantManager,
     AuthContext authContext,
     AiProviderDao providerDao,
-    ChatTools chatTools)
+    ChatTools chatTools,
+    UserManager userManager)
 {
     public async Task<ChatExecutionContext> BuildAsync(int roomId)
     {
@@ -57,6 +58,7 @@ public class ChatExecutionContextBuilder(
         var providerTask = providerDao.GetProviderAsync(tenantId, room.SettingsChatProviderId);
         var resultStorageTask = folderDao.GetFoldersAsync(room.Id, FolderType.ResultStorage).FirstAsync();
         var chatSettingsTask = chatDao.GetUserChatSettingsAsync(tenantId, roomId, userId);
+        var userTask = userManager.GetUsersAsync(userId);
         
         var provider = await providerTask;
         if (provider == null)
@@ -70,11 +72,12 @@ public class ChatExecutionContextBuilder(
         
         var resultStorage = await resultStorageTask;
         var tools = await toolsTask;
+        var user = await userTask;
 
         var context = new ChatExecutionContext
         {
             TenantId = tenantId,
-            UserId = userId,
+            User = user,
             Room = room,
             ClientOptions = new ChatClientOptions
             {
@@ -96,7 +99,7 @@ public class ChatExecutionContextBuilder(
 public class ChatExecutionContext : IAsyncDisposable
 {
     public int TenantId { get; init; }
-    public Guid UserId { get; init; }
+    public required UserInfo User { get; init; }
     public required Folder<int> Room { get; init; }
     public required ChatClientOptions ClientOptions { get; init; }
     public string? Instruction { get; init; }

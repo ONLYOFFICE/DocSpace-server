@@ -124,11 +124,13 @@ public static class ChatPromptTemplate
         - Do not use favicon url
         <citation_guidelines>
         <context>
-        The current date is {0}
-        The work folder id is {1}
-        The work room id is {2}
+        The current date is: {0}
+        The work folder id is: {1}
+        The work room id is: {2}
+        The current user's name is: {3}
+        The current user's email is: {4}
         </context>
-        {3}
+        {5}
         """;
 
     private const string UserPromptTemplate = 
@@ -142,16 +144,16 @@ public static class ChatPromptTemplate
         </additional_user_instruction>
         """;
     
-    public static string GetPrompt(string? instruction, int contextFolderId, int contextRoomId) 
+    public static string GetPrompt(string? instruction, int contextFolderId, int contextRoomId, string userName, string userEmail) 
     { 
         var date = DateTime.UtcNow.ToString("D");
         
         if (string.IsNullOrEmpty(instruction))
         {
-            return string.Format(SystemPromptTemplate, date, contextFolderId, contextRoomId, string.Empty);
+            return string.Format(SystemPromptTemplate, date, contextFolderId, contextRoomId, userName, userEmail, string.Empty);
         }
 
         var userPrompt = string.Format(UserPromptTemplate, instruction);
-        return string.Format(SystemPromptTemplate, date, contextFolderId, contextRoomId, userPrompt);
+        return string.Format(SystemPromptTemplate, date, contextFolderId, contextRoomId, userName, userEmail, userPrompt);
     }
 }
