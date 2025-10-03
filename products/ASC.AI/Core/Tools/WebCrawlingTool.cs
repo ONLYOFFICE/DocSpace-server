@@ -30,7 +30,7 @@ namespace ASC.AI.Core.Tools;
 public class WebCrawlingTool(WebSearchEngineFactory searchEngineFactory, IFaviconService faviconService)
 {
     public const string Name = "docspace_web_crawling";
-    private const string Description = "Extract and crawl content from specific URLs - retrieves full text content, metadata, and structured information from web pages. Ideal for extracting detailed content from known URLs.  In the text, leave links to the resources you refer to when generating in md format. Example: [Title or domain](URL)";
+    private const string Description = "Extract and crawl content from specific URLs - retrieves full text content, metadata, and structured information from web pages. Ideal for extracting detailed content from known URLs.";
     
     private static AIFunctionFactoryOptions FactoryOptions => new()
     {
