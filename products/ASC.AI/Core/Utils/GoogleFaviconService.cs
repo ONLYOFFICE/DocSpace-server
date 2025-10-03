@@ -24,14 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core;
+namespace ASC.AI.Core.Utils;
 
-public static class AiUtils
+[Singleton(typeof(IFaviconService))]
+public class GoogleFaviconService : IFaviconService
 {
-    public static readonly JsonSerializerOptions ContentSerializerOptions = new()
+    private const string GoogleFaviconApiBase = "https://www.google.com/s2/favicons";
+
+    public string GetFaviconUrl(string domain, uint size = 16)
     {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-    };
+        ArgumentException.ThrowIfNullOrEmpty(domain);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(size, (uint)256);
+        
+        return $"{GoogleFaviconApiBase}?domain={domain}&sz={size}";
+    }
 }

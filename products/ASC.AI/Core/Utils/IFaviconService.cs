@@ -24,12 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Retrieval.Web;
+namespace ASC.AI.Core.Utils;
 
-public class WebSearchResult
+public interface IFaviconService
 {
-    public string? Title { get; set; }
-    public string? Url { get; init; }
-    public string? FaviconUrl { get; internal set; }
-    public required string Text { get; init; }
+    public string GetFaviconUrl(string domain, uint size = 16);
 }

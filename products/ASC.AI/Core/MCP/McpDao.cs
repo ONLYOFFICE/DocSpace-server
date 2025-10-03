@@ -81,7 +81,7 @@ public class McpDao(
             
             if (server.HasIcon)
             {
-                await iconStore.SaveAsync(tenantId, server.Id, iconBase64);
+                await iconStore.SaveAsync(tenantId, server.Id, iconBase64!);
             }
             
             await context.SaveChangesAsync();

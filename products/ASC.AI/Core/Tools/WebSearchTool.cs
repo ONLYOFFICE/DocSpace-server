@@ -27,7 +27,7 @@
 namespace ASC.AI.Core.Tools;
 
 [Scope]
-public class WebSearchTool(WebSearchEngineFactory searchEngineFactory)
+public class WebSearchTool(WebSearchEngineFactory searchEngineFactory, IFaviconService faviconService)
 {
     public const string Name = "docspace_web_search";
     private const string Description = "Search the web - performs real-time web searches and can scrape content from specific URLs. In the text, leave links to the resources you refer to when generating in md format. Example: [Title or domain](URL)";
@@ -54,7 +54,24 @@ public class WebSearchTool(WebSearchEngineFactory searchEngineFactory)
                     MaxResults = 5
                 });
 
-                var response = results.ToList();
+                var response = results.Select(x =>
+                {
+                    var faviconUrl = x.FaviconUrl;
+                    
+                    if (!string.IsNullOrEmpty(x.Url))
+                    {
+                        var domain = new Uri(x.Url).Host;
+                        faviconUrl = faviconService.GetFaviconUrl(domain);
+                    }
+
+                    return new WebSearchResult
+                    {
+                        Title = x.Title,
+                        Url = x.Url,
+                        FaviconUrl = faviconUrl,
+                        Text = x.Text
+                    };
+                }).ToList();
 
                 return new ToolResponse<List<WebSearchResult>> { Data = response };
             }

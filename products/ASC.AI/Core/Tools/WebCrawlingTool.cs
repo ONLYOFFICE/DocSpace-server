@@ -27,7 +27,7 @@
 namespace ASC.AI.Core.Tools;
 
 [Scope]
-public class WebCrawlingTool(WebSearchEngineFactory searchEngineFactory)
+public class WebCrawlingTool(WebSearchEngineFactory searchEngineFactory, IFaviconService faviconService)
 {
     public const string Name = "docspace_web_crawling";
     private const string Description = "Extract and crawl content from specific URLs - retrieves full text content, metadata, and structured information from web pages. Ideal for extracting detailed content from known URLs.  In the text, leave links to the resources you refer to when generating in md format. Example: [Title or domain](URL)";
@@ -55,6 +55,12 @@ public class WebCrawlingTool(WebSearchEngineFactory searchEngineFactory)
                     Url = url,
                     MaxCharacters = maxCharacters ?? 3000
                 });
+
+                if (result != null && !string.IsNullOrEmpty(url))
+                {
+                    var domain = new Uri(url).Host;
+                    result.FaviconUrl = faviconService.GetFaviconUrl(domain);
+                }
 
                 return new ToolResponse<WebSearchResult> { Data = result };
             }
