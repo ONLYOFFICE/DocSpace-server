@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Files.Core.Mapping;
+using System.Text.Json.Serialization;
 
 namespace ASC.Files.Core;
 
@@ -75,6 +76,7 @@ public class File<T> : FileEntry<T>
 {
     private FileStatus _status;
     
+    [JsonConstructor]
     protected File()
     {
         Version = 1;
