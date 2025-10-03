@@ -41,27 +41,35 @@ public class AiSettingsService(
         {
             throw new SecurityException();
         }
-        
+    
         var settings = await webSearchSettingsStore.GetSettingsAsync();
         settings.Enabled = enabled;
+        
+        var typeChanged = settings.Type != type;
         settings.Type = type;
 
         switch (type)
         {
             case EngineType.Exa:
-                ArgumentException.ThrowIfNullOrEmpty(key);
-                settings.Config = new ExaConfig
+                if (typeChanged || !string.IsNullOrEmpty(key))
                 {
-                    ApiKey = key
-                };
+                    ArgumentException.ThrowIfNullOrEmpty(key);
+                    settings.Config = new ExaConfig
+                    {
+                        ApiKey = key
+                    };
+                }
                 break;
+            
             case EngineType.None:
                 settings.Config = null;
                 break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
-        
+    
         await webSearchSettingsStore.SetSettingsAsync(settings);
-        
+    
         return settings;
     }
 

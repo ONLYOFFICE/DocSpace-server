@@ -39,15 +39,15 @@ public class SettingsController(AiSettingsService aiSettingsService, IMapper map
             inDto.Body.Enabled, 
             inDto.Body.Type, 
             inDto.Body.Key);
-        
-        return settings.ToDto();
+
+        return mapper.Map<WebSearchSettings, WebSearchSettingsDto>(settings);
     }
     
     [HttpGet("config/web-search")]
     public async Task<WebSearchSettingsDto> GetWebSearchSettingsAsync()
     {
         var settings = await aiSettingsService.GetWebSearchSettingsAsync();
-        return settings.ToDto();
+        return mapper.Map<WebSearchSettings, WebSearchSettingsDto>(settings);
     }
     
     [HttpGet("config")]
