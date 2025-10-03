@@ -261,6 +261,12 @@ public class CspSettingsHelper(
                 options.Add(oformOptions);
             }
         }
+        
+        var webSearch = configuration.GetSection("csp:websearch").Get<CspOptions>();
+        if (webSearch != null)
+        {
+            options.Add(webSearch);
+        }
 
         if (!string.IsNullOrEmpty(configuration["web:recaptcha:public-key"]) || !string.IsNullOrEmpty(configuration["web:hcaptcha:public-key"]))
         {
