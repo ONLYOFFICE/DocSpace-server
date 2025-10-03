@@ -109,6 +109,7 @@ public class File<T> : FileEntry<T>
     /// <summary>
     /// The file comment.
     /// </summary>
+    [JsonIgnore]
     public string Comment { get; set; }
 
     /// <summary>

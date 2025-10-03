@@ -237,7 +237,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         catch (Exception error)
         {
             logger.ErrorChunkedUploaderHandlerService(error);
-            await WriteError(context, error.Message);
+            await WriteError(context, error.InnerException?.Message ?? error.Message);
         }
     }
 
