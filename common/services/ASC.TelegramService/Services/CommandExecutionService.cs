@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Globalization;
+
 namespace ASC.TelegramService.Services;
 
 [Singleton]
@@ -135,6 +137,7 @@ public partial class CommandExecutionService
             context.Context = cmd;
             context.Client = client;
             context.TenantId = tenantId;
+            context.TelegramCulture = GetUserCulture(cmd.User.LanguageCode);
 
             cancellationToken.ThrowIfCancellationRequested();
             command.Invoke(context, param);
@@ -142,6 +145,18 @@ public partial class CommandExecutionService
         catch (Exception ex)
         {
             _log.DebugCouldntHandle(msg.Text, ex);
+        }
+    }
+
+    private CultureInfo GetUserCulture(string langCode)
+    {
+        try
+        {
+            return CultureInfo.GetCultureInfo(langCode);
+        }
+        catch
+        {
+            return null;
         }
     }
 }
