@@ -577,7 +577,7 @@ public class UserController(
                 await securityContext.SetUserPasswordHashAsync(inDto.UserId, inDto.MemberBase.PasswordHash);
 
                 var messageTarget = MessageTarget.Create(inDto.UserId);
-                messageService.Send(MessageAction.UserUpdatedPassword, messageTarget);
+                await messageService.SendAsync(MessageAction.UserUpdatedPassword, messageTarget);
 
                 var passwordChangeEvent = (await auditEventsRepository.GetByFilterAsync(
                     userId: securityContext.CurrentAccount.ID,
