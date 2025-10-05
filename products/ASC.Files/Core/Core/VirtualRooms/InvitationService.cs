@@ -243,6 +243,14 @@ public class InvitationService(
             return data;
         }
 
+        var linkOwner = await userManager.GetUsersAsync(record.Owner);
+
+        if (linkOwner.Status == EmployeeStatus.Terminated || linkOwner.Removed)
+        {
+            data.Result = EmailValidationKeyProvider.ValidationResult.Invalid;
+            return data;
+        }
+        
         data.Result = record.Options.ExpirationDate > DateTime.UtcNow 
             ? EmailValidationKeyProvider.ValidationResult.Ok 
             : EmailValidationKeyProvider.ValidationResult.Expired;
