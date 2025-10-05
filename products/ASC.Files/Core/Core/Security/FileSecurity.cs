@@ -1230,14 +1230,21 @@ public class FileSecurity(
                 }
                 break;
             case FolderType.RoomTemplates:
-                if (action is FilesSecurityActions.FillForms 
-                    or FilesSecurityActions.EditHistory 
-                    or FilesSecurityActions.ReadHistory
-                    or FilesSecurityActions.SubmitToFormGallery
-                    or FilesSecurityActions.Lock)
+                if (action is 
+                    FilesSecurityActions.FillForms or 
+                    FilesSecurityActions.EditHistory or 
+                    FilesSecurityActions.ReadHistory or 
+                    FilesSecurityActions.SubmitToFormGallery or 
+                    FilesSecurityActions.Lock)
                 {
                     return false;
                 }
+
+                if (action is FilesSecurityActions.EditAccess && !isRoom)
+                {
+                    return false;
+                }
+                
                 if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
                 {
                     return true;
