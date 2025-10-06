@@ -3892,6 +3892,11 @@ public class FileStorageService //: IFileStorageService
                                 }
                                 else
                                 {
+                                    if (entry is File<T> file)
+                                    {
+                                        await socketManager.UpdateFileAsync(file);
+                                    }
+                                    
                                     await filesMessageService.SendAsync(
                                         entry.FileEntryType == FileEntryType.Folder ? MessageAction.FolderUpdatedAccessFor : MessageAction.FileUpdatedAccessFor, entry,
                                         entry.Title, name, FileShareExtensions.GetAccessString(ace.Access));
