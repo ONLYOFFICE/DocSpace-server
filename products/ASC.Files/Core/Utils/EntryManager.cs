@@ -440,7 +440,7 @@ public class EntryManager(IDaoFactory daoFactory,
             {
                 total++;
                 allFoldersCountTask++;
-                
+            
                 if (total > from && total <= from + count)
                 {
                     folders.Add((Folder<T>)e);
@@ -1480,7 +1480,7 @@ public class EntryManager(IDaoFactory daoFactory,
         return file;
     }
 
-    public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, bool editingAlone = false)
+    public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, bool editingAlone = false, string fillingSessionId = null)
     {
         var token = externalShare.GetKey();
         
@@ -1495,7 +1495,7 @@ public class EntryManager(IDaoFactory daoFactory,
         bool checkRight;
         if ((await fileTracker.GetEditingByAsync(fileId)).Contains(userId))
         {
-            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenant, commonLinkUtility.ServerRootPath, docKey, editingAlone, token);
+            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenant, commonLinkUtility.ServerRootPath, docKey, editingAlone, token, fillingSessionId);
             if (!checkRight)
             {
                 return null;
@@ -1517,7 +1517,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
-        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenant, commonLinkUtility.ServerRootPath, docKey, editingAlone, token);
+        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenant, commonLinkUtility.ServerRootPath, docKey, editingAlone, token, fillingSessionId);
         if (checkRight)
         {
             await fileTracker.ChangeRight(fileId, userId, false);
@@ -2112,8 +2112,8 @@ public class EntryManager(IDaoFactory daoFactory,
                     // {
                     //     await MarkAsRecent(result);
                     // }
+                    }
                 }
-            }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Form submission error");
