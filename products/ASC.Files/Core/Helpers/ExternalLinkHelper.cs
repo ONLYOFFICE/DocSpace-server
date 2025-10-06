@@ -141,7 +141,7 @@ public class ExternalLinkHelper(
                 });
             }
 
-            if (!result.Shared && result.Status == Status.Ok && !isDocSpaceAdmin)
+            if (!result.Shared && result.Status == Status.Ok)
             {
                 result.Shared = entry switch
                 {
@@ -256,6 +256,8 @@ public class ExternalLinkHelper(
     private async Task<bool> MarkAsync<T>(Folder<T> room, Guid linkId, Guid userId)
     {
         await fileMarker.MarkAsRecentByLink(room, linkId);
+        await socketManager.AddToSharedAsync(room, [userId]);
+        
         room.FolderIdDisplay = IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync);
         await socketManager.CreateFolderAsync(room, [userId]);
         return true;
