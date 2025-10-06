@@ -70,8 +70,10 @@ internal abstract class SecurityBaseDao<T>(
 
         foreach (var record in records)
         {
-            var query = filesDbContext.ForDeleteShareRecordsAsync(record.TenantId, record.EntryType, record.Subject)
-            .WhereAwait(async r => r.EntryId == (await mapping.MappingIdAsync(record.EntryId)));
+            var mappedId = (await mapping.MappingIdAsync(record.EntryId));
+            var query = await filesDbContext
+                .ForDeleteShareRecordsAsync(record.TenantId, record.EntryType, record.Subject, mappedId)
+                .ToListAsync();
 
             filesDbContext.RemoveRange(query);
         }

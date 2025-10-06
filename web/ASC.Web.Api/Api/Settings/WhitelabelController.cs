@@ -432,13 +432,12 @@ public class WhitelabelController(
     }
 
     /// <summary>
-    /// Specifies if the white label logo text are default or not.
+    /// Specifies if the white label logo text is default or not.
     /// </summary>
     /// <short>
     /// Check the default white label logo text
     /// </short>
     /// <path>api/2.0/settings/whitelabel/logotext/isdefault</path>
-    /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Request properties of white label logos", typeof(IsDefaultWhiteLabelLogosDto))]
     [HttpGet("whitelabel/logotext/isdefault")]

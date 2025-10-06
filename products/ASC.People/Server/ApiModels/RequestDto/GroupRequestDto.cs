@@ -37,13 +37,13 @@ public class GroupRequestDto
     public IEnumerable<Guid> Members { get; init; }
 
     /// <summary>
-    /// Group manager ID
+    /// The group manager ID.
     /// </summary>
     [Required]
     public Guid GroupManager { get; set; }
 
     /// <summary>
-    /// Group name
+    /// The group name.
     /// </summary>
     [StringLength(128)]
     public string GroupName { get; set; }

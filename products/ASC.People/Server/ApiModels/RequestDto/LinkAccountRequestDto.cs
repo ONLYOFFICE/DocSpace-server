@@ -79,7 +79,7 @@ public class SignupAccountRequestDto
     public string Culture { get; set; }
 
     /// <summary>
-    /// Third-party profile in the serialized format
+    /// The third-party profile in the serialized format
     /// </summary>
     public required string SerializedProfile { get; set; }
 }

@@ -34,13 +34,13 @@ public class RoomDataLifetimeDto
     /// <summary>
     /// Specifies whether to permanently delete the room data or not.
     /// </summary>
-    public bool DeletePermanently { get; set; }
+    public required bool DeletePermanently { get; set; }
 
     /// <summary>
     /// Specifies the time period type of the room data lifetime.
     /// </summary>
     [EnumDataType(typeof(RoomDataLifetimePeriod))]
-    public RoomDataLifetimePeriod Period { get; set; }
+    public required RoomDataLifetimePeriod Period { get; set; }
 
     /// <summary>
     /// Specifies the time period value of the room data lifetime.

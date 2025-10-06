@@ -91,6 +91,9 @@ public class UserController(
     /// <summary>
     /// Returns the user claims.
     /// </summary>
+    /// <short>
+    /// Get user claims
+    /// </short>
     /// <path>api/2.0/people/tokendiagnostics</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Claims", typeof(object))]
@@ -574,7 +577,7 @@ public class UserController(
                 await securityContext.SetUserPasswordHashAsync(inDto.UserId, inDto.MemberBase.PasswordHash);
 
                 var messageTarget = MessageTarget.Create(inDto.UserId);
-                messageService.Send(MessageAction.UserUpdatedPassword, messageTarget);
+                await messageService.SendAsync(MessageAction.UserUpdatedPassword, messageTarget);
 
                 var passwordChangeEvent = (await auditEventsRepository.GetByFilterAsync(
                     userId: securityContext.CurrentAccount.ID,
@@ -962,12 +965,12 @@ public class UserController(
     }
 
     /// <summary>
-    /// Returns the detailed information about a profile of the user with the name specified in the request.
+    /// Returns the detailed information about a profile of the user with the ID specified in the request.
     /// </summary>
     /// <short>
-    /// Get a profile by user name
+    /// Get a profile by user ID
     /// </short>
-    /// <path>api/2.0/people/{username}</path>
+    /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "Incorect UserId")]
@@ -1056,7 +1059,7 @@ public class UserController(
     /// Returns a list of users with full information about them matching the parameters specified in the request.
     /// </summary>
     /// <short>
-    /// Search users with detaailed information by extended filter
+    /// Search users with detailed information by extended filter
     /// </short>
     /// <path>api/2.0/people/filter</path>
     /// <collection>list</collection>
@@ -2053,7 +2056,7 @@ public class UserController(
     /// <summary>
     /// Starts updating the type of the user or guest when reassigning rooms and shared files.
     /// </summary>
-    /// <short>Update user type</short>
+    /// <short>Start updating user type</short>
     /// <path>api/2.0/people/type</path>
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
@@ -2131,7 +2134,7 @@ public class UserController(
     /// <summary>
     /// Terminates the process of updating the type of the user or guest.
     /// </summary>
-    /// <short>Terminate update user type</short>
+    /// <short>Terminate updating user type</short>
     /// <path>api/2.0/people/type/terminate</path>
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
@@ -2594,6 +2597,7 @@ public class UserControllerAdditional<T>(
     /// Get users with room sharing settings
     /// </short>
     /// <path>api/2.0/people/room/{id}</path>
+    /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]

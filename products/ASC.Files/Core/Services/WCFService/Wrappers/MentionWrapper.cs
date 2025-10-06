@@ -27,7 +27,7 @@
 namespace ASC.Web.Files.Services.WCFService;
 
 /// <summary>
-/// The mention message parameters.
+/// The parameters of a user mentioned in a message.
 /// </summary>
 public class MentionWrapper
 {
@@ -39,13 +39,13 @@ public class MentionWrapper
     public UserInfo User { get; internal set; }
 
     /// <summary>
-    /// The email address of the user.
+    /// The user email address.
     /// </summary>
     [EmailAddress]
     public string Email { get; internal set; }
 
     /// <summary>
-    /// The identification of the user.
+    /// The user unique identification.
     /// </summary>
     public string Id { get; internal set; }
 
@@ -55,12 +55,12 @@ public class MentionWrapper
     public string Image { get; internal set; }
 
     /// <summary>
-    /// Specifies if the user has the access to the file or not.
+    /// Specifies whether the user has the access to the file where they are mentioned.
     /// </summary>
     public bool HasAccess { get; internal set; }
 
     /// <summary>
-    /// The full name of the user.
+    /// The user full name.
     /// </summary>
     public string Name { get; internal set; }
 }
@@ -76,23 +76,23 @@ public class MentionMessageWrapper
     public ActionLinkConfig ActionLink { get; set; }
 
     /// <summary>
-    /// A list of emails which will receive the mention message.
+    /// A list of emails that will receive the mention message.
     /// </summary>
     public List<string> Emails { get; set; }
 
     /// <summary>
-    /// The comment message.
+    /// The mention message.
     /// </summary>
     public string Message { get; set; }
 }
 
 /// <summary>
-/// The mention message request parameters.
+/// The request parameters for sending the mention message.
 /// </summary>
 public class MentionMessageWrapperRequestDto<T>
 {
     /// <summary>
-    /// The file ID of the mention message.
+    /// The file ID with the mention message.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }

@@ -44,12 +44,12 @@ public class WatermarkDto
     /// <summary>
     /// The watermark text and image rotate.
     /// </summary>
-    public int Rotate { get; set; }
+    public required int Rotate { get; set; }
 
     /// <summary>
     /// The watermark image scale.
     /// </summary>
-    public int ImageScale { get; set; }
+    public required int ImageScale { get; set; }
 
     /// <summary>
     /// The watermark image url.
@@ -59,12 +59,12 @@ public class WatermarkDto
     /// <summary>
     /// The watermark image height.
     /// </summary>
-    public double ImageHeight { get; set; }
+    public required double ImageHeight { get; set; }
 
     /// <summary>
     /// The watermark image width.
     /// </summary>
-    public double ImageWidth { get; set; }
+    public required double ImageWidth { get; set; }
 }
 [Scope]
 public class WatermarkDtoHelper

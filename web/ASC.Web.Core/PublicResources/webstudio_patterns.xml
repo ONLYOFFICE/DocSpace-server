@@ -86,7 +86,17 @@
     <subject />
     <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_backup_created_tg|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
-  
+
+  <!-- scheduled_backup_failed -->
+  <pattern id="scheduled_backup_failed" sender="email.sender">
+    <subject resource="|subject_scheduled_backup_failed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_scheduled_backup_failed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+  <pattern id="scheduled_backup_failed" sender="telegram.sender">
+    <subject />
+    <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_scheduled_backup_failed_tg|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
   <!-- restore_started -->
   <pattern id="restore_started" sender="email.sender">
     <subject resource="|subject_restore_started|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />

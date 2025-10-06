@@ -35,7 +35,7 @@ public abstract class FileEntry : ICloneable
 {    
     [JsonIgnore]
     public IServiceProvider ServiceProvider { get; set; }
-    
+
     protected FileEntry() { }
 
     protected FileEntry(IServiceProvider serviceProvider)
@@ -101,9 +101,14 @@ public abstract class FileEntry : ICloneable
     public FileShare Access { get; set; }
 
     /// <summary>
-    /// Specifies if the file entry shared or not.
+    /// Specifies if the file entry shared via link or not.
     /// </summary>
     public bool Shared { get; set; }
+    
+    /// <summary>
+    /// Specifies if the file entry shared for user or not.
+    /// </summary>
+    public bool SharedForUser { get; set; }
 
     /// <summary>
     /// Indicates whether the parent entity is shared.
@@ -207,7 +212,7 @@ public abstract class FileEntry : ICloneable
 /// <summary>
 /// The file entry parameters.
 /// </summary>
-public abstract class FileEntry<T>(IServiceProvider serviceProvider) : FileEntry(serviceProvider), IEquatable<FileEntry<T>>
+public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
 {
     /// <summary>
     /// The file entry ID.
@@ -245,6 +250,13 @@ public abstract class FileEntry<T>(IServiceProvider serviceProvider) : FileEntry
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     private T _folderIdDisplay;
+
+
+    protected FileEntry() { }
+    
+    protected FileEntry(IServiceProvider serviceProvider) : base(serviceProvider)
+    {
+    }
 
     /// <summary>
     /// The folder ID display.

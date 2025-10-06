@@ -437,7 +437,11 @@ public class Builder<T>(
             (thumbnailHeight, thumbnailWidth) = (thumbnailWidth, thumbnailHeight);
         }
 
-        var size = new MagickGeometry(thumbnailWidth, thumbnailHeight);
+        var size = new MagickGeometry(thumbnailWidth, thumbnailHeight)
+        {
+            IgnoreAspectRatio = false,
+            Greater = true
+        };
 
         var result = sourceBitmap.CloneAndMutate(r =>
         {

@@ -273,9 +273,14 @@ public abstract class EditorController<T>(
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionWrapper>))]
     [HttpGet("{fileId}/sharedusers")]
-    public async Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
-    {
-        return await fileStorageService.SharedUsersAsync(inDto.FileId);
+    public Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
+    {        
+        if (!securityContext.IsAuthenticated)
+        {
+            return Task.FromResult<List<MentionWrapper>>(null);
+        }
+
+        return fileStorageService.SharedUsersAsync(inDto.FileId);
     }
 
     /// <summary>

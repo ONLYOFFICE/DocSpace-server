@@ -111,7 +111,7 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
         var botname = tgProvider?.TelegramBotName;
         return string.IsNullOrEmpty(botname)
             ? null
-            : $"t.me/{botname}?start={token}";
+            : $"t.me/{botname.TrimStart('@')}?start={token}";
     }
 
     public async Task<bool> TestingClient(TelegramBotClient telegramBotClient)

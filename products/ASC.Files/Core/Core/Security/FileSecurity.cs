@@ -916,6 +916,11 @@ public class FileSecurity(
 
     private async Task<bool> CanAsync<T>(FileEntry<T> entry, Guid userId, FilesSecurityActions action, IEnumerable<FileShareRecord<T>> shares = null, bool setEntryAccess = true)
     {
+        if (entry == null)
+        {
+            return false;
+        }
+        
         if (entry.Security != null && entry.Security.TryGetValue(action, out var result))
         {
             return result;
@@ -1225,14 +1230,21 @@ public class FileSecurity(
                 }
                 break;
             case FolderType.RoomTemplates:
-                if (action is FilesSecurityActions.FillForms 
-                    or FilesSecurityActions.EditHistory 
-                    or FilesSecurityActions.ReadHistory
-                    or FilesSecurityActions.SubmitToFormGallery
-                    or FilesSecurityActions.Lock)
+                if (action is 
+                    FilesSecurityActions.FillForms or 
+                    FilesSecurityActions.EditHistory or 
+                    FilesSecurityActions.ReadHistory or 
+                    FilesSecurityActions.SubmitToFormGallery or 
+                    FilesSecurityActions.Lock)
                 {
                     return false;
                 }
+
+                if (action is FilesSecurityActions.EditAccess && !isRoom)
+                {
+                    return false;
+                }
+                
                 if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
                 {
                     return true;
@@ -1269,6 +1281,11 @@ public class FileSecurity(
                         return true;
                     }
 
+                    if (action == FilesSecurityActions.EditAccess && !isRoom)
+                    {
+                        return true;
+                    }
+                    
                     switch (action)
                     {
                         case FilesSecurityActions.Read or FilesSecurityActions.Copy:
@@ -1662,7 +1679,8 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        return e.Access == FileShare.ReadWrite && e.CreateBy == authContext.CurrentAccount.ID;
+                        var id = file != null ? file.Id : folder != null ? folder.Id : default;
+                        return !Equals(default(T), id) && !Equals(ace.EntryId, id) &&  e.Access == FileShare.ReadWrite;
                     default:
                         if (e.Access == FileShare.RoomManager ||
                             (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
@@ -1735,7 +1753,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        return false;
+                        return e.Access == FileShare.ReadWrite;
                     default:
                         if (e.Access == FileShare.RoomManager ||
                             (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
@@ -1825,7 +1843,8 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        return false;
+                        var id = file != null ? file.Id : folder != null ? folder.Id : default;
+                        return !Equals(default(T), id) && !Equals(ace.EntryId, id) &&  e.Access == FileShare.ReadWrite;
                     default:
                         if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
                         {
@@ -1840,7 +1859,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access != FileShare.Restrict && isAuthenticated && !isGuest)
+                        if (e.Access != FileShare.Restrict && isAuthenticated && !isGuest && ace?.Options is not { DenyDownload: true })
                         {
                             return true;
                         }
@@ -1905,7 +1924,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        return false;
+                        return e.Access == FileShare.ReadWrite;
                     default:
                         if ((e.Access == FileShare.RoomManager ||
                              (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))

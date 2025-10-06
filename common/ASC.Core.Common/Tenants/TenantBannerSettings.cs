@@ -27,7 +27,7 @@
 namespace ASC.Core.Tenants;
 
 /// <summary>
-/// The promotional banners visibility settings.
+/// The visibility settings of the promotional banners.
 /// </summary>
 [Scope]
 [Serializable]

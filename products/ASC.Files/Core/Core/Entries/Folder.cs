@@ -296,6 +296,8 @@ public class Folder<T> : FileEntry<T>, IFolder
 public partial class FolderMapper(IServiceProvider serviceProvider, TenantDateTimeConverter tenantDateTimeConverter, FilesMappingAction filesMappingAction)
 {
     private partial Folder<int> Map(DbFolderQuery source);
+    
+    [MapperIgnoreSource(nameof(DbFolder.Settings))]
     private partial void ApplyChanges(DbFolder source, Folder<int> target);
     
     [UserMapping(Default = true)]
@@ -311,6 +313,13 @@ public partial class FolderMapper(IServiceProvider serviceProvider, TenantDateTi
         result.CreateOn = tenantDateTimeConverter.Convert(dbFolderQuery.Folder.CreateOn);
         result.ModifiedOn = tenantDateTimeConverter.Convert(dbFolderQuery.Folder.ModifiedOn);
         filesMappingAction.Process(result);
+        
+        if (dbFolderQuery.UserShared != null)
+        {
+            result.Shared = dbFolderQuery.UserShared.Any(r => r is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
+            result.SharedForUser = dbFolderQuery.UserShared.Any(r => r is SubjectType.Group or SubjectType.User);
+        }
+
         return result;
     }
     

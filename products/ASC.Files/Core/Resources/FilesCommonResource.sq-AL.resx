@@ -527,19 +527,19 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
     <value>Hapni skedarin</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Skedari nuk mund të ngarkohet në këtë dhomë. Ju lutem provoni të ngarkoni formularin PDF {0}.</value>
+    <value>Skedari nuk mund të ngarkohet në këtë dhomë. Ju lutem provoni të ngarkoni formularin PDF ONLYOFFICE.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Lidhje për të plotësuar</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Zhvendosja e disa skedarëve në dhomën e plotësimit të formularit nuk mbështetet. Lëvizni një formular PDF {0} në të njëjtën kohë.</value>
+    <value>Zhvendosja e disa skedarëve në dhomën e plotësimit të formularit nuk mbështetet. Lëvizni një formular PDF ONLYOFFICE në të njëjtën kohë.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Zhvendosja e dosjeve në dhomën e plotësimit të formularit nuk mbështetet. Lëvizni një formular PDF {0} në të njëjtën kohë.</value>
+    <value>Zhvendosja e dosjeve në dhomën e plotësimit të formularit nuk mbështetet. Lëvizni një formular PDF ONLYOFFICE në të njëjtën kohë.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Skedari nuk mund të zhvendoset në këtë dhomë. Ju lutemi provoni të zhvendosni formularin PDF {0}.</value>
+    <value>Skedari nuk mund të zhvendoset në këtë dhomë. Ju lutemi provoni të zhvendosni formularin PDF ONLYOFFICE.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Numri i formularit</value>

@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Files.Core.Mapping;
+using System.Text.Json.Serialization;
 
 namespace ASC.Files.Core;
 
@@ -75,6 +76,14 @@ public class File<T> : FileEntry<T>
 {
     private FileStatus _status;
     
+    [JsonConstructor]
+    protected File()
+    {
+        Version = 1;
+        VersionGroup = 1;
+        FileEntryType = FileEntryType.File;
+    }
+    
     public File(IServiceProvider provider) : base(provider)
     {
         Version = 1;
@@ -100,6 +109,7 @@ public class File<T> : FileEntry<T>
     /// <summary>
     /// The file comment.
     /// </summary>
+    [JsonIgnore]
     public string Comment { get; set; }
 
     /// <summary>
@@ -316,11 +326,6 @@ public class File<T> : FileEntry<T>
     public ForcesaveType Forcesave { get; set; }
     
     /// <summary>
-    /// Parent room title.
-    /// </summary>
-    public string Location { get; set; }
-    
-    /// <summary>
     /// The file converted type.
     /// </summary>
     public string ConvertedType { get; set; }
@@ -390,7 +395,7 @@ public partial class FileMapper(IServiceProvider serviceProvider, TenantDateTime
     
     [MapProperty(nameof(DbFile.Title), nameof(File<int>.PureTitle))]
     private partial void ApplyChanges(DbFile source, File<int> target);
-    
+
     [UserMapping(Default = true)]
     public File<int> MapDbFileQueryToDbFileInternal(DbFileQuery dbFileQuery)
     {
@@ -398,13 +403,20 @@ public partial class FileMapper(IServiceProvider serviceProvider, TenantDateTime
         {
             return null;
         }
-        
+
         var result = Map(dbFileQuery);
         ApplyChanges(dbFileQuery.File, result);
         result.CreateOn = tenantDateTimeConverter.Convert(dbFileQuery.File.CreateOn);
         result.ModifiedOn = tenantDateTimeConverter.Convert(dbFileQuery.File.ModifiedOn);
         result.LastOpened = tenantDateTimeConverter.Convert(dbFileQuery.LastOpened);
         result.ShareRecord = treeRecordMapper.MapToInternal(dbFileQuery.SharedRecord);
+        
+        if (dbFileQuery.UserShared != null)
+        {
+            result.Shared = dbFileQuery.UserShared.Any(r => r is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
+            result.SharedForUser = dbFileQuery.UserShared.Any(r => r is SubjectType.Group or SubjectType.User);
+        }
+
         return result;
     }
     

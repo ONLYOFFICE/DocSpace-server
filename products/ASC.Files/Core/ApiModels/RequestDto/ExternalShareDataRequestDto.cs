@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The external shared data request parameters.
+/// The request parameters for getting external shared data.
 /// </summary>
 public class ExternalShareDataRequestDto
 {

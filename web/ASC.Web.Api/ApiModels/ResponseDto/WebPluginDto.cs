@@ -96,7 +96,7 @@ public class WebPluginDto
     /// <summary>
     /// Specifies if the web plugin is enabled or not.
     /// </summary>
-    public bool Enabled { get; set; }
+    public required bool Enabled { get; set; }
 
     /// <summary>
     /// Specifies if the web plugin is system or not.

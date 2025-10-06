@@ -159,7 +159,7 @@ public class FileSharingAceHelper(
                     
                 if (w.FileShareOptions != null)
                 {
-                    if (w.SubjectType == SubjectType.PrimaryExternalLink)
+                    if (w.SubjectType == SubjectType.PrimaryExternalLink && room is { FolderType: FolderType.PublicRoom or FolderType.FillingFormsRoom } )
                     {
                         w.FileShareOptions.ExpirationDate = default;
                     }

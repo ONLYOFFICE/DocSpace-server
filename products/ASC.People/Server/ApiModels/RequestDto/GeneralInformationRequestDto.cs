@@ -27,7 +27,7 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The general information request parameters.
+/// The request parameters for getting the general group information.
 /// </summary>
 public class GeneralInformationRequestDto
 {

@@ -39,6 +39,8 @@ public static class AuthorizationExtension
         { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people/@self", [ "accounts.self:write" ] },
         { "GET api/[0-9].[0-9]/people", [ "accounts:read", "accounts:write" ] },
         { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people", [ "accounts:write" ] },
+        { "GET api/[0-9].[0-9]/group", [ "accounts:read" ] },
+        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/group", [ "accounts:write" ] },
         { "(GET|POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/keys(/.*)?", [ "*" ] },
     };
     

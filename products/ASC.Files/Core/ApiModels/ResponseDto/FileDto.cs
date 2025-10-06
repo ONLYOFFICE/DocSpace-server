@@ -299,6 +299,11 @@ public class FileDtoHelper(
             {
                 result.OriginRoomTitle = result.OriginTitle;
             }
+            else if(result.RootFolderType == FolderType.USER)
+            {
+                result.OriginRoomTitle = FilesUCResource.SharedForMe;
+                
+            }
         }
         
         if (file.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
@@ -306,17 +311,15 @@ public class FileDtoHelper(
             switch (contextFolder)
             {
                 case { FolderType: FolderType.Recent }:
-                    result.RootFolderType = FolderType.Recent;
-                    result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
-
-                    break;
                 case { FolderType: FolderType.SHARE }:
                 case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, authContext.CurrentAccount.ID):
+                    var folderShareAsync = await _globalFolderHelper.GetFolderShareAsync<T>();
                     result.RootFolderType = FolderType.SHARE;
+                    result.RootFolderId = folderShareAsync;
                     var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.FolderId);
                     if (!await _fileSecurity.CanReadAsync(parent))
                     {
-                        result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                        result.FolderId = folderShareAsync;
                     }
 
                     break;
@@ -521,11 +524,11 @@ public class FileDtoHelper(
                 result.RequestToken = await _externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
                 result.External = true;
                 result.ExpirationDate = _apiDateTimeHelper.Get(file.ShareRecord?.Options?.ExpirationDate);
-                result.RootFolderType = FolderType.SHARE;
                 var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.FolderId);
                 if (!await _fileSecurity.CanReadAsync(parent))
                 {
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                    result.RootFolderType = FolderType.SHARE;
                 }
             }
             

@@ -385,7 +385,7 @@ public class Balance
 }
 
 /// <summary>
-/// Represents a sub-account with a specific currency and amount.
+/// Represents a sub-account with a specific currency and balance.
 /// </summary>
 public class SubAccount
 {
@@ -394,7 +394,7 @@ public class SubAccount
     /// </summary>
     public string Currency { get; init; }
     /// <summary>
-    /// The amount of the sub-account.
+    /// The balance of the sub-account in the specified currency.
     /// </summary>
     public decimal Amount { get; init; }
 }
@@ -569,7 +569,7 @@ public class Operation
 public class Currency
 {
     /// <summary>
-    /// Unique identifier of the currency.
+    /// The currency unique identifier.
     /// </summary>
     public int Id { get; init; }
 

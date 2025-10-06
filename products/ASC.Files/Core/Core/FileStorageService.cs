@@ -1873,7 +1873,7 @@ public class FileStorageService //: IFileStorageService
 
             if (result.Renamed)
             {
-                await entryManager.MarkAsRecent(file);
+                //await entryManager.MarkAsRecent(file);
                 
                 await filesMessageService.SendAsync(MessageAction.FileRenamed, file, file.Title, oldTitle);
 
@@ -4110,17 +4110,7 @@ public class FileStorageService //: IFileStorageService
 
         return await SetExternalLinkAsync(entry.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, primary, requiredAuth);
     }
-
-    public Task<List<MentionWrapper>> SharedUsersAsync<T>(T fileId)
-    {
-        if (!authContext.IsAuthenticated)
-        {
-            return Task.FromResult<List<MentionWrapper>>(null);
-        }
-
-        return InternalSharedUsersAsync(fileId);
-    }
-
+    
     public async Task<FileReference> GetReferenceDataAsync<T>(string fileId, string portalName, T sourceFileId, string path, string link)
     {
         File<T> file = null;
@@ -4236,7 +4226,7 @@ public class FileStorageService //: IFileStorageService
         return await fileDao.GetUserFormRolesInRoom(room.Id, userId).AnyAsync();
     }
 
-    private async Task<List<MentionWrapper>> InternalSharedUsersAsync<T>(T fileId)
+    public async Task<List<MentionWrapper>> SharedUsersAsync<T>(T fileId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
 
@@ -4245,6 +4235,11 @@ public class FileStorageService //: IFileStorageService
         if (file == null)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (!await fileSecurity.CanReadAsync(file))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
         
         var usersIdWithAccess = await WhoCanRead(file);

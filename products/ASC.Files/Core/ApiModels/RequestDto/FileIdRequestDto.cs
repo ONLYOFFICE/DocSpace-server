@@ -27,24 +27,24 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The file ID request parameters.
+/// The request parameters for accessing a file by its ID.
 /// </summary>
 public class FileIdRequestDto<T>
 {
     /// <summary>
-    /// The file ID of the request.
+    /// The file unique identifier.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 }
 
 /// <summary>
-/// The file ID request parameters.
+/// The request parameters for accessing a file by its primary ID, with optional pagination settings.
 /// </summary>
 public class FilePrimaryIdRequestDto<T>
 {
     /// <summary>
-    /// The file ID of the request.
+    /// The file unique identifier.
     /// </summary>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
@@ -64,12 +64,12 @@ public class FilePrimaryIdRequestDto<T>
 }
 
 /// <summary>
-/// The operation ID request parameters.
+/// The request parameters for accessing an operation by its ID.
 /// </summary>
 public class OperationIdRequestDto
 {
     /// <summary>
-    /// The operation ID of the request.
+    /// The operation unique identifier.
     /// </summary>
     [FromRoute(Name = "id")]
     public required string Id { get; set; } = null;
