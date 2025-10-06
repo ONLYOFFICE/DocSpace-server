@@ -21,18 +21,6 @@ echo [6/6] npm install in typescript-sdk...
 call npm install || goto :error
 cd ..
 
-echo [5/6] Generating Typescript SDK with OpenAPI Generator...
-call openapi-generator-cli generate -c tools/toolsJava.json --custom-generator target/custom-generators-1.0-SNAPSHOT-jar-with-dependencies.jar || goto :error
-
-echo [5/6] Generating Typescript SDK with OpenAPI Generator...
-call openapi-generator-cli generate -c tools/toolsKotlin.json --custom-generator target/custom-generators-1.0-SNAPSHOT-jar-with-dependencies.jar || goto :error
-
-echo [5/6] Generating Typescript SDK with OpenAPI Generator...
-call openapi-generator-cli generate -c tools/toolsPhp.json --custom-generator target/custom-generators-1.0-SNAPSHOT-jar-with-dependencies.jar || goto :error
-
-echo [5/6] Generating Typescript SDK with OpenAPI Generator...
-call openapi-generator-cli generate -c tools/toolsSwift6.json --custom-generator target/custom-generators-1.0-SNAPSHOT-jar-with-dependencies.jar || goto :error
-
 echo Succesfully completed
 pause
 

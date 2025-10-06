@@ -38,7 +38,6 @@ public class MyPythonCodegen extends PythonClientCodegen {
 
     public MyPythonCodegen() {
         super();
-        this.outputFolder = "generated-code/my-python";
         this.templateDir = "templates/python";
         this.embeddedTemplateDir = "python";
 
@@ -60,6 +59,7 @@ public class MyPythonCodegen extends PythonClientCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
+        this.outputFolder = "generated-code/my-python";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
@@ -110,19 +110,7 @@ public class MyPythonCodegen extends PythonClientCodegen {
                             .anyMatch(p -> "count".equals(p.baseName));
 
                         if (allAreQueryParams && hasCountParam) {
-                            CodegenParameter fieldsParam = new CodegenParameter();
-                            fieldsParam.baseName = "fields";
-                            fieldsParam.paramName = "fields";
-                            fieldsParam.dataType = "string";
-                            fieldsParam.description = "Comma-separated list of fields to include in the response";
-                            fieldsParam.required = false;
-                            fieldsParam.isQueryParam = true;
-                            fieldsParam.isPrimitiveType = true;
-                            fieldsParam.isNullable = true;
-                            fieldsParam.collectionFormat = "csv";
-
-                            op.allParams.add(fieldsParam);
-                            op.queryParams.add(fieldsParam);
+                            op.vendorExtensions.put("x-hasFieldsParam", true);
                         }
                     }
                 }

@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const inputFilePath = path.join(__dirname, 'api-docs.json');
-const outputFilePath = path.join(__dirname, 'api-docs.json');
+const inputFilePath = path.join(__dirname, '../json/api-docs.json');
+const outputFilePath = path.join(__dirname, '../json/api-docs.json');
 
 function processNode(node, parentNode = null) {
   if (typeof node !== 'object' || node === null) {

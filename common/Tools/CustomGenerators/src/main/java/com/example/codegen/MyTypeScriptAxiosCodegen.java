@@ -41,7 +41,6 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
 
     public MyTypeScriptAxiosCodegen() {
         super();
-        this.outputFolder = "generated-code/my-typescript-axios";
         this.templateDir = "templates/typescript-axios";
         this.embeddedTemplateDir = "typescript-axios";
 
@@ -66,6 +65,7 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
+        this.outputFolder = "generated-code/my-typescript-axios";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
@@ -160,19 +160,7 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
                         .anyMatch(p -> "count".equals(p.baseName));
 
                     if (allAreQueryParams && hasCountParam) {
-                        CodegenParameter fieldsParam = new CodegenParameter();
-                        fieldsParam.baseName = "fields";
-                        fieldsParam.paramName = "fields";
-                        fieldsParam.dataType = "string";
-                        fieldsParam.description = "Comma-separated list of fields to include in the response";
-                        fieldsParam.required = false;
-                        fieldsParam.isQueryParam = true;
-                        fieldsParam.isPrimitiveType = true;
-                        fieldsParam.isNullable = true;
-                        fieldsParam.collectionFormat = "csv";
-
-                        op.allParams.add(fieldsParam);
-                        op.queryParams.add(fieldsParam);
+                        op.vendorExtensions.put("x-hasFieldsParam", true);
                     }
                 }
             }

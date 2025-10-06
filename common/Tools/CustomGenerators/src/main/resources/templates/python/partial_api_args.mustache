@@ -3,6 +3,9 @@
         {{#allParams}}
         {{paramName}}: {{{vendorExtensions.x-py-typing}}}{{^required}} = None{{/required}},
         {{/allParams}}
+        {{#vendorExtensions.x-hasFieldsParam}}
+        fields: Annotated[Optional[StrictStr], Field(description="Specifies which fields to include in the response. If omitted, default fields are returned.")] = None,
+        {{/vendorExtensions.x-hasFieldsParam}}
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],

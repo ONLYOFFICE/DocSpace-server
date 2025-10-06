@@ -72,6 +72,9 @@ class {{x-classname}}:
         {{#allParams}}
         {{paramName}},
         {{/allParams}}
+        {{#vendorExtensions.x-hasFieldsParam}}
+        fields,
+        {{/vendorExtensions.x-hasFieldsParam}}
         _request_auth,
         _content_type,
         _headers,
@@ -144,6 +147,10 @@ class {{x-classname}}:
             {{/isDate}}{{/isDateTime}}
 {{/queryParams}}
         # process the header parameters
+        {{#vendorExtensions.x-hasFieldsParam}}
+        if fields is not None:
+            _header_params['fields'] = fields
+        {{/vendorExtensions.x-hasFieldsParam}}
 {{#headerParams}}
         if {{paramName}} is not None:
             _header_params['{{baseName}}'] = {{paramName}}

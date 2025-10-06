@@ -5,6 +5,6 @@
     "version": "7.14.0"
   },
   "generatorName": "my-k6",
-  "inputSpec": "./tools/api-docs.json",
+  "inputSpec": "./json/api-docs.json",
   "outputDir": "k6"
 }

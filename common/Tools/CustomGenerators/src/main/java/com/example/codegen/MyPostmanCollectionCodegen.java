@@ -25,7 +25,6 @@ public class MyPostmanCollectionCodegen extends PostmanCollectionCodegen {
 
     public MyPostmanCollectionCodegen() {
         super();
-        this.outputFolder = "generated-code/my-postman-collection";
         this.templateDir = "templates/postman-collection";
         this.embeddedTemplateDir = "postman-collection";
     }
@@ -33,6 +32,7 @@ public class MyPostmanCollectionCodegen extends PostmanCollectionCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
+        this.outputFolder = "generated-code/my-postman-collection";
 
         String baseURL = openAPI.getServers().get(0).getUrl();
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
