@@ -115,9 +115,9 @@ public static class ChatPromptTemplate
         </search_guidelines>
         <citation_guidelines>
         - If the assistant's response is based on content returned by the docspace_web_search, docspace_web_crawling, docspace_knowledge_search tool, the assistant must always appropriately cite its response. 
-        - You MUST add a citation like this: Some fact[short title](URL)
-        - One piece of information can have multiple citations: Some important fact[short title](URL)[short title](URL)
-        - When citing from a compressed URL, remember to include the curly brackets: Some fact[anthropic doc](https://docs.anthropic.com/en/resources/prompt-library/google-apps-scripter)
+        - You MUST add a citation like this: Some fact [Short title](URL)
+        - One piece of information can have multiple citations: Some important fact [Short title](URL) [short title](URL)
+        - When citing from a compressed URL, remember to include the curly brackets: Some fact [nthropic doc](https://docs.anthropic.com/en/resources/prompt-library/google-apps-scripter)
         - If multiple lines use the same source, group them together with one citation
         - You can also use normal markdown links if needed: [Link text](URL)
         - If this link is to a document within the docspace, then instead of the link name, you should use the document name without the extension, and the link should be a relative link to the document: [Report](RELATIVE URL)
