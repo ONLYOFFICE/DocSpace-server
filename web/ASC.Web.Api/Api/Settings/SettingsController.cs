@@ -429,9 +429,11 @@ public partial class SettingsController(
     /// Get the deep link settings
     /// </short>
     /// <path>api/2.0/settings/deeplink</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Ok", typeof(TenantDeepLinkSettings))]
     [HttpGet("deeplink")]
+    [AllowAnonymous]
     public async Task<TenantDeepLinkSettings> GetDeepLinkSettings()
     {
         var result = await settingsManager.LoadAsync<TenantDeepLinkSettings>(HttpContext.GetIfModifiedSince());
