@@ -24,11 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.AspNetCore.RateLimiting;
+
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
 public class MessageSettingsController(
+    AuthContext authContext,
+    SetupInfo setupInfo,
     MessageService messageService,
     StudioNotifyService studioNotifyService,
     UserManager userManager,
@@ -38,8 +42,10 @@ public class MessageSettingsController(
     WebItemManager webItemManager,
     CustomNamingPeople customNamingPeople,
     IFusionCache fusionCache,
+    IHttpContextAccessor httpContextAccessor,
     TenantManager tenantManager,
     CookiesManager cookiesManager,
+    BruteForceLoginManager bruteForceLoginManager,
     CountPaidUserChecker countPaidUserChecker)
     : BaseSettingsController(fusionCache, webItemManager)
 {
@@ -126,6 +132,7 @@ public class MessageSettingsController(
     [SwaggerResponse(429, "Request limit is exceeded")]
     [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<string> SendAdminMail(AdminMessageSettingsRequestsDto inDto)
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
@@ -138,17 +145,28 @@ public class MessageSettingsController(
 
         if (!inDto.Email.TestEmailRegex())
         {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
+            throw new ArgumentException(Resource.ErrorNotCorrectEmail);
         }
 
         var message = HtmlUtil.ToPlainText(inDto.Message);
 
         if (string.IsNullOrEmpty(message))
         {
-            throw new Exception(Resource.ErrorEmptyMessage);
+            throw new ArgumentException(Resource.ErrorEmptyMessage);
         }
 
-        await CheckCache("sendadmmail");
+        if (!authContext.IsAuthenticated && (!string.IsNullOrEmpty(setupInfo.HcaptchaPublicKey) || !string.IsNullOrEmpty(setupInfo.RecaptchaPublicKey)))
+        {
+            var requestIp = MessageSettings.GetIP(httpContextAccessor.HttpContext?.Request);
+            var secretEmail = SetupInfo.IsSecretEmail(inDto.Email);
+
+            var recaptchaPassed = secretEmail || await bruteForceLoginManager.CheckRecaptchaAsync(inDto.RecaptchaType, inDto.RecaptchaResponse, requestIp);
+
+            if (!recaptchaPassed)
+            {
+                throw new RecaptchaException(Resource.RecaptchaInvalid);
+            }
+        }
 
         await studioNotifyService.SendMsgToAdminFromNotAuthUserAsync(inDto.Email, message, inDto.Culture);
         messageService.Send(MessageAction.ContactAdminMailSent);

@@ -27,6 +27,7 @@
 using System.Globalization;
 
 using ASC.Core.Common.Identity;
+using ASC.MessagingSystem;
 
 namespace ASC.People.Api;
 
@@ -84,6 +85,8 @@ public class UserController(
     UserSocketManager socketManager,
     GlobalFolderHelper globalFolderHelper,
     UserWebhookManager webhookManager,
+    BruteForceLoginManager bruteForceLoginManager,
+    SetupInfo setupInfo,
     IdentityClient client,
     GroupFullDtoHelper groupFullDtoHelper)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
@@ -1606,7 +1609,19 @@ public class UserController(
             var currentUser = await _userManager.GetUserByEmailAsync(inDto.Email);
             if (currentUser.Id != authContext.CurrentAccount.ID && !(await _userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)))
             {
-                throw new Exception(Resource.ErrorAccessDenied);
+                throw new InvalidOperationException(Resource.ErrorAccessDenied);
+            }
+        }
+        else if (!string.IsNullOrEmpty(setupInfo.HcaptchaPublicKey) || !string.IsNullOrEmpty(setupInfo.RecaptchaPublicKey))
+        {
+            var requestIp = MessageSettings.GetIP(httpContextAccessor.HttpContext?.Request);
+            var secretEmail = SetupInfo.IsSecretEmail(inDto.Email);
+
+            var recaptchaPassed = secretEmail || await bruteForceLoginManager.CheckRecaptchaAsync(inDto.RecaptchaType, inDto.RecaptchaResponse, requestIp);
+
+            if (!recaptchaPassed)
+            {
+                throw new RecaptchaException(Resource.RecaptchaInvalid);
             }
         }
 
