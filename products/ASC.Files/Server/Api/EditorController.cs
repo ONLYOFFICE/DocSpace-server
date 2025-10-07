@@ -194,6 +194,10 @@ public abstract class EditorController<T>(
                 };
             }
         }
+        if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
+        {
+            file.FormInfo = new FormInfo<T> { FillingSessionId = formOpenSetup.FillingSessionId };
+        }
 
         var result = await configurationConverter.Convert(configuration, file);
 
@@ -234,7 +238,6 @@ public abstract class EditorController<T>(
 
         if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
         {
-            result.EditorConfig.CallbackUrl = QueryHelpers.AddQueryString(result.EditorConfig.CallbackUrl, FilesLinkUtility.FillingSessionId, formOpenSetup.FillingSessionId);
             result.FillingSessionId = formOpenSetup.FillingSessionId;
         }
 

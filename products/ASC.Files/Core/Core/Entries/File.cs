@@ -382,6 +382,11 @@ public record FormInfo<T>
     public EntryProperties<T> Properties { get; init; }
     
     /// <summary>
+    /// The file filling session ID.
+    /// </summary>
+    public string FillingSessionId { get; set; }
+
+    /// <summary>
     /// The empty form information.
     /// </summary>
     public static FormInfo<T> Empty => new();
