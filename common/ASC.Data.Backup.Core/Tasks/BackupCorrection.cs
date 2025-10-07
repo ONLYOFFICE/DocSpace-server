@@ -24,33 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.Tasks.Modules;
+namespace ASC.Data.Backup.Tasks;
 
-public enum ModuleName
+public class BackupCorrection
 {
-    Audit,
-    Core,
-    Files,
-    Files2,
-    Tenants,
-    WebStudio,
-    RoomLogos,
-    Identity
-}
+    public Dictionary<int, long> FoldersTable = [];
 
-public interface IModuleSpecifics
-{
-    IEnumerable<RelationInfo> TableRelations { get; }
-    IEnumerable<TableInfo> Tables { get; }
-    ModuleName ModuleName { get; }
-    string ConnectionStringName { get; }
+    public Dictionary<Guid, long> QuotaRowTable = [];
 
-    bool TryAdjustFilePath(bool dump, ColumnMapper columnMapper, ref string filePath);
-    DbCommand CreateDeleteCommand(DbConnection connection, int tenantId, TableInfo table);
-    Task<DbCommand> CreateInsertCommand(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row);
-    DbCommand CreateSelectCommand(DbConnection connection, int tenantId, TableInfo table, int limit, int offset);
-    DbCommand CreateSelectCommand(DbConnection connection, int tenantId, TableInfo table, int limit, int offset, Guid id);
-    IEnumerable<TableInfo> GetTablesOrdered();
-    Stream PrepareData(string key, Stream data, ColumnMapper columnMapper);
-    void PrepareData(DataTable data, BackupCorrection backupCorrection);
+    public string QuotaRowTableDocumentsPath = $"/{FileConstant.ModuleId}/";
+
+    public string QuotaRowTableDocumentsTag = Web.Core.WebItemManager.DocumentsProductID.ToString();
 }

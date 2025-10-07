@@ -36,6 +36,8 @@ public class BackupPortalTask(
     TenantManager tenantManager,
     CoreBaseSettings coreBaseSettings,
     StorageFactory storageFactory,
+    IDaoFactory daoFactory,
+    IQuotaService quotaService,
     StorageFactoryConfig storageFactoryConfig,
     ModuleProvider moduleProvider,
     TempStream tempStream)
@@ -519,6 +521,9 @@ public class BackupPortalTask(
     private async Task<int> DoBackupModule(IDataWriteOperator writer, List<IModuleSpecifics> modules, int count)
     {
         var tablesProcessed = 0;
+
+        var backupCorrection = await GetBackupCorrection(TenantId);
+
         foreach (var module in modules)
         {
             logger.DebugBeginSavingDataForModule(module.ModuleName);
@@ -555,7 +560,7 @@ public class BackupPortalTask(
                         col.DateTimeMode = DataSetDateTime.Unspecified;
                     }
 
-                    module.PrepareData(data);
+                    module.PrepareData(data, backupCorrection);
 
                     logger.DebugEndLoadTable(table.Name);
 
@@ -622,6 +627,86 @@ public class BackupPortalTask(
         await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, () => Task.CompletedTask);
 
         logger.DebugEndBackupStorage();
+    }
+
+    /// <summary>
+    /// Recalculating quota when excluding old backup files.
+    /// </summary>
+    private async Task<BackupCorrection> GetBackupCorrection(int tenantId)
+    {
+        await tenantManager.SetCurrentTenantAsync(tenantId);
+
+        var correction = new BackupCorrection();
+
+        await using var backupRecordContext = await dbContextFactory.CreateDbContextAsync();
+        var backupRecords = await Queries.BackupRecordsAsync(backupRecordContext, tenantId).ToListAsync();
+
+        if (backupRecords.Count == 0)
+        {
+            return correction;
+        }
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        foreach (var backupRecord in backupRecords)
+        {
+            if (!int.TryParse(backupRecord.StoragePath, out var fileId))
+            {
+                continue;
+            }
+
+            var backupFile = await fileDao.GetFileAsync(fileId);
+
+            if (backupFile == null)
+            {
+                continue;
+            }
+
+            var backupFileParents = await folderDao.GetParentFoldersAsync(backupFile.ParentId).ToListAsync();
+
+            foreach (var backupFileParent in backupFileParents)
+            {
+                if (!correction.FoldersTable.TryGetValue(backupFileParent.Id, out var folderSize))
+                {
+                    folderSize = backupFileParent.Counter;
+                    correction.FoldersTable.Add(backupFileParent.Id, folderSize);
+                }
+
+                correction.FoldersTable[backupFileParent.Id] = Math.Max(0, folderSize - backupFile.ContentLength);
+            }
+
+            if (!correction.QuotaRowTable.TryGetValue(Guid.Empty, out var fullSize))
+            {
+                var tenantQuotaRow = (await quotaService.FindUserQuotaRowsAsync(TenantId, Guid.Empty))
+                    .Where(r => string.Equals(r.Path, correction.QuotaRowTableDocumentsPath) &&
+                                string.Equals(r.Tag, correction.QuotaRowTableDocumentsTag))
+                    .FirstOrDefault();
+
+                fullSize = tenantQuotaRow?.Counter ?? 0;
+                correction.QuotaRowTable.Add(Guid.Empty, fullSize);
+            }
+
+            correction.QuotaRowTable[Guid.Empty] = Math.Max(0, fullSize - backupFile.ContentLength);
+
+            if (backupFile.RootFolderType == FolderType.USER)
+            {
+                if (!correction.QuotaRowTable.TryGetValue(backupFile.RootCreateBy, out var userSize))
+                {
+                    var userQuotaRow = (await quotaService.FindUserQuotaRowsAsync(TenantId, backupFile.RootCreateBy))
+                        .Where(r => string.Equals(r.Path, correction.QuotaRowTableDocumentsPath) &&
+                                    string.Equals(r.Tag, correction.QuotaRowTableDocumentsTag))
+                        .FirstOrDefault();
+
+                    userSize = userQuotaRow?.Counter ?? 0;
+                    correction.QuotaRowTable.Add(backupFile.RootCreateBy, userSize);
+                }
+
+                correction.QuotaRowTable[backupFile.RootCreateBy] = Math.Max(0, userSize - backupFile.ContentLength);
+            }
+        }
+
+        return correction;
     }
 }
 
