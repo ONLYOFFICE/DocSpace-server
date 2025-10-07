@@ -2094,15 +2094,12 @@ public class FileStorageService //: IFileStorageService
 
         file.NotFoundIfNull();
 
-        if (file.RootFolderType != FolderType.VirtualRooms || !fileUtility.CanWebCustomFilterEditing(file.Title))
+        if (!fileUtility.CanWebCustomFilterEditing(file.Title))
         {
             throw new ArgumentException();
         }
 
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
-
-        if (room == null || !await fileSecurity.CanEditAsync(file))
+        if (!await fileSecurity.CanEditAsync(file))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
