@@ -1679,8 +1679,21 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        var id = file != null ? file.Id : folder != null ? folder.Id : default;
-                        return !Equals(default(T), id) && !Equals(ace.EntryId, id) &&  e.Access == FileShare.ReadWrite;
+                        if (e.Access != FileShare.ReadWrite)
+                        {
+                            return false;
+                        }
+
+                        if (file != null)
+                        {
+                            return !Equals(default(T), file.Id) && !Equals(ace.EntryId, file.Id);
+                        }
+
+                        if (folder != null)
+                        {
+                            return !Equals(default(T), folder.Id) && Equals(ace.EntryId, folder.Id);
+                        }
+                        break;
                     default:
                         if (e.Access == FileShare.RoomManager ||
                             (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
@@ -1843,9 +1856,23 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        var id = file != null ? file.Id : folder != null ? folder.Id : default;
-                        return !Equals(default(T), id) && !Equals(ace.EntryId, id) &&  e.Access == FileShare.ReadWrite;
-                    default:
+                        if (e.Access != FileShare.ReadWrite)
+                        {
+                            return false;
+                        }
+
+                        if (file != null)
+                        {
+                            return !Equals(default(T), file.Id) && !Equals(ace.EntryId, file.Id);
+                        }
+
+                        if (folder != null)
+                        {
+                            return !Equals(default(T), folder.Id) && Equals(ace.EntryId, folder.Id);
+                        }
+                        break;
+
+                        default:
                         if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
                         {
                             return true;
