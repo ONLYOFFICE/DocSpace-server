@@ -70,9 +70,7 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
 
         services.RegisterFeature();
-
-        services.AddAutoMapper(GetAutoMapperProfileAssemblies());
-
+        
         if (!HostEnvironment.IsDevelopment())
         {
             services.AddStartupTask<WarmupServicesStartupTask>().TryAddSingleton(services);
@@ -90,7 +88,6 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
                 .AddHttpClient()
                 .AddDistributedLock(Configuration);
 
-
         DIHelper.Configure(services);
         DIHelper.Scan();
         
@@ -104,11 +101,6 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
         services.AddBillingHttpClient();
         services.AddAccountingHttpClient();
-    }
-
-    protected IEnumerable<Assembly> GetAutoMapperProfileAssemblies()
-    {
-        return AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GetName().Name.StartsWith("ASC."));
     }
 
     public virtual void Configure(IApplicationBuilder app)

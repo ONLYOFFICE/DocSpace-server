@@ -29,12 +29,12 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 /// <summary>
 /// The form gallery parameters.
 /// </summary>
-public class FormGalleryDto : IMapFrom<OFormSettings>
+public class FormGalleryDto
 {
     /// <summary>
     /// The form gallery path.
     /// </summary>
-    public string Path { get; set; }
+    public required string Path { get; set; }
 
     /// <summary>
     /// The form gallery domain.
@@ -65,4 +65,10 @@ public class FormGalleryDto : IMapFrom<OFormSettings>
     /// The form gallery upload dashboard.
     /// </summary>
     public required string UploadDashboard { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class FormGalleryDtoMapper
+{       
+    public static partial FormGalleryDto Map(this OFormSettings source);
 }

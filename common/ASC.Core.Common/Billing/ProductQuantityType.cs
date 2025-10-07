@@ -27,7 +27,7 @@
 namespace ASC.Core.Billing;
 
 /// <summary>
-/// The product quantity type.
+/// The type of action performed on a product's quantity.
 /// </summary>
 public enum ProductQuantityType
 {

@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The security request parameters of the group member.
+/// The group member security information.
 /// </summary>
 public class GroupMemberSecurityRequestDto
 {

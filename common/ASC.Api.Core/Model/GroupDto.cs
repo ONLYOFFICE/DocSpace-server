@@ -36,7 +36,7 @@ public class GroupDto
     /// <summary>
     /// The group name.
     /// </summary>
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     /// <summary>
     /// The parent group ID.
@@ -46,17 +46,17 @@ public class GroupDto
     /// <summary>
     /// The group category ID.
     /// </summary>
-    public Guid Category { get; set; }
+    public required Guid Category { get; set; }
 
     /// <summary>
     /// The group ID.
     /// </summary>
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
     /// Specifies if the LDAP settings are enabled for the group or not.
     /// </summary>
-    public bool IsLDAP { get; set; }
+    public required bool IsLDAP { get; set; }
 
     /// <summary>
     /// Indicates whether the group is a system group.

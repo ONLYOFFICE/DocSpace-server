@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The company white label settings.
 /// </summary>
-public class CompanyWhiteLabelSettingsDto: IMapFrom<CompanyWhiteLabelSettings>
+public class CompanyWhiteLabelSettingsDto
 {
     /// <summary>
     /// The company name.
@@ -71,10 +71,17 @@ public class CompanyWhiteLabelSettingsDto: IMapFrom<CompanyWhiteLabelSettings>
     /// Specifies if these settings are default or not.
     /// </summary>
     public required bool IsDefault { get; set; }
+}
 
-    public void Mapping(Profile profile)
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class CompanyWhiteLabelSettingsDtoMapper(CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper)
+{    
+    [MapPropertyFromSource(nameof(CompanyWhiteLabelSettingsDto.IsDefault), Use = nameof(GetIsDefault))]
+    public partial CompanyWhiteLabelSettingsDto Map(CompanyWhiteLabelSettings source);
+
+    private bool GetIsDefault(CompanyWhiteLabelSettings source)
     {
-        profile.CreateMap<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>()
-            .ConvertUsing<CompanyWhiteLabelSettingsConverter>();
+        return companyWhiteLabelSettingsHelper.IsDefault(source);
     }
 }

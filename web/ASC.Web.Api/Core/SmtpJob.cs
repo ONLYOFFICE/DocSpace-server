@@ -40,6 +40,7 @@ public class SmtpJob : DistributedTaskProgress
     private readonly UserManager _userManager;
     private readonly SecurityContext _securityContext;
     private readonly TenantManager _tenantManager;
+    private readonly TenantLogoManager _tenantLogoManager;
     private readonly ILogger<SmtpJob> _logger;
 
     public SmtpJob()
@@ -50,12 +51,14 @@ public class SmtpJob : DistributedTaskProgress
     public SmtpJob(UserManager userManager,
         SecurityContext securityContext,
         TenantManager tenantManager,
+        TenantLogoManager tenantLogoManager,
         ILogger<SmtpJob> logger)
     {
         _userManager = userManager;
         _securityContext = securityContext;
         _tenantManager = tenantManager;
         _logger = logger;
+        _tenantLogoManager = tenantLogoManager;
     }
 
     public void Init(SmtpSettingsDto smtpSettings, int tenant, Guid user)
@@ -97,9 +100,13 @@ public class SmtpJob : DistributedTaskProgress
 
             mimeMessage.To.Add(toAddress);
 
+            var logoText = await _tenantLogoManager.GetLogoTextAsync();
+
+            var trulyYoursText = WebstudioNotifyPatternResource.TrulyYoursText.Replace("${LetterLogoText}", logoText);
+
             var bodyBuilder = new BodyBuilder
             {
-                TextBody = WebstudioNotifyPatternResource.pattern_smtp_test.Replace("$TrulyYours", WebstudioNotifyPatternResource.TrulyYoursText)
+                TextBody = WebstudioNotifyPatternResource.pattern_smtp_test.Replace("$TrulyYours", trulyYoursText)
             };
 
             mimeMessage.Body = bodyBuilder.ToMessageBody();

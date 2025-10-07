@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Collections.Specialized;
-
 namespace ASC.Api.Core.Auth;
 
 public static class AuthorizationExtension
@@ -41,6 +39,8 @@ public static class AuthorizationExtension
         { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people/@self", [ "accounts.self:write" ] },
         { "GET api/[0-9].[0-9]/people", [ "accounts:read", "accounts:write" ] },
         { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people", [ "accounts:write" ] },
+        { "GET api/[0-9].[0-9]/group", [ "accounts:read" ] },
+        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/group", [ "accounts:write" ] },
         { "(GET|POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/keys(/.*)?", [ "*" ] },
     };
     

@@ -71,3 +71,9 @@ public class FormRole
     /// </summary>
     public DateTime SubmissionDate { get; set; }
 }
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class FormRoleMapper
+{       
+    public static partial FormRole Map(this DbFilesFormRoleMapping source);
+}

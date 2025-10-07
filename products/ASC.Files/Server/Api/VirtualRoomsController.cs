@@ -38,7 +38,6 @@ public class VirtualRoomsInternalController(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileShareDtoHelper fileShareDtoHelper,
-    IMapper mapper,
     SocketManager socketManager,
     ApiContext apiContext,
     FilesMessageService filesMessageService,
@@ -60,7 +59,6 @@ public class VirtualRoomsInternalController(
         folderDtoHelper,
         fileDtoHelper,
         fileShareDtoHelper,
-        mapper,
         socketManager,
         apiContext,
         filesMessageService,
@@ -79,7 +77,7 @@ public class VirtualRoomsInternalController(
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoom(CreateRoomRequestDto inDto)
     {
-        var lifetime = _mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto.Lifetime);
+        var lifetime = inDto.Lifetime.Map();
         if (lifetime != null)
         {
             lifetime.StartDate = DateTime.UtcNow;
@@ -209,7 +207,6 @@ public class VirtualRoomsThirdPartyController(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileShareDtoHelper fileShareDtoHelper,
-    IMapper mapper,
     SocketManager socketManager,
     ApiContext apiContext,
     FilesMessageService filesMessageService,
@@ -227,7 +224,6 @@ public class VirtualRoomsThirdPartyController(
         folderDtoHelper,
         fileDtoHelper,
         fileShareDtoHelper,
-        mapper,
         socketManager,
         apiContext,
         filesMessageService,
@@ -264,7 +260,6 @@ public abstract class VirtualRoomsController<T>(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileShareDtoHelper fileShareDtoHelper,
-    IMapper mapper,
     SocketManager socketManager,
     ApiContext apiContext,
     FilesMessageService filesMessageService,
@@ -275,7 +270,6 @@ public abstract class VirtualRoomsController<T>(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     protected readonly FileStorageService _fileStorageService = fileStorageService;
-    protected readonly IMapper _mapper = mapper;
 
     /// <summary>
     /// Returns the room information.
@@ -501,7 +495,7 @@ public abstract class VirtualRoomsController<T>(
             }
         }
 
-        var wrappers = _mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.RoomInvitation.Invitations);
+        var wrappers = inDto.RoomInvitation.Invitations.Map();
 
         var aceCollection = new AceCollection<T> { Files = [], Folders = [inDto.Id], Aces = wrappers, Message = inDto.RoomInvitation.Message };
 
@@ -903,9 +897,9 @@ public class VirtualRoomsCommonController(
     }
 
     /// <summary>
-    /// Creates a custom tag with the parameters specified in the request.
+    /// Creates a custom room tag with the parameters specified in the request.
     /// </summary>
-    /// <short>Create a tag</short>
+    /// <short>Create a room tag</short>
     /// <path>api/2.0/files/tags</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "New tag name", typeof(object))]
@@ -918,9 +912,9 @@ public class VirtualRoomsCommonController(
     }
 
     /// <summary>
-    /// Returns a list of custom tags.
+    /// Returns a list of custom room tags.
     /// </summary>
-    /// <short>Get tags</short>
+    /// <short>Get the room tags</short>
     /// <path>api/2.0/files/tags</path>
     /// <collection>list</collection>
     [Tags("Rooms")]
@@ -932,9 +926,9 @@ public class VirtualRoomsCommonController(
     }
 
     /// <summary>
-    /// Deletes a bunch of custom tags specified in the request.
+    /// Deletes a bunch of custom room tags specified in the request.
     /// </summary>
-    /// <short>Delete tags</short>
+    /// <short>Delete the custom room tags</short>
     /// <path>api/2.0/files/tags</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Ok")]

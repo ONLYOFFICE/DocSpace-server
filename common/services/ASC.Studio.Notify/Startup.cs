@@ -45,7 +45,6 @@ public class Startup : BaseWorkerStartup
 
         var services = builder.Services;
         services.AddHttpClient();
-        services.AddAutoMapper(GetAutoMapperProfileAssemblies());//toDo
         services.AddHostedService<ServiceLauncher>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         services.AddBaseDbContextPool<FilesDbContext>();

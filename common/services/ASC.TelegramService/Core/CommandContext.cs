@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Globalization;
+
+using ASC.Web.Core.PublicResources;
+
 namespace ASC.TelegramService.Core;
 
 public abstract class CommandContext
@@ -31,9 +35,15 @@ public abstract class CommandContext
     public ITelegramBotClient Client { get; set; }
     public TelegramCommand Context { get; set; }
     public int TenantId { get; set; }
+    public CultureInfo TelegramCulture { get; set; }
 
     protected async Task ReplyAsync(string message)
     {
         _ = await Client.SendMessage(Context.Chat, message);
+    }
+
+    protected string GetResourceString(string key)
+    {
+        return Resource.ResourceManager.GetString(key, TelegramCulture ?? CultureInfo.CurrentCulture);
     }
 }

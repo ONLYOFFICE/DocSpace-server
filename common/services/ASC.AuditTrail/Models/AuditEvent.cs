@@ -26,7 +26,7 @@
 
 namespace ASC.AuditTrail.Models;
 
-public class AuditEvent : BaseEvent, IMapFrom<AuditEventQuery>
+public class AuditEvent : BaseEvent
 {
     public string Initiator { get; set; }
 
@@ -41,12 +41,21 @@ public class AuditEvent : BaseEvent, IMapFrom<AuditEventQuery>
     
     [Event("LocationCol", 32)]
     public string Context { get; set; }
+}
 
-    public override void Mapping(Profile profile)
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class AuditEventMapper(EventTypeConverter eventTypeConverter)
+{
+    public partial List<AuditEvent> ToAuditEvents(List<AuditEventQuery> auditEventQuery);
+    
+    [MapperIgnoreSource(nameof(DbAuditEvent.Target))]
+    private partial AuditEvent ToAuditEvent(DbAuditEvent auditEventQuery);
+
+    public AuditEvent ToAuditEvent(AuditEventQuery auditEventQuery)
     {
-        profile.CreateMap<DbAuditEvent, AuditEvent>();
-
-        profile.CreateMap<AuditEventQuery, AuditEvent>()
-            .ConvertUsing<EventTypeConverter>();
+        var result = ToAuditEvent(auditEventQuery.Event);
+        eventTypeConverter.Convert(auditEventQuery, result);
+        return result;   
     }
 }

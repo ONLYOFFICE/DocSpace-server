@@ -316,7 +316,7 @@ public class AnonymousConfigDto
     /// <summary>
     /// Specifies if the anonymous is a request.
     /// </summary>
-    public bool Request { get; set; }
+    public required bool Request { get; set; }
 }
 
 /// <summary>

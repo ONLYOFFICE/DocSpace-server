@@ -69,8 +69,8 @@ public class PortalController(
     StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
-    IMapper mapper,
     QuotaHelper quotaHelper,
+    QuotaSocketManager quotaSocketManager,
     ApiDateTimeHelper apiDateTimeHelper,
     IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
@@ -97,7 +97,7 @@ public class PortalController(
             return new TenantDto { TenantId = tenant.Id };
         }
 
-        var dto =  mapper.Map<TenantDto>(tenant);
+        var dto = tenant.MapToDto();
 
         if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
         {
@@ -510,13 +510,24 @@ public class PortalController(
         }
 
         var rewriter = HttpContext.Request.Url();
-        var confirmUrl = string.Format("{0}{1}{2}{3}/{4}",
+
+        var baseUrl = string.Format("{0}{1}{2}{3}",
                                 rewriter?.Scheme ?? Uri.UriSchemeHttp,
                                 Uri.SchemeDelimiter,
                                 tenant.GetTenantDomain(coreSettings),
-                                rewriter != null && !rewriter.IsDefaultPort ? $":{rewriter.Port}" : "",
-                                commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth, messageDate.ToString(CultureInfo.InvariantCulture))
-               );
+                                rewriter != null && !rewriter.IsDefaultPort ? $":{rewriter.Port}" : "");
+
+        var confirmUrl = string.Format("{0}/{1}",
+                                baseUrl,
+                                commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth, messageDate.ToString(CultureInfo.InvariantCulture)));
+
+        var users = (await userManager.GetUsersAsync(EmployeeStatus.Active))
+                .Where(u => u.Id != user.Id);
+
+        foreach (var u in users)
+        {
+            await quotaSocketManager.LogoutSession(u.Id, 0, baseUrl);
+        }
 
         cookiesManager.ClearCookies(CookiesType.AuthKey);
         cookiesManager.ClearCookies(CookiesType.SocketIO);

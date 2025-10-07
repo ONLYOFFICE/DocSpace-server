@@ -24,12 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using EnumMappingStrategy = Riok.Mapperly.Abstractions.EnumMappingStrategy;
+
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
 /// The web plugin information.
 /// </summary>
-public class WebPluginDto: IMapFrom<WebPlugin>
+public class WebPluginDto
 {
     /// <summary>
     /// The web plugin name.
@@ -94,7 +96,7 @@ public class WebPluginDto: IMapFrom<WebPlugin>
     /// <summary>
     /// Specifies if the web plugin is enabled or not.
     /// </summary>
-    public bool Enabled { get; set; }
+    public required bool Enabled { get; set; }
 
     /// <summary>
     /// Specifies if the web plugin is system or not.
@@ -110,10 +112,24 @@ public class WebPluginDto: IMapFrom<WebPlugin>
     /// The web plugin settings.
     /// </summary>
     public required string Settings { get; set; }
+}
 
-    public void Mapping(Profile profile)
+[Scope]
+[Mapper(EnumMappingStrategy = EnumMappingStrategy.ByName, EnumMappingIgnoreCase = true)]
+public partial class WebPluginMapper(EmployeeDtoHelper employeeDtoHelper)
+{
+    [MapperIgnoreSource(nameof(WebPlugin.CspDomains))]
+    [MapProperty(nameof(WebPluginDto.CreateBy), nameof(WebPlugin.CreateBy), Use = nameof(MapCreateBy))]
+    private partial WebPluginDto ToDto(WebPlugin webPlugin);
+    
+    [UserMapping(Default = false)]
+    private static EmployeeDto MapCreateBy(Guid _) => new();
+    
+    public async Task<WebPluginDto> ToDtoManual(WebPlugin source)
     {
-        profile.CreateMap<Guid, EmployeeDto>().ConvertUsing<WebPluginMappingConverter>();
-        profile.CreateMap<WebPlugin, WebPluginDto>();
+        var dto = ToDto(source);
+        dto.CreateBy = await employeeDtoHelper.GetAsync(source.CreateBy);
+
+        return dto;
     }
 }

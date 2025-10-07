@@ -168,7 +168,6 @@ public class FolderDtoHelper(
     BreadCrumbsManager breadCrumbsManager,
     TenantManager tenantManager,
     WatermarkDtoHelper watermarkHelper,
-    IMapper mapper,
     ExternalShare externalShare,
     FileSecurityCommon fileSecurityCommon,
     SecurityContext securityContext,
@@ -253,12 +252,16 @@ public class FolderDtoHelper(
 
             result.Expired = folder.ShareRecord.Options?.IsExpired;
             result.RequestToken = await _externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
-            result.ExpirationDate = _apiDateTimeHelper.Get(folder.ShareRecord?.Options?.ExpirationDate);
-            result.RootFolderType = FolderType.SHARE;
+            var expirationDate = folder.ShareRecord?.Options?.ExpirationDate;
+            if (expirationDate != null && expirationDate != DateTime.MinValue)
+            {
+                result.ExpirationDate = _apiDateTimeHelper.Get(expirationDate);
+            }
             var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.ParentId);
             if (!await _fileSecurity.CanReadAsync(parent))
             {
                 result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                result.RootFolderType = FolderType.SHARE;
             }
         }
         
@@ -277,7 +280,7 @@ public class FolderDtoHelper(
             result.Type = folder.FolderType;
         }
 
-        result.Lifetime = mapper.Map<RoomDataLifetime, RoomDataLifetimeDto>(folder.SettingsLifetime);
+        result.Lifetime = folder.SettingsLifetime.MapToDto();
         result.AvailableShareRights =  (await _fileSecurity.GetAccesses(folder)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
 
         if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })
@@ -327,12 +330,10 @@ public class FolderDtoHelper(
             switch (contextFolder)
             {
                 case { FolderType: FolderType.Recent }:
-                    result.RootFolderType = FolderType.Recent;
-                    result.ParentId = await _globalFolderHelper.GetFolderRecentAsync<T>();
-                    break;
                 case { FolderType: FolderType.SHARE }:
                 case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, authContext.CurrentAccount.ID):
                     result.RootFolderType = FolderType.SHARE;
+                    result.RootFolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
                     var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.ParentId);
                     if (!await _fileSecurity.CanReadAsync(parent))
                     {

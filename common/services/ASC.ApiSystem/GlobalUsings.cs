@@ -34,6 +34,7 @@ global using System.Text;
 global using System.Text.Encodings.Web;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
+global using System.Threading.Channels;
 global using System.Web.Http.Filters;
 
 global using ASC.Api.Core;

@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using DocSpace.API.SDK.Api.Group;
-
+using FileShareLink = DocSpace.API.SDK.Model.FileShareLink;
 using RoomsApi = DocSpace.API.SDK.Api.Rooms.RoomsApi;
 
 namespace ASC.Files.Tests.FilesController;
@@ -59,7 +59,7 @@ public class BaseTest(
     
     public static TheoryData<FileShare> InvalidFileShare =>
     [
-        FileShare.None, FileShare.ReadWrite, FileShare.Varies, FileShare.RoomManager, FileShare.ContentCreator
+       FileShare.ReadWrite, FileShare.Varies, FileShare.RoomManager, FileShare.ContentCreator
     ];
     
     public static TheoryData<FileShare> InvalidFileShareFillingForms =>

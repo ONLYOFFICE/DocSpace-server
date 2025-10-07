@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters of the file favorite status.
+/// The request parameters for changing the file favorite status.
 /// </summary>
 public class ToggleFileFavoriteRequestDto<T>
 {

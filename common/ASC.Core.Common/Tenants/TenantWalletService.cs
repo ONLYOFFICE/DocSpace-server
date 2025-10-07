@@ -27,7 +27,7 @@
 namespace ASC.Core.Tenants;
 
 /// <summary>
-/// The wallet service
+/// The wallet service type.
 /// </summary>
 [EnumExtensions]
 public enum TenantWalletService

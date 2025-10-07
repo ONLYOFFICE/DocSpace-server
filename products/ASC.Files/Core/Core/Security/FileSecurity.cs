@@ -27,7 +27,6 @@
 using System.ComponentModel;
 
 using Actions = ASC.Web.Studio.Core.Notify.Actions;
-using Folder = DocuSign.eSign.Model.Folder;
 
 namespace ASC.Files.Core.Security;
 
@@ -53,8 +52,7 @@ public class FileSecurity(
     StudioNotifyHelper studioNotifyHelper,
     BadgesSettingsHelper badgesSettingsHelper,
     ExternalShare externalShare,
-    AuthManager authManager,
-    IMapper mapper)
+    AuthManager authManager)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -918,6 +916,11 @@ public class FileSecurity(
 
     private async Task<bool> CanAsync<T>(FileEntry<T> entry, Guid userId, FilesSecurityActions action, IEnumerable<FileShareRecord<T>> shares = null, bool setEntryAccess = true)
     {
+        if (entry == null)
+        {
+            return false;
+        }
+        
         if (entry.Security != null && entry.Security.TryGetValue(action, out var result))
         {
             return result;
@@ -1227,14 +1230,21 @@ public class FileSecurity(
                 }
                 break;
             case FolderType.RoomTemplates:
-                if (action is FilesSecurityActions.FillForms 
-                    or FilesSecurityActions.EditHistory 
-                    or FilesSecurityActions.ReadHistory
-                    or FilesSecurityActions.SubmitToFormGallery
-                    or FilesSecurityActions.Lock)
+                if (action is 
+                    FilesSecurityActions.FillForms or 
+                    FilesSecurityActions.EditHistory or 
+                    FilesSecurityActions.ReadHistory or 
+                    FilesSecurityActions.SubmitToFormGallery or 
+                    FilesSecurityActions.Lock)
                 {
                     return false;
                 }
+
+                if (action is FilesSecurityActions.EditAccess && !isRoom)
+                {
+                    return false;
+                }
+                
                 if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
                 {
                     return true;
@@ -1271,6 +1281,11 @@ public class FileSecurity(
                         return true;
                     }
 
+                    if (action == FilesSecurityActions.EditAccess && !isRoom)
+                    {
+                        return true;
+                    }
+                    
                     switch (action)
                     {
                         case FilesSecurityActions.Read or FilesSecurityActions.Copy:
@@ -1664,7 +1679,8 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        return e.Access == FileShare.ReadWrite && e.CreateBy == authContext.CurrentAccount.ID;
+                        var id = file != null ? file.Id : folder != null ? folder.Id : default;
+                        return !Equals(default(T), id) && !Equals(ace.EntryId, id) &&  e.Access == FileShare.ReadWrite;
                     default:
                         if (e.Access == FileShare.RoomManager ||
                             (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
@@ -1737,7 +1753,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        return false;
+                        return e.Access == FileShare.ReadWrite;
                     default:
                         if (e.Access == FileShare.RoomManager ||
                             (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
@@ -1827,7 +1843,8 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        return false;
+                        var id = file != null ? file.Id : folder != null ? folder.Id : default;
+                        return !Equals(default(T), id) && !Equals(ace.EntryId, id) &&  e.Access == FileShare.ReadWrite;
                     default:
                         if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
                         {
@@ -1842,7 +1859,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access != FileShare.Restrict && isAuthenticated && !isGuest)
+                        if (e.Access != FileShare.Restrict && isAuthenticated && !isGuest && ace?.Options is not { DenyDownload: true })
                         {
                             return true;
                         }
@@ -1907,7 +1924,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        return false;
+                        return e.Access == FileShare.ReadWrite;
                     default:
                         if ((e.Access == FileShare.RoomManager ||
                              (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
@@ -1956,7 +1973,7 @@ public class FileSecurity(
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access == FileShare.RoomManager || (e.Access != FileShare.Restrict && e.Shared))
+                        if (e.Access == FileShare.RoomManager || (e.Access != FileShare.Restrict && e.Shared  && ace is { IsLink: true}))
                         {
                             return true;
                         }
@@ -2124,7 +2141,7 @@ public class FileSecurity(
         {
             if (int.TryParse(r.EntryId, out _))
             {
-                recordsInternal.Add(mapper.Map<FileShareRecord<int>>(r));
+                recordsInternal.Add(r.MapToFileShareRecordInternal());
             }
             else
             {
@@ -2177,7 +2194,7 @@ public class FileSecurity(
         }
 
         var currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects)
-            .Where(x => x.EntryType == FileEntryType.Folder && x.SubjectType != SubjectType.ExternalLink && x.SubjectType != SubjectType.PrimaryExternalLink)
+            .Where(x => x.EntryType == FileEntryType.Folder)
             .ToListAsync();
 
         var internalRoomsRecords = new Dictionary<int, FileShareRecord<int>>();
@@ -2258,11 +2275,13 @@ public class FileSecurity(
         var roomsEntries = storageFilter == StorageFilter.ThirdParty ? 
             [] : 
             await folderDao.GetRoomsAsync(rootFoldersIds, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries, quotaFilter)
+                .Where(r => withSubfolders || DocSpaceHelper.IsRoom(r.FolderType))
                 .ToListAsync();
 
         var thirdPartyRoomsEntries = storageFilter == StorageFilter.Internal ?
             [] : 
             await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries)
+                .Where(r => withSubfolders || DocSpaceHelper.IsRoom(r.FolderType))
                 .Distinct()
                 .ToListAsync();
 
@@ -2321,63 +2340,7 @@ public class FileSecurity(
             return folder;
         }
     }
-
-    private async Task<List<FileEntry>> GetPublicRoomTemplatesAsync(
-        IEnumerable<FilterType> filterTypes,
-        Guid subjectId,
-        string search,
-        bool searchInContent,
-        bool withSubfolders,
-        bool withoutTags,
-        IEnumerable<string> tagNames,
-        bool excludeSubject,
-        ProviderFilter provider,
-        SubjectFilter subjectFilter,
-        IEnumerable<string> subjectEntries,
-        Dictionary<int, FileShareRecord<int>> internalRecords)
-    {
-        var folderDao = daoFactory.GetFolderDao<int>();
-        var fileDao = daoFactory.GetFileDao<int>();
-        var entries = new List<FileEntry>();
-
-        int[] rootFoldersIds = [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)];
-
-        var rooms = await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider,
-                subjectFilter, subjectEntries, rootFoldersIds).Where(r => Filter(r, internalRecords)).ToListAsync();
-
-        if (withSubfolders && (filterTypes == null || !filterTypes.Contains(FilterType.FoldersOnly)))
-        {
-            var files = await fileDao.GetFilesAsync(rooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
-
-            entries.AddRange(files.Where(f => Filter(f, internalRecords)));
-        }
-
-        var t1 = SetTagsAsync(rooms);
-        var t2 = SetPinAsync(rooms);
-
-        await Task.WhenAll(t1, t2);
-
-        entries.AddRange(rooms);
-
-        return entries;
-
-        bool Filter<T>(FileEntry<T> entry, IReadOnlyDictionary<T, FileShareRecord<T>> records)
-        {
-            var id = entry.FileEntryType == FileEntryType.Folder ? entry.Id : entry.ParentId;
-            var record = records.GetValueOrDefault(id);
-
-            if (entry.RootFolderType == FolderType.RoomTemplates)
-            {
-                entry.ShareRecord = record;
-                entry.Access = record?.Share ?? FileShare.None;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-    }
+    
 
     private async Task<List<FileEntry>> GetVirtualRoomsForMeAsync(
         IEnumerable<FilterType> filterTypes,
@@ -2413,12 +2376,14 @@ public class FileSecurity(
         var rooms = storageFilter == StorageFilter.ThirdParty
             ? []
             : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries, rootFoldersIds)
+                .Where(r => withSubfolders || DocSpaceHelper.IsRoom(r.FolderType))
                 .Where(r => Filter(r, internalRecords))
                 .ToListAsync();
 
         var thirdPartyRooms = storageFilter == StorageFilter.Internal
             ? []
             : await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, thirdPartyRecords.Keys, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries)
+                .Where(r => withSubfolders || DocSpaceHelper.IsRoom(r.FolderType))
                 .Where(r => Filter(r, thirdPartyRecords))
                 .Distinct()
                 .ToListAsync();

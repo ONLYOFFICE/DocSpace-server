@@ -71,8 +71,7 @@ public class AuthenticationController(
     InvitationService invitationService,
     UserSocketManager socketManager,
     LoginProfileTransport loginProfileTransport,
-    AuditEventsRepository auditEventsRepository,
-    IMapper mapper)
+    AuditEventsRepository auditEventsRepository)
     : ControllerBase
 {
     /// <summary>
@@ -293,7 +292,7 @@ public class AuthenticationController(
 
             var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session, initiator, description);
 
-            if (!string.IsNullOrEmpty(inDto.Culture))
+            if (!string.IsNullOrEmpty(inDto.Culture) && user.CultureName != inDto.Culture)
             {
                 await userManager.ChangeUserCulture(user, inDto.Culture);
                 messageService.Send(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
@@ -423,7 +422,7 @@ public class AuthenticationController(
 
         var result = await invitationService.ConfirmAsync(inDto.Key, email, inDto.EmplType ?? default, inDto.RoomId, inDto.UiD);
 
-        return mapper.Map<Validation, ConfirmDto>(result);
+        return result.Map();
     }
 
     /// <summary>

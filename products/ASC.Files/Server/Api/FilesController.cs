@@ -528,7 +528,7 @@ public abstract class FilesController<T>(
     }
     
     /// <summary>
-    /// Sets order of the file with ID specified in the request.
+    /// Sets the order of the file with the ID specified in the request.
     /// </summary>
     /// <short>
     /// Set file order
@@ -547,7 +547,7 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Sets order of the files.
+    /// Sets the order of the files specified in the request.
     /// </summary>
     /// <short>
     /// Set order of files

@@ -1029,4 +1029,13 @@
   <data name="RoomExternalLinkRevoked" xml:space="preserve">
     <value>External link revoked: {1}</value>
   </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>File Marked As Favorite: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>File Removed From Favorite: {0}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Folder Downloaded: {0}</value>
+  </data>
 </root>

@@ -3418,6 +3418,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An unexpected error occurred. Please try again..
+        /// </summary>
+        public static string TelegramOnGenericError {
+            get {
+                return ResourceManager.GetString("TelegramOnGenericError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have been successfully connected Telegram to receive notifications from your DocSpace..
+        /// </summary>
+        public static string TelegramOnSuccessfulLink {
+            get {
+                return ResourceManager.GetString("TelegramOnSuccessfulLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Incorrect code.
         /// </summary>
         public static string TfaAppAuthMessageError {

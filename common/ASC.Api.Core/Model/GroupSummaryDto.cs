@@ -37,13 +37,13 @@ public class GroupSummaryDto
     /// The group ID.
     /// </summary>
     [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
     /// The group name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Group Name")]
-    public string Name { get; init; }
+    public required string Name { get; init; }
 
     /// <summary>
     /// The group manager.

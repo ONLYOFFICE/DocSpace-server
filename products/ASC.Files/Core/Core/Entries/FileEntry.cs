@@ -32,22 +32,15 @@ namespace ASC.Files.Core;
 /// The file entry parameters.
 /// </summary>
 public abstract class FileEntry : ICloneable
-{
-    /// <summary>
-    /// The file entry helper.
-    /// </summary>
+{    
     [JsonIgnore]
-    public FileHelper FileHelper { get; set; }
-
-    [JsonIgnore] 
-    private Global Global { get; }
+    public IServiceProvider ServiceProvider { get; set; }
 
     protected FileEntry() { }
 
-    protected FileEntry(FileHelper fileHelper, Global global)
+    protected FileEntry(IServiceProvider serviceProvider)
     {
-        FileHelper = fileHelper;
-        Global = global;
+        ServiceProvider = serviceProvider;
     }
 
     /// <summary>
@@ -66,7 +59,7 @@ public abstract class FileEntry : ICloneable
     [JsonIgnore]
     public string CreateByString
     {
-        get => !CreateBy.Equals(Guid.Empty) ? Global.GetUserNameAsync(CreateBy).Result : _createByString;
+        get => !CreateBy.Equals(Guid.Empty) ? ServiceProvider.GetService<Global>().GetUserNameAsync(CreateBy).Result : _createByString;
         set => _createByString = value;
     }
 
@@ -81,7 +74,7 @@ public abstract class FileEntry : ICloneable
     [JsonIgnore]
     public string ModifiedByString
     {
-        get => !ModifiedBy.Equals(Guid.Empty) ? Global.GetUserNameAsync(ModifiedBy).Result : _modifiedByString;
+        get => !ModifiedBy.Equals(Guid.Empty) ? ServiceProvider.GetService<Global>().GetUserNameAsync(ModifiedBy).Result : _modifiedByString;
         set => _modifiedByString = value;
     }
 
@@ -108,9 +101,14 @@ public abstract class FileEntry : ICloneable
     public FileShare Access { get; set; }
 
     /// <summary>
-    /// Specifies if the file entry shared or not.
+    /// Specifies if the file entry shared via link or not.
     /// </summary>
     public bool Shared { get; set; }
+    
+    /// <summary>
+    /// Specifies if the file entry shared for user or not.
+    /// </summary>
+    public bool SharedForUser { get; set; }
 
     /// <summary>
     /// Indicates whether the parent entity is shared.
@@ -252,16 +250,12 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     private T _folderIdDisplay;
-    private readonly SecurityContext _securityContext;
+
 
     protected FileEntry() { }
-
-    protected FileEntry(
-        FileHelper fileHelper,
-        Global global,
-        SecurityContext securityContext) : base(fileHelper, global)
+    
+    protected FileEntry(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        _securityContext = securityContext;
     }
 
     /// <summary>
@@ -310,7 +304,7 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
                 RootFolderType is FolderType.USER or FolderType.DEFAULT or FolderType.TRASH ?
                     RootCreateBy :
 
-                    RootFolderType == FolderType.Privacy && CreateBy == _securityContext.CurrentAccount.ID ?
+                    RootFolderType == FolderType.Privacy && CreateBy == ServiceProvider.GetService<SecurityContext>().CurrentAccount.ID ?
                         CreateBy :
                         ASC.Core.Configuration.Constants.CoreSystem.ID;
 

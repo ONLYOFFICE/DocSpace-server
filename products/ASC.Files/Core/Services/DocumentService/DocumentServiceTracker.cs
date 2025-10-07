@@ -193,13 +193,17 @@ public class DocumentServiceTrackerHelper(
         return callbackUrl;
     }
 
-    public async Task<bool> StartTrackAsync<T>(T fileId, string docKeyForTrack, string token = null, int? tenantId = null)
+    public async Task<bool> StartTrackAsync<T>(T fileId, string docKeyForTrack, string token = null, int? tenantId = null, string fillingSessionId = null)
     {
         var callbackUrl = GetCallbackUrl(fileId, tenantId);
 
         if (!string.IsNullOrEmpty(token))
         {
             callbackUrl = QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.ShareKey, token);
+        }
+        if (!string.IsNullOrEmpty(fillingSessionId))
+        {
+            callbackUrl = QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.FillingSessionId, fillingSessionId);
         }
 
         return await documentServiceConnector.CommandAsync(CommandMethod.Info, docKeyForTrack, fileId, callbackUrl);
@@ -234,6 +238,8 @@ public class DocumentServiceTrackerHelper(
                     var fileForDeletion = await documentServiceHelper.CheckNeedDeletion(fileDao, fileId, properties.FormFilling);
                     if (fileForDeletion != null)
                     {
+                        await fileTracker.RemoveAsync(fileForDeletion.Id);
+                        await socketManager.StopEditAsync(fileForDeletion.Id);
                         await fileDao.SaveProperties(fileForDeletion.Id, null);
                         await socketManager.DeleteFileAsync(fileForDeletion);
                         await folderDao.ChangeTreeFolderSizeAsync(fileForDeletion.ParentId, (-1) * fileForDeletion.ContentLength);
@@ -275,34 +281,41 @@ public class DocumentServiceTrackerHelper(
             if (!documentServiceHelper.IsDocSubmitKey(docKey, fileData.Key))
             {
                 logger.InformationDocServiceEditingFile(fileId.ToString(), docKey, fileData.Key, fileData.Users);
+                usersDrop = fileData.Users;
             }
-            return;
+            else
+            {
+                return;
+            }
         }
-
-        foreach (var user in fileData.Users)
+        else
         {
-            if (!Guid.TryParse(user, out var userId))
+            foreach (var user in fileData.Users)
             {
-                if (!string.IsNullOrEmpty(user) && user.StartsWith("uid-"))
+                if (!Guid.TryParse(user, out var userId))
                 {
-                    userId = Guid.Empty;
+                    if (!string.IsNullOrEmpty(user) && user.StartsWith("uid-"))
+                    {
+                        userId = Guid.Empty;
+                    }
+                    else
+                    {
+                        logger.InformationDocServiceUserIdIsNotGuid(user);
+                        continue;
+                    }
                 }
-                else
-                {
-                    logger.InformationDocServiceUserIdIsNotGuid(user);
-                    continue;
-                }
-            }
-            users.Remove(userId);
+                users.Remove(userId);
 
-            try
-            {
-                file = await entryManager.TrackEditingAsync(fileId, userId, userId, tenantManager.GetCurrentTenant());
-            }
-            catch (Exception e)
-            {
-                logger.DebugDropCommand(fileId.ToString(), fileData.Key, user, e);
-                usersDrop.Add(userId.ToString());
+                try
+                {
+                    logger.Information($"2 File Id: {fileId} Filling session Id {httpContextAccessor.HttpContext.Request.QueryString}");
+                    file = await entryManager.TrackEditingAsync(fileId, userId, userId, tenantManager.GetCurrentTenant(), fillingSessionId: httpContextAccessor.HttpContext.Request.Query[FilesLinkUtility.FillingSessionId].FirstOrDefault());
+                }
+                catch (Exception e)
+                {
+                    logger.DebugDropCommand(fileId.ToString(), fileData.Key, user, e);
+                    usersDrop.Add(userId.ToString());
+                }
             }
         }
 

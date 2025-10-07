@@ -62,9 +62,6 @@ try
 
     startup.Configure(app, app.Environment);
 
-    var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
-    await eventBus.SubscribeAsync<NotifySendTelegramMessageRequestedIntegrationEvent, TelegramSendMessageRequestedIntegrationEventHandler>();
-
     await app.RunWithTasksAsync();
 }
 catch (Exception ex)

@@ -234,14 +234,8 @@ public abstract class EditorController<T>(
 
         if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
         {
+            result.EditorConfig.CallbackUrl = QueryHelpers.AddQueryString(result.EditorConfig.CallbackUrl, FilesLinkUtility.FillingSessionId, formOpenSetup.FillingSessionId);
             result.FillingSessionId = formOpenSetup.FillingSessionId;
-            if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
-            {
-                result.EditorConfig.User = new UserConfig
-                {
-                    Id = formOpenSetup.FillingSessionId
-                };
-            }
         }
 
         if (rootFolder.RootFolderType == FolderType.RoomTemplates)
@@ -273,9 +267,14 @@ public abstract class EditorController<T>(
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionWrapper>))]
     [HttpGet("{fileId}/sharedusers")]
-    public async Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
+    public Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
+    {        
+        if (!securityContext.IsAuthenticated)
     {
-        return await fileStorageService.SharedUsersAsync(inDto.FileId);
+            return Task.FromResult<List<MentionWrapper>>(null);
+    }
+
+        return fileStorageService.SharedUsersAsync(inDto.FileId);
     }
 
     /// <summary>

@@ -26,6 +26,9 @@
 
 namespace ASC.Api.Core.Core;
 
+/// <summary>
+/// The order in which the results are sorted.
+/// </summary>
 public enum SortOrder
 {
     [SwaggerEnum("Ascending")]

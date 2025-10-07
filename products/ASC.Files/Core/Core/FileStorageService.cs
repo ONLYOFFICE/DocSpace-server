@@ -95,10 +95,10 @@ public class FileStorageService //: IFileStorageService
     IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
     WatermarkManager watermarkManager,
     CustomTagsService customTagsService,
-    IMapper mapper,
     ICacheNotify<ClearMyFolderItem> notifyMyFolder,
     FormRoleDtoHelper formRoleDtoHelper,
-    WebhookManager webhookManager)
+    WebhookManager webhookManager,
+    FileSharingHelper fileSharingHelper)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -1089,13 +1089,13 @@ public class FileStorageService //: IFileStorageService
 
             if (watermarkChanged)
             {
-                watermark = mapper.Map<WatermarkRequestDto, WatermarkSettings>(updateData.Watermark);
+                watermark = updateData.Watermark.Map();
                 watermark.ImageUrl = await watermarkManager.GetWatermarkImageUrlAsync(folder, watermark.ImageUrl);
             }
 
             if (lifetimeChanged)
             {
-                lifetime = mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(updateData.Lifetime);
+                lifetime = updateData.Lifetime.Map();
                 lifetime.StartDate = DateTime.UtcNow;
             }
 
@@ -1873,7 +1873,7 @@ public class FileStorageService //: IFileStorageService
 
             if (result.Renamed)
             {
-                await entryManager.MarkAsRecent(file);
+                //await entryManager.MarkAsRecent(file);
                 
                 await filesMessageService.SendAsync(MessageAction.FileRenamed, file, file.Title, oldTitle);
 
@@ -3705,6 +3705,27 @@ public class FileStorageService //: IFileStorageService
         {
             yield return ace;
         }
+        //hack for the form-filling room. return a link to a file with the room key.
+        if (entry is File<T> file && file.IsForm)
+        {
+            var parentRoom = await DocSpaceHelper.GetParentRoom(file, daoFactory.GetCacheFolderDao<T>());
+            if (parentRoom.FolderType != FolderType.FillingFormsRoom)
+            {
+                yield break;
+            }
+            var roomExternalLink = await fileSharing
+                .GetPureSharesAsync(parentRoom, ShareFilterType.PrimaryExternalLink, null, null, 0, 1)
+                .FirstOrDefaultAsync();
+
+            if (roomExternalLink == null)
+            {
+                yield break;
+            }
+            var linkData = await externalShare.GetLinkDataAsync(file, roomExternalLink.Id);
+            roomExternalLink.Link = await urlShortener.GetShortenLinkAsync(linkData.Url);
+
+            yield return roomExternalLink;
+        }
     }
 
     public async Task<int> GetPureSharesCountAsync<T>(T entryId, FileEntryType entryType, ShareFilterType filterType, string text)
@@ -3744,6 +3765,23 @@ public class FileStorageService //: IFileStorageService
 
         entry.NotFoundIfNull();
 
+        //hack for the form-filling room. return a link to a file with the room key.
+        if (share is FileShare.FillForms && entry is File<T>)
+        {
+            var parentRoom = await DocSpaceHelper.GetParentRoom(entry, daoFactory.GetCacheFolderDao<T>());
+            if (parentRoom.FolderType == FolderType.FillingFormsRoom)
+            {
+                var roomExternalLink = await fileSharing.GetPureSharesAsync(parentRoom, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
+
+                if (roomExternalLink != null)
+                {
+                    var linkData = await externalShare.GetLinkDataAsync(entry, roomExternalLink.Id);
+                    roomExternalLink.Link = await urlShortener.GetShortenLinkAsync(linkData.Url);
+                    return roomExternalLink;
+                }
+            }
+        }
+
         var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
         if (link == null)
         {
@@ -3754,6 +3792,11 @@ public class FileStorageService //: IFileStorageService
                 _ => share
             };
 
+            if (!await fileSharingHelper.CanSetAccessAsync(entry))
+            {
+                return null;
+            }
+            
             return await SetExternalLinkAsync(
                 entry,
                 Guid.NewGuid(),
@@ -3849,6 +3892,11 @@ public class FileStorageService //: IFileStorageService
                                 }
                                 else
                                 {
+                                    if (entry is File<T> file)
+                                    {
+                                        await socketManager.UpdateFileAsync(file);
+                                    }
+                                    
                                     await filesMessageService.SendAsync(
                                         entry.FileEntryType == FileEntryType.Folder ? MessageAction.FolderUpdatedAccessFor : MessageAction.FileUpdatedAccessFor, entry,
                                         entry.Title, name, FileShareExtensions.GetAccessString(ace.Access));
@@ -4052,19 +4100,22 @@ public class FileStorageService //: IFileStorageService
             ? await daoFactory.GetFileDao<T>().GetFileAsync(entryId)
             : await daoFactory.GetFolderDao<T>().GetFolderAsync(entryId);
 
-        return await SetExternalLinkAsync(entry.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, primary, requiredAuth);
-    }
-
-    public Task<List<MentionWrapper>> SharedUsersAsync<T>(T fileId)
-    {
-        if (!authContext.IsAuthenticated)
+        //hack for the form-filling room. return a link to a file with the room key.
+        if (share is FileShare.FillForms && entry is File<T>)
         {
-            return Task.FromResult<List<MentionWrapper>>(null);
+            var parentRoom = await DocSpaceHelper.GetParentRoom(entry, daoFactory.GetCacheFolderDao<T>());
+            if (parentRoom.FolderType == FolderType.FillingFormsRoom)
+            {
+                var roomExternalLink = await SetExternalLinkAsync(parentRoom.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, primary, requiredAuth);
+                var linkData = await externalShare.GetLinkDataAsync(entry, roomExternalLink.Id);
+                roomExternalLink.Link = await urlShortener.GetShortenLinkAsync(linkData.Url);
+                return roomExternalLink;
+            }
         }
 
-        return InternalSharedUsersAsync(fileId);
+        return await SetExternalLinkAsync(entry.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, primary, requiredAuth);
     }
-
+    
     public async Task<FileReference> GetReferenceDataAsync<T>(string fileId, string portalName, T sourceFileId, string path, string link)
     {
         File<T> file = null;
@@ -4180,7 +4231,7 @@ public class FileStorageService //: IFileStorageService
         return await fileDao.GetUserFormRolesInRoom(room.Id, userId).AnyAsync();
     }
 
-    private async Task<List<MentionWrapper>> InternalSharedUsersAsync<T>(T fileId)
+    public async Task<List<MentionWrapper>> SharedUsersAsync<T>(T fileId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
 
@@ -4189,6 +4240,11 @@ public class FileStorageService //: IFileStorageService
         if (file == null)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (!await fileSecurity.CanReadAsync(file))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
         
         var usersIdWithAccess = await WhoCanRead(file);
