@@ -3709,7 +3709,7 @@ public class FileStorageService //: IFileStorageService
         if (entry is File<T> file && file.IsForm)
         {
             var parentRoom = await DocSpaceHelper.GetParentRoom(file, daoFactory.GetCacheFolderDao<T>());
-            if (parentRoom.FolderType != FolderType.FillingFormsRoom)
+            if (parentRoom?.FolderType != FolderType.FillingFormsRoom)
             {
                 yield break;
             }
@@ -3769,7 +3769,7 @@ public class FileStorageService //: IFileStorageService
         if (share is FileShare.FillForms && entry is File<T>)
         {
             var parentRoom = await DocSpaceHelper.GetParentRoom(entry, daoFactory.GetCacheFolderDao<T>());
-            if (parentRoom.FolderType == FolderType.FillingFormsRoom)
+            if (parentRoom?.FolderType == FolderType.FillingFormsRoom)
             {
                 var roomExternalLink = await fileSharing.GetPureSharesAsync(parentRoom, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
 
@@ -4104,7 +4104,7 @@ public class FileStorageService //: IFileStorageService
         if (share is FileShare.FillForms && entry is File<T>)
         {
             var parentRoom = await DocSpaceHelper.GetParentRoom(entry, daoFactory.GetCacheFolderDao<T>());
-            if (parentRoom.FolderType == FolderType.FillingFormsRoom)
+            if (parentRoom?.FolderType == FolderType.FillingFormsRoom)
             {
                 var roomExternalLink = await SetExternalLinkAsync(parentRoom.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, primary, requiredAuth);
                 var linkData = await externalShare.GetLinkDataAsync(entry, roomExternalLink.Id);
