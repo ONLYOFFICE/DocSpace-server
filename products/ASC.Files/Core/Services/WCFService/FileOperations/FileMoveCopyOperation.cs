@@ -1029,7 +1029,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 await socketManager.DeleteFileAsync(file, action: async () =>
                                 {
                                     newFileId = await FileDao.MoveFileAsync(file.Id, toFolderId, deleteLinks);
-                                    await fileStorageService.DeleteFromRecentAsync([], [file.Id]);
                                 });
                                 
                                 newFile = await fileDao.GetFileAsync(newFileId);
