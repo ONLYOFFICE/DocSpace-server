@@ -34,6 +34,8 @@ using ImageMagick;
 
 using NetEscapades.EnumGenerators;
 
+using FilterType = ImageMagick.FilterType;
+
 namespace ASC.AI.Core.MCP;
 
 [Scope]
@@ -83,11 +85,24 @@ public class McpIconStore(StorageFactory storageFactory, SetupInfo setupInfo)
 
             var serverIdStr = serverId.ToString("N");
             
-            using var img = new MagickImage(imgStream);
+            using var img = new MagickImage(imgStream, new MagickReadSettings
+            {
+                Density = new Density(300, 300),
+                BackgroundColor = MagickColors.Transparent
+            });
+            
+            img.FilterType = FilterType.Lanczos;
 
             if (img is { Width: < 48, Height: < 48 })
             {
-                throw new ArgumentException("image size is too small");
+                if (img.Format is MagickFormat.Svg)
+                {
+                    img.Resize(512, 512);
+                }
+                else
+                {
+                    img.Resize(48, 48);
+                }
             }
 
             foreach (var size in _iconSizes)
@@ -95,12 +110,10 @@ public class McpIconStore(StorageFactory storageFactory, SetupInfo setupInfo)
                 if (size.Value.Width != img.Width || size.Value.Height != img.Height)
                 {
                     using var processedImg = img.CloneAndMutate(a =>
-                        a.Colorize(MagickColors.White, new Percentage()));
-
-                    processedImg.Resize(size.Value.Width, size.Value.Height);
+                        a.Resize(size.Value.Width, size.Value.Height));
 
                     using var memoryStream = new MemoryStream();
-                    await processedImg.WriteAsync(memoryStream, MagickFormat.Png);
+                    await processedImg.WriteAsync(memoryStream, MagickFormat.Png32);
 
                     var fileName = GetFilePath(serverIdStr, size.Key);
                     await store.SaveAsync(fileName, memoryStream);
@@ -108,7 +121,7 @@ public class McpIconStore(StorageFactory storageFactory, SetupInfo setupInfo)
                 else
                 {
                     using var memoryStream = new MemoryStream();
-                    await img.WriteAsync(memoryStream, MagickFormat.Png);
+                    await img.WriteAsync(memoryStream, MagickFormat.Png32);
 
                     var fileName = GetFilePath(serverIdStr, size.Key);
 
