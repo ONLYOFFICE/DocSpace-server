@@ -87,7 +87,7 @@ public class McpIconStore(StorageFactory storageFactory, SetupInfo setupInfo)
 
             if (img is { Width: < 48, Height: < 48 })
             {
-                throw new ImageSizeLimitException();
+                throw new ArgumentException("image size is too small");
             }
 
             foreach (var size in _iconSizes)
