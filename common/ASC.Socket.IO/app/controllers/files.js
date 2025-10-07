@@ -192,13 +192,13 @@ module.exports = (files) => {
     res.end();
   });
 
-  router.post("/update-accessrights-file", (req, res) => {
-    files.updateAccessRightsForFile(req.body);
+  router.post("/self-restriction-file", (req, res) => {
+    files.selfRestrictionForFile(req.body);
     res.end();
   });
 
-  router.post("/update-accessrights-folder", (req, res) => {
-    files.updateAccessRightsForFolder(req.body);
+  router.post("/self-restriction-folder", (req, res) => {
+    files.selfRestrictionForFolder(req.body);
     res.end();
   });
 

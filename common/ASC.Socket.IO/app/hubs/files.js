@@ -540,30 +540,14 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:encryption-progress", { percentage, error });
   }
 
-  function updateAccessRightsForFile({ id, room, data, userIds } = {}) {
-    logger.info(`update access rights for file ${id} in room ${room}`);
-    
-    if(userIds)
-    {
-      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "update-access", id, "file", data));
-    }
-    else
-    {
-      modifyFolder(room, "update-access", id, "file", data);
-    }
+  function selfRestrictionForFile({ id, room, data } = {}) {
+    logger.info(`self restriction for file ${id} in room ${room}`);
+    filesIO.to(room).emit("s:self-restriction-file", { id, data });
   }
 
-  function updateAccessRightsForFolder({ id, room, data, userIds } = {}) {
-    logger.info(`update access rights for folder ${id} in room ${room}`);
-
-    if(userIds)
-    {
-      userIds.forEach(userId =>  modifyFolder(`${room}-${userId}`, "update-access", id, "folder", data));
-    }
-    else
-    {
-      modifyFolder(room, "update-access", id, "folder", data);
-    }
+  function selfRestrictionForFolder({ id, room, data } = {}) {
+    logger.info(`self restriction for folder ${id} in room ${room}`);
+    filesIO.to(room).emit("s:self-restriction-folder", { id, data });
   }
 
   return {
@@ -600,7 +584,7 @@ module.exports = (io) => {
     endBackup,
     endRestore,
     encryptionProgress,
-    updateAccessRightsForFile,
-    updateAccessRightsForFolder
+    selfRestrictionForFile,
+    selfRestrictionForFolder
   };
 };

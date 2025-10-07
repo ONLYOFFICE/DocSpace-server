@@ -467,17 +467,19 @@ public class FileSharingAceHelper(
         }
 
         var entryType = entry.FileEntryType;
-        await fileSecurity.ShareAsync(entry.Id, entryType, authContext.CurrentAccount.ID,
-            entry.RootFolderType == FolderType.USER
+
+        var defaultShare = entry.RootFolderType == FolderType.USER
                 ? fileSecurity.DefaultMyShare
-                : fileSecurity.DefaultPrivacyShare);
+                : fileSecurity.DefaultPrivacyShare;
+
+        await fileSecurity.ShareAsync(entry.Id, entryType, authContext.CurrentAccount.ID, defaultShare);
 
         if (entryType == FileEntryType.File)
         {
             await documentServiceHelper.CheckUsersForDropAsync((File<T>)entry);
         }
 
-        await socketManager.UpdateAccessRightsAsync(entry);
+        await socketManager.SelfRestrictionAsync(entry, authContext.CurrentAccount.ID, defaultShare);
 
         await fileMarker.RemoveMarkAsNewAsync(entry);
 
