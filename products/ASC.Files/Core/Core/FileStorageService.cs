@@ -2099,7 +2099,7 @@ public class FileStorageService //: IFileStorageService
             throw new ArgumentException();
         }
 
-        if (!await fileSecurity.CanEditAsync(file))
+        if (!await fileSecurity.CanCustomFilterEditAsync(file))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
