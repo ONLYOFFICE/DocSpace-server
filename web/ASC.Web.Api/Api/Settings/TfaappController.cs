@@ -188,12 +188,12 @@ public class TfaappController(
             case TfaRequestsDtoType.Sms:
                 if (!await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync())
                 {
-                    throw new Exception(Resource.SmsNotAvailable);
+                    throw new InvalidOperationException(Resource.SmsNotAvailable);
                 }
 
                 if (!smsProviderManager.Enabled())
                 {
-                    throw new MethodAccessException();
+                    throw new InvalidOperationException();
                 }
 
                 var smsSettings = await settingsManager.LoadAsync<StudioSmsNotificationSettings>();
@@ -214,7 +214,7 @@ public class TfaappController(
             case TfaRequestsDtoType.App:
                 if (!tfaAppAuthSettingsHelper.IsVisibleSettings)
                 {
-                    throw new Exception(Resource.TfaAppNotAvailable);
+                    throw new InvalidOperationException(Resource.TfaAppNotAvailable);
                 }
 
                 var appSettings = await settingsManager.LoadAsync<TfaAppAuthSettings>();
@@ -280,7 +280,7 @@ public class TfaappController(
     {
         if (inDto.Id == tenantManager.GetCurrentTenant().OwnerId && inDto.Id != authContext.CurrentAccount.ID)
         {
-            throw new Exception(Resource.ErrorAccessDenied);
+            throw new InvalidOperationException(Resource.ErrorAccessDenied);
         }
         
         if (await UpdateTfaSettings(inDto))
@@ -310,12 +310,12 @@ public class TfaappController(
             !(await settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting ||
             await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
         {
-            throw new Exception(Resource.TfaAppNotAvailable);
+            throw new InvalidOperationException(Resource.TfaAppNotAvailable);
         }
 
         if (await userManager.IsOutsiderAsync(currentUser))
         {
-            throw new NotSupportedException("Not available.");
+            throw new InvalidOperationException("Not available.");
         }
 
         return await tfaManager.GenerateSetupCodeAsync(currentUser);
@@ -339,12 +339,12 @@ public class TfaappController(
             !(await settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting ||
             !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
         {
-            throw new Exception(Resource.TfaAppNotAvailable);
+            throw new InvalidOperationException(Resource.TfaAppNotAvailable);
         }
 
         if (await userManager.IsOutsiderAsync(currentUser))
         {
-            throw new NotSupportedException("Not available.");
+            throw new InvalidOperationException("Not available.");
         }
 
         return (await settingsManager.LoadForCurrentUserAsync<TfaAppUserSettings>()).CodesSetting.Select(r => new { r.IsUsed, Code = r.GetEncryptedCode(instanceCrypto, signature) }).ToList();
@@ -366,12 +366,12 @@ public class TfaappController(
 
         if (!tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
         {
-            throw new Exception(Resource.TfaAppNotAvailable);
+            throw new InvalidOperationException(Resource.TfaAppNotAvailable);
         }
 
         if (await userManager.IsOutsiderAsync(currentUser))
         {
-            throw new NotSupportedException("Not available.");
+            throw new InvalidOperationException("Not available.");
         }
 
         var codes = (await tfaManager.GenerateBackupCodesAsync()).Select(r => new { r.IsUsed, Code = r.GetEncryptedCode(instanceCrypto, signature) }).ToList();
@@ -398,23 +398,23 @@ public class TfaappController(
 
         if (!isMe && !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser))
         {
-            throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
+            throw new InvalidOperationException(Resource.ErrorAccessDenied);
         }
 
         var tenant = tenantManager.GetCurrentTenant();
         if (!isMe && tenant.OwnerId != authContext.CurrentAccount.ID)
         {
-            throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
+            throw new InvalidOperationException(Resource.ErrorAccessDenied);
         }
 
         if (!tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
         {
-            throw new Exception(Resource.TfaAppNotAvailable);
+            throw new InvalidOperationException(Resource.TfaAppNotAvailable);
         }
 
         if (await userManager.IsOutsiderAsync(user) || user.Status == EmployeeStatus.Terminated)
         {
-            throw new NotSupportedException("Not available.");
+            throw new InvalidOperationException("Not available.");
         }
 
         await TfaAppUserSettings.DisableForUserAsync(settingsManager, user.Id);
