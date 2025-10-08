@@ -338,7 +338,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         {{/isDeprecated}}
         public {{{returnType}}}{{^returnType}}void{{/returnType}} {{operationId}}({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, string fields = default{{/vendorExtensions.x-hasFieldsParam}})
         {
-            {{#returnType}}var localVarResponse = {{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{#vendorExtensions.x-hasFieldsParam}}, string fields = default{{/vendorExtensions.x-hasFieldsParam}}{{/allParams}});
+            {{#returnType}}var localVarResponse = {{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields{{/vendorExtensions.x-hasFieldsParam}});
             return localVarResponse.Data;{{/returnType}}{{^returnType}}{{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}});{{/returnType}}
         }
 
@@ -568,7 +568,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         {{/isDeprecated}}
         {{#returnType}}public async Task<{{{.}}}>{{/returnType}}{{^returnType}}public async Task{{/returnType}} {{operationId}}Async({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, string fields = default{{/vendorExtensions.x-hasFieldsParam}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default)
         {
-            {{#returnType}}var localVarResponse = await {{operationId}}WithHttpInfoAsync({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{#vendorExtensions.x-hasFieldsParam}}, string fields = default{{/vendorExtensions.x-hasFieldsParam}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}cancellationToken).ConfigureAwait(false);
+            {{#returnType}}var localVarResponse = await {{operationId}}WithHttpInfoAsync({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields{{/vendorExtensions.x-hasFieldsParam}}{{#allParams.0}}, {{/allParams.0}}cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;{{/returnType}}{{^returnType}}await {{operationId}}WithHttpInfoAsync({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}cancellationToken).ConfigureAwait(false);{{/returnType}}
         }
 
