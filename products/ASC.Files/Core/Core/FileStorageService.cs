@@ -1420,10 +1420,8 @@ public class FileStorageService //: IFileStorageService
 
     public async ValueTask<File<T>> CreateNewFileAsync<T, TTemplate>(FileModel<T, TTemplate> fileWrapper, bool enableExternalExt = false)
     {
-        if (string.IsNullOrEmpty(fileWrapper.Title) || fileWrapper.ParentId == null)
-        {
-            throw new ArgumentException();
-        }
+        ArgumentException.ThrowIfNullOrEmpty(fileWrapper.Title);
+        ArgumentNullException.ThrowIfNull(fileWrapper.ParentId);
 
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -1432,9 +1430,10 @@ public class FileStorageService //: IFileStorageService
         if (!EqualityComparer<T>.Default.Equals(fileWrapper.ParentId, default))
         {
             folder = await folderDao.GetFolderAsync(fileWrapper.ParentId);
-            var canCreate = await fileSecurity.CanCreateAsync(folder) && folder.FolderType != FolderType.VirtualRooms
-                                                                      && folder.FolderType != FolderType.RoomTemplates
-                                                                      && folder.FolderType != FolderType.Archive;
+            var canCreate = await fileSecurity.CanCreateAsync(folder) && 
+                            folder.FolderType != FolderType.VirtualRooms && 
+                            folder.FolderType != FolderType.RoomTemplates && 
+                            folder.FolderType != FolderType.Archive;
 
             if (!canCreate)
             {
