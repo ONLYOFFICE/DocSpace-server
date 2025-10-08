@@ -268,9 +268,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sfenks parametrləri yeniləndi</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Ümumi</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Salamalama Səhifə Parametrləri Yeniləndi</value>
   </data>
@@ -279,9 +276,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Qrup Silindi: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Qruplar</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Qrup Yeniləndi: {0}</value>
@@ -466,9 +460,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Məhsulların Siyahısı Yeniləndi</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Məhsullar</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Yenidən təyin edir</value>
   </data>
@@ -609,9 +600,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>İstifadəçilər [{0}]. Parol Dəyişmə Təlimatları Göndərildi</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>İstifadəçilər</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>İstifadəçilər [{0}]. Aktivləşdirmə Təlimatları Göndərilib</value>
@@ -795,9 +783,6 @@
   </data>
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Dəvətlər yenidən göndərildi: {0}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Müştərinin {0} aktivləşdirilməsi dəyişdirildi</value>

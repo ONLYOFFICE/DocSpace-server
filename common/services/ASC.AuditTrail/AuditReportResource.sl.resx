@@ -226,9 +226,6 @@
   <data name="FollowActionType" xml:space="preserve">
     <value>Sledi</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Splošen</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Nastavitve pozdrava posodobljene</value>
   </data>
@@ -237,9 +234,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Skupina izbrisana: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Skupine</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Skupina posodobljena: {0}</value>
@@ -379,9 +373,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Seznam izdelkov posodobljen</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Izdelki</value>
-  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Pošlji</value>
   </data>
@@ -489,9 +480,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Uporabniki [{0}]. Poslana navodila za spremembo gesla</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Uporabniki</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Uporabniki [{0}]. Aktivacijska navodila poslana</value>
@@ -795,9 +783,6 @@
   </data>
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Ponovno poslana vabila: {0}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Aktivacija odjemalca {0} je spremenjena</value>

@@ -253,9 +253,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sfinksy zostały zaktualizowane</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Ogólny</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Ustawienia strony powitalnej zostały zaktualizowane</value>
   </data>
@@ -264,9 +261,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Usunięta grupa: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Grupy</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Grupa zaktualizowana: {0}</value>
@@ -424,9 +418,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista produktów została zaktualizowana</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Produkty</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Ponowne przypisanie</value>
   </data>
@@ -546,9 +537,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Użytkownicy [{0}]. Instrukcje dotyczące wysyłania hasła</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Użytkownicy</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Użytkownicy [{0}]. Wysłano instrukcje aktywacji</value>
@@ -789,9 +777,6 @@
   </data>
   <data name="FormSubmit" xml:space="preserve">
     <value>Użytkownicy [{0}]. Przesłany formularz: {1}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Zmieniono aktywację klienta {0}</value>

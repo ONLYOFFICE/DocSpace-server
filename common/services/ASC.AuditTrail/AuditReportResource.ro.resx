@@ -327,9 +327,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Setări Sphinx au fost actualizate</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>General</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Setările paginii de întâmpinare au fost actualizate</value>
   </data>
@@ -338,9 +335,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Grupul șters: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Grupuri</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Grupul a fost actualizat: {0}</value>
@@ -522,9 +516,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista produse a fost actualizată</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Produse</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Reatribuiri</value>
   </data>
@@ -705,9 +696,6 @@
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Utilizatori [{0}]. Au trimis instrucțiuni pentru schimbarea parolei</value>
   </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Utilizatori</value>
-  </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Utilizatori [{0}]. Instrucțiuni de activare au fost trimise</value>
   </data>
@@ -857,9 +845,6 @@
   </data>
   <data name="FolderIndexReordered" xml:space="preserve">
     <value>Folderul: {0}. Indexuri au fost înregistrate</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="RoomDenyDownloadDisabled" xml:space="preserve">
     <value>Sală: {0}. Interzicerea încărcării a fost dezactivată</value>

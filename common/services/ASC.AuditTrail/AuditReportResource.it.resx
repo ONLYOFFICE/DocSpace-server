@@ -268,9 +268,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Impostazioni Sphinx aggiornati</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Generale</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Le impostazioni della pagina di saluto sono aggiornate</value>
   </data>
@@ -279,9 +276,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Gruppo eliminato: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Gruppi</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Gruppo aggiornato: {0}</value>
@@ -466,9 +460,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista prodotti aggiornata</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Prodotti</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Riassegna</value>
   </data>
@@ -609,9 +600,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Utenti [{0}]. Istruzioni su cambio di password inviate</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Utenti</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Utenti [{0}]. Istruzioni di attivazione inviate</value>
@@ -798,9 +786,6 @@
   </data>
   <data name="FolderIndexReordered" xml:space="preserve">
     <value>Cartella: {0}. Indici riordinati</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="RoomDenyDownloadDisabled" xml:space="preserve">
     <value>Stanza: {0}. Rifiuta il download disabilitato</value>

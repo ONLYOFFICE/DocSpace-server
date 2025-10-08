@@ -342,9 +342,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Podešavanja Sphinx-a su ažurirana</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Generalno</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Podešavanja dobrodošli stranice ažurirana</value>
   </data>
@@ -353,9 +350,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Grupa obrisana: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Grupe</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Grupe ažurirane: {0}</value>
@@ -542,9 +536,6 @@
   </data>
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista proizvoda ažurirana</value>
-  </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Proizvodi</value>
   </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Ponovna dodela</value>
@@ -747,9 +738,6 @@
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Korisnicima [{0}]. Poslata uputstva za promenu lozinke</value>
   </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Korisnici</value>
-  </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Korisnicima [{0}]. Poslata uputstva za aktivaciju</value>
   </data>
@@ -863,9 +851,6 @@
   </data>
   <data name="FolderIndexReordered" xml:space="preserve">
     <value>Folder: {0}. Indeksi su preuređeni</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="RoomDenyDownloadDisabled" xml:space="preserve">
     <value>Soba: {0}. Zabrani preuzimanje onemogućeno</value>

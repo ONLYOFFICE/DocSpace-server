@@ -384,9 +384,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>As Definições do Sphinx foram atualizadas</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Geral</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>As Configurações da Página de Boas Vindas foram Atualizadas</value>
   </data>
@@ -395,9 +392,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Grupo Eliminado: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Grupos</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Grupo Atualizado: {0}</value>
@@ -582,9 +576,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista de Produtos Atualizada</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Produtos</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Reatribuições</value>
   </data>
@@ -720,9 +711,6 @@
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Utilizadores [{0}]. As Instruções para a Alteração de Palavra-Chave foram Enviadas</value>
   </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Utilizadores</value>
-  </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Utilizadores [{0}]. As Instruções de Ativação foram Enviadas</value>
   </data>
@@ -854,9 +842,6 @@
   </data>
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Reenviar convites: {0}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Ativação do {0} do cliente alterada</value>

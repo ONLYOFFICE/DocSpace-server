@@ -256,9 +256,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Đã cập nhật cài đặt Sphinx</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Tổng quát</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Đã cập nhật Thiết lập Trang Chào Mừng</value>
   </data>
@@ -267,9 +264,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Đã xóa nhóm: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Nhóm</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Đã cập nhật Nhóm: {0}</value>
@@ -427,9 +421,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Đã cập nhật Danh sách Sản phẩm</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Sản phẩm</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Phân bổ lại</value>
   </data>
@@ -552,9 +543,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Người dùng [{0}]. Đã gửi Hướng dẫn Thay đổi Mật khẩu</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Người dùng</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Người dùng [{0}]. Đã gửi hướng dẫn kích hoạt</value>
@@ -795,9 +783,6 @@
   </data>
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Đã gửi lại lời mời: {0}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Kích hoạt máy khách {0} đã thay đổi</value>

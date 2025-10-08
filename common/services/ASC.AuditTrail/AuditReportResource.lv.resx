@@ -259,9 +259,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sphinx uzstādījumi atjaunināti</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Vispārīgi</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Sagaidīšanas lapas uzstādījumi atjaunināti</value>
   </data>
@@ -270,9 +267,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Dzēsta grupa: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Grupas</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Atjaunināta grupa: {0}</value>
@@ -430,9 +424,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Produktu saraksts atjaunināts</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Produkti</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Pārzīmēšana</value>
   </data>
@@ -558,9 +549,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Lietotāji [{0}]. Nosūtītas paroles maiņas instrukcijas</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Lietotāji</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Lietotāji [{0}]. Nosūtītas aktivizācijas instrukcijas</value>
@@ -789,9 +777,6 @@
   </data>
   <data name="FormSubmit" xml:space="preserve">
     <value>Lietotāji [{0}]. Veidlapa ir iesniegta: {1}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="RoomIndexExportSaved" xml:space="preserve">
     <value>Dokumentos saglabātā telpas rādītāja eksportēšana</value>

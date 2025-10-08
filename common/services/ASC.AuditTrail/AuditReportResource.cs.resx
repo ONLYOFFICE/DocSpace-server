@@ -256,9 +256,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Nastavení Sphinx bylo aktualizováno</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Obecný</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Nastavení uvítací stránky aktualizováno</value>
   </data>
@@ -267,9 +264,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Skupina vymazána: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Skupiny</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Skupina aktualizována: {0}</value>
@@ -427,9 +421,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Seznam produktů aktualizován</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Produkty</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Změna přiřazení</value>
   </data>
@@ -552,9 +543,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Uživatelé [{0}]. Pokyny ke změně hesla byly odeslány</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Uživatelé</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>User [{0}]. Aktivační pokyny byly odeslány</value>
@@ -795,9 +783,6 @@
   </data>
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Opětovné odeslání pozvánek: {0}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Aktivace klienta {0} změněna</value>

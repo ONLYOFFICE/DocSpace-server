@@ -259,9 +259,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sphinx设置已更新</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>常规</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>欢迎页面设置已更新</value>
   </data>
@@ -270,9 +267,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>小组已删除：{0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>小组</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>小组已更新：{0}</value>
@@ -439,9 +433,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>产品列表已更新</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>产品</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>重新分配</value>
   </data>
@@ -567,9 +558,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>户[{0}]。 发送密码更改说明</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>用户</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>用户[{0}]。 激活说明已发送</value>
@@ -822,9 +810,6 @@
   </data>
   <data name="GeneratePersonalAccessToken" xml:space="preserve">
     <value>为客户端 {0} 生成的个人访问令牌</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>客户端 {0} 密钥已重新生成</value>

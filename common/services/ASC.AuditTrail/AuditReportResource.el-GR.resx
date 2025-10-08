@@ -184,17 +184,11 @@
   <data name="FollowActionType" xml:space="preserve">
     <value>Ακολούθηση</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Γενικά</value>
-  </data>
   <data name="GroupCreated" xml:space="preserve">
     <value>Δημιουργήθηκε Ομάδα: {0}</value>
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Διαγράφηκε Ομάδα: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Ομάδες</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Ομάδα Που Ενημερώθηκε: {0}</value>
@@ -304,9 +298,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Η Λίστα Προϊόντων Ενημερώθηκε</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Προϊόντα</value>
-  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Αποστολή</value>
   </data>
@@ -375,9 +366,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Χρήστες [{0}]. Οι Οδηγίες Αλλαγής Συνθηματικού Στάλθηκαν</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Χρήστες</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Χρήστες [{0}]. Οι Οδηγίες Ενεργοποίησης Στάλθηκαν</value>
@@ -795,9 +783,6 @@
   </data>
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Οι προσκλήσεις στάλθηκαν ξανά: {0}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Η ενεργοποίηση {0} του πελάτη άλλαξε</value>

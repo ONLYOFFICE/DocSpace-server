@@ -33,7 +33,6 @@ public class AuditActionMapper(ILogger<AuditActionMapper> logger)
     [
         new DocumentsActionMapper(),
         new LoginActionsMapper(),
-        new OthersActionsMapper(),
         new PeopleActionMapper(),
         new SettingsActionsMapper()
     ];
