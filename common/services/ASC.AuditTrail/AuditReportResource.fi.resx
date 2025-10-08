@@ -427,6 +427,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Istunto aloitettu</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Asetukset</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Kertakirjautuminen (SSO) poistettu käytöstä</value>
   </data>

@@ -582,6 +582,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>تم بدء الجلسة</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>الإعدادات</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>تم تعطيل بوابة الدخول الموحد</value>
   </data>

@@ -439,6 +439,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesija uzsākta</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Iestatījumi</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO atspējots</value>
   </data>

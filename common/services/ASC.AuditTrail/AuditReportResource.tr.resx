@@ -433,6 +433,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Seans Başlatıldı</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Ayarlar</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO Devre Dışı Bırakıldı</value>
   </data>

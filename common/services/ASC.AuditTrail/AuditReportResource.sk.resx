@@ -436,6 +436,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Relácia začala</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Nastavenia</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO deaktivované</value>
   </data>

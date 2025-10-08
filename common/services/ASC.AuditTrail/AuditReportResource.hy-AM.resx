@@ -534,6 +534,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Աշխատաշրջանը սկսված է</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Կարգավորումներ</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO անջատված</value>
   </data>

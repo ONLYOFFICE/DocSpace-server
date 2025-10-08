@@ -628,6 +628,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Η περίοδος λειτουργίας ξεκίνησε</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Ρυθμίσεις</value>
+  </data>
   <data name="StartStorageDecryption" xml:space="preserve">
     <value>Έναρξη αποκρυπτογράφησης αποθήκευσης</value>
   </data>

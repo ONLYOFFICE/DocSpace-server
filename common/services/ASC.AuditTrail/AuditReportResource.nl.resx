@@ -430,6 +430,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Sessie Gestart</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Instellingen</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO Uitgeschakeld</value>
   </data>

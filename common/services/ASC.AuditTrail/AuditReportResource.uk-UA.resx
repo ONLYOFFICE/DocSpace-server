@@ -430,6 +430,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Сесія розпочалася</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Налаштування</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO вимкнено</value>
   </data>

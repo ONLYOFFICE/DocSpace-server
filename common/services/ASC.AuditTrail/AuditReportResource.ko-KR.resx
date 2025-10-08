@@ -363,6 +363,9 @@
   <data name="SessionCompleted" xml:space="preserve">
     <value>세션이 완료되었습니다</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>설정</value>
+  </data>
   <data name="FileSendAccessLink" xml:space="preserve">
     <value>[{0}] 파일로 공유 링크가 발송되었습니다. 수신자: [{1}]</value>
   </data>

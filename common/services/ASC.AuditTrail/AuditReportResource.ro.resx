@@ -561,6 +561,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesiunea a început</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Setări</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Conectarea unică dezactivată</value>
   </data>

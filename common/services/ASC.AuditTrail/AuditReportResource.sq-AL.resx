@@ -726,6 +726,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesioni filloi</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Cilësimet</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO u çaktivizua</value>
   </data>

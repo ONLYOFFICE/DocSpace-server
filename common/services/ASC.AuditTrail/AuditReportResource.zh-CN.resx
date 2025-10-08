@@ -448,6 +448,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>会话已开始</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>设置</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO已禁用</value>
   </data>

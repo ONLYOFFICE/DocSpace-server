@@ -475,6 +475,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Sessione iniziata</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Impostazioni</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Accesso singolo (SSO) disabilitato</value>
   </data>

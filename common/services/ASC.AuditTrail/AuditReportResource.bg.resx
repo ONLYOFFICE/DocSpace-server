@@ -454,6 +454,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Започна сесия</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Настройки</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO инвалиди</value>
   </data>

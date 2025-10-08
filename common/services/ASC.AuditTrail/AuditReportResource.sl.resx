@@ -385,6 +385,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Seja začeta</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Nastavitve</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO onemogočen</value>
   </data>

@@ -472,6 +472,9 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>セションは開始です</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>設定</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSOは無効です</value>
   </data>
