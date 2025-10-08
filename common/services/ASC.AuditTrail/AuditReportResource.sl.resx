@@ -91,6 +91,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Barva teme spremenjena</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kontakti</value>
+  </data>
   <data name="CopyActionType" xml:space="preserve">
     <value>Kopiraj</value>
   </data>

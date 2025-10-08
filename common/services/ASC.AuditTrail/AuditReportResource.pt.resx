@@ -216,6 +216,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>O Tema de Cores foi Alterado</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Contatos</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>As Definições de Cookies foram Alteradas</value>
   </data>

@@ -97,6 +97,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Mainīta krāsu tēma</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kontakti</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Atjaunināti sīkdatņu uzstādījumi</value>
   </data>

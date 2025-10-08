@@ -94,6 +94,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Zmieniono temat kolorów</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kontakt</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Zaktualizowano ustawienia Cookie</value>
   </data>

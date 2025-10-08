@@ -97,6 +97,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Đã thay đổi màu theme</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Liên lạc</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Đã cập nhật Cài đặt Cookie</value>
   </data>

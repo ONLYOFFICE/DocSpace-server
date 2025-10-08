@@ -159,6 +159,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Боја теме промењена</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Контакти</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Подешавања колачића ажурирана</value>
   </data>

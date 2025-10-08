@@ -165,6 +165,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Boja teme promenjena</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kontakti</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Podešavanja kolačića ažurirana</value>
   </data>

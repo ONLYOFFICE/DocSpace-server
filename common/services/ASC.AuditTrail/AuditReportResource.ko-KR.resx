@@ -732,6 +732,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>색상 테마가 변경되었습니다</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>연락처</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>쿠키 설정이 업데이트되었습니다</value>
   </data>

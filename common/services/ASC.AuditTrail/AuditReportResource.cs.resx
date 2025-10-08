@@ -97,6 +97,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Bylo změněno barevné schéma</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kontakty</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Nastavení Cookie bylo aktualizováno</value>
   </data>

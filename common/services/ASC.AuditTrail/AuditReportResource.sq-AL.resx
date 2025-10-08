@@ -171,6 +171,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Është ndryshuar tema e ngjyrës</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kontaktet</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Cilësimet e biskotës u përditësuar</value>
   </data>

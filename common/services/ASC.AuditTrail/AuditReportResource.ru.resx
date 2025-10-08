@@ -100,6 +100,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Изменена цветовая тема</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Контакты</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Обновлены настройки файлов cookie</value>
   </data>

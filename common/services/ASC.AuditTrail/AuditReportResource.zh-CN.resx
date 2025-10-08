@@ -97,6 +97,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>颜色主题已修改</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>联系人信息</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Cookie设置已更新</value>
   </data>

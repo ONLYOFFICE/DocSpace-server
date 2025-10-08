@@ -100,6 +100,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Rəng teması dəyişdirildi</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Əlaqələr</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Kuki Parametrləri Yeniləndi</value>
   </data>
