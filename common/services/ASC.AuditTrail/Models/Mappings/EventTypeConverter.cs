@@ -167,7 +167,7 @@ public class EventTypeConverter(
                 var notificationInfo = JsonSerializer.Deserialize<EventDescription<JsonElement>>(rawNotificationInfo);
 
                 var newContext = dest.Action == (int)MessageAction.RoomRenamed ? notificationInfo.RoomOldTitle :
-                    !string.IsNullOrEmpty(notificationInfo.RoomTitle) ? notificationInfo.RoomTitle : notificationInfo.RootFolderTitle;
+                    !string.IsNullOrEmpty(notificationInfo.RoomTitle) ? $"{AuditReportResource.RoomsModule}: {notificationInfo.RoomTitle}"  : notificationInfo.RootFolderTitle;
 
                 if (newContext != null)
                 {
