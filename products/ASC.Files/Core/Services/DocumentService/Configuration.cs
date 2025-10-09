@@ -975,7 +975,7 @@ public class CustomizationConfig<T>(
 
                 string url;
 
-                if (parent.FolderType != FolderType.USER)
+                if (parent.FolderType != FolderType.USER && await fileSecurity.CanReadAsync(parent))
                 {
                     parent.RootFolderType = FolderType.SHARE;
                     url = pathProvider.GetFolderUrl(parent, key);
