@@ -154,18 +154,17 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsTask = tagDao.GetTagsAsync([TagType.Locked], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync());
-        var tagsFavoriteTask = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Favorite], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync());
-        var tagsNewTask = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, files).ToListAsync();
+        var tagsTask = tagDao.GetTagsAsync([TagType.Locked], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync()).AsTask();
+        var tagsFavoriteTask = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Favorite], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync()).AsTask();
+        var tagsNewTask = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, files).ToListAsync().AsTask();
 
+        await Task.WhenAll(tagsTask, tagsFavoriteTask, tagsNewTask);
+        
         var tags = await tagsTask;
         var tagsNew = await tagsNewTask;
         var tagsFavorite = await tagsFavoriteTask;
 
-        var spreadsheets = files.Where(file =>
-            file.RootFolderType == FolderType.VirtualRooms &&
-            fileUtility.CanWebCustomFilterEditing(file.Title))
-            .ToList();
+        var spreadsheets = files.Where(file => fileUtility.CanWebCustomFilterEditing(file.Title)).ToList();
 
         var customFilterTags = spreadsheets.Count != 0
             ? await tagDao.GetTagsAsync([TagType.CustomFilter], spreadsheets).ToDictionaryAsync(k => k.EntryId, v => v)

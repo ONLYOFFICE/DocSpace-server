@@ -35,7 +35,7 @@ public class EventTypeConverter(
     AuditActionMapper actionMapper,
     TenantUtil tenantUtil)
 {
-    public void Convert(LoginEventQuery source, LoginEvent dest)
+    public void Convert(LoginEventQuery source, LoginEvent dest, bool limitedActionText)
     {
         if (source?.Event == null)
         {
@@ -72,13 +72,13 @@ public class EventTypeConverter(
             dest.UserName = AuditReportResource.UnknownAccount;
         }
 
-        dest.ActionText = actionMapper.GetActionText(actionMapper.GetMessageMaps(dest.Action), dest);
+        dest.ActionText = actionMapper.GetActionText(actionMapper.GetMessageMaps(dest.Action), dest, limitedActionText);
 
         dest.Date = tenantUtil.DateTimeFromUtc(dest.Date);
         dest.IP = dest.IP.Split(':').Length > 1 ? dest.IP.Split(':')[0] : dest.IP;
     }
 
-    public void Convert(AuditEventQuery source, AuditEvent dest)
+    public void Convert(AuditEventQuery source, AuditEvent dest, bool limitedActionText)
     {
         if (source?.Event == null)
         {
@@ -141,7 +141,7 @@ public class EventTypeConverter(
             }
             else
             {
-                dest.ActionText = actionMapper.GetActionText(map, dest);
+                dest.ActionText = actionMapper.GetActionText(map, dest, limitedActionText);
             }
 
             dest.ActionTypeText = actionMapper.GetActionTypeText(map);

@@ -38,7 +38,7 @@ public class AuditActionMapper(ILogger<AuditActionMapper> logger)
         new SettingsActionsMapper()
     ];
 
-    public string GetActionText(MessageMaps action, AuditEvent evt)
+    public string GetActionText(MessageMaps action, AuditEvent evt, bool limited)
     {
         if (action == null)
         {
@@ -63,7 +63,7 @@ public class AuditActionMapper(ILogger<AuditActionMapper> logger)
             
             var description = evt.Description
                 .Select(t => t.Split([','], StringSplitOptions.RemoveEmptyEntries))
-                .Select(split => string.Join(", ", split.Select(ToLimitedText)))
+                .Select(split => string.Join(", ", limited ? split.Select(ToLimitedText) : split))
                 .ToArray();
 
             return string.Format(actionText, description);
@@ -75,7 +75,7 @@ public class AuditActionMapper(ILogger<AuditActionMapper> logger)
         }
     }
 
-    public string GetActionText(MessageMaps action, LoginEvent evt)
+    public string GetActionText(MessageMaps action, LoginEvent evt, bool limited)
     {
         if (action == null)
         {
@@ -94,7 +94,7 @@ public class AuditActionMapper(ILogger<AuditActionMapper> logger)
 
             var description = evt.Description
                                  .Select(t => t.Split([','], StringSplitOptions.RemoveEmptyEntries))
-                                 .Select(split => string.Join(", ", split.Select(ToLimitedText)))
+                                 .Select(split => string.Join(", ", limited ? split.Select(ToLimitedText) : split))
                                  .ToArray();
 
             return string.Format(actionText, description);

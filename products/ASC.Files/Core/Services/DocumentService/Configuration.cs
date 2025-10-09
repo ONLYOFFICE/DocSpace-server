@@ -310,6 +310,11 @@ public class EditorConfiguration<T>(
         
         var callbackUrl = documentServiceTrackerHelper.GetCallbackUrl(file.Id.ToString());
 
+        if (!string.IsNullOrEmpty(file.FormInfo?.FillingSessionId))
+        {
+            callbackUrl = externalShare.GetUrlWithFillingSessionId(callbackUrl, file.FormInfo.FillingSessionId);
+        }
+
         if (file.ShareRecord is not { IsLink: true } || string.IsNullOrEmpty(file.ShareRecord.Options?.Password))
         {
             return externalShare.GetUrlWithShare(callbackUrl);

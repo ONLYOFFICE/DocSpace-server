@@ -1038,4 +1038,10 @@
   <data name="FolderDownloaded" xml:space="preserve">
     <value>Folder Downloaded: {0}</value>
   </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>File removed from "Shared with me": {0}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Folder removed from "Shared with me": {0}</value>
+  </data>
 </root>

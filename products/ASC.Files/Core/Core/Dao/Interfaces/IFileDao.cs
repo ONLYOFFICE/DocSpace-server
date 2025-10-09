@@ -87,10 +87,8 @@ public interface IFileDao<T>
     /// <param name="searchText"></param>
     /// <param name="extension"></param>
     /// <param name="searchInContent"></param>
-    /// <param name="checkShared"></param>
     /// <returns></returns>
-    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent, bool checkShared = false);
+    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent);
 
     /// <summary>
     /// 

@@ -223,8 +223,7 @@ public class FileDtoHelper(
     public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null)
     {
         var result = await GetFileWrapperAsync(file, order, expiration, contextFolder);
-
-        result.FolderId = file.ParentId;
+        
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableShareRights =  (await _fileSecurity.GetAccesses(file)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
         
@@ -332,8 +331,9 @@ public class FileDtoHelper(
     private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, string order, TimeSpan? expiration, IFolder contextFolder = null)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
+        result.FolderId = file.ParentId;
+        
         var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
-
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 

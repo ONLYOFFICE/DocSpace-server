@@ -24,39 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AuditTrail.Models;
+namespace ASC.Data.Backup.Tasks;
 
-public class LoginEvent : BaseEvent
+public class BackupCorrection
 {
-    public string Login { get; set; }
-    public int Action { get; set; }
-}
+    public Dictionary<int, long> FoldersTable = [];
 
-[Scope]
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public partial class LoginEventMapper(EventTypeConverter eventTypeConverter)
-{
-    private partial LoginEvent ToLoginEvent(DbLoginEvent loginEventQuery);
+    public Dictionary<Guid, long> QuotaRowTable = [];
 
-    public partial List<LoginEvent> ToLoginEvents(List<LoginEventQuery> loginEventQuery);
+    public string QuotaRowTableDocumentsPath = $"/{FileConstant.ModuleId}/";
 
-    [UserMapping(Default = true)]
-    private LoginEvent ToLoginEvent(LoginEventQuery source)
-    {
-        var dto = ToLoginEvent(source.Event);
-        eventTypeConverter.Convert(source, dto, false);
-        return dto;
-    }
-
-    public List<LoginEvent> ToLimitedLoginEvents(List<LoginEventQuery> loginEventQuery)
-    {
-        return loginEventQuery?.Select(ToLimitedLoginEvent).ToList();
-    }
-
-    private LoginEvent ToLimitedLoginEvent(LoginEventQuery source)
-    {
-        var dto = ToLoginEvent(source.Event);
-        eventTypeConverter.Convert(source, dto, true);
-        return dto;
-    }
+    public string QuotaRowTableDocumentsTag = Web.Core.WebItemManager.DocumentsProductID.ToString();
 }

@@ -201,6 +201,7 @@ public class DocumentServiceTrackerHelper(
         {
             callbackUrl = QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.ShareKey, token);
         }
+        logger.Information($"4 File Id: {fileId} Filling session Id {fillingSessionId}");
         if (!string.IsNullOrEmpty(fillingSessionId))
         {
             callbackUrl = QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.FillingSessionId, fillingSessionId);
