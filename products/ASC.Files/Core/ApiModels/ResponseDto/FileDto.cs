@@ -521,8 +521,10 @@ public class FileDtoHelper(
             
             if (externalMediaAccess)
             {
+                result.IsLinkExpired = file.ShareRecord.Options?.IsExpired;
                 result.RequestToken = await _externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
                 result.External = true;
+                
                 var expirationDate = file.ShareRecord?.Options?.ExpirationDate;
                 if (expirationDate != null && expirationDate != DateTime.MinValue)
                 {

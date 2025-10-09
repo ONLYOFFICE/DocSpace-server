@@ -1044,10 +1044,18 @@ public class FileSharing(
         {
             w.CanEditDenyDownload = !room.SettingsDenyDownload;
         }
+        
         if (room is {FolderType: FolderType.PublicRoom} && record.SubjectType == SubjectType.PrimaryExternalLink)
-        {
+        {       
             w.CanEditExpirationDate = false;
+            w.CanRevoke = true;
         }
+        
+        if (room is {FolderType: FolderType.FillingFormsRoom} )
+        {       
+            w.CanRevoke = true;
+        }
+        
         return w;
     }
 }
