@@ -68,13 +68,7 @@ $DocumentURL
   </pattern>
   <pattern id="ShareDocument" sender="telegram.sender">
     <subject />
-    <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common">
-      $__AuthorName
-
-      $AccessRights
-
-      $Message
-    </body>
+    <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_ShareDocument|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
   </pattern>
 
   <pattern id="ShareFolder" sender="email.sender">
@@ -100,12 +94,7 @@ $DocumentURL
   </pattern>
   <pattern id="ShareFolder" sender="telegram.sender">
     <subject />
-    <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common">$__AuthorName
-
-$AccessRights
-
-$Message
-    </body>
+    <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_ShareFolder|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
   </pattern>
   
   <pattern id="EditorMentions" sender="email.sender">
