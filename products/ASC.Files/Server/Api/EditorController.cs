@@ -223,6 +223,10 @@ public abstract class EditorController<T>(
                     result.EditorConfig.User.Roles = [formOpenSetup.RoleName];
                     result.FillingStatus = true;
                 }
+                if (!formOpenSetup.HasRole)
+                {
+                    result.EditorConfig.Customization.SubmitForm.Visible = false;
+                }
             }
             else
             {

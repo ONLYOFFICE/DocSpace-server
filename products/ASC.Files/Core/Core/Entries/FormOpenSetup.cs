@@ -86,4 +86,6 @@ public record FormOpenSetup<T>
     /// </summary>
     public bool CanEditRoom { get; set; }
 
+    public bool HasRole { get; set; }
+
 }

@@ -643,9 +643,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             if (myRoles.Count == 0)
             {
+                result.CanFill = false;
+                result.CanStartFilling = false;
                 return result;
             }
-
+            result.HasRole = true;
             var role = myRoles.FirstOrDefault(role => !role.Submitted && currentStep == role.Sequence);
             if (role != null)
             {
@@ -673,11 +675,17 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
         else
         {
-            result.CanEdit = true;
-            result.CanFill = false;
-            result.EditorType = editorType;
+            var canEdit = await fileSecurity.CanEditAsync(file);
+            var canFill = await fileSecurity.CanFillFormsAsync(file);
+
+            result.CanEdit = canEdit;
+            result.CanFill = canFill;
+            result.CanEditRoom = await fileSecurity.CanEditRoomAsync(room);
+            result.EditorType = !canEdit && canFill && editorType != EditorType.Mobile
+                        ? EditorType.Embedded
+                        : editorType;
         }
-        return result;
+            return result;
     }
 
     public async Task<FormOpenSetup<T>> GetFormOpenSetupForUserFolderAsync<T>(File<T> file, EditorType editorType, bool edit, bool fill)
