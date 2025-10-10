@@ -16,8 +16,19 @@ call openapi-generator-cli generate -c tools/toolsPostmanCollection.json --custo
 
 echo [5/6] Generating Typescript SDK with OpenAPI Generator...
 call openapi-generator-cli generate -c tools/toolsTypeScript.json --custom-generator target/custom-generators-1.0-SNAPSHOT-jar-with-dependencies.jar || goto :error
+
+
 cd typescript-sdk
 echo [6/6] npm install in typescript-sdk...
+call npm install || goto :error
+cd ..
+
+echo [7/6] Generating Typescript SDK K6 with OpenAPI Generator...
+call openapi-generator-cli generate -c tools/toolsK6TypeScript.json --custom-generator target/custom-generators-1.0-SNAPSHOT-jar-with-dependencies.jar || goto :error
+
+
+cd typescript-k6-sdk
+echo [8/6] npm install in typescript-k6-sdk...
 call npm install || goto :error
 cd ..
 

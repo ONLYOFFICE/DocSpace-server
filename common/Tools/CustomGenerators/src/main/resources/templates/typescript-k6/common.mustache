@@ -1,0 +1,167 @@
+{{>licenseInfo}}
+
+import type { Configuration } from "./configuration";
+import type { RequestArgs } from "./base";
+import http, {
+RefinedResponse,
+ResponseType
+} from "k6/http";
+import { check } from "k6";
+import { RequiredError } from "./base";
+
+/**
+ *
+ * @export
+ */
+export const DUMMY_BASE_URL = 'https://example.com'
+
+/**
+ *
+ * @throws {RequiredError}
+ * @export
+ */
+export const assertParamExists = function (functionName: string, paramName: string, paramValue: unknown) {
+    if (paramValue === null || paramValue === undefined) {
+        throw new RequiredError(paramName, `Required parameter ${paramName} was null or undefined when calling ${functionName}.`);
+    }
+}
+
+/**
+ *
+ * @export
+ */
+export const setApiKeyToObject = function (object: any, keyParamName: string, configuration?: Configuration) {
+    if (configuration && configuration.apiKey) {
+        const localVarApiKeyValue = typeof configuration.apiKey === 'function'
+            ? configuration.apiKey(keyParamName)
+            : configuration.apiKey;
+        object[keyParamName] = localVarApiKeyValue;
+    }
+}
+
+/**
+ *
+ * @export
+ */
+export const setBasicAuthToObject = function (object: any, configuration?: Configuration) {
+    if (configuration && (configuration.username || configuration.password)) {
+        object["auth"] = { username: configuration.username, password: configuration.password };
+    }
+}
+
+/**
+ *
+ * @export
+ */
+export const setBearerAuthToObject = function (object: any, configuration?: Configuration) {
+    if (configuration && configuration.accessToken) {
+        const accessToken = typeof configuration.accessToken === 'function'
+            ? configuration.accessToken()
+            : configuration.accessToken;
+        object["Authorization"] = "Bearer " + accessToken;
+    }
+}
+
+/**
+ *
+ * @export
+ */
+export const setOAuthToObject = function (object: any, name: string, scopes: string[], configuration?: Configuration) {
+    if (configuration && configuration.accessToken) {
+        const localVarAccessTokenValue = typeof configuration.accessToken === 'function'
+            ? configuration.accessToken(name, scopes)
+            : configuration.accessToken;
+        object["Authorization"] = "Bearer " + localVarAccessTokenValue;
+    }
+}
+
+function setFlattenedQueryParams(urlSearchParams: URLSearchParams, parameter: any, key: string = ""): void {
+    if (parameter == null) return;
+    if (typeof parameter === "object") {
+        if (Array.isArray(parameter)) {
+            (parameter as any[]).forEach(item => setFlattenedQueryParams(urlSearchParams, item, key));
+        } 
+        else {
+            Object.keys(parameter).forEach(currentKey => 
+                setFlattenedQueryParams(urlSearchParams, parameter[currentKey], `${key}${key !== '' ? '.' : ''}${currentKey}`)
+            );
+        }
+    } 
+    else {
+        if (urlSearchParams.has(key)) {
+            urlSearchParams.append(key, parameter);
+        } 
+        else {
+            urlSearchParams.set(key, parameter);
+        }
+    }
+}
+
+/**
+ *
+ * @export
+ */
+export const setSearchParams = function (url: URL, ...objects: any[]) {
+    const searchParams = new URLSearchParams(url.search);
+    setFlattenedQueryParams(searchParams, objects);
+    url.search = searchParams.toString();
+}
+
+/**
+ *
+ * @export
+ */
+export const serializeDataIfNeeded = function (value: any, requestOptions: any, configuration?: Configuration) {
+    const nonString = typeof value !== 'string';
+    const needsSerialization = nonString && configuration && configuration.isJsonMime
+        ? configuration.isJsonMime(requestOptions.headers['Content-Type'])
+        : nonString;
+    return needsSerialization
+        ? JSON.stringify(value !== undefined ? value : {})
+        : (value || "");
+}
+
+/**
+ *
+ * @export
+ */
+export const toPathString = function (url: URL) {
+    return url.pathname + url.search + url.hash
+}
+
+/**
+ *
+ * @export
+ */
+
+export const createRequestFunction = function (args: RequestArgs, BASE_PATH: string, configuration?: Configuration) {
+    return <T = unknown, R = ApiResponse<T>>(basePath: string = BASE_PATH) => {
+        const requestArgs = {params: args.params, method: args.method, body: args.body, url:  (configuration?.basePath ?? basePath) + args.url};
+        return sendTypedRequest<T>(requestArgs.method, requestArgs.url, requestArgs.body, requestArgs.params);
+    };
+}
+
+interface ApiResponse<T> extends  RefinedResponse<ResponseType | undefined> {
+    data: T;
+}
+
+function sendTypedRequest<T = any>(
+    method: string,
+    url: string,
+    body?: any,
+    params?: any
+    ): ApiResponse<T> {
+    const response = http.request(method, url, body, params);
+
+    let parsedData: T;
+    try {
+        const responseBody = typeof response.body === 'string'
+        ? response.body
+        : new TextDecoder().decode(response.body);
+        parsedData = JSON.parse(responseBody) as T;
+    } catch (error) {
+        throw new Error(`Failed to parse response as JSON: ${error}`);
+    }
+
+    return {data: parsedData,  ...response};
+}
