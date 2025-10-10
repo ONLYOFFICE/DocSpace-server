@@ -350,7 +350,9 @@ public abstract class FilesController<T>(
     [HttpPut("file/{fileId}/customfilter")]
     public async Task<FileDto<T>> SetCustomFilterTag(FileCustomFilterRequestDto<T> inDto)
     {
-        return await filesControllerHelper.SetCustomFilterTagAsync(inDto.FileId, inDto.Parameters.Enabled);
+        var result = await fileStorageService.SetCustomFilterTagAsync(inDto.FileId, inDto.Parameters.Enabled);
+
+        return await _fileDtoHelper.GetAsync(result);
     }
 
     /// <summary>

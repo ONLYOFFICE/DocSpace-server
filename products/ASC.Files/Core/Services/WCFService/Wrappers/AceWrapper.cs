@@ -98,6 +98,11 @@ public class AceWrapper
     public bool CanEditExpirationDate { get; set; }
 
     /// <summary>
+    /// Indicates whether the access rights can be revoked.
+    /// </summary>
+    public bool CanRevoke { get; set; }
+
+    /// <summary>
     /// Determines whether the user has permission to modify the deny download setting for the file share.
     /// </summary>
     public bool CanEditDenyDownload { get; set; } = true;

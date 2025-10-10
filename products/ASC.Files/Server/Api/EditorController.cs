@@ -194,6 +194,10 @@ public abstract class EditorController<T>(
                 };
             }
         }
+        if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
+        {
+            file.FormInfo = new FormInfo<T> { FillingSessionId = formOpenSetup.FillingSessionId };
+        }
 
         var result = await configurationConverter.Convert(configuration, file);
 
@@ -235,13 +239,6 @@ public abstract class EditorController<T>(
         if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
         {
             result.FillingSessionId = formOpenSetup.FillingSessionId;
-            if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
-            {
-                result.EditorConfig.User = new UserConfig
-                {
-                    Id = formOpenSetup.FillingSessionId
-                };
-            }
         }
 
         if (rootFolder.RootFolderType == FolderType.RoomTemplates)
@@ -276,9 +273,9 @@ public abstract class EditorController<T>(
     public Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
     {        
         if (!securityContext.IsAuthenticated)
-        {
+    {
             return Task.FromResult<List<MentionWrapper>>(null);
-        }
+    }
 
         return fileStorageService.SharedUsersAsync(inDto.FileId);
     }

@@ -97,6 +97,7 @@ global using Autofac;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
+global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 

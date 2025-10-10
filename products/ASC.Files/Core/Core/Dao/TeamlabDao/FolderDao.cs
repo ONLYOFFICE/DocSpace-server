@@ -738,7 +738,7 @@ internal class FolderDao(
         
         if (trashId != 0)
         {
-            initQuery = initQuery.Where(r => r.f.ParentId != trashId);
+            initQuery = initQuery.Where(r => !filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == trashId));
         }
         
         var query = initQuery.Select(x => new FolderByTagQuery

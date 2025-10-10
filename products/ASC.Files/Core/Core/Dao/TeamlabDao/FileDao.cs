@@ -170,8 +170,7 @@ internal class FileDao(
         }
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesFilteredAsync(IEnumerable<int> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent, bool checkShared = false)
+    public async IAsyncEnumerable<File<int>> GetFilesFilteredAsync(IEnumerable<int> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
         {
@@ -2677,7 +2676,7 @@ internal class FileDao(
 
         if (trashId != 0)
         {
-            initQuery = initQuery.Where(r => r.f.ParentId != trashId);
+            initQuery = initQuery.Where(r => !filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == trashId));
         }
         
         var query = initQuery.Select(x => new FileByTagQuery

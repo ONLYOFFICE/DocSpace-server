@@ -310,6 +310,11 @@ public class EditorConfiguration<T>(
         
         var callbackUrl = documentServiceTrackerHelper.GetCallbackUrl(file.Id.ToString());
 
+        if (!string.IsNullOrEmpty(file.FormInfo?.FillingSessionId))
+        {
+            callbackUrl = externalShare.GetUrlWithFillingSessionId(callbackUrl, file.FormInfo.FillingSessionId);
+        }
+
         if (file.ShareRecord is not { IsLink: true } || string.IsNullOrEmpty(file.ShareRecord.Options?.Password))
         {
             return externalShare.GetUrlWithShare(callbackUrl);
@@ -970,7 +975,7 @@ public class CustomizationConfig<T>(
 
                 string url;
 
-                if (parent.FolderType != FolderType.USER)
+                if (parent.FolderType != FolderType.USER && await fileSecurity.CanReadAsync(parent))
                 {
                     parent.RootFolderType = FolderType.SHARE;
                     url = pathProvider.GetFolderUrl(parent, key);

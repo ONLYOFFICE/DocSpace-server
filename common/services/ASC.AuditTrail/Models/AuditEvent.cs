@@ -47,15 +47,28 @@ public class AuditEvent : BaseEvent
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public partial class AuditEventMapper(EventTypeConverter eventTypeConverter)
 {
-    public partial List<AuditEvent> ToAuditEvents(List<AuditEventQuery> auditEventQuery);
-    
     [MapperIgnoreSource(nameof(DbAuditEvent.Target))]
     private partial AuditEvent ToAuditEvent(DbAuditEvent auditEventQuery);
 
+    public partial List<AuditEvent> ToAuditEvents(List<AuditEventQuery> auditEventQuery);
+
+    [UserMapping(Default = true)]
     public AuditEvent ToAuditEvent(AuditEventQuery auditEventQuery)
     {
         var result = ToAuditEvent(auditEventQuery.Event);
-        eventTypeConverter.Convert(auditEventQuery, result);
-        return result;   
+        eventTypeConverter.Convert(auditEventQuery, result, false);
+        return result;
+    }
+
+    public List<AuditEvent> ToLimitedAuditEvents(List<AuditEventQuery> auditEventQuery)
+    {
+        return auditEventQuery?.Select(ToLimitedAuditEvent).ToList();
+    }
+
+    public AuditEvent ToLimitedAuditEvent(AuditEventQuery auditEventQuery)
+    {
+        var result = ToAuditEvent(auditEventQuery.Event);
+        eventTypeConverter.Convert(auditEventQuery, result, true);
+        return result;
     }
 }

@@ -36,12 +36,27 @@ public class LoginEvent : BaseEvent
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public partial class LoginEventMapper(EventTypeConverter eventTypeConverter)
 {
-    private partial LoginEvent ToLoginEvent(DbLoginEvent auditEventQuery);
-    public partial List<LoginEvent> ToLoginEvents(List<LoginEventQuery> auditEventQuery);
+    private partial LoginEvent ToLoginEvent(DbLoginEvent loginEventQuery);
+
+    public partial List<LoginEvent> ToLoginEvents(List<LoginEventQuery> loginEventQuery);
+
+    [UserMapping(Default = true)]
     private LoginEvent ToLoginEvent(LoginEventQuery source)
     {
         var dto = ToLoginEvent(source.Event);
-        eventTypeConverter.Convert(source, dto);
+        eventTypeConverter.Convert(source, dto, false);
+        return dto;
+    }
+
+    public List<LoginEvent> ToLimitedLoginEvents(List<LoginEventQuery> loginEventQuery)
+    {
+        return loginEventQuery?.Select(ToLimitedLoginEvent).ToList();
+    }
+
+    private LoginEvent ToLimitedLoginEvent(LoginEventQuery source)
+    {
+        var dto = ToLoginEvent(source.Event);
+        eventTypeConverter.Convert(source, dto, true);
         return dto;
     }
 }

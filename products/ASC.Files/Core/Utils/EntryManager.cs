@@ -154,18 +154,17 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsTask = tagDao.GetTagsAsync([TagType.Locked], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync());
-        var tagsFavoriteTask = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Favorite], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync());
-        var tagsNewTask = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, files).ToListAsync();
+        var tagsTask = tagDao.GetTagsAsync([TagType.Locked], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync()).AsTask();
+        var tagsFavoriteTask = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Favorite], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync()).AsTask();
+        var tagsNewTask = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, files).ToListAsync().AsTask();
 
+        await Task.WhenAll(tagsTask, tagsFavoriteTask, tagsNewTask);
+        
         var tags = await tagsTask;
         var tagsNew = await tagsNewTask;
         var tagsFavorite = await tagsFavoriteTask;
 
-        var spreadsheets = files.Where(file =>
-            file.RootFolderType == FolderType.VirtualRooms &&
-            fileUtility.CanWebCustomFilterEditing(file.Title))
-            .ToList();
+        var spreadsheets = files.Where(file => fileUtility.CanWebCustomFilterEditing(file.Title)).ToList();
 
         var customFilterTags = spreadsheets.Count != 0
             ? await tagDao.GetTagsAsync([TagType.CustomFilter], spreadsheets).ToDictionaryAsync(k => k.EntryId, v => v)
@@ -440,7 +439,7 @@ public class EntryManager(IDaoFactory daoFactory,
             {
                 total++;
                 allFoldersCountTask++;
-                
+            
                 if (total > from && total <= from + count)
                 {
                     folders.Add((Folder<T>)e);
@@ -1480,7 +1479,7 @@ public class EntryManager(IDaoFactory daoFactory,
         return file;
     }
 
-    public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, bool editingAlone = false)
+    public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, bool editingAlone = false, string fillingSessionId = null)
     {
         var token = externalShare.GetKey();
         
@@ -1495,7 +1494,7 @@ public class EntryManager(IDaoFactory daoFactory,
         bool checkRight;
         if ((await fileTracker.GetEditingByAsync(fileId)).Contains(userId))
         {
-            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenant, commonLinkUtility.ServerRootPath, docKey, editingAlone, token);
+            checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenant, commonLinkUtility.ServerRootPath, docKey, editingAlone, token, fillingSessionId);
             if (!checkRight)
             {
                 return null;
@@ -1517,7 +1516,7 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
-        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenant, commonLinkUtility.ServerRootPath, docKey, editingAlone, token);
+        checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenant, commonLinkUtility.ServerRootPath, docKey, editingAlone, token, fillingSessionId);
         if (checkRight)
         {
             await fileTracker.ChangeRight(fileId, userId, false);
@@ -2054,6 +2053,7 @@ public class EntryManager(IDaoFactory daoFactory,
             }
             await notifyClient.SendFormSubmittedAsync(room, originalForm, pdfFile);
 
+            logger.Information($"3 File Id: {file.Id} Filling session Id {fillingSessionId}");
             if (fillingSessionId != null)
             {
                 await hybridCache.SetAsync(fillingSessionId, result.Id.ToString());
@@ -2112,8 +2112,8 @@ public class EntryManager(IDaoFactory daoFactory,
                     // {
                     //     await MarkAsRecent(result);
                     // }
+                    }
                 }
-            }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Form submission error");

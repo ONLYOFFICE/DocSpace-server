@@ -45,7 +45,7 @@ public class SmtpSettings
     public bool IsDefaultSettings { get; internal set; }
     public bool UseNtlm { get; set; }
 
-    public static readonly SmtpSettings Empty = new();
+    public static readonly SmtpSettings Empty = new() { IsDefaultSettings = true };
 
     private SmtpSettings() { }
 

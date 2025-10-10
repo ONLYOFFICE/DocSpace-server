@@ -540,6 +540,16 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:encryption-progress", { percentage, error });
   }
 
+  function selfRestrictionForFile({ id, room, data } = {}) {
+    logger.info(`self restriction for file ${id} in room ${room}`);
+    filesIO.to(room).emit("s:self-restriction-file", { id, data });
+  }
+
+  function selfRestrictionForFolder({ id, room, data } = {}) {
+    logger.info(`self restriction for folder ${id} in room ${room}`);
+    filesIO.to(room).emit("s:self-restriction-folder", { id, data });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -573,6 +583,8 @@ module.exports = (io) => {
     restoreProgress,
     endBackup,
     endRestore,
-    encryptionProgress
+    encryptionProgress,
+    selfRestrictionForFile,
+    selfRestrictionForFolder
   };
 };

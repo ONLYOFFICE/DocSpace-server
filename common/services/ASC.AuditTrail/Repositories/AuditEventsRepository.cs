@@ -44,7 +44,8 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         DateTime? to = null,
         int startIndex = 0,
         int limit = 0,
-        Guid? withoutUserId = null)
+        Guid? withoutUserId = null,
+        bool limitedActionText = false)
     {
         return await GetByFilterWithActionsAsync(
             userId,
@@ -57,7 +58,9 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
             to,
             startIndex,
             limit,
-            withoutUserId);
+            withoutUserId,
+            null,
+            limitedActionText);
     }
 
     public async Task<IEnumerable<AuditEvent>> GetByFilterWithActionsAsync(
@@ -72,7 +75,8 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         int startIndex = 0,
         int limit = 0,
         Guid? withoutUserId = null,
-        string description = null)
+        string description = null,
+        bool limitedActionText = false)
     {
         var tenant = tenantManager.GetCurrentTenantId();
         await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
@@ -180,9 +184,10 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
                 LastName = u.LastName
             }).FirstOrDefault()
         });
-        
-        var events = mapper.ToAuditEvents(await q2.ToListAsync());
-        
+
+        var eventQueryList = await q2.ToListAsync();
+        var events = limitedActionText ? mapper.ToLimitedAuditEvents(eventQueryList) : mapper.ToAuditEvents(eventQueryList);
+
         foreach (var e in events)
         {
             await geolocationHelper.AddGeolocationAsync(e);

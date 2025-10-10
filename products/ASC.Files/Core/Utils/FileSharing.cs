@@ -126,7 +126,7 @@ public class FileSharingAceHelper(
 
             if (file != null)
             {
-                if ((w.Access is not (FileShare.Read or FileShare.Restrict or FileShare.None) && !fileUtility.CanWebView(entry.Title))
+                if ((w.Access is not (FileShare.Read or FileShare.Restrict or FileShare.ReadWrite or FileShare.None) && !fileUtility.CanWebView(entry.Title))
                     || (entry.RootFolderType != FolderType.USER && entry.RootFolderType != FolderType.VirtualRooms))
                 {
                     continue;
@@ -180,9 +180,18 @@ public class FileSharingAceHelper(
                 {
                     continue;
                 }
-                if (existedShare.Options?.ExpirationDate != w.FileShareOptions?.ExpirationDate && !await fileSecurity.CanEditExpirationAsync(entry) && (folder?.FolderType != FolderType.PublicRoom || w.SubjectType != SubjectType.PrimaryExternalLink))
+
+                if (existedShare.Options?.ExpirationDate != w.FileShareOptions?.ExpirationDate)
                 {
-                    continue;
+                    if (folder?.FolderType == FolderType.PublicRoom && w.SubjectType == SubjectType.PrimaryExternalLink)
+                    {                        
+                        continue;
+                    }
+
+                    if (w.SubjectType != SubjectType.InvitationLink && !await fileSecurity.CanEditExpirationAsync(entry))
+                    {
+                        continue;
+                    }
                 }
             }
             
@@ -467,15 +476,19 @@ public class FileSharingAceHelper(
         }
 
         var entryType = entry.FileEntryType;
-        await fileSecurity.ShareAsync(entry.Id, entryType, authContext.CurrentAccount.ID,
-            entry.RootFolderType == FolderType.USER
+
+        var defaultShare = entry.RootFolderType == FolderType.USER
                 ? fileSecurity.DefaultMyShare
-                : fileSecurity.DefaultPrivacyShare);
+                : fileSecurity.DefaultPrivacyShare;
+
+        await fileSecurity.ShareAsync(entry.Id, entryType, authContext.CurrentAccount.ID, defaultShare);
 
         if (entryType == FileEntryType.File)
         {
             await documentServiceHelper.CheckUsersForDropAsync((File<T>)entry);
         }
+
+        await socketManager.SelfRestrictionAsync(entry, authContext.CurrentAccount.ID, defaultShare);
 
         await fileMarker.RemoveMarkAsNewAsync(entry);
 
@@ -1040,10 +1053,18 @@ public class FileSharing(
         {
             w.CanEditDenyDownload = !room.SettingsDenyDownload;
         }
+        
         if (room is {FolderType: FolderType.PublicRoom} && record.SubjectType == SubjectType.PrimaryExternalLink)
-        {
+        {       
             w.CanEditExpirationDate = false;
+            w.CanRevoke = true;
         }
+        
+        if (room is {FolderType: FolderType.FillingFormsRoom} )
+        {       
+            w.CanRevoke = true;
+        }
+        
         return w;
     }
 }

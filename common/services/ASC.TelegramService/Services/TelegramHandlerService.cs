@@ -170,14 +170,14 @@ public class TelegramHandlerService(
 
         client.StartReceiving(
             updateHandler: (botClient, update, ct) => HandleUpdate(botClient, update, tenantId, ct),
-            errorHandler: HandleErrorAsync,
+            errorHandler: (botClient, exception, ct) => HandleErrorAsync(exception, tenantId, linkedCts),
             cancellationToken: linkedCts.Token);
     }
 
     private Task HandleUpdate(ITelegramBotClient botClient, Update update, int tenantId, CancellationToken cancellationToken)
     {
-        if (update.Type != UpdateType.Message || 
-            update.Message?.Type != MessageType.Text || 
+        if (update.Type != UpdateType.Message ||
+            update.Message?.Type != MessageType.Text ||
             string.IsNullOrEmpty(update.Message.Text) || update.Message.Text[0] != '/')
         {
             return Task.CompletedTask;
@@ -187,12 +187,28 @@ public class TelegramHandlerService(
         return Task.CompletedTask;
     }
 
-    Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+    private readonly int[] _stopErrorCodes = [
+        401, // Unathorized
+        409, // Keys Conflict
+    ];
+    Task HandleErrorAsync(Exception exception, int tenantId, CancellationTokenSource cts)
     {
-        var errorMessage = exception is ApiRequestException apiException
-            ? $"Telegram API Error:\n[{apiException.ErrorCode}]\n{apiException.Message}"
-            : exception.ToString();
-        logger.Error(errorMessage);
+        string message;
+        if (exception is ApiRequestException apiException)
+        {
+            message = $"Telegram API Error:\n[{apiException.ErrorCode}]\n(TenantId: {tenantId})\n{apiException.Message}";
+            logger.Error(message);
+
+            if (_stopErrorCodes.Contains(apiException.ErrorCode))
+            {
+                cts.Cancel();
+            }
+        }
+        else
+        {
+            message = exception.ToString();
+        }
+        logger.Error(message);
 
         return Task.CompletedTask;
     }

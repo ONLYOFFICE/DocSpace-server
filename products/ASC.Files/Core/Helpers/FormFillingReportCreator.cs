@@ -113,7 +113,7 @@ public class FormFillingReportCreator(
         };
         
         var fromData = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
-        fromData.FormsData = fromData.FormsData.Where(f => f.Type != "picture").ToList();
+        fromData.FormsData = fromData.FormsData.Where(f => f.Type != "picture" && f.Type != "signature").ToList();
 
         var now = DateTime.UtcNow;
         var tenantId = tenantManager.GetCurrentTenantId();

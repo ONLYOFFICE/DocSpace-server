@@ -238,6 +238,11 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// Represents the expiration date of the file entry.
     /// </summary>
     public ApiDateTime ExpirationDate { get; set; }
+
+    /// <summary>
+    /// Indicates whether the shareable link associated with the file or folder has expired.
+    /// </summary>
+    public bool? IsLinkExpired { get; set; }
     
     protected FileEntryDto(FileEntry<T> entry)
         : base(entry)

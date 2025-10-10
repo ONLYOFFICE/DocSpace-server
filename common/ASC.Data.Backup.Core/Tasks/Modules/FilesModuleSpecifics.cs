@@ -121,10 +121,24 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
         return false;
     }
 
-    public override void PrepareData(DataTable data)
+    public override void PrepareData(DataTable data, BackupCorrection backupCorrection)
     {
         switch (data.TableName)
         {
+            case "files_folder":
+                {
+                    for (var i = 0; i < data.Rows.Count; i++)
+                    {
+                        var folderId = Convert.ToInt32(data.Rows[i]["id"]);
+
+                        if (backupCorrection.FoldersTable.TryGetValue(folderId, out var correction))
+                        {
+                            data.Rows[i]["counter"] = correction;
+                        }
+                    }
+
+                    break;
+                }
             case "files_file":
                 {
                     for (var i = 0; i < data.Rows.Count; i++)
