@@ -192,5 +192,15 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/self-restriction-file", (req, res) => {
+    files.selfRestrictionForFile(req.body);
+    res.end();
+  });
+
+  router.post("/self-restriction-folder", (req, res) => {
+    files.selfRestrictionForFolder(req.body);
+    res.end();
+  });
+
   return router;
 };

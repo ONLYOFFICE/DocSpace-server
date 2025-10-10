@@ -1,4 +1,5 @@
 com.example.codegen.MyTypeScriptAxiosCodegen
+com.example.codegen.MyTypeScriptK6Codegen
 com.example.codegen.MyPythonCodegen
 com.example.codegen.MyPostmanCollectionCodegen
 com.example.codegen.MyCSharpCodegen

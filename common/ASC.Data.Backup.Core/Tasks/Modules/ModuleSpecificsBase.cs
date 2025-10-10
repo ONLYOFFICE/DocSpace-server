@@ -199,7 +199,7 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
         return true;
     }
 
-    public virtual void PrepareData(DataTable data)
+    public virtual void PrepareData(DataTable data, BackupCorrection backupCorrection)
     {
         // nothing to do
     }

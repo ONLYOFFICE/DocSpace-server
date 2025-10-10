@@ -290,7 +290,14 @@ public class ExternalShare(Global global,
             ? QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key)
             : url;
     }
-    
+
+    public string GetUrlWithFillingSessionId(string url, string fillingSessionId)
+    {
+        return !string.IsNullOrEmpty(fillingSessionId)
+            ? QueryHelpers.AddQueryString(url, FilesLinkUtility.FillingSessionId, fillingSessionId)
+            : url;
+    }
+
     public async Task<ExternalSessionSnapshot> TakeSessionSnapshotAsync()
     {
         var linkId = await GetLinkIdAsync();

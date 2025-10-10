@@ -39,7 +39,8 @@ public class LoginEventsRepository(
         DateTime? fromDate = null,
         DateTime? to = null,
         int startIndex = 0,
-        int limit = 0)
+        int limit = 0,
+        bool limitedActionText = false)
     {
         var tenant = tenantManager.GetCurrentTenantId();
         await using var messagesContext = await dbContextFactory.CreateDbContextAsync();
@@ -93,7 +94,8 @@ public class LoginEventsRepository(
             }
         }
 
-        var events = eventMapper.ToLoginEvents(await query.ToListAsync());
+        var eventQueryList = await query.ToListAsync();
+        var events = limitedActionText ? eventMapper.ToLimitedLoginEvents(eventQueryList) : eventMapper.ToLoginEvents(eventQueryList);
 
         foreach (var e in events)
         {

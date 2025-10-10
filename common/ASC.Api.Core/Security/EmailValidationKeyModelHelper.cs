@@ -270,6 +270,17 @@ public class EmailValidationKeyModelHelper(
                     checkKeyResult = ValidationResult.Invalid;
                     break;
                 }
+
+                if (uiD.HasValue)
+                {
+                    var user = await userManager.GetUsersAsync(uiD.Value);
+                    if (Equals(user, Constants.LostUser) || user.Status == EmployeeStatus.Terminated)
+                    {
+                        checkKeyResult = ValidationResult.Invalid;
+                        break;
+                    }
+                }
+
                 checkKeyResult = provider.ValidateEmailKey(email + type + uiD + userInfo.Id, key, provider.ValidEmailKeyInterval);
                 break;
 

@@ -142,6 +142,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// Specifies if an external link to the folder is expired or not.
     /// </summary>
+    [Obsolete("Use IsLinkExpired instead")]
     public bool? Expired { get; set; }
 
     /// <summary>
@@ -250,7 +251,9 @@ public class FolderDtoHelper(
                                        folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && 
                                        !canRead;
 
+#pragma warning disable CS0618 // Type or member is obsolete
             result.Expired = folder.ShareRecord.Options?.IsExpired;
+            result.IsLinkExpired = folder.ShareRecord.Options?.IsExpired;
             result.RequestToken = await _externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
             var expirationDate = folder.ShareRecord?.Options?.ExpirationDate;
             if (expirationDate != null && expirationDate != DateTime.MinValue)

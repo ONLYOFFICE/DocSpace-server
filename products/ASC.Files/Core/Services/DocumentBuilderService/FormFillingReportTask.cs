@@ -58,6 +58,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
     {
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
         var clientFactory = serviceProvider.GetService<IHttpClientFactory>();
+        var tenantUtil = serviceProvider.GetService<TenantUtil>();
 
         var fileDao = daoFactory.GetFileDao<int>();
         var origProperties = await daoFactory.GetFileDao<int>().GetProperties(_data.OriginalFormId);
@@ -69,12 +70,11 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         using var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
-        
-        resultFile.Version++;
-        resultFile.VersionGroup++;
+
+        resultFile.CreateOn = tenantUtil.DateTimeNow();
         resultFile.ContentLength = stream.Length;
 
-        resultFile = await fileDao.SaveFileAsync(resultFile, stream, false);
+        resultFile = await fileDao.ReplaceFileVersionAsync(resultFile, stream);
 
         if (resultFile.Id != origProperties.FormFilling.ResultsFileID)
         {
@@ -124,7 +124,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
                     var t = new List<object>();
                     foreach (var field in formFillingRes.FormsData)
                     {
-                        if (field.Type == "picture")
+                        if (field.Type == "picture" || field.Type == "signature")
                         {
                             continue;
                         }

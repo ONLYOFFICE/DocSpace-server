@@ -1679,8 +1679,18 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        var id = file != null ? file.Id : folder != null ? folder.Id : default;
-                        return !Equals(default(T), id) && !Equals(ace.EntryId, id) &&  e.Access == FileShare.ReadWrite;
+                        if (e.Access != FileShare.ReadWrite)
+                        {
+                            return false;
+                        }
+                        switch (e)
+                        {
+                            case File<T> file1:
+                                return !Equals(default(T), file1.Id) && ace.Level > -1;
+                            case Folder<T> folder1:
+                                return !Equals(default(T), folder1.Id) && ace.Level > 0;
+                        }
+                        break;
                     default:
                         if (e.Access == FileShare.RoomManager ||
                             (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
@@ -1838,20 +1848,20 @@ public class FileSecurity(
                 }
 
                 break;
-            case FilesSecurityActions.CopyTo:
             case FilesSecurityActions.MoveTo:
+            case FilesSecurityActions.CopyTo:
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        var id = file != null ? file.Id : folder != null ? folder.Id : default;
-                        return !Equals(default(T), id) && !Equals(ace.EntryId, id) &&  e.Access == FileShare.ReadWrite;
-                    default:
-                        if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
-                        {
-                            return true;
-                        }
+                            return e.Access == FileShare.ReadWrite;
 
-                        break;
+                        default:
+                            if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
+                            {
+                                return true;
+                            }
+
+                            break;
                 }
 
                 break;
@@ -1924,7 +1934,19 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        return e.Access == FileShare.ReadWrite;
+                        if (e.Access != FileShare.ReadWrite)
+                        {
+                            return false;
+                        }
+
+                        switch (e)
+                        {
+                            case File<T> file1:
+                                return !Equals(default(T), file1.Id) && ace.Level > -1;
+                            case Folder<T> folder1:
+                                return !Equals(default(T), folder1.Id) && ace.Level > 0;
+                        }
+                        break;
                     default:
                         if ((e.Access == FileShare.RoomManager ||
                              (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
