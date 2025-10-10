@@ -67,6 +67,8 @@ public class MyTypeScriptK6Codegen extends TypeScriptAxiosClientCodegen {
     public void processOpts() {
         super.processOpts();
 
+        this.outputFolder = "generated-code/my-typescript-k6";
+
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
             ServerVariables serverVars = server.getVariables();
