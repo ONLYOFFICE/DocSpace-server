@@ -300,6 +300,7 @@ public class TfaappController(
     [SwaggerResponse(200, "Setup code", typeof(SetupCode))]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpGet("tfaapp/setup")]
+    [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation")]
     public async Task<SetupCode> TfaAppGenerateSetupCode()
     {
