@@ -134,16 +134,17 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
         objs = super.postProcessOperationsWithModels(objs, allModels);
-        OperationMap vals = objs.getOperations();
-        List<CodegenOperation> operations = vals.getOperation();
-        String className = vals.getClassname();
+        OperationMap operationMap = objs.getOperations();
+        List<CodegenOperation> operations = operationMap.getOperation();
+        String className = operationMap.getClassname();
         if (className != null && className.endsWith(apiNameSuffix)) {
             className = className.substring(0, className.length() - 3);
         }
         TagParts tagParts = tagMap.get(className);
-        vals.put("x-folder", (tagParts.folderPart).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
-        vals.put("x-file", (tagParts.classPart + apiNameSuffix).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
-        vals.put("x-classname", tagParts.classPart + apiNameSuffix);
+        operationMap.put("x-folder", (tagParts.folderPart).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
+        operationMap.put("x-file", (tagParts.classPart + apiNameSuffix).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
+        operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
+        boolean shouldSupportFields = false;
         if (operations != null) {
             for (CodegenOperation op : operations) {
                 if (op.operationId != null) {
@@ -161,10 +162,12 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
 
                     if (allAreQueryParams && hasCountParam) {
                         op.vendorExtensions.put("x-hasFieldsParam", true);
+                        shouldSupportFields = true;
                     }
                 }
             }
         }
+        operationMap.put("x-supportsFields", shouldSupportFields);
 
         return objs;
     }

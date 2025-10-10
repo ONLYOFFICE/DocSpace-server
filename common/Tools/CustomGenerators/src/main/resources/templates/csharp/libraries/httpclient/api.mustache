@@ -28,7 +28,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         {{#isDeprecated}}
         [Obsolete]
         {{/isDeprecated}}
-        {{{returnType}}}{{^returnType}}void{{/returnType}} {{operationId}}({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, string fields = default{{/vendorExtensions.x-hasFieldsParam}});
+        {{{returnType}}}{{^returnType}}void{{/returnType}} {{operationId}}({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}});
 
         /// <summary>
         /// {{summary}}
@@ -43,7 +43,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         {{#isDeprecated}}
         [Obsolete]
         {{/isDeprecated}}
-        ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}> {{operationId}}WithHttpInfo({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, string fields = default{{/vendorExtensions.x-hasFieldsParam}});
+        ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}> {{operationId}}WithHttpInfo({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}});
         {{/operation}}
         #endregion Synchronous Operations
     }
@@ -72,7 +72,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         {{#isDeprecated}}
         [Obsolete]
         {{/isDeprecated}}
-        {{#returnType}}Task<{{{.}}}>{{/returnType}}{{^returnType}}Task{{/returnType}} {{operationId}}Async({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, string fields = default{{/vendorExtensions.x-hasFieldsParam}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default);
+        {{#returnType}}Task<{{{.}}}>{{/returnType}}{{^returnType}}Task{{/returnType}} {{operationId}}Async({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default);
 
         /// <summary>
         /// {{summary}}
@@ -90,7 +90,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         {{#isDeprecated}}
         [Obsolete]
         {{/isDeprecated}}
-        Task<ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}>> {{operationId}}WithHttpInfoAsync({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, string fields = default{{/vendorExtensions.x-hasFieldsParam}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default);
+        Task<ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}>> {{operationId}}WithHttpInfoAsync({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default);
         {{/operation}}
         #endregion Asynchronous Operations
     }
@@ -320,6 +320,22 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
             set => _exceptionFactory = value; 
         }
 
+        {{#x-supportsFields}}
+        private string? _fields;
+
+        /// <summary>
+        /// Specifies which fields should be included in the API response.
+        /// </summary>
+        /// <param name="fields">A comma-separated list of field paths to include in the response</param>
+        /// <returns></returns>
+
+        public {{x-classname}} WithFields(string fields)
+        {
+            _fields = fields;
+            return this;
+        }
+        {{/x-supportsFields}}
+
         {{#operation}}
         /// <summary>
         /// {{summary}}
@@ -336,9 +352,9 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         {{#isDeprecated}}
         [Obsolete]
         {{/isDeprecated}}
-        public {{{returnType}}}{{^returnType}}void{{/returnType}} {{operationId}}({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, string fields = default{{/vendorExtensions.x-hasFieldsParam}})
+        public {{{returnType}}}{{^returnType}}void{{/returnType}} {{operationId}}({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}})
         {
-            {{#returnType}}var localVarResponse = {{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields{{/vendorExtensions.x-hasFieldsParam}});
+            {{#returnType}}var localVarResponse = {{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}});
             return localVarResponse.Data;{{/returnType}}{{^returnType}}{{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}});{{/returnType}}
         }
 
@@ -357,7 +373,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         {{#isDeprecated}}
         [Obsolete]
         {{/isDeprecated}}
-        public ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}> {{operationId}}WithHttpInfo({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, string fields = default{{/vendorExtensions.x-hasFieldsParam}})
+        public ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}> {{operationId}}WithHttpInfo({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}})
         {
             {{#allParams}}
             {{#required}}
@@ -439,9 +455,9 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
             {{/required}}
             {{/headerParams}}
             {{#vendorExtensions.x-hasFieldsParam}}
-            if (fields != null)
+            if (_fields != null)
             {
-                localVarRequestOptions.HeaderParameters.Add("fields", fields); // header parameter
+                localVarRequestOptions.HeaderParameters.Add("fields", _fields); // header parameter
             }
             {{/vendorExtensions.x-hasFieldsParam}}
             {{#formParams}}
@@ -566,9 +582,9 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         {{#isDeprecated}}
         [Obsolete]
         {{/isDeprecated}}
-        {{#returnType}}public async Task<{{{.}}}>{{/returnType}}{{^returnType}}public async Task{{/returnType}} {{operationId}}Async({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, string fields = default{{/vendorExtensions.x-hasFieldsParam}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default)
+        {{#returnType}}public async Task<{{{.}}}>{{/returnType}}{{^returnType}}public async Task{{/returnType}} {{operationId}}Async({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default)
         {
-            {{#returnType}}var localVarResponse = await {{operationId}}WithHttpInfoAsync({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields{{/vendorExtensions.x-hasFieldsParam}}{{#allParams.0}}, {{/allParams.0}}cancellationToken).ConfigureAwait(false);
+            {{#returnType}}var localVarResponse = await {{operationId}}WithHttpInfoAsync({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;{{/returnType}}{{^returnType}}await {{operationId}}WithHttpInfoAsync({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}cancellationToken).ConfigureAwait(false);{{/returnType}}
         }
 
@@ -590,7 +606,7 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         {{#isDeprecated}}
         [Obsolete]
         {{/isDeprecated}}
-        public async Task<ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}>> {{operationId}}WithHttpInfoAsync({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, string fields = default{{/vendorExtensions.x-hasFieldsParam}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default)
+        public async Task<ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}>> {{operationId}}WithHttpInfoAsync({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default)
         {
             {{#allParams}}
             {{#required}}
@@ -656,9 +672,9 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
             localVarRequestOptions.HeaderParameters.Add("{{baseName}}", ClientUtils.ParameterToString({{#_enum}}"{{{.}}}"{{/_enum}})); // Constant header parameter
             {{/isHeaderParam}}
             {{#vendorExtensions.x-hasFieldsParam}}
-            if (fields != null)
+            if (_fields != null)
             {
-                localVarRequestOptions.HeaderParameters.Add("fields", fields); // header parameter
+                localVarRequestOptions.HeaderParameters.Add("fields", _fields); // header parameter
             }
             {{/vendorExtensions.x-hasFieldsParam}}
             {{/constantParams}}

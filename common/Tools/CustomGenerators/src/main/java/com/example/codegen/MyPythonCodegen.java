@@ -98,6 +98,7 @@ public class MyPythonCodegen extends PythonClientCodegen {
             TagParts tagParts = tagMapSanitize.get(className);
             operationMap.put("x-folder", underscore(tagParts.folderPart));
             operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
+            boolean shouldSupportFields = false;
 
             if (operationList != null) {
                 for (CodegenOperation op : operationList) { 
@@ -111,10 +112,12 @@ public class MyPythonCodegen extends PythonClientCodegen {
 
                         if (allAreQueryParams && hasCountParam) {
                             op.vendorExtensions.put("x-hasFieldsParam", true);
+                            shouldSupportFields = true;
                         }
                     }
                 }
             }
+            operationMap.put("x-supportsFields", shouldSupportFields);
         }
 
         return objs;

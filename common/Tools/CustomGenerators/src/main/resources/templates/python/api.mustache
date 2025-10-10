@@ -4,6 +4,9 @@ import warnings
 from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
+{{#operations.x-supportsFields}}
+from __future__ import annotations
+{{/operations.x-supportsFields}}
 
 {{#imports}}
 {{import}}
@@ -26,6 +29,15 @@ class {{x-classname}}:
         if api_client is None:
             api_client = ApiClient.get_default()
         self.api_client = api_client
+        {{#x-supportsFields}}
+        self._fields = None
+        {{/x-supportsFields}}
+
+{{#x-supportsFields}}
+    def with_fields(self, fields: str) -> {{x-classname}}:
+        self._fields = fields
+        return self
+{{/x-supportsFields}}
 {{#operation}}
 
 
@@ -72,9 +84,6 @@ class {{x-classname}}:
         {{#allParams}}
         {{paramName}},
         {{/allParams}}
-        {{#vendorExtensions.x-hasFieldsParam}}
-        fields,
-        {{/vendorExtensions.x-hasFieldsParam}}
         _request_auth,
         _content_type,
         _headers,
@@ -148,8 +157,8 @@ class {{x-classname}}:
 {{/queryParams}}
         # process the header parameters
         {{#vendorExtensions.x-hasFieldsParam}}
-        if fields is not None:
-            _header_params['fields'] = fields
+        if self._fields is not None:
+            _header_params['fields'] = self._fields
         {{/vendorExtensions.x-hasFieldsParam}}
 {{#headerParams}}
         if {{paramName}} is not None:

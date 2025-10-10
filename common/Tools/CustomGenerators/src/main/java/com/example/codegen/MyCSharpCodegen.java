@@ -169,6 +169,7 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
             TagParts tagParts = tagMap.get(camelize(className));
             operationMap.put("x-folder", tagParts.folderPart);
             operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
+            boolean shouldSupportFields = false;
             if (operationList != null) {
                 for (CodegenOperation op : operationList) { 
                     if (op.operationId != null) {
@@ -186,6 +187,7 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
 
                         if (allAreQueryParams && hasCountParam) {
                             op.vendorExtensions.put("x-hasFieldsParam", true);
+                            shouldSupportFields = true;
                         }
                     }
 
@@ -212,6 +214,7 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
                     }
                 }
             }
+            operationMap.put("x-supportsFields", shouldSupportFields);
         }
 
         return objs;
