@@ -180,9 +180,18 @@ public class FileSharingAceHelper(
                 {
                     continue;
                 }
-                if (existedShare.Options?.ExpirationDate != w.FileShareOptions?.ExpirationDate && !await fileSecurity.CanEditExpirationAsync(entry) && (folder?.FolderType != FolderType.PublicRoom || w.SubjectType != SubjectType.PrimaryExternalLink))
+
+                if (existedShare.Options?.ExpirationDate != w.FileShareOptions?.ExpirationDate)
                 {
-                    continue;
+                    if (folder?.FolderType == FolderType.PublicRoom && w.SubjectType == SubjectType.PrimaryExternalLink)
+                    {                        
+                        continue;
+                    }
+
+                    if (w.SubjectType != SubjectType.InvitationLink && !await fileSecurity.CanEditExpirationAsync(entry))
+                    {
+                        continue;
+                    }
                 }
             }
             
