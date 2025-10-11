@@ -1322,7 +1322,7 @@ public class FileSecurity(
                         return false;
                     }
 
-                    if (fileFolder is { FolderType: FolderType.VirtualDataRoom })
+                    if (fileFolder is { FolderType: FolderType.VirtualDataRoom } && !userId.Equals(ASC.Core.Configuration.Constants.Guest.ID))
                     {
                         var (currentStep, myRoles) = await cacheFileDao.GetUserFormRoles(file.Id, userId);
                         var role = myRoles.FirstOrDefault(r => !r.Submitted);
@@ -1332,6 +1332,7 @@ public class FileSecurity(
                         var userHasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
 
                         var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
+                        var formShareRecord = await GetCurrentShareAsync(file, userId, isDocSpaceAdmin, shares);
 
                         var hasFullAccessToForm = userHasFullAccess || (shareRecord is { Share: FileShare.ContentCreator or FileShare.RoomManager});
 
@@ -1348,10 +1349,10 @@ public class FileSecurity(
                                 hasFullAccessToForm && (formFilling == null || formFilling?.StartFilling == false || formFilling?.StartFilling == null),
 
                             FilesSecurityActions.FillForms =>
-                                !isFillingStoped && myRoles.Count != 0 && (role != null && role.Sequence == currentStep),
+                                (!isFillingStoped && myRoles.Count != 0 && (role != null && role.Sequence == currentStep)) || (formShareRecord is { Share: FileShare.FillForms} && myRoles.Count == 0),
 
                             FilesSecurityActions.Edit =>
-                                currentStep == -1 && (hasFullAccessToForm || e.Access is FileShare.Editing),
+                                (currentStep == -1 && (hasFullAccessToForm || e.Access is FileShare.Editing)) || formShareRecord is { Share: FileShare.Editing },
 
                             FilesSecurityActions.FillingStatus =>
                                 formFilling?.StartFilling == true,

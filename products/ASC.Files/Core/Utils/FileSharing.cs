@@ -468,7 +468,7 @@ public class FileSharingAceHelper(
 
     public async Task RemoveAceAsync<T>(FileEntry<T> entry)
     {
-        if ((entry.RootFolderType != FolderType.USER && entry.RootFolderType != FolderType.Privacy)
+        if ((entry.RootFolderType != FolderType.USER && entry.RootFolderType != FolderType.Privacy && entry.RootFolderType != FolderType.VirtualRooms)
             || Equals(entry.RootId, await globalFolderHelper.FolderMyAsync)
             || Equals(entry.RootId, await globalFolderHelper.FolderPrivacyAsync))
         {
@@ -497,7 +497,7 @@ public class FileSharingAceHelper(
         await socketManager.RemoveFromFavoritesAsync(entry, [currentId]);
         await socketManager.RemoveFromRecentAsync(entry, [currentId]);
         
-        if (entry.RootFolderType is FolderType.USER or FolderType.Privacy)
+        if (entry.RootFolderType is FolderType.USER or FolderType.Privacy or FolderType.VirtualRooms)
         { 
             await socketManager.RemoveFromSharedAsync(entry, users: [currentId]);
         }

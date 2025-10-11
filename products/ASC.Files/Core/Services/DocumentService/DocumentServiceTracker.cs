@@ -357,11 +357,6 @@ public class DocumentServiceTrackerHelper(
                 await filesMessageService.SendAsync(MessageAction.FileOpenedForChange, file, file.Title);
             }
             
-            if (securityContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry && await fileSecurity.CanReadAsync(file))
-            {
-                await entryManager.MarkAsRecent(file);
-            }
-            
             securityContext.Logout();
         }
     }

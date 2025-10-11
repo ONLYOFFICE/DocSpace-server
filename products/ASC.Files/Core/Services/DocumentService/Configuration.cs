@@ -932,11 +932,6 @@ public class CustomizationConfig<T>(
 
     public async Task<GobackConfig> GetGoBack(EditorType editorType, File<T> file)
     {
-        if (editorType == EditorType.Embedded)
-        {
-            return null;
-        }
-        
         if (GobackUrl != null)
         {
             return new GobackConfig

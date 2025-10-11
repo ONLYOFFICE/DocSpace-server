@@ -3646,7 +3646,7 @@ public class FileStorageService //: IFileStorageService
             entries.AddRange(items);
         }
 
-        var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Recent, TagType.RecentByLink], entries).ToListAsync();
+        var tags = await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Recent], entries).ToListAsync();
 
         await tagDao.RemoveTagsAsync(tags);
 
@@ -4102,10 +4102,10 @@ public class FileStorageService //: IFileStorageService
             : await daoFactory.GetFolderDao<T>().GetFolderAsync(entryId);
 
         //hack for the form-filling room. return a link to a file with the room key.
-        if (share is FileShare.FillForms && entry is File<T>)
+        if (entry is File<T> file && file.IsForm)
         {
             var parentRoom = await DocSpaceHelper.GetParentRoom(entry, daoFactory.GetCacheFolderDao<T>());
-            if (parentRoom?.FolderType == FolderType.FillingFormsRoom)
+            if (parentRoom?.FolderType == FolderType.FillingFormsRoom && (share is FileShare.FillForms or FileShare.None))
             {
                 var roomExternalLink = await SetExternalLinkAsync(parentRoom.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, primary, requiredAuth);
                 var linkData = await externalShare.GetLinkDataAsync(entry, roomExternalLink.Id);
@@ -5153,7 +5153,7 @@ public class FileStorageService //: IFileStorageService
 
             var (defaultTitle, defaultAccess) = folder.FolderType switch
             {
-                FolderType.PublicRoom => (FilesCommonResource.DefaultExternalLinkTitle, FileShare.Read),
+                FolderType.PublicRoom => (FilesCommonResource.DefaultExternalLinkTitle, entry is File<T> file && file.IsForm ? FileShare.FillForms : FileShare.Read),
                 FolderType.FillingFormsRoom => (FilesCommonResource.FillOutExternalLinkTitle, FileShare.FillForms),
                 _ => throw new InvalidOperationException()
             };
