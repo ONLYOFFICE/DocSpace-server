@@ -420,6 +420,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
             }
 
+            await entryStatusManager.SetFileStatusAsync(entries.OfType<File<T>>().ToList());
             return (entries, total);
         }
         else if (parent.FolderType == FolderType.Favorites)
