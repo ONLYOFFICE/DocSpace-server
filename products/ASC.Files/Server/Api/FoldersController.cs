@@ -255,7 +255,7 @@ public abstract class FoldersController<T>(
     {        
         var folder = await fileStorageService.GetFolderAsync(inDto.FolderId).NotFoundIfNull("Folder not found");
 
-        return await _folderDtoHelper.GetAsync(folder);
+        return await _folderDtoHelper.GetAsync(folder, contextFolder: folder);
     }
 
     /// <summary>
