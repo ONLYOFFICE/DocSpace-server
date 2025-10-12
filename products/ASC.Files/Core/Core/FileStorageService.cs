@@ -235,7 +235,7 @@ public class FileStorageService //: IFileStorageService
     {
         var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
 
-        var folderDao = daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetCacheFolderDao<T>();
 
         Folder<T> parent = null;
         Folder<T> parentRoom = null;

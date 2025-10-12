@@ -172,7 +172,8 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         foreach (var file in files)
         {
-            var lockedTag = lockedTags.Where(r=> Equals(r.EntryId, file.Id)).FirstOrDefault(r => r.Type == TagType.Locked);
+            var fileId = (object)file.Id;
+            var lockedTag = lockedTags.Where(r=> Equals(r.EntryId, fileId)).FirstOrDefault(r => r.Type == TagType.Locked);
             if (lockedTag != null)
             {
                 var lockedBy = lockedTag.Owner;
@@ -182,14 +183,14 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
                     : null;
             }
             
-            file.IsFavorite = tagsFavorite.Any(r=> Equals(r.EntryId, file.Id) && r.Type == TagType.Favorite);
+            file.IsFavorite = tagsFavorite.Any(r => Equals(r.EntryId, fileId) && r.Type == TagType.Favorite);
             
-            if (tagsNew.Exists(r => r.EntryId.Equals(file.Id)))
+            if (tagsNew.Exists(r => Equals(r.EntryId, fileId)))
             {
                 file.IsNew = true;
             }
 
-            if (customFilterTags.TryGetValue(file.Id, out var customFilterTag))
+            if (customFilterTags.TryGetValue(fileId, out var customFilterTag))
             {
                 file.CustomFilterEnabled = true;
                 file.CustomFilterEnabledBy = customFilterTag.Owner != authContext.CurrentAccount.ID
