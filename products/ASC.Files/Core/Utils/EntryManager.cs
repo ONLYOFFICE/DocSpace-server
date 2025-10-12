@@ -154,13 +154,13 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsTask = tagDao.GetTagsAsync([TagType.Locked], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync()).AsTask();
-        var tagsFavoriteTask = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Favorite], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync()).AsTask();
+        var lockedTagsTask = tagDao.GetTagsAsync([TagType.Locked], files).ToListAsync().AsTask();
+        var tagsFavoriteTask = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Favorite], files).ToListAsync().AsTask();
         var tagsNewTask = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, files).ToListAsync().AsTask();
 
-        await Task.WhenAll(tagsTask, tagsFavoriteTask, tagsNewTask);
+        await Task.WhenAll(lockedTagsTask, tagsFavoriteTask, tagsNewTask);
         
-        var tags = await tagsTask;
+        var lockedTags = await lockedTagsTask;
         var tagsNew = await tagsNewTask;
         var tagsFavorite = await tagsFavoriteTask;
 
@@ -172,8 +172,7 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         foreach (var file in files)
         {
-            var fileLockedTags = await tags.GetValueOrDefault(file.Id);
-            var lockedTag = fileLockedTags?.FirstOrDefault(r => r.Type == TagType.Locked);
+            var lockedTag = lockedTags.Where(r=> Equals(r.EntryId, file.Id)).FirstOrDefault(r => r.Type == TagType.Locked);
             if (lockedTag != null)
             {
                 var lockedBy = lockedTag.Owner;
@@ -183,8 +182,7 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
                     : null;
             }
             
-            var fileFavoriteTags = await tagsFavorite.GetValueOrDefault(file.Id);
-            file.IsFavorite = fileFavoriteTags?.FirstOrDefault(r => r.Type == TagType.Favorite) != null;
+            file.IsFavorite = tagsFavorite.Any(r=> Equals(r.EntryId, file.Id) && r.Type == TagType.Favorite);
             
             if (tagsNew.Exists(r => r.EntryId.Equals(file.Id)))
             {
