@@ -585,12 +585,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             await fileDao.InvalidateCacheAsync(id);
 
             var (linkRight, file) = await CheckLinkAsync(id, version, fileDao);
-
-            if (linkRight.Access == FileShare.Restrict && linkRight.Status == Status.ExternalAccessDenied && !securityContext.IsAuthenticated)
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                return;
-            }
             
             if (linkRight.Access == FileShare.Restrict && !securityContext.IsAuthenticated)
             {
@@ -677,7 +671,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
                 return;
             }
-
+            
             if (linkRight.Access == FileShare.Restrict && securityContext.IsAuthenticated && !await fileSecurity.CanDownloadAsync(file))
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
@@ -915,12 +909,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             
             var (linkRight, file) = await CheckLinkAsync(id, version, fileDao);
             
-            if (linkRight.Access == FileShare.Restrict && linkRight.Status == Status.ExternalAccessDenied && !securityContext.IsAuthenticated)
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                return;
-            }
-            
             if (linkRight.Access == FileShare.Restrict && !securityContext.IsAuthenticated)
             {
                 var auth = context.Request.Query[FilesLinkUtility.AuthKey].FirstOrDefault();
@@ -952,7 +940,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
                 return;
             }
-
+            
             if (linkRight.Access == FileShare.Restrict && securityContext.IsAuthenticated && !await fileSecurity.CanReadAsync(file))
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
