@@ -153,7 +153,6 @@ public abstract class EditorController<T>(
         var rootFolder = await documentServiceHelper.GetRootFolderAsync(file);
         if (file.IsForm && rootFolder.RootFolderType != FolderType.RoomTemplates)
         {
-
             formOpenSetup = rootFolder.FolderType switch
             {
                 FolderType.FillingFormsRoom => await documentServiceHelper.GetFormOpenSetupForFillingRoomAsync(file, rootFolder, inDto.EditorType, inDto.Edit, entryManager),
@@ -167,6 +166,7 @@ public abstract class EditorController<T>(
                     CanFill = inDto.Fill,
                 }
             };
+            
             formOpenSetup.RootFolder = rootFolder;
         }
 

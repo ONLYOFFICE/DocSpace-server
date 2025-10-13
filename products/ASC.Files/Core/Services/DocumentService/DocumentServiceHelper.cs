@@ -49,8 +49,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         SettingsManager settingsManager,
         IQuotaService quotaService,
         TenantManager tenantManager)
-    {
-
+{
     public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
     {
         var lastVersion = true;
@@ -60,8 +59,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var file = await fileDao.GetFileAsync(fileId);
         if (file != null && 0 < version && version < file.Version)
         {
-                file = await fileDao.GetFileAsync(fileId, version);
-                lastVersion = false;
+            file = await fileDao.GetFileAsync(fileId, version);
+            lastVersion = false;
         }
 
         if (file == null)
@@ -70,7 +69,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         return (file, lastVersion);
-            }
+    }
 
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit,
         bool tryCoauth, bool fillFormsPossible, EditorType editorType, bool isSubmitOnly = false)
@@ -143,7 +142,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     private async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion,
         bool rightToEdit, bool editPossible, bool tryEdit, bool tryCoAuthoring, bool fillFormsPossible)
     {
-
         if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);

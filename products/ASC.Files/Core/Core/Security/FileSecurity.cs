@@ -1516,9 +1516,10 @@ public class FileSecurity(
         if (ace == null)
         {
             var cachedRecords = GetCachedRecords<T>();
-            if ((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive &&
+            if (((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive &&
                  cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId), out var value)) ||
-                cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))
+                cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))  &&
+                value != null)
             {
                 ace = value.Clone();
                 ace.EntryId = e.Id;

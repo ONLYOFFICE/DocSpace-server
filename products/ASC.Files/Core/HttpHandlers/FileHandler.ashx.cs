@@ -586,7 +586,13 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
             var (linkRight, file) = await CheckLinkAsync(id, version, fileDao);
 
-            if (linkRight == FileShare.Restrict && !securityContext.IsAuthenticated)
+            if (linkRight.Access == FileShare.Restrict && linkRight.Status == Status.ExternalAccessDenied && !securityContext.IsAuthenticated)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                return;
+            }
+            
+            if (linkRight.Access == FileShare.Restrict && !securityContext.IsAuthenticated)
             {
                 var auth = context.Request.Query[FilesLinkUtility.AuthKey];
                 var validateResult = emailValidationKeyProvider.ValidateEmailKey(id.ToString() + version, auth.FirstOrDefault() ?? "", global.StreamUrlExpire);
@@ -672,7 +678,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
 
-            if (linkRight == FileShare.Restrict && securityContext.IsAuthenticated && !await fileSecurity.CanDownloadAsync(file))
+            if (linkRight.Access == FileShare.Restrict && securityContext.IsAuthenticated && !await fileSecurity.CanDownloadAsync(file))
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                 return;
@@ -712,20 +718,20 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         }
     }
 
-    private async Task<(FileShare, File<T>)> CheckLinkAsync<T>(T id, int version, IFileDao<T> fileDao)
+    private async Task<(ValidationInfo, File<T>)> CheckLinkAsync<T>(T id, int version, IFileDao<T> fileDao)
     {
-        var linkRight = FileShare.Restrict;
+        var validationInfo = new ValidationInfo { Access = FileShare.Restrict };
 
         var key = externalShare.GetKey();
         if (string.IsNullOrEmpty(key))
         {
-            return (linkRight, null);
+            return (validationInfo, null);
         }
 
         var result = await externalLinkHelper.ValidateAsync(key);
         if (result.Access == FileShare.Restrict)
         {
-            return (linkRight, null);
+            return (result, null);
         }
 
         var file = version > 0
@@ -734,10 +740,10 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
         if (file != null && await fileSecurity.CanDownloadAsync(file))
         {
-            linkRight = result.Access;
+            return (result, file);
         }
 
-        return (linkRight, file);
+        return (validationInfo, file);
     }
 
     private async Task EmptyFile(HttpContext context)
@@ -908,7 +914,14 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             }
             
             var (linkRight, file) = await CheckLinkAsync(id, version, fileDao);
-            if (linkRight == FileShare.Restrict && !securityContext.IsAuthenticated)
+            
+            if (linkRight.Access == FileShare.Restrict && linkRight.Status == Status.ExternalAccessDenied && !securityContext.IsAuthenticated)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                return;
+            }
+            
+            if (linkRight.Access == FileShare.Restrict && !securityContext.IsAuthenticated)
             {
                 var auth = context.Request.Query[FilesLinkUtility.AuthKey].FirstOrDefault();
                 var validateResult = emailValidationKeyProvider.ValidateEmailKey(id.ToString() + version, auth ?? "", global.StreamUrlExpire);
@@ -940,7 +953,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
 
-            if (linkRight == FileShare.Restrict && securityContext.IsAuthenticated && !await fileSecurity.CanReadAsync(file))
+            if (linkRight.Access == FileShare.Restrict && securityContext.IsAuthenticated && !await fileSecurity.CanReadAsync(file))
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                 return;
