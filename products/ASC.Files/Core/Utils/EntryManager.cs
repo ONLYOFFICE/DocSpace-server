@@ -2053,7 +2053,6 @@ public class EntryManager(IDaoFactory daoFactory,
             }
             await notifyClient.SendFormSubmittedAsync(room, originalForm, pdfFile);
 
-            logger.Information($"3 File Id: {file.Id} Filling session Id {fillingSessionId}");
             if (fillingSessionId != null)
             {
                 await hybridCache.SetAsync(fillingSessionId, result.Id.ToString());

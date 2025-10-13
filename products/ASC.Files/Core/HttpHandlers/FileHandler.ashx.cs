@@ -1535,7 +1535,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             throw new HttpException((int)HttpStatusCode.BadRequest, e.Message);
         }
 
-        logger.Information($"1 File Id: {fileId} Filling session Id {context.Request.QueryString}");
         var fillingSessionId = context.Request.Query[FilesLinkUtility.FillingSessionId].FirstOrDefault() ?? string.Empty;
 
         var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
