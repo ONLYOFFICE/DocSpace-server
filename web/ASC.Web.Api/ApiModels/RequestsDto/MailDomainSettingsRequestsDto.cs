@@ -87,6 +87,16 @@ public class AdminMessageSettingsRequestsDto
     /// Culture
     /// </summary>
     public string Culture { get; set; }
+
+    /// <summary>
+    /// The type of CAPTCHA validation used.
+    /// </summary>
+    public RecaptchaType RecaptchaType { get; set; }
+
+    /// <summary>
+    /// The user's response to the CAPTCHA challenge.
+    /// </summary>
+    public string RecaptchaResponse { get; set; }
 }
 
 /// <summary>
