@@ -3534,11 +3534,6 @@ public class FileStorageService //: IFileStorageService
 
     public async ValueTask<List<FileEntry<T>>> AddToFavoritesAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId)
     {
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
         var tagDao = daoFactory.GetTagDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
