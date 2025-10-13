@@ -99,7 +99,7 @@ public class BreadCrumbsManager(
             {
                 breadCrumbs.Add(e.Item1);
             }
-            else if(i == 0 && e.Item1 is Folder<T> { FolderType: FolderType.USER } folder && folder.CreateBy != authContext.CurrentAccount.ID)
+            else if(i == 0 && e.Item1 is Folder<T> { FolderType: FolderType.USER } folder && folder.CreateBy != authContext.CurrentAccount.ID && authContext.IsAuthenticated)
             {
                 breadCrumbs.Add(await folderDaoInt.GetFolderAsync(await globalFolderHelper.FolderShareAsync));
             }
