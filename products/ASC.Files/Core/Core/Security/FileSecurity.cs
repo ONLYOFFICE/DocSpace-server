@@ -63,7 +63,7 @@ public class FileSecurity(
     public readonly FileShare DefaultRoomTemplatesShare = FileShare.Restrict;
 
     public static readonly HashSet<FileShare> PaidShares = [FileShare.RoomManager];
-    private static HashSet<FileShare> DefaultFileAccess => [FileShare.Editing, FileShare.FillForms, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None];
+    private static HashSet<FileShare> DefaultFileAccess => [FileShare.Editing, FileShare.FillForms, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None];
     private static readonly FrozenDictionary<SubjectType, HashSet<FileShare>> _defaultFileShareDictionary = new Dictionary<SubjectType, HashSet<FileShare>>
     {
         { SubjectType.ExternalLink, DefaultFileAccess },
@@ -77,8 +77,8 @@ public class FileSecurity(
         { FolderType.USER, 
             new Dictionary<SubjectType, HashSet<FileShare>>
             {
-                { SubjectType.User, [FileShare.ReadWrite, FileShare.Editing, FileShare.FillForms, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None] },
-                { SubjectType.Group, [FileShare.ReadWrite, FileShare.Editing, FileShare.FillForms, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None] },
+                { SubjectType.User, [FileShare.ReadWrite, FileShare.Editing, FileShare.FillForms, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None] },
+                { SubjectType.Group, [FileShare.ReadWrite, FileShare.Editing, FileShare.FillForms, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None] },
                 { SubjectType.ExternalLink, DefaultFileAccess },
                 { SubjectType.PrimaryExternalLink, DefaultFileAccess }
             }.ToFrozenDictionary() 
@@ -869,10 +869,10 @@ public class FileSecurity(
             var security = new Dictionary<FilesSecurityActions, bool>();
             var parentFolders = await GetFileParentFolders(entry.ParentId);
             
+            
             foreach (var action in Enum.GetValues<FilesSecurityActions>().Where(r => _securityEntries[entry.FileEntryType].Contains(r)))
             {
-                var result = await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders);
-                security[action] = result;
+                security[action] = await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders);
             }
 
             entry.Security = security;
@@ -954,11 +954,24 @@ public class FileSecurity(
         return haveAccess;
     }
     
-    private IAsyncEnumerable<Tuple<FileEntry<T>, bool>> CanAsync<T>(IAsyncEnumerable<FileEntry<T>> entries, Guid userId, FilesSecurityActions action)
+    
+    private async IAsyncEnumerable<Tuple<FileEntry<T>, bool>> CanAsync<T>(IAsyncEnumerable<FileEntry<T>> entries, Guid userId, FilesSecurityActions action)
     {
-        return entries.SelectAwait(async r => new Tuple<FileEntry<T>, bool>(r, await CanAsync(r, userId, action)));
+        var user = await userManager.GetUsersAsync(userId);
+        var isOutsider = await userManager.IsOutsiderAsync(user);
+        var userType = await userManager.GetUserTypeAsync(user);
+        var isGuest = userType is EmployeeType.Guest;
+        var isAuthenticated =  authContext.IsAuthenticated;
+        var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
+        var isUser = userType is EmployeeType.User;
+        
+        await foreach (var entry in entries)
+        {            
+            var parentFolders = await GetFileParentFolders(entry.ParentId);
+            yield return new Tuple<FileEntry<T>, bool>(entry, await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders));
+        }
     }
-
+    
     private async Task<bool> FilterEntryAsync<T>(FileEntry<T> e, FilesSecurityActions action, Guid userId, IEnumerable<FileShareRecord<T>> shares, bool isOutsider, bool isGuest, 
         bool isAuthenticated, bool isDocSpaceAdmin, bool isUser, List<Folder<T>> parentFolders)
     {

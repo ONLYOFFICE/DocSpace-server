@@ -235,7 +235,7 @@ public class FileStorageService //: IFileStorageService
     {
         var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
 
-        var folderDao = daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetCacheFolderDao<T>();
 
         Folder<T> parent = null;
         Folder<T> parentRoom = null;
@@ -3534,11 +3534,6 @@ public class FileStorageService //: IFileStorageService
 
     public async ValueTask<List<FileEntry<T>>> AddToFavoritesAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId)
     {
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
         var tagDao = daoFactory.GetTagDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();

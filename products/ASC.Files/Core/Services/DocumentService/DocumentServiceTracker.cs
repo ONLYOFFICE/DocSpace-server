@@ -165,8 +165,7 @@ public class DocumentServiceTrackerHelper(
     FileTrackerHelper fileTracker,
     IHttpClientFactory clientFactory,
     IHttpContextAccessor httpContextAccessor,
-    WebhookManager webhookManager,
-    FileSecurity fileSecurity)
+    WebhookManager webhookManager)
 {
     public string GetCallbackUrl<T>(T fileId, int? tenantId = null)
     {
@@ -201,7 +200,7 @@ public class DocumentServiceTrackerHelper(
         {
             callbackUrl = QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.ShareKey, token);
         }
-        logger.Information($"4 File Id: {fileId} Filling session Id {fillingSessionId}");
+
         if (!string.IsNullOrEmpty(fillingSessionId))
         {
             callbackUrl = QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.FillingSessionId, fillingSessionId);
@@ -309,7 +308,6 @@ public class DocumentServiceTrackerHelper(
 
                 try
                 {
-                    logger.Information($"2 File Id: {fileId} Filling session Id {httpContextAccessor.HttpContext.Request.QueryString}");
                     file = await entryManager.TrackEditingAsync(fileId, userId, userId, tenantManager.GetCurrentTenant(), fillingSessionId: httpContextAccessor.HttpContext.Request.Query[FilesLinkUtility.FillingSessionId].FirstOrDefault());
                 }
                 catch (Exception e)

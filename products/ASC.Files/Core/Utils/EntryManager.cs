@@ -154,13 +154,13 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         var tagDao = daoFactory.GetTagDao<T>();
 
-        var tagsTask = tagDao.GetTagsAsync([TagType.Locked], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync()).AsTask();
-        var tagsFavoriteTask = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Favorite], files).GroupBy(r=> r.EntryId).ToDictionaryAsync(k => k.Key, v => v.ToListAsync()).AsTask();
+        var lockedTagsTask = tagDao.GetTagsAsync([TagType.Locked], files).ToListAsync().AsTask();
+        var tagsFavoriteTask = tagDao.GetTagsAsync(authContext.CurrentAccount.ID, [TagType.Favorite], files).ToListAsync().AsTask();
         var tagsNewTask = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, files).ToListAsync().AsTask();
 
-        await Task.WhenAll(tagsTask, tagsFavoriteTask, tagsNewTask);
+        await Task.WhenAll(lockedTagsTask, tagsFavoriteTask, tagsNewTask);
         
-        var tags = await tagsTask;
+        var lockedTags = await lockedTagsTask;
         var tagsNew = await tagsNewTask;
         var tagsFavorite = await tagsFavoriteTask;
 
@@ -172,8 +172,8 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         foreach (var file in files)
         {
-            var fileLockedTags = await tags.GetValueOrDefault(file.Id);
-            var lockedTag = fileLockedTags?.FirstOrDefault(r => r.Type == TagType.Locked);
+            var fileId = (object)file.Id;
+            var lockedTag = lockedTags.Where(r=> Equals(r.EntryId, fileId)).FirstOrDefault(r => r.Type == TagType.Locked);
             if (lockedTag != null)
             {
                 var lockedBy = lockedTag.Owner;
@@ -183,15 +183,14 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
                     : null;
             }
             
-            var fileFavoriteTags = await tagsFavorite.GetValueOrDefault(file.Id);
-            file.IsFavorite = fileFavoriteTags?.FirstOrDefault(r => r.Type == TagType.Favorite) != null;
+            file.IsFavorite = tagsFavorite.Any(r => Equals(r.EntryId, fileId) && r.Type == TagType.Favorite);
             
-            if (tagsNew.Exists(r => r.EntryId.Equals(file.Id)))
+            if (tagsNew.Exists(r => Equals(r.EntryId, fileId)))
             {
                 file.IsNew = true;
             }
 
-            if (customFilterTags.TryGetValue(file.Id, out var customFilterTag))
+            if (customFilterTags.TryGetValue(fileId, out var customFilterTag))
             {
                 file.CustomFilterEnabled = true;
                 file.CustomFilterEnabledBy = customFilterTag.Owner != authContext.CurrentAccount.ID
@@ -2054,7 +2053,6 @@ public class EntryManager(IDaoFactory daoFactory,
             }
             await notifyClient.SendFormSubmittedAsync(room, originalForm, pdfFile);
 
-            logger.Information($"3 File Id: {file.Id} Filling session Id {fillingSessionId}");
             if (fillingSessionId != null)
             {
                 await hybridCache.SetAsync(fillingSessionId, result.Id.ToString());
