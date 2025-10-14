@@ -1856,7 +1856,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
     public async Task MarkAsRecent<T>(File<T> file, Guid? linkId = null)
     {
-        if (file.Encrypted || file.ProviderEntry)
+        if (file.Encrypted)
         {
             throw new NotSupportedException();
         }
