@@ -238,19 +238,19 @@ public class FileDtoHelper(
                 if (!string.IsNullOrEmpty(folderId))
                 {
                     var shareId = await _globalFolderHelper.GetFolderShareAsync<string>();
-                    var cachedFolderDao =  _daoFactory.GetCacheFolderDao<T>();
                     if (folderId == "@share")
                     {
                         folderId = shareId;
                     }
 
-                    if (int.TryParse(folderId, out _))
+                    if (int.TryParse(folderId, out var fId))
                     {
-                        var folder = await cachedFolderDao.GetFolderAsync((T)Convert.ChangeType(folderId, typeof(T)));
+                        var internalFolderDao = _daoFactory.GetCacheFolderDao<int>();
+                        var folder = await internalFolderDao.GetFolderAsync(fId);
 
                         if (folder.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID))
                         {
-                            folder = await cachedFolderDao.GetFolderAsync((T)Convert.ChangeType(shareId, typeof(T)));
+                            folder = await internalFolderDao.GetFolderAsync(fId);
                         }
 
                         contextFolder = folder;
