@@ -147,6 +147,8 @@ public class ExternalLinkHelper(
                 {
                     Folder<int> folderInt => await MarkAsync(folderInt, data.Id, userId),
                     Folder<string> folderString => await MarkAsync(folderString, data.Id, userId),
+                    File<int> fileInt => await MarkAsync(fileInt, data.Id, userId),
+                    File<string> fileString => await MarkAsync(fileString, data.Id, userId),
                     _ => false
                 };
             }
@@ -266,6 +268,14 @@ public class ExternalLinkHelper(
         {
             await socketManager.AddToSharedAsync(room, [userId]);
         }
+        
+        return true;
+    }
+    
+    private async Task<bool> MarkAsync<T>(File<T> file, Guid linkId, Guid userId)
+    {
+        await fileMarker.MarkAsRecentByLink(file, linkId);
+        await socketManager.AddToSharedAsync(file, [userId]);
         
         return true;
     }
