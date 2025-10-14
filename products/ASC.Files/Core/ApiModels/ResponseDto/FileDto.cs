@@ -243,15 +243,18 @@ public class FileDtoHelper(
                     {
                         folderId = shareId;
                     }
-                    
-                    var folder = await cachedFolderDao.GetFolderAsync((T)Convert.ChangeType(folderId, typeof(T)));
 
-                    if (folder.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID))
+                    if (int.TryParse(folderId, out _))
                     {
-                        folder = await cachedFolderDao.GetFolderAsync((T)Convert.ChangeType(shareId, typeof(T)));
-                    }
+                        var folder = await cachedFolderDao.GetFolderAsync((T)Convert.ChangeType(folderId, typeof(T)));
 
-                    contextFolder = folder;
+                        if (folder.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID))
+                        {
+                            folder = await cachedFolderDao.GetFolderAsync((T)Convert.ChangeType(shareId, typeof(T)));
+                        }
+
+                        contextFolder = folder;
+                    }
                 }
             }
         }
