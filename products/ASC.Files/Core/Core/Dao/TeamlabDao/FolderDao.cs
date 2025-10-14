@@ -2305,15 +2305,15 @@ internal class CacheFolderDao(
 {
     private readonly ConcurrentDictionary<int, Folder<int>> _cache = new();
     public override async Task<Folder<int>> GetFolderAsync(int folderId)
-                        {
+    {
         if (!_cache.TryGetValue(folderId, out var result))
-                        {
+        {
             result = await base.GetFolderAsync(folderId);
             _cache.TryAdd(folderId, result);
-                        }
+        }
 
         return result;
-                        }
+    }
     
     private readonly ConcurrentDictionary<int, IEnumerable<Folder<int>>> _parentFoldersCache = new();
     public override async IAsyncEnumerable<Folder<int>> GetParentFoldersAsync(int folderId)

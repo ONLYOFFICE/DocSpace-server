@@ -372,23 +372,10 @@ public class FileStorageService //: IFileStorageService
         {
             if (breadCrumbs[0] is Folder<T> { FolderType: FolderType.VirtualRooms } && breadCrumbs [1] is Folder<T> second && !DocSpaceHelper.IsRoom(second.FolderType))
             {
-                breadCrumbs = breadCrumbs.Skip(1).ToList();
+                breadCrumbs[0] = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>());
             }
         }
-
-        var prevVisible = breadCrumbs.ElementAtOrDefault(breadCrumbs.Count - 2);
-        if (prevVisible != null && !DocSpaceHelper.IsRoom(parent.FolderType) && prevVisible.FileEntryType == FileEntryType.Folder)
-        {
-            if (prevVisible is Folder<string> f1)
-            {
-                parent.ParentId = (T)Convert.ChangeType(f1.Id, typeof(T));
-            }
-            else if (prevVisible is Folder<int> f2)
-            {
-                parent.ParentId = (T)Convert.ChangeType(f2.Id, typeof(T));
-            }
-        }
-
+        
         parent.Shareable =
             parent.FolderType == FolderType.SHARE ||
             parent.RootFolderType == FolderType.Privacy ||
