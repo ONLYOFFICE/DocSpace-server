@@ -131,7 +131,13 @@ public class AccountsController<T>(
         var separator = inDto.FilterSeparator;
 
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
+        var parentUserIds = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(fileEntry.ParentId).Select(r => r.CreateBy).Where(r => !r.Equals(fileEntry.CreateBy)).Distinct().ToListAsync();
 
+        if (!parentUserIds.Contains(fileEntry.CreateBy))
+        {
+            parentUserIds.Add(fileEntry.CreateBy);
+        }
+        
         if (string.IsNullOrEmpty(text))
         {
             apiContext.SetCount(0).SetTotalCount(0);
@@ -152,7 +158,8 @@ public class AccountsController<T>(
             inDto.Area,
             inDto.InvitedByMe,
             inDto.InviterId,
-            inDto.EmployeeTypes);
+            inDto.EmployeeTypes,
+            parentUserIds);
         
         var total = totalGroups + totalUsers;
         
@@ -181,6 +188,7 @@ public class AccountsController<T>(
                            inDto.InvitedByMe,
                            inDto.InviterId,
                            inDto.EmployeeTypes,
+                           parentUserIds,
                            usersOffset,
                            usersCount))
         {

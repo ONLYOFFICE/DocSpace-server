@@ -726,7 +726,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, 
-        bool excludeShared, bool includeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, int offset = 0, int count = -1)
+        bool excludeShared, bool includeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds, int offset = 0, int count = -1)
     {
         if (entry == null || count == 0)
         {
@@ -738,7 +738,7 @@ internal abstract class SecurityBaseDao<T>(
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, filesDbContext, separator, 
-            includeStrangers, area, invitedByMe, inviterId, employeeTypes);
+            includeStrangers, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
 
         if (offset > 0)
         {
@@ -757,7 +757,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus,
-        bool excludeShared, bool includeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes)
+        bool excludeShared, bool includeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds)
     {
         if (entry == null)
         {
@@ -768,7 +768,7 @@ internal abstract class SecurityBaseDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         
-        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, filesDbContext, separator, includeStrangers, area, invitedByMe, inviterId, employeeTypes);
+        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, filesDbContext, separator, includeStrangers, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
 
         return await q1.CountAsync();
     }
@@ -788,7 +788,8 @@ internal abstract class SecurityBaseDao<T>(
         Area area,
         bool? invitedByMe,
         Guid? inviterId,
-        IEnumerable<EmployeeType> employeeTypes)
+        IEnumerable<EmployeeType> employeeTypes, 
+        IEnumerable<Guid> parentUserIds)
     {
         var q = filesDbContext.Users
             .AsNoTracking()
@@ -906,7 +907,7 @@ internal abstract class SecurityBaseDao<T>(
                         s.EntryId == entryId &&
                         s.EntryType == entry.FileEntryType &&
                         s.Subject == u.Id) && 
-                    u.Id != entry.CreateBy)
+                    !parentUserIds.Contains(u.Id))
                 .Select(u => new UserWithShared { User = u, Shared = false })
             : includeShared
             ? q.Where(u =>
@@ -915,7 +916,7 @@ internal abstract class SecurityBaseDao<T>(
                         s.EntryId == entryId &&
                         s.EntryType == entry.FileEntryType &&
                         s.Subject == u.Id) ||
-                    u.Id == entry.CreateBy)
+                    parentUserIds.Contains(u.Id))
                 .Select(u => new UserWithShared { User = u, Shared = true })
             : q.GroupJoin(
                     filesDbContext.Security, 
@@ -942,7 +943,7 @@ internal abstract class SecurityBaseDao<T>(
                 .Select(x => new UserWithShared
                 {
                     User = x.user, 
-                    Shared = x.s != null || x.user.Id == entry.CreateBy
+                    Shared = x.s != null || parentUserIds.Contains(x.user.Id)
                 });
 
         if (area == Area.All && !includeStrangers)
