@@ -105,5 +105,5 @@ public class AuthKey
     /// <summary>
     /// The authorization key title.
     /// </summary>
-    public required string Title { get; set; }
+    public string Title { get; set; }
 }
