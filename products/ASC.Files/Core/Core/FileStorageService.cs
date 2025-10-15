@@ -3303,9 +3303,12 @@ public class FileStorageService //: IFileStorageService
         return;
     }
 
-    public async Task UpdatePersonalFolderModified(Guid userId)
+    public async Task UpdatePersonalFolderModified(Guid userId, bool checkPermission = false)
     {
-        await DemandPermissionToDeletePersonalDataAsync(userId);
+        if (checkPermission)
+        {
+            await DemandPermissionToDeletePersonalDataAsync(userId);
+        }
 
         var folderDao = daoFactory.GetFolderDao<int>();
 
