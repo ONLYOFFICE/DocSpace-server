@@ -996,4 +996,10 @@
   <data name="LocationCol" xml:space="preserve">
     <value>Lokacija</value>
   </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Uspešna prijava putem OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Uspešna prijava putem korisničkog imena i lozinke</value>
+  </data>
 </root>

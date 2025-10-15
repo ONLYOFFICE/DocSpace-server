@@ -996,4 +996,10 @@
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>تم تحديث إعدادات الخدمات الممكّنة لمحفظة العملاء</value>
   </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>تسجيل الدخول بنجاح عبر OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>تم تسجيل الدخول بنجاح عبر تسجيل الدخول وكلمة المرور</value>
+  </data>
 </root>

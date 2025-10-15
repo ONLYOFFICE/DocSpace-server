@@ -515,4 +515,7 @@
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Invitado</value>
   </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Documentos del usuario {0} {1}</value>
+  </data>
 </root>

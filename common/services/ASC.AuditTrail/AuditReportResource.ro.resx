@@ -993,4 +993,10 @@
   <data name="LocationCol" xml:space="preserve">
     <value>Locaţie</value>
   </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Autentificarea reușită prin OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Autentificarea reușită cu nume de utilizator și parolă</value>
+  </data>
 </root>

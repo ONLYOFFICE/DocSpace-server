@@ -515,4 +515,7 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Ospite</value>
   </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Documenti dell’utente {0} {1}</value>
+  </data>
 </root>

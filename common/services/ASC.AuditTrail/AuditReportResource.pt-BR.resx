@@ -937,4 +937,10 @@
   <data name="LocationCol" xml:space="preserve">
     <value>Localização</value>
   </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Login bem-sucedido via OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Login e senha efetuados com sucesso</value>
+  </data>
 </root>

@@ -996,4 +996,10 @@
   <data name="BannerSettingsChanged" xml:space="preserve">
     <value>Поставке видљивости промотивних банера су променене</value>
   </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Успешна пријава путем OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Успешна пријава путем корисничког имена и лозинке</value>
+  </data>
 </root>

@@ -996,4 +996,10 @@
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Հաճախորդի դրամապանակի միացված ծառայությունների կարգավորումները թարմացվել են</value>
   </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Հաջող մուտք OAuth 2.0 միջոցով</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Հաջող մուտք՝ օգտագործելով մուտք և գաղտնաբառ</value>
+  </data>
 </root>

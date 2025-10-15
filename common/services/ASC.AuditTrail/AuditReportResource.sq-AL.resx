@@ -996,4 +996,10 @@
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Shërbimet e aktivizuara për portofolin e klientit</value>
   </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Identifikimi i suksesshëm përmes OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Identifikim i suksesshëm përmes emrit të përdoruesit dhe fjalëkalimit</value>
+  </data>
 </root>
