@@ -107,6 +107,41 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
         await RemoveTrackerAsync(fileId);
     }
 
+    public record EditingStatus(bool IsEditing, bool IsEditingAlone);
+
+    public async Task<EditingStatus> GetEditingStatusAsync<T>(T fileId, bool setTracker = true)
+    {
+        var tracker = await GetTrackerAsync(fileId);
+        if (tracker == null)
+        {
+            return new(false, false);
+        }
+
+        var now = DateTime.UtcNow;
+
+        var listForRemove = tracker.EditingBy.Where(e => !e.Value.NewScheme && (now - e.Value.TrackTime).Duration() > _trackTimeout)
+                      .ToList();
+
+        foreach (var editTab in listForRemove)
+        {
+            tracker.EditingBy.TryRemove(editTab.Key, out _);
+        }
+
+        if (tracker.EditingBy.IsEmpty)
+        {
+            await RemoveTrackerAsync(fileId);
+            return new(false, false);
+        }
+
+        if (setTracker)
+        {
+            await SetTrackerAsync(fileId, tracker);
+        }
+
+        var alone = tracker.EditingBy.Count == 1 && tracker.EditingBy.FirstOrDefault().Value.EditingAlone;
+        return new(true, alone);
+    }
+
     public async Task<bool> IsEditingAsync<T>(T fileId, bool setTracker = true)
     {
         var tracker = await GetTrackerAsync(fileId);
