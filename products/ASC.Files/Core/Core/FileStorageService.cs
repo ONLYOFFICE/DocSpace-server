@@ -3687,7 +3687,7 @@ public class FileStorageService //: IFileStorageService
             yield return ace;
         }
         //hack for the form-filling room. return a link to a file with the room key.
-        if (entry is File<T> file && file.IsForm)
+        if (entry is File<T> { IsForm: true } file)
         {
             var parentRoom = await DocSpaceHelper.GetParentRoom(file, daoFactory.GetCacheFolderDao<T>());
             if (parentRoom?.FolderType != FolderType.FillingFormsRoom)
