@@ -2083,6 +2083,6 @@ Ako imate bilo kakva pitanja ili vam je potrebna pomoć, slobodno nas kontaktira
 
 Srdačan pozdrav,
 ${LetterLogoText} tim za podršku
-${__SiteLink}</value>
+[${__SiteLink}](${__SiteLink})</value>
   </data>
 </root>
