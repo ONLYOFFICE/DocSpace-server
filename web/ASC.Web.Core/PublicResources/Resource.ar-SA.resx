@@ -1221,4 +1221,46 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>تفاصيل</value>
   </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>معرف العميل</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>مفتاح العميل السري</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>تمكين التطبيق من تسجيل الدخول إلى البوابة باستخدام حساب WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>تمكين التطبيق من تسجيل الدخول إلى البوابة باستخدام حساب WeChat.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>التاريخ</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>البريد الإلكتروني</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>الاسم الأول</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>المعرف</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>اسم العائلة</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>حصص خدمة المستندات ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>عدد الإضافات يتجاوز الحد المسموح به</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>لقد تم توصيل Telegram بنجاح لتلقي الإشعارات من DocSpace الخاص بكم.</value>
+  </data>
 </root>

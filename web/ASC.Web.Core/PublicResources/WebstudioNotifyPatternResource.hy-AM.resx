@@ -2057,4 +2057,29 @@ $TrulyYours</value>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Բացել DocSpace-ը</value>
   </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Ձեր DocSpace-ի ավտոմատ պահուստավորումը ձախողվեց։</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Ողջուն, $UserName,
+
+Ձեր DocSpace-ի "${__VirtualRootPath}":"${__VirtualRootPath}" պլանավորված պահուստավորման գործընթացը ձախողվել է։ Խորհուրդ ենք տալիս ստուգել "Պահուստավորում":"${__VirtualRootPath}/portal-settings/backup/data-backup" և "Services":"${__VirtualRootPath}/portal-settings/services" կարգավորումները։ 
+
+Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "${__SupportLink}":"${__SupportLink}" միջոցով։
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Ողջույն, $UserName,
+
+Ձեր DocSpace [${__VirtualRootPath}](${__VirtualRootPath})-ի համար նախատեսված պահուստավորման գործընթացը ձախողվել է։
+
+Խորհուրդ ենք տալիս ստուգել [Պահուստավորում](${__VirtualRootPath}/portal-settings/backup/data-backup) և [Services](${__VirtualRootPath}/portal-settings/services) կարգավորումները։
+
+Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [${__SupportLink}](${__SupportLink}) միջոցով։
+
+Հարգանքներով՝
+${LetterLogoText} Աջակցության թիմ
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
 </root>
