@@ -225,6 +225,10 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         {
             throw;
         }
+        catch (FusionCacheSerializationException)
+        {
+            throw;
+        }
         catch (FileNotFoundException error)
         {
             logger.ErrorChunkedUploaderHandlerService(error);
