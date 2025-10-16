@@ -2675,6 +2675,12 @@ public class UserControllerAdditional<T>(
         }
         
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
+        var parentUserIds = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(fileEntry.ParentId).Select(r => r.CreateBy).Where(r => !r.Equals(fileEntry.CreateBy)).Distinct().ToListAsync();
+
+        if (!parentUserIds.Contains(fileEntry.CreateBy))
+        {
+            parentUserIds.Add(fileEntry.CreateBy);
+        }
         
         var offset = inDto.StartIndex;
         var count = inDto.Count;
@@ -2694,7 +2700,8 @@ public class UserControllerAdditional<T>(
             inDto.Area,
             inDto.InvitedByMe,
             inDto.InviterId,
-            inDto.EmployeeTypes);
+            inDto.EmployeeTypes,
+            parentUserIds);
 
         apiContext.SetCount(Math.Min(Math.Max(totalUsers - offset, 0), count)).SetTotalCount(totalUsers);
 
@@ -2710,6 +2717,7 @@ public class UserControllerAdditional<T>(
                            inDto.InvitedByMe,
                            inDto.InviterId,
                            inDto.EmployeeTypes,
+                           parentUserIds,
                            offset,
                            count))
         {

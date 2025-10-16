@@ -482,12 +482,13 @@ public class FileSharingAceHelper(
                 ? fileSecurity.DefaultMyShare
                 : fileSecurity.DefaultPrivacyShare;
         
-        List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry)];
         if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
         {
             defaultShare = FileShare.None;
-            tags.AddRange(await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync());
         }
+        
+        List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry)];
+        tags.AddRange(await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync());
         
         await fileSecurity.ShareAsync(entry.Id, entryType, currentId, defaultShare);
 
@@ -615,9 +616,13 @@ public class FileSharing(
             throw new ArgumentNullException(FilesCommonResource.ErrorMessage_BadRequest);
         }
 
-        var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
-        var canEditInternal = await fileSecurity.CanEditInternalAsync(entry);
-        var canEditExpiration = await fileSecurity.CanEditExpirationAsync(entry);
+        _ = await fileSecurity.SetSecurity(new[] { entry }.ToAsyncEnumerable()).ToListAsync();
+        
+        var (canEditAccess, canEditInternal, canEditExpiration) = await Task.WhenAll(
+            fileSecurity.CanEditAccessAsync(entry),
+            fileSecurity.CanEditInternalAsync(entry),
+            fileSecurity.CanEditExpirationAsync(entry)
+        ).ContinueWith(t => (t.Result[0], t.Result[1], t.Result[2]));
         
         var canAccess = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType)
             ? await CheckAccessAsync(entry, filterType)
@@ -629,7 +634,7 @@ public class FileSharing(
 
             yield break;
         }
-
+        
         var allDefaultAces = await GetDefaultAcesAsync(entry, filterType, status, text).ToListAsync();
         var defaultAces = allDefaultAces.Skip(offset).Take(count).ToList();
 
@@ -976,7 +981,9 @@ public class FileSharing(
 
             var user = await userManager.GetUsersAsync(entry.CreateBy);
 
-            if (!(user.FirstName.ToLower().Contains(text) || user.LastName.ToLower().Contains(text) || user.Email.ToLower().Contains(text)))
+            if (!(user.FirstName.Contains(text, StringComparison.CurrentCultureIgnoreCase) || 
+                  user.LastName.Contains(text, StringComparison.CurrentCultureIgnoreCase) || 
+                  user.Email.Contains(text, StringComparison.CurrentCultureIgnoreCase)))
             {
                 yield break;
             }
@@ -993,6 +1000,30 @@ public class FileSharing(
         };
 
         yield return owner;
+
+        var i = 0;
+        var cachedFolderDao = daoFactory.GetCacheFolderDao<T>();
+        await foreach (var parent in cachedFolderDao.GetParentFoldersAsync(entry.ParentId).Select(r=> r.CreateBy).Where(r=> !r.Equals(entry.CreateBy)).Distinct())
+        {
+            var parentOwner = false;
+            
+            if (i == 0)
+            {
+                owner.Owner = false;
+                parentOwner = true;
+            }
+            
+            yield return new AceWrapper
+            {
+                Id = parent,
+                SubjectName = await global.GetUserNameAsync(parent),
+                SubjectGroup = false,
+                Access = FileShare.ReadWrite,
+                Owner = parentOwner,
+                CanEditAccess = false
+            };
+            i++;
+        }
     }
 
     private async Task<AceWrapper> ToAceAsync<T>(FileEntry<T> entry, FileShareRecord<T> record, bool canEditAccess, bool canEditInternal, bool canEditExpiration)
