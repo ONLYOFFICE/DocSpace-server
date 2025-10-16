@@ -482,12 +482,13 @@ public class FileSharingAceHelper(
                 ? fileSecurity.DefaultMyShare
                 : fileSecurity.DefaultPrivacyShare;
         
-        List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry)];
         if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
         {
             defaultShare = FileShare.None;
-            tags.AddRange(await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync());
         }
+        
+        List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry)];
+        tags.AddRange(await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync());
         
         await fileSecurity.ShareAsync(entry.Id, entryType, currentId, defaultShare);
 
