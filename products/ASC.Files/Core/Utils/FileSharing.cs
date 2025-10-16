@@ -999,19 +999,29 @@ public class FileSharing(
         };
 
         yield return owner;
-        
+
+        var i = 0;
         var cachedFolderDao = daoFactory.GetCacheFolderDao<T>();
         await foreach (var parent in cachedFolderDao.GetParentFoldersAsync(entry.ParentId).Select(r=> r.CreateBy).Where(r=> !r.Equals(entry.CreateBy)).Distinct())
         {
+            var parentOwner = false;
+            
+            if (i == 0)
+            {
+                owner.Owner = false;
+                parentOwner = true;
+            }
+            
             yield return new AceWrapper
             {
                 Id = parent,
                 SubjectName = await global.GetUserNameAsync(parent),
                 SubjectGroup = false,
                 Access = FileShare.ReadWrite,
-                Owner = true,
+                Owner = parentOwner,
                 CanEditAccess = false
             };
+            i++;
         }
     }
 
