@@ -1997,4 +1997,31 @@ $TrulyYours</value>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Apri DocSpace</value>
   </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Backup automatico del tuo DocSpace non riuscito</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Ciao, $UserName,
+
+Il processo di backup pianificato per il tuo DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" non è riuscito.
+
+Ti consigliamo di controllare le impostazioni di "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" e "Servizi":"${__VirtualRootPath}/portal-settings/services".
+
+Se hai domande o hai bisogno di assistenza, non esitare a contattarci tramite "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Ciao, $UserName,
+
+Il processo di backup pianificato per il tuo [${__VirtualRootPath}](${__VirtualRootPath}) non è riuscito.
+
+Ti consigliamo di controllare le impostazioni di [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) e [Services](${__VirtualRootPath}/portal-settings/services).
+
+Se hai domande o hai bisogno di assistenza, non esitare a contattarci tramite [${__SupportLink}](${__SupportLink})
+
+Cordiali saluti,
+Team di supporto ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
 </root>

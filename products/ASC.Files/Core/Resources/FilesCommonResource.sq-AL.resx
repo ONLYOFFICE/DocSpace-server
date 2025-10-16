@@ -574,4 +574,7 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="RoleEnum_RoomAdmin" xml:space="preserve">
     <value>Administratori i dhomës</value>
   </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Dokumentet e përdoruesit {0} {1}</value>
+  </data>
 </root>

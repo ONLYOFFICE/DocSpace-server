@@ -2058,4 +2058,31 @@ $TrulyYours</value>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Hapni DocSpace-in tuaj</value>
   </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Kopja rezervë automatike për DocSpace-in tuaj dështoi</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Përshëndetje, $UserName,
+
+Procesi i planifikuar i kopjes rezervë për DocSpace-in tuaj "${__VirtualRootPath}":"${__VirtualRootPath}" ka dështuar.
+
+Ju rekomandojmë të kontrolloni cilësimet e "Ruajtjes automatike të të dhënave":"${__VirtualRootPath}/portal-settings/backup/data-backup" dhe "Shërbimeve":"${__VirtualRootPath}/portal-settings/services" settings.
+
+Në qoftë se keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutem mos hezitoni të na kontaktoni "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Përshëndetje, $UserName,
+
+Procesi i planifikuar i kopjes rezervë për DocSpace-in tuaj [${__VirtualRootPath}](${__VirtualRootPath}) ka dështuar.
+
+Ju rekomandojmë të kontrolloni cilësimet e [Ruajtjes automatike të të dhënave](${__VirtualRootPath}/portal-settings/backup/data-backup) dhe [Shërbimeve](${__VirtualRootPath}/portal-settings/services) settings.
+
+Nëse keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutem mos hezitoni të na kontaktoni përmes [${__SupportLink}](${__SupportLink})
+
+Gjithë të mirat,
+${LetterLogoText} Support Team
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
 </root>
