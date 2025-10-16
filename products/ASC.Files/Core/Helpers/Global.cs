@@ -125,11 +125,9 @@ public partial class Global(
     IConfiguration configuration,
     AuthContext authContext,
     UserManager userManager,
-    CoreSettings coreSettings,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     CustomNamingPeople customNamingPeople,
-    FileSecurityCommon fileSecurityCommon,
-    IDistributedLockProvider distributedLockProvider)
+    FileSecurityCommon fileSecurityCommon)
 {
     private DocThumbnailExtension? _docThumbnailExtension;
     public DocThumbnailExtension DocThumbnailExtension
