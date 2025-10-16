@@ -1198,4 +1198,10 @@
   <data name="ErrorWebPluginMaxCount" xml:space="preserve">
     <value>插件数量超出限制</value>
   </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>发生意外错误，请重试。</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>您已成功连接 Telegram 并接收来自协作空间的通知。</value>
+  </data>
 </root>

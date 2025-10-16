@@ -2058,4 +2058,31 @@ $TrulyYours</value>
   <data name="ButtonOpenDocSpace" xml:space="preserve">
     <value>Otvori DocSpace</value>
   </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Automatska rezervna kopija za vaš DocSpace nije uspela</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Zdravo, $UserName,
+
+Planirani proces pravljenja rezervne kopije za vaš DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" nije uspeo.
+
+Preporučujemo da proverite podešavanja "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" i "Services":"${__VirtualRootPath}/portal-settings/services".
+
+Ako imate bilo kakva pitanja ili vam je potrebna pomoć, slobodno nas kontaktirajte putem "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Zdravo, $UserName,
+
+Planirani proces pravljenja rezervne kopije za vaš DocSpace ${__VirtualRootPath}}](${__VirtualRootPath}) nije uspeo.
+
+Preporučujemo da proverite [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) i [Services](${__VirtualRootPath}/portal-settings/services) podešavanja.
+
+Ako imate bilo kakva pitanja ili vam je potrebna pomoć, slobodno nas kontaktirajte putem ${__SupportLink}](${__SupportLink})
+
+Srdačan pozdrav,
+${LetterLogoText} tim za podršku
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
 </root>

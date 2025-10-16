@@ -460,7 +460,7 @@
     <value>Пријава путем API и друштвених медија успешна</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Пријава путем друштвеног налога упешна</value>
+    <value>Успешна пријава путем друштвеног налога: {0}</value>
   </data>
   <data name="LoginSuccessViaSSO" xml:space="preserve">
     <value>Успешна пријава путем SSO</value>
@@ -1001,5 +1001,47 @@
   </data>
   <data name="LoginSuccessViaPassword" xml:space="preserve">
     <value>Успешна пријава путем корисничког имена и лозинке</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Датотеке [{0}]. Креирана је екстерна веза: {1}. Улога: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Датотеке [{0}]. Екстерна веза обрисана: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Датотеке [{0}]. Екстерна веза ажурирана: {1}. Улога: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Датотека означена као омиљена: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Датотека уклоњена из омиљених: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Датотека уклоњена из „Дељено са мном“: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Фајлови [{0}]. Приступ ажуриран за {1}. Улога: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Фасцикла преузета: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Фасцикле [{0}]. Креирана је екстерна веза: {1}. Улога: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Фасцикле [{0}]. Екстерна веза обрисана: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Фасцикле [{0}]. Екстерна веза ажурирана: {1}. Улога: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Фасцикла уклоњена из „Дељено са мном“: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Фасцикле [{0}]. Приступ ажуриран за {1}. Улога: {2}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Екстерна веза опозвана: {1}</value>
   </data>
 </root>

@@ -1198,4 +1198,10 @@
   <data name="ErrorWebPluginMaxCount" xml:space="preserve">
     <value>O número de plugins excede o limite</value>
   </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Ocorreu um erro inesperado. Tente novamente.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Você se conectou com sucesso ao Telegram para receber notificações do seu DocSpace.</value>
+  </data>
 </root>

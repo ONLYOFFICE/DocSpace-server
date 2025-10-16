@@ -1257,4 +1257,10 @@
   <data name="ErrorWebPluginMaxCount" xml:space="preserve">
     <value>Broj dodataka premašuje ograničenje</value>
   </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Došlo je do neočekivane greške. Molimo pokušajte ponovo.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Uspešno ste povezali Telegram da primate obaveštenja iz svog DocSpace-a.</value>
+  </data>
 </root>

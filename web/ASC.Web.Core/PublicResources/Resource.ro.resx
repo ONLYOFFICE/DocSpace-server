@@ -1257,4 +1257,10 @@
   <data name="ErrorWebPluginMaxCount" xml:space="preserve">
     <value>Numărul de plugin-uri depășește limita permisă</value>
   </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>A intervenit o eroare neaşteptată. Încercaţi din nou.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Ați conectat cu succes contul Telegram pentru a primi notificări de DocSpace.</value>
+  </data>
 </root>

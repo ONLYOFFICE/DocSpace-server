@@ -2057,4 +2057,31 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Copierea de rezervă automată a spațiului DocSpace a eșuat</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Stimate, $UserName,
+
+Copierea de rezervă programată a spațiului DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" a eșuat.
+
+Vă recomandăm să verificați setările pentru "Copiere de rezervă":"${__VirtualRootPath}/portal-settings/backup/data-backup" și "Servicii":"${__VirtualRootPath}/portal-settings/services".
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Stimate, $UserName,
+
+Copierea de rezervă programată a spațiului DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) a eșuat.
+
+Vă recomandăm să verificați setările pentru [Copiere de rezervă](${__VirtualRootPath}/portal-settings/backup/data-backup) și [Servicii](${__VirtualRootPath}/portal-settings/services).
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SupportLink}](${__SupportLink})
+
+Cu stimă,
+${LetterLogoText} Echipă de Asistență
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
 </root>

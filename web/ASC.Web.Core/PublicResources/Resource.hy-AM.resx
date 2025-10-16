@@ -1257,4 +1257,10 @@
   <data name="ErrorWebPluginMaxCount" xml:space="preserve">
     <value>Պլագինների թիվը գերազանցում է սահմանը</value>
   </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Անսպասելի սխալ տեղի ունեցավ։ Խնդրում ենք կրկին փորձել։</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Դուք հաջողությամբ միացել եք Telegram-ին՝ ձեր DocSpace-ից ծանուցումներ ստանալու համար։</value>
+  </data>
 </root>

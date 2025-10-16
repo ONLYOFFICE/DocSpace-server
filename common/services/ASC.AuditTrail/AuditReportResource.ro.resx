@@ -424,7 +424,7 @@
     <value>Conectarea a reușit</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Conectarea prin cont de rețea socială a reușit</value>
+    <value>Conectarea prin cont de rețea socială a reușit: {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Conectarea prin aplicația de socializare a reușit</value>
@@ -998,5 +998,50 @@
   </data>
   <data name="LoginSuccessViaPassword" xml:space="preserve">
     <value>Autentificarea reușită cu nume de utilizator și parolă</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Fișiere [{0}]. Link-ul extern a fost creat: {1}. Rol: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Fișiere [{0}]. Link-ul extern a fost șters: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Fișiere [{0}]. Link-ul extern a fost actualizat: {1}. Rol: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Fișierul a fost marcat ca favorit: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Fişierul a fost eliminat din Favorite: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Fişieul a fost eliminat din secțiunea Partajate cu mine: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Fișiere [{0}]. Permisiuni de acces actualizate pentru {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Folderul a fost încărcat {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Foldere [{0}]. Link-ul extern a fost creat: {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Foldere [{0}]. Link-ul extern a fost șters: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Foldere [{0}]. Link-ul extern a fost actualizat: {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Folderul a fost eliminat din secțiunea Partajate cu mine: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Foldere [{0}]. Permisiuni de acces au fost actualizate pentru {1}. Rol: {2}</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Setările de vizibilitate ale anunțurilor banner au fost modificate</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Link-ul extern a fost revocat: {1}</value>
   </data>
 </root>

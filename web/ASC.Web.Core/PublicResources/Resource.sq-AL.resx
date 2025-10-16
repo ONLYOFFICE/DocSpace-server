@@ -1257,4 +1257,10 @@
   <data name="ErrorWebPluginMaxCount" xml:space="preserve">
     <value>Numri i shtojcave e kalon limitin</value>
   </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Ndodhi një gabim i papritur. Ju lutemi provoni sërish.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Ju jeni lidhur me sukses me Telegram për të marrë njoftime nga DocSpace.</value>
+  </data>
 </root>

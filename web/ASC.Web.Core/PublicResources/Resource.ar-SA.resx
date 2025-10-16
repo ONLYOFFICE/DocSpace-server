@@ -1257,4 +1257,10 @@
   <data name="ErrorWebPluginMaxCount" xml:space="preserve">
     <value>عدد الإضافات يتجاوز الحد المسموح به</value>
   </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>لقد تم توصيل Telegram بنجاح لتلقي الإشعارات من DocSpace الخاص بكم.</value>
+  </data>
 </root>

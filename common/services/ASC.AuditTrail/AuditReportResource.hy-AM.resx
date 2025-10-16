@@ -427,7 +427,7 @@
     <value>Հաջողությամբ մուտք է գործել</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Մուտք գործել սոցիալական հաշվի միջոցով հաջողվեց</value>
+    <value>Մուտք սոցիալական հաշվի միջոցով՝ հաջողությամբ՝ {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Հաջող մուտք սոցիալական հավելվածի միջոցով</value>
@@ -1001,5 +1001,47 @@
   </data>
   <data name="LoginSuccessViaPassword" xml:space="preserve">
     <value>Հաջող մուտք՝ օգտագործելով մուտք և գաղտնաբառ</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Ֆայլեր [{0}]: Արտաքին հղումը ստեղծվել է՝ {1}: Դեր՝ {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Ֆայլեր [{0}]: Արտաքին հղումը ջնջվել է՝ {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Ֆայլեր [{0}]: Արտաքին հղումը թարմացվել է՝ {1}: Դեր՝ {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Ֆայլը նշվել է որպես Նախընտրելի՝ {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Ֆայլը հեռացվել է նախընտրելիից՝ {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Ֆայլը հեռացվել է «Ինձ հետ կիսված» բաժնից՝ {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Ֆայլեր [{0}]: Մուտքը թարմացվել է {1}-ի համար: Դեր՝ {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Թղթապանակը ներբեռնվել է՝ {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Թղթապանակները [{0}]: Արտաքին հղումը ստեղծվել է՝ {1}: Դեր՝ {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Թղթապանակները[{0}]: Արտաքին հղումը ջնջվել է՝ {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Թղթապանակները [{0}]: Արտաքին հղումը թարմացվել է՝ {1}: Դեր՝ {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Թղթապանակը հեռացվել է «Ինձ հետ կիսված»-ից՝ {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Թղթապանակները [{0}]: Մուտքը թարմացվել է {1}-ի համար: Դեր՝ {2}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Արտաքին հղումը չեղարկվել է՝ {1}</value>
   </data>
 </root>
