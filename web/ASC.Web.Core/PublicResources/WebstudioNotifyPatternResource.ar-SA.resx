@@ -2150,10 +2150,11 @@ $TrulyYours</value>
 
 فشلت عملية النسخ الاحتياطي المجدولة لمساحة عملك DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-نوصي بالتحقق من إعدادات "النسخ الاحتياطي":"${__VirtualRootPath}/portal-settings/backup/data-backup" و"الخدمات":"${__VirtualRootPath}/portal-settings/services".
+نوصي بالتحقق من إعدادات "النسخ الاحتياطي":"${__VirtualRootPath}/portal-settings/backup/data-backup" و "الخدمات":"${__VirtualRootPath}/portal-settings/services".
 
 إذا كانت لديكم أي أسئلة أو كنتم بحاجة إلى مساعدة، لا تترددوا في التواصل معنا عبر الرابط "${__SupportLink}":"${__SupportLink}".
 
+مع خالص التحية،
 $TrulyYours</value>
   </data>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">

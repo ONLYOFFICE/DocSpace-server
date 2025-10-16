@@ -2002,24 +2002,24 @@ $TrulyYours</value>
   </data>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>Hallo, $UserName,
- 
+
 Der geplante Backup-Prozess für Ihren DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ist fehlgeschlagen.
- 
+
 Wir empfehlen Ihnen, die Einstellungen "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" und "Services":"${__VirtualRootPath}/portal-settings/services" zu überprüfen.
- 
+
 Bei Fragen oder Unterstützung kontaktieren Sie uns gerne über "${__SupportLink}":"${__SupportLink}"
- 
+
 $TrulyYours</value>
   </data>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Hallo, $UserName,
- 
+
 Der geplante Backup-Prozess für Ihren DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ist fehlgeschlagen.
- 
+
 Wir empfehlen Ihnen, die Einstellungen [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) und [Services](${__VirtualRootPath}/portal-settings/services) zu überprüfen.
- 
+
 Bei Fragen oder Unterstützung kontaktieren Sie uns gerne über [${__SupportLink}](${__SupportLink})
- 
+
 Mit freundlichen Grüßen,
 ${LetterLogoText} Support Team
 [${__SiteLink}](${__SiteLink})</value>

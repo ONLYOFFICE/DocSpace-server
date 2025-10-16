@@ -2059,24 +2059,24 @@ $TrulyYours</value>
     <value>Аутоматска резервна копија за ваш DocSpace није успела</value>
   </data>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
-    <value>Zdravo, $UserName,
+    <value>Здраво, $UserName,
 
-Planirani proces pravljenja rezervne kopije za vaš DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" nije uspeo.
+Планирани процес прављења резервне копије за ваш DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" није успео.
 
-Preporučujemo da proverite podešavanja "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" i "Services":"${__VirtualRootPath}/portal-settings/services".
+Препоручујемо да проверите подешавања "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" и "Services":"${__VirtualRootPath}/portal-settings/services".
 
-Ako imate bilo kakva pitanja ili vam je potrebna pomoć, slobodno nas kontaktirajte putem "${__SupportLink}":"${__SupportLink}"
+Ако имате било каква питања или вам је потребна помоћ, слободно нас контактирајте путем "${__SupportLink}":"${__SupportLink}"
 
 $TrulyYours</value>
   </data>
   <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
     <value>Здраво, $UserName,
 
-Планирани процес прављења резервне копије за ваш DocSpace ${__VirtualRootPath}}](${__VirtualRootPath}) није успео.
+Планирани процес прављења резервне копије за ваш DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) није успео.
 
 Препоручујемо да проверите [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) и [Services](${__VirtualRootPath}/portal-settings/services) подешавања.
 
-Ако имате било каква питања или вам је потребна помоћ, слободно нас контактирајте путем ${__SupportLink}](${__SupportLink})
+Ако имате било каква питања или вам је потребна помоћ, слободно нас контактирајте путем [${__SupportLink}](${__SupportLink})
 
 Срдачан поздрав,
 ${LetterLogoText} тим за подршку
