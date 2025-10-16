@@ -478,26 +478,30 @@ public class FileSharingAceHelper(
         var currentId = authContext.CurrentAccount.ID;
         var entryType = entry.FileEntryType;
         var tagDao = daoFactory.GetTagDao<T>();
-        var defaultShare = entry.RootFolderType == FolderType.USER
-                ? fileSecurity.DefaultMyShare
-                : fileSecurity.DefaultPrivacyShare;
-        
-        if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
-        {
-            defaultShare = FileShare.None;
-        }
         
         List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry)];
         tags.AddRange(await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync());
+
+        var currentShare = await fileSecurity.GetSharesAsync(entry, [currentId]);
+        if (currentShare != null && currentShare.Any() || entry is Folder<T>)
+        {        
+            var defaultShare = entry.RootFolderType == FolderType.USER
+                ? fileSecurity.DefaultMyShare
+                : fileSecurity.DefaultPrivacyShare;
         
-        await fileSecurity.ShareAsync(entry.Id, entryType, currentId, defaultShare);
+            if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
+            {
+                defaultShare = FileShare.None;
+            }
+            await fileSecurity.ShareAsync(entry.Id, entryType, currentId, defaultShare);
+            await socketManager.SelfRestrictionAsync(entry, currentId, defaultShare);
+        }
 
         if (entryType == FileEntryType.File)
         {
             await documentServiceHelper.CheckUsersForDropAsync((File<T>)entry);
         }
-
-        await socketManager.SelfRestrictionAsync(entry, currentId, defaultShare);
+        
         await fileMarker.RemoveMarkAsNewAsync(entry);
         await tagDao.RemoveTagsAsync(tags);
         await socketManager.RemoveFromFavoritesAsync(entry, [currentId]);
