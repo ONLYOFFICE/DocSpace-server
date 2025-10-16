@@ -440,7 +440,7 @@ public class FileSharingAceHelper(
         {                
             var recipientIds = recipients.Keys.ToList();
             
-            if (file != null || (folder != null && folder.FoldersCount + folder.FilesCount > 0) || entry.ProviderEntry)
+            if (file != null || folder != null || entry.ProviderEntry)
             {
                 await fileMarker.MarkAsNewAsync(entry, recipientIds);
             }
