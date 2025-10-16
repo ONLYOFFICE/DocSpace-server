@@ -61,7 +61,7 @@ public class SignupAccountRequestDto
     /// The user email address.
     /// </summary>
     [EmailAddress]
-    public required string Email { get; set; }
+    public string Email { get; set; }
 
     /// <summary>
     /// The user password hash.
