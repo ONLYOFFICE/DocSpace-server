@@ -797,11 +797,12 @@ public class FileSecurity(
             return users;
         }
 
-        async Task<bool> CheckAccessAsync(Guid userId, FilesSecurityActions action)
+        async Task<bool> CheckAccessAsync(Guid userId, FilesSecurityActions filesSecurityAction)
         {
             var userSubjects = await GetUserSubjectsAsync(userId);
             var userShares = new List<FileShareRecord<T>>();
-
+            entry.Security = null;
+            
             foreach (var subject in userSubjects)
             {
                 if (copyShares.TryGetValue(subject, out var value))
@@ -810,7 +811,7 @@ public class FileSecurity(
                 }
             }
 
-            return await CanAsync(entry, userId, action, userShares, false);
+            return await CanAsync(entry, userId, filesSecurityAction, userShares, false);
         }
     }
 
