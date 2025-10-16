@@ -3700,7 +3700,7 @@ public class FileStorageService //: IFileStorageService
                 yield break;
             }
             var linkData = await externalShare.GetLinkDataAsync(file, roomExternalLink.Id);
-            roomExternalLink.Link = await urlShortener.GetShortenLinkAsync(linkData.Url);
+            roomExternalLink.Link = await urlShortener.GetShortenLinkAsync(QueryHelpers.AddQueryString(linkData.Url, FilesLinkUtility.IsFile, "true"));
 
             yield return roomExternalLink;
         }
@@ -3754,7 +3754,7 @@ public class FileStorageService //: IFileStorageService
                 if (roomExternalLink != null)
                 {
                     var linkData = await externalShare.GetLinkDataAsync(entry, roomExternalLink.Id);
-                    roomExternalLink.Link = await urlShortener.GetShortenLinkAsync(linkData.Url);
+                    roomExternalLink.Link = await urlShortener.GetShortenLinkAsync(QueryHelpers.AddQueryString(linkData.Url, FilesLinkUtility.IsFile, "true"));
                     return roomExternalLink;
                 }
             }
@@ -4091,7 +4091,7 @@ public class FileStorageService //: IFileStorageService
             {
                 var roomExternalLink = await SetExternalLinkAsync(parentRoom.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, primary, requiredAuth);
                 var linkData = await externalShare.GetLinkDataAsync(entry, roomExternalLink.Id);
-                roomExternalLink.Link = await urlShortener.GetShortenLinkAsync(linkData.Url);
+                roomExternalLink.Link = await urlShortener.GetShortenLinkAsync(QueryHelpers.AddQueryString(linkData.Url, FilesLinkUtility.IsFile, "true"));
                 return roomExternalLink;
             }
         }
