@@ -1614,7 +1614,7 @@ public class UserController(
         }
         else if (!string.IsNullOrEmpty(setupInfo.HcaptchaPublicKey) || !string.IsNullOrEmpty(setupInfo.RecaptchaPublicKey))
         {
-            var requestIp = MessageSettings.GetIP(httpContextAccessor.HttpContext?.Request);
+            var requestIp = MessageSettings.GetIP(_httpContextAccessor.HttpContext?.Request);
             var secretEmail = SetupInfo.IsSecretEmail(inDto.Email);
 
             var recaptchaPassed = secretEmail || await bruteForceLoginManager.CheckRecaptchaAsync(inDto.RecaptchaType, inDto.RecaptchaResponse, requestIp);
