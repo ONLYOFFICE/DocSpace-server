@@ -27,13 +27,14 @@
 namespace ASC.Files.Core.Security;
 
 [Scope]
-public class ExternalShare(Global global, 
+public class ExternalShare(
     IDaoFactory daoFactory, 
     CookiesManager cookiesManager,
     IHttpContextAccessor httpContextAccessor,
     BaseCommonLinkUtility commonLinkUtility,
     FilesLinkUtility filesLinkUtility,
-    FileUtility fileUtility)
+    FileUtility fileUtility,
+    CoreSettings coreSettings)
 {
     private ExternalSessionSnapshot _snapshot;
     private string _dbKey;
@@ -330,7 +331,7 @@ public class ExternalShare(Global global,
 
     private async Task<string> GetDbKeyAsync()
     {
-        return _dbKey ??= await global.GetDocDbKeyAsync();
+        return _dbKey ??= await coreSettings.GetDocDbKeyAsync();
     }
 }
 

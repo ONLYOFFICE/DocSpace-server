@@ -48,7 +48,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         SecurityContext securityContext,
         SettingsManager settingsManager,
         IQuotaService quotaService,
-        TenantManager tenantManager)
+        TenantManager tenantManager,
+        CoreSettings coreSettings)
 {
     public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
     {
@@ -429,7 +430,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public async Task<string> GetDocKeyAsync<T>(T fileId, int fileVersion, DateTime modified, string extraKey = null)
     {
-        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}_{await global.GetDocDbKeyAsync()}";
+        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}_{await coreSettings.GetDocDbKeyAsync()}";
 
         if (!string.IsNullOrEmpty(extraKey))
         {
