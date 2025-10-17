@@ -116,7 +116,7 @@ public class ApiKeysController(
     ///  Returns a list of all API keys for the current user.
     /// </summary>  
     /// <short>
-    ///  Get user API keys
+    ///  Get current user's API keys
     /// </short>
     /// <path>api/2.0/keys</path>
     /// <collection>list</collection>
@@ -146,12 +146,12 @@ public class ApiKeysController(
         }
     }
 
-    
+
     /// <summary>
-    ///  Returns current user API key info.
+    /// Returns information about the current user's API key.
     /// </summary>  
     /// <short>
-    ///  Get user API key info
+    ///  Get current user's API key
     /// </short>
     /// <path>api/2.0/keys/@self</path>
     [Tags("Api keys")]
@@ -167,7 +167,7 @@ public class ApiKeysController(
     
     
     /// <summary>
-    ///  Updates an existing API key changing its name, permissions and status.
+    ///  Updates an existing API key changing its name, permissions, and status.
     /// </summary>  
     /// <short>
     ///  Update an API key
@@ -211,7 +211,7 @@ public class ApiKeysController(
     }
 
     /// <summary>
-    ///  Delete a user API key by its ID.
+    ///  Deletes a user API key by its ID.
     /// </summary>  
     /// <short>
     ///  Delete a user API key

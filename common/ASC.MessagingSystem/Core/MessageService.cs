@@ -82,6 +82,11 @@ public class MessageService(
 
     #region HttpRequest & Target
 
+    public async Task SendAsync(MessageAction action, MessageTarget target)
+    {
+        await SendRequestMessageAsync(action, target);
+    }
+
     public void Send(MessageAction action, MessageTarget target)
     {
         SendRequestMessage(action, target);
@@ -165,6 +170,30 @@ public class MessageService(
         }
 
         _ = Sender.SendAsync(message);
+    }
+
+    private async Task SendRequestMessageAsync(MessageAction action, MessageTarget target = null, string loginName = null, DateTime? dateTime = null,
+        IEnumerable<FilesAuditReference> references = null, params string[] description)
+    {
+        if (Sender == null)
+        {
+            return;
+        }
+
+        if (Request == null)
+        {
+            logger.DebugEmptyHttpRequest(action);
+
+            return;
+        }
+
+        var message = messageFactory.Create(Request, loginName, dateTime, action, target, references, description);
+        if (!messagePolicy.Check(message))
+        {
+            return;
+        }
+
+        await Sender.SendAsync(message);
     }
 
     #region HttpHeaders

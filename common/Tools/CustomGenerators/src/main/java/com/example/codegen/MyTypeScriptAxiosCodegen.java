@@ -41,7 +41,6 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
 
     public MyTypeScriptAxiosCodegen() {
         super();
-        this.outputFolder = "generated-code/my-typescript-axios";
         this.templateDir = "templates/typescript-axios";
         this.embeddedTemplateDir = "typescript-axios";
 
@@ -66,6 +65,7 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
+        this.outputFolder = "generated-code/my-typescript-axios";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
@@ -134,16 +134,17 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
         objs = super.postProcessOperationsWithModels(objs, allModels);
-        OperationMap vals = objs.getOperations();
-        List<CodegenOperation> operations = vals.getOperation();
-        String className = vals.getClassname();
+        OperationMap operationMap = objs.getOperations();
+        List<CodegenOperation> operations = operationMap.getOperation();
+        String className = operationMap.getClassname();
         if (className != null && className.endsWith(apiNameSuffix)) {
             className = className.substring(0, className.length() - 3);
         }
         TagParts tagParts = tagMap.get(className);
-        vals.put("x-folder", (tagParts.folderPart).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
-        vals.put("x-file", (tagParts.classPart + apiNameSuffix).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
-        vals.put("x-classname", tagParts.classPart + apiNameSuffix);
+        operationMap.put("x-folder", (tagParts.folderPart).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
+        operationMap.put("x-file", (tagParts.classPart + apiNameSuffix).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
+        operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
+        boolean shouldSupportFields = false;
         if (operations != null) {
             for (CodegenOperation op : operations) {
                 if (op.operationId != null) {
@@ -160,23 +161,13 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
                         .anyMatch(p -> "count".equals(p.baseName));
 
                     if (allAreQueryParams && hasCountParam) {
-                        CodegenParameter fieldsParam = new CodegenParameter();
-                        fieldsParam.baseName = "fields";
-                        fieldsParam.paramName = "fields";
-                        fieldsParam.dataType = "string";
-                        fieldsParam.description = "Comma-separated list of fields to include in the response";
-                        fieldsParam.required = false;
-                        fieldsParam.isQueryParam = true;
-                        fieldsParam.isPrimitiveType = true;
-                        fieldsParam.isNullable = true;
-                        fieldsParam.collectionFormat = "csv";
-
-                        op.allParams.add(fieldsParam);
-                        op.queryParams.add(fieldsParam);
+                        op.vendorExtensions.put("x-hasFieldsParam", true);
+                        shouldSupportFields = true;
                     }
                 }
             }
         }
+        operationMap.put("x-supportsFields", shouldSupportFields);
 
         return objs;
     }

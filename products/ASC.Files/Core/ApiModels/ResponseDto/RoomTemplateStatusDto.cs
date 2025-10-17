@@ -70,7 +70,7 @@ public class RoomFromTemplateStatusDto
     /// <summary>
     /// The error message that is sent when a room is not created successfully from the template.
     /// </summary>
-    public string Error { get; set; }
+    public required string Error { get; set; }
 
     /// <summary>
     /// Specifies whether the process of creating a room from the template is completed.

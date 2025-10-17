@@ -397,10 +397,10 @@ static file class FolderQueries
                                     where f.TenantId == r.TenantId
                                     select f
                                 ).FirstOrDefault(),
-                            Shared = ctx.Security.Any(x => 
-                                x.TenantId == r.TenantId && 
-                                (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                                ((x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder))),
+                            UserShared = ctx.Security.Where(x => 
+                                    x.TenantId == r.TenantId && 
+                                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder)
+                                .Select(s => s.SubjectType).ToList(),
                             ParentShared = ctx.Security.Any(x => 
                                 x.TenantId == r.TenantId && 
                                 (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&

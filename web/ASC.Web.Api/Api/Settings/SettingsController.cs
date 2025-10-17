@@ -45,7 +45,6 @@ public partial class SettingsController(
     SetupInfo setupInfo,
     ExternalResourceSettings externalResourceSettings,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
-    GeolocationHelper geolocationHelper,
     ConsumerFactory consumerFactory,
     TimeZoneConverter timeZoneConverter,
     CustomNamingPeople customNamingPeople,
@@ -199,9 +198,7 @@ public partial class SettingsController(
 
             settings.ThirdpartyEnable = setupInfo.ThirdPartyAuthEnabled && providerManager.IsNotEmpty;
 
-            var country = (await geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key;
-
-            settings.RecaptchaType = country == "CN" ? RecaptchaType.hCaptcha : RecaptchaType.Default;
+            settings.RecaptchaType = !string.IsNullOrEmpty(setupInfo.HcaptchaPublicKey) ? RecaptchaType.hCaptcha : RecaptchaType.Default;
 
             settings.RecaptchaPublicKey = settings.RecaptchaType is RecaptchaType.hCaptcha ? setupInfo.HcaptchaPublicKey : setupInfo.RecaptchaPublicKey;
         }
@@ -432,9 +429,11 @@ public partial class SettingsController(
     /// Get the deep link settings
     /// </short>
     /// <path>api/2.0/settings/deeplink</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Ok", typeof(TenantDeepLinkSettings))]
     [HttpGet("deeplink")]
+    [AllowAnonymous]
     public async Task<TenantDeepLinkSettings> GetDeepLinkSettings()
     {
         var result = await settingsManager.LoadAsync<TenantDeepLinkSettings>(HttpContext.GetIfModifiedSince());
@@ -1113,10 +1112,10 @@ public partial class SettingsController(
     }
 
     /// <summary>
-    /// Returns the promotional banners visibility settings settings for the portal.
+    /// Returns the visibility settings of the promotional banners in the portal.
     /// </summary>
     /// <short>
-    /// Get the promotional banners visibility settings
+    /// Get the banners visibility
     /// </short>
     /// <path>api/2.0/settings/banner</path>
     [Tags("Settings / Banners visibility")]
@@ -1128,10 +1127,10 @@ public partial class SettingsController(
     }
 
     /// <summary>
-    /// Sets the promotional banners visibility settings settings for the portal.
+    /// Sets the visibility settings of the promotional banners in the portal.
     /// </summary>
     /// <short>
-    /// Set the promotional banners visibility settings
+    /// Set the banners visibility
     /// </short>
     /// <path>api/2.0/settings/banner</path>
     [Tags("Security / Banners visibility")]

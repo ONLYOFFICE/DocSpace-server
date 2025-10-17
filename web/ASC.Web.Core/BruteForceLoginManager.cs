@@ -170,7 +170,7 @@ public class BruteForceLoginManager(
         return user;
     }
 
-    private async Task<bool> CheckRecaptchaAsync(RecaptchaType recaptchaType, string recaptchaResponse, string requestIp)
+    public async Task<bool> CheckRecaptchaAsync(RecaptchaType recaptchaType, string recaptchaResponse, string requestIp)
     {
         var recaptchaPassed = false;
 
@@ -186,7 +186,7 @@ public class BruteForceLoginManager(
 
             if (!recaptchaPassed)
             {
-                throw new RecaptchaException();
+                throw new RecaptchaException(Resource.RecaptchaInvalid);
             }
         }
 

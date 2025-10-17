@@ -57,7 +57,7 @@ public class PaymentInformationRequestDto
 public class QuotasRequestDto
 {
     /// <summary>
-    /// Get wallet quotas only
+    /// Specifies whether to return the wallet quotas only.
     /// </summary>
     [FromQuery(Name = "wallet")]
     public bool Wallet { get; set; }

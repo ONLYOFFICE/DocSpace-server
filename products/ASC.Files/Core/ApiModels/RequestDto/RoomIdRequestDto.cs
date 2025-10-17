@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The room request parameters.
+/// The request parameters for accessing a room by its ID.
 /// </summary>
 public class RoomIdRequestDto<T>
 {
     /// <summary>
-    /// The room ID of the request.
+    /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }

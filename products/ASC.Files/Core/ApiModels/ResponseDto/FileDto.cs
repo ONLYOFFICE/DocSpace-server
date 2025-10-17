@@ -223,8 +223,7 @@ public class FileDtoHelper(
     public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null)
     {
         var result = await GetFileWrapperAsync(file, order, expiration, contextFolder);
-
-        result.FolderId = file.ParentId;
+        
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableShareRights =  (await _fileSecurity.GetAccesses(file)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
         
@@ -239,20 +238,23 @@ public class FileDtoHelper(
                 if (!string.IsNullOrEmpty(folderId))
                 {
                     var shareId = await _globalFolderHelper.GetFolderShareAsync<string>();
-                    var cachedFolderDao =  _daoFactory.GetCacheFolderDao<T>();
                     if (folderId == "@share")
                     {
                         folderId = shareId;
                     }
-                    
-                    var folder = await cachedFolderDao.GetFolderAsync((T)Convert.ChangeType(folderId, typeof(T)));
 
-                    if (folder.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID))
+                    if (int.TryParse(folderId, out var fId))
                     {
-                        folder = await cachedFolderDao.GetFolderAsync((T)Convert.ChangeType(shareId, typeof(T)));
-                    }
+                        var internalFolderDao = _daoFactory.GetCacheFolderDao<int>();
+                        var folder = await internalFolderDao.GetFolderAsync(fId);
 
-                    contextFolder = folder;
+                        if (folder.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID))
+                        {
+                            folder = await internalFolderDao.GetFolderAsync(fId);
+                        }
+
+                        contextFolder = folder;
+                    }
                 }
             }
         }
@@ -299,6 +301,11 @@ public class FileDtoHelper(
             {
                 result.OriginRoomTitle = result.OriginTitle;
             }
+            else if(result.RootFolderType == FolderType.USER)
+            {
+                result.OriginRoomTitle = FilesUCResource.SharedForMe;
+                
+            }
         }
         
         if (file.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
@@ -306,17 +313,15 @@ public class FileDtoHelper(
             switch (contextFolder)
             {
                 case { FolderType: FolderType.Recent }:
-                    result.RootFolderType = FolderType.Recent;
-                    result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
-
-                    break;
                 case { FolderType: FolderType.SHARE }:
                 case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, authContext.CurrentAccount.ID):
+                    var folderShareAsync = await _globalFolderHelper.GetFolderShareAsync<T>();
                     result.RootFolderType = FolderType.SHARE;
+                    result.RootFolderId = folderShareAsync;
                     var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.FolderId);
                     if (!await _fileSecurity.CanReadAsync(parent))
                     {
-                        result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                        result.FolderId = folderShareAsync;
                     }
 
                     break;
@@ -329,8 +334,9 @@ public class FileDtoHelper(
     private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, string order, TimeSpan? expiration, IFolder contextFolder = null)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
+        result.FolderId = file.ParentId;
+        
         var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
-
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 
@@ -518,14 +524,21 @@ public class FileDtoHelper(
             
             if (externalMediaAccess)
             {
+                result.IsLinkExpired = file.ShareRecord.Options?.IsExpired;
                 result.RequestToken = await _externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
                 result.External = true;
-                result.ExpirationDate = _apiDateTimeHelper.Get(file.ShareRecord?.Options?.ExpirationDate);
-                result.RootFolderType = FolderType.SHARE;
+                
+                var expirationDate = file.ShareRecord?.Options?.ExpirationDate;
+                if (expirationDate != null && expirationDate != DateTime.MinValue)
+                {
+                    result.ExpirationDate = _apiDateTimeHelper.Get(expirationDate);
+                }
+
                 var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.FolderId);
                 if (!await _fileSecurity.CanReadAsync(parent))
                 {
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                    result.RootFolderType = FolderType.SHARE;
                 }
             }
             

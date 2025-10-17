@@ -38,7 +38,7 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
     private static readonly TimeSpan _checkRightTimeout = TimeSpan.FromMinutes(1);
     private readonly Guid _instanceId = Guid.NewGuid();
     
-    public async Task<bool> ProlongEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, string baseUri, string docKey, bool editingAlone = false, string token = null)
+    public async Task<bool> ProlongEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, string baseUri, string docKey, bool editingAlone = false, string token = null, string fillingSessionId = null)
     {
         var checkRight = true;
         var tracker = await GetTrackerAsync(fileId);
@@ -63,7 +63,7 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
         }
         else
         {
-            tracker = new FileTracker(tabId, userId, tabId == userId, editingAlone, tenant, baseUri, docKey, token);
+            tracker = new FileTracker(tabId, userId, tabId == userId, editingAlone, tenant, baseUri, docKey, token, fillingSessionId);
         }
 
         await SetTrackerAsync(fileId, tracker);
@@ -105,6 +105,41 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
         }
 
         await RemoveTrackerAsync(fileId);
+    }
+
+    public record EditingStatus(bool IsEditing, bool IsEditingAlone);
+
+    public async Task<EditingStatus> GetEditingStatusAsync<T>(T fileId, bool setTracker = true)
+    {
+        var tracker = await GetTrackerAsync(fileId);
+        if (tracker == null)
+        {
+            return new(false, false);
+        }
+
+        var now = DateTime.UtcNow;
+
+        var listForRemove = tracker.EditingBy.Where(e => !e.Value.NewScheme && (now - e.Value.TrackTime).Duration() > _trackTimeout)
+                      .ToList();
+
+        foreach (var editTab in listForRemove)
+        {
+            tracker.EditingBy.TryRemove(editTab.Key, out _);
+        }
+
+        if (tracker.EditingBy.IsEmpty)
+        {
+            await RemoveTrackerAsync(fileId);
+            return new(false, false);
+        }
+
+        if (setTracker)
+        {
+            await SetTrackerAsync(fileId, tracker);
+        }
+
+        var alone = tracker.EditingBy.Count == 1 && tracker.EditingBy.FirstOrDefault().Value.EditingAlone;
+        return new(true, alone);
     }
 
     public async Task<bool> IsEditingAsync<T>(T fileId, bool setTracker = true)
@@ -260,7 +295,7 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
                            new KeyValuePair<string, object>("TenantId", $"{tenantId}") 
                        }))
                 {
-                    if (await tracker.StartTrackAsync(fileId.ToString(), fileTracker.DocKey, token, tenantId))
+                    if (await tracker.StartTrackAsync(fileId.ToString(), fileTracker.DocKey, token, tenantId, fileTracker.FillingSessionId))
                     {
                         await SetTrackerAsync(fileId, fileTracker);
                     }
@@ -311,13 +346,17 @@ public record FileTracker
     [ProtoMember(4)]
     public string DocKey { get; set; }
 
+    [ProtoMember(5)]
+    public string FillingSessionId { get; set; }
+
     public FileTracker() { }
     
-    internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, Tenant tenant, string baseUri, string docKey, string token = null)
+    internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, Tenant tenant, string baseUri, string docKey, string token = null, string fillingSessionId = null)
     {
         DocKey = docKey;
         Tenant = tenant;
         BaseUri = baseUri;
+        FillingSessionId = fillingSessionId;
         EditingBy = new ConcurrentDictionary<Guid, TrackInfo>();
         EditingBy.TryAdd(tabId, new TrackInfo 
         {

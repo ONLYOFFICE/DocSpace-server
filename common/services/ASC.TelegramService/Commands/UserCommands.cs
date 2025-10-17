@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Socket;
+using ASC.Web.Core.PublicResources;
 
 namespace ASC.TelegramService.Commands;
 
@@ -65,13 +66,13 @@ public class UserCommands(
             if (tenantId == TenantId)
             {
                 await telegramDao.RegisterUserAsync(portalUserId, tenantId, telegramUserId, telegramUsername);
-                await ReplyAsync("Ok!");
+                await ReplyAsync(GetResourceString(nameof(Resource.TelegramOnSuccessfulLink)));
                 await socketManager.UpdateTelegram(tenantId, portalUserId, telegramUsername);
 
                 return;
             }
         }
 
-        await ReplyAsync("Error");
+        await ReplyAsync(GetResourceString(nameof(Resource.TelegramOnGenericError)));
     }
 }

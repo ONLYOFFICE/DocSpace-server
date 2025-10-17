@@ -368,7 +368,7 @@
     <value>Accesso riuscito</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Accesso via account sociale riuscito</value>
+    <value>Accesso tramite account social riuscito: {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Login tramite Social Application effettuato con successo</value>
@@ -936,5 +936,53 @@
   </data>
   <data name="BannerSettingsChanged" xml:space="preserve">
     <value>Impostazioni di visibilità dei banner promozionali modificate</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Accesso riuscito tramite OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Accesso riuscito con login e password</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>File [{0}]. Link esterno creato: {1}. Ruolo: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>File [{0}]. Link esterno eliminato: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>File [{0}]. Link esterno aggiornato: {1}. Ruolo: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>File aggiunto ai preferiti: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>File rimosso dai preferiti: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>File rimosso da "Condivisi con me": {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>File [{0}]. Accesso aggiornato per {1}. Ruolo: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Cartella scaricata: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Cartelle [{0}]. Link esterno creato: {1}. Ruolo: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Cartelle [{0}]. Link esterno eliminato: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Cartelle [{0}]. Link esterno aggiornato: {1}. Ruolo: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Cartella rimossa da "Condivisi con me": {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Cartelle [{0}]. Accesso aggiornato per {1}. Ruolo: {2}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Link esterno revocato: {1}</value>
   </data>
 </root>

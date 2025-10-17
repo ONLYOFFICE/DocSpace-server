@@ -198,7 +198,7 @@ public abstract class FoldersController<T>(
     }
 
     /// <summary>
-    /// Sets the file order in the folder with ID specified in the request.
+    /// Sets the order of a folder with ID specified in the request.
     /// </summary>
     /// <short>
     /// Set folder order
@@ -255,7 +255,7 @@ public abstract class FoldersController<T>(
     {        
         var folder = await fileStorageService.GetFolderAsync(inDto.FolderId).NotFoundIfNull("Folder not found");
 
-        return await _folderDtoHelper.GetAsync(folder);
+        return await _folderDtoHelper.GetAsync(folder, contextFolder: folder);
     }
 
     /// <summary>
@@ -553,6 +553,7 @@ public class FoldersControllerCommon(
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("@recent")]
+    [HttpGet("recent")]
     public async Task<FolderContentDto<int>> GetRecentFolder(GetRecentFolderRequestDto inDto)
     {
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderRecentAsync, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, inDto.Extension);

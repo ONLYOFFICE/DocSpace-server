@@ -56,10 +56,16 @@ public abstract class FileEntryBaseDto
     public FileShare Access { get; set; }
 
     /// <summary>
-    /// Specifies if the file entry is shared or not.
+    /// Specifies if the file entry is shared via link or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool Shared { get; set; }
+    
+    /// <summary>
+    /// Specifies if the file entry is shared for user or not.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
+    public bool SharedForUser { get; set; }
 
     /// <summary>
     /// Indicates whether the parent entity is shared.
@@ -148,6 +154,7 @@ public abstract class FileEntryBaseDto
         Title = entry.Title;
         Access = entry.Access;
         Shared = entry.Shared;
+        SharedForUser = entry.SharedForUser;
         ParentShared = entry.ParentShared;
         RootFolderType = entry.RootFolderType;
         ParentRoomType = entry.ParentRoomType;
@@ -231,6 +238,11 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// Represents the expiration date of the file entry.
     /// </summary>
     public ApiDateTime ExpirationDate { get; set; }
+
+    /// <summary>
+    /// Indicates whether the shareable link associated with the file or folder has expired.
+    /// </summary>
+    public bool? IsLinkExpired { get; set; }
     
     protected FileEntryDto(FileEntry<T> entry)
         : base(entry)
@@ -337,6 +349,7 @@ public class FileEntryDtoHelper(
             Title = entry.Title,
             Access = entry.Access,
             Shared = entry.Shared,
+            SharedForUser = entry.SharedForUser,
             ParentShared = entry.ParentShared,
             ShortWebUrl = shortWebUrl,
             Created = _apiDateTimeHelper.Get(entry.CreateOn),

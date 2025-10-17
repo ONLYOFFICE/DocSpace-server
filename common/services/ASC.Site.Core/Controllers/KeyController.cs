@@ -45,7 +45,7 @@ public class KeyController(
                 return null;
             }
 
-            var encryptedEmail = await validationKeyProvider.Encrypt(inDto?.Email);
+            var encryptedEmail = await validationKeyProvider.EncryptAndEncode(inDto?.Email);
 
             var linkKey = validationKeyProvider.GetKey(encryptedEmail);
 
@@ -69,7 +69,7 @@ public class KeyController(
                 return null;
             }
 
-            var decryptedEmail = await validationKeyProvider.Decrypt(inDto.EmailKey);
+            var decryptedEmail = await validationKeyProvider.DecodeAndDecrypt(inDto.EmailKey);
 
             var cacheKey = $"{inDto.Page}{inDto.LinkKey}";
 

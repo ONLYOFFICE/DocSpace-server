@@ -1998,4 +1998,31 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Не удалось выполнить автоматическое резервное копирование для вашего DocSpace</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Не удалось выполнить запланированное резервное копирование для вашего DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Рекомендуем проверить настройки "Резервного копирования":"${__VirtualRootPath}/portal-settings/backup/data-backup" и "Сервисов":"${__VirtualRootPath}/portal-settings/services".
+
+Если у вас есть какие-либо вопросы или требуется помощь, свяжитесь с нами: "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Не удалось выполнить запланированное резервное копирование для вашего DocSpace [${__VirtualRootPath}](${__VirtualRootPath}).
+
+Рекомендуем проверить настройки [Резервного копирования](${__VirtualRootPath}/portal-settings/backup/data-backup) и [Сервисов](${__VirtualRootPath}/portal-settings/services).
+
+Если у вас есть какие-либо вопросы или требуется помощь, свяжитесь с нами: [${__SupportLink}](${__SupportLink})
+
+С уважением,
+команда ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
 </root>

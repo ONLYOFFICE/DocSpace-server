@@ -310,6 +310,11 @@ public class EditorConfiguration<T>(
         
         var callbackUrl = documentServiceTrackerHelper.GetCallbackUrl(file.Id.ToString());
 
+        if (!string.IsNullOrEmpty(file.FormInfo?.FillingSessionId))
+        {
+            callbackUrl = externalShare.GetUrlWithFillingSessionId(callbackUrl, file.FormInfo.FillingSessionId);
+        }
+
         if (file.ShareRecord is not { IsLink: true } || string.IsNullOrEmpty(file.ShareRecord.Options?.Password))
         {
             return externalShare.GetUrlWithShare(callbackUrl);
@@ -927,11 +932,6 @@ public class CustomizationConfig<T>(
 
     public async Task<GobackConfig> GetGoBack(EditorType editorType, File<T> file)
     {
-        if (editorType == EditorType.Embedded)
-        {
-            return null;
-        }
-        
         if (GobackUrl != null)
         {
             return new GobackConfig
@@ -960,6 +960,7 @@ public class CustomizationConfig<T>(
         {
 
             parent = await folderDao.GetFolderAsync(file.ParentId);
+            
             if (file.RootFolderType == FolderType.USER && !Equals(file.RootId, await globalFolderHelper.FolderMyAsync))
             {
                 if (!await fileSecurity.CanReadAsync(file))
@@ -967,17 +968,9 @@ public class CustomizationConfig<T>(
                     return null;
                 }
 
-                if (!string.IsNullOrEmpty(key))
-                {
-                    return new GobackConfig
-                    {
-                        Url = await pathProvider.GetFolderUrlByIdAsync(await globalFolderHelper.FolderRecentAsync, key)
-                    };
-                }
-
                 string url;
 
-                if (parent.FolderType != FolderType.USER)
+                if (parent.FolderType != FolderType.USER && await fileSecurity.CanReadAsync(parent))
                 {
                     parent.RootFolderType = FolderType.SHARE;
                     url = pathProvider.GetFolderUrl(parent, key);
@@ -985,7 +978,7 @@ public class CustomizationConfig<T>(
                 }
                 else
                 {
-                    url = pathProvider.GetFolderUrl(await folderDao.GetFolderAsync((T)Convert.ChangeType(await globalFolderHelper.FolderShareAsync, typeof(T))), key);
+                    url = pathProvider.GetFolderUrl(await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>()), key);
                 }
                 
                 return new GobackConfig
@@ -994,13 +987,21 @@ public class CustomizationConfig<T>(
                 };
             }
 
+            var canReadParent = await fileSecurity.CanReadAsync(parent);
+            
             if (file.Encrypted && 
                 file.RootFolderType == FolderType.Privacy && 
-                !await fileSecurity.CanReadAsync(parent))
+                !canReadParent)
             {
                 parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderPrivacyAsync<T>());
             }
 
+            if (file.RootFolderType == FolderType.VirtualRooms && 
+                !canReadParent)
+            {
+                parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>());
+            }
+            
             return new GobackConfig
             {
                 Url =  pathProvider.GetFolderUrl(parent, key)

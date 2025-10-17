@@ -93,9 +93,9 @@ public class NotificationController(
     }
 
     /// <summary>
-    /// Returns a list of notification channels
+    /// Returns a list of notification channels.
     /// </summary>
-    /// <short>Gets notification channel settings</short>
+    /// <short>Get notification channels</short>
     /// <path>api/2.0/settings/notification/channels</path>
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Notification settings", typeof(NotificationChannelStatusDto))]

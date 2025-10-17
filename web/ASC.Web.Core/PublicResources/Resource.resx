@@ -1257,4 +1257,10 @@
   <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
     <value>Document Service Quota ({0})</value>
   </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>You have been successfully connected Telegram to receive notifications from your DocSpace.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>An unexpected error occurred. Please try again.</value>
+  </data>
 </root>

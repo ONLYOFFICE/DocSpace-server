@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The auto-clearing request parameters.
+/// The request parameters for updating the trash bin auto-clearing setting.
 /// </summary>
 public class AutoCleanupRequestDto
 {

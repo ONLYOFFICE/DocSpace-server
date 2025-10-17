@@ -37,6 +37,7 @@ public static class ModelBindingContextExtension
         if (valueProviderResult != ValueProviderResult.None)
         {
             bindingContext.ModelState.SetModelValue(modelName, valueProviderResult);
+            bindingContext.ModelState.MarkFieldValid(modelName);
             firstValue = valueProviderResult.FirstValue;
 
             return true;

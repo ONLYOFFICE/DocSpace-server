@@ -432,9 +432,6 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>تم تسجيل الدخول بنجاح</value>
   </data>
-  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>تم تسجيل الدخول من خلال حسابات مواقع التواصل الاجتماعي بنجاح</value>
-  </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>تم تسجيل الدخول من خلال تطبيق مواقع التواصل الاجتماعي</value>
   </data>
@@ -995,5 +992,56 @@
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>تم تحديث إعدادات الخدمات الممكّنة لمحفظة العملاء</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>تسجيل الدخول بنجاح عبر OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>تم تسجيل الدخول بنجاح عبر تسجيل الدخول وكلمة المرور</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>الملفات [{0}]. تم إنشاء الرابط الخارجي: {1}. الدور: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>الملفات [{0}]. تم حذف الرابط الخارجي: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>الملفات [{0}]. تم تحديث الرابط الخارجي: {1}. الدور: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>تم تمييز الملف كمفضل: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>تمت إزالة الملف من المفضلة: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>تمت إزالة الملف من "المشارك معي": {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>الملفات [{0}]. تم تحديث الوصول لـ {1}. الدور: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>تم تنزيل المجلد: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>المجلدات [{0}]. تم إنشاء الرابط الخارجي: {1}. الدور: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>المجلدات [{0}]. تم حذف الرابط الخارجي: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>المجلدات [{0}]. تم تحديث الرابط الخارجي: {1}. الدور: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>تمت إزالة المجلد من "المشارك معي": {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>المجلدات [{0}]. تم تحديث الوصول لـ {1}. الدور: {2}</value>
+  </data>
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
+    <value>تم تسجيل الدخول بنجاح عبر حساب التواصل الاجتماعي: {0}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>تم إلغاء الرابط الخارجي: {1}</value>
   </data>
 </root>

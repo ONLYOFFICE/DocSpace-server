@@ -126,7 +126,7 @@ public class FileSharingAceHelper(
 
             if (file != null)
             {
-                if ((w.Access is not (FileShare.Read or FileShare.Restrict or FileShare.None) && !fileUtility.CanWebView(entry.Title))
+                if ((w.Access is not (FileShare.Read or FileShare.Restrict or FileShare.ReadWrite or FileShare.None) && !fileUtility.CanWebView(entry.Title))
                     || (entry.RootFolderType != FolderType.USER && entry.RootFolderType != FolderType.VirtualRooms))
                 {
                     continue;
@@ -159,7 +159,7 @@ public class FileSharingAceHelper(
                     
                 if (w.FileShareOptions != null)
                 {
-                    if (w.SubjectType == SubjectType.PrimaryExternalLink)
+                    if (w.SubjectType == SubjectType.PrimaryExternalLink && room is { FolderType: FolderType.PublicRoom or FolderType.FillingFormsRoom } )
                     {
                         w.FileShareOptions.ExpirationDate = default;
                     }
@@ -180,9 +180,18 @@ public class FileSharingAceHelper(
                 {
                     continue;
                 }
-                if (existedShare.Options?.ExpirationDate != w.FileShareOptions?.ExpirationDate && !await fileSecurity.CanEditExpirationAsync(entry) && (folder?.FolderType != FolderType.PublicRoom || w.SubjectType != SubjectType.PrimaryExternalLink))
+
+                if (existedShare.Options?.ExpirationDate != w.FileShareOptions?.ExpirationDate)
                 {
-                    continue;
+                    if (folder?.FolderType == FolderType.PublicRoom && w.SubjectType == SubjectType.PrimaryExternalLink)
+                    {                        
+                        continue;
+                    }
+
+                    if (w.SubjectType != SubjectType.InvitationLink && !await fileSecurity.CanEditExpirationAsync(entry))
+                    {
+                        continue;
+                    }
                 }
             }
             
@@ -431,7 +440,7 @@ public class FileSharingAceHelper(
         {                
             var recipientIds = recipients.Keys.ToList();
             
-            if (file != null || (folder != null && folder.FoldersCount + folder.FilesCount > 0) || entry.ProviderEntry)
+            if (file != null || folder != null || entry.ProviderEntry)
             {
                 await fileMarker.MarkAsNewAsync(entry, recipientIds);
             }
@@ -459,32 +468,46 @@ public class FileSharingAceHelper(
 
     public async Task RemoveAceAsync<T>(FileEntry<T> entry)
     {
-        if ((entry.RootFolderType != FolderType.USER && entry.RootFolderType != FolderType.Privacy)
+        if ((entry.RootFolderType != FolderType.USER && entry.RootFolderType != FolderType.Privacy && entry.RootFolderType != FolderType.VirtualRooms)
             || Equals(entry.RootId, await globalFolderHelper.FolderMyAsync)
             || Equals(entry.RootId, await globalFolderHelper.FolderPrivacyAsync))
         {
             return;
         }
-
+        
+        var currentId = authContext.CurrentAccount.ID;
         var entryType = entry.FileEntryType;
-        await fileSecurity.ShareAsync(entry.Id, entryType, authContext.CurrentAccount.ID,
-            entry.RootFolderType == FolderType.USER
+        var tagDao = daoFactory.GetTagDao<T>();
+        
+        List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry)];
+        tags.AddRange(await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync());
+
+        var currentShare = await fileSecurity.GetSharesAsync(entry, [currentId]);
+        if (currentShare != null && currentShare.Any() || entry is Folder<T>)
+        {        
+            var defaultShare = entry.RootFolderType == FolderType.USER
                 ? fileSecurity.DefaultMyShare
-                : fileSecurity.DefaultPrivacyShare);
+                : fileSecurity.DefaultPrivacyShare;
+        
+            if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
+            {
+                defaultShare = FileShare.None;
+            }
+            await fileSecurity.ShareAsync(entry.Id, entryType, currentId, defaultShare);
+            await socketManager.SelfRestrictionAsync(entry, currentId, defaultShare);
+        }
 
         if (entryType == FileEntryType.File)
         {
             await documentServiceHelper.CheckUsersForDropAsync((File<T>)entry);
         }
-
+        
         await fileMarker.RemoveMarkAsNewAsync(entry);
-
-        var currentId = authContext.CurrentAccount.ID;
-        await daoFactory.GetTagDao<T>().RemoveTagsAsync([Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry)]);
+        await tagDao.RemoveTagsAsync(tags);
         await socketManager.RemoveFromFavoritesAsync(entry, [currentId]);
         await socketManager.RemoveFromRecentAsync(entry, [currentId]);
         
-        if (entry.RootFolderType is FolderType.USER or FolderType.Privacy)
+        if (entry.RootFolderType is FolderType.USER or FolderType.Privacy or FolderType.VirtualRooms)
         { 
             await socketManager.RemoveFromSharedAsync(entry, users: [currentId]);
         }
@@ -597,9 +620,13 @@ public class FileSharing(
             throw new ArgumentNullException(FilesCommonResource.ErrorMessage_BadRequest);
         }
 
-        var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
-        var canEditInternal = await fileSecurity.CanEditInternalAsync(entry);
-        var canEditExpiration = await fileSecurity.CanEditExpirationAsync(entry);
+        _ = await fileSecurity.SetSecurity(new[] { entry }.ToAsyncEnumerable()).ToListAsync();
+        
+        var (canEditAccess, canEditInternal, canEditExpiration) = await Task.WhenAll(
+            fileSecurity.CanEditAccessAsync(entry),
+            fileSecurity.CanEditInternalAsync(entry),
+            fileSecurity.CanEditExpirationAsync(entry)
+        ).ContinueWith(t => (t.Result[0], t.Result[1], t.Result[2]));
         
         var canAccess = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType)
             ? await CheckAccessAsync(entry, filterType)
@@ -611,7 +638,7 @@ public class FileSharing(
 
             yield break;
         }
-
+        
         var allDefaultAces = await GetDefaultAcesAsync(entry, filterType, status, text).ToListAsync();
         var defaultAces = allDefaultAces.Skip(offset).Take(count).ToList();
 
@@ -958,7 +985,9 @@ public class FileSharing(
 
             var user = await userManager.GetUsersAsync(entry.CreateBy);
 
-            if (!(user.FirstName.ToLower().Contains(text) || user.LastName.ToLower().Contains(text) || user.Email.ToLower().Contains(text)))
+            if (!(user.FirstName.Contains(text, StringComparison.CurrentCultureIgnoreCase) || 
+                  user.LastName.Contains(text, StringComparison.CurrentCultureIgnoreCase) || 
+                  user.Email.Contains(text, StringComparison.CurrentCultureIgnoreCase)))
             {
                 yield break;
             }
@@ -975,6 +1004,30 @@ public class FileSharing(
         };
 
         yield return owner;
+
+        var i = 0;
+        var cachedFolderDao = daoFactory.GetCacheFolderDao<T>();
+        await foreach (var parent in cachedFolderDao.GetParentFoldersAsync(entry.ParentId).Where(r=> r.FolderType != FolderType.VirtualRooms).Select(r=> r.CreateBy).Where(r=> !r.Equals(entry.CreateBy)).Distinct())
+        {
+            var parentOwner = false;
+            
+            if (i == 0)
+            {
+                owner.Owner = false;
+                parentOwner = true;
+            }
+            
+            yield return new AceWrapper
+            {
+                Id = parent,
+                SubjectName = await global.GetUserNameAsync(parent),
+                SubjectGroup = false,
+                Access = FileShare.ReadWrite,
+                Owner = parentOwner,
+                CanEditAccess = false
+            };
+            i++;
+        }
     }
 
     private async Task<AceWrapper> ToAceAsync<T>(FileEntry<T> entry, FileShareRecord<T> record, bool canEditAccess, bool canEditInternal, bool canEditExpiration)
@@ -1040,10 +1093,18 @@ public class FileSharing(
         {
             w.CanEditDenyDownload = !room.SettingsDenyDownload;
         }
+        
         if (room is {FolderType: FolderType.PublicRoom} && record.SubjectType == SubjectType.PrimaryExternalLink)
-        {
+        {       
             w.CanEditExpirationDate = false;
+            w.CanRevoke = true;
         }
+        
+        if (room is {FolderType: FolderType.FillingFormsRoom} )
+        {       
+            w.CanRevoke = true;
+        }
+        
         return w;
     }
 }

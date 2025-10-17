@@ -125,14 +125,10 @@ public partial class Global(
     IConfiguration configuration,
     AuthContext authContext,
     UserManager userManager,
-    CoreSettings coreSettings,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     CustomNamingPeople customNamingPeople,
-    FileSecurityCommon fileSecurityCommon,
-    IDistributedLockProvider distributedLockProvider)
+    FileSecurityCommon fileSecurityCommon)
 {
-    #region Property
-
     private DocThumbnailExtension? _docThumbnailExtension;
     public DocThumbnailExtension DocThumbnailExtension
     {
@@ -210,34 +206,6 @@ public partial class Global(
 
     public Task<bool> IsDocSpaceAdministratorAsync => fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
 
-    public async Task<string> GetDocDbKeyAsync()
-    {
-        const string dbKey = "UniqueDocument";
-        
-        // check without lock
-        var resultKey = await coreSettings.GetSettingAsync(dbKey);
-        if (!string.IsNullOrEmpty(resultKey))
-        {
-            return resultKey;
-        }
-        
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(dbKey))
-        {
-            // check again with lock
-            resultKey = await coreSettings.GetSettingAsync(dbKey);
-            if (!string.IsNullOrEmpty(resultKey))
-            {
-                return resultKey;
-            }
-            
-            resultKey = Guid.NewGuid().ToString();
-            await coreSettings.SaveSettingAsync(dbKey, resultKey);
-
-            return resultKey;
-        }
-    }
-
-    #endregion
 
     public static string ReplaceInvalidCharsAndTruncate(string title)
     {

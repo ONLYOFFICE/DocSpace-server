@@ -48,9 +48,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         SecurityContext securityContext,
         SettingsManager settingsManager,
         IQuotaService quotaService,
-        TenantManager tenantManager)
-    {
-
+        TenantManager tenantManager,
+        CoreSettings coreSettings)
+{
     public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
     {
         var lastVersion = true;
@@ -60,8 +60,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var file = await fileDao.GetFileAsync(fileId);
         if (file != null && 0 < version && version < file.Version)
         {
-                file = await fileDao.GetFileAsync(fileId, version);
-                lastVersion = false;
+            file = await fileDao.GetFileAsync(fileId, version);
+            lastVersion = false;
         }
 
         if (file == null)
@@ -70,7 +70,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         return (file, lastVersion);
-            }
+    }
 
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit,
         bool tryCoauth, bool fillFormsPossible, EditorType editorType, bool isSubmitOnly = false)
@@ -143,7 +143,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     private async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion,
         bool rightToEdit, bool editPossible, bool tryEdit, bool tryCoAuthoring, bool fillFormsPossible)
     {
-
         if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
@@ -431,7 +430,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public async Task<string> GetDocKeyAsync<T>(T fileId, int fileVersion, DateTime modified, string extraKey = null)
     {
-        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}_{await global.GetDocDbKeyAsync()}";
+        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}_{await coreSettings.GetDocDbKeyAsync()}";
 
         if (!string.IsNullOrEmpty(extraKey))
         {
@@ -643,9 +642,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             if (myRoles.Count == 0)
             {
+                result.CanFill = false;
+                result.CanStartFilling = false;
                 return result;
             }
-
+            result.HasRole = true;
             var role = myRoles.FirstOrDefault(role => !role.Submitted && currentStep == role.Sequence);
             if (role != null)
             {
@@ -673,11 +674,17 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
         else
         {
-            result.CanEdit = true;
-            result.CanFill = false;
-            result.EditorType = editorType;
+            var canEdit = await fileSecurity.CanEditAsync(file);
+            var canFill = await fileSecurity.CanFillFormsAsync(file);
+
+            result.CanEdit = canEdit;
+            result.CanFill = canFill;
+            result.CanEditRoom = await fileSecurity.CanEditRoomAsync(room);
+            result.EditorType = !canEdit && canFill && editorType != EditorType.Mobile
+                        ? EditorType.Embedded
+                        : editorType;
         }
-        return result;
+            return result;
     }
 
     public async Task<FormOpenSetup<T>> GetFormOpenSetupForUserFolderAsync<T>(File<T> file, EditorType editorType, bool edit, bool fill)

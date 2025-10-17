@@ -90,6 +90,10 @@ public class FileShareDto
     public required bool CanEditExpirationDate { get; set; }
 
     /// <summary>
+    /// Specifies whether the file sharing access can be revoked by the current user.
+    /// </summary>
+    public required bool CanRevoke { get; set; }
+    /// <summary>
     /// The subject type.
     /// </summary>
     public required SubjectType SubjectType { get; set; }
@@ -190,6 +194,7 @@ public class FileShareDtoHelper(
             CanEditInternal = aceWrapper.CanEditInternal,
             CanEditDenyDownload = aceWrapper.CanEditDenyDownload,
             CanEditExpirationDate = aceWrapper.CanEditExpirationDate,
+            CanRevoke = aceWrapper.CanRevoke,
             SubjectType = aceWrapper.SubjectType
         };
 

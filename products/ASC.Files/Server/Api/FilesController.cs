@@ -350,7 +350,9 @@ public abstract class FilesController<T>(
     [HttpPut("file/{fileId}/customfilter")]
     public async Task<FileDto<T>> SetCustomFilterTag(FileCustomFilterRequestDto<T> inDto)
     {
-        return await filesControllerHelper.SetCustomFilterTagAsync(inDto.FileId, inDto.Parameters.Enabled);
+        var result = await fileStorageService.SetCustomFilterTagAsync(inDto.FileId, inDto.Parameters.Enabled);
+
+        return await _fileDtoHelper.GetAsync(result);
     }
 
     /// <summary>
@@ -528,7 +530,7 @@ public abstract class FilesController<T>(
     }
     
     /// <summary>
-    /// Sets order of the file with ID specified in the request.
+    /// Sets the order of the file with the ID specified in the request.
     /// </summary>
     /// <short>
     /// Set file order
@@ -547,7 +549,7 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Sets order of the files.
+    /// Sets the order of the files specified in the request.
     /// </summary>
     /// <short>
     /// Set order of files

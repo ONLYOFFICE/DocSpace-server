@@ -799,6 +799,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File removed from &quot;Shared with me&quot;: {0}.
+        /// </summary>
+        public static string FileRemovedFromList {
+            get {
+                return ResourceManager.GetString("FileRemovedFromList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File Renamed: {0}.
         /// </summary>
         public static string FileRenamed {
@@ -970,6 +979,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Folder Downloaded: {0}.
+        /// </summary>
+        public static string FolderDownloaded {
+            get {
+                return ResourceManager.GetString("FolderDownloaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Folders [{0}]. External link created: {1}. Role: {2}.
         /// </summary>
         public static string FolderExternalLinkCreated {
@@ -1038,6 +1056,15 @@ namespace ASC.AuditTrail {
         public static string FolderMovedWithOverwriting {
             get {
                 return ResourceManager.GetString("FolderMovedWithOverwriting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folder removed from &quot;Shared with me&quot;: {0}.
+        /// </summary>
+        public static string FolderRemovedFromList {
+            get {
+                return ResourceManager.GetString("FolderRemovedFromList", resourceCulture);
             }
         }
         

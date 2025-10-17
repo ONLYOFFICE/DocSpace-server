@@ -178,6 +178,19 @@ public class SocketManager(
         await MakeRequest($"delete-shared-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
     }
 
+    public async Task SelfRestrictionAsync<T>(FileEntry<T> fileEntry, Guid subject, FileShare access)
+    {
+        var room = fileEntry.FileEntryType == FileEntryType.File ? FileRoom(fileEntry.Id) : FolderRoom(fileEntry.Id);
+        var data = JsonSerializer.Serialize(new Dictionary<Guid, FileShare> { { subject, access } });
+
+        await base.MakeRequest($"self-restriction-{fileEntry.FileEntryType.ToStringLowerFast()}", new
+        {
+            room,
+            fileEntry.Id,
+            data
+        });
+    }
+
     private async Task<IEnumerable<Guid>> GetRecipientListForForm<T>(File<T> form)
     {
         List<Guid> users = null;

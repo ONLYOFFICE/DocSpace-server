@@ -75,5 +75,5 @@ public class ConfirmationCodeUrlRequestDto
     /// The identity provider used for authentication.
     /// </summary>
     [FromRoute(Name = "provider")]
-    public required LoginProvider Provider { get; set; }
+    public LoginProvider Provider { get; set; }
 }

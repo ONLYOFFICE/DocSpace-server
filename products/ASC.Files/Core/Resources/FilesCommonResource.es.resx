@@ -468,19 +468,19 @@
     <value>Abrir archivo</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>El archivo no se puede cargar en esta sala. Intente cargar el formulario PDF de {0}.</value>
+    <value>El archivo no se puede cargar en esta sala. Intente cargar el formulario PDF de ONLYOFFICE.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Enlace para rellenar</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>No se admite mover varios archivos a la sala para rellenar formularios. Mueva un formulario PDF de {0} a la vez.</value>
+    <value>No se admite mover varios archivos a la sala para rellenar formularios. Mueva un formulario PDF de ONLYOFFICE a la vez.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>No se admite mover carpetas a la sala para rellenar formularios. Mueva un formulario PDF de {0} a la vez.</value>
+    <value>No se admite mover carpetas a la sala para rellenar formularios. Mueva un formulario PDF de ONLYOFFICE a la vez.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>El archivo no se puede mover a esta sala. Intente mover el formulario PDF de {0}.</value>
+    <value>El archivo no se puede mover a esta sala. Intente mover el formulario PDF de ONLYOFFICE.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Número de formulario</value>
@@ -514,5 +514,8 @@
   </data>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Invitado</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Documentos del usuario {0} {1}</value>
   </data>
 </root>

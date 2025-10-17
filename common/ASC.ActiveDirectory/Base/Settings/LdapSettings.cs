@@ -44,7 +44,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     }
 
     ///<summary>
-    /// The LDAP settings mapping.
+    /// The mapping fields of LDAP settings.
     /// </summary>
     public enum MappingFields
     {
@@ -133,7 +133,10 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
 
         return settings;
     }
-    
+
+    /// <summary>
+    /// The data and time when the LDAP settings were last modified.
+    /// </summary>
     public DateTime LastModified { get; set; }
 
     public override bool Equals(object obj)
@@ -310,7 +313,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     }
 
     /// <summary>
-    /// The attribute in a user record that corresponds to the user's email address.
+    /// The attribute in a user record that corresponds to the user's mail address.
     /// </summary>
     public string MailAttribute
     {
