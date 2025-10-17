@@ -1297,7 +1297,7 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Calculate amount of the wallet payment",
+        "summary": "Calculate the wallet payment amount",
         "operationId": "calculateWalletPayment",
         "requestBody": {
           "content": {
@@ -1355,7 +1355,7 @@
             "OpenId": []
           }
         ],
-        "description": "Calculate amount of the wallet payment with the parameters specified in the request."
+        "description": "Calculates an amount of the wallet payment with the parameters specified in the request."
       }
     },
     "/api/2.0/portal/payment/account": {
@@ -1545,7 +1545,7 @@
           {
             "name": "wallet",
             "in": "query",
-            "description": "Get wallet quotas only",
+            "description": "Specifies whether to return the wallet quotas only.",
             "schema": {
               "type": "boolean",
               "example": true
@@ -1664,7 +1664,7 @@
           {
             "name": "service",
             "in": "query",
-            "description": "Wallet service",
+            "description": "The wallet service type.",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/TenantWalletService"
@@ -1715,7 +1715,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the wallet services."
+        "description": "Returns the specified wallet service."
       }
     },
     "/api/2.0/portal/payment/quota": {
@@ -1859,7 +1859,7 @@
           {
             "name": "BackUrl",
             "in": "query",
-            "description": "Back URL",
+            "description": "The URL where the user will be redirected after completing the setup.",
             "schema": {
               "type": "string",
               "example": "some text"
@@ -1921,7 +1921,7 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Get the customer info",
+        "summary": "Get the customer information",
         "operationId": "getCustomerInfo",
         "parameters": [
           {
@@ -1981,7 +1981,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the customer info."
+        "description": "Returns the customer information."
       }
     },
     "/api/2.0/portal/payment/deposit": {
@@ -2047,7 +2047,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns result of putting money on deposit."
+        "description": "Returns the result of putting money on deposit."
       }
     },
     "/api/2.0/portal/payment/customer/balance": {
@@ -2129,7 +2129,7 @@
           {
             "name": "startDate",
             "in": "query",
-            "description": "Start date",
+            "description": "The report start date.",
             "schema": {
               "type": "string",
               "format": "date-time",
@@ -2139,7 +2139,7 @@
           {
             "name": "endDate",
             "in": "query",
-            "description": "End date",
+            "description": "The report end date.",
             "schema": {
               "type": "string",
               "format": "date-time",
@@ -2149,7 +2149,7 @@
           {
             "name": "participantName",
             "in": "query",
-            "description": "Participant name",
+            "description": "The participant name.",
             "schema": {
               "type": "string",
               "example": "some text"
@@ -2158,7 +2158,7 @@
           {
             "name": "credit",
             "in": "query",
-            "description": "Include credit operations (true by default)",
+            "description": "Specifies whether to include credit operations in the report. The default value is true.",
             "schema": {
               "type": "boolean",
               "example": true
@@ -2167,7 +2167,7 @@
           {
             "name": "debit",
             "in": "query",
-            "description": "Include debit operations (true by default)",
+            "description": "Specifies whether to include debit operations in the report. The default value is true.",
             "schema": {
               "type": "boolean",
               "example": true
@@ -2176,7 +2176,7 @@
           {
             "name": "offset",
             "in": "query",
-            "description": "Offset (0 by default)",
+            "description": "The number of items to skip for pagination. The default value is 0.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2186,7 +2186,7 @@
           {
             "name": "limit",
             "in": "query",
-            "description": "Limit (25 by default)",
+            "description": "The maximum number of items to return for pagination. The default value is 25.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2249,7 +2249,7 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Start generating the customer operations report",
+        "summary": "Start the customer operations report generation",
         "operationId": "createCustomerOperationsReport",
         "requestBody": {
           "content": {
@@ -2304,13 +2304,13 @@
             "OpenId": []
           }
         ],
-        "description": "Start generating the customer operations report as xlsx file and save in Documents."
+        "description": "Starts generating a customer operations report as an xlsx file and saves it in Documents."
       },
       "get": {
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Get the status of generating a customer operations report",
+        "summary": "Get the status of the customer operations report generation",
         "operationId": "getCustomerOperationsReport",
         "responses": {
           "200": {
@@ -2356,13 +2356,13 @@
             "OpenId": []
           }
         ],
-        "description": "Get the status of generating a customer operations report."
+        "description": "Returns the status of generating a customer operations report."
       },
       "delete": {
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Terminate the generating a customer operations report",
+        "summary": "Terminate the customer operations report generation",
         "operationId": "terminateCustomerOperationsReport",
         "responses": {
           "200": {
@@ -2401,7 +2401,7 @@
             "OpenId": []
           }
         ],
-        "description": "Terminates the generating a customer operations report."
+        "description": "Terminates generating a customer operations report."
       }
     },
     "/api/2.0/portal/payment/topupsettings": {
@@ -2409,7 +2409,7 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Get wallet auto top up settings",
+        "summary": "Get wallet auto top-up settings",
         "operationId": "getTenantWalletSettings",
         "responses": {
           "200": {
@@ -2458,13 +2458,13 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the wallet auto top up settings."
+        "description": "Returns the wallet auto top-up settings."
       },
       "post": {
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Set wallet auto top up settings",
+        "summary": "Set wallet auto top-up settings",
         "operationId": "setTenantWalletSettings",
         "requestBody": {
           "content": {
@@ -2522,7 +2522,7 @@
             "OpenId": []
           }
         ],
-        "description": "Set the wallet auto top up settings."
+        "description": "Sets the wallet auto top-up settings."
       }
     },
     "/api/2.0/portal/payment/servicessettings": {
@@ -2579,7 +2579,7 @@
             "OpenId": []
           }
         ],
-        "description": "Get the wallet services settings."
+        "description": "Returns the wallet services settings."
       }
     },
     "/api/2.0/portal/payment/servicestate": {
@@ -2645,7 +2645,7 @@
             "OpenId": []
           }
         ],
-        "description": "Change wallet service state."
+        "description": "Changes the wallet service state."
       }
     },
     "/api/2.0/portal/usedspace": {
@@ -4375,7 +4375,7 @@
         "tags": [
           "Security / Banners visibility"
         ],
-        "summary": "Set the promotional banners visibility settings",
+        "summary": "Set the banners visibility",
         "operationId": "setTenantBannerSettings",
         "requestBody": {
           "content": {
@@ -4430,13 +4430,13 @@
             "OpenId": []
           }
         ],
-        "description": "Sets the promotional banners visibility settings settings for the portal."
+        "description": "Sets the visibility settings of the promotional banners in the portal."
       },
       "get": {
         "tags": [
           "Settings / Banners visibility"
         ],
-        "summary": "Get the promotional banners visibility settings",
+        "summary": "Get the banners visibility",
         "operationId": "getTenantBannerSettings",
         "responses": {
           "200": {
@@ -4482,7 +4482,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the promotional banners visibility settings settings for the portal."
+        "description": "Returns the visibility settings of the promotional banners in the portal."
       }
     },
     "/api/2.0/security/csp": {
@@ -5568,40 +5568,8 @@
                 }
               }
             }
-          },
-          "401": {
-            "description": "Unauthorized"
           }
         },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ],
         "description": "Returns the deep link settings."
       }
     },
@@ -7917,7 +7885,7 @@
         "tags": [
           "Settings / Notifications"
         ],
-        "summary": "Gets notification channel settings",
+        "summary": "Get notification channels",
         "operationId": "getNotificationChannels",
         "responses": {
           "200": {
@@ -7963,7 +7931,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns a list of notification channels"
+        "description": "Returns a list of notification channels."
       }
     },
     "/api/2.0/settings/owner": {
@@ -8874,7 +8842,7 @@
             "OpenId": []
           }
         ],
-        "description": "Specifies if the white label logo text are default or not."
+        "description": "Specifies if the white label logo text is default or not."
       }
     },
     "/api/2.0/settings/whitelabel/logotext/restore": {
@@ -12719,7 +12687,7 @@
         "tags": [
           "Api keys"
         ],
-        "summary": "Get user API keys",
+        "summary": "Get current user's API keys",
         "operationId": "getApiKeys",
         "responses": {
           "200": {
@@ -12827,7 +12795,7 @@
         "tags": [
           "Api keys"
         ],
-        "summary": "Get user API key info",
+        "summary": "Get current user's API key",
         "operationId": "getApiKey",
         "responses": {
           "200": {
@@ -12873,7 +12841,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns current user API key info."
+        "description": "Returns information about the current user's API key."
       }
     },
     "/api/2.0/keys/{keyId}": {
@@ -12951,7 +12919,7 @@
             "OpenId": []
           }
         ],
-        "description": "Updates an existing API key changing its name, permissions and status."
+        "description": "Updates an existing API key changing its name, permissions, and status."
       },
       "delete": {
         "tags": [
@@ -13015,7 +12983,7 @@
             "OpenId": []
           }
         ],
-        "description": "Delete a user API key by its ID."
+        "description": "Deletes a user API key by its ID."
       }
     },
     "/api/2.0/group": {
@@ -14885,7 +14853,7 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Returns the user claims.",
+        "summary": "Get user claims",
         "operationId": "getClaims",
         "responses": {
           "200": {
@@ -15328,7 +15296,7 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Get a profile by user name",
+        "summary": "Get a profile by user ID",
         "operationId": "getProfileByUserId",
         "parameters": [
           {
@@ -15392,7 +15360,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the detailed information about a profile of the user with the name specified in the request."
+        "description": "Returns the detailed information about a profile of the user with the ID specified in the request."
       },
       "put": {
         "tags": [
@@ -16676,7 +16644,7 @@
         "tags": [
           "People / Search"
         ],
-        "summary": "Search users with detaailed information by extended filter",
+        "summary": "Search users with detailed information by extended filter",
         "operationId": "searchUsersByExtendedFilter",
         "parameters": [
           {
@@ -18428,7 +18396,7 @@
         "tags": [
           "People / User data"
         ],
-        "summary": "Check the data reassignment need",
+        "summary": "Check data for reassignment need",
         "operationId": "necessaryReassign",
         "parameters": [
           {
@@ -18494,7 +18462,7 @@
             "OpenId": []
           }
         ],
-        "description": "Checks if the reassignment of rooms and shared files is necessary or not."
+        "description": "Checks whether the reassignment of rooms and shared files is required."
       }
     },
     "/api/2.0/people/remove/progress/{userid}": {
@@ -19222,7 +19190,7 @@
         "tags": [
           "People / User type"
         ],
-        "summary": "Update user type",
+        "summary": "Start updating user type",
         "operationId": "starUserTypetUpdate",
         "requestBody": {
           "content": {
@@ -19355,7 +19323,7 @@
         "tags": [
           "People / User type"
         ],
-        "summary": "Terminate update user type",
+        "summary": "Terminate updating user type",
         "operationId": "terminateUserTypeUpdate",
         "requestBody": {
           "content": {
@@ -19808,7 +19776,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -19870,7 +19838,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -20025,7 +19993,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -20058,7 +20026,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -20091,7 +20059,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -20516,7 +20484,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -20740,7 +20708,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -20798,7 +20766,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -20983,7 +20951,7 @@
           }
         ],
         "requestBody": {
-          "description": "The parameters for saving file as PDF.",
+          "description": "The parameters for saving the file as PDF.",
           "content": {
             "application/json": {
               "schema": {
@@ -21055,7 +21023,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -21292,7 +21260,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -21450,6 +21418,136 @@
                 }
               }
             }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Files / Folders"
+        ],
+        "operationId": "getFolderRecent",
+        "parameters": [
+          {
+            "name": "userIdOrGroupId",
+            "in": "query",
+            "description": "The user or group ID.",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            }
+          },
+          {
+            "name": "filterType",
+            "in": "query",
+            "description": "The filter type.",
+            "schema": {
+              "$ref": "#/components/schemas/FilterType"
+            }
+          },
+          {
+            "name": "excludeSubject",
+            "in": "query",
+            "description": "Specifies whether to exclude search by user or group ID.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "applyFilterOption",
+            "in": "query",
+            "description": "Specifies whether to return only files, only folders or all elements.",
+            "schema": {
+              "$ref": "#/components/schemas/ApplyFilterOption"
+            }
+          },
+          {
+            "name": "searchArea",
+            "in": "query",
+            "description": "The search area.",
+            "schema": {
+              "$ref": "#/components/schemas/SearchArea"
+            }
+          },
+          {
+            "name": "extension",
+            "in": "query",
+            "description": "Specifies whether to search for a specific file extension in the Recent folder.",
+            "style": "deepObject",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": ".txt"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "The maximum number of items to return.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "description": "The starting position of the results to be returned in the query response.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Specifies the sorting criteria for the folder request.",
+            "schema": {
+              "type": "string",
+              "example": "some text"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "The order in which the results are sorted.",
+            "schema": {
+              "$ref": "#/components/schemas/SortOrder"
+            }
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "The text used for filtering or searching folder contents.",
+            "schema": {
+              "type": "string",
+              "example": "some text"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Recent section contents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderContentIntegerWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You don't have enough permission to view the folder content"
+          },
+          "404": {
+            "description": "The required folder was not found"
           }
         }
       }
@@ -21624,7 +21722,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The request folder ID.",
+            "description": "The folder unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -21741,7 +21839,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The request folder ID.",
+            "description": "The folder unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -21862,7 +21960,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The folder ID of the request.",
+            "description": "The folder ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -21910,7 +22008,7 @@
           {
             "name": "applyFilterOption",
             "in": "query",
-            "description": "Specifies whether to return only files, only folders or all elements from the specified folder.",
+            "description": "Specifies whether to return only files, only folders, or all elements from the specified folder.",
             "schema": {
               "$ref": "#/components/schemas/ApplyFilterOption"
             }
@@ -21975,7 +22073,7 @@
           {
             "name": "sortBy",
             "in": "query",
-            "description": "Specifies the property used for sorting the folder request results.",
+            "description": "The property used for sorting the folder request results.",
             "schema": {
               "type": "string",
               "example": "some text"
@@ -22001,7 +22099,7 @@
           {
             "name": "Location",
             "in": "query",
-            "description": "Represents the location context of the request, specifying the area\r\nwhere the operation is performed, such as a room, documents, or a link.",
+            "description": "The location context of the request, specifying the area\r\nwhere the operation is performed, such as a room, documents, or a link.",
             "schema": {
               "$ref": "#/components/schemas/Location"
             }
@@ -22037,7 +22135,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The request folder ID.",
+            "description": "The folder unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -22073,7 +22171,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The request folder ID.",
+            "description": "The folder unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -22109,7 +22207,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The request folder ID.",
+            "description": "The folder unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -22210,7 +22308,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The request folder ID.",
+            "description": "The folder unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -23885,7 +23983,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The operation ID of the request.",
+            "description": "The operation unique identifier.",
             "required": true,
             "schema": {
               "type": "string",
@@ -23976,7 +24074,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The folder ID of the session.",
+            "description": "The session folder ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -24821,7 +24919,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -24854,7 +24952,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -24909,7 +25007,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The request folder ID.",
+            "description": "The folder unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -25052,7 +25150,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the mention message.",
+            "description": "The file ID with the mention message.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -25934,7 +26032,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -26334,7 +26432,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -26380,7 +26478,7 @@
           }
         ],
         "requestBody": {
-          "description": "The parameters for adding tags.",
+          "description": "The parameters for managing tags.",
           "content": {
             "application/json": {
               "schema": {
@@ -26424,7 +26522,7 @@
           }
         ],
         "requestBody": {
-          "description": "The parameters for adding tags.",
+          "description": "The parameters for managing tags.",
           "content": {
             "application/json": {
               "schema": {
@@ -26505,7 +26603,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -26608,7 +26706,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -26641,7 +26739,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -26711,7 +26809,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -26744,7 +26842,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -26972,7 +27070,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -29699,6 +29797,15 @@
             "description": "Culture",
             "nullable": true,
             "example": "some text"
+          },
+          "recaptchaType": {
+            "$ref": "#/components/schemas/RecaptchaType"
+          },
+          "recaptchaResponse": {
+            "type": "string",
+            "description": "The user's response to the CAPTCHA challenge.",
+            "nullable": true,
+            "example": "some text"
           }
         },
         "additionalProperties": false,
@@ -29872,14 +29979,13 @@
       "AuthKey": {
         "required": [
           "name",
-          "title",
           "value"
         ],
         "type": "object",
         "properties": {
           "name": {
             "type": "string",
-            "description": "The authentication key name.",
+            "description": "The authorization key name.",
             "nullable": true,
             "example": "Winfield Upton"
           },
@@ -29887,19 +29993,19 @@
             "maxLength": 255,
             "minLength": 0,
             "type": "string",
-            "description": "The authentication key value.",
+            "description": "The authorization key value.",
             "nullable": true,
             "example": "some text"
           },
           "title": {
             "type": "string",
-            "description": "The authentication key title.",
+            "description": "The authorization key title.",
             "nullable": true,
             "example": "legacy_1080p_small_wooden_mouse"
           }
         },
         "additionalProperties": false,
-        "description": "The authentication key parameters."
+        "description": "The authorization key parameters."
       },
       "AuthRequestsDto": {
         "type": "object",
@@ -30021,31 +30127,31 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "The name of the authentication service.",
+            "description": "The name of the authorization service.",
             "nullable": true,
             "example": "Winfield Upton"
           },
           "title": {
             "type": "string",
-            "description": "The user-friendly display title of the authentication service.",
+            "description": "The user-friendly display title of the authorization service.",
             "nullable": true,
             "example": "legacy_1080p_small_wooden_mouse"
           },
           "description": {
             "type": "string",
-            "description": "The brief description of the authentication service.",
+            "description": "The brief description of the authorization service.",
             "nullable": true,
             "example": "some text"
           },
           "instruction": {
             "type": "string",
-            "description": "The detailed instructions for configuring or using the authentication service.",
+            "description": "The detailed instructions for configuring or using the authorization service.",
             "nullable": true,
             "example": "some text"
           },
           "canSet": {
             "type": "boolean",
-            "description": "Specifies whether the authentication service can be configured by the user.",
+            "description": "Specifies whether the authorization service can be configured by the user.",
             "example": true
           },
           "props": {
@@ -30053,7 +30159,7 @@
             "items": {
               "$ref": "#/components/schemas/AuthKey"
             },
-            "description": "The collection of authorization keys associated with the authentication service.",
+            "description": "The collection of authorization keys associated with the authorization service.",
             "nullable": true
           }
         },
@@ -30450,12 +30556,12 @@
           },
           "enabled": {
             "type": "boolean",
-            "description": "Service state",
+            "description": "Specifies whether the wallet service is enabled.",
             "example": true
           }
         },
         "additionalProperties": false,
-        "description": "Tenant wallet service state request parameters"
+        "description": "The request parameters for changing the tenant wallet service state."
       },
       "CompanyWhiteLabelSettings": {
         "type": "object",
@@ -31279,7 +31385,7 @@
           },
           "email": {
             "type": "string",
-            "description": "The email address of the customer.",
+            "description": "The customer email address.",
             "nullable": true,
             "readOnly": true,
             "example": "Sydney_Roberts4@hotmail.com"
@@ -31330,39 +31436,39 @@
         "properties": {
           "startDate": {
             "type": "string",
-            "description": "Start date",
+            "description": "The report start date.",
             "format": "date-time",
             "nullable": true,
             "example": "2008-04-10T06:30:00.0000000+04:00"
           },
           "endDate": {
             "type": "string",
-            "description": "End date",
+            "description": "The report end date.",
             "format": "date-time",
             "nullable": true,
             "example": "2008-04-10T06:30:00.0000000+04:00"
           },
           "participantName": {
             "type": "string",
-            "description": "Participant name",
+            "description": "The participant name.",
             "nullable": true,
             "example": "some text"
           },
           "credit": {
             "type": "boolean",
-            "description": "Include credit operations",
+            "description": "Specifies whether to include credit operations in the report.",
             "nullable": true,
             "example": true
           },
           "debit": {
             "type": "boolean",
-            "description": "Include debit operations",
+            "description": "Specifies whether to include debit operations in the report.",
             "nullable": true,
             "example": true
           }
         },
         "additionalProperties": false,
-        "description": "Parameters of the request for generating the report on client operations"
+        "description": "The request parameters for generating a report on client operations."
       },
       "DbTenant": {
         "type": "object",
@@ -31647,19 +31753,19 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "The document builder ID.",
+            "description": "The Document Builder task ID.",
             "nullable": true,
             "example": "9846"
           },
           "error": {
             "type": "string",
-            "description": "The error message occured while the document building process.",
+            "description": "The error message occurred during the document building process.",
             "nullable": true,
             "example": "some text"
           },
           "percentage": {
             "type": "integer",
-            "description": "The percentage of the progress of the document building process.",
+            "description": "The progress percentage of the document building process.",
             "format": "int32",
             "example": 1234
           },
@@ -31694,7 +31800,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The document builder task parameters."
+        "description": "The Document Builder task parameters."
       },
       "DocumentBuilderTaskWrapper": {
         "type": "object",
@@ -31769,7 +31875,7 @@
         "properties": {
           "show": {
             "type": "boolean",
-            "description": "Specifies whether the email activation settings is shown or hidden.",
+            "description": "Specifies whether the email activation settings are shown or hidden.",
             "example": true
           },
           "lastModified": {
@@ -32814,7 +32920,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The default white label logos parameters."
+        "description": "The default white label logo parameters."
       },
       "IsDefaultWhiteLabelLogosWrapper": {
         "type": "object",
@@ -34474,15 +34580,18 @@
         "properties": {
           "name": {
             "type": "string",
+            "description": "The notification channel name.",
             "nullable": true,
             "example": "Winfield Upton"
           },
           "isEnabled": {
             "type": "boolean",
+            "description": "Specifies whether the notification channel is enabled.",
             "example": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The notification channel information."
       },
       "NotificationChannelStatusDto": {
         "type": "object",
@@ -34492,10 +34601,12 @@
             "items": {
               "$ref": "#/components/schemas/NotificationChannelDto"
             },
+            "description": "The list of notification channels.",
             "nullable": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The notification channel settings."
       },
       "NotificationChannelStatusWrapper": {
         "type": "object",
@@ -34700,31 +34811,31 @@
           },
           "service": {
             "type": "string",
-            "description": "Service related to the operation.",
+            "description": "The service related to the operation.",
             "nullable": true,
             "example": "some text"
           },
           "description": {
             "type": "string",
-            "description": "Brief description of the operation.",
+            "description": "The brief operation description.",
             "nullable": true,
             "example": "some text"
           },
           "details": {
             "type": "string",
-            "description": "Brief details of the operation.",
+            "description": "The detailed information about the operation.",
             "nullable": true,
             "example": "some text"
           },
           "serviceUnit": {
             "type": "string",
-            "description": "Unit of the service.",
+            "description": "The service unit.",
             "nullable": true,
             "example": "some text"
           },
           "quantity": {
             "type": "integer",
-            "description": "Quantity of the service used.",
+            "description": "The quantity of the service used.",
             "format": "int32",
             "example": 1234
           },
@@ -34736,23 +34847,23 @@
           },
           "credit": {
             "type": "number",
-            "description": "Credit amount of the operation.",
+            "description": "The credit amount of the operation.",
             "format": "double"
           },
           "debit": {
             "type": "number",
-            "description": "Debit amount of the operation.",
+            "description": "The debit amount of the operation.",
             "format": "double"
           },
           "participantName": {
             "type": "string",
-            "description": "Original name of the participant.",
+            "description": "The participant original name.",
             "nullable": true,
             "example": "some text"
           },
           "participantDisplayName": {
             "type": "string",
-            "description": "Display name of the participant.",
+            "description": "The participant display name.",
             "nullable": true,
             "example": "some text"
           }
@@ -34985,18 +35096,18 @@
         "properties": {
           "operationId": {
             "type": "integer",
-            "description": "Unique identifier of the operation.",
+            "description": "The operation unique identifier.",
             "format": "int64",
             "example": 1234
           },
           "amount": {
             "type": "number",
-            "description": "The amount of the payment calculation.",
+            "description": "The calculated payment amount.",
             "format": "double"
           },
           "currency": {
             "type": "string",
-            "description": "The three-character ISO 4217 currency symbol of the payment calculation.",
+            "description": "The three-character ISO 4217 currency symbol used for the payment calculation.",
             "nullable": true,
             "example": "some text"
           },
@@ -35008,7 +35119,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The payment calculation."
+        "description": "The parameters of the calculated payment amount."
       },
       "PaymentCalculationWrapper": {
         "type": "object",
@@ -35159,7 +35270,7 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "The quantity of payment",
+            "description": "The payment quantity.",
             "nullable": true,
             "example": [
               {
@@ -35344,7 +35455,7 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "The mapping of item identifiers with their respective quantities in the payment.",
+            "description": "The mapping of item identifiers to their respective quantities in the payment.",
             "nullable": true,
             "example": [
               {
@@ -35355,7 +35466,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The request parameters for the payment quantity specifications."
+        "description": "The request parameters for specifying payment quantity."
       },
       "Quota": {
         "type": "object",
@@ -35625,36 +35736,36 @@
             "items": {
               "$ref": "#/components/schemas/OperationDto"
             },
-            "description": "Collection of operations.",
+            "description": "A collection of operations.",
             "nullable": true
           },
           "offset": {
             "type": "integer",
-            "description": "Offset of the report data.",
+            "description": "The report data offset.",
             "format": "int32",
             "example": 1234
           },
           "limit": {
             "type": "integer",
-            "description": "Limit of the report data.",
+            "description": "The report data limit.",
             "format": "int32",
             "example": 1234
           },
           "totalQuantity": {
             "type": "integer",
-            "description": "Total quantity of operations in the report.",
+            "description": "The total quantity of operations in the report.",
             "format": "int32",
             "example": 1234
           },
           "totalPage": {
             "type": "integer",
-            "description": "Total number of pages in the report.",
+            "description": "The total number of pages in the report.",
             "format": "int32",
             "example": 1234
           },
           "currentPage": {
             "type": "integer",
-            "description": "Current page number of the report.",
+            "description": "The current page number of the report.",
             "format": "int32",
             "example": 1234
           }
@@ -36989,12 +37100,12 @@
           },
           "amount": {
             "type": "number",
-            "description": "The amount of the sub-account.",
+            "description": "The balance of the sub-account in the specified currency.",
             "format": "double"
           }
         },
         "additionalProperties": false,
-        "description": "Represents a sub-account with a specific currency and amount."
+        "description": "Represents a sub-account with a specific currency and balance."
       },
       "Tariff": {
         "required": [
@@ -37213,7 +37324,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The promotional banners visibility settings."
+        "description": "The visibility settings of the promotional banners."
       },
       "TenantBannerSettingsDto": {
         "type": "object",
@@ -37225,7 +37336,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The request parameters for managing the promotional banners visibility settings for the current tenant."
+        "description": "The request parameters for managing the visibility settings of the promotional banners for the current tenant."
       },
       "TenantBannerSettingsWrapper": {
         "type": "object",
@@ -38122,34 +38233,34 @@
         "properties": {
           "allowInvitingMembers": {
             "type": "boolean",
-            "description": "Allow invite new DocSpace members through the Contacts section.",
+            "description": "Specifies whether to allow inviting new DocSpace members through the Contacts section.",
             "example": true
           },
           "allowInvitingGuests": {
             "type": "boolean",
-            "description": "Allow all DocSpace members to invite external guests to rooms.",
+            "description": "Specifies whether to allow all DocSpace members to invite external guests to the rooms.",
             "example": true
           }
         },
         "additionalProperties": false,
-        "description": "User invitation settings"
+        "description": "The user invitation settings."
       },
       "TenantUserInvitationSettingsRequestDto": {
         "type": "object",
         "properties": {
           "allowInvitingMembers": {
             "type": "boolean",
-            "description": "Allow invite new DocSpace members through the Contacts section.",
+            "description": "Specifies whether to allow inviting new DocSpace members through the Contacts section.",
             "example": true
           },
           "allowInvitingGuests": {
             "type": "boolean",
-            "description": "Allow all DocSpace members to invite external guests to rooms.",
+            "description": "Specifies whether to allow all DocSpace members to invite external guests to the rooms.",
             "example": true
           }
         },
         "additionalProperties": false,
-        "description": "User invitation settings"
+        "description": "The request parameters for updating the user invitation settings."
       },
       "TenantUserInvitationSettingsWrapper": {
         "type": "object",
@@ -38275,18 +38386,20 @@
                 "Backup",
                 "Storage"
               ],
-              "description": "Enabled services"
+              "description": "The list of the enabled wallet services."
             },
-            "description": "Enabled services",
+            "description": "The list of the enabled wallet services.",
             "nullable": true
           },
           "lastModified": {
             "type": "string",
+            "description": "The date and time when the wallet services settings were last modified.",
             "format": "date-time",
             "example": "2008-04-10T06:30:00.0000000+04:00"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The wallet services settings."
       },
       "TenantWalletServiceSettingsWrapper": {
         "type": "object",
@@ -38327,14 +38440,14 @@
         "properties": {
           "enabled": {
             "type": "boolean",
-            "description": "Enabled",
+            "description": "Specifies whether automatic top-up for the tenant wallet is enabled.",
             "example": true
           },
           "minBalance": {
             "maximum": 1000,
             "minimum": 5,
             "type": "integer",
-            "description": "Minimun balance",
+            "description": "The minimum wallet balance at which automatic top-up will be triggered. Must be between 5 and 1000.",
             "format": "int32",
             "example": 1234
           },
@@ -38342,7 +38455,7 @@
             "maximum": 5000,
             "minimum": 6,
             "type": "integer",
-            "description": "Up to balance",
+            "description": "The maximum wallet balance at which automatic top-up will be triggered. Must be between 6 and 5000.",
             "format": "int32",
             "example": 1234
           },
@@ -38354,11 +38467,13 @@
           },
           "lastModified": {
             "type": "string",
+            "description": "The date and time when the tenant wallet settings were last modified.",
             "format": "date-time",
             "example": "2008-04-10T06:30:00.0000000+04:00"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The tenant wallet settings."
       },
       "TenantWalletSettingsWrapper": {
         "type": "object",
@@ -38368,7 +38483,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "Tenant wallet settings"
+        "description": "The wrapper for the tenant wallet settings."
       },
       "TenantWrapper": {
         "type": "object",
@@ -38405,10 +38520,6 @@
         }
       },
       "TfaRequestsDto": {
-        "required": [
-          "id",
-          "type"
-        ],
         "type": "object",
         "properties": {
           "type": {
@@ -38669,19 +38780,19 @@
             "maximum": 999999,
             "minimum": 1,
             "type": "integer",
-            "description": "Amount",
+            "description": "The amount of money for the operation.",
             "format": "int32",
             "example": 1234
           },
           "currency": {
             "type": "string",
-            "description": "The three-character ISO 4217 currency symbol",
+            "description": "The three-character ISO 4217 currency symbol.",
             "nullable": true,
             "example": "some text"
           }
         },
         "additionalProperties": false,
-        "description": "Put money on deposit request parameters"
+        "description": "The request parameters for putting money on deposit."
       },
       "TurnOnAdminMessageSettingsRequestDto": {
         "type": "object",
@@ -39093,7 +39204,7 @@
               "format": "int32",
               "nullable": true
             },
-            "description": "The mapping of item identifiers with their respective quantities in the payment.",
+            "description": "The mapping of item identifiers to their respective quantities in the payment.",
             "nullable": true,
             "example": [
               {
@@ -39107,7 +39218,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The request parameters for the wallet payment quantity specifications."
+        "description": "The request parameters for specifying wallet payment quantity."
       },
       "WebItemSecurityRequestsDto": {
         "required": [
@@ -39412,7 +39523,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The request parameters for requesting the webhook delivery retries."
+        "description": "The parameters for requesting the webhook delivery retries."
       },
       "WebhookTrigger": {
         "description": "[0 - *, 1 - user.created, 2 - user.invited, 4 - user.updated, 8 - user.deleted, 16 - group.created, 32 - group.updated, 64 - group.deleted, 128 - file.created, 256 - file.uploaded, 512 - file.updated, 1024 - file.trashed, 2048 - file.deleted, 4096 - file.restored, 8192 - file.copied, 16384 - file.moved, 32768 - folder.created, 65536 - folder.updated, 131072 - folder.trashed, 262144 - folder.deleted, 524288 - folder.restored, 1048576 - folder.copied, 2097152 - folder.moved, 4194304 - room.created, 8388608 - room.updated, 16777216 - room.archived, 33554432 - room.deleted, 67108864 - room.restored, 134217728 - room.copied]",
@@ -40194,7 +40305,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "The unique identifier of the API key.",
+            "description": "The API key unique identifier.",
             "format": "uuid",
             "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
           },
@@ -40467,6 +40578,15 @@
             "description": "The user email address.",
             "format": "email",
             "example": "Sydney_Roberts4@hotmail.com"
+          },
+          "recaptchaType": {
+            "$ref": "#/components/schemas/RecaptchaType"
+          },
+          "recaptchaResponse": {
+            "type": "string",
+            "description": "The user's response to the CAPTCHA challenge.",
+            "nullable": true,
+            "example": "some text"
           }
         },
         "additionalProperties": false,
@@ -40973,7 +41093,7 @@
           },
           "groupManager": {
             "type": "string",
-            "description": "Group manager ID",
+            "description": "The group manager ID.",
             "format": "uuid",
             "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
           },
@@ -40981,7 +41101,7 @@
             "maxLength": 128,
             "minLength": 0,
             "type": "string",
-            "description": "Group name",
+            "description": "The group name.",
             "nullable": true,
             "example": "some text"
           }
@@ -41423,7 +41543,6 @@
       },
       "SignupAccountRequestDto": {
         "required": [
-          "email",
           "key",
           "serializedProfile"
         ],
@@ -41471,7 +41590,7 @@
           },
           "serializedProfile": {
             "type": "string",
-            "description": "Third-party profile in the serialized format",
+            "description": "The third-party profile in the serialized format",
             "nullable": true,
             "example": "some text"
           }
@@ -41480,6 +41599,7 @@
         "description": "The request parameters for creating a third-party account."
       },
       "SortOrder": {
+        "description": "[0 - Ascending, 1 - Descending]",
         "enum": [
           0,
           1
@@ -41493,8 +41613,7 @@
         "x-enum-descriptions": [
           "Ascending",
           "Descending"
-        ],
-        "description": "[0 - Ascending, 1 - Descending]"
+        ]
       },
       "StartReassignRequestDto": {
         "required": [
@@ -42139,6 +42258,7 @@
         "description": "The anonymous config parameters."
       },
       "ApplyFilterOption": {
+        "description": "[0 - All, 1 - Files, 2 - Folders]",
         "enum": [
           0,
           1,
@@ -42155,8 +42275,7 @@
           "All",
           "Files",
           "Folders"
-        ],
-        "description": "[0 - All, 1 - Files, 2 - Folders]"
+        ]
       },
       "ArchiveRoomRequest": {
         "type": "object",
@@ -42313,7 +42432,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The auto-clearing request parameters."
+        "description": "The request parameters for updating the trash bin auto-clearing setting."
       },
       "BaseBatchRequestDto": {
         "allOf": [
@@ -42458,7 +42577,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The parameters for adding tags."
+        "description": "The parameters for managing room tags."
       },
       "ChangeHistory": {
         "required": [
@@ -42588,12 +42707,12 @@
             "items": {
               "$ref": "#/components/schemas/FileEntryBaseDto"
             },
-            "description": "The list of files of the destination folder.",
+            "description": "The list of files in the destination folder.",
             "nullable": true
           }
         },
         "additionalProperties": false,
-        "description": "The destination folder checking information."
+        "description": "The result of checking whether files can be moved or copied to the specified folder."
       },
       "CheckDestFolderResult": {
         "description": "[0 - All allowed, 1 - Part allowed, 2 - None allowed]",
@@ -44170,7 +44289,7 @@
           }
         ],
         "additionalProperties": false,
-        "description": "The duplicate request parameters."
+        "description": "The request parameters for duplicating files and fodlers."
       },
       "EditHistoryArrayWrapper": {
         "type": "object",
@@ -45417,6 +45536,12 @@
               },
               "expirationDate": {
                 "$ref": "#/components/schemas/ApiDateTime"
+              },
+              "isLinkExpired": {
+                "type": "boolean",
+                "description": "Indicates whether the shareable link associated with the file or folder has expired.",
+                "nullable": true,
+                "example": true
               }
             }
           }
@@ -45698,6 +45823,12 @@
               },
               "expirationDate": {
                 "$ref": "#/components/schemas/ApiDateTime"
+              },
+              "isLinkExpired": {
+                "type": "boolean",
+                "description": "Indicates whether the shareable link associated with the file or folder has expired.",
+                "nullable": true,
+                "example": true
               }
             }
           }
@@ -46339,6 +46470,7 @@
           "canEditDenyDownload",
           "canEditExpirationDate",
           "canEditInternal",
+          "canRevoke",
           "isLocked",
           "isOwner",
           "subjectType"
@@ -46395,6 +46527,11 @@
           "canEditExpirationDate": {
             "type": "boolean",
             "description": "Indicates whether the expiration date of access permissions can be edited.",
+            "example": true
+          },
+          "canRevoke": {
+            "type": "boolean",
+            "description": "Specifies whether the file sharing access can be revoked by the current user.",
             "example": true
           },
           "subjectType": {
@@ -47637,7 +47774,8 @@
                 "type": "boolean",
                 "description": "Specifies if an external link to the folder is expired or not.",
                 "nullable": true,
-                "example": true
+                "example": true,
+                "deprecated": true
               }
             }
           }
@@ -47770,7 +47908,8 @@
                 "type": "boolean",
                 "description": "Specifies if an external link to the folder is expired or not.",
                 "nullable": true,
-                "example": true
+                "example": true,
+                "deprecated": true
               }
             }
           }
@@ -48430,7 +48569,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The security request parameters of the group member."
+        "description": "The group member security information."
       },
       "HideConfirmConvertRequestDto": {
         "type": "object",
@@ -48715,6 +48854,7 @@
           3
         ],
         "type": "integer",
+        "description": "The location context of the request.",
         "format": "int32"
       },
       "LockFileParameters": {
@@ -48905,7 +49045,7 @@
             "items": {
               "type": "string"
             },
-            "description": "A list of emails which will receive the mention message.",
+            "description": "A list of emails that will receive the mention message.",
             "nullable": true,
             "example": [
               "some text"
@@ -48913,7 +49053,7 @@
           },
           "message": {
             "type": "string",
-            "description": "The comment message.",
+            "description": "The mention message.",
             "nullable": true,
             "example": "some text"
           }
@@ -48929,7 +49069,7 @@
           },
           "email": {
             "type": "string",
-            "description": "The email address of the user.",
+            "description": "The user email address.",
             "format": "email",
             "nullable": true,
             "readOnly": true,
@@ -48937,7 +49077,7 @@
           },
           "id": {
             "type": "string",
-            "description": "The identification of the user.",
+            "description": "The user unique identification.",
             "nullable": true,
             "readOnly": true,
             "example": "9846"
@@ -48951,20 +49091,20 @@
           },
           "hasAccess": {
             "type": "boolean",
-            "description": "Specifies if the user has the access to the file or not.",
+            "description": "Specifies whether the user has the access to the file where they are mentioned.",
             "readOnly": true,
             "example": true
           },
           "name": {
             "type": "string",
-            "description": "The full name of the user.",
+            "description": "The user full name.",
             "nullable": true,
             "readOnly": true,
             "example": "Winfield Upton"
           }
         },
         "additionalProperties": false,
-        "description": "The mention message parameters."
+        "description": "The parameters of a user mentioned in a message."
       },
       "MentionWrapperArrayWrapper": {
         "type": "object",
@@ -50172,7 +50312,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The parameters for saving the file as PDF."
+        "description": "The parameters for saving a file as PDF."
       },
       "SaveFormRoleMappingDtoInteger": {
         "required": [
@@ -51031,7 +51171,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The request parameters for updating the room."
+        "description": "The request parameters for updating the rooms."
       },
       "UploadRequestDto": {
         "type": "object",

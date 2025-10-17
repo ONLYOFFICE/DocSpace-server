@@ -5,7 +5,7 @@
     "version": "7.13.0"
   },
   "generatorName": "my-typescript-k6",
-  "inputSpec": "./tools/api-docs.json",
+  "inputSpec": "./json/api-docs.json",
   "outputDir": "typescript-k6-sdk",
   "additionalProperties": {
     "packageName": "@onlyoffice/docspace-api-sdk-k6",
