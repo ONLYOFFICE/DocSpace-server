@@ -1007,7 +1007,7 @@ public class FileSharing(
 
         var i = 0;
         var cachedFolderDao = daoFactory.GetCacheFolderDao<T>();
-        await foreach (var parent in cachedFolderDao.GetParentFoldersAsync(entry.ParentId).Select(r=> r.CreateBy).Where(r=> !r.Equals(entry.CreateBy)).Distinct())
+        await foreach (var parent in cachedFolderDao.GetParentFoldersAsync(entry.ParentId).Where(r=> r.FolderType != FolderType.VirtualRooms).Select(r=> r.CreateBy).Where(r=> !r.Equals(entry.CreateBy)).Distinct())
         {
             var parentOwner = false;
             
