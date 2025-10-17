@@ -162,7 +162,7 @@ public abstract class BaseStorage(TempStream tempStream,
     public abstract Task<Stream> GetReadStreamAsync(string domain, string path, long offset);
 
     public abstract Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length);
-    
+
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream);
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId);
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl);
@@ -184,7 +184,7 @@ public abstract class BaseStorage(TempStream tempStream,
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
                             string contentDisposition);
 
-    public abstract Task<Uri> SaveAsync(string domain, string path,Guid ownerId, Stream stream, string contentType,
+    public abstract Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
                             string contentDisposition);
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays);
 
@@ -197,7 +197,7 @@ public abstract class BaseStorage(TempStream tempStream,
     {
         return await SaveAsync(string.Empty, path, stream);
     }
-    
+
     protected abstract Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName);
 
     #region chunking
@@ -381,7 +381,7 @@ public abstract class BaseStorage(TempStream tempStream,
             ownerId = ownerId == Guid.Empty ? Core.Configuration.Constants.CoreSystem.ID : ownerId;
 
             await QuotaController.QuotaUsedAddAsync(Modulename, domain, DataList.GetData(domain), size, ownerId, quotaCheckFileSize);
-            var(name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<MaxTotalSizeFeature, long>();
+            var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<MaxTotalSizeFeature, long>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
             await NotifyChangeUserQuota(ownerId);
         }
@@ -389,7 +389,7 @@ public abstract class BaseStorage(TempStream tempStream,
 
     internal async Task QuotaUsedDeleteAsync(string domain, long size)
     {
-       await QuotaUsedDeleteAsync(domain, size, Guid.Empty);
+        await QuotaUsedDeleteAsync(domain, size, Guid.Empty);
     }
     internal async Task QuotaUsedDeleteAsync(string domain, long size, Guid ownerId)
     {

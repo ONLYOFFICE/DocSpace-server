@@ -43,6 +43,7 @@ global using ASC.FederatedLogin.LoginProviders;
 global using ASC.Notify.Messages;
 global using ASC.TelegramService;
 global using ASC.TelegramService.Core;
+global using ASC.TelegramService.Extension;
 global using ASC.TelegramService.IntegrationEvents.EventHandling;
 global using ASC.TelegramService.Log;
 
@@ -57,4 +58,3 @@ global using Telegram.Bot;
 global using Telegram.Bot.Exceptions;
 global using Telegram.Bot.Types;
 global using Telegram.Bot.Types.Enums;
-global using ASC.TelegramService.Extension;

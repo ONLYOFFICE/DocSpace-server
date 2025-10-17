@@ -64,7 +64,7 @@ public class AccountingClient
 
         _configuration.Currencies = _configuration.Currencies == null || _configuration.Currencies.Count == 0 ? ["USD"] : _configuration.Currencies;
 
-        if (!string.IsNullOrEmpty(_configuration.Url)) 
+        if (!string.IsNullOrEmpty(_configuration.Url))
         {
             Configured = true;
         }

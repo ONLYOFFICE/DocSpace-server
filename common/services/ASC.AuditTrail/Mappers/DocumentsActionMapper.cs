@@ -73,7 +73,7 @@ internal class FilesActionMapper : ILocationActionMapper
                     },
                     { ActionType.Send, [MessageAction.FileSendAccessLink, MessageAction.FileChangeOwner] },
                     { ActionType.Upload, [MessageAction.FileUploaded, MessageAction.FileUploadedWithOverwriting]}
-                }, 
+                },
                 new Dictionary<ActionType, MessageAction>
                 {
                     { ActionType.Import, MessageAction.FileImported },
@@ -186,7 +186,7 @@ internal class RoomsActionMapper : ILocationActionMapper
             {
                 EntryType.Tag, new Dictionary<ActionType, MessageAction>
                 {
-                    { ActionType.Create, MessageAction.TagCreated }, 
+                    { ActionType.Create, MessageAction.TagCreated },
                     { ActionType.Delete, MessageAction.TagsDeleted }
                 }
             }

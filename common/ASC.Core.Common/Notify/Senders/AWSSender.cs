@@ -153,10 +153,10 @@ public class AWSSender : SmtpSender, IDisposable
         //Check last send and throttle if needed
         if (_sendWindow != TimeSpan.MinValue && DateTime.UtcNow - _lastSend <= _sendWindow)
         {
-                //Possible BUG: at high frequncies maybe bug with to little differences
-                //This means that time passed from last send is less then message per second
-                _logger.DebugSendRate(_sendWindow);
-                Thread.Sleep(_sendWindow);
+            //Possible BUG: at high frequncies maybe bug with to little differences
+            //This means that time passed from last send is less then message per second
+            _logger.DebugSendRate(_sendWindow);
+            Thread.Sleep(_sendWindow);
         }
     }
 

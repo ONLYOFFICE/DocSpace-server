@@ -76,7 +76,7 @@ public class CompanyWhiteLabelSettingsDto
 [Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public partial class CompanyWhiteLabelSettingsDtoMapper(CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper)
-{    
+{
     [MapPropertyFromSource(nameof(CompanyWhiteLabelSettingsDto.IsDefault), Use = nameof(GetIsDefault))]
     public partial CompanyWhiteLabelSettingsDto Map(CompanyWhiteLabelSettings source);
 

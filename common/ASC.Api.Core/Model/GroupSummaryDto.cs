@@ -64,8 +64,8 @@ public class GroupSummaryDtoHelper(UserManager userManager)
     {
         return new GroupSummaryDto
         {
-            Id = group.ID, 
-            Name = group.Name, 
+            Id = group.ID,
+            Name = group.Name,
             Manager = (await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID))).UserName,
             IsSystem = await userManager.IsSystemGroup(group.ID) ? true : null
         };

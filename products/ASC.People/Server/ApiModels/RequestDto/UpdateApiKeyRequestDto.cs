@@ -57,12 +57,12 @@ public class UpdateApiKeyRequestDto
     /// <summary>
     /// The unique identifier of the API key to update.
     /// </summary>
-    [FromRoute(Name = "keyId")] 
+    [FromRoute(Name = "keyId")]
     public required Guid KeyId { get; set; }
 
     /// <summary>
     /// The request parameters for updating an existing API key.
     /// </summary>
-    [FromBody] 
+    [FromBody]
     public required UpdateApiKeyRequest Changed { get; set; }
 }

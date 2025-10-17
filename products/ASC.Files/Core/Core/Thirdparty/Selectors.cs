@@ -29,7 +29,7 @@ namespace ASC.Files.Core.Core.Thirdparty;
 public static class Selectors
 {
     public static Regex Pattern => new(@"^(?'selector'.*)-(?'id'\d+)(-(?'path'.*)){0,1}$", RegexOptions.Singleline | RegexOptions.Compiled);
-    
+
     public static readonly Selector WebDav = new() { Name = "WebDav", Id = "sbox" };
     public static readonly Selector SharePoint = new() { Name = "sharepoint", Id = "spoint" };
     public static readonly Selector GoogleDrive = new() { Name = "GoogleDrive", Id = "drive" };

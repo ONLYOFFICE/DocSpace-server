@@ -257,7 +257,7 @@ public partial class SettingsController(
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
-    
+
 
     /// <summary>
     /// Saves the user quota settings specified in the request to the current portal.
@@ -305,7 +305,7 @@ public partial class SettingsController(
         quotaSettings.DefaultQuota = quota > 0 ? quota : 0;
 
         await settingsManager.SaveAsync(quotaSettings);
-        
+
         if (inDto.EnableQuota)
         {
             messageService.Send(MessageAction.QuotaPerUserChanged, quota.ToString());
@@ -314,7 +314,7 @@ public partial class SettingsController(
         {
             messageService.Send(MessageAction.QuotaPerUserDisabled);
         }
-        
+
         return quotaSettings;
     }
 
@@ -331,9 +331,9 @@ public partial class SettingsController(
     public async Task<TenantUserQuotaSettings> GetUserQuotaSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        
+
         var result = await settingsManager.LoadAsync<TenantUserQuotaSettings>(HttpContext.GetIfModifiedSince());
-        
+
         return HttpContext.TryGetFromCache(result.LastModified) ? null : result;
     }
 
@@ -382,7 +382,7 @@ public partial class SettingsController(
         quotaSettings.DefaultQuota = quota > 0 ? quota : 0;
 
         await settingsManager.SaveAsync(quotaSettings);
-        
+
         if (inDto.EnableQuota)
         {
             messageService.Send(MessageAction.QuotaPerRoomChanged, quota.ToString());
@@ -437,7 +437,7 @@ public partial class SettingsController(
     public async Task<TenantDeepLinkSettings> GetDeepLinkSettings()
     {
         var result = await settingsManager.LoadAsync<TenantDeepLinkSettings>(HttpContext.GetIfModifiedSince());
-        
+
         return HttpContext.TryGetFromCache(result.LastModified) ? null : result;
     }
 
@@ -481,7 +481,7 @@ public partial class SettingsController(
         var admins = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID)).Select(u => u.Id).ToList();
 
         _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(inDto.TenantId, customQuota.GetFeature<TenantCustomQuotaFeature>().Name, tenantQuotaSetting.EnableQuota, usedSize, tenantQuotaSetting.Quota, admins);
-        
+
         if (tenantQuotaSetting.EnableQuota)
         {
             messageService.Send(MessageAction.QuotaPerPortalChanged, tenantQuotaSetting.Quota.ToString());
@@ -490,7 +490,7 @@ public partial class SettingsController(
         {
             messageService.Send(MessageAction.QuotaPerPortalDisabled);
         }
-        
+
         return tenantQuotaSetting;
     }
 
@@ -507,7 +507,7 @@ public partial class SettingsController(
     [AllowNotPayment]
     [HttpGet("cultures")]
     public async Task<IEnumerable<string>> GetSupportedCultures()
-    {        
+    {
         var result = coreBaseSettings.EnabledCultures.Select(r => r.Name).ToList();
         return HttpContext.TryGetFromCache(await HttpContextExtension.CalculateEtagAsync(result)) ? null : result;
     }
@@ -625,9 +625,9 @@ public partial class SettingsController(
     [SwaggerResponse(200, "Portal logo image URL", typeof(string))]
     [HttpGet("logo")]
     public async Task<string> GetPortalLogo()
-    {        
+    {
         var result = await settingsManager.LoadAsync<TenantInfoSettings>(HttpContext.GetIfModifiedSince());
-        
+
         return HttpContext.TryGetFromCache(result.LastModified) ? null : await tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(result);
     }
 
@@ -689,7 +689,7 @@ public partial class SettingsController(
     public async Task<CustomColorThemesSettingsDto> GetPortalColorTheme()
     {
         var settings = await settingsManager.LoadAsync<CustomColorThemesSettings>(HttpContext.GetIfModifiedSince());
-        
+
         return HttpContext.TryGetFromCache(settings.LastModified) ? null : new CustomColorThemesSettingsDto(settings, customColorThemesSettingsHelper.Limit);
     }
 

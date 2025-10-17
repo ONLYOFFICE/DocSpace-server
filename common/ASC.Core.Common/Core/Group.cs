@@ -56,20 +56,20 @@ public class Group
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class GroupMapper
-{    
+{
     public static partial Group Map(this DbGroup source);
     public static partial IQueryable<Group> Project(this IQueryable<DbGroup> source);
     public static partial DbGroup Map(this Group source);
     public static partial Group Map(this GroupInfo source);
-    
+
     // Handle nullable Guid mapping
     private static Guid MapNullableGuid(Guid? source) => source ?? Guid.Empty;
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class GroupInfoMapper
-{    
+{
     public static partial GroupInfo MapToGroupInfo(this DbGroup source);
-    
+
     private static Guid MapNullableGuid(Guid? source) => source ?? Guid.Empty;
 }

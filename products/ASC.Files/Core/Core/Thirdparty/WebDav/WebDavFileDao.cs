@@ -38,11 +38,11 @@ internal class WebDavFileDao(UserManager userManager,
     TempPath tempPath,
     SetupInfo setupInfo,
     TenantManager tenantManager,
-    Global global) : 
+    Global global) :
     ThirdPartyFileDao<WebDavEntry, WebDavEntry, WebDavEntry>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager, global)
 {
     protected override string UploadSessionKey => "WebDavSession";
-    
+
     public override Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength)
     {
         if (setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
@@ -61,7 +61,7 @@ internal class WebDavFileDao(UserManager userManager,
     {
         await using var fs = new FileStream(uploadSession.TempPath,
             FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
-        
+
         uploadSession.File = await SaveFileAsync(uploadSession.File, fs);
 
         return uploadSession.File;
@@ -77,7 +77,7 @@ internal class WebDavFileDao(UserManager userManager,
 
         return Task.CompletedTask;
     }
-    
+
     protected override Task NativeUploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength)
     {
         throw new NotSupportedException();

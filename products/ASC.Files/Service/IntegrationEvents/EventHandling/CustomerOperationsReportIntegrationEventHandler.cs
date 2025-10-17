@@ -35,7 +35,7 @@ public class CustomerOperationsReportIntegrationEventHandler(
     IServiceProvider serviceProvider)
     : IIntegrationEventHandler<CustomerOperationsReportIntegrationEvent>
 {
-    
+
     public async Task Handle(CustomerOperationsReportIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();

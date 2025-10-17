@@ -53,7 +53,7 @@ public class AccountsEntriesRequestDto<T>
     /// Specifies whether to exclude the account sharing settings from the response.
     /// </summary>
     [FromQuery(Name = "excludeShared")]
-    public bool? ExcludeShared {  get; set; }
+    public bool? ExcludeShared { get; set; }
 
     /// <summary>
     /// Specifies whether to include the account sharing settings in the response.
@@ -84,7 +84,7 @@ public class AccountsEntriesRequestDto<T>
     /// </summary>
     [FromQuery(Name = "employeeTypes")]
     public IEnumerable<EmployeeType> EmployeeTypes { get; set; } = new List<EmployeeType>();
-    
+
     /// <summary>
     /// The number of items to retrieve in a request.
     /// </summary>

@@ -63,7 +63,7 @@ public class GroupController(
     public async IAsyncEnumerable<GroupDto> GetGroups(GeneralInformationRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
-        
+
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var text = inDto.Text;
@@ -103,7 +103,7 @@ public class GroupController(
     public async Task<GroupDto> GetGroup(DetailedInformationRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
-        
+
         return await groupFullDtoHelper.Get(await GetGroupInfoAsync(inDto.Id), inDto.IncludeMembers);
     }
 
@@ -123,7 +123,7 @@ public class GroupController(
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
         var groups = await userManager.GetUserGroupsAsync(inDto.UserId);
         List<GroupSummaryDto> result = new(groups.Count);
-        
+
         foreach (var g in groups)
         {
             result.Add(await groupSummaryDtoHelper.GetAsync(g));
@@ -188,7 +188,7 @@ public class GroupController(
 
         group.Name = inDto.Update.GroupName ?? group.Name;
         await userManager.SaveGroupInfoAsync(group);
-        
+
         await TransferUserToDepartmentAsync(inDto.Update.GroupManager, group, true);
 
         if (inDto.Update.MembersToAdd != null)
@@ -198,7 +198,7 @@ public class GroupController(
                 await TransferUserToDepartmentAsync(memberToAdd, group, false);
             }
         }
-        
+
         if (inDto.Update.MembersToRemove != null)
         {
             foreach (var memberToRemove in inDto.Update.MembersToRemove)
@@ -230,7 +230,7 @@ public class GroupController(
     [SwaggerResponse(404, "Group not found")]
     [HttpDelete("{id:guid}")]
     public async Task<NoContentResult> DeleteGroup(GetGroupByIdRequestDto inDto)
-    { 
+    {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
         var group = await GetGroupInfoAsync(inDto.Id);
@@ -266,7 +266,7 @@ public class GroupController(
         var toGroup = await GetGroupInfoAsync(inDto.ToId);
 
         var users = await userManager.GetUsersByGroupAsync(fromGroup.ID);
-        
+
         foreach (var userInfo in users)
         {
             await TransferUserToDepartmentAsync(userInfo.Id, toGroup, false);
@@ -289,7 +289,7 @@ public class GroupController(
     {
         await RemoveMembersFrom(new MembersRequestDto { Id = inDto.Id, Members = new MembersRequest { Members = (await userManager.GetUsersByGroupAsync(inDto.Id)).Select(x => x.Id) } });
         await AddMembersTo(inDto);
-        
+
         return await GetGroup(new DetailedInformationRequestDto { Id = inDto.Id });
     }
 
@@ -332,7 +332,7 @@ public class GroupController(
     public async Task<GroupDto> SetGroupManager(SetManagerRequestDto inDto)
     {
         var group = await GetGroupInfoAsync(inDto.Id);
-        
+
         if (await userManager.UserExistsAsync(inDto.SetManager.UserId))
         {
             await TransferUserToDepartmentAsync(inDto.SetManager.UserId, group, true);
@@ -393,7 +393,7 @@ public class GroupController(
         {
             await userManager.SetDepartmentManagerAsync(group.ID, userId);
         }
-        
+
         await userManager.AddUserIntoGroupAsync(userId, group.ID, notifyWebSocket: false);
     }
 
@@ -454,7 +454,7 @@ public class GroupControllerAdditional<T>(
             yield return p;
         }
     }
-    
+
     /// <summary>
     /// Returns groups with their sharing settings in a folder with the ID specified in request.
     /// </summary>
@@ -474,7 +474,7 @@ public class GroupControllerAdditional<T>(
             yield return p;
         }
     }
-    
+
     /// <summary>
     /// Returns groups with their sharing settings for a file with the ID specified in request.
     /// </summary>
@@ -501,11 +501,11 @@ public class GroupControllerAdditional<T>(
         {
             throw new SecurityException();
         }
-        
+
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var text = inDto.Text;
-        
+
         var securityDao = daoFactory.GetSecurityDao<T>();
 
         var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false);

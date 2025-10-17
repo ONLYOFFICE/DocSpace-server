@@ -32,7 +32,7 @@ public abstract class BaseBackupProgressItem : DistributedTaskProgress
 
     public BaseBackupProgressItem()
     {
-        
+
     }
 
     protected BaseBackupProgressItem(IServiceScopeFactory serviceScopeFactory)
@@ -41,7 +41,7 @@ public abstract class BaseBackupProgressItem : DistributedTaskProgress
     }
 
     public int NewTenantId { get; set; }
-    public bool Dump {get; set; }
+    public bool Dump { get; set; }
     public int TenantId { get; set; }
     public string Link { get; set; }
     public BackupProgressItemType BackupProgressItemType { get; set; }

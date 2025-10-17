@@ -54,7 +54,7 @@ public class CommonChunkedUploadSessionHolder(
         chunkedUploadSession.TempPath = path;
         chunkedUploadSession.UploadId = uploadId;
     }
-    
+
     public async Task<Dictionary<int, Chunk>> GetChunksAsync(CommonChunkedUploadSession uploadSession)
     {
         var count = uploadSession.BytesTotal / MaxChunkUploadSize;

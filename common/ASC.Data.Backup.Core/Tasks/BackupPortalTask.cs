@@ -129,7 +129,7 @@ public class BackupPortalTask(
         }
 
         List<BackupFileInfo> files = null;
-        
+
         var count = databases.Select(d => d.Value.Count * 4).Sum(); // (schema + data) * (dump + zip)
         var completedCount = count;
 
@@ -498,7 +498,7 @@ public class BackupPortalTask(
     private async Task<List<BackupFileInfo>> GetFilesTenants(IEnumerable<int> tenantIds)
     {
         var result = new List<BackupFileInfo>();
-        foreach(var tenantId in tenantIds)
+        foreach (var tenantId in tenantIds)
         {
             result.AddRange(await GetFiles(tenantId));
         }
@@ -603,7 +603,7 @@ public class BackupPortalTask(
         var bytes = "<storage_restore>"u8.ToArray();
         await tmpFile.WriteAsync(bytes);
         var storages = new Dictionary<string, IDataStore>();
-        
+
         foreach (var file in files)
         {
             if (!storages.TryGetValue(file.Module + file.Tenant, out var storage))
@@ -612,7 +612,7 @@ public class BackupPortalTask(
                 storages.Add(file.Module + file.Tenant, storage);
             }
             var path = file.GetZipKey();
-            if (dump) 
+            if (dump)
             {
                 path = Path.Combine("storage", path);
             }

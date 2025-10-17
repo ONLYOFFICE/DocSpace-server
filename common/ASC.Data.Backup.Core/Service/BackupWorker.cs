@@ -42,7 +42,7 @@ public class BackupWorker(
     private DistributedTaskQueue<TransferProgressItem> _transferProgressQueue = queueFactory.CreateQueue<TransferProgressItem>();
     private int _limit;
     private string _upgradesPath;
-    
+
     public void Start(BackupSettings settings)
     {
         if (!Directory.Exists(TempFolder))
@@ -69,7 +69,7 @@ public class BackupWorker(
 
                 _backupProgressQueue = null;
             }
-            
+
             if (_restoreProgressQueue != null)
             {
                 var tasks = await _restoreProgressQueue.GetAllTasks(DistributedTaskQueue<BackupProgressItem>.INSTANCE_ID);
@@ -81,7 +81,7 @@ public class BackupWorker(
 
                 _restoreProgressQueue = null;
             }
-            
+
             if (_transferProgressQueue != null)
             {
                 var tasks = await _transferProgressQueue.GetAllTasks(DistributedTaskQueue<BackupProgressItem>.INSTANCE_ID);
@@ -101,7 +101,7 @@ public class BackupWorker(
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
             BackupProgressItem item = null;
-            if (request.Dump) 
+            if (request.Dump)
             {
                 item = (await _backupProgressQueue.GetAllTasks()).FirstOrDefault(t => t.Dump);
             }
@@ -193,7 +193,7 @@ public class BackupWorker(
             return ToBackupProgress((await _restoreProgressQueue.GetAllTasks()).FirstOrDefault(t => !t.Dump && (t.TenantId == tenantId || t.NewTenantId == tenantId) && t.BackupProgressItemType == BackupProgressItemType.Restore));
         }
     }
-    
+
     public async Task<BackupProgress> GetAnyRestoreProgressAsync(int tenantId)
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))

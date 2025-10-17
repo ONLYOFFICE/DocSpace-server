@@ -102,7 +102,7 @@ public class FilesMappingAction(TenantUtil tenantUtil)
             }
         }
     }
-    
+
     public void Process(FileShareRecord<int> source, DbFilesSecurity destination)
     {
         Process<int>(source, destination);
@@ -112,14 +112,14 @@ public class FilesMappingAction(TenantUtil tenantUtil)
     {
         Process<string>(source, destination);
     }
-    
+
     private void Process<T>(FileShareRecord<T> source, DbFilesSecurity destination)
     {
         if (source.Options == null)
         {
             return;
         }
-        
+
         source.Options.ExpirationDate = tenantUtil.DateTimeToUtc(source.Options.ExpirationDate);
     }
 

@@ -32,7 +32,7 @@ namespace ASC.Api.Core.Core;
 public class WarmupServicesStartupTask(IServiceCollection services, IServiceProvider provider) : IStartupTask
 {
     public Task ExecuteAsync(CancellationToken cancellationToken = default)
-    {      
+    {
         var processedFailed = 0;
         var processedSuccessed = 0;
         var startTime = DateTime.UtcNow;
@@ -40,7 +40,7 @@ public class WarmupServicesStartupTask(IServiceCollection services, IServiceProv
         using var scope = provider.CreateScope();
         var logger = scope.ServiceProvider.GetService<ILogger<WarmupServicesStartupTask>>();
         logger.TraceWarmupStarted();
-            
+
         foreach (var service in GetServices(services))
         {
             try
@@ -71,7 +71,7 @@ public class WarmupServicesStartupTask(IServiceCollection services, IServiceProv
             processedSuccessed,
             processedFailed,
             (DateTime.UtcNow - startTime).TotalMilliseconds);
-        
+
         return Task.CompletedTask;
     }
 

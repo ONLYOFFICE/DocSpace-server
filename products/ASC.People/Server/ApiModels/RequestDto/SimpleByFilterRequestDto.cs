@@ -133,7 +133,7 @@ public class SimpleByFilterRequestDto
     /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
-    
+
     /// <summary>
     /// The order in which the results are sorted.
     /// </summary>

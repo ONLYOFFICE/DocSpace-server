@@ -45,4 +45,3 @@ internal interface IDaoSelector<TFile, TFolder, TItem> : IDaoSelector
     Task RenameProviderAsync(IProviderInfo<TFile, TFolder, TItem> provider, string newTitle);
     Task RenameRoomProviderAsync(IProviderInfo<TFile, TFolder, TItem> provider, string newTitle, string folderId);
 }
-

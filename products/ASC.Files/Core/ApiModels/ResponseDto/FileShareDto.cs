@@ -42,17 +42,17 @@ public class FileShareDto
     /// </summary>
     [Obsolete]
     public object SharedTo { get; set; }
-    
+
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
     public EmployeeFullDto SharedToUser { get; set; }
-    
+
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
     public GroupSummaryDto SharedToGroup { get; set; }
-    
+
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
@@ -83,7 +83,7 @@ public class FileShareDto
     /// Determines whether the user has permission to modify the deny download setting for the file share.
     /// </summary>
     public required bool CanEditDenyDownload { get; set; }
-    
+
     /// <summary>
     /// Indicates whether the expiration date of access permissions can be edited.
     /// </summary>
@@ -185,7 +185,7 @@ public class FileShareDtoHelper(
         {
             return null;
         }
-        
+
         var result = new FileShareDto
         {
             IsOwner = aceWrapper.Owner,

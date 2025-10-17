@@ -55,54 +55,54 @@ public class FileUtilityConfiguration
         foreach (var format in Formats)
         {
             var newFormatName = $".{format.Name.TrimStart('.')}";
-            if(format.Actions.Contains("auto-convert"))
+            if (format.Actions.Contains("auto-convert"))
             {
                 ExtsMustConvert.Add(newFormatName);
             }
-            
-            if(format.Actions.Contains("edit"))
+
+            if (format.Actions.Contains("edit"))
             {
                 ExtsWebEdited.Add(newFormatName);
             }
-            
-            if(format.Actions.Contains("view"))
+
+            if (format.Actions.Contains("view"))
             {
                 ExtsWebPreviewed.Add(newFormatName);
             }
-            
-            if(format.Actions.Contains("comment"))
+
+            if (format.Actions.Contains("comment"))
             {
                 ExtsWebCommented.Add(newFormatName);
             }
-            
-            if(format.Actions.Contains("review"))
+
+            if (format.Actions.Contains("review"))
             {
                 ExtsWebReviewed.Add(newFormatName);
             }
-            
-            if(format.Actions.Contains("encrypt"))
+
+            if (format.Actions.Contains("encrypt"))
             {
                 ExtsWebEncrypt.Add(newFormatName);
             }
-            
-            if(format.Actions.Contains("customfilter"))
+
+            if (format.Actions.Contains("customfilter"))
             {
                 ExtsWebCustomFilterEditing.Add(newFormatName);
             }
-            
-            if(format.Actions.Contains("fill"))
+
+            if (format.Actions.Contains("fill"))
             {
                 ExtsWebRestrictedEditing.Add(newFormatName);
             }
         }
-        
+
         ExtsWebTemplate = configuration.GetSection("files:docservice:template-docs").Get<List<string>>() ?? [];
         MasterFormExtension = configuration["files:docservice:internal-form"] ?? ".docxf";
-        
+
         ExtsIndexing = configuration.GetSection("files:index").Get<List<string>>() ?? [];
         ExtsImagePreviewed = configuration.GetSection("files:viewed-images").Get<List<string>>() ?? [];
         ExtsMediaPreviewed = configuration.GetSection("files:viewed-media").Get<List<string>>() ?? [];
-        
+
         LogoColors = configuration.GetSection("logocolors").Get<List<LogoColor>>() ?? [];
         _forceSave = configuration["files:docservice:forcesave"];
         MaxPinnedRooms = int.Parse(configuration["files:pin"] ?? "10");
@@ -156,7 +156,7 @@ public enum Accessibility
 
     [SwaggerEnum("Web comment")]
     WebComment = 7,
-    
+
     [SwaggerEnum("Can convert")]
     CanConvert = 9,
 
@@ -327,7 +327,7 @@ public class FileUtility(
         var ext = GetFileExtension(fileName).ToLower();
         return !ext.Equals(".pdf") && ExtsWebPreviewed.Contains(ext);
     }
-    
+
     public bool CanWebView(string fileName)
     {
         var ext = GetFileExtension(fileName);
@@ -363,7 +363,7 @@ public class FileUtility(
         var ext = GetFileExtension(fileName);
         return ExtsWebCommented.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase)) && CanWebEdit(fileName);
     }
-    
+
     public async Task<bool> CanConvert<T>(File<T> file)
     {
         var folderDao = daoFactory.GetCacheFolderDao<T>();
@@ -408,18 +408,18 @@ public class FileUtility(
         {
             return _extsConvertible;
         }
-        
+
         foreach (var inputFormat in fileUtilityConfiguration.Formats)
         {
             foreach (var output in inputFormat.Convert)
-            {            
+            {
                 var input = $".{inputFormat.Name.ToLower().TrimStart('.')}";
-                
+
                 if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(output))
                 {
                     continue;
                 }
-                
+
                 if (!_extsConvertible.ContainsKey(input))
                 {
                     _extsConvertible[input] = [];
@@ -554,7 +554,7 @@ public class FileUtility(
             return fileUtilityConfiguration.ExtsMustConvert;
         }
     }
-    
+
     public static readonly ImmutableList<string> ExtsArchive = new List<string>
     {
                 ".zip", ".rar", ".ace", ".arc", ".arj",

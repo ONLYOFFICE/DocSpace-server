@@ -286,7 +286,7 @@ public class EmployeeFullDtoHelper(
     //
     //     return lambda;
     // }
-    
+
     public async Task<EmployeeFullDto> GetSimple(UserInfo userInfo, bool withGroups = true)
     {
         var result = new EmployeeFullDto
@@ -397,7 +397,7 @@ public class EmployeeFullDtoHelper(
         await FillGroupsAsync(result, userInfo);
 
         var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
-        
+
         result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
         result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
@@ -407,9 +407,9 @@ public class EmployeeFullDtoHelper(
         {
             result.ListAdminModules = listAdminModules;
         }
-        
+
         result.RegistrationDate = apiDateTimeHelper.Get(userInfo.CreateDate);
-        
+
         if (!isDocSpaceAdmin)
         {
             return result;
@@ -437,7 +437,7 @@ public class EmployeeFullDtoHelper(
         {
             groups.Add(await groupSummaryDtoHelper.GetAsync(g));
         }
-        
+
 
         if (groups.Count > 0)
         {

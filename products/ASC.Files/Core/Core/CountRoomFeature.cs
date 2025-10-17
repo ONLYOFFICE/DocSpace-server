@@ -28,8 +28,8 @@ namespace ASC.Files.Core.Core;
 
 [Scope]
 public class CountRoomChecker(
-    ITenantQuotaFeatureStat<CountRoomFeature, int> tenantQuotaFeatureStatistic, 
-    TenantManager tenantManager, 
+    ITenantQuotaFeatureStat<CountRoomFeature, int> tenantQuotaFeatureStatistic,
+    TenantManager tenantManager,
     ITariffService tariffService)
     : TenantQuotaFeatureCheckerCount<CountRoomFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {

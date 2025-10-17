@@ -32,7 +32,7 @@ namespace ASC.Files.Core;
 /// The file entry parameters.
 /// </summary>
 public abstract class FileEntry : ICloneable
-{    
+{
     [JsonIgnore]
     public IServiceProvider ServiceProvider { get; set; }
 
@@ -104,7 +104,7 @@ public abstract class FileEntry : ICloneable
     /// Specifies if the file entry shared via link or not.
     /// </summary>
     public bool Shared { get; set; }
-    
+
     /// <summary>
     /// Specifies if the file entry shared for user or not.
     /// </summary>
@@ -117,7 +117,7 @@ public abstract class FileEntry : ICloneable
 
     [JsonIgnore]
     public bool FullShared { get => Shared || ParentShared; }
-    
+
     /// <summary>
     /// The provider ID.
     /// </summary>
@@ -253,7 +253,7 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
 
 
     protected FileEntry() { }
-    
+
     protected FileEntry(IServiceProvider serviceProvider) : base(serviceProvider)
     {
     }

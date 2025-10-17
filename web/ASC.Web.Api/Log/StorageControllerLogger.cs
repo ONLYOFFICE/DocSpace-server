@@ -29,8 +29,8 @@ namespace ASC.Web.Api.Log;
 internal static partial class StorageControllerLogger
 {
     [LoggerMessage(LogLevel.Error, "GetStorageEncryptionSettings")]
-    public static partial void ErrorGetStorageEncryptionSettings(this ILogger logger, Exception exception);   
-    
+    public static partial void ErrorGetStorageEncryptionSettings(this ILogger logger, Exception exception);
+
     [LoggerMessage(LogLevel.Error, "UpdateStorage")]
     public static partial void ErrorUpdateStorage(this ILogger logger, Exception exception);
 

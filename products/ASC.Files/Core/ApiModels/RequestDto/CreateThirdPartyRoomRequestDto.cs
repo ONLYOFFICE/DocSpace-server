@@ -55,12 +55,12 @@ public class CreateThirdPartyRoom
     /// Specifies whether to create the third-party room with indexing.
     /// </summary>
     public bool Indexing { get; set; }
-    
+
     /// <summary>
     /// Specifies whether to deny downloads from the third-party room.
     /// </summary>
     public bool DenyDownload { get; set; }
-    
+
     /// <summary>
     /// The color of the third-party room.
     /// </summary>

@@ -87,7 +87,7 @@ public class QueueWorkerReassign(IHttpContextAccessor httpContextAccessor,
         IServiceProvider serviceProvider,
         IDistributedTaskQueueFactory queueFactory,
         IDistributedLockProvider distributedLockProvider)
-    : QueueWorker<ReassignProgressItem>(httpContextAccessor, serviceProvider, queueFactory,  distributedLockProvider)
+    : QueueWorker<ReassignProgressItem>(httpContextAccessor, serviceProvider, queueFactory, distributedLockProvider)
 {
     public async Task<ReassignProgressItem> StartAsync(int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool notify, bool deleteProfile)
     {

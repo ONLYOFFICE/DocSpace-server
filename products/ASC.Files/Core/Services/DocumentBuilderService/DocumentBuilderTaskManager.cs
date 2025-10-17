@@ -39,7 +39,7 @@ public class DocumentBuilderTaskManager<T, TId, TData> where T : DocumentBuilder
     {
         _queue = queueFactory.CreateQueue<T>();
     }
-    
+
     public async Task<T> GetTask(int tenantId, Guid userId)
     {
         var taskId = DocumentBuilderTaskManager.GetTaskId(tenantId, userId);

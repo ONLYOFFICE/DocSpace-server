@@ -45,6 +45,6 @@ public class IPRestrictionsSettings : ISettings<IPRestrictionsSettings>
     {
         return new IPRestrictionsSettings { Enable = false };
     }
-    
+
     public DateTime LastModified { get; set; }
 }

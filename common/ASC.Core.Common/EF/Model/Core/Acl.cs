@@ -186,6 +186,6 @@ public static class AclExtension
 
             entity.Property(e => e.AceType).HasColumnName("acetype");
         });
-        
+
     }
 }

@@ -635,11 +635,11 @@ public class TenantQuota
 [Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public partial class TenantQuotaMapper(IServiceProvider provider)
-{ 
+{
     private partial TenantQuota Map(DbQuota source);
     public partial List<TenantQuota> Map(List<DbQuota> source);
     public partial DbQuota Map(TenantQuota source);
-    
+
     [UserMapping(Default = true)]
     public TenantQuota MapDbQuotaToTenantQuota(DbQuota quota)
     {
@@ -647,12 +647,12 @@ public partial class TenantQuotaMapper(IServiceProvider provider)
         (dto.Price, dto.PriceCurrencySymbol, dto.PriceISOCurrencySymbol) = Resolve(quota);
         return dto;
     }
-    
+
     private (decimal, string, string) Resolve(DbQuota source)
     {
         var tenantManager = provider.GetService<TenantManager>();
         var regionHelper = provider.GetService<RegionHelper>();
-        
+
         var priceInfo = tenantManager.GetProductPriceInfo(source.ProductId, source.Wallet);
 
         if (priceInfo != null)

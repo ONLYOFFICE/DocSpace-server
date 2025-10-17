@@ -216,7 +216,7 @@ public class NotifyTransferRequest(TenantManager tenantManager,
         var productid = CallContext.GetData("asc.web.product_id");
         var product = productid != null ? webItemManager[(Guid)productid] as IProduct : null;
 
-        var logoText =  await tenantLogoManager.GetLogoTextAsync();
+        var logoText = await tenantLogoManager.GetLogoTextAsync();
 
         var rootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 

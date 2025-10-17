@@ -41,7 +41,7 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
-    {
+{
     /// <summary>
     /// Checks if the current file is a form draft which can be filled out.
     /// </summary>
@@ -55,6 +55,6 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
     public async Task<string> CheckFillFormDraft(CheckFillFormDraftRequestDto<T> inDto)
     {
-        return await fileStorageService.CheckFillFormDraftAsync(inDto.FileId, inDto.File.Version,!inDto.File.RequestEmbedded, inDto.File.RequestView);
+        return await fileStorageService.CheckFillFormDraftAsync(inDto.FileId, inDto.File.Version, !inDto.File.RequestEmbedded, inDto.File.RequestView);
     }
 }

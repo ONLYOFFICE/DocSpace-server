@@ -118,6 +118,6 @@ public static class TelegramUsersExtension
                 .HasColumnName("telegram_username")
                 .HasColumnType("char(35)");
         });
-        
+
     }
 }

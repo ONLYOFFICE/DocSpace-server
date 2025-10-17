@@ -41,19 +41,19 @@ public class Startup : BaseStartup
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
         var services = builder.Services;
-        
+
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         services.AddMemoryCache();
 
         await base.ConfigureServices(builder);
-        
+
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddBaseDbContextPool<BackupsContext>();
         services.RegisterQuotaFeature();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         services.AddDocumentServiceHttpClient(_configuration);
-        
+
         services.RegisterQueue<AsyncTaskData<int>>();
         services.RegisterQueue<AsyncTaskData<string>>();
         services.RegisterFreeBackupQuotaFeature();

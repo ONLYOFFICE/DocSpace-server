@@ -143,12 +143,12 @@ public class ModelBuilderWrapper
             default:
                 throw new InvalidOperationException();
         }
-        
+
         ModelBuilder.HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.JsonValue))!)
             .HasTranslation(expressions =>
             {
                 var result = new List<SqlExpression>();
-                
+
                 var jsonDoc = expressions[0];
                 switch (jsonDoc)
                 {
@@ -161,12 +161,12 @@ public class ModelBuilderWrapper
                     default:
                         throw new InvalidOperationException();
                 }
-                
+
                 var path = expressions[1];
                 if (path is SqlConstantExpression value)
                 {
                     var strValue = value.Value?.ToString();
-                    
+
                     if (strValue != null && strValue.StartsWith('[') && strValue.EndsWith(']'))
                     {
                         result.Add(new SqlConstantExpression($"${strValue}", value.TypeMapping));

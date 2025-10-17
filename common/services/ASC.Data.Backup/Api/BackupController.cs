@@ -93,7 +93,7 @@ public class BackupController(
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupSchedule(BackupScheduleDto inDto)
     {
-        if (inDto.Dump) 
+        if (inDto.Dump)
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
@@ -107,7 +107,7 @@ public class BackupController(
             Hour = inDto.CronParams.Hour,
             Day = inDto.CronParams.Day ?? 0
         };
-        if(backupStored is > 30 or < 1)
+        if (backupStored is > 30 or < 1)
         {
             throw new ArgumentException("backupStored must be 1 - 30");
         }
@@ -168,7 +168,7 @@ public class BackupController(
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
 
-        var storageType =  inDto.StorageType ?? BackupStorageType.Documents;
+        var storageType = inDto.StorageType ?? BackupStorageType.Documents;
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
         var canParse = false;
@@ -378,7 +378,7 @@ public class BackupController(
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
             ? commonLinkUtility.GetFullAbsolutePath("")
             : null;
-        
+
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var storageType = inDto.StorageType ?? BackupStorageType.Documents;

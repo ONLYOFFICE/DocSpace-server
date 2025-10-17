@@ -41,7 +41,7 @@ public class WebhookLogsRequestDto
     /// The delivery end time for filtering webhook logs.
     /// </summary>
     [FromQuery(Name = "deliveryTo")]
-    public DateTime? DeliveryTo {  get; set; }
+    public DateTime? DeliveryTo { get; set; }
 
     /// <summary>
     /// The destination URL where webhooks are delivered.
@@ -53,7 +53,7 @@ public class WebhookLogsRequestDto
     /// The webhook configuration identifier.
     /// </summary>
     [FromQuery(Name = "configId")]
-    public int? ConfigId {  get; set; }
+    public int? ConfigId { get; set; }
 
     /// <summary>
     /// The unique identifier of the event that triggered the webhook.

@@ -68,7 +68,7 @@ public class FirebaseHelper(AuthContext authContext,
 
         var messages = fireBaseUsers.Select(fb => CreateFirebaseMessage(fb, msg)).ToList();
         await SendMessagesAsync(userId, msg.TenantId, messages);
-        
+
     }
 
     private static readonly SemaphoreSlim _firebaseInitLock = new(initialCount: 1, maxCount: 1);

@@ -36,7 +36,7 @@ public static class ArabicNumeralHelper
         {
             return input.ToString(format, Thread.CurrentThread.CurrentCulture);
         }
-        
+
         var result = input.ToString(format, new CultureInfo("ar"));
         return result
             .Replace('0', '\u06f0')

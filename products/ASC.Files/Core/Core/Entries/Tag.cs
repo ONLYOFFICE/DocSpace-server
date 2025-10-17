@@ -207,8 +207,8 @@ public sealed class Tag
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class TagMapper
-{       
+{
     public static partial Tag Map(this DbFilesTag source);
-    
+
     public static partial void ApplyUpdate(DbFilesTagLink link, Tag tag);
 }

@@ -86,8 +86,8 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, Insta
     private async Task<string> SerializeAsync(EncryptionSettings encryptionSettings)
     {
         return string.Join("#",
-            string.IsNullOrEmpty(encryptionSettings.Pass) ? 
-                string.Empty : 
+            string.IsNullOrEmpty(encryptionSettings.Pass) ?
+                string.Empty :
                 await instanceCrypto.EncryptAsync(encryptionSettings.Pass),
             (int)encryptionSettings.Status,
             encryptionSettings.NotifyUsers

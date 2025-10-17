@@ -52,7 +52,7 @@ public static class HostExtension
 
         // Execute all the tasks
         foreach (var startupTask in startupTasks)
-        {        
+        {
             var t = startupTask.ExecuteAsync(cancellationToken);
             if (startupTask is not IStartupTaskNotAwaitable)
             {

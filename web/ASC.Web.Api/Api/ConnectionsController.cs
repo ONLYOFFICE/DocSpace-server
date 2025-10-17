@@ -192,8 +192,8 @@ public class ConnectionsController(
     public async Task LogOutAllActiveConnectionsForUser(UserIdRequestDto inDto)
     {
         var currentUserId = securityContext.CurrentAccount.ID;
-        if (!await userManager.IsDocSpaceAdminAsync(currentUserId) && 
-            !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) || 
+        if (!await userManager.IsDocSpaceAdminAsync(currentUserId) &&
+            !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) ||
             (currentUserId != inDto.Id && await userManager.IsDocSpaceAdminAsync(inDto.Id)))
         {
             throw new SecurityException("Method not available");

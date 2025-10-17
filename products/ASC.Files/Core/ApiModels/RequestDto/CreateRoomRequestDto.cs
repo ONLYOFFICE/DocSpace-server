@@ -56,7 +56,7 @@ public static class RoomTypeExtensions
         {
             return null;
         }
-        
+
         return types.Select(x => x switch
         {
             RoomType.FillingFormsRoom => FilterType.FillingFormsRooms,

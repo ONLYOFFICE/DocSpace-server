@@ -35,4 +35,3 @@ public record TariffCacheItem
     [ProtoMember(2)]
     public int TariffId { get; set; }
 }
-

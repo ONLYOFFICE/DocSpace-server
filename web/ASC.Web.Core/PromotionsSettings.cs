@@ -40,6 +40,6 @@ public class PromotionsSettings : ISettings<PromotionsSettings>
     {
         return new PromotionsSettings { Show = true };
     }
-    
+
     public DateTime LastModified { get; set; }
 }

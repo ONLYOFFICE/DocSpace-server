@@ -40,6 +40,6 @@ public class RoomsNotificationSettingsDto
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class RoomsNotificationSettingsDtoMapper
-{       
+{
     public static partial RoomsNotificationSettingsDto Map(this RoomsNotificationSettings source);
 }

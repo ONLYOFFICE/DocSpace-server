@@ -55,8 +55,8 @@ public class ApiKeysController(
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
 
-        var tenantDevToolsAccessSettings  = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
-           
+        var tenantDevToolsAccessSettings = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
+
         if (!isAdmin && tenantDevToolsAccessSettings is { LimitedAccessForUsers: true })
         {
             throw new UnauthorizedAccessException("This operation available only for portal owner/admins");
@@ -66,9 +66,9 @@ public class ApiKeysController(
         {
             throw new UnauthorizedAccessException("This operation unavailable for user with guest role");
         }
-        
+
         var expiresAt = apiKey.ExpiresInDays.HasValue ? TimeSpan.FromDays(apiKey.ExpiresInDays.Value) : (TimeSpan?)null;
-            
+
         if (!IsValidPermission(apiKey.Permissions))
         {
             throw new ArgumentException("Permissions are not valid.");
@@ -77,7 +77,7 @@ public class ApiKeysController(
         var result = await apiKeyManager.CreateApiKeyAsync(apiKey.Name,
             apiKey.Permissions,
             expiresAt);
-        
+
         var apiKeyResponseDto = await mapper.MapManual(result.keyData);
 
         messageService.Send(MessageAction.ApiKeyCreated, MessageTarget.Create(apiKeyResponseDto.Id), apiKeyResponseDto.Key);
@@ -104,10 +104,10 @@ public class ApiKeysController(
 
         var globalScopes = new List<string>
         {
-            AuthConstants.Claim_ScopeGlobalRead.Value, 
+            AuthConstants.Claim_ScopeGlobalRead.Value,
             AuthConstants.Claim_ScopeGlobalWrite.Value
         };
-        
+
         return scopes.Keys.SelectMany(key => scopes[key]).Union(globalScopes).Distinct().Order();
     }
 
@@ -136,7 +136,7 @@ public class ApiKeysController(
         }
         else
         {
-           
+
             result = apiKeyManager.GetApiKeysAsync(authContext.CurrentAccount.ID);
         }
 
@@ -164,8 +164,8 @@ public class ApiKeysController(
         var apiKey = await apiKeyManager.GetApiKeyAsync(token);
         return await mapper.MapManual(apiKey);
     }
-    
-    
+
+
     /// <summary>
     ///  Updates an existing API key changing its name, permissions, and status.
     /// </summary>  
@@ -250,7 +250,7 @@ public class ApiKeysController(
             return true;
         }
 
-        var orderedScopes = GetAllPermissions().Union(new List<string> {"*"});
+        var orderedScopes = GetAllPermissions().Union(new List<string> { "*" });
 
         return permission.All(x => orderedScopes.Contains(x));
     }

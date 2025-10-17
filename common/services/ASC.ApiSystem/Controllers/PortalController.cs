@@ -70,7 +70,7 @@ public class PortalController(
     private readonly char[] _alphabetArray = Enumerable.Range('a', 26).Union(Enumerable.Range('0', 10)).Select(x => (char)x).ToArray();
     private const string DefaultPrefix = "docspace";
     private const int DefaultRandomLength = 6;
-    
+
     #region For TEST api
 
     /// <summary>
@@ -182,7 +182,7 @@ public class PortalController(
         }
 
         error = await GetRecaptchaError(model, clientIP, sw);
-            
+
         if (error != null)
         {
             return BadRequest(error);
@@ -250,7 +250,7 @@ public class PortalController(
             await cspSettingsHelper.SaveAsync(null);
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
-            { 
+            {
                 await apiSystemHelper.AddTenantToCacheAsync(t.GetTenantDomain(coreSettings), model.AWSRegion);
 
                 option.LogDebug("PortalName = {0}; Elapsed ms. CacheController.AddTenantToCache: {1}", model.PortalName, sw.ElapsedMilliseconds);
@@ -458,10 +458,10 @@ public class PortalController(
             prefix = DefaultPrefix;
             randomLength = DefaultRandomLength;
         }
-        
+
         var random = new Random();
         random.Shuffle(_alphabetArray);
-        
+
         var alphabet = new string(_alphabetArray);
         var portalName = (model.PortalName ?? $"{prefix}-{shortUrl.GenerateRandomKey(randomLength, alphabet)}").Trim();
 
@@ -476,16 +476,16 @@ public class PortalController(
                 break;
             }
 
-                if (error.GetType().GetProperty("error")?.GetValue(error).ToString() == "portalNameExist")
-                {
+            if (error.GetType().GetProperty("error")?.GetValue(error).ToString() == "portalNameExist")
+            {
                 model.PortalName = $"{prefix}-{shortUrl.GenerateRandomKey(randomLength, alphabet)}";
-                }
-                else
-                {
-                    sw.Stop();
-                    return BadRequest(error);
-                }
             }
+            else
+            {
+                sw.Stop();
+                return BadRequest(error);
+            }
+        }
 
         option.LogDebug("PortalName = {0}; Elapsed ms. CheckExistingNamePortal: {1}", model.PortalName, sw.ElapsedMilliseconds);
 
@@ -875,11 +875,11 @@ public class PortalController(
 
             var owners = statistics
                 ? (await hostedSolution.FindUsersAsync(tenants.Select(t => t.OwnerId))).Select(owner => new TenantOwnerDto
-                    {
-                        Id = owner.Id,
-                        Email = owner.Email,
-                        DisplayName = userFormatter.GetUserName(owner)
-                    })
+                {
+                    Id = owner.Id,
+                    Email = owner.Email,
+                    DisplayName = userFormatter.GetUserName(owner)
+                })
                 : null;
 
             foreach (var t in tenants)

@@ -133,6 +133,6 @@ public static class AccountLinksExtension
                 .HasColumnType("char")
                 .HasMaxLength(60);
         });
-        
+
     }
 }

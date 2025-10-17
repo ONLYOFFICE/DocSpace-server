@@ -142,7 +142,7 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
             string.Empty, //login
             tenant,
             string.Empty, //password
-            GetUserDependencySalt(), 
+            GetUserDependencySalt(),
             userid,
             indexTenant,
             expires.ToString(DateTimeFormat, CultureInfo.InvariantCulture),

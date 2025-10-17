@@ -84,8 +84,8 @@ public class LoginEventsRepository(
         {
             if (hasFromFilter)
             {
-                query = hasToFilter ? 
-                    query.Where(q => q.Event.Date >= fromDate.Value & q.Event.Date <= to.Value) : 
+                query = hasToFilter ?
+                    query.Where(q => q.Event.Date >= fromDate.Value & q.Event.Date <= to.Value) :
                     query.Where(q => q.Event.Date >= fromDate.Value);
             }
             else
@@ -101,7 +101,7 @@ public class LoginEventsRepository(
         {
             await geolocationHelper.AddGeolocationAsync(e);
         }
-        
+
         return events;
     }
 

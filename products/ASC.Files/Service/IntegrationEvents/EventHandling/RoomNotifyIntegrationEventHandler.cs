@@ -34,7 +34,7 @@ public class RoomNotifyIntegrationEventHandler(
     IServiceScopeFactory serviceScopeFactory)
     : IIntegrationEventHandler<RoomNotifyIntegrationEvent>
 {
-    
+
     public async Task Handle(RoomNotifyIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();

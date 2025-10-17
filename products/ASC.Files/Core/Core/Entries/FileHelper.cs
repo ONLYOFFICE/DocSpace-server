@@ -27,9 +27,9 @@
 namespace ASC.Files.Core;
 
 [Scope]
-public class FileHelper(FileTrackerHelper fileTracker, 
-                        FilesLinkUtility filesLinkUtility, 
-                        FileUtility fileUtility, 
+public class FileHelper(FileTrackerHelper fileTracker,
+                        FilesLinkUtility filesLinkUtility,
+                        FileUtility fileUtility,
                         FileConverter fileConverter)
 {
     internal string GetTitle<T>(File<T> file)

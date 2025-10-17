@@ -32,19 +32,19 @@ public class UserGroupRef
 {
     [ProtoMember(1)]
     public Guid UserId { get; set; }
-    
+
     [ProtoMember(2)]
     public Guid GroupId { get; set; }
-    
+
     [ProtoMember(3)]
     public bool Removed { get; set; }
-    
+
     [ProtoMember(4)]
     public DateTime LastModified { get; set; }
-    
+
     [ProtoMember(5)]
     public UserGroupRefType RefType { get; set; }
-    
+
     [ProtoMember(6)]
     public int TenantId { get; set; }
 

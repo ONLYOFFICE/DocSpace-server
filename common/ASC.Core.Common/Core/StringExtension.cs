@@ -79,14 +79,14 @@ public static class StringExtension
                 return true;
             }
         }
-        catch (ArgumentException ex) when(ex.ParamName == "unicode")
+        catch (ArgumentException ex) when (ex.ParamName == "unicode")
         {
             return true;
         }
-        
+
         return false;
     }
-    
+
 
     public static int EnumerableComparer(this string x, string y)
     {

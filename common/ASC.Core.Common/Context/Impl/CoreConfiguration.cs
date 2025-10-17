@@ -194,18 +194,18 @@ public class CoreSettings(
 
         return configuration["core:payment:region"] + tenant;
     }
-    
+
     public async Task<string> GetDocDbKeyAsync()
     {
         const string dbKey = "UniqueDocument";
-        
+
         // check without lock
         var resultKey = await GetSettingAsync(dbKey);
         if (!string.IsNullOrEmpty(resultKey))
         {
             return resultKey;
         }
-        
+
         await using (await distributedLockProvider.TryAcquireFairLockAsync(dbKey))
         {
             // check again with lock
@@ -214,7 +214,7 @@ public class CoreSettings(
             {
                 return resultKey;
             }
-            
+
             resultKey = Guid.NewGuid().ToString();
             await SaveSettingAsync(dbKey, resultKey);
 

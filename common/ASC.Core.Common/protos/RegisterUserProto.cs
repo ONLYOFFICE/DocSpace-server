@@ -38,4 +38,3 @@ public record RegisterUserProto
     [ProtoMember(3)]
     public string Token { get; set; }
 }
-

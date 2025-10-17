@@ -77,14 +77,14 @@ public class RoomNewItemsDtoHelper(FileDtoHelper fileDtoHelper, FolderDtoHelper 
         {
             files.Add(await GetFileEntryDtoAsync(entry));
         }
-        
+
         return new RoomNewItemsDto
         {
             Room = roomDto,
             Items = files
         };
     }
-    
+
     private async Task<FileEntryBaseDto> GetFileEntryDtoAsync(FileEntry entry)
     {
         FileEntryBaseDto dto;
@@ -109,7 +109,7 @@ public class RoomNewItemsDtoHelper(FileDtoHelper fileDtoHelper, FolderDtoHelper 
 
         return dto;
     }
-    
+
     private async Task<FileEntryBaseDto> GetShortRoomDtoAsync(FileEntry entry)
     {
         return entry switch

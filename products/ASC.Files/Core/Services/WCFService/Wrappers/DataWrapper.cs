@@ -52,7 +52,7 @@ public class DataWrapper<T>
     /// </summary>
     [JsonPropertyName("folder_info")]
     public Folder<T> FolderInfo { get; init; }
-    
+
     /// <summary>
     /// The folder parent room.
     /// </summary>

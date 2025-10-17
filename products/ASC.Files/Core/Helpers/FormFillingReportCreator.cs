@@ -35,13 +35,14 @@ public class FormFillingReportCreator(
     FactoryIndexerForm factoryIndexerForm)
 {
 
-    private static readonly JsonSerializerOptions _options = new() {
+    private static readonly JsonSerializerOptions _options = new()
+    {
         Converters = { new BoolToStringConverter() },
         AllowTrailingCommas = true,
         PropertyNameCaseInsensitive = true
     };
 
-    public async Task UpdateFormFillingReport<T>(int originalFormId, int roomId, int resultFormNumber,string formsDataUrl, File<T> formsDataFile)
+    public async Task UpdateFormFillingReport<T>(int originalFormId, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile)
     {
         await GetSubmitFormsData(formsDataFile, originalFormId, roomId, resultFormNumber, formsDataUrl);
         await exportToXLSX.UpdateXlsxReport(roomId, originalFormId);
@@ -55,7 +56,7 @@ public class FormFillingReportCreator(
         {
             return [];
         }
-        
+
         var fileDao = daoFactory.GetFileDao<int>();
         var file = await fileDao.GetFilesAsync([folderId], FilterType.Pdf, false, Guid.Empty, null, null, false).FirstOrDefaultAsync();
         var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.Id, file.Id));
@@ -98,7 +99,7 @@ public class FormFillingReportCreator(
             RequestUri = new Uri(url),
             Method = HttpMethod.Get
         };
-        
+
         var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
@@ -111,7 +112,7 @@ public class FormFillingReportCreator(
                 Value = resultFormNumber.ToString()
             }
         };
-        
+
         var fromData = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
         fromData.FormsData = fromData.FormsData.Where(f => f.Type != "picture" && f.Type != "signature").ToList();
 

@@ -38,7 +38,7 @@ public static class HttpContextExtension
         }
         return lastModified;
     }
-    
+
     public static bool TryGetFromCache(this HttpContext httpContext, DateTime lastModified)
     {
         if (lastModified != DateTime.MinValue)
@@ -49,14 +49,14 @@ public static class HttpContextExtension
                 httpContext.Response.StatusCode = 304;
                 return true;
             }
-            
+
             httpContext.Response.Headers.LastModified = lastModifiedStr;
             httpContext.Response.Headers.CacheControl = "private, no-cache";
         }
-        
+
         return false;
     }
-    
+
     public static bool TryGetFromCache(this HttpContext httpContext, string etag)
     {
         var etagFromRequest = httpContext.Request.Headers.IfNoneMatch;
@@ -67,18 +67,18 @@ public static class HttpContextExtension
             httpContext.Response.StatusCode = 304;
             return true;
         }
-    
+
         httpContext.Response.Headers.ETag = etag;
         httpContext.Response.Headers.CacheControl = "private, no-cache";
-        
+
         return false;
     }
-    
+
     public static async Task<string> CalculateEtagAsync(IEnumerable<string> data)
     {
         using var md5 = MD5.Create();
         using var memoryStream = new MemoryStream();
-                
+
         foreach (var d in data)
         {
             await memoryStream.WriteAsync(Encoding.UTF8.GetBytes(d).AsMemory(0, Encoding.UTF8.GetByteCount(d)));

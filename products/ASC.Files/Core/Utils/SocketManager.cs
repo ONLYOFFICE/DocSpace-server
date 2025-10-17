@@ -98,31 +98,32 @@ public class SocketManager(
     public async Task ExecMarkAsNewFilesAsync(IEnumerable<Tag> tags)
     {
         var result = new List<object>();
-        
+
         foreach (var g in tags.GroupBy(r => r.EntryId))
         {
             var room = FileRoom(g.Key);
             result.Add(new { room, fileId = g.Key });
         }
-        
+
         await MakeRequest("mark-as-new-file", result);
     }
 
     public async Task ExecMarkAsNewFoldersAsync(IEnumerable<Tag> tags)
-    { 
+    {
         var result = new List<object>();
-        
+
         foreach (var g in tags.GroupBy(r => r.EntryId))
         {
             var room = FolderRoom(g.Key);
-            result.Add(             
-                new {
+            result.Add(
+                new
+                {
                     room,
                     folderId = g.Key,
-                    userIds = g.Select(r=> new { owner = r.Owner, count = r.Count }).DistinctBy(r => r.owner).ToList()
+                    userIds = g.Select(r => new { owner = r.Owner, count = r.Count }).DistinctBy(r => r.owner).ToList()
                 });
         }
-        
+
         await MakeRequest("mark-as-new-folder", result);
     }
 
@@ -147,32 +148,32 @@ public class SocketManager(
     {
         await MakeRequest("end-restore", new { tenantId, dump, result });
     }
-    
+
     public async Task AddToRecentAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
         await MakeRequest($"add-recent-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderRecentAsync<T>());
     }
-    
+
     public async Task RemoveFromRecentAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
         await MakeRequest($"delete-recent-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderRecentAsync<T>());
     }
-    
+
     public async Task AddToFavoritesAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
         await MakeRequest($"add-favorites-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderFavoritesAsync<T>());
     }
-    
+
     public async Task RemoveFromFavoritesAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
         await MakeRequest($"delete-favorites-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderFavoritesAsync<T>());
     }
-    
+
     public async Task AddToSharedAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
         await MakeRequest($"add-shared-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
     }
-    
+
     public async Task RemoveFromSharedAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
         await MakeRequest($"delete-shared-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
@@ -219,7 +220,7 @@ public class SocketManager(
             userIds,
             isOneMember
         });
-        
+
     }
     private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null, T folderIdDisplay = default)
     {
@@ -332,32 +333,32 @@ public class SocketManager(
     }
 
     private async Task<string> Serialize<T>(FileEntry<T> entry)
-    { 
+    {
         var externalMediaAccess = entry.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink };
         string requestToken = null;
-            
+
         if (externalMediaAccess)
         {
             requestToken = await externalShare.CreateShareKeyAsync(entry.ShareRecord.Subject);
         }
-        
+
         return entry switch
         {
             File<T> file => JsonSerializer.Serialize(new FileDto<T>
             {
-                Id = file.Id, 
-                FolderId = file.ParentId, 
-                Title = file.Title, 
-                Version = file.Version, 
+                Id = file.Id,
+                FolderId = file.ParentId,
+                Title = file.Title,
+                Version = file.Version,
                 VersionGroup = file.VersionGroup,
                 RequestToken = requestToken
             }, _jsonSerializerOptions),
             Folder<T> folder => JsonSerializer.Serialize(new FolderDto<T>
             {
-                Id = folder.Id, 
-                ParentId = folder.ParentId, 
-                Title = folder.Title, 
-                RoomType = DocSpaceHelper.MapToRoomType(folder.FolderType), 
+                Id = folder.Id,
+                ParentId = folder.ParentId,
+                Title = folder.Title,
+                RoomType = DocSpaceHelper.MapToRoomType(folder.FolderType),
                 CreatedBy = new EmployeeDto
                 {
                     Id = folder.CreateBy
@@ -394,17 +395,17 @@ public class SocketManager(
 
     private Task<IEnumerable<Guid>> Admins()
     {
-        return _admins != null 
-            ? Task.FromResult<IEnumerable<Guid>>(_admins) 
+        return _admins != null
+            ? Task.FromResult<IEnumerable<Guid>>(_admins)
             : AdminsFromDb();
     }
-    
+
     private async Task<IEnumerable<Guid>> AdminsFromDb()
     {
         _admins = (await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
             .Select(x => x.Id)
             .ToList();
-        
+
         _admins.Add((_tenantManager.GetCurrentTenant()).OwnerId);
 
         return _admins;

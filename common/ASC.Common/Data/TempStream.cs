@@ -55,11 +55,11 @@ public class TempStream(TempPath tempPath)
 
         if (limit > 0)
         {
-           await originalStream.CopyToAsync(cloneStream, limit);
+            await originalStream.CopyToAsync(cloneStream, limit);
         }
         else
         {
-           await originalStream.CopyToAsync(cloneStream);
+            await originalStream.CopyToAsync(cloneStream);
         }
 
 

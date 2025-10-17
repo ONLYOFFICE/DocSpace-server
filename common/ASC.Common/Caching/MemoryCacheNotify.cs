@@ -30,7 +30,7 @@ namespace ASC.Common.Caching;
 public class MemoryCacheNotify<T> : ICacheNotify<T> where T : new()
 {
     private readonly ConcurrentDictionary<string, List<Action<T>>> _actions = new();
-    
+
     public Task PublishAsync(T obj, CacheNotifyAction action)
     {
         if (_actions.TryGetValue(GetKey(action), out var onchange) && onchange != null)

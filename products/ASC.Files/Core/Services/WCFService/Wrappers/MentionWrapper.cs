@@ -101,5 +101,5 @@ public class MentionMessageWrapperRequestDto<T>
     /// The mention message.
     /// </summary>
     [FromBody]
-    public MentionMessageWrapper MentionMessage {  get; set; }
+    public MentionMessageWrapper MentionMessage { get; set; }
 }

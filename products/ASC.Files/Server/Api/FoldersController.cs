@@ -190,7 +190,7 @@ public abstract class FoldersController<T>(
     public async IAsyncEnumerable<FileOperationDto> DeleteFolder(DeleteFolder<T> inDto)
     {
         await fileOperationsManager.Publish([inDto.FolderId], [], false, !inDto.Delete.DeleteAfter, inDto.Delete.Immediately);
-        
+
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
@@ -252,7 +252,7 @@ public abstract class FoldersController<T>(
     [AllowAnonymous]
     [HttpGet("folder/{folderId}")]
     public async Task<FolderDto<T>> GetFolderInfo(FolderIdRequestDto<T> inDto)
-    {        
+    {
         var folder = await fileStorageService.GetFolderAsync(inDto.FolderId).NotFoundIfNull("Folder not found");
 
         return await _folderDtoHelper.GetAsync(folder, contextFolder: folder);
@@ -360,18 +360,18 @@ public abstract class FoldersController<T>(
     public async Task<FileShareDto> CreateFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
     {
         var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(
-            inDto.Id, 
-            FileEntryType.Folder, 
-            inDto.FolderLink.Access, 
-            expirationDate: inDto.FolderLink.ExpirationDate, 
-            requiredAuth: inDto.FolderLink.Internal, 
+            inDto.Id,
+            FileEntryType.Folder,
+            inDto.FolderLink.Access,
+            expirationDate: inDto.FolderLink.ExpirationDate,
+            requiredAuth: inDto.FolderLink.Internal,
             allowUnlimitedDate: true,
-            denyDownload: inDto.FolderLink.DenyDownload, 
+            denyDownload: inDto.FolderLink.DenyDownload,
             password: inDto.FolderLink.Password);
-        
+
         return await fileShareDtoHelper.Get(linkAce);
     }
-    
+
     /// <summary>
     /// Returns the primary external link by the identifier specified in the request.
     /// </summary>
@@ -389,7 +389,7 @@ public abstract class FoldersController<T>(
 
         return await fileShareDtoHelper.Get(linkAce);
     }
-    
+
     /// <summary>
     /// Sets the folder external link with the ID specified in the request.
     /// </summary>
@@ -416,17 +416,17 @@ public abstract class FoldersController<T>(
         {
             return null;
         }
-        
-        var result =  await fileShareDtoHelper.Get(linkAce);
+
+        var result = await fileShareDtoHelper.Get(linkAce);
 
         if (inDto.FolderLink.LinkId != Guid.Empty && linkAce.Id != inDto.FolderLink.LinkId && result.SharedLink != null)
         {
             result.SharedLink.RequestToken = null;
         }
-        
+
         return result;
     }
-    
+
     /// <summary>
     /// Returns the links of the folder with the ID specified in the request.
     /// </summary>
@@ -626,7 +626,7 @@ public class FoldersControllerCommon(
     {
         return await folderContentDtoHelper.GetAsync(Convert.ToInt32(await globalFolderHelper.FolderTrashAsync), inDto.UserIdOrGroupId, inDto.FilterType, 0, true, true, false, inDto.ApplyFilterOption, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
-    
+
     private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
@@ -636,7 +636,7 @@ public class FoldersControllerCommon(
         {
             withoutTrash = true;
         }
-        
+
         yield return await globalFolderHelper.FolderFavoritesAsync;
 
         if (await filesSettingsHelper.GetRecentSection())
@@ -644,7 +644,7 @@ public class FoldersControllerCommon(
             yield return await globalFolderHelper.FolderRecentAsync;
         }
         yield return await globalFolderHelper.FolderShareAsync;
-        
+
         var my = await globalFolderHelper.FolderMyAsync;
         if (my != 0)
         {

@@ -41,7 +41,7 @@ public class HistoryRequestDto
     /// The start date of the history.
     /// </summary>
     [FromQuery(Name = "fromDate")]
-    public ApiDateTime FromDate {  get; set; }
+    public ApiDateTime FromDate { get; set; }
 
     /// <summary>
     /// The end date of the history.

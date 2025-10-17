@@ -110,7 +110,7 @@ public abstract class DIAttribute : Attribute
     public abstract DIAttributeType DiAttributeType { get; }
     protected internal Type Implementation { get; }
     protected internal Type Service { get; }
-    
+
     public Type[] GenericArguments { get; init; }
 
     protected DIAttribute() { }
@@ -141,20 +141,20 @@ public class DIHelper
     private IServiceCollection _serviceCollection;
 
     readonly HashSet<string> _visited = [];
-    
+
     public void Scan()
-    {        
+    {
         AppDomain.CurrentDomain.AssemblyLoad += (_, args) =>
         {
             Scan(args.LoadedAssembly);
         };
-        
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().OrderBy(r=> r.FullName))
+
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().OrderBy(r => r.FullName))
         {
             Scan(assembly);
         }
     }
-    
+
     private void Scan(Assembly assembly)
     {
         var assemblyName = assembly.GetName();
@@ -162,18 +162,18 @@ public class DIHelper
         {
             return;
         }
-        
+
         _visited.Add(assembly.FullName);
-        
+
         var types = assembly.GetTypes().Where(t => t.GetCustomAttributes<DIAttribute>().Any());
-        
+
         foreach (var a in types)
         {
             TryAdd(a);
         }
-        
+
         var references = assembly.GetReferencedAssemblies();
-        foreach(var reference in references.Where(r => CheckAssemblyName(r) && !_visited.Contains(r.FullName)))
+        foreach (var reference in references.Where(r => CheckAssemblyName(r) && !_visited.Contains(r.FullName)))
         {
             Assembly.Load(reference);
         }
@@ -188,7 +188,7 @@ public class DIHelper
     private void TryAdd(Type service, Type implementation = null, DIAttribute di = null)
     {
         Type serviceGenericTypeDefinition = null;
-        
+
         if (service.IsGenericType)
         {
             serviceGenericTypeDefinition = service.GetGenericTypeDefinition();
@@ -210,7 +210,7 @@ public class DIHelper
                     return;
                 }
             }
-            else if(service.IsGenericTypeDefinition)
+            else if (service.IsGenericTypeDefinition)
             {
                 var attributes = service.GetCustomAttributes<DIAttribute>();
                 foreach (var attr in attributes)
@@ -219,7 +219,7 @@ public class DIHelper
                     {
                         continue;
                     }
-                    
+
                     TryAdd(service.MakeGenericType(attr.GenericArguments), di: attr);
                 }
                 return;
@@ -239,162 +239,162 @@ public class DIHelper
             serviceGenericTypeDefinition == typeof(IConfigureOptions<>) ||
             serviceGenericTypeDefinition == typeof(IPostConfigureOptions<>) ||
             serviceGenericTypeDefinition == typeof(IOptionsMonitor<>)
-            ) && implementation != null ? 
-            implementation.GetCustomAttributes<DIAttribute>().FirstOrDefault() : 
+            ) && implementation != null ?
+            implementation.GetCustomAttributes<DIAttribute>().FirstOrDefault() :
             service.GetCustomAttributes<DIAttribute>().FirstOrDefault();
 
-            if (!service.IsInterface || implementation != null)
+        if (!service.IsInterface || implementation != null)
+        {
+            var isnew = implementation != null ? Register(di, service, implementation) : Register(di, service);
+            if (!isnew)
             {
-                var isnew = implementation != null ? Register(di, service, implementation) : Register(di, service);
-                if (!isnew)
-                {
-                    return;
-                }
+                return;
             }
+        }
 
-            if (service.IsInterface && implementation == null || !service.IsInterface)
+        if (service.IsInterface && implementation == null || !service.IsInterface)
+        {
+            if (di.Service != null)
             {
-                if (di.Service != null)
+                var a = di.Service.GetInterfaces().FirstOrDefault(x =>
                 {
-                    var a = di.Service.GetInterfaces().FirstOrDefault(x =>
+                    Type xGenericTypeDefinition = null;
+
+                    if (x.IsGenericType)
                     {
-                        Type xGenericTypeDefinition = null;
+                        xGenericTypeDefinition = x.GetGenericTypeDefinition();
+                    }
 
-                        if (x.IsGenericType)
-                        {
-                            xGenericTypeDefinition = x.GetGenericTypeDefinition();
-                        }
+                    return
+                    xGenericTypeDefinition != null && (
+                    xGenericTypeDefinition == typeof(IConfigureOptions<>) ||
+                    xGenericTypeDefinition == typeof(IPostConfigureOptions<>) ||
+                    xGenericTypeDefinition == typeof(IOptionsMonitor<>));
+                });
 
-                        return
-                        xGenericTypeDefinition != null && (
-                        xGenericTypeDefinition == typeof(IConfigureOptions<>) ||
-                        xGenericTypeDefinition == typeof(IPostConfigureOptions<>) ||
-                        xGenericTypeDefinition == typeof(IOptionsMonitor<>));
-                    });
-
-                    if (a != null)
+                if (a != null)
+                {
+                    if (!a.ContainsGenericParameters)
                     {
-                        if (!a.ContainsGenericParameters)
-                        {
-                            var b = a.GetGenericArguments();
+                        var b = a.GetGenericArguments();
 
-                            foreach (var g in b)
+                        foreach (var g in b)
+                        {
+                            if (g != service)
                             {
-                                if (g != service)
-                                {
-                                    TryAdd(g);
+                                TryAdd(g);
 
-                                    if (service.IsInterface && di.Implementation == null)
-                                    {
-                                        TryAdd(service, g);
-                                    }
+                                if (service.IsInterface && di.Implementation == null)
+                                {
+                                    TryAdd(service, g);
                                 }
                             }
-
-                            TryAdd(a, di.Service);
                         }
-                        else
-                        {
-                            Type c;
-                            var a1 = a.GetGenericTypeDefinition();
-                            var b = a.GetGenericArguments().FirstOrDefault();
 
-                            if (b is { IsGenericType: true })
-                            {
-                                var b1 = b.GetGenericTypeDefinition().MakeGenericType(service.GetGenericArguments());
-
-                                TryAdd(b1);
-                                c = a1.MakeGenericType(b1);
-                            }
-                            else
-                            {
-                                c = a1.MakeGenericType(service.GetGenericArguments());
-                            }
-
-                            TryAdd(c, di.Service.MakeGenericType(service.GetGenericArguments()));
-                            //a, di.Service
-                        }
+                        TryAdd(a, di.Service);
                     }
                     else
                     {
-                        if (di.Implementation == null)
+                        Type c;
+                        var a1 = a.GetGenericTypeDefinition();
+                        var b = a.GetGenericArguments().FirstOrDefault();
+
+                        if (b is { IsGenericType: true })
                         {
-                            Register(di, di.Service, service);
-                            TryAdd(service);
+                            var b1 = b.GetGenericTypeDefinition().MakeGenericType(service.GetGenericArguments());
+
+                            TryAdd(b1);
+                            c = a1.MakeGenericType(b1);
                         }
                         else
                         {
-                            Register(di, di.Service, di.Implementation);
-                            Register(di, service);
+                            c = a1.MakeGenericType(service.GetGenericArguments());
                         }
+
+                        TryAdd(c, di.Service.MakeGenericType(service.GetGenericArguments()));
+                        //a, di.Service
                     }
                 }
-
-                if (di.Implementation != null)
+                else
                 {
-                    var a = di.Implementation.GetInterfaces().FirstOrDefault(x =>
+                    if (di.Implementation == null)
                     {
-
-                        Type xGenericTypeDefinition = null;
-
-                        if (x.IsGenericType)
-                        {
-                            xGenericTypeDefinition = x.GetGenericTypeDefinition();
-                        }
-
-                        return
-                        xGenericTypeDefinition != null &&
-                        (
-                        xGenericTypeDefinition == typeof(IConfigureOptions<>) ||
-                        xGenericTypeDefinition == typeof(IPostConfigureOptions<>) ||
-                        xGenericTypeDefinition == typeof(IOptionsMonitor<>));
-                    });
-
-                    if (a != null)
+                        Register(di, di.Service, service);
+                        TryAdd(service);
+                    }
+                    else
                     {
-                        if (!a.ContainsGenericParameters)
-                        {
-                            var b = a.GetGenericArguments();
-
-                            foreach (var g in b)
-                            {
-                                if (g != service)
-                                {
-                                    //TryAdd(g);
-                                    if (service.IsInterface && implementation == null)
-                                    {
-                                        TryAdd(service, g);
-                                    }
-                                }
-                            }
-
-                            TryAdd(a, di.Implementation);
-                        }
-                        else
-                        {
-                            Type c;
-                            var a1 = a.GetGenericTypeDefinition();
-                            var b = a.GetGenericArguments().FirstOrDefault();
-
-                            if (b is { IsGenericType: true })
-                            {
-                                var b1 = b.GetGenericTypeDefinition().MakeGenericType(service.GetGenericArguments());
-
-                                TryAdd(b1);
-                                c = a1.MakeGenericType(b1);
-                            }
-                            else
-                            {
-                                c = a1.MakeGenericType(service.GetGenericArguments());
-                            }
-
-                            TryAdd(c, di.Implementation.MakeGenericType(service.GetGenericArguments()));
-                            //a, di.Service
-                        }
+                        Register(di, di.Service, di.Implementation);
+                        Register(di, service);
                     }
                 }
             }
-        
+
+            if (di.Implementation != null)
+            {
+                var a = di.Implementation.GetInterfaces().FirstOrDefault(x =>
+                {
+
+                    Type xGenericTypeDefinition = null;
+
+                    if (x.IsGenericType)
+                    {
+                        xGenericTypeDefinition = x.GetGenericTypeDefinition();
+                    }
+
+                    return
+                    xGenericTypeDefinition != null &&
+                    (
+                    xGenericTypeDefinition == typeof(IConfigureOptions<>) ||
+                    xGenericTypeDefinition == typeof(IPostConfigureOptions<>) ||
+                    xGenericTypeDefinition == typeof(IOptionsMonitor<>));
+                });
+
+                if (a != null)
+                {
+                    if (!a.ContainsGenericParameters)
+                    {
+                        var b = a.GetGenericArguments();
+
+                        foreach (var g in b)
+                        {
+                            if (g != service)
+                            {
+                                //TryAdd(g);
+                                if (service.IsInterface && implementation == null)
+                                {
+                                    TryAdd(service, g);
+                                }
+                            }
+                        }
+
+                        TryAdd(a, di.Implementation);
+                    }
+                    else
+                    {
+                        Type c;
+                        var a1 = a.GetGenericTypeDefinition();
+                        var b = a.GetGenericArguments().FirstOrDefault();
+
+                        if (b is { IsGenericType: true })
+                        {
+                            var b1 = b.GetGenericTypeDefinition().MakeGenericType(service.GetGenericArguments());
+
+                            TryAdd(b1);
+                            c = a1.MakeGenericType(b1);
+                        }
+                        else
+                        {
+                            c = a1.MakeGenericType(service.GetGenericArguments());
+                        }
+
+                        TryAdd(c, di.Implementation.MakeGenericType(service.GetGenericArguments()));
+                        //a, di.Service
+                    }
+                }
+            }
+        }
+
     }
 
     public void Configure(IServiceCollection serviceCollection)
@@ -404,8 +404,8 @@ public class DIHelper
 
     private bool Register(DIAttribute c, Type service, Type implementation = null)
     {
-        if (service.IsSubclassOf(typeof(ControllerBase)) || 
-            service.GetInterfaces().Contains(typeof(IResourceFilter)) || 
+        if (service.IsSubclassOf(typeof(ControllerBase)) ||
+            service.GetInterfaces().Contains(typeof(IResourceFilter)) ||
             service.GetInterfaces().Contains(typeof(IDictionary<string, string>)))
         {
             return true;
@@ -421,7 +421,7 @@ public class DIHelper
                 var fooRef = mi.MakeGenericMethod(service);
                 fooRef.Invoke(this, null);
             }
-            
+
             c.TryAdd(_serviceCollection, service, implementation);
             _services[c.DiAttributeType].Add(serviceName);
 

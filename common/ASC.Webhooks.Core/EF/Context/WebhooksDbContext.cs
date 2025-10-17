@@ -65,7 +65,7 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
     {
         return Queries.WebhooksConfigAsync(this, tenantId, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<DbWebhooks> WebhooksLogAsync(int tenantId, int id)
     {
@@ -86,10 +86,10 @@ static file class Queries
                 ctx.WebhooksConfigs.Where(it => it.TenantId == tenantId && (userId == null || it.CreatedBy == userId))
                 .GroupJoin(ctx.WebhooksLogs, c => c.Id, l => l.ConfigId, (configs, logs) => new { configs, logs })
                 .Select(it => new WebhooksConfigWithStatus
-                    {
-                        WebhooksConfig = it.configs,
-                        Status = it.logs.OrderByDescending(webhooksLog => webhooksLog.Delivery).FirstOrDefault().Status
-                    }));
+                {
+                    WebhooksConfig = it.configs,
+                    Status = it.logs.OrderByDescending(webhooksLog => webhooksLog.Delivery).FirstOrDefault().Status
+                }));
 
     public static readonly Func<WebhooksDbContext, int, bool?, IAsyncEnumerable<DbWebhooksConfig>> WebhooksConfigsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

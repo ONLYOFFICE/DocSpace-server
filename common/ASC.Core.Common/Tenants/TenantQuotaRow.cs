@@ -38,7 +38,7 @@ public class TenantQuotaRow
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class TenantQuotaRowMapper
-{       
+{
     public static partial TenantQuotaRow Map(this DbQuotaRow source);
     public static partial DbQuotaRow Map(this TenantQuotaRow source);
     public static partial IQueryable<TenantQuotaRow> Project(this IQueryable<DbQuotaRow> q);

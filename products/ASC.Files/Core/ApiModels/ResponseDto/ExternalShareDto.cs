@@ -52,7 +52,7 @@ public class ExternalShareDto
     /// The type of the external data.
     /// </summary>
     public FileEntryType? Type { get; set; }
-    
+
     /// <summary>
     /// The tenant ID.
     /// </summary>
@@ -62,7 +62,7 @@ public class ExternalShareDto
     /// The unique identifier of the shared entity.
     /// </summary>
     public string EntityId { get; set; }
-   
+
     /// <summary>
     /// The title of the shared entity.
     /// </summary>
@@ -72,12 +72,12 @@ public class ExternalShareDto
     /// The entry type of the external data.
     /// </summary>
     public FileEntryType? EntityType { get; set; }
-    
+
     /// <summary>
     /// Indicates whether the entity represents a room.
     /// </summary>
     public bool? IsRoom { get; set; }
-    
+
     /// <summary>
     /// Specifies whether to share the external data or not.
     /// </summary>
@@ -87,12 +87,12 @@ public class ExternalShareDto
     /// The link ID of the external data.
     /// </summary>
     public required Guid LinkId { get; set; }
-    
+
     /// <summary>
     /// Specifies whether the user is authenticated or not.
     /// </summary>
     public required bool IsAuthenticated { get; set; }
-    
+
     /// <summary>
     /// The room ID of the external data.
     /// </summary>

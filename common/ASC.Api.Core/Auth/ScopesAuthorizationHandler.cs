@@ -66,9 +66,8 @@ public class ScopesAuthorizationHandler : AuthorizationHandler<ScopesRequirement
         if (expectedRequirements.Any(x => userScopes.Contains(x)))
         {
             context.Succeed(requirement);
-        } 
-      
+        }
+
         return Task.CompletedTask;
     }
 }
-

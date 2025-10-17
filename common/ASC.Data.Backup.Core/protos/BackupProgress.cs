@@ -74,13 +74,10 @@ public record BackupProgress
     /// <summary>
     /// The backup progress type.
     /// </summary>
-    public BackupProgressEnum BackupProgressEnum { get; set;}
+    public BackupProgressEnum BackupProgressEnum { get; set; }
 
     /// <summary>
     /// The task ID.
     /// </summary>
     public string TaskId { get; set; }
 }
-
-
-
