@@ -800,14 +800,14 @@ public class GoogleCloudStorage(TempStream tempStream,
 
     private StorageClient GetStorage()
     {
-        var credential = GoogleCredential.FromJson(_json);
+        var credential =  CredentialFactory.FromJson<GoogleCredential>(_json);
 
         return StorageClient.Create(credential);
     }
 
     private async Task<StorageClient> GetStorageAsync()
     {
-        var credential = GoogleCredential.FromJson(_json);
+        var credential = CredentialFactory.FromJson<GoogleCredential>(_json);
 
         return await StorageClient.CreateAsync(credential);
     }
