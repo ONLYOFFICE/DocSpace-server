@@ -23,17 +23,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Amazon.Extensions.S3.Encryption" Version="2.2.1" />
-    <PackageReference Include="AWSSDK.CloudFront" Version="3.7.404.55" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.415.25" />
-    <PackageReference Include="Google.Api.Gax" Version="4.12.1" />
-    <PackageReference Include="Google.Api.Gax.Rest" Version="4.12.1" />
-    <PackageReference Include="Google.Apis.Auth" Version="1.72.0" />
-    <PackageReference Include="Google.Apis.Core" Version="1.72.0" />
-    <PackageReference Include="Google.Apis.Storage.v1" Version="1.71.0.3920" />
-    <PackageReference Include="Google.Cloud.Storage.V1" Version="4.13.0" />
-    <PackageReference Include="Rackspace" Version="1.0.0" />
-    <PackageReference Include="SharpZipLib" Version="2.4.3" />
+    <PackageReference Include="Amazon.Extensions.S3.Encryption" />
+    <PackageReference Include="AWSSDK.CloudFront" />
+    <PackageReference Include="AWSSDK.S3" />
+    <PackageReference Include="Google.Api.Gax" />
+    <PackageReference Include="Google.Api.Gax.Rest" />
+    <PackageReference Include="Google.Apis.Auth" />
+    <PackageReference Include="Google.Apis.Core" />
+    <PackageReference Include="Google.Apis.Storage.v1" />
+    <PackageReference Include="Google.Cloud.Storage.V1" />
+    <PackageReference Include="Rackspace" />
+    <PackageReference Include="SharpZipLib" />
   </ItemGroup>
 
   <ItemGroup>

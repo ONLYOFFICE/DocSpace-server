@@ -15,7 +15,7 @@
     <None Remove="Attributes\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="EtaEmre.NetEscapades.EnumGenerators" Version="1.0.0-beta07" />
+    <PackageReference Include="EtaEmre.NetEscapades.EnumGenerators" />
   </ItemGroup>
 
   <ItemGroup>

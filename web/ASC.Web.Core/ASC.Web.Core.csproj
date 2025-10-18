@@ -549,13 +549,13 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.406.8" />
-    <PackageReference Include="GoogleAuthenticator" Version="3.2.0" />
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.9.0" />
-    <PackageReference Include="SkiaSharp" Version="3.119.1" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.1" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.1" />
-    <PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />
-    <PackageReference Include="Twilio" Version="7.13.4" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" />
+    <PackageReference Include="GoogleAuthenticator" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" />
+    <PackageReference Include="SkiaSharp" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
+    <PackageReference Include="SkiaSharp.Svg" />
+    <PackageReference Include="Twilio" />
   </ItemGroup>
 </Project>
