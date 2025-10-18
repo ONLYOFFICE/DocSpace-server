@@ -28,7 +28,6 @@ namespace ASC.AI.Core.MCP.Data;
 
 public class Icon
 {
-    public required string IconOrig { get; init; }
     public required string Icon48 { get; init; }
     public required string Icon32 { get; init; }
     public required string Icon24 { get; init; }

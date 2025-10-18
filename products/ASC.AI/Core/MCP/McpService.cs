@@ -55,7 +55,7 @@ public partial class McpService(
         string name,
         string description,
         Dictionary<string, string>? headers,
-        IconParams? icon)
+        string? iconBase64)
     {
         await ThrowIfNotAccessAsync();
         
@@ -80,7 +80,7 @@ public partial class McpService(
         
         await ThrowIfNotConnectAsync(transport);
         
-        return await mcpDao.AddServerAsync(tenantId, endpoint, name, headers, description, ConnectionType.Direct, icon);
+        return await mcpDao.AddServerAsync(tenantId, endpoint, name, headers, description, ConnectionType.Direct, iconBase64);
     }
 
     public async Task<McpServer> UpdateCustomServerAsync(
@@ -90,7 +90,7 @@ public partial class McpService(
         Dictionary<string, string>? headers, 
         string? description,
         bool updateIcon,
-        IconParams? icon)
+        string? iconBase64)
     {
         await ThrowIfNotAccessAsync();
         
@@ -126,7 +126,7 @@ public partial class McpService(
 
         if (updateIcon)
         {
-            server.HasIcon = icon != null;
+            server.HasIcon = iconBase64 != null;
         }
 
         if (!string.IsNullOrEmpty(description))
@@ -136,7 +136,7 @@ public partial class McpService(
 
         if (!needConnect)
         {
-            return await mcpDao.UpdateServerAsync(server, updateIcon, icon);
+            return await mcpDao.UpdateServerAsync(server, updateIcon, iconBase64);
         }
 
         var options = new SseClientTransportOptions
@@ -152,7 +152,7 @@ public partial class McpService(
             
         await ThrowIfNotConnectAsync(transport);
 
-        return await mcpDao.UpdateServerAsync(server, updateIcon, icon);
+        return await mcpDao.UpdateServerAsync(server, updateIcon, iconBase64);
     }
     
     public async Task<McpServer> SetServerStateAsync(Guid serverId, bool enabled)

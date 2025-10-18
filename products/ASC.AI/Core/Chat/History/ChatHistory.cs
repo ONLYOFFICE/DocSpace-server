@@ -121,13 +121,21 @@ public class ChatHistory(ChatDao chatDao)
         return chatDao.AddMessageAsync(chatId, msg);
     }
 
-    public async IAsyncEnumerable<ChatMessage> GetMessagesAsync(Guid chatId, HistoryAdapter adapter)
+    public async IAsyncEnumerable<ChatMessage> GetMessagesAsync(
+        Guid chatId, 
+        HistoryAdapter adapter, 
+        ChatMessage systemMessage,
+        ChatMessage userMessage)
     {
+        yield return systemMessage;
+        
         var history = chatDao.GetMessagesAsync(chatId);
         
         await foreach (var msg in adapter.AdaptHistoryAsync(history))
         {
             yield return msg;
         }
+        
+        yield return userMessage;
     }
 }

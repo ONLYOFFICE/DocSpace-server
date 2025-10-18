@@ -30,31 +30,31 @@ public class OpenAiHistoryAdapter : HistoryAdapter
 {
     protected override IEnumerable<ChatMessage> AdaptAssistantMessage(Message message)
     {
+        ChatMessage? prevAssistantMessage = null;
+        
         foreach (var content in message.Contents)
         {
             switch (content)
             {
                 case TextMessageContent textContent:
-                    yield return new ChatMessage
+                    var msg = new ChatMessage
                     {
                         Role = ChatRole.Assistant, 
                         Contents = [
                             new TextContent(textContent.Text)
                         ]
                     };
+                    prevAssistantMessage = msg;
+                    yield return msg;
                     break;
-                case ToolCallMessageContent toolCallContent:
-                    yield return new ChatMessage
-                    {
-                        Role = ChatRole.Tool, 
-                        Contents = [
-                            new FunctionCallContent(toolCallContent.CallId, toolCallContent.Name, toolCallContent.Arguments)
-                        ]
-                    };
+                case ToolCallMessageContent toolCallContent when prevAssistantMessage != null:
+                    prevAssistantMessage.Contents.Add(
+                        new FunctionCallContent(toolCallContent.CallId, toolCallContent.Name, toolCallContent.Arguments)
+                    );
                 
                     yield return new ChatMessage
                     {
-                        Role = ChatRole.User, 
+                        Role = ChatRole.Tool, 
                         Contents = [
                             new FunctionResultContent(toolCallContent.CallId, toolCallContent.Result)
                         ]

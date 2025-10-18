@@ -27,7 +27,6 @@
 global using ASC.AI.Core.Database;
 global using ASC.AI.Core.Database.Models;
 global using ASC.AI.Core.Chat.Data;
-global using ASC.AI.Core.Chat.Extensions;
 global using ASC.AI.Core.Chat.History;
 global using ASC.AI.Core.MCP;
 global using ASC.AI.Core.MCP.Auth;
@@ -41,6 +40,7 @@ global using ASC.AI.Core.Chat.Tool;
 global using ASC.AI.Core.Retrieval.Knowledge;
 global using ASC.AI.Core.Retrieval.Web;
 global using ASC.AI.Core.Retrieval.Web.Engine;
+global using ASC.AI.Core.Utils;
 
 global using ASC.Common;
 global using ASC.Common.Log;
@@ -56,7 +56,6 @@ global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.EF.Model.Chat;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Notify.Socket;
-global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.Files.Core;
 global using ASC.Files.Core.EF;
@@ -104,11 +103,9 @@ global using System.Net.Http.Json;
 global using System.Runtime.CompilerServices;
 global using System.Security;
 global using System.Security.Cryptography;
-global using System.Text.Encodings.Web;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Threading.Channels;
-global using System.Web;
 
 global using ZiggyCreatures.Caching.Fusion;

@@ -30,7 +30,7 @@ namespace ASC.AI.Core.Tools;
 public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine)
 {
     public const string Name = "docspace_knowledge_search";
-    private const string Description = "Search in knowledge base. In the text, leave links to the resources you refer to when generating in md format. Example: [file title without extension](relative URL)";
+    private const string Description = "Search the DocSpace knowledge base using semantic search to find relevant information from documents and resources stored in the workspace. Finds content based on meaning and context, not just exact keyword matches. Use for questions about company policies, procedures, reports, documentation, and other organizational knowledge stored in DocSpace.";
     
     private static AIFunctionFactoryOptions FactoryOptions => new()
     {

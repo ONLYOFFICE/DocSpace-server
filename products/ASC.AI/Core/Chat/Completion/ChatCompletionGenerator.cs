@@ -81,7 +81,7 @@ public class ChatCompletionGenerator(
                         context.Chat = await chatHistory.AddChatAsync(
                             context.TenantId,
                             context.Room.Id,
-                            context.UserId,
+                            context.User.Id,
                             tempTitle,
                             context.RawMessage,
                             context.Attachments);
@@ -95,7 +95,7 @@ public class ChatCompletionGenerator(
                             
                                 context.Chat.Title = title;
                             
-                                await socketManager.UpdateChatAsync(context.Room, context.Chat.Id, title, context.UserId);
+                                await socketManager.UpdateChatAsync(context.Room, context.Chat.Id, title, context.User.Id);
                             }
                         }, cancellationToken: CancellationToken.None);
                     }

@@ -28,8 +28,8 @@ namespace ASC.AI.Core.Retrieval.Web;
 
 public class WebSearchResult
 {
-    public string? Title { get; init; }
+    public string? Title { get; set; }
     public string? Url { get; init; }
-    public string? FaviconUrl { get; init; }
+    public string? FaviconUrl { get; internal set; }
     public required string Text { get; init; }
 }

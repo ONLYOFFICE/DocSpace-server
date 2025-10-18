@@ -32,25 +32,4 @@ public class Message(int id, Role role, List<MessageContent> contents, DateTime 
     public Role Role { get; } = role;
     public List<MessageContent> Contents { get; } = contents;
     public DateTime CreatedOn { get; } = createdOn;
-    
-    public string ToMarkdown(TenantUtil tenantUtil)
-    {
-        var builder = new StringBuilder();
-
-        builder.Append($"## [{Role.ToStringFast()}] {tenantUtil.DateTimeFromUtc(CreatedOn).ToString("g")}");
-        builder.Append("\n\n");
-        
-        foreach (var content in Contents)
-        {
-            if (content is not TextMessageContent textMessageContent)
-            {
-                continue;
-            }
-
-            builder.Append($"{textMessageContent.Text ?? string.Empty}");
-            builder.Append("\n\n");
-        }
-        
-        return builder.ToString();
-    }
 }

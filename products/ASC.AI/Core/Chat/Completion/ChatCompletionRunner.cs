@@ -50,7 +50,12 @@ public class ChatCompletionRunner(
         var attachments = await attachmentsTask;
         var userMessage = FormatUserMessage(message, attachments);
 
-        var content = ChatPromptTemplate.GetPrompt(context.Instruction, context.ContextFolderId, context.Room.Id);
+        var content = ChatPromptTemplate.GetPrompt(
+            context.Instruction, 
+            context.ContextFolderId, 
+            context.Room.Id,
+            context.User.FirstName,
+            context.User.Email);
         
         var messages = new List<ChatMessage>
         {
@@ -82,27 +87,25 @@ public class ChatCompletionRunner(
         var context = await contextBuilder.BuildAsync(chat.RoomId);
         context.Chat = chat;
         
-        var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
-
-        var historyAdapter = HistoryHelper.GetAdapter(context.ClientOptions.Provider);
-        var history = await chatHistory.GetMessagesAsync(chatId, historyAdapter).ToListAsync();
+        var attachments = await GetAttachmentsAsync(files).ToListAsync();
         
-        var attachments = await attachmentsTask;
+        var systemPrompt = ChatPromptTemplate.GetPrompt(
+            context.Instruction, 
+            context.ContextFolderId, 
+            context.Room.Id,
+            context.User.FirstName,
+            context.User.Email);
+        
+        var systemMessage = new ChatMessage(ChatRole.System, systemPrompt);
         
         var userMessage = FormatUserMessage(message, attachments);
+
+        var historyAdapter = HistoryHelper.GetAdapter(context.ClientOptions.Provider);
+        var messages = await chatHistory.GetMessagesAsync(chatId, historyAdapter, systemMessage, userMessage)
+            .ToListAsync();
         
         context.UserMessage = userMessage;
         context.RawMessage = message;
-        
-        var system = ChatPromptTemplate.GetPrompt(context.Instruction, context.ContextFolderId, context.Room.Id);
-        
-        var messages = new List<ChatMessage>(history.Count + 2)
-        {
-            new(ChatRole.System, system)
-        };
-        
-        messages.AddRange(history);
-        messages.Add(userMessage);
         
         var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
 

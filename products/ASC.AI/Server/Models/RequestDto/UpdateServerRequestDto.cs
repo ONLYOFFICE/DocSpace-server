@@ -48,5 +48,5 @@ public class UpdateServerRequestBody
     
     public Dictionary<string, string>? Headers { get; init; }
     public bool UpdateIcon { get; init; }
-    public IconParams? Icon { get; init; }
+    public string? Icon { get; init; }
 }

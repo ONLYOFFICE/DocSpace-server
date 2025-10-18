@@ -26,11 +26,10 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class WebSearchSettingsDto
+public class WebSearchSettingsDto : IMapFrom<WebSearchSettings>
 {
     public bool Enabled { get; init; }
     public EngineType Type { get; init; }
-    public string? Key { get; set; }
 }
 
 public static class WebSearchSettingsExtensions
@@ -42,11 +41,6 @@ public static class WebSearchSettingsExtensions
             Enabled = settingsRaw.Enabled, 
             Type = settingsRaw.Type
         };
-
-        if (settingsRaw is { Type: EngineType.Exa, Config: ExaConfig exaConfig })
-        {
-            dto.Key = exaConfig.ApiKey;
-        }
         
         return dto;
     }
