@@ -2,18 +2,12 @@
   <PropertyGroup>
     <ProductVersion>9.0.30729</ProductVersion>
     <ProjectGuid>{A51D0454-4AFA-46DE-89D4-B03D37E1816C}</ProjectGuid>
-    <TargetFramework>net9.0</TargetFramework>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
-    <AssemblyVersion>1.0.1</AssemblyVersion>
-    <InformationalVersion>1.0.1</InformationalVersion>
     <AssemblyTitle>ASC.Core.Common</AssemblyTitle>
-    <Company>Ascensio System SIA</Company>
     <Product>ASC.Core.Common</Product>
-    <Copyright>(c) Ascensio System SIA. All rights reserved</Copyright>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>

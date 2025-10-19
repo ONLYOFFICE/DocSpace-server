@@ -4,6 +4,21 @@
     <CentralPackageTransitiveEnabled>true</CentralPackageTransitiveEnabled>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
+
+  <!-- Common properties for all projects -->
+  <PropertyGroup>
+      <TargetFramework>net9.0</TargetFramework>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <Company>Ascensio System SIA</Company>
+      <AssemblyVersion>3.5.0</AssemblyVersion>
+      <Copyright>(c) Ascensio System SIA. All rights reserved</Copyright>
+  </PropertyGroup>
+
+  <!-- Release configuration properties -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
   <ItemGroup>
     <!-- Central package versions can be defined here as:
          <PackageVersion Include="Package.Id" Version="x.y.z" />
