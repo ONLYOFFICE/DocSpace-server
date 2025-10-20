@@ -34,7 +34,8 @@ public class AiProviderService(
     ProviderSettings providerSettings,
     UserManager userManager,
     ModelClientFactory modelClientFactory,
-    ILogger<AiProviderService> logger)
+    ILogger<AiProviderService> logger,
+    AiGateway gateway)
 {
     public async Task<AiProvider> AddProviderAsync(string? title, string? url, string key, ProviderType type)
     {
@@ -104,15 +105,34 @@ public class AiProviderService(
         {
             throw new SecurityException("Access denied");       
         }
-
-        await foreach (var provider in providerDao.GetProvidersAsync(tenantManager.GetCurrentTenantId(), offset, limit))
+        
+        if (gateway.IsEnabled)
         {
-            yield return provider;
+            yield return new AiProvider
+            {
+                Id = 0,
+                Title = "DocSpace AI",
+                Url = string.Empty,
+                Key = string.Empty,
+                Type = ProviderType.DocSpaceAi
+            };
+        }
+        else
+        {
+            await foreach (var provider in providerDao.GetProvidersAsync(tenantManager.GetCurrentTenantId(), offset, limit))
+            {
+                yield return provider;
+            }
         }
     }
 
     public async Task<int> GetProvidersTotalCountAsync()
     {
+        if (gateway.IsEnabled)
+        {
+            return 1;
+        }
+        
         return await providerDao.GetProvidersTotalCountAsync(tenantManager.GetCurrentTenantId());
     }
 
@@ -132,6 +152,12 @@ public class AiProviderService(
 
     public async Task<IEnumerable<ModelData>> GetModelsAsync(int? providerId, Scope? scope)
     {
+        if (gateway.IsEnabled)
+        {
+            var provider = await GetProviderAsync(0);
+            return await GetProviderModelsAsync(provider, scope);
+        }
+        
         if (providerId.HasValue)
         {
             var provider = await GetProviderAsync(providerId.Value);
@@ -162,13 +188,20 @@ public class AiProviderService(
     
     public async Task<AiProvider> GetProviderAsync(int providerId)
     {
-        var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId);
-        if (provider == null)
+        if (gateway.IsEnabled)
         {
-            throw new ItemNotFoundException("Provider not found");
+            return new AiProvider
+            {
+                Id = 0,
+                Title = "DocSpace AI",
+                Url = gateway.Url,
+                Key = await gateway.GetKeyAsync(),
+                Type = ProviderType.DocSpaceAi
+            };
         }
 
-        return provider;
+        var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId);
+        return provider ?? throw new ItemNotFoundException("Provider not found");
     }
     
     private async Task<IEnumerable<ModelData>> GetProviderModelsAsync(AiProvider p, Scope? scope)

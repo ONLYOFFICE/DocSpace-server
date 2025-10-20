@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class ChatSettings
 {
-    public int ProviderId { get; init; }
+    public int ProviderId { get; internal set; }
     public string ModelId { get; init; }
     public string Prompt { get; init; }
 }

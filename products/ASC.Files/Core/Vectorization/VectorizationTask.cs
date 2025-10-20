@@ -108,7 +108,7 @@ public class VectorizationTask : DistributedTaskProgress
             }
 
             await collection.EnsureCollectionExistsAsync(CancellationToken);
-            var embeddingGenerator = generatorFactory.Create();
+            var embeddingGenerator = await generatorFactory.CreateAsync();
 
             var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
             if (!parents.Exists(x => x.FolderType == FolderType.Knowledge))

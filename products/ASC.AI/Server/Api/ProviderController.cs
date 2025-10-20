@@ -34,7 +34,6 @@ namespace ASC.AI.Api;
 [ControllerName("ai")]
 public class ProviderController(
     AiProviderService providerService, 
-    ApiDateTimeHelper apiDateTimeHelper,
     ApiContext apiContext,
     ProviderMapper providerMapper) : ControllerBase
 {

@@ -24,48 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Retrieval.Knowledge;
+namespace ASC.AI.Core.Provider.Model;
 
-[Scope]
-public class KnowledgeSearchEngine(
-    TenantManager tenantManager,
-    VectorStore vectorStore,
-    EmbeddingGeneratorFactory embeddingGeneratorFactory,
-    FilesLinkUtility filesLinkUtility)
+public class DocSpaceModelClient(HttpClient client) : OpenAiModelClient(client)
 {
-    public async Task<List<KnowledgeSearchResult>> SearchAsync(int roomId, string query)
+    protected override async Task<List<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response, Scope? scope)
     {
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var generator = await embeddingGeneratorFactory.CreateAsync();
-        var embedding = await generator.GenerateAsync(query);
-
-        var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName, null);
-        var searchOptions = new VectorSearchOptions<Chunk>
+        var content = await response.Content.ReadFromJsonAsync<Response>();
+        if (content == null)
         {
-            Filter = x => x.TenantId == tenantId && x.RoomId == roomId
-        };
+            return [];
+        }
 
-        return await collection.SearchAsync(
-            x => x.Embedding,
-            embedding.Vector.ToArray(),
-            5,
-            searchOptions)
-            .Select(x => new KnowledgeSearchResult
-            {
-                FileId = x.FileId,
-                Title = x.Title,
-                Text = x.TextEmbedding,
-                RelativeUrl = filesLinkUtility.GetFileWebEditorUrl(x.FileId)
-            })
-            .ToListAsync();
+        return scope is Scope.Chat 
+            ? content.Data.Where(x => x.Type == "chat").OfType<ModelInfo>().ToList() 
+            : content.Data.OfType<ModelInfo>().ToList();
     }
-}
-
-public class KnowledgeSearchResult
-{
-    public int FileId { get; init; }
-    public required string Title { get; init; }
-    public required string Text { get; init; }
-    public required string RelativeUrl { get; init; }
+    
+    private class Response
+    {
+        public required List<DocSpaceModel> Data { get; init; }
+    }
+    
+    private class DocSpaceModel : ModelInfo
+    {
+        public required string Type { get; init; }
+    }
 }
