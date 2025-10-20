@@ -898,7 +898,7 @@ public class FileStorageService //: IFileStorageService
                 ArgumentException.ThrowIfNullOrEmpty(chatSettings.ModelId);
                 
                 newFolder.SettingsChatProviderId = chatSettings.ProviderId;
-                newFolder.SettingsChatParameters = mapper.Map<ChatSettings, ChatParameters>(chatSettings);
+                newFolder.SettingsChatParameters = chatSettings.Map();
             }
 
             newFolder.SettingsLifetime = lifetime;

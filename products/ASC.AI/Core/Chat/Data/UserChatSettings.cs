@@ -26,7 +26,14 @@
 
 namespace ASC.AI.Core.Chat.Data;
 
-public class UserChatSettings : IMapFrom<DbUserChatSettings>
+public class UserChatSettings
 {
     public bool WebSearchEnabled { get; set; } = true;
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class UserChatSettingsMapper
+{
+    public static partial UserChatSettings Map(this DbUserChatSettings source);
 }

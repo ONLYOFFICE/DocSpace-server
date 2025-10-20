@@ -26,10 +26,17 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class AttachmentContentDto : MessageContentDto, IMapFrom<AttachmentMessageContent>
+public class AttachmentContentDto : MessageContentDto
 {
     public override ContentType Type => ContentType.Attachment;
     public required JsonElement Id { get; init; }
     public required string Title { get; init; }
     public required string Extension { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class AttachmentContentDtoMapper
+{
+    public static partial AttachmentContentDto MapToDto(this AttachmentMessageContent source);
 }

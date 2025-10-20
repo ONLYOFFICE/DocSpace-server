@@ -30,7 +30,7 @@ namespace ASC.AI.Api;
 [DefaultRoute]
 [ApiController]
 [ControllerName("ai")]
-public class McpController(McpService mcpService, IMapper mapper, ApiContext apiContext) : ControllerBase
+public class McpController(McpService mcpService, ApiContext apiContext) : ControllerBase
 {
     [HttpPost("servers")]
     public async Task<McpServerDto> AddServerAsync(AddServerRequestDto inDto)
@@ -42,7 +42,7 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
             inDto.Body.Headers,
             inDto.Body.Icon);
         
-        return mapper.Map<McpServer, McpServerDto>(server);
+        return server.MapToDto();
     }
     
     [HttpPut("servers/{id}")]
@@ -56,16 +56,16 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
             inDto.Body.Description,
             inDto.Body.UpdateIcon,
             inDto.Body.Icon);
-        
-        return mapper.Map<McpServer, McpServerDto>(server);
+
+        return server.MapToDto();
     }
     
     [HttpPut("servers/{id}/status")]
     public async Task<McpServerDto> SetServerStatusAsync(SetServerStatusRequestDto inDto)
     {
         var server = await mcpService.SetServerStateAsync(inDto.Id, inDto.Body.Enabled);
-        
-        return mapper.Map<McpServer, McpServerDto>(server);
+
+        return server.MapToDto();
     }
     
     [HttpDelete("servers")]
@@ -82,8 +82,8 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
         var (servers, count) = await mcpService.GetAllServersAsync(inDto.StartIndex, inDto.Count);
         
         apiContext.SetCount(servers.Count).SetTotalCount(count);
-        
-        return mapper.Map<List<McpServer>, List<McpServerDto>>(servers);
+
+        return servers.Select(x => x.MapToDto()).ToList();
     }
 
     [HttpGet("servers/available")]
@@ -93,15 +93,15 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
         
         apiContext.SetCount(servers.Count).SetTotalCount(count);
         
-        return mapper.Map<List<McpServer>, List<McpServerShortDto>>(servers);
+        return servers.Select(x => x.MapToShortDto()).ToList();
     }
     
     [HttpPost("rooms/{roomId}/servers")]
     public async Task<List<McpServerStatusDto>> AddRoomServersAsync(AddRoomServersRequestDto inDto)
     {
         var statuses = await mcpService.AddServersToRoomAsync(inDto.RoomId, inDto.Body.Servers);
-        
-        return mapper.Map<List<McpServerStatus>, List<McpServerStatusDto>>(statuses);
+
+        return statuses.Select(x => x.MapToStatusDto()).ToList();
     }
 
     [HttpGet("rooms/{roomId}/servers")]
@@ -109,7 +109,7 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     {
         var statuses = await mcpService.GetServersStatusesAsync(inDto.RoomId);
         
-        return mapper.Map<List<McpServerStatus>, List<McpServerStatusDto>>(statuses);
+        return statuses.Select(x => x.MapToStatusDto()).ToList();
     }
 
     [HttpDelete("rooms/{roomId}/servers")]
@@ -149,15 +149,15 @@ public class McpController(McpService mcpService, IMapper mapper, ApiContext api
     public async Task<McpServerStatusDto> ConnectServerAsync(ConnectServerRequestDto inDto)
     {
         var status = await mcpService.ConnectServerAsync(inDto.RoomId, inDto.ServerId, inDto.Body.Code);
-        
-        return mapper.Map<McpServerStatus, McpServerStatusDto>(status);
+
+        return status.MapToStatusDto();
     }
     
     [HttpPost("rooms/{roomId}/servers/{serverId}/disconnect")]
     public async Task<McpServerStatusDto> DisconnectServerAsync(DisconnectServerRequestDto inDto)
     {
         var status = await mcpService.DisconnectServerAsync(inDto.RoomId, inDto.ServerId);
-        
-        return mapper.Map<McpServerStatus, McpServerStatusDto>(status);
+
+        return status.MapToStatusDto();
     }
 }

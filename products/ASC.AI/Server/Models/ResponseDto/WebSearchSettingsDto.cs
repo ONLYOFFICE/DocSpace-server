@@ -26,23 +26,16 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class WebSearchSettingsDto : IMapFrom<WebSearchSettings>
+public class WebSearchSettingsDto
 {
     public bool Enabled { get; init; }
     public EngineType Type { get; init; }
 }
 
-public static class WebSearchSettingsExtensions
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class WebSearchSettingsDtoMapper
 {
-    public static WebSearchSettingsDto ToDto(this WebSearchSettings settingsRaw)
-    {
-        var dto = new WebSearchSettingsDto
-        {
-            Enabled = settingsRaw.Enabled, 
-            Type = settingsRaw.Type
-        };
-        
-        return dto;
-    }
+    public static partial WebSearchSettingsDto MapToDto(this WebSearchSettings source);
 }
 

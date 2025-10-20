@@ -62,7 +62,7 @@ public class ChatHistory(ChatDao chatDao)
         return chatDao.GetChatAsync(tenantId, chatId);
     }
     
-    public Task<int> AddAssistantMessagesAsync(Guid chatId, IEnumerable<ChatMessage> chatMessages)
+    public Task<long> AddAssistantMessagesAsync(Guid chatId, IEnumerable<ChatMessage> chatMessages)
     {
         var contents = new List<MessageContent>();
         var toolCalls = new Dictionary<string, ToolCallMessageContent>();
@@ -113,7 +113,7 @@ public class ChatHistory(ChatDao chatDao)
         
         if (contents.Count == 0)
         {
-            return Task.FromResult(0);
+            return Task.FromResult(0L);
         }
         
         var msg = new Message(0, Role.Assistant, contents, DateTime.UtcNow);

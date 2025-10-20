@@ -199,7 +199,7 @@ public class SocketManager(
         await base.MakeRequest("update-chat", new { room, chatId, chatTitle, userId });
     }
     
-    public async Task CommitMessageAsync(Guid chatId, int messageId)
+    public async Task CommitMessageAsync(Guid chatId, long messageId)
     {
         var room = ChatRoom(chatId);
         await MakeRequest("commit-chat-message", new { room, messageId });

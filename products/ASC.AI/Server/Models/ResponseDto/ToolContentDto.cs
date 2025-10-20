@@ -28,11 +28,18 @@ using ASC.AI.Core.Chat.Tool;
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class ToolContentDto : MessageContentDto, IMapFrom<ToolCallMessageContent>
+public class ToolContentDto : MessageContentDto
 {
     public override ContentType Type => ContentType.Tool;
     public required string Name { get; init; }
     public IDictionary<string, object?>? Arguments { get; init; }
     public object? Result { get; init; }
     public McpServerInfo? McpServerInfo { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class ToolContentDtoMapper
+{
+    public static partial ToolContentDto MapToDto(this ToolCallMessageContent source);
 }

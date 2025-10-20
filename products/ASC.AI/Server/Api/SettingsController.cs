@@ -30,7 +30,7 @@ namespace ASC.AI.Api;
 [DefaultRoute]
 [ApiController]
 [ControllerName("ai")]
-public class SettingsController(AiSettingsService aiSettingsService, IMapper mapper) : ControllerBase
+public class SettingsController(AiSettingsService aiSettingsService) : ControllerBase
 {
     [HttpPut("config/web-search")]
     public async Task<WebSearchSettingsDto> SetWebSearchSettingsAsync(SetWebSearchConfigRequestDto inDto)
@@ -40,20 +40,20 @@ public class SettingsController(AiSettingsService aiSettingsService, IMapper map
             inDto.Body.Type, 
             inDto.Body.Key);
 
-        return mapper.Map<WebSearchSettings, WebSearchSettingsDto>(settings);
+        return settings.MapToDto();
     }
     
     [HttpGet("config/web-search")]
     public async Task<WebSearchSettingsDto> GetWebSearchSettingsAsync()
     {
         var settings = await aiSettingsService.GetWebSearchSettingsAsync();
-        return mapper.Map<WebSearchSettings, WebSearchSettingsDto>(settings);
+        return settings.MapToDto();
     }
     
     [HttpGet("config")]
     public async Task<AiSettingsDto> GetAiSettingsAsync()
     {
         var settings = await aiSettingsService.GetAiSettingsAsync();
-        return mapper.Map<AiSettings, AiSettingsDto>(settings);
+        return settings.MapToDto();
     }
 }

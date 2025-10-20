@@ -81,8 +81,6 @@ global using ASC.ElasticSearch.VectorData;
 
 global using Anthropic.SDK;
 
-global using AutoMapper;
-
 global using ModelContextProtocol.Client;
 
 global using Microsoft.Extensions.DependencyInjection;
@@ -107,5 +105,7 @@ global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Threading.Channels;
+
+global using Riok.Mapperly.Abstractions;
 
 global using ZiggyCreatures.Caching.Fusion;

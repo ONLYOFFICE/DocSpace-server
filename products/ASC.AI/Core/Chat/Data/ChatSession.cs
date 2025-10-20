@@ -24,9 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Riok.Mapperly.Abstractions;
+
 namespace ASC.AI.Core.Chat.Data;
 
-public class ChatSession : IMapFrom<DbChat>
+public class ChatSession
 {
     public Guid Id { get; init; }
     public int TenantId { get; init; }
@@ -35,4 +37,10 @@ public class ChatSession : IMapFrom<DbChat>
     public required string Title { get; set; }
     public DateTime CreatedOn { get; init; }
     public DateTime ModifiedOn { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class ChatMapper
+{
+    public static partial ChatSession Map(this DbChat source);
 }

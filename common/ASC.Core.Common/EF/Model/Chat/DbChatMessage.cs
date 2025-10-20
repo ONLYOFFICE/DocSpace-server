@@ -35,7 +35,7 @@ public enum Role
 
 public class DbChatMessage : BaseEntity
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
     public Guid ChatId { get; set; }
     public Role Role { get; set; }
     public required string Content { get; set; }

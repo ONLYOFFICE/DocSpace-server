@@ -28,7 +28,7 @@ namespace ASC.AI.Core.Chat.Completion;
 
 public class MessageStopCompletion : ChatCompletion
 {
-    public int MessageId { get; init; }
+    public long MessageId { get; init; }
     
     public override string GetEventName()
     {

@@ -1253,7 +1253,7 @@ internal class FolderDao(
         if (chatSettings != null)
         {
             toUpdate.Settings.ChatProviderId = chatSettings.ProviderId;
-            toUpdate.Settings.ChatParameters = mapper.Map<ChatSettings, ChatParameters>(chatSettings);
+            toUpdate.Settings.ChatParameters = chatSettings.Map();
         }
         
         if (lifeTime != null)

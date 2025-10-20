@@ -26,8 +26,15 @@
 
 namespace ASC.AI.Core.MCP.Data;
 
-public class McpServerState : IMapFrom<DbMcpServerState>
+public class McpServerState
 {
     public Guid ServerId { get; init; }
     public bool Enabled { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class McpServerStateMapper
+{
+    public static partial McpServerState Map(this DbMcpServerState source);
 }
