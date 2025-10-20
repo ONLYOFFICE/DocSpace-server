@@ -38,17 +38,17 @@ public class RoomTemplatesWorker(
 
     public async Task<string> StartCreateTemplateAsync(int tenantId,
         Guid userId,
-        int roomId, 
-        string title, 
-        IEnumerable<string> emails, 
+        int roomId,
+        string title,
+        IEnumerable<string> emails,
         LogoSettings logo,
         bool CopyLogo,
-        IEnumerable<string> tags, 
+        IEnumerable<string> tags,
         IEnumerable<Guid> groups,
         string cover,
         string color,
         long? quota,
-        bool enqueueTask = true, 
+        bool enqueueTask = true,
         string taskId = null)
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
@@ -88,7 +88,7 @@ public class RoomTemplatesWorker(
 
     public async Task<string> StartCreateRoomAsync(int tenantId,
         Guid userId,
-        int templateId, 
+        int templateId,
         string title,
         LogoSettings logo,
         bool copyLogo,

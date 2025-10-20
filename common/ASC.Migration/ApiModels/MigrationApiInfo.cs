@@ -51,25 +51,25 @@ public class MigrationApiInfo
     public List<string> FailedArchives { get; set; } = [];
 
     /// <summary>
-    /// The list of migrating API users.
+    /// The list of migrating users.
     /// </summary>
     [ProtoMember(4)]
     public List<MigratingApiUser> Users { get; set; } = [];
 
     /// <summary>
-    /// The list of migrating API users without email.
+    /// The list of migrating users without email.
     /// </summary>
     [ProtoMember(5)]
     public List<MigratingApiUser> WithoutEmailUsers { get; set; } = [];
 
     /// <summary>
-    /// The list of migrating API existing users.
+    /// The list of existing migrating users.
     /// </summary>
     [ProtoMember(6)]
     public List<MigratingApiUser> ExistUsers { get; set; } = [];
 
     /// <summary>
-    /// The list of migrating API groups.
+    /// The list of migrating groups.
     /// </summary>
     [ProtoMember(7)]
     public List<MigratingApiGroup> Groups { get; set; } = [];

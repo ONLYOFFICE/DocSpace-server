@@ -278,7 +278,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                     var urlShortener = scope.ServiceProvider.GetRequiredService<IUrlShortener>();
 
                     var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(ldapUserInfo.Email, ConfirmType.EmailActivation);
-                   
+
                     await client.SendNoticeToAsync(
                         NotifyConstants.ActionLdapActivation,
                         [new DirectRecipient(ldapUserInfo.Email, null, [ldapUserInfo.Email], false)],
@@ -287,7 +287,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                         new TagValue(NotifyConstants.TagUserName, ldapUserInfo.DisplayUserName(displayUserSettingsHelper)),
                         new TagValue(NotifyConstants.TagUserEmail, ldapUserInfo.Email),
                         new TagValue(NotifyConstants.TagMyStaffLink, commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff())),
-                        NotifyConstants.TagOrangeButton(_resource.NotifyButtonJoin,  await urlShortener.GetShortenLinkAsync(confirmLink)),
+                        NotifyConstants.TagOrangeButton(_resource.NotifyButtonJoin, await urlShortener.GetShortenLinkAsync(confirmLink)),
                         new TagValue(NotifyCommonTags.WithoutUnsubscribe, true));
                 }
 

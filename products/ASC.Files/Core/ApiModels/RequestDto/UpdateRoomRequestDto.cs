@@ -71,7 +71,7 @@ public class UpdateRoomRequest
     /// The list of tags.
     /// </summary>
     public IEnumerable<string> Tags { get; set; }
-    
+
     /// <summary>
     /// The room color.
     /// </summary>
@@ -102,5 +102,5 @@ public class UpdateRoomRequestDto<T>
     /// The request parameters for updating a room.
     /// </summary>
     [FromBody]
-    public UpdateRoomRequest UpdateRoom { get; set; }
+    public required UpdateRoomRequest UpdateRoom { get; set; }
 }

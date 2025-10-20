@@ -34,12 +34,12 @@ public class NewItemsDto<TItem>
     /// <summary>
     /// The date and time when the new item was created.
     /// </summary>
-    public ApiDateTime Date { get; init; }
+    public required ApiDateTime Date { get; init; }
 
     /// <summary>
     /// The list of items.
     /// </summary>
-    public IEnumerable<TItem> Items { get; init; }
+    public required IEnumerable<TItem> Items { get; init; }
 }
 
 /// <summary>
@@ -77,14 +77,14 @@ public class RoomNewItemsDtoHelper(FileDtoHelper fileDtoHelper, FolderDtoHelper 
         {
             files.Add(await GetFileEntryDtoAsync(entry));
         }
-        
+
         return new RoomNewItemsDto
         {
             Room = roomDto,
             Items = files
         };
     }
-    
+
     private async Task<FileEntryBaseDto> GetFileEntryDtoAsync(FileEntry entry)
     {
         FileEntryBaseDto dto;
@@ -109,7 +109,7 @@ public class RoomNewItemsDtoHelper(FileDtoHelper fileDtoHelper, FolderDtoHelper 
 
         return dto;
     }
-    
+
     private async Task<FileEntryBaseDto> GetShortRoomDtoAsync(FileEntry entry)
     {
         return entry switch

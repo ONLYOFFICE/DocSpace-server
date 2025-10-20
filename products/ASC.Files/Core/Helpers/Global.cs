@@ -125,14 +125,10 @@ public partial class Global(
     IConfiguration configuration,
     AuthContext authContext,
     UserManager userManager,
-    CoreSettings coreSettings,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     CustomNamingPeople customNamingPeople,
-    FileSecurityCommon fileSecurityCommon,
-    IDistributedLockProvider distributedLockProvider)
+    FileSecurityCommon fileSecurityCommon)
 {
-    #region Property
-
     private DocThumbnailExtension? _docThumbnailExtension;
     public DocThumbnailExtension DocThumbnailExtension
     {
@@ -142,7 +138,7 @@ public partial class Global(
             {
                 return _docThumbnailExtension.Value;
             }
-            
+
             if (!DocThumbnailExtensionExtensions.TryParse(configuration["files:thumbnail:docs-exts"] ?? "jpg", true, out var fromConfig))
             {
                 fromConfig = DocThumbnailExtension.jpg;
@@ -152,7 +148,7 @@ public partial class Global(
             return fromConfig;
         }
     }
-    
+
     private ThumbnailExtension? _thumbnailExtension;
     public ThumbnailExtension ThumbnailExtension
     {
@@ -162,17 +158,17 @@ public partial class Global(
             {
                 return _thumbnailExtension.Value;
             }
-            
-            if (!ThumbnailExtensionExtensions.TryParse(configuration["files:thumbnail:exts"] ?? "webp", true,  out var fromConfig))
+
+            if (!ThumbnailExtensionExtensions.TryParse(configuration["files:thumbnail:exts"] ?? "webp", true, out var fromConfig))
             {
                 fromConfig = ThumbnailExtension.jpg;
             }
-            
+
             _thumbnailExtension = fromConfig;
             return fromConfig;
         }
     }
-    
+
     private List<string> _imageThumbnailExtension;
     public List<string> ImageThumbnailExtension
     {
@@ -182,7 +178,7 @@ public partial class Global(
             {
                 return _imageThumbnailExtension;
             }
-            
+
             _imageThumbnailExtension = configuration.GetSection("files:thumbnail:img-exts").Get<List<string>>() ?? [".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tif", ".tga", ".webp", ".heic"];
             return _imageThumbnailExtension;
         }
@@ -210,34 +206,6 @@ public partial class Global(
 
     public Task<bool> IsDocSpaceAdministratorAsync => fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
 
-    public async Task<string> GetDocDbKeyAsync()
-    {
-        const string dbKey = "UniqueDocument";
-        
-        // check without lock
-        var resultKey = await coreSettings.GetSettingAsync(dbKey);
-        if (!string.IsNullOrEmpty(resultKey))
-        {
-            return resultKey;
-        }
-        
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(dbKey))
-        {
-            // check again with lock
-            resultKey = await coreSettings.GetSettingAsync(dbKey);
-            if (!string.IsNullOrEmpty(resultKey))
-            {
-                return resultKey;
-            }
-            
-            resultKey = Guid.NewGuid().ToString();
-            await coreSettings.SaveSettingAsync(dbKey, resultKey);
-
-            return resultKey;
-        }
-    }
-
-    #endregion
 
     public static string ReplaceInvalidCharsAndTruncate(string title)
     {
@@ -283,7 +251,7 @@ public partial class Global(
 
         return userInfo.DisplayUserName(false, displayUserSettingsHelper);
     }
-    
+
     public async Task<string> GetAvailableTitleAsync<T>(string requestTitle, T parentFolderId, Func<string, T, Task<bool>> isExist, FileEntryType fileEntryType)
     {
         if (!await isExist(requestTitle, parentFolderId))
@@ -292,7 +260,7 @@ public partial class Global(
         }
 
         var re = MyRegex();
-        
+
         var insertIndex = requestTitle.Length;
         if (fileEntryType == FileEntryType.File && requestTitle.LastIndexOf('.') != -1)
         {
@@ -308,7 +276,7 @@ public partial class Global(
 
         return requestTitle;
     }
-    
+
     private static string MatchEvaluator(Match match)
     {
         var index = Convert.ToInt32(match.Groups[2].Value);
@@ -530,11 +498,11 @@ public class GlobalFolder(
         }
 
         commonFolderId = await GetFolderIdAndProcessFirstVisitAsync(daoFactory, false);
-        
-            if (!Equals(commonFolderId, 0))
-            {
-                CommonFolderCache[tenant.Id] = commonFolderId;
-            }
+
+        if (!Equals(commonFolderId, 0))
+        {
+            CommonFolderCache[tenant.Id] = commonFolderId;
+        }
 
         return commonFolderId;
     }
@@ -727,7 +695,7 @@ public class GlobalFolder(
         }
 
         id = my ? await folderDao.GetFolderIDUserAsync(true) : await folderDao.GetFolderIDCommonAsync(true);
-        
+
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).StartDocsEnabled)
         {
             return id;
@@ -736,22 +704,22 @@ public class GlobalFolder(
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
 
-        var task = new Task(async () => await CreateSampleDocumentsAsync(serviceProvider, tenantId, userId, id, my), 
+        var task = new Task(async () => await CreateSampleDocumentsAsync(serviceProvider, tenantId, userId, id, my),
             TaskCreationOptions.LongRunning);
 
         _ = task.ConfigureAwait(false);
-        
+
         task.Start();
 
         return id;
     }
-    
+
     private async Task CreateSampleDocumentsAsync(IServiceProvider serviceProvider, int tenantId, Guid userId, int folderId, bool my)
     {
         try
         {
             await using var scope = serviceProvider.CreateAsyncScope();
-            
+
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
 
@@ -778,16 +746,16 @@ public class GlobalFolder(
             logger.ErrorCreateSampleDocuments(e);
         }
     }
-    
-    private async Task SaveSampleDocumentsAsync(IServiceProvider serviceProvider, FileMarker fileMarker, FolderDao folderDao, FileDao fileDao, SocketManager socketManager, 
+
+    private async Task SaveSampleDocumentsAsync(IServiceProvider serviceProvider, FileMarker fileMarker, FolderDao folderDao, FileDao fileDao, SocketManager socketManager,
         int folderId, string path, IDataStore storeTemplate)
-    { 
+    {
         var files = await storeTemplate.ListFilesRelativeAsync("", path, "*", false)
             .Where(f => FileUtility.GetFileTypeByFileName(f) is not (FileType.Audio or FileType.Video))
             .ToListAsync();
-        
+
         logger.Debug($"Found {files.Count} sample documents. Path: {path}");
-        
+
         foreach (var file in files)
         {
             await SaveFileAsync(serviceProvider, storeTemplate, fileMarker, fileDao, socketManager, path + file, folderId, files);
@@ -802,16 +770,16 @@ public class GlobalFolder(
                 folder.ParentId = folderId;
 
                 var subFolderId = await folderDao.SaveFolderAsync(folder);
-                    
+
                 var subFolder = await folderDao.GetFolderAsync(subFolderId);
                 await socketManager.CreateFolderAsync(subFolder);
-                    
+
                 await SaveSampleDocumentsAsync(serviceProvider, fileMarker, folderDao, fileDao, socketManager, folderId, path + folderName + "/", storeTemplate);
             }
             catch (Exception e)
             {
                 logger.ErrorSaveSampleFolder(e);
-            }   
+            }
         }
     }
 
@@ -821,9 +789,9 @@ public class GlobalFolder(
         try
         {
             var fileName = Path.GetFileName(filePath);
-            
-            foreach (var ext in Enum.GetValues<ThumbnailExtension>()) 
-            { 
+
+            foreach (var ext in Enum.GetValues<ThumbnailExtension>())
+            {
                 if (FileUtility.GetFileExtension(filePath) == "." + ext
                     && files.Contains(Regex.Replace(fileName, "\\." + ext + "$", "")))
                 {
@@ -842,7 +810,7 @@ public class GlobalFolder(
             {
                 newFile.Category = (int)FilterType.PdfForm;
             }
-           
+
             await using (var stream = await storeTemplate.GetReadStreamAsync("", filePath))
             {
                 newFile.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync("", filePath);
@@ -914,12 +882,12 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     {
         return IdConverter.Convert<T>(await FolderRecentAsync);
     }
-    
+
     public async ValueTask<T> GetFolderFavoritesAsync<T>()
     {
         return IdConverter.Convert<T>(await FolderFavoritesAsync);
     }
-    
+
     public ValueTask<int> FolderShareAsync => globalFolder.GetFolderShareAsync(daoFactory);
 
     public void SetFolderTrashAsync(object value)

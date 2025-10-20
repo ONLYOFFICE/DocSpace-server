@@ -35,7 +35,7 @@ public class FormFillingReportIntegrationEventHandler(
     IServiceProvider serviceProvider)
     : IIntegrationEventHandler<FormFillingReportIntegrationEvent>
 {
-    
+
     public async Task Handle(FormFillingReportIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();

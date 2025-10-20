@@ -342,7 +342,7 @@ public class CspOptions
     public List<string> Media { get; set; } = [];
 
     public int MaxSize { get; set; } = 15 * 1024;
-    
+
     public CspOptions()
     {
     }

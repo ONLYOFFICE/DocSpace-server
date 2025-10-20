@@ -215,8 +215,6 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     [HttpPost("@common/upload")]
     public async Task<object> UploadFileToCommon([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
-        inDto.CreateNewIfExist = false;
-
         return await filesControllerHelper.UploadFileAsync(await globalFolderHelper.FolderCommonAsync, inDto);
     }
 
@@ -240,8 +238,6 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     [HttpPost("@my/upload")]
     public async Task<object> UploadFileToMy([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
-        inDto.CreateNewIfExist = false;
-
         return await filesControllerHelper.UploadFileAsync(await globalFolderHelper.FolderMyAsync, inDto);
     }
 }

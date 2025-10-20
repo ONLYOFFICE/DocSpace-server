@@ -123,7 +123,7 @@ public static class SubscriptionExtension
                 .HasColumnName("unsubscribed")
                 .HasColumnType("tinyint(1)")
                 .HasDefaultValueSql("'0'");
-                
+
         });
     }
     public static void PgSqlAddSubscription(this ModelBuilder modelBuilder)

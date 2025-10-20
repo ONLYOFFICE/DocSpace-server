@@ -72,5 +72,5 @@ public class LogoRequest<T>
     /// The logo request parameters.
     /// </summary>
     [FromBody]
-    public LogoRequest Logo { get; set; }
+    public required LogoRequest Logo { get; set; }
 }

@@ -30,7 +30,7 @@ namespace ASC.Web.Files;
 public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
     private readonly DistributedTaskQueue<UsersQuotaSyncJob> _progressQueue = queueFactory.CreateQueue<UsersQuotaSyncJob>();
-    
+
     public async Task RecalculateQuota(Tenant tenant)
     {
         var item = (await _progressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenant.Id);
@@ -76,12 +76,12 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     public int TenantId { get; set; }
-    
+
     public UsersQuotaSyncJob()
     {
-        
+
     }
-    
+
     public UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory)
     {
         _serviceScopeFactory = serviceScopeFactory;
@@ -100,13 +100,13 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
 
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var tenant = await tenantManager.SetCurrentTenantAsync(TenantId);
-            
+
             var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
             var authentication = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             var filesSpaceUsageStatManager = scope.ServiceProvider.GetRequiredService<FilesSpaceUsageStatManager>();
-            
+
             await filesSpaceUsageStatManager.RecalculateQuota(tenant.Id);
 
             var tenantQuotaSettings = await settingsManager.LoadAsync<TenantQuotaSettings>();
@@ -152,7 +152,7 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
         {
             IsCompleted = true;
         }
-        
+
         await PublishChanges();
     }
 }

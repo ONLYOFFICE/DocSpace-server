@@ -43,7 +43,7 @@ public class MigrationCore(
 
     public async Task StartParseAsync(string migrationName)
     {
-       await eventBus.PublishAsync(new MigrationParseIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
+        await eventBus.PublishAsync(new MigrationParseIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             MigratorName = migrationName
         });
@@ -51,7 +51,7 @@ public class MigrationCore(
 
     public async Task StartAsync(MigrationApiInfo info)
     {
-       await  eventBus.PublishAsync(new MigrationIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
+        await eventBus.PublishAsync(new MigrationIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             ApiInfo = info
         });

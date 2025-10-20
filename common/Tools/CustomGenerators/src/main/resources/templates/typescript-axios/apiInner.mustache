@@ -31,7 +31,13 @@ import type { {{classname}} } from '../../{{tsModelPackage}}';
  * @export
  */
 export const {{x-classname}}AxiosParamCreator = function (configuration?: Configuration) {
+    {{#x-supportsFields}}let fields: string | undefined;{{/x-supportsFields}}
     return {
+        {{#x-supportsFields}}
+        withFields: (f: string) => {
+            fields = f;
+        },
+        {{/x-supportsFields}}
     {{#operation}}
         /**
          * {{&notes}}
@@ -223,6 +229,11 @@ export const {{x-classname}}AxiosParamCreator = function (configuration?: Config
             }
             {{/isArray}}
     {{/headerParams}}
+    {{#vendorExtensions.x-hasFieldsParam}}
+            if(fields !== undefined) {
+                localVarHeaderParameter['fields'] = fields;
+            }
+    {{/vendorExtensions.x-hasFieldsParam}}
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions,{{#hasFormParams}}{{#multipartFormData}} ...(localVarFormParams as any).getHeaders?.(),{{/multipartFormData}}{{/hasFormParams}} ...options.headers};

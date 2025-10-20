@@ -35,6 +35,8 @@ var options = new WebApplicationOptions
 var builder = WebApplication.CreateBuilder(options);
 
 builder.Configuration.AddDefaultConfiguration(builder.Environment)
+                     .AddJsonFile("notify.json", optional: false, reloadOnChange: true)
+                     .AddJsonFile($"notify.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
                      .AddEnvironmentVariables()
                      .AddCommandLine(args);
 

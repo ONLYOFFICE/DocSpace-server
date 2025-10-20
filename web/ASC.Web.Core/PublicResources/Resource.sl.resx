@@ -269,7 +269,7 @@
     <value>Kaj je novega</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Spremljanje uporabnikovih prijav &amp; akcij</value>
+    <value>Sledenje prijavam in dejanjem</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Maksimalna velikost datotek</value>
@@ -284,7 +284,7 @@
     <value>Število skrbnikov</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Samodejno varnostno kopiranje &amp; obnovitev</value>
+    <value>Obnovitev podatkov</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Neomejeno število aktivnih sob</value>
@@ -311,7 +311,7 @@
     <value>Uporabnikov v sobi:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Neomejeno število uporabnikov</value>
+    <value>Neomejeno število uporabnikov in gostov</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Število uporabnikov ne sme presegati {0}</value>
@@ -1116,5 +1116,50 @@
   </data>
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Uporabljen prostor za shranjevanje:</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Samodejno podaljšanje</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Število brezplačnih varnostnih kopij ne sme preseči {0} v enem mesecu</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Varnostno kopiraj</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Varnostno kopiraj</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Podrobnosti</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debetna</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Kontakt</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Varnostno kopiraj</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} brezplačnih varnostnih kopij na mesec</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Zgodovina transakcij</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Samodejno polnjenje</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Zahtevano plačilo</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Omogočite varnostne kopije za svoj DocSpace. Stroški se bodo zaračunavali samodejno.</value>
   </data>
 </root>

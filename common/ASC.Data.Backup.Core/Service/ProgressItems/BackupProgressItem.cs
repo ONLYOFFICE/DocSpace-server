@@ -49,7 +49,7 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
 
     public BackupProgressItem()
     {
-        
+
     }
 
     public BackupProgressItem(ILogger<BackupProgressItem> logger,

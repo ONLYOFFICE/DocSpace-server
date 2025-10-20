@@ -368,7 +368,7 @@
     <value>Neler Yeni</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Kullanıcı girişlerini ve eylemlerini izleme</value>
+    <value>Oturum açma ve eylemleri izleme</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Maks. Dosya Boyutu</value>
@@ -383,7 +383,7 @@
     <value>Yönetici sayısı</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Otomatik yedekleme ve kurtarma</value>
+    <value>Veri kurtarma</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Sınırsız sayıda aktif oda</value>
@@ -410,7 +410,7 @@
     <value>Odadaki kullanıcılar:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Sınırsız sayıda kullanıcı</value>
+    <value>Sınırsız sayıda kullanıcı ve misafir</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Kullanıcı sayısı {0} değerini geçmemelidir</value>
@@ -1116,5 +1116,50 @@
   </data>
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Kullanılan depolama alanı:</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Otomatik yenileme</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Ücretsiz yedekleme sayısı bir ay içinde {0}'ı geçmemelidir</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>DocSpace'iniz için yedeklemeleri etkinleştirin. Ücretler otomatik olarak faturalandırılacaktır.</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Borç</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Temas etmek</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>İşlem geçmişi</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Otomatik yükleme</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>Ayda {0} ücretsiz yedekleme</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Ödeme gerekli</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detaylar</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Yedekleme</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Yedekleme</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Yedekleme</value>
   </data>
 </root>

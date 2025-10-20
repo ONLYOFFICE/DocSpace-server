@@ -102,7 +102,7 @@ public static class DbFileExtension
 
         return modelBuilder;
     }
-    
+
     public static void MySqlAddDbFiles(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFile>(entity =>
@@ -228,7 +228,7 @@ public static class DbFileExtension
         });
 
     }
-    
+
     public static void PgSqlAddDbFiles(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFile>(entity =>

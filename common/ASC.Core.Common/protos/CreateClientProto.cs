@@ -44,4 +44,3 @@ public record CreateClientProto
     [ProtoMember(5)]
     public string Time { get; set; }
 }
-

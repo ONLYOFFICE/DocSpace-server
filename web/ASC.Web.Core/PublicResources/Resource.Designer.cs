@@ -1546,6 +1546,51 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to WeChat.
+        /// </summary>
+        public static string ConsumersWeixin {
+            get {
+                return ResourceManager.GetString("ConsumersWeixin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client ID.
+        /// </summary>
+        public static string ConsumersWeixinClientId {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinClientId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client Secret.
+        /// </summary>
+        public static string ConsumersWeixinClientSecret {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinClientSecret", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a WeChat account..
+        /// </summary>
+        public static string ConsumersWeixinDescription {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a WeChat account..
+        /// </summary>
+        public static string ConsumersWeixinInstruction {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinInstruction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to WordPress.
         /// </summary>
         public static string ConsumersWordpress {
@@ -1749,6 +1794,60 @@ namespace ASC.Web.Core.PublicResources {
         public static string CustomNamingPeopleSchema {
             get {
                 return ResourceManager.GetString("CustomNamingPeopleSchema", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Date.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaDate {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaEmail {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to First name.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaFirstName {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaFirstName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Id.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaId {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Last name.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaLastName {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaLastName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Document Service Quota ({0}).
+        /// </summary>
+        public static string DocumentServerLicenseQuotaReportName {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaReportName", resourceCulture);
             }
         }
         
@@ -2190,6 +2289,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string ErrorWebPluginForbiddenSystem {
             get {
                 return ResourceManager.GetString("ErrorWebPluginForbiddenSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of plugins exceeds the limit.
+        /// </summary>
+        public static string ErrorWebPluginMaxCount {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginMaxCount", resourceCulture);
             }
         }
         
@@ -3306,6 +3414,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_usersQuotaExceeds_exception {
             get {
                 return ResourceManager.GetString("TariffsFeature_usersQuotaExceeds_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An unexpected error occurred. Please try again..
+        /// </summary>
+        public static string TelegramOnGenericError {
+            get {
+                return ResourceManager.GetString("TelegramOnGenericError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have been successfully connected Telegram to receive notifications from your DocSpace..
+        /// </summary>
+        public static string TelegramOnSuccessfulLink {
+            get {
+                return ResourceManager.GetString("TelegramOnSuccessfulLink", resourceCulture);
             }
         }
         

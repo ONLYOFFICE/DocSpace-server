@@ -29,7 +29,7 @@ namespace ASC.Core.Common.Quota.Custom;
 public class CustomQuota
 {
     private IReadOnlyList<CustomQuotaFeature> CustomQuotaFeatures { get; }
-    
+
     public CustomQuota()
     {
         var userCustomQuotaFeature = new UserCustomQuotaFeature();

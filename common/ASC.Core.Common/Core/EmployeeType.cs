@@ -45,7 +45,7 @@ public enum EmployeeType
 
     [SwaggerEnum("DocSpace admin")]
     DocSpaceAdmin = 3,
-	
+
     [SwaggerEnum("User")]
     User = 4
 }

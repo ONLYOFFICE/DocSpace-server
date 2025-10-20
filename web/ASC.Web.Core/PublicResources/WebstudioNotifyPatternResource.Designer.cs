@@ -1981,6 +1981,42 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName,
+        ///
+        ///The scheduled backup process for your DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; has failed.
+        ///
+        ///We recommend checking the &quot;Backup&quot;:&quot;${__VirtualRootPath}/portal-settings/backup/data-backup&quot; and &quot;Services&quot;:&quot;${__VirtualRootPath}/portal-settings/services&quot; settings.
+        ///
+        ///If you have any questions or need assistance, please don’t hesitate to contact us via &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_scheduled_backup_failed {
+            get {
+                return ResourceManager.GetString("pattern_scheduled_backup_failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName,
+        ///
+        ///The scheduled backup process for your DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) has failed.
+        ///
+        ///We recommend checking the [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) and [Services](${__VirtualRootPath}/portal-settings/services) settings.
+        ///
+        ///If you have any questions or need assistance, please don’t hesitate to contact us via [${__SupportLink}](${__SupportLink})
+        ///
+        ///Best regards,
+        ///${LetterLogoText} Support Team
+        ///[${__SiteLink}](${__SiteLink}).
+        /// </summary>
+        public static string pattern_scheduled_backup_failed_tg {
+            get {
+                return ResourceManager.GetString("pattern_scheduled_backup_failed_tg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1.&quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal profile change notification
         ///
         ///&quot;$__AuthorName&quot;:&quot;$__AuthorUrl&quot; has changed his/her profile details at the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal.
@@ -2992,6 +3028,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_saas_video_guides_v1 {
             get {
                 return ResourceManager.GetString("subject_saas_video_guides_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Auto backup for your DocSpace failed.
+        /// </summary>
+        public static string subject_scheduled_backup_failed {
+            get {
+                return ResourceManager.GetString("subject_scheduled_backup_failed", resourceCulture);
             }
         }
         

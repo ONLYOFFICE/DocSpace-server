@@ -31,6 +31,6 @@ public class NLogSettings
     public string Name { get; set; }
     public string Dir { get; set; }
     public string AWSAccessKeyId { get; set; }
-    public string AWSSecretAccessKey {get; set;}
+    public string AWSSecretAccessKey { get; set; }
 
 }

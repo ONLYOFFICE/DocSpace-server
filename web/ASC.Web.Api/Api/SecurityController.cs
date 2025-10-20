@@ -51,7 +51,7 @@ public class SecurityController(
         SettingsManager settingsManager,
         AuditActionMapper auditActionMapper,
         CoreBaseSettings coreBaseSettings,
-        CspSettingsHelper cspSettingsHelper, 
+        CspSettingsHelper cspSettingsHelper,
         ApiDateTimeHelper apiDateTimeHelper,
         IdentityClient identityClient)
     : ControllerBase
@@ -74,7 +74,8 @@ public class SecurityController(
 
         DemandBaseAuditPermission();
 
-        return (await loginEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20)).Select(x => new LoginEventDto(x, apiDateTimeHelper));
+        return (await loginEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20, limitedActionText: true))
+            .Select(x => new LoginEventDto(x, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -100,7 +101,7 @@ public class SecurityController(
         var to = DateTime.UtcNow;
         var from = to.Subtract(TimeSpan.FromDays(settings.AuditTrailLifeTime));
 
-        return (await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20, from: from, to: to))
+        return (await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20, from: from, to: to, limitedActionText: true))
             .Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
@@ -350,7 +351,7 @@ public class SecurityController(
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "Ok", typeof(CspDto))]
     [SwaggerResponse(400, "Exception in Domains")]
-    [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName )]
+    [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpPost("csp")]
     public async Task<CspDto> ConfigureCsp(CspRequestsDto request)
     {
@@ -368,7 +369,7 @@ public class SecurityController(
                 {
                     uriString = uriString.Replace("*.", "");
                 }
-                
+
                 if (!uriString.Contains(Uri.SchemeDelimiter))
                 {
                     uriString = string.Concat(Uri.UriSchemeHttp, Uri.SchemeDelimiter, uriString);
@@ -402,14 +403,14 @@ public class SecurityController(
     public async Task<CspDto> GetCspSettings()
     {
         //await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        
+
         var settings = await cspSettingsHelper.LoadAsync(HttpContext.GetIfModifiedSince());
 
         if (HttpContext.TryGetFromCache(settings.LastModified))
         {
             return null;
         }
-        
+
         return new CspDto
         {
             Domains = settings.Domains ?? [],
@@ -431,7 +432,7 @@ public class SecurityController(
     {
         return await identityClient.GenerateJwtTokenAsync();
     }
-    
+
 
     private async Task DemandAuditPermissionAsync()
     {

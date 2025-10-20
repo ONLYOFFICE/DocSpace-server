@@ -64,7 +64,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         UpgradesPath = upgradesPath;
         _columnMapper = columnMapper ?? new ColumnMapper();
         _region = region;
-        _expectDump = expectDump; 
+        _expectDump = expectDump;
         Init(tenantId);
     }
 
@@ -169,7 +169,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         }
 
         var stepscount = keys.Count * 2 + upgrades.Count;
-        
+
         foreach (var db in dbs)
         {
             var keys1 = dataReader.GetEntries(db + "/" + keyBase).Select(Path.GetFileName).ToList();
@@ -373,7 +373,7 @@ public class RestorePortalTask(DbFactory dbFactory,
             foreach (var module in storageModules)
             {
                 var storage = await StorageFactory.GetStorageAsync(tenant.Id, module, _region);
-                var domains = StorageFactoryConfig.GetDomainList(module, region:_region).ToList();
+                var domains = StorageFactoryConfig.GetDomainList(module, region: _region).ToList();
 
                 domains.Add(string.Empty); //instead storage.DeleteFiles("\\", "*.*", true);
 

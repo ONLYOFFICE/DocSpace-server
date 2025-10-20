@@ -119,28 +119,28 @@ public abstract class Migrator(
 
         var progressStep = _usersForImport.Count == 0 ? 30 : 30 / _usersForImport.Count;
         var i = 1;
-        foreach (var kv in _usersForImport.Where(u=> !_failedUsers.Contains(u.Value.Info.Email)))
+        foreach (var kv in _usersForImport.Where(u => !_failedUsers.Contains(u.Value.Info.Email)))
         {
             try
             {
                 await ReportProgressAsync(_lastProgressUpdate + progressStep, string.Format(MigrationResource.MigratingUserFiles, kv.Value.Info.DisplayUserName(DisplayUserSettingsHelper), i++, _usersForImport.Count));
                 await MigrateStorageAsync(kv.Value.Storage, kv.Value);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log(MigrationResource.CanNotImportUserFiles, e);
-                MigrationInfo.Errors.Add($"{kv.Key} - {MigrationResource.CanNotImportUserFiles}"); 
+                MigrationInfo.Errors.Add($"{kv.Key} - {MigrationResource.CanNotImportUserFiles}");
             }
         }
 
-        if(MigrationInfo.CommonStorage != null)
+        if (MigrationInfo.CommonStorage != null)
         {
             try
             {
                 await ReportProgressAsync(85, string.Format(MigrationResource.MigrationCommonFiles));
                 await MigrateStorageAsync(MigrationInfo.CommonStorage);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log(MigrationResource.СanNotImportCommonFiles, e);
                 MigrationInfo.Errors.Add(MigrationResource.СanNotImportCommonFiles);
@@ -234,7 +234,7 @@ public abstract class Migrator(
                     _importedUsers.Add(user.Info.Email);
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log(MigrationResource.CanNotImportUser, e);
                 MigrationInfo.Errors.Add($"{key} - {MigrationResource.CanNotImportUser}");
@@ -248,7 +248,7 @@ public abstract class Migrator(
     {
         user.Info.UserName ??= user.Info.Email.Split('@').First();
         user.Info.LastName ??= user.Info.FirstName;
-        }
+    }
 
     private async Task MigrateGroupAsync()
     {
@@ -259,7 +259,7 @@ public abstract class Migrator(
             var group = kv.Value;
 
             await ReportProgressAsync(_lastProgressUpdate + progressStep, string.Format(MigrationResource.GroupMigration, group.Info.Name, i++, MigrationInfo.Groups.Count));
-            
+
             if (!group.ShouldImport)
             {
                 return;
@@ -320,12 +320,12 @@ public abstract class Migrator(
 
         var matchingFilesIds = new Dictionary<string, FileEntry<int>>();
         Folder<int> newFolder;
-        if (storage.Type != FolderType.BUNCH) 
+        if (storage.Type != FolderType.BUNCH)
         {
             newFolder = storage.Type == FolderType.USER
             ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
                     : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
-        Log(MigrationResource.СreateRootFolder);
+            Log(MigrationResource.СreateRootFolder);
         }
         else
         {
@@ -406,7 +406,7 @@ public abstract class Migrator(
         var aces = new Dictionary<string, AceWrapper>();
         var matchingRoomIds = new Dictionary<int, FileEntry<int>>();
         var innerFolders = new List<int>();
-        var orderedSecurity = storage.Securities.OrderBy(s => OrderSecurity(storage,s));
+        var orderedSecurity = storage.Securities.OrderBy(s => OrderSecurity(storage, s));
         foreach (var security in orderedSecurity)
         {
             try
@@ -417,11 +417,11 @@ public abstract class Migrator(
                 }
                 var access = (Files.Core.Security.FileShare)security.Security;
 
-                    var entryIsFile = security.EntryType == 2;
+                var entryIsFile = security.EntryType == 2;
                 if (entryIsFile && storage.ShouldImportSharedFiles)
                 {
                     var key = $"{FileKey}-{security.EntryId}";
-                    if(!matchingFilesIds.ContainsKey(key))
+                    if (!matchingFilesIds.ContainsKey(key))
                     {
                         continue;
                     }
@@ -466,7 +466,7 @@ public abstract class Migrator(
                                 Offset = 0,
                                 Area = Area.All
                             };
-                            
+
                             var users = UserManager.GetUsers(filter).Where(u => u.Id != user.Info.Id);
                             await foreach (var u in users)
                             {
@@ -563,7 +563,7 @@ public abstract class Migrator(
                                     matchingFilesIds.Add($"{FileKey}-{file.Id}", newFile);
                                 }
                             }
-                            catch(Exception ex)
+                            catch (Exception ex)
                             {
                                 Log(string.Format(MigrationResource.CanNotCreateFile, Path.GetFileName(file.Title)), ex);
                                 MigrationInfo.Errors.Add(string.Format(MigrationResource.CanNotCreateFile, Path.GetFileName(file.Title)));
@@ -580,8 +580,8 @@ public abstract class Migrator(
                         new()
                         {
                             Access = access,
-                            Id = MigrationInfo.Users.TryGetValue(security.Subject, out var infoUser) 
-                                ? infoUser.Info.Id 
+                            Id = MigrationInfo.Users.TryGetValue(security.Subject, out var infoUser)
+                                ? infoUser.Info.Id
                                 : MigrationInfo.Groups[security.Subject].Info.ID
                         }
                     };
@@ -607,7 +607,7 @@ public abstract class Migrator(
 
     private static int OrderSecurity(MigrationStorage storage, MigrationSecurity security)
     {
-        if(security.EntryType != 1)
+        if (security.EntryType != 1)
         {
             return 0;
         }

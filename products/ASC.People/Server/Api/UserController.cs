@@ -27,6 +27,7 @@
 using System.Globalization;
 
 using ASC.Core.Common.Identity;
+using ASC.MessagingSystem;
 
 namespace ASC.People.Api;
 
@@ -73,7 +74,7 @@ public class UserController(
     CountPaidUserChecker countPaidUserChecker,
     CountUserChecker activeUsersChecker,
     IUrlShortener urlShortener,
-    FileSecurityCommon fileSecurityCommon, 
+    FileSecurityCommon fileSecurityCommon,
     IDistributedLockProvider distributedLockProvider,
     QuotaSocketManager quotaSocketManager,
     IQuotaService quotaService,
@@ -84,6 +85,8 @@ public class UserController(
     UserSocketManager socketManager,
     GlobalFolderHelper globalFolderHelper,
     UserWebhookManager webhookManager,
+    BruteForceLoginManager bruteForceLoginManager,
+    SetupInfo setupInfo,
     IdentityClient client,
     GroupFullDtoHelper groupFullDtoHelper)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
@@ -91,6 +94,9 @@ public class UserController(
     /// <summary>
     /// Returns the user claims.
     /// </summary>
+    /// <short>
+    /// Get user claims
+    /// </short>
     /// <path>api/2.0/people/tokendiagnostics</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Claims", typeof(object))]
@@ -172,7 +178,7 @@ public class UserController(
         {
             user.Sex = inDto.Sex.Value == SexEnum.Male;
         }
-        
+
         user.Spam = inDto.Spam;
         user.BirthDate = inDto.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         user.WorkFromDate = inDto.Worksfrom != null ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
@@ -234,8 +240,8 @@ public class UserController(
             await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
             var tenant = tenantManager.GetCurrentTenant();
             var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-            var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
-            
+            var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id);
+
             switch (inDto.Type)
             {
                 case EmployeeType.Guest:
@@ -323,18 +329,18 @@ public class UserController(
         user.BirthDate = inDto.Birthday != null && inDto.Birthday != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         user.WorkFromDate = inDto.Worksfrom != null && inDto.Worksfrom != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
         user.Status = EmployeeStatus.Active;
-        
+
         await UpdateContactsAsync(inDto.Contacts, user, !inDto.FromInviteLink);
 
         cache.Insert("REWRITE_URL" + tenantManager.GetCurrentTenantId(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
 
         var quotaLimit = false;
-        
+
         try
         {
             user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, inDto.Type,
                 inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
-            if(inDto.Type is EmployeeType.Guest)
+            if (inDto.Type is EmployeeType.Guest)
             {
                 await socketManager.AddGuestAsync(user);
             }
@@ -405,12 +411,12 @@ public class UserController(
         var currentUserType = await _userManager.GetUserTypeAsync(currentUser);
 
         var tenant = tenantManager.GetCurrentTenant();
-        
+
         if (currentUserType is EmployeeType.User or EmployeeType.Guest)
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
-        
+
         var quotaIncreaseBy = inDto.Invitations.Count(x => x.Type is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin);
         if (quotaIncreaseBy > 0)
         {
@@ -418,7 +424,7 @@ public class UserController(
             var quota = await tenantManager.GetTenantQuotaAsync(tenantId);
             var maxCount = quota.GetFeature<CountPaidUserFeature>().Value;
             var currentCount = await countPaidUserStatistic.GetValueAsync();
-            
+
             if (maxCount < currentCount + quotaIncreaseBy)
             {
                 throw new TenantQuotaException(string.Format(Resource.TariffsFeature_usersQuotaExceeds_exception, quotaIncreaseBy, maxCount - currentCount));
@@ -426,12 +432,12 @@ public class UserController(
         }
 
         foreach (var invite in inDto.Invitations)
-        {            
+        {
             if (!invite.Email.TestEmailRegex() || invite.Email.TestEmailPunyCode())
             {
-               continue;
+                continue;
             }
-            
+
             switch (invite.Type)
             {
                 case EmployeeType.Guest:
@@ -447,9 +453,9 @@ public class UserController(
                 {
                     continue;
                 }
-                
+
                 var type = await _userManager.GetUserTypeAsync(user.Id);
-                
+
                 var comparer = EmployeeTypeComparer.Instance;
                 if (comparer.Compare(type, invite.Type) < 0)
                 {
@@ -544,7 +550,7 @@ public class UserController(
             {
                 throw new ArgumentException(Resource.ErrorNotCorrectEmail);
             }
-            
+
             var address = new MailAddress(email);
             if (!string.Equals(address.Address, user.Email, StringComparison.OrdinalIgnoreCase))
             {
@@ -574,7 +580,7 @@ public class UserController(
                 await securityContext.SetUserPasswordHashAsync(inDto.UserId, inDto.MemberBase.PasswordHash);
 
                 var messageTarget = MessageTarget.Create(inDto.UserId);
-                messageService.Send(MessageAction.UserUpdatedPassword, messageTarget);
+                await messageService.SendAsync(MessageAction.UserUpdatedPassword, messageTarget);
 
                 var passwordChangeEvent = (await auditEventsRepository.GetByFilterAsync(
                     userId: securityContext.CurrentAccount.ID,
@@ -632,9 +638,9 @@ public class UserController(
         {
             throw new SecurityException();
         }
-        
+
         var isGuest = await _userManager.IsGuestAsync(user);
-        
+
         await CheckReassignProcessAsync([user.Id]);
 
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
@@ -648,7 +654,7 @@ public class UserController(
         await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
 
         messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(user.Id), userName);
-        if (isGuest) 
+        if (isGuest)
         {
             await socketManager.DeleteGuestAsync(user.Id);
         }
@@ -696,7 +702,7 @@ public class UserController(
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }
-        
+
         var tenant = tenantManager.GetCurrentTenant();
         if (user.IsLDAP() || user.IsOwner(tenant))
         {
@@ -735,29 +741,29 @@ public class UserController(
     public async Task DeleteGuests(UpdateMembersRequestDto inDto)
     {
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-        
+
         var type = await _userManager.GetUserTypeAsync(currentUser.Id);
         if (type != EmployeeType.RoomAdmin)
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
-        
+
         var relations = await _userManager.GetUserRelationsAsync(currentUser.Id);
 
         foreach (var userId in inDto.UserIds)
         {
             var user = await _userManager.GetUsersAsync(userId);
-            if (user.Equals(Constants.LostUser) || 
-                user.Status == EmployeeStatus.Terminated || 
-                !await _userManager.IsGuestAsync(user) ||       
+            if (user.Equals(Constants.LostUser) ||
+                user.Status == EmployeeStatus.Terminated ||
+                !await _userManager.IsGuestAsync(user) ||
                 !relations.ContainsKey(user.Id))
             {
                 continue;
             }
-        
+
             var t1 = _userManager.DeleteUserRelationAsync(currentUser.Id, user.Id);
             var t2 = fileSecurity.RemoveSecuritiesAsync(user.Id, currentUser.Id, SubjectType.User);
-            
+
             await Task.WhenAll(t1, t2).ContinueWith(async _ => await socketManager.DeleteGuestAsync(currentUser.Id, user.Id));
         }
     }
@@ -782,13 +788,13 @@ public class UserController(
         {
             throw new ItemNotFoundException("User not found");
         }
-        
+
         var currentUserId = authContext.CurrentAccount.ID;
         var currentUser = await _userManager.GetUsersAsync(currentUserId);
         var targetUserType = await _userManager.GetUserTypeAsync(targetUser);
 
-        if (targetUserType is not EmployeeType.Guest || 
-            await _userManager.GetUserTypeAsync(currentUser) is EmployeeType.Guest || 
+        if (targetUserType is not EmployeeType.Guest ||
+            await _userManager.GetUserTypeAsync(currentUser) is EmployeeType.Guest ||
             !await _userManager.CanUserViewAnotherUserAsync(currentUser, targetUser))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
@@ -813,11 +819,13 @@ public class UserController(
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "GuestShareLink")]
     [HttpPost("guests/share/approve")]
-    public async Task<EmployeeFullDto> ApproveGuestShareLink(EmailMemberRequestDto inDto)
+    public async Task<EmployeeFullDto> ApproveGuestShareLink(EmailMemberRequestDto _)
     {
         await securityContext.AuthByClaimAsync();
 
-        var targetUser = await _userManager.GetUserByEmailAsync(inDto.Email);
+        var model = emailValidationKeyModelHelper.GetModel();
+        var targetEmail = emailValidationKeyModelHelper.DecryptEmail(model.EncEmail);
+        var targetUser = await _userManager.GetUserByEmailAsync(targetEmail);
 
         if (Equals(targetUser, Constants.LostUser))
         {
@@ -875,10 +883,10 @@ public class UserController(
             list = list.WhereAwait(async x => await _userManager.IsUserInGroupAsync(x.Id, groupId));
         }
 
-        list = list.Where(x => x.FirstName != null && x.FirstName.Contains(inDto.Query, StringComparison.OrdinalIgnoreCase) || 
+        list = list.Where(x => x.FirstName != null && x.FirstName.Contains(inDto.Query, StringComparison.OrdinalIgnoreCase) ||
                                (x.LastName != null && x.LastName.Contains(inDto.Query, StringComparison.OrdinalIgnoreCase)) ||
-                               (x.UserName != null && x.UserName.Contains(inDto.Query, StringComparison.OrdinalIgnoreCase)) || 
-                               (x.Email != null && x.Email.Contains(inDto.Query, StringComparison.OrdinalIgnoreCase)) || 
+                               (x.UserName != null && x.UserName.Contains(inDto.Query, StringComparison.OrdinalIgnoreCase)) ||
+                               (x.Email != null && x.Email.Contains(inDto.Query, StringComparison.OrdinalIgnoreCase)) ||
                                (x.ContactsList != null && x.ContactsList.Exists(y => y.Contains(inDto.Query, StringComparison.OrdinalIgnoreCase))));
 
         await foreach (var item in list)
@@ -911,7 +919,7 @@ public class UserController(
             FilterSeparator = inDto.FilterSeparator,
             Text = inDto.Text
         };
-        
+
         return GetByStatus(status);
     }
 
@@ -960,12 +968,12 @@ public class UserController(
     }
 
     /// <summary>
-    /// Returns the detailed information about a profile of the user with the name specified in the request.
+    /// Returns the detailed information about a profile of the user with the ID specified in the request.
     /// </summary>
     /// <short>
-    /// Get a profile by user name
+    /// Get a profile by user ID
     /// </short>
-    /// <path>api/2.0/people/{username}</path>
+    /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "Incorect UserId")]
@@ -1054,7 +1062,7 @@ public class UserController(
     /// Returns a list of users with full information about them matching the parameters specified in the request.
     /// </summary>
     /// <short>
-    /// Search users with detaailed information by extended filter
+    /// Search users with detailed information by extended filter
     /// </short>
     /// <path>api/2.0/people/filter</path>
     /// <collection>list</collection>
@@ -1087,7 +1095,7 @@ public class UserController(
             FilterSeparator = inDto.FilterSeparator,
             Text = inDto.Text
         };
-        
+
         var users = GetByFilterAsync(filter);
 
         await foreach (var user in users)
@@ -1196,7 +1204,7 @@ public class UserController(
             FilterSeparator = inDto.FilterSeparator,
             Text = inDto.Text
         };
-        
+
         var users = GetByFilterAsync(filter);
 
         await foreach (var user in users)
@@ -1229,15 +1237,15 @@ public class UserController(
         var userNames = users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)).ToList();
         var tenant = tenantManager.GetCurrentTenant();
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-        var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
-        
+        var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id);
+
         foreach (var user in users)
         {
             if (user.Status != EmployeeStatus.Terminated)
             {
                 continue;
             }
-            
+
             var userType = await _userManager.GetUserTypeAsync(user.Id);
             switch (userType)
             {
@@ -1245,7 +1253,7 @@ public class UserController(
                 case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
                     continue;
             }
-            
+
             var isGuest = userType == EmployeeType.Guest;
 
             await client.DeleteClientsAsync(user.Id);
@@ -1299,7 +1307,7 @@ public class UserController(
             {
                 throw new SecurityException(Resource.ErrorAccessDenied);
             }
-            
+
             users = (await _userManager.GetUsersAsync())
                 .Where(u => u.ActivationStatus == EmployeeActivationStatus.Pending)
                 .ToList();
@@ -1316,7 +1324,7 @@ public class UserController(
 
         foreach (var user in users)
         {
-            if (user.IsActive)
+            if (user.IsActive || user.Status == EmployeeStatus.Terminated)
             {
                 continue;
             }
@@ -1364,7 +1372,7 @@ public class UserController(
             }
         }
 
-        messageService.Send(MessageAction.UsersSentActivationInstructions, MessageTarget.Create(users.Select(x => x.Id)), 
+        messageService.Send(MessageAction.UsersSentActivationInstructions, MessageTarget.Create(users.Select(x => x.Id)),
             users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
 
         foreach (var user in users)
@@ -1383,10 +1391,10 @@ public class UserController(
             {
                 return false;
             }
-            
-            if (currentUserType != EmployeeType.DocSpaceAdmin && 
-                type == EmployeeType.Guest && 
-                user.CreatedBy.HasValue && 
+
+            if (currentUserType != EmployeeType.DocSpaceAdmin &&
+                type == EmployeeType.Guest &&
+                user.CreatedBy.HasValue &&
                 user.CreatedBy.Value != currentUser.Id)
             {
                 userRelations ??= await _userManager.GetUserRelationsAsync(currentUser.Id);
@@ -1395,7 +1403,7 @@ public class UserController(
                     return false;
                 }
             }
-            
+
             switch (type)
             {
                 case EmployeeType.DocSpaceAdmin when currentUser.IsOwner(tenant):
@@ -1465,9 +1473,18 @@ public class UserController(
 
         result.Theme = (await settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>()).Theme;
 
-        result.LoginEventId = cookieStorage.GetLoginEventIdFromCookie(cookiesManager.GetCookies(CookiesType.AuthKey));
+        var (loginEventId, expiration) = cookieStorage.GetLoginEventIdFromCookie(cookiesManager.GetCookies(CookiesType.AuthKey));
 
-        if (result.IsVisitor) 
+        result.LoginEventId = loginEventId;
+
+        var lifetime = expiration - DateTime.UtcNow;
+
+        if (lifetime < TimeSpan.FromDays(1) || (await settingsManager.LoadForCurrentUserAsync<TenantCookieSettings>()).Enabled)
+        {
+            result.AuthCookieLifetime = lifetime.TotalSeconds;
+        }
+
+        if (result.IsVisitor)
         {
             var my = await globalFolderHelper.FolderMyAsync;
             result.HasPersonalFolder = my != 0;
@@ -1520,7 +1537,7 @@ public class UserController(
         var viewerIsAdmin = await _userManager.IsDocSpaceAdminAsync(viewer);
         var user = await _userManager.GetUsersAsync(userid);
 
-        if (_userManager.IsSystemUser(user.Id) || user.Status == EmployeeStatus.Terminated || user.Status ==  EmployeeStatus.Pending)
+        if (_userManager.IsSystemUser(user.Id) || user.Status == EmployeeStatus.Terminated || user.Status == EmployeeStatus.Pending)
         {
             throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
@@ -1575,7 +1592,7 @@ public class UserController(
         {
             await socketManager.UpdateUserAsync(user);
         }
-        
+
         return string.Format(Resource.MessageEmailChangeInstuctionsSentOnEmail, email);
     }
 
@@ -1601,7 +1618,19 @@ public class UserController(
             var currentUser = await _userManager.GetUserByEmailAsync(inDto.Email);
             if (currentUser.Id != authContext.CurrentAccount.ID && !(await _userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)))
             {
-                throw new Exception(Resource.ErrorAccessDenied);
+                throw new InvalidOperationException(Resource.ErrorAccessDenied);
+            }
+        }
+        else if (!string.IsNullOrEmpty(setupInfo.HcaptchaPublicKey) || !string.IsNullOrEmpty(setupInfo.RecaptchaPublicKey))
+        {
+            var requestIp = MessageSettings.GetIP(_httpContextAccessor.HttpContext?.Request);
+            var secretEmail = SetupInfo.IsSecretEmail(inDto.Email);
+
+            var recaptchaPassed = secretEmail || await bruteForceLoginManager.CheckRecaptchaAsync(inDto.RecaptchaType, inDto.RecaptchaResponse, requestIp);
+
+            if (!recaptchaPassed)
+            {
+                throw new RecaptchaException(Resource.RecaptchaInvalid);
             }
         }
 
@@ -1631,11 +1660,11 @@ public class UserController(
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserActivationStatus(UpdateMemberActivationStatusRequestDto inDto)
     {
         await securityContext.AuthByClaimAsync();
-        
+
         var tenant = tenantManager.GetCurrentTenant();
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-        var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id); 
-        
+        var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id);
+
         foreach (var id in inDto.UpdateMembers.UserIds.Where(userId => !_userManager.IsSystemUser(userId)))
         {
             await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(id), Constants.Action_EditUser);
@@ -1734,7 +1763,7 @@ public class UserController(
         var changed = false;
         var self = securityContext.CurrentAccount.ID.Equals(user.Id);
         var currentUserIsDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
-        
+
         //Update it
         if (self)
         {
@@ -1802,13 +1831,13 @@ public class UserController(
 
             changed = true;
         }
-        
+
         var tenant = tenantManager.GetCurrentTenant();
         var userIsOwner = user.IsOwner(tenant);
         var currentUserIsOwner = securityContext.CurrentAccount.ID.IsOwner(tenant);
-        var userType = await _userManager.GetUserTypeAsync(user.Id); 
+        var userType = await _userManager.GetUserTypeAsync(user.Id);
         var statusChanged = false;
-        
+
         if ((self || currentUserIsOwner || currentUserIsDocSpaceAdmin && !userIsOwner && userType != EmployeeType.DocSpaceAdmin) && inDto.UpdateMember.Disable.HasValue)
         {
             user.Status = inDto.UpdateMember.Disable.Value ? EmployeeStatus.Terminated : EmployeeStatus.Active;
@@ -1819,15 +1848,15 @@ public class UserController(
 
 
         // change user type
-        var canBeGuestFlag = !userIsOwner && 
-                             !await _userManager.IsDocSpaceAdminAsync(user) && 
-                             (await user.GetListAdminModulesAsync(webItemSecurity, webItemManager)).Count == 0 && 
+        var canBeGuestFlag = !userIsOwner &&
+                             !await _userManager.IsDocSpaceAdminAsync(user) &&
+                             (await user.GetListAdminModulesAsync(webItemSecurity, webItemManager)).Count == 0 &&
                              !self;
 
         if (inDto.UpdateMember.IsUser.HasValue)
         {
             var isGuest = inDto.UpdateMember.IsUser.Value;
-            
+
             if (isGuest && canBeGuestFlag && !await _userManager.IsGuestAsync(user))
             {
                 await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id)))
@@ -1852,7 +1881,7 @@ public class UserController(
 
         if (changed)
         {
-            await _userManager.UpdateUserInfoWithSyncCardDavAsync(user); 
+            await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
             if (await _userManager.IsGuestAsync(user))
             {
                 await socketManager.UpdateGuestAsync(user);
@@ -1909,21 +1938,21 @@ public class UserController(
                     if (user.Status == EmployeeStatus.Terminated)
                     {
                         IDistributedLockHandle lockHandle = null;
-                        
+
                         var type = await _userManager.GetUserTypeAsync(user.Id);
-                        
+
                         try
                         {
                             if (type is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin)
                             {
                                 lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
-                                
+
                                 await countPaidUserChecker.CheckAppend();
                             }
                             else
                             {
                                 lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id));
-                                
+
                                 await activeUsersChecker.CheckAppend();
                             }
 
@@ -1941,7 +1970,7 @@ public class UserController(
                             }
 
                             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-                            if (await _userManager.IsGuestAsync(user)) 
+                            if (await _userManager.IsGuestAsync(user))
                             {
                                 await socketManager.UpdateGuestAsync(user);
                             }
@@ -1965,7 +1994,7 @@ public class UserController(
                     await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
                     await cookiesManager.ResetUserCookieAsync(user.Id);
-                    messageService.Send(MessageAction.CookieSettingsUpdated); 
+                    messageService.Send(MessageAction.CookieSettingsUpdated);
                     if (await _userManager.IsGuestAsync(user))
                     {
                         await socketManager.UpdateGuestAsync(user);
@@ -2024,7 +2053,7 @@ public class UserController(
         {
             var isGuest = await _userManager.IsGuestAsync(user);
             await userManagerWrapper.UpdateUserTypeAsync(user, inDto.Type);
-            if (isGuest && !await _userManager.IsGuestAsync(user)) 
+            if (isGuest && !await _userManager.IsGuestAsync(user))
             {
                 await socketManager.AddUserAsync(user);
                 await socketManager.DeleteGuestAsync(user.Id);
@@ -2051,7 +2080,7 @@ public class UserController(
     /// <summary>
     /// Starts updating the type of the user or guest when reassigning rooms and shared files.
     /// </summary>
-    /// <short>Update user type</short>
+    /// <short>Start updating user type</short>
     /// <path>api/2.0/people/type</path>
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
@@ -2079,7 +2108,7 @@ public class UserController(
         var userType = await _userManager.GetUserTypeAsync(user);
         var toUserType = await _userManager.GetUserTypeAsync(toUser);
 
-        if (_userManager.IsSystemUser(user.Id) 
+        if (_userManager.IsSystemUser(user.Id)
             || user.Status == EmployeeStatus.Terminated
             || toUser.Status == EmployeeStatus.Terminated
             || user.Id == toUser.Id
@@ -2129,7 +2158,7 @@ public class UserController(
     /// <summary>
     /// Terminates the process of updating the type of the user or guest.
     /// </summary>
-    /// <short>Terminate update user type</short>
+    /// <short>Terminate updating user type</short>
     /// <path>api/2.0/people/type/terminate</path>
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
@@ -2214,7 +2243,7 @@ public class UserController(
         var tenant = tenantManager.GetCurrentTenant();
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
         var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
-        
+
         if (maxTotalSize < quota)
         {
             throw new Exception(Resource.UserQuotaGreaterPortalError);
@@ -2242,7 +2271,7 @@ public class UserController(
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
 
-        if(quota >= 0)
+        if (quota >= 0)
         {
             messageService.Send(MessageAction.CustomQuotaPerUserChanged, inDto.Quota.ToString(),
                         users.Select(x => HttpUtility.HtmlDecode(displayUserSettingsHelper.GetFullUserName(x))));
@@ -2251,7 +2280,7 @@ public class UserController(
         {
             messageService.Send(MessageAction.CustomQuotaPerUserDisabled, MessageTarget.Create(users.Select(x => x.Id)), users.Select(x => HttpUtility.HtmlDecode(displayUserSettingsHelper.GetFullUserName(x))));
         }
-        
+
 
     }
 
@@ -2304,7 +2333,7 @@ public class UserController(
 
         messageService.Send(MessageAction.CustomQuotaPerUserDefault, quotaUserSettings.DefaultQuota.ToString(),
                         users.Select(x => HttpUtility.HtmlDecode(displayUserSettingsHelper.GetFullUserName(x))));
-        
+
     }
 
     private async Task UpdateDepartmentsAsync(IEnumerable<Guid> department, UserInfo user)
@@ -2321,7 +2350,7 @@ public class UserController(
 
         var groups = await _userManager.GetUserGroupsAsync(user.Id);
         var managerGroups = new List<Guid>();
-        foreach (var groupInfoId in groups.Select(r=> r.ID))
+        foreach (var groupInfoId in groups.Select(r => r.ID))
         {
             await _userManager.RemoveUserFromGroupAsync(user.Id, groupInfoId);
             var managerId = await _userManager.GetDepartmentManagerAsync(groupInfoId);
@@ -2348,7 +2377,7 @@ public class UserController(
     private async Task CheckReassignProcessAsync(IEnumerable<Guid> userIds)
     {
         var tenant = tenantManager.GetCurrentTenant();
-        
+
         foreach (var userId in userIds)
         {
             var reassignStatus = await queueWorkerReassign.GetProgressItemStatus(tenant.Id, userId);
@@ -2370,7 +2399,7 @@ public class UserController(
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
-        
+
         var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
                       await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
 
@@ -2389,7 +2418,7 @@ public class UserController(
                 includeGroups.Add([filter.GroupId.Value]);
             }
         }
-        
+
         if (filter.EmployeeType.HasValue)
         {
             FilterByUserType(filter.EmployeeType.Value, includeGroups, excludeGroups);
@@ -2425,14 +2454,14 @@ public class UserController(
             {
                 Constants.GroupAdmin.ID
             };
-            
+
             var products = webItemManager.GetItemsAll().Where(i => i is IProduct || i.ID == WebItemManager.MailProductID);
             adminGroups.AddRange(products.Select(r => r.ID));
 
             includeGroups.Add(adminGroups);
         }
-        
-        
+
+
         var queryFilter = new UserQueryFilter(
             isDocSpaceAdmin,
             filter.EmployeeStatus,
@@ -2559,31 +2588,31 @@ public class UserController(
 
 [ConstraintRoute("int")]
 public class UserControllerAdditionalInternal(
-    EmployeeFullDtoHelper employeeFullDtoHelper, 
-    FileSecurity fileSecurity, 
-    ApiContext apiContext, 
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    FileSecurity fileSecurity,
+    ApiContext apiContext,
     IDaoFactory daoFactory,
     AuthContext authContext,
-    UserManager userManager) 
+    UserManager userManager)
     : UserControllerAdditional<int>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory, authContext, userManager);
-        
+
 public class UserControllerAdditionalThirdParty(
-    EmployeeFullDtoHelper employeeFullDtoHelper, 
-    FileSecurity fileSecurity, 
-    ApiContext apiContext, 
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    FileSecurity fileSecurity,
+    ApiContext apiContext,
     IDaoFactory daoFactory,
     AuthContext authContext,
-    UserManager userManager) 
+    UserManager userManager)
     : UserControllerAdditional<string>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory, authContext, userManager);
-        
+
 public class UserControllerAdditional<T>(
-    EmployeeFullDtoHelper employeeFullDtoHelper, 
-    FileSecurity fileSecurity, 
-    ApiContext apiContext, 
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    FileSecurity fileSecurity,
+    ApiContext apiContext,
     IDaoFactory daoFactory,
     AuthContext authContext,
-    UserManager userManager) 
-    : ApiControllerBase 
+    UserManager userManager)
+    : ApiControllerBase
 {
     /// <summary>
     /// Returns the users with the sharing settings in a room with the ID specified in request.
@@ -2592,21 +2621,76 @@ public class UserControllerAdditional<T>(
     /// Get users with room sharing settings
     /// </short>
     /// <path>api/2.0/people/room/{id}</path>
+    /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}")]
-    public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomShared(UsersWithRoomSharedRequestDto<T> inDto)
+    public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomShared(UsersWithFileEntitySharedRequestDto<T> inDto)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
 
-        if (!await fileSecurity.CanReadAsync(room))
+        await foreach (var p in GetUsers(inDto, room))
+        {
+            yield return p;
+        }
+    }
+    /// <summary>
+    /// Returns the users with the sharing settings in a folder with the ID specified in request.
+    /// </summary>
+    /// <short>
+    /// Get users with folder sharing settings
+    /// </short>
+    /// <path>api/2.0/people/folder/{id}</path>
+    [Tags("People / Search")]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("folder/{id}")]
+    public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithFoldersShared(UsersWithFileEntitySharedRequestDto<T> inDto)
+    {
+        var folder = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
+
+        await foreach (var p in GetUsers(inDto, folder))
+        {
+            yield return p;
+        }
+    }
+    /// <summary>
+    /// Returns the users with the sharing settings in a file with the ID specified in request.
+    /// </summary>
+    /// <short>
+    /// Get users with file sharing settings
+    /// </short>
+    /// <path>api/2.0/people/file/{id}</path>
+    [Tags("People / Search")]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("file/{id}")]
+    public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithFilesShared(UsersWithFileEntitySharedRequestDto<T> inDto)
+    {
+        var file = (await daoFactory.GetFileDao<T>().GetFileAsync(inDto.Id)).NotFoundIfNull();
+
+        await foreach (var p in GetUsers(inDto, file))
+        {
+            yield return p;
+        }
+    }
+
+    private async IAsyncEnumerable<EmployeeFullDto> GetUsers(UsersWithFileEntitySharedRequestDto<T> inDto, FileEntry<T> fileEntry)
+    {
+        if (!await fileSecurity.CanReadAsync(fileEntry))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
-        
+        var parentUserIds = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(fileEntry.ParentId).Where(r => r.FolderType != FolderType.VirtualRooms).Select(r => r.CreateBy).Where(r => !r.Equals(fileEntry.CreateBy)).Distinct().ToListAsync();
+
+        if (!parentUserIds.Contains(fileEntry.CreateBy))
+        {
+            parentUserIds.Add(fileEntry.CreateBy);
+        }
+
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var filterValue = inDto.Text;
@@ -2614,7 +2698,7 @@ public class UserControllerAdditional<T>(
 
         var securityDao = daoFactory.GetSecurityDao<T>();
 
-        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(room,
+        var totalUsers = await securityDao.GetUsersWithSharedCountAsync(fileEntry,
             filterValue,
             inDto.EmployeeStatus,
             inDto.ActivationStatus,
@@ -2625,11 +2709,12 @@ public class UserControllerAdditional<T>(
             inDto.Area,
             inDto.InvitedByMe,
             inDto.InviterId,
-            inDto.EmployeeTypes);
+            inDto.EmployeeTypes,
+            parentUserIds);
 
         apiContext.SetCount(Math.Min(Math.Max(totalUsers - offset, 0), count)).SetTotalCount(totalUsers);
 
-        await foreach (var u in securityDao.GetUsersWithSharedAsync(room, 
+        await foreach (var u in securityDao.GetUsersWithSharedAsync(fileEntry,
                            filterValue,
                            inDto.EmployeeStatus,
                            inDto.ActivationStatus,
@@ -2641,6 +2726,7 @@ public class UserControllerAdditional<T>(
                            inDto.InvitedByMe,
                            inDto.InviterId,
                            inDto.EmployeeTypes,
+                           parentUserIds,
                            offset,
                            count))
         {

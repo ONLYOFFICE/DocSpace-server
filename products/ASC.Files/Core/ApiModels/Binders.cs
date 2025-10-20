@@ -37,6 +37,7 @@ public static class ModelBindingContextExtension
         if (valueProviderResult != ValueProviderResult.None)
         {
             bindingContext.ModelState.SetModelValue(modelName, valueProviderResult);
+            bindingContext.ModelState.MarkFieldValid(modelName);
             firstValue = valueProviderResult.FirstValue;
 
             return true;
@@ -247,7 +248,7 @@ public class InsertFileModelBinder : IModelBinder
     {
         ArgumentNullException.ThrowIfNull(bindingContext);
 
-        if (bindingContext is DefaultModelBindingContext defaultBindingContext && 
+        if (bindingContext is DefaultModelBindingContext defaultBindingContext &&
             bindingContext.ValueProvider is CompositeValueProvider { Count: 0 })
         {
             bindingContext.ValueProvider = defaultBindingContext.OriginalValueProvider;

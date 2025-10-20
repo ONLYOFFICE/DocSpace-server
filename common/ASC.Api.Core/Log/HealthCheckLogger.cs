@@ -28,7 +28,7 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 namespace ASC.Api.Core.Log;
 
 internal static partial class HealthCheckLogger
-{ 
+{
     [LoggerMessage(LogLevel.Error, "Health check failed. Status: {Status}. Duration: {Duration}ms")]
     public static partial void ErrorHealthCheckFailed(this ILogger logger, string Status, double Duration);
 

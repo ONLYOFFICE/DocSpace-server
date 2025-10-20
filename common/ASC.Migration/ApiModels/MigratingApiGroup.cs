@@ -27,23 +27,26 @@
 namespace ASC.Migration.Core.Models.Api;
 
 
+/// <summary>
+/// The migrating group parameters.
+/// </summary>
 [ProtoContract]
 public class MigratingApiGroup : ImportableApiEntity
 {
     /// <summary>
-    /// Group name
+    /// The group name.
     /// </summary>
     [ProtoMember(2)]
     public string GroupName { get; set; }
 
     /// <summary>
-    /// Module name
+    /// The group module name.
     /// </summary>
     [ProtoMember(3)]
     public string ModuleName { get; set; }
 
     /// <summary>
-    /// List of user uid
+    /// The list of group user UIDs.
     /// </summary>
     [ProtoMember(4)]
     public List<string> UserUidList { get; set; }

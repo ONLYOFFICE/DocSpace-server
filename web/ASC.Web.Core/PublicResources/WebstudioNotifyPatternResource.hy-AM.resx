@@ -376,7 +376,7 @@
     <value>${__VirtualRootHost} պորտալի ջնջում</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace-ն ապաակտիվացված է</value>
+    <value>${LetterLogoText} DocSpace-ը ջնջված է</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}: Պորտալի հասցեի փոփոխություն</value>
@@ -1072,7 +1072,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace-ն &lt;span style="color: #FF6F3D;"&gt;ապաակտիվացված է&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&amp;gt;${LetterLogoText} DocSpace-ը &amp;lt;span style="color: #FF6F3D;"&gt;ջնջվել է&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ձեր ${LetterLogoText} DocSpace-ը հաջողությամբ ապաակտիվացվել է: Խնդրում ենք նկատի ունենալ, որ ձեր բոլոր տվյալները կջնջվեն մեր &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Գաղտնիության քաղաքականության&lt;/a&gt;:&lt;/td&gt;&lt;/tr&gt;
 
@@ -2032,5 +2032,54 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Պահանջվող գործողություն՝ հնարավոր չէ ավտոմատ կերպով լիցքավորել դրամապանակի մնացորդը ձեր ${LetterLogoText} DocSpace-ում։</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Գաղտնաբառը հաջողությամբ փոխվել է
+
+Ձեր հաշվի գաղտնաբառը *$UserName*, *$UserEmail* հաջողությամբ փոփոխվել է *$Date* in DocSpace-ում: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Device: *$Device*
+#if($Location != "")
+Լոկացիա: *$Location*
+#end
+Բրաուզեր: *$Browser*
+
+Եթե այս գործողությունը կատարվել է ձեր կողմից՝ լրացուցիչ քայլեր անհրաժեշտ չեն։ Եթե այս փոփոխությունը կասկածելի է թվում կամ իրականացված չէ ձեր թույլտվությամբ, խնդրում ենք անմիջապես վերականգնել ձեր գաղտնաբառը և անջատել DocSpace-ի մուտքը այս սարքից։
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Ձեր գաղտնաբառը հաջողությամբ փոխվել է</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Բացել DocSpace-ը</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Ձեր DocSpace-ի ավտոմատ պահուստավորումը ձախողվեց։</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Ողջուն, $UserName,
+
+Ձեր DocSpace-ի "${__VirtualRootPath}":"${__VirtualRootPath}" պլանավորված պահուստավորման գործընթացը ձախողվել է։ Խորհուրդ ենք տալիս ստուգել "Պահուստավորում":"${__VirtualRootPath}/portal-settings/backup/data-backup" և "Services":"${__VirtualRootPath}/portal-settings/services" կարգավորումները։ 
+
+Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "${__SupportLink}":"${__SupportLink}" միջոցով։
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Ողջույն, $UserName,
+
+Ձեր DocSpace [${__VirtualRootPath}](${__VirtualRootPath})-ի համար նախատեսված պահուստավորման գործընթացը ձախողվել է։
+
+Խորհուրդ ենք տալիս ստուգել [Պահուստավորում](${__VirtualRootPath}/portal-settings/backup/data-backup) և [Services](${__VirtualRootPath}/portal-settings/services) կարգավորումները։
+
+Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [${__SupportLink}](${__SupportLink}) միջոցով։
+
+Հարգանքներով՝
+${LetterLogoText} Աջակցության թիմ
+[${__SiteLink}](${__SiteLink})</value>
   </data>
 </root>

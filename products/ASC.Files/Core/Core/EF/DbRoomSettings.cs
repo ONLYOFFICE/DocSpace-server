@@ -79,7 +79,7 @@ public static class DbRoomSettingsExtension
                 .HasDefaultValueSql("'0'");
 
             entity.Property(e => e.HasLogo).HasColumnName("has_logo").HasDefaultValueSql("0");
-            
+
             entity.Property(e => e.Indexing).HasColumnName("indexing").HasDefaultValueSql("0");
 
             entity.Property(e => e.Watermark)
@@ -93,8 +93,8 @@ public static class DbRoomSettingsExtension
                 .HasColumnType("char")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
-            
-            entity.Property(e => e.Cover)      
+
+            entity.Property(e => e.Cover)
                 .HasColumnName("cover")
                 .HasColumnType("varchar")
                 .HasCharSet("utf8")
@@ -111,7 +111,7 @@ public static class DbRoomSettingsExtension
                 .HasColumnType("json")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
-            
+
             entity.Property(e => e.DenyDownload).HasColumnName("deny_download").HasDefaultValueSql("0");
             
             entity.Property(e => e.ChatProviderId)

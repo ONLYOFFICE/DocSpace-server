@@ -823,7 +823,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Konto ${LetterLogoText} DocSpace zostało &lt;span style="color: #FF6F3D;"&gt;dezaktywowane&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Konto ${LetterLogoText} DocSpace zostało &lt;span style="color: #FF6F3D;"&gt;usunięty&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Twoje konto ${LetterLogoText} DocSpace zostało dezaktywowane. Wszystkie dane zostaną usunięte zgodnie z naszą &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Polityką prywatności&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1055,7 +1055,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Zmieniono hasło do skrzynki pocztowej</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>Konto ${LetterLogoText} DocSpace zostało dezaktywowane</value>
+    <value>${LetterLogoText} DocSpace został usunięty</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Użytkownik usunął swój profil</value>
@@ -1972,5 +1972,29 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Wymagane działanie: Nie udało się automatycznie zasilić portfela w ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Twoje hasło zostało pomyślnie zmienione</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Otwórz DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Hasło zostało pomyślnie zmienione
+
+Twoje hasło do konta *$UserName*, *$UserEmail* zostało pomyślnie zmienione w dniu *$Date* w DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Urządzenie: *$Device*
+#if($Location != "")
+Lokalizacja: *$Location*
+#end
+Przeglądarka: *$Browser*
+
+Jeśli ta czynność została wykonana przez Ciebie — nie są wymagane żadne dalsze kroki. Jeśli ta zmiana wygląda podejrzanie lub nie została przez Ciebie autoryzowana, natychmiast zresetuj hasło i wyłącz dostęp do DocSpace dla tego urządzenia.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

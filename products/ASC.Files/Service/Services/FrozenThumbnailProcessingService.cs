@@ -31,7 +31,7 @@ public class FrozenThumbnailProcessingService(
     ILogger<FrozenThumbnailProcessingService> logger,
     IServiceScopeFactory scopeFactory,
     IConfiguration configuration,
-    IDbContextFactory<FilesDbContext> dbContextFactory) 
+    IDbContextFactory<FilesDbContext> dbContextFactory)
     : ActivePassiveBackgroundService<FrozenThumbnailProcessingService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
@@ -41,30 +41,30 @@ public class FrozenThumbnailProcessingService(
         try
         {
             await using var filesDbContext = await dbContextFactory.CreateDbContextAsync(stoppingToken);
-            
+
             var files = await Queries.DbFilesAsync(filesDbContext, ExecuteTaskPeriod.Minutes).ToListAsync(cancellationToken: stoppingToken);
             if (files.Count == 0)
             {
                 return;
             }
-            
+
             logger.Information($"Found {files.Count} files to process");
-            
+
             foreach (var f in files)
             {
                 f.ThumbnailStatus = ASC.Files.Core.Thumbnail.Waiting;
             }
-            
+
             filesDbContext.UpdateRange(files);
             await filesDbContext.SaveChangesAsync(stoppingToken);
 
             foreach (var group in files.GroupBy(x => x.TenantId))
             {
                 await using var scope = _scopeFactory.CreateAsyncScope();
-                
+
                 var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
                 await tenantManager.SetCurrentTenantAsync(group.Key);
-                
+
                 var thumbnailBuilderService = scope.ServiceProvider.GetRequiredService<Builder<int>>();
 
                 foreach (var file in group)

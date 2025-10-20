@@ -45,9 +45,9 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
     public RestoreProgressItem()
     {
-        
+
     }
-    
+
     public RestoreProgressItem(
         IConfiguration configuration,
         ILogger<RestoreProgressItem> logger,
@@ -94,7 +94,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         var socketTenant = TenantId;
         await using var scope = _serviceScopeProvider.CreateAsyncScope();
         _socketManager = scope.ServiceProvider.GetService<SocketManager>();
-        
+
         try
         {
             _tenantManager = scope.ServiceProvider.GetService<TenantManager>();
@@ -112,7 +112,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
             {
                 var tenants = await _tenantManager.GetTenantsAsync(true);
 
-                foreach(var t in tenants)
+                foreach (var t in tenants)
                 {
                     await _notifyHelper.SendAboutRestoreStartedAsync(t, Notify);
                     t.SetStatus(TenantStatus.Restoring);
@@ -161,7 +161,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
                 await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
                 await PublishChanges();
             };
-            await restoreTask.RunJob(); 
+            await restoreTask.RunJob();
             NewTenantId = columnMapper.GetTenantMapping();
 
             await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
@@ -196,7 +196,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
                 {
                     await _notifyHelper.SendAboutRestoreCompletedAsync(restoredTenant, Notify);
                 }
-                catch(Exception error)
+                catch (Exception error)
                 {
                     _logger.ErrorNotifyComplete(error);
                 }
@@ -210,7 +210,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
                 File.Delete(tempFile);
             }
-            catch(Exception error)
+            catch (Exception error)
             {
                 _logger.ErrorDeleteFiles(error);
             }

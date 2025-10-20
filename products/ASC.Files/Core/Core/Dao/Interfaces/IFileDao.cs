@@ -87,10 +87,8 @@ public interface IFileDao<T>
     /// <param name="searchText"></param>
     /// <param name="extension"></param>
     /// <param name="searchInContent"></param>
-    /// <param name="checkShared"></param>
     /// <returns></returns>
-    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent, bool checkShared = false);
+    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent);
 
     /// <summary>
     /// 
@@ -141,7 +139,7 @@ public interface IFileDao<T>
     /// <param name="offset"></param>
     /// <returns>Stream</returns>
     Task<Stream> GetFileStreamAsync(File<T> file, long offset);
-    
+
     Task<Stream> GetFileStreamAsync(File<T> file, long offset, long length);
 
     Task<long> GetFileSizeAsync(File<T> file);
@@ -208,7 +206,7 @@ public interface IFileDao<T>
     /// <param name="fileId">file id</param>
     Task DeleteFileAsync(T fileId);
     Task DeleteFileVersionAsync(File<T> file, int version);
-    
+
     /// <summary>
     ///   Deletes a file including all previous versions
     /// </summary>
@@ -349,7 +347,7 @@ public interface IFileDao<T>
     Task<File<T>> FinalizeUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
     Task AbortUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
     Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<T> uploadSession);
-    
+
     #endregion
 
     #region Only in TMFileDao
@@ -380,7 +378,7 @@ public interface IFileDao<T>
     /// <param name="extension"></param>
     /// <param name="searchInContent"></param>
     /// <returns></returns>
-    IAsyncEnumerable<File<T>> GetFilesAsync(IEnumerable<T> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
+    IAsyncEnumerable<File<T>> GetFilesAsync(IEnumerable<T> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
         bool searchInContent);
     /// <summary>
     /// Search the list of files containing text
@@ -420,7 +418,7 @@ public interface IFileDao<T>
 
     Task SaveProperties(T fileId, EntryProperties<T> entryProperties);
 
-    Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
+    Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent,
         bool withSubfolders = false, bool excludeSubject = false, T roomId = default,
         FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All);
 
@@ -429,10 +427,14 @@ public interface IFileDao<T>
     Task InitCustomOrder(Dictionary<T, int> fileIds, T parentFolderId);
 
     IAsyncEnumerable<File<T>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, OrderBy orderBy, int offset = 0, int count = -1);
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, OrderBy orderBy, int offset, int count);
 
     Task<int> GetFilesByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location);
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId);
+
+    Task<int> GetSharedFilesCountAsync(T parentId);
+
+    IAsyncEnumerable<File<T>> GetSharedFilesAsync(T parentId, int offset = 0, int count = -1);
 
     Task SetVectorizationStatusAsync(T fileId, VectorizationStatus status, Func<Task> action = null);
 

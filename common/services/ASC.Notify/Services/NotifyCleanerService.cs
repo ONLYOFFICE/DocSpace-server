@@ -24,11 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Notify.Model;
+
 namespace ASC.Notify.Services;
 
 [Singleton]
 public class NotifyCleanerService(
-    ConfigureNotifyServiceCfg notifyServiceCfg, 
+    ConfigureNotifyServiceCfg notifyServiceCfg,
     IServiceScopeFactory scopeFactory,
     ILogger<NotifyCleanerService> logger) : ActivePassiveBackgroundService<NotifyCleanerService>(logger, scopeFactory)
 
@@ -40,25 +42,25 @@ public class NotifyCleanerService(
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-         try
-         {
-             var date = DateTime.UtcNow.AddDays(-_notifyServiceCfg.StoreMessagesDays);
+        try
+        {
+            var date = DateTime.UtcNow.AddDays(-_notifyServiceCfg.StoreMessagesDays);
 
-             await using var scope = _serviceScopeFactory.CreateAsyncScope();
-             await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync(stoppingToken);
+            await using var scope = _serviceScopeFactory.CreateAsyncScope();
+            await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync(stoppingToken);
 
-             await Queries.DeleteNotifyInfosAsync(dbContext, date);
-             await Queries.DeleteNotifyQueuesAsync(dbContext, date);
+            await Queries.DeleteNotifyInfosAsync(dbContext, date);
+            await Queries.DeleteNotifyQueuesAsync(dbContext, date);
 
-         }
-         catch (ThreadAbortException)
-         {
-             // ignore
-         }
-         catch (Exception err)
-         {
-             logger.ErrorClear(err);
-         }
+        }
+        catch (ThreadAbortException)
+        {
+            // ignore
+        }
+        catch (Exception err)
+        {
+            logger.ErrorClear(err);
+        }
     }
 }
 

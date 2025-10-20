@@ -52,7 +52,7 @@ internal class BoxDaoBase(
     {
         return item.Name;
     }
-    
+
     public string GetId(BoxItem item)
     {
         return item.Id;
@@ -151,7 +151,7 @@ internal class BoxDaoBase(
         {
             folder.ModifiedOn = _tenantUtil.DateTimeFromUtc(folder.ModifiedOn);
         }
-        
+
         folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return folder;
@@ -219,7 +219,7 @@ internal class BoxDaoBase(
     {
         return ToFolder(await GetFolderAsync("0"));
     }
-    
+
     public async Task<BoxFolder> CreateFolderAsync(string title, string folderId)
     {
         return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);

@@ -49,7 +49,7 @@ public class Tariff
     /// The tariff due date.
     /// </summary>
     [ProtoMember(3)]
-    public DateTime DueDate { get; set; }
+    public required DateTime DueDate { get; set; }
 
     /// <summary>
     /// The tariff delay due date.
@@ -73,7 +73,7 @@ public class Tariff
     /// The list of tariff quotas.
     /// </summary>
     [ProtoMember(7)]
-    public List<Quota> Quotas { get; set; }
+    public required List<Quota> Quotas { get; set; }
 
     /// <summary>
     /// The list of overdue tariff quotas.

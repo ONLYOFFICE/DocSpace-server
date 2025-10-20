@@ -213,7 +213,7 @@ public class NextcloudWorkspaceMigrator : Migrator
             }
             DbExtractGroup(dbFile);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_takeout));
             var error = string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_takeout));
@@ -462,7 +462,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                         {
                             Id = entry.FileId,
                             Level = j++,
-                            ParentId = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/',split[..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey),
+                            ParentId = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/', split[..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey),
                             Title = split.Last()
                         };
                         user.Storage.Folders.Add(folder);

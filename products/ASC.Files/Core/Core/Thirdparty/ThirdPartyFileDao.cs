@@ -110,7 +110,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent, bool checkShared = false)
+        bool searchInContent)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
         {
@@ -208,11 +208,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         }
         catch
         {
-            filesWait = []; 
+            filesWait = [];
         }
-        
+
         var files = filesWait.Select(item => Dao.ToFile(item as TFile)).ToAsyncEnumerable();
-        
+
         if (subjectID != Guid.Empty)
         {
             files = files.WhereAwait(async x => subjectGroup
@@ -416,7 +416,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         await DeleteFileAsync(fileId);
     }
-    
+
     public async Task DeleteFileAsync(string fileId)
     {
         var file = await Dao.GetFileAsync(fileId);
@@ -662,7 +662,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             var path = uploadSession.TempPath;
             await using var fs = new FileStream(path, FileMode.Append);
             await stream.CopyToAsync(fs);
-            
+
             if (!uploadSession.Items.TryAdd(BytesTransferredKey, chunkLength.ToString()))
             {
                 if (long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred))
@@ -777,6 +777,16 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
 
+    public Task<int> GetSharedFilesCountAsync(string parentId)
+    {
+        return Task.FromResult(0);
+    }
+
+    public IAsyncEnumerable<File<string>> GetSharedFilesAsync(string parentId, int offset = 0, int count = -1)
+    {
+        return AsyncEnumerable.Empty<File<string>>();
+    }
+
     public Task<int> SetCustomOrder(string fileId, string parentFolderId, int order)
     {
         return Task.FromResult(0);
@@ -788,13 +798,13 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, OrderBy orderBy, int offset = 0, int count = -1)
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, OrderBy orderBy, int offset, int count)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }
 
     public Task<int> GetFilesByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location)
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId)
     {
         return Task.FromResult(0);
     }
@@ -805,11 +815,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
         if (!uploadSession.Items.ContainsKey(UploadSessionKey))
         {
-            return long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred) 
-                ? Task.FromResult(transferred) 
+            return long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred)
+                ? Task.FromResult(transferred)
                 : null;
         }
-        
+
         var nativeSession = uploadSession.GetItemOrDefault<ThirdPartyUploadSessionBase>(UploadSessionKey);
 
         return Task.FromResult(nativeSession.BytesTransferred);
@@ -856,9 +866,9 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx) =>
                 (from ft in ctx.Tag
-                    join ftl in ctx.TagLink.DefaultIfEmpty() on new { ft.TenantId, ft.Id } equals new { ftl.TenantId, Id = ftl.TagId }
-                    where ftl == null
-                    select ft)
+                 join ftl in ctx.TagLink.DefaultIfEmpty() on new { ft.TenantId, ft.Id } equals new { ftl.TenantId, Id = ftl.TagId }
+                 where ftl == null
+                 select ft)
                 .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteTagLinksAsync =

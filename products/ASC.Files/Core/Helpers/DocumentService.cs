@@ -61,9 +61,10 @@ public static class DocumentService
 
     private static readonly JsonSerializerOptions _commonSettings = new()
     {
-        AllowTrailingCommas = true, PropertyNameCaseInsensitive = true
+        AllowTrailingCommas = true,
+        PropertyNameCaseInsensitive = true
     };
-    
+
     /// <summary>
     /// Translation key to a supported form.
     /// </summary>
@@ -409,7 +410,7 @@ public static class DocumentService
 
         using (var response = await httpClient.SendAsync(request))
         {
-            dataResponse = await  response.Content.ReadAsStringAsync();
+            dataResponse = await response.Content.ReadAsStringAsync();
         }
 
         if (string.IsNullOrEmpty(dataResponse))
@@ -938,7 +939,7 @@ public static class DocumentService
         /// The type of the file for the source viewed or edited document.
         /// </summary>
         [JsonPropertyName("filetype")]
-        public string FileType { get; set; }
+        public required string FileType { get; set; }
 
         /// <summary>
         /// The encrypted signature added to the config in the form of a token.
@@ -949,7 +950,7 @@ public static class DocumentService
         /// The absolute URL where the source viewed or edited document is stored.
         /// </summary>
         [Url]
-        public string Url { get; set; }
+        public required string Url { get; set; }
     }
 
     public class DocumentServiceException(DocumentServiceException.ErrorCode errorCode, string message)

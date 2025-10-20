@@ -55,9 +55,9 @@ public class ReassignProgressItem : DistributedTaskProgress
 
     public ReassignProgressItem()
     {
-        
+
     }
-    
+
     /// <summary>
     /// </summary>
     public ReassignProgressItem(IServiceScopeFactory serviceScopeFactory)
@@ -101,11 +101,12 @@ public class ReassignProgressItem : DistributedTaskProgress
 
             List<int> personalFolderIds = null;
 
+            await fileStorageService.MoveSharedEntriesAsync(FromUser, ToUser);
+
+            await SetPercentageAndCheckCancellationAsync(20, true);
+
             if (_deleteProfile)
             {
-                await fileStorageService.MoveSharedFilesAsync(FromUser, ToUser);
-
-                await SetPercentageAndCheckCancellationAsync(20, true);
                 await fileStorageService.DeletePersonalDataAsync(FromUser);
             }
             else

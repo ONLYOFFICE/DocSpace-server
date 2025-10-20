@@ -31,8 +31,7 @@ public class DbTenantService(
     IDbContextFactory<TenantDbContext> dbContextFactory,
     IDbContextFactory<UserDbContext> userDbContextFactory,
     TenantDomainValidator tenantDomainValidator,
-    MachinePseudoKeys machinePseudoKeys,
-    IMapper mapper)
+    MachinePseudoKeys machinePseudoKeys)
     : ITenantService
 {
     private List<string> _forbiddenDomains;
@@ -57,7 +56,7 @@ public class DbTenantService(
     {
         tenantDomainValidator.ValidateTenantName(name);
     }
-    
+
     public async Task<IEnumerable<Tenant>> GetTenantsAsync(DateTime from, bool active = true)
     {
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
@@ -73,16 +72,16 @@ public class DbTenantService(
             q = q.Where(r => r.LastModified >= from);
         }
 
-        return await q.ProjectTo<Tenant>(mapper.ConfigurationProvider).ToListAsync();
+        return await q.Project().ToListAsync();
     }
-    
+
     public async Task<IEnumerable<Tenant>> GetTenantsAsync(List<int> ids)
     {
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
 
         return await tenantDbContext.Tenants
             .Where(r => ids.Contains(r.Id) && r.Status == TenantStatus.Active)
-            .ProjectTo<Tenant>(mapper.ConfigurationProvider)
+            .Project()
             .ToListAsync();
     }
 
@@ -93,7 +92,7 @@ public class DbTenantService(
         //await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
         await using var userDbContext = await userDbContextFactory.CreateDbContextAsync();//TODO: remove
         IQueryable<TenantUserSecurity> Query() => userDbContext.Tenants
-                
+
                 .Where(r => r.Status == TenantStatus.Active)
                 .Join(userDbContext.Users, r => r.Id, r => r.TenantId, (tenant, user) => new
                 {
@@ -116,7 +115,7 @@ public class DbTenantService(
             var q = Query()
                 .Where(r => login.Contains('@') ? r.User.Email == login : r.User.Id.ToString() == login);
 
-            return await q.ProjectTo<Tenant>(mapper.ConfigurationProvider).ToListAsync();
+            return await q.Project().ToListAsync();
         }
 
         if (Guid.TryParse(login, out var userId))
@@ -126,7 +125,7 @@ public class DbTenantService(
                 .Where(r => r.User.Id == userId)
                 .Where(r => r.UserSecurity.PwdHash == pwdHash);
 
-            return await q.ProjectTo<Tenant>(mapper.ConfigurationProvider).ToListAsync();
+            return await q.Project().ToListAsync();
         }
         else
         {
@@ -142,7 +141,7 @@ public class DbTenantService(
             var q = Query()
                 .Where(r => passwordHashs.Any(p => r.UserSecurity.PwdHash == p) && r.DbTenant.Status == TenantStatus.Active);
 
-            return await q.ProjectTo<Tenant>(mapper.ConfigurationProvider).ToListAsync();
+            return await q.Project().ToListAsync();
         }
     }
 
@@ -164,10 +163,10 @@ public class DbTenantService(
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
         return await tenantDbContext.Tenants
             .Where(r => r.Id == id)
-            .ProjectTo<Tenant>(mapper.ConfigurationProvider)
+            .Project()
             .SingleOrDefaultAsync();
     }
-    
+
     public async Task<Tenant> GetTenantAsync(string domain)
     {
         ArgumentException.ThrowIfNullOrEmpty(domain);
@@ -176,9 +175,9 @@ public class DbTenantService(
 
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        return mapper.Map<Tenant>(await tenantDbContext.TenantByDomainAsync(domain));
+        return (await tenantDbContext.TenantByDomainAsync(domain)).Map();
     }
-    
+
     public Tenant GetTenant(string domain)
     {
         ArgumentException.ThrowIfNullOrEmpty(domain);
@@ -191,7 +190,7 @@ public class DbTenantService(
             .Where(r => r.Alias == domain || r.MappedDomain == domain)
             .OrderBy(a => a.Status == TenantStatus.Restoring ? TenantStatus.Active : a.Status)
             .ThenByDescending(a => a.Status == TenantStatus.Restoring ? 0 : a.Id)
-            .ProjectTo<Tenant>(mapper.ConfigurationProvider)
+            .Project()
             .FirstOrDefault();
     }
 
@@ -203,7 +202,7 @@ public class DbTenantService(
              .Where(t => t.Id != -1)
             .OrderBy(a => a.Status)
             .ThenBy(a => a.Id)
-            .ProjectTo<Tenant>(mapper.ConfigurationProvider)
+            .Project()
             .FirstOrDefault();
     }
 
@@ -216,7 +215,7 @@ public class DbTenantService(
             .Where(t => t.Status != TenantStatus.Suspended && t.Status != TenantStatus.RemovePending)
             .OrderBy(a => a.Status)
             .ThenBy(a => a.Id)
-            .ProjectTo<Tenant>(mapper.ConfigurationProvider)
+            .Project()
             .FirstOrDefaultAsync();
     }
 
@@ -226,7 +225,7 @@ public class DbTenantService(
 
         var dbtenant = await InnerSaveTenantAsync(tenantDbContext, coreSettings, tenant);
 
-        if(dbtenant != null)
+        if (dbtenant != null)
         {
             await tenantDbContext.SaveChangesAsync();
         }
@@ -384,7 +383,7 @@ public class DbTenantService(
 
             tenant.LastModified = DateTime.UtcNow;
 
-            dbTenant = mapper.Map<Tenant, DbTenant>(tenant);
+            dbTenant = tenant.Map();
             dbTenant.Id = 0;
 
             var entity = await tenantDbContext.Tenants.AddAsync(dbTenant);

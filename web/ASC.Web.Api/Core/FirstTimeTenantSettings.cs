@@ -117,7 +117,7 @@ public class FirstTimeTenantSettings(
 
             await tenantManager.SaveTenantAsync(tenant);
             await cspSettingsHelper.SaveAsync(null);
-            
+
             await studioNotifyService.SendCongratulationsAsync(currentUser);
             await studioNotifyService.SendRegDataAsync(currentUser);
 
@@ -157,7 +157,7 @@ public class FirstTimeTenantSettings(
 
     public async Task<bool> GetRequestLicense()
     {
-        return await tenantExtra.GetEnableTariffSettings() && 
+        return await tenantExtra.GetEnableTariffSettings() &&
                tenantExtra.Enterprise &&
                !File.Exists(licenseReader.LicensePath);
     }

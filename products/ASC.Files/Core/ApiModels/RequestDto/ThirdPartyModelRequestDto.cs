@@ -54,12 +54,12 @@ public class ThirdPartyRequestDto
     /// <summary>
     /// The customer title. 
     /// </summary>
-    public string CustomerTitle { get; set; }
+    public required string CustomerTitle { get; set; }
 
     /// <summary>
     /// The provider key.
     /// </summary>
-    public string ProviderKey { get; set; }
+    public required string ProviderKey { get; set; }
 
     /// <summary>
     /// The provider ID.
@@ -87,7 +87,7 @@ public class ProviderIdConverter : JsonConverter<int?>
             {
                 return null;
             }
-            
+
             if (int.TryParse(providerIdString, out var result))
             {
                 return result;

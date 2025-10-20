@@ -27,19 +27,19 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The security request parameters of the group member.
+/// The group member security information.
 /// </summary>
 public class GroupMemberSecurityRequestDto
 {
     /// <summary>
     /// The group member parameters.
     /// </summary>
-    public EmployeeFullDto User { get; init; }
+    public required EmployeeFullDto User { get; init; }
 
     /// <summary>
     /// The group access rights to the files.
     /// </summary>
-    public FileShare GroupAccess { get; init; }
+    public required FileShare GroupAccess { get; init; }
 
     /// <summary>
     /// The group member access rights to the files.
@@ -49,15 +49,15 @@ public class GroupMemberSecurityRequestDto
     /// <summary>
     /// Specifies if the group access rights are overridden or not.
     /// </summary>
-    public bool Overridden { get; init; }
+    public required bool Overridden { get; init; }
 
     /// <summary>
     /// Specifies if the group member can edit the group access rights or not.
     /// </summary>
-    public bool CanEditAccess { get; init; }
+    public required bool CanEditAccess { get; init; }
 
     /// <summary>
     /// Specifies if the group member is a group owner or not.
     /// </summary>
-    public bool Owner { get; init; }
+    public required bool Owner { get; init; }
 }

@@ -34,15 +34,15 @@ public class DeepLinkDto
     /// <summary>
     /// The Android package name.
     /// </summary>
-    public string AndroidPackageName { get; set; }
+    public required string AndroidPackageName { get; set; }
 
     /// <summary>
     /// The deep link URL. 
     /// </summary>
-    public string Url { get; set; }
+    public required string Url { get; set; }
 
     /// <summary>
     /// The deep link IOS package ID.
     /// </summary>
-    public string IosPackageId { get; set; }
+    public required string IosPackageId { get; set; }
 }

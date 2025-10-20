@@ -35,7 +35,7 @@ public static class ISetupBuilderExtension
         var conf = new XmlLoggingConfiguration(CrossPlatform.PathCombine(configuration["pathToConf"], "nlog.config"));
 
         var settings = configuration.GetSection("log").Get<NLogSettings>();
-        
+
         if (!string.IsNullOrEmpty(settings.Name))
         {
             conf.Variables["name"] = settings.Name;

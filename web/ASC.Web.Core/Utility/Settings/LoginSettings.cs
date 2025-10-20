@@ -60,7 +60,7 @@ public class LoginSettings : ISettings<LoginSettings>
             CheckPeriod = 60
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 
     public bool IsDefault

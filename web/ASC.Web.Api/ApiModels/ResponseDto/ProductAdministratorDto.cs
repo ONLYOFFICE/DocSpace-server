@@ -34,15 +34,15 @@ public class ProductAdministratorDto
     /// <summary>
     /// The product ID.
     /// </summary>
-    public Guid ProductId { get; set; }
+    public required Guid ProductId { get; set; }
 
     /// <summary>
     /// The user unique identifier.
     /// </summary>
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 
     /// <summary>
     /// Indicates whether the user has administrator privileges for the product.
     /// </summary>
-    public bool Administrator { get; set; }
+    public required bool Administrator { get; set; }
 }

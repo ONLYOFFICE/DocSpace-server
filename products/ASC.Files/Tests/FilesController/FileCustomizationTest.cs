@@ -44,8 +44,12 @@ public class FileCustomizationTest(
         
         // Act
         var customFilterParams = new CustomFilterParameters(enabled: true);
-        await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.SetCustomFilterTagAsync(file.Id, customFilterParams, TestContext.Current.CancellationToken));
+        var result = (await _filesApi.SetCustomFilterTagAsync(file.Id, customFilterParams, TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        result.Should().NotBeNull();
+        result.Id.Should().Be(file.Id);
+        result.CustomFilterEnabled.Should().BeTrue();
     }
     
     [Fact]

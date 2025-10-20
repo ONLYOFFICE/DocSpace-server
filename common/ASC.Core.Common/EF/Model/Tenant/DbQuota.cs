@@ -24,19 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core.Common.EF;
 
-public class DbQuota : BaseEntity, IMapFrom<TenantQuota>
+public class DbQuota : BaseEntity
 {
     public int TenantId { get; set; }
+
     [MaxLength(128)]
     public string Name { get; set; }
+
     [MaxLength(128)]
     public string Description { get; set; }
     public string Features { get; set; }
     public decimal Price { get; set; }
+
     [MaxLength(128)]
     public string ProductId { get; set; }
     public bool Visible { get; set; }
@@ -44,11 +45,6 @@ public class DbQuota : BaseEntity, IMapFrom<TenantQuota>
     public override object[] GetKeys()
     {
         return [TenantId];
-    }
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<TenantQuota, DbQuota>();
     }
 }
 public static class DbQuotaExtension
@@ -178,7 +174,7 @@ public static class DbQuotaExtension
                     Name = "backup",
                     Description = null,
                     Features = "backup",
-                    Price = 12,
+                    Price = 10,
                     ProductId = "10006",
                     Visible = false,
                     Wallet = true
@@ -186,7 +182,7 @@ public static class DbQuotaExtension
                 );
         return modelBuilder;
     }
-    
+
     public static void MySqlAddDbQuota(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbQuota>(entity =>
@@ -282,6 +278,6 @@ public static class DbQuotaExtension
                 .HasColumnType("boolean")
                 .HasDefaultValue(false);
         });
-        
+
     }
 }

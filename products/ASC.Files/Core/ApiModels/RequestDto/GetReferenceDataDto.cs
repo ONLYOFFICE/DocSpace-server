@@ -39,7 +39,7 @@ public class GetReferenceDataDto<T>
     /// <summary>
     /// The unique system identifier.
     /// </summary>
-    public string InstanceId { get; set; }
+    public required string InstanceId { get; set; }
 
     /// <summary>
     /// The source file ID.

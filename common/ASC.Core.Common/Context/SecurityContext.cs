@@ -43,7 +43,7 @@ public class SecurityContext(
 {
     public IAccount CurrentAccount => authContext.CurrentAccount;
     public bool IsAuthenticated => authContext.IsAuthenticated;
-    
+
     public async Task<string> AuthenticateMeAsync(string login, string passwordHash, Func<Task<int>> funcLoginEvent = null, List<Claim> additionalClaims = null)
     {
         ArgumentNullException.ThrowIfNull(login);
@@ -195,7 +195,7 @@ public class SecurityContext(
 
             var anonymousSession = new AnonymousSession(Constants.Guest.ID, Constants.Guest.Name, session);
             authContext.Principal = new CustomClaimsPrincipal(new ClaimsIdentity(anonymousSession, []), anonymousSession);
-                
+
             return;
         }
 
@@ -254,7 +254,7 @@ public class SecurityContext(
 
         authContext.Principal = new CustomClaimsPrincipal(new ClaimsIdentity(account, claims), account);
     }
-    
+
     public async Task AuthByClaimAsync()
     {
         var id = httpContextAccessor.HttpContext?.User.Claims.FirstOrDefault(r => r.Type == ClaimTypes.Sid);
@@ -263,7 +263,7 @@ public class SecurityContext(
             await AuthenticateMeWithoutCookieAsync(userId);
         }
     }
-    
+
     public async Task AuthenticateMeWithoutCookieAsync(Guid userId, List<Claim> additionalClaims = null)
     {
         await AuthenticateMeWithoutCookieAsync(tenantManager.GetCurrentTenantId(), userId, additionalClaims);
@@ -274,7 +274,7 @@ public class SecurityContext(
         var account = await authentication.GetAccountByIDAsync(tenantId, userId);
         await AuthenticateMeWithoutCookieAsync(account, additionalClaims);
     }
-    
+
     public void Logout()
     {
         authContext.Logout();
@@ -315,7 +315,7 @@ public class PermissionContext(IPermissionResolver permissionResolver, AuthConte
     {
         await PermissionResolver.DemandAsync(AuthContext.CurrentAccount, action);
     }
-    
+
     public async Task DemandPermissionsAsync(IAction action1, IAction action2)
     {
         await PermissionResolver.DemandAsync(AuthContext.CurrentAccount, action1, action2);
@@ -332,7 +332,7 @@ public class AuthContext(IHttpContextAccessor httpContextAccessor)
 {
     private IHttpContextAccessor HttpContextAccessor { get; } = httpContextAccessor;
     private static readonly List<string> _typesCheck = [ConfirmType.LinkInvite.ToStringFast(), ConfirmType.EmpInvite.ToStringFast()];
-    
+
     public IAccount CurrentAccount => Principal?.Identity as IAccount ?? Constants.Guest;
 
     public bool IsAuthenticated => CurrentAccount.IsAuthenticated;

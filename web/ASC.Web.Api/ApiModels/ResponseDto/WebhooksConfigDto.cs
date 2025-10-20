@@ -34,7 +34,7 @@ public class WebhooksConfigDto
     /// <summary>
     /// The webhook ID.
     /// </summary>
-    public int Id { get; set; }
+    public required int Id { get; set; }
 
     /// <summary>
     /// The webhook name.
@@ -133,7 +133,7 @@ public class WebhooksConfigDtoHelper(TenantUtil tenantUtil, EmployeeDtoHelper em
             Triggers = dbWebhooksConfig.Triggers,
             TargetId = dbWebhooksConfig.TargetId,
             CreatedBy = dbWebhooksConfig.CreatedBy.HasValue ? await employeeDtoHelper.GetAsync(dbWebhooksConfig.CreatedBy.Value) : null,
-            CreatedOn = dbWebhooksConfig.CreatedOn.HasValue? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.CreatedOn.Value) : null,
+            CreatedOn = dbWebhooksConfig.CreatedOn.HasValue ? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.CreatedOn.Value) : null,
             ModifiedBy = dbWebhooksConfig.ModifiedBy.HasValue ? await employeeDtoHelper.GetAsync(dbWebhooksConfig.ModifiedBy.Value) : null,
             ModifiedOn = dbWebhooksConfig.ModifiedOn.HasValue ? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.ModifiedOn.Value) : null,
             LastFailureOn = dbWebhooksConfig.LastFailureOn.HasValue ? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.LastFailureOn.Value) : null,
@@ -144,7 +144,8 @@ public class WebhooksConfigDtoHelper(TenantUtil tenantUtil, EmployeeDtoHelper em
 
     public async Task<WebhooksConfigWithStatusDto> GetAsync(WebhooksConfigWithStatus webhooksConfigWithStatus)
     {
-        return new WebhooksConfigWithStatusDto {
+        return new WebhooksConfigWithStatusDto
+        {
             Configs = await GetAsync(webhooksConfigWithStatus.WebhooksConfig),
             Status = webhooksConfigWithStatus.Status ?? 0
         };

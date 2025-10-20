@@ -33,7 +33,7 @@ public class FilesLinkUtility
     public const string EditorPage = "doceditor";
     public TimeSpan DefaultLinkLifeTime { get; }
     public const int MaxLinkLifeTimeInYears = 10;
-    
+
     private readonly string _filesUploaderUrl;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly BaseCommonLinkUtility _baseCommonLinkUtility;
@@ -80,6 +80,7 @@ public class FilesLinkUtility
     public const string IsFile = "is_file";
     public const string View = "view";
     public const string ShardKey = "shardkey";
+    public const string FillingSessionId = "fillingSessionId";
 
     public string FileHandlerPath
     {
@@ -519,7 +520,7 @@ public class FilesLinkUtility
 
         return value;
     }
-    
+
     private async Task<string> GetUrlSettingAsync(string key)
     {
         var value = string.Empty;
@@ -536,7 +537,7 @@ public class FilesLinkUtility
 
         return value;
     }
-    
+
     private async Task<bool> IsDefaultUrlSettingAsync(string key)
     {
         var value = string.Empty;
@@ -602,7 +603,7 @@ public class FilesLinkUtility
 
         return value;
     }
-    
+
     private async Task<string> GetSignatureSettingAsync(string key)
     {
         var value = string.Empty;
@@ -631,7 +632,7 @@ public class FilesLinkUtility
 
         return string.IsNullOrEmpty(value);
     }
-    
+
     private string GetDefaultSignatureSetting(string key)
     {
         return _configuration[$"files:docservice:{key}"];
@@ -678,7 +679,7 @@ public class FilesLinkUtility
 
         return GetDefaultSslVerificationSetting();
     }
-    
+
     private async Task<bool> IsDefaultSslVerificationAsync()
     {
         if (_coreBaseSettings.Standalone)
@@ -692,7 +693,7 @@ public class FilesLinkUtility
 
         return true;
     }
-    
+
     private bool GetDefaultSslVerificationSetting()
     {
         var value = _configuration[$"files:docservice:{SslVerificationKey}"];
@@ -720,12 +721,12 @@ public class FilesLinkUtility
     private string GetFileWebMediaViewUrl(object fileId, bool external = false)
     {
         var id = HttpUtility.UrlEncode(fileId.ToString());
-        
+
         if (external)
         {
             return FilesBaseAbsolutePath + $"share/preview/{id}";
         }
-        
+
         return FilesBaseAbsolutePath + $"media/view/{id}";
     }
 
@@ -740,8 +741,8 @@ public class FilesLinkUtility
             anchorText = uriToBeAppended.Substring(anchorIndex);
             uriToBeAppended = uriToBeAppended.Substring(0, anchorIndex);
         }
-        
-        var hasQuery =  uriToBeAppended.Contains('?');
+
+        var hasQuery = uriToBeAppended.Contains('?');
 
         var sb = new StringBuilder();
         sb.Append(uriToBeAppended);

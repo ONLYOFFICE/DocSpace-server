@@ -155,12 +155,12 @@ public class TenantLogoManager(
     {
         return (await tenantManager.GetCurrentTenantQuotaAsync()).Customization;
     }
-    
+
     public async Task<bool> GetEnableWhitelabelAsync()
     {
         return WhiteLabelEnabled && await GetWhiteLabelPaidAsync();
     }
-    
+
     public async Task DemandWhiteLabelPermissionAsync()
     {
         if (!await GetEnableWhitelabelAsync())
@@ -168,7 +168,7 @@ public class TenantLogoManager(
             throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
-    
+
     /// <summary>
     /// Get logo stream or null in case of default logo
     /// </summary>

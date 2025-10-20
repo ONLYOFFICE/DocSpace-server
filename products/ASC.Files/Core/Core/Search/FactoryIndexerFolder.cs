@@ -122,18 +122,18 @@ public class FactoryIndexerFolder(ILoggerProvider options,
         }
 
         (int, int, int) GetCount(DateTime lastIndexed)
-            {
-                using var filesDbContext = dbContextFactory.CreateDbContext();
+        {
+            using var filesDbContext = dbContextFactory.CreateDbContext();
 
-                var minId = Queries.FolderMinId(filesDbContext, lastIndexed);
+            var minId = Queries.FolderMinId(filesDbContext, lastIndexed);
 
-                var maxId = Queries.FolderMaxId(filesDbContext, lastIndexed);
+            var maxId = Queries.FolderMaxId(filesDbContext, lastIndexed);
 
-                var count = Queries.FoldersCount(filesDbContext, lastIndexed);
+            var count = Queries.FoldersCount(filesDbContext, lastIndexed);
 
-                return new ValueTuple<int, int, int>(count, maxId, minId);
-            }
+            return new ValueTuple<int, int, int>(count, maxId, minId);
         }
+    }
 }
 
 class FolderTenant

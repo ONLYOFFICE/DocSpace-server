@@ -30,10 +30,11 @@ namespace ASC.MessagingSystem.Data;
 public class MessagesRepository(
     IServiceScopeFactory serviceScopeFactory,
     ILogger<MessagesRepository> logger,
-    IMapper mapper,
+    DbLoginEventMapper loginEventMapper,
+    DbAuditEventMapper auditEventMapper,
     IEventBus eventBus)
 {
-    private static readonly HashSet<MessageAction> _forceSaveAuditActions = 
+    private static readonly HashSet<MessageAction> _forceSaveAuditActions =
     [
         MessageAction.RoomInviteLinkUsed,
         MessageAction.UserSentEmailChangeInstructions,
@@ -58,7 +59,7 @@ public class MessagesRepository(
 
         await eventBus.PublishAsync(new EventDataIntegrationEvent(message.UserId, message.TenantId)
         {
-             RequestMessage = message
+            RequestMessage = message
         });
 
         return 0;
@@ -69,7 +70,7 @@ public class MessagesRepository(
         // messages with action code < 2000 are related to login-history
         return (int)message.Action < 2000 || _forceSaveAuditActions.Contains(message.Action);
     }
-    
+
     private async Task<int> ForceSave(EventMessage message)
     {
         int id;
@@ -103,7 +104,7 @@ public class MessagesRepository(
 
     private async Task<int> AddLoginEventAsync(EventMessage message, MessagesContext dbContext)
     {
-        var loginEvent = mapper.Map<EventMessage, DbLoginEvent>(message);
+        var loginEvent = loginEventMapper.MapManual(message);
 
         await dbContext.LoginEvents.AddAsync(loginEvent);
         await dbContext.SaveChangesAsync();
@@ -113,7 +114,7 @@ public class MessagesRepository(
 
     private async Task<int> AddAuditEventAsync(EventMessage message, MessagesContext dbContext, HistorySocketManager historySocketManager)
     {
-        var auditEvent = mapper.Map<EventMessage, DbAuditEvent>(message);
+        var auditEvent = auditEventMapper.MapManual(message);
 
         await dbContext.AuditEvents.AddAsync(auditEvent);
         await dbContext.SaveChangesAsync();
@@ -152,17 +153,17 @@ public class EventDataIntegrationEventHandler : IIntegrationEventHandler<EventDa
         _tariffService = tariffService;
         _tenantManager = tenantManager;
     }
-    
+
 
     public async Task Handle(EventDataIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
         using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}") }))
         {
-            
+
             await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
             var tariff = await _tariffService.GetTariffAsync(@event.TenantId);
-            
+
             if (await _channelWriter.WaitToWriteAsync())
             {
                 await _channelWriter.WriteAsync(new EventData(@event.RequestMessage, tariff.State));
@@ -172,16 +173,17 @@ public class EventDataIntegrationEventHandler : IIntegrationEventHandler<EventDa
 }
 
 public class MessageSenderService(
-    IServiceScopeFactory serviceScopeFactory, 
-    ILogger<MessagesRepository> logger, 
-    IMapper mapper,
+    IServiceScopeFactory serviceScopeFactory,
+    ILogger<MessagesRepository> logger,
     ChannelReader<EventData> channelReader,
-    IConfiguration configuration
+    IConfiguration configuration,
+    DbLoginEventMapper loginEventMapper,
+    DbAuditEventMapper auditEventMapper
 ) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    { 
-        if(!int.TryParse(configuration["messaging:maxDegreeOfParallelism"], out var maxDegreeOfParallelism))
+    {
+        if (!int.TryParse(configuration["messaging:maxDegreeOfParallelism"], out var maxDegreeOfParallelism))
         {
             maxDegreeOfParallelism = 10;
         }
@@ -196,10 +198,10 @@ public class MessageSenderService(
             readers = premiumChannels.Union(freeChannel).ToList();
         }
 
-        var tasks = readers.Select(reader1 => Task.Run(async () => 
+        var tasks = readers.Select(reader1 => Task.Run(async () =>
             {
                 await foreach (var eventData in reader1.ReadAllAsync(stoppingToken))
-                {        
+                {
                     try
                     {
                         await using var scope = serviceScopeFactory.CreateAsyncScope();
@@ -229,21 +231,21 @@ public class MessageSenderService(
                                 // messages with action code < 2000 are related to login-history
                                 if ((int)message.Action < 2000)
                                 {
-                                    var loginEvent = mapper.Map<EventMessage, DbLoginEvent>(message);
+                                    var loginEvent = loginEventMapper.MapManual(message);
                                     await ef.LoginEvents.AddAsync(loginEvent, stoppingToken);
                                 }
                                 else
                                 {
-                                    var auditEvent = mapper.Map<EventMessage, DbAuditEvent>(message);
+                                    var auditEvent = auditEventMapper.MapManual(message);
                                     await ef.AuditEvents.AddAsync(auditEvent, stoppingToken);
-                                    
+
                                     if (auditEvent.FilesReferences is { Count: > 0 })
                                     {
                                         references.AddRange(auditEvent.FilesReferences);
                                     }
                                 }
                             }
-                            
+
 
                             await ef.SaveChangesAsync(stoppingToken);
 
@@ -254,7 +256,7 @@ public class MessageSenderService(
 
                             await historySocketManager.UpdateHistoryAsync(tenantId, references);
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             logger.ErrorFlushCache(tenantId, e);
                         }

@@ -593,7 +593,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
         result.FoldersCount = 0;
         result.SettingsPrivate = Private;
         result.SettingsHasLogo = HasLogo;
-        
+
         SetFolderType(result, isRoot);
 
         return result;

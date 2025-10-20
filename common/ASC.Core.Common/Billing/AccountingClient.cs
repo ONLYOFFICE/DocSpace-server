@@ -64,7 +64,7 @@ public class AccountingClient
 
         _configuration.Currencies = _configuration.Currencies == null || _configuration.Currencies.Count == 0 ? ["USD"] : _configuration.Currencies;
 
-        if (!string.IsNullOrEmpty(_configuration.Url)) 
+        if (!string.IsNullOrEmpty(_configuration.Url))
         {
             Configured = true;
         }
@@ -184,7 +184,7 @@ public class AccountingClient
         return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/account/{serviceAccount}");
     }
 
-    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, string[] serviceAccounts)
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, List<string> serviceAccounts)
     {
         var key = $"accounting-prices-{partnerId}-{string.Join(",", serviceAccounts)}";
         var result = _cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
@@ -385,7 +385,7 @@ public class Balance
 }
 
 /// <summary>
-/// Represents a sub-account with a specific currency and amount.
+/// Represents a sub-account with a specific currency and balance.
 /// </summary>
 public class SubAccount
 {
@@ -394,7 +394,7 @@ public class SubAccount
     /// </summary>
     public string Currency { get; init; }
     /// <summary>
-    /// The amount of the sub-account.
+    /// The balance of the sub-account in the specified currency.
     /// </summary>
     public decimal Amount { get; init; }
 }
@@ -499,7 +499,7 @@ public class Report
 
             if (Guid.TryParse(operation.ParticipantName, out var userId))
             {
-                var participantDisplayName = await displayUserSettingsHelper.GetFullUserNameAsync(userId);
+                var participantDisplayName = await displayUserSettingsHelper.GetFullUserNameAsync(userId, true, false);
                 participantDisplayNames.Add(operation.ParticipantName, participantDisplayName);
             }
         }
@@ -569,7 +569,7 @@ public class Operation
 public class Currency
 {
     /// <summary>
-    /// Unique identifier of the currency.
+    /// The currency unique identifier.
     /// </summary>
     public int Id { get; init; }
 

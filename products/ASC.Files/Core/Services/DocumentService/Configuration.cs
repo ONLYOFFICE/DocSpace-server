@@ -166,7 +166,7 @@ public class Configuration<T>(
         set => Document.Info.Type = value;
         get => Document.Info.Type;
     }
-    
+
     public string Error { get; set; }
 
     /// <summary>
@@ -194,9 +194,9 @@ public class Configuration<T>(
 [Transient(GenericArguments = [typeof(int)])]
 [Transient(GenericArguments = [typeof(string)])]
 public class DocumentConfig<T>(
-    DocumentServiceConnector documentServiceConnector, 
-    PathProvider pathProvider, 
-    InfoConfig<T> infoConfig, 
+    DocumentServiceConnector documentServiceConnector,
+    PathProvider pathProvider,
+    InfoConfig<T> infoConfig,
     TenantManager tenantManager)
 {
     private string _fileUri;
@@ -213,15 +213,15 @@ public class DocumentConfig<T>(
     }
 
     public PermissionsConfig Permissions { get; set; } = new();
-    
-	public Options Options { get; set; }
+
+    public Options Options { get; set; }
     public string SharedLinkParam { get; set; }
     public string SharedLinkKey { get; set; }
     public FileReferenceData GetReferenceData(File<T> file)
     {
         return _referenceData ??= new FileReferenceData
         {
-            FileKey = file.Id.ToString(), 
+            FileKey = file.Id.ToString(),
             InstanceId = (tenantManager.GetCurrentTenantId()).ToString()
         };
     }
@@ -232,7 +232,7 @@ public class DocumentConfig<T>(
     {
         _fileUri = documentServiceConnector.ReplaceCommunityAddress(val);
     }
-    
+
     public string GetUrl(File<T> file)
     {
         if (!string.IsNullOrEmpty(_fileUri))
@@ -262,7 +262,7 @@ public class EditorConfiguration<T>(
     FilesSettingsHelper filesSettingsHelper,
     IDaoFactory daoFactory,
     EntryManager entryManager,
-    DocumentServiceTrackerHelper documentServiceTrackerHelper, 
+    DocumentServiceTrackerHelper documentServiceTrackerHelper,
     ExternalShare externalShare,
     UserPhotoManager userPhotoManager,
     GlobalFolderHelper globalFolderHelper,
@@ -278,7 +278,7 @@ public class EditorConfiguration<T>(
     public string Mode => ModeWrite ? "edit" : "view";
 
     public bool ModeWrite { get; set; }
-    
+
     private UserInfo _userInfo;
     private UserInfo UserInfo => _userInfo ??= userManager.GetUsers(authContext.CurrentAccount.ID);
 
@@ -304,13 +304,18 @@ public class EditorConfiguration<T>(
     }
 
     public async Task<string> GetCallbackUrl(File<T> file)
-    {        
+    {
         if (!ModeWrite)
         {
             return null;
         }
-        
+
         var callbackUrl = documentServiceTrackerHelper.GetCallbackUrl(file.Id.ToString());
+
+        if (!string.IsNullOrEmpty(file.FormInfo?.FillingSessionId))
+        {
+            callbackUrl = externalShare.GetUrlWithFillingSessionId(callbackUrl, file.FormInfo.FillingSessionId);
+        }
 
         if (file.ShareRecord is not { IsLink: true } || string.IsNullOrEmpty(file.ShareRecord.Options?.Password))
         {
@@ -373,12 +378,12 @@ public class EditorConfiguration<T>(
                + "&doctype=" + documentType
                + "&" + FilesLinkUtility.FileTitle + "=" + HttpUtility.UrlEncode(title);
     }
-    
+
     public EmbeddedConfig GetEmbedded(EditorType editorType)
     {
         return editorType == EditorType.Embedded ? embeddedConfig : null;
     }
-    
+
     public async IAsyncEnumerable<RecentConfig> GetRecent(FileType fileType, T fileId)
     {
         if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
@@ -406,8 +411,8 @@ public class EditorConfiguration<T>(
         var recent = await folderDao.GetFolderAsync(recentId);
 
         var (entries, _) = await entryManager.GetEntriesAsync(recent, null, 0, 10, [filter], false, Guid.Empty, String.Empty, null, false, false, new OrderBy(SortedByType.LastOpened, false));
-        
-        var files = entries 
+
+        var files = entries
             .Cast<File<int>>()
             .Where(file => file != null && !Equals(fileId, file.Id))
             .ToList();
@@ -415,19 +420,19 @@ public class EditorConfiguration<T>(
         var parentIds = files.Select(r => r.ParentId).Distinct().ToList();
         var parentFolders = await folderDao.GetFoldersAsync(parentIds).ToListAsync();
 
-           
-        
+
+
         foreach (var file in files)
-        { 
+        {
             var externalMediaAccess = file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink };
             var requestToken = "";
             if (externalMediaAccess)
             {
                 requestToken = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
             }
-            
+
             var webUrl = externalShare.GetUrlWithShare(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), requestToken);
-            
+
             yield return new RecentConfig
             {
                 Folder = parentFolders.FirstOrDefault(r => file.ParentId == r.Id)?.Title,
@@ -439,39 +444,39 @@ public class EditorConfiguration<T>(
 
     public async Task<List<TemplatesConfig>> GetTemplates(FileType fileType, string title)
     {
-            if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
-            {
-                return null;
-            }
+        if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            return null;
+        }
 
-            if (!await filesSettingsHelper.GetTemplatesSection())
-            {
-                return null;
-            }
+        if (!await filesSettingsHelper.GetTemplatesSection())
+        {
+            return null;
+        }
 
-            var extension = fileUtility.GetInternalExtension(title).TrimStart('.');
-            var filter = fileType switch
-            {
-                FileType.Document => FilterType.DocumentsOnly,
-                FileType.Pdf => FilterType.Pdf,
-                FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
-                FileType.Presentation => FilterType.PresentationsOnly,
-                FileType.Diagram => FilterType.DiagramsOnly,
-                _ => FilterType.FilesOnly
-            };
+        var extension = fileUtility.GetInternalExtension(title).TrimStart('.');
+        var filter = fileType switch
+        {
+            FileType.Document => FilterType.DocumentsOnly,
+            FileType.Pdf => FilterType.Pdf,
+            FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
+            FileType.Presentation => FilterType.PresentationsOnly,
+            FileType.Diagram => FilterType.DiagramsOnly,
+            _ => FilterType.FilesOnly
+        };
 
-            var folderDao = daoFactory.GetFolderDao<int>();
-            var fileDao = daoFactory.GetFileDao<int>();
-            var files = await entryManager.GetTemplatesAsync(folderDao, fileDao, filter, false, Guid.Empty, string.Empty, null, false).ToListAsync();
-            var listTemplates = from file in files
-                                select
-                                    new TemplatesConfig
-                                    {
-                                        Image = baseCommonLinkUtility.GetFullAbsolutePath("skins/default/images/filetype/thumb/" + extension + ".png"),
-                                        Title = file.Title,
-                                        Url = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
-                                    };
-            return listTemplates.ToList();
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var fileDao = daoFactory.GetFileDao<int>();
+        var files = await entryManager.GetTemplatesAsync(folderDao, fileDao, filter, false, Guid.Empty, string.Empty, null, false).ToListAsync();
+        var listTemplates = from file in files
+                            select
+                                new TemplatesConfig
+                                {
+                                    Image = baseCommonLinkUtility.GetFullAbsolutePath("skins/default/images/filetype/thumb/" + extension + ".png"),
+                                    Title = file.Title,
+                                    Url = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
+                                };
+        return listTemplates.ToList();
     }
 }
 
@@ -633,7 +638,7 @@ public class Options
 
         _ = stringBuilder.Append(WatermarkOnDraw.Width.ToString(CultureInfo.InvariantCulture));
         _ = stringBuilder.Append(WatermarkOnDraw.Height.ToString(CultureInfo.InvariantCulture));
-        _ = stringBuilder.Append(string.Join(',',WatermarkOnDraw.Margins));
+        _ = stringBuilder.Append(string.Join(',', WatermarkOnDraw.Margins));
         _ = stringBuilder.Append(WatermarkOnDraw.Fill);
         _ = stringBuilder.Append(WatermarkOnDraw.Rotate);
         _ = stringBuilder.Append(WatermarkOnDraw.Transparent.ToString(CultureInfo.InvariantCulture));
@@ -929,11 +934,6 @@ public class CustomizationConfig<T>(
 
     public async Task<GobackConfig> GetGoBack(EditorType editorType, File<T> file)
     {
-        if (editorType == EditorType.Embedded)
-        {
-            return null;
-        }
-        
         if (GobackUrl != null)
         {
             return new GobackConfig
@@ -941,15 +941,15 @@ public class CustomizationConfig<T>(
                 Url = GobackUrl
             };
         }
-        
+
         Folder<T> parent;
-        var folderDao = daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetCacheFolderDao<T>();
         var (shareRight, key) = await CheckLinkAsync(file);
-        
+
         if (!authContext.IsAuthenticated)
         {
             if (shareRight != FileShare.Restrict && !string.IsNullOrEmpty(key))
-            {           
+            {
                 parent = await folderDao.GetFolderAsync(file.ParentId);
                 return new GobackConfig
                 {
@@ -957,43 +957,63 @@ public class CustomizationConfig<T>(
                 };
             }
         }
-        
+
         try
         {
 
             parent = await folderDao.GetFolderAsync(file.ParentId);
-            if (file.RootFolderType == FolderType.USER && 
-                !Equals(file.RootId, await globalFolderHelper.FolderMyAsync) && 
-                !await fileSecurity.CanReadAsync(parent))
+
+            if (file.RootFolderType == FolderType.USER && !Equals(file.RootId, await globalFolderHelper.FolderMyAsync))
             {
-                if (await fileSecurity.CanReadAsync(file))
+                if (!await fileSecurity.CanReadAsync(file))
                 {
-                    return new GobackConfig
-                    {
-                        Url = await pathProvider.GetFolderUrlByIdAsync(await globalFolderHelper.FolderRecentAsync, key)
-                    };
+                    return null;
                 }
 
-                return null;
+                string url;
+
+                if (parent.FolderType != FolderType.USER && await fileSecurity.CanReadAsync(parent))
+                {
+                    parent.RootFolderType = FolderType.SHARE;
+                    url = pathProvider.GetFolderUrl(parent, key);
+                    parent.RootFolderType = FolderType.USER;
+                }
+                else
+                {
+                    url = pathProvider.GetFolderUrl(await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>()), key);
+                }
+
+                return new GobackConfig
+                {
+                    Url = url
+                };
             }
 
-            if (file.Encrypted && 
-                file.RootFolderType == FolderType.Privacy && 
-                !await fileSecurity.CanReadAsync(parent))
+            var canReadParent = await fileSecurity.CanReadAsync(parent);
+
+            if (file.Encrypted &&
+                file.RootFolderType == FolderType.Privacy &&
+                !canReadParent)
             {
                 parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderPrivacyAsync<T>());
             }
 
+            if (file.RootFolderType == FolderType.VirtualRooms &&
+                !canReadParent)
+            {
+                parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>());
+            }
+
             return new GobackConfig
             {
-                Url =  pathProvider.GetFolderUrl(parent, key)
+                Url = pathProvider.GetFolderUrl(parent, key)
             };
         }
         catch (Exception)
         {
             return null;
         }
-        
+
     }
 
     public LogoConfig Logo { get; set; } = logoConfig;
@@ -1019,7 +1039,7 @@ public class CustomizationConfig<T>(
             ResultMessage = ""
         };
     }
-    
+
     private async Task<(FileShare, string)> CheckLinkAsync(File<T> file)
     {
         var linkRight = FileShare.Restrict;
@@ -1143,7 +1163,7 @@ public class GobackConfig
 public class ReviewConfig
 {
     public string ReviewDisplay { get; private set; }
-    
+
     [JsonIgnore]
     public ReviewDisplayEnum ReviewDisplayEnum { set => ReviewDisplay = value.ToStringLowerFast(); }
 }
@@ -1212,10 +1232,10 @@ public class LogoConfig(
 /// </summary>
 [Transient]
 public class PluginsConfig
-    // ConsumerFactory consumerFactory,
-    // BaseCommonLinkUtility baseCommonLinkUtility,
-    // CoreBaseSettings coreBaseSettings,
-    // TenantManager tenantManager)
+// ConsumerFactory consumerFactory,
+// BaseCommonLinkUtility baseCommonLinkUtility,
+// CoreBaseSettings coreBaseSettings,
+// TenantManager tenantManager)
 {
     // private readonly BaseCommonLinkUtility _baseCommonLinkUtility = baseCommonLinkUtility;
     //

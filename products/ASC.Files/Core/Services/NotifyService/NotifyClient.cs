@@ -140,6 +140,11 @@ public class NotifyClient(WorkContext notifyContext,
 
         foreach (var recipientPair in recipients)
         {
+            if (!await studioNotifyHelper.IsSubscribedToNotifyAsync(recipientPair.Key, Actions.RoomsActivity))
+            {
+                continue;
+            }
+
             var u = await userManager.GetUsersAsync(recipientPair.Key);
             CultureInfo userCulture;
 
@@ -153,7 +158,7 @@ public class NotifyClient(WorkContext notifyContext,
                     ? (tenantManager.GetCurrentTenant()).GetCulture()
                     : CultureInfo.GetCultureInfo(u.CultureName);
             }
-            
+
 
             var aceString = GetAccessString(recipientPair.Value, userCulture);
             var recipient = await recipientsProvider.GetRecipientAsync(u.Id.ToString());
@@ -164,19 +169,19 @@ public class NotifyClient(WorkContext notifyContext,
                 new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(url)),
                 new TagValue(NotifyConstants.TagDocumentExtension, fileExtension),
                 new TagValue(NotifyConstants.TagAccessRights, aceString),
-                new TagValue(NotifyConstants.TagMessage, message.HtmlEncode()),
+                new TagValue(NotifyConstants.TagMessage, message == null ? string.Empty : message.HtmlEncode()),
                 new TagValue(NotifyConstants.TagFolderID, folder.Id),
                 new TagValue(NotifyConstants.TagFolderParentId, folder.RootId),
                 new TagValue(NotifyConstants.TagFolderRootFolderType, folder.RootFolderType),
                 TagValues.Image(studioNotifyHelper, 0, "privacy.png"),
                 new AdditionalSenderTag("push.sender")
             };
-            
+
             if (!string.IsNullOrEmpty(culture))
             {
                 tags.Add(new TagValue(CommonTags.Culture, culture));
             }
-            
+
             await client.SendNoticeAsync(
                 action,
                 fileEntry.UniqID,
@@ -206,7 +211,7 @@ public class NotifyClient(WorkContext notifyContext,
         {
             return;
         }
-        
+
         var roomUrl = pathProvider.GetRoomsUrl(roomId, false);
 
         var room = await folderDao.GetFolderAsync(id);
@@ -635,6 +640,7 @@ public class NotifyClient(WorkContext notifyContext,
         {
             FileShare.Read => FilesCommonResource.ResourceManager.GetString("AceStatusEnum_Read", cultureInfo),
             FileShare.ReadWrite => FilesCommonResource.ResourceManager.GetString("AceStatusEnum_ReadWrite", cultureInfo),
+            FileShare.Editing => FilesCommonResource.ResourceManager.GetString("AceStatusEnum_Editing", cultureInfo),
             FileShare.CustomFilter => FilesCommonResource.ResourceManager.GetString("AceStatusEnum_CustomFilter", cultureInfo),
             FileShare.Review => FilesCommonResource.ResourceManager.GetString("AceStatusEnum_Review", cultureInfo),
             FileShare.FillForms => FilesCommonResource.ResourceManager.GetString("AceStatusEnum_FillForms", cultureInfo),

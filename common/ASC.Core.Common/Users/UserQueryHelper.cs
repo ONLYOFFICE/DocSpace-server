@@ -36,42 +36,42 @@ public static class UserQueryHelper
         }
 
         if (inviterId.HasValue)
-        { 
+        {
             return (T)query.Where(u => u.CreatedBy == inviterId);
         }
 
         return query;
     }
-    
+
     public static T FilterByText<T>(T query, string text, string separator) where T : IQueryable<User>, IEnumerable<User>
     {
         if (string.IsNullOrEmpty(text))
         {
             return query;
         }
-        
+
         var processedText = text.ToLower().Trim();
 
         if (string.IsNullOrEmpty(separator))
         {
             var split = processedText.Split(" ");
-            return split.Aggregate(query, (current, t) => (T)current.Where(u => 
-                u.FirstName.ToLower().Contains(t) || 
-                u.LastName.ToLower().Contains(t) || 
+            return split.Aggregate(query, (current, t) => (T)current.Where(u =>
+                u.FirstName.ToLower().Contains(t) ||
+                u.LastName.ToLower().Contains(t) ||
                 u.Email.ToLower().Contains(t)));
         }
         else
         {
             var split = processedText.Split(separator);
             var expression = split
-                .Select(x => 
-                    (Expression<Func<User, bool>>)(u => 
-                        u.FirstName.ToLower().Contains(x) || 
-                        u.LastName.ToLower().Contains(x) || 
+                .Select(x =>
+                    (Expression<Func<User, bool>>)(u =>
+                        u.FirstName.ToLower().Contains(x) ||
+                        u.LastName.ToLower().Contains(x) ||
                         u.Email.ToLower().Contains(x)))
-                .Aggregate<Expression<Func<User, bool>>, Expression<Func<User, bool>>>(null, (current, combinedPartLambda) => 
-                    current == null 
-                        ? combinedPartLambda 
+                .Aggregate<Expression<Func<User, bool>>, Expression<Func<User, bool>>>(null, (current, combinedPartLambda) =>
+                    current == null
+                        ? combinedPartLambda
                         : current.Or(combinedPartLambda));
 
             if (expression != null)

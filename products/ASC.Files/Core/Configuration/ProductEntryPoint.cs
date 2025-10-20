@@ -250,7 +250,7 @@ public class ProductEntryPoint : Product
 
             result.Add(activityInfo);
         }
-        
+
         return result;
     }
 
@@ -287,21 +287,19 @@ public class ProductEntryPoint : Product
         }
         var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
 
-        if (!isDocSpaceAdmin)
-        {
-            var myRooms = await folderDao.GetRoomsAsync(null, null, null, userId, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, new List<int> { virtualRoomsFolderId }).ToListAsync();
+        var myRooms = await folderDao.GetRoomsAsync(null, null, null, userId, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, new List<int> { virtualRoomsFolderId }).ToListAsync();
 
-            foreach (var room in myRooms)
-            {
-                var roomId = room.Id.ToString();
-                result.TryAdd(roomId, true);
-            }
+        foreach (var room in myRooms)
+        {
+            var roomId = room.Id.ToString();
+            result.TryAdd(roomId, true);
         }
-        else
+
+        if (isDocSpaceAdmin)
         {
             var archiveFolderId = await _globalFolder.GetFolderArchiveAsync(_daoFactory);
 
-            var rooms = await folderDao.GetRoomsAsync(new List<int> { virtualRoomsFolderId, archiveFolderId }, null, null, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+            var rooms = await folderDao.GetRoomsAsync(new List<int> { archiveFolderId }, null, null, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
 
             foreach (var room in rooms)
             {
@@ -359,9 +357,9 @@ public class ProductEntryPoint : Product
     {
         return employeeType switch
         {
-            EmployeeType.Guest or 
-            EmployeeType.RoomAdmin or 
-            EmployeeType.DocSpaceAdmin or 
+            EmployeeType.Guest or
+            EmployeeType.RoomAdmin or
+            EmployeeType.DocSpaceAdmin or
             EmployeeType.User => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + employeeType.ToStringFast()),
             _ => string.Empty
         };
@@ -371,12 +369,12 @@ public class ProductEntryPoint : Product
     {
         return userRoomRole switch
         {
-            FileShare.Read or 
-            FileShare.Review or 
-            FileShare.Comment or 
-            FileShare.FillForms or 
-            FileShare.RoomManager or 
-            FileShare.Editing or 
+            FileShare.Read or
+            FileShare.Review or
+            FileShare.Comment or
+            FileShare.FillForms or
+            FileShare.RoomManager or
+            FileShare.Editing or
             FileShare.ContentCreator => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + userRoomRole.ToStringFast()),
             _ => string.Empty
         };

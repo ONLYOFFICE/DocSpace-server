@@ -62,7 +62,7 @@ public interface IFolderDao<T>
     IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null);
 
-    IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags, 
+    IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags,
         bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
 
     IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<T> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags,
@@ -254,12 +254,12 @@ public interface IFolderDao<T>
             T folderId,
             CommonChunkedUploadSession chunkedUploadSession,
             CommonChunkedUploadSessionHolder sessionHolder);
-    
+
 
     Task<string> GetBackupExtensionAsync(T folderId);
-    
+
     Task<bool> IsExistAsync(string title, T folderId);
-    
+
     #region Only for TMFolderDao
 
     /// <summary>
@@ -270,6 +270,13 @@ public interface IFolderDao<T>
     /// <param name="exceptFolderIds"></param>
     Task ReassignFoldersAsync(Guid oldOwnerId, Guid newOwnerId, IEnumerable<T> exceptFolderIds);
 
+
+    /// <summary>
+    /// Set created by
+    /// </summary>
+    /// <param name="newOwnerId"></param>
+    /// <param name="folderIds"></param>
+    Task ReassignFoldersAsync(Guid newOwnerId, IEnumerable<T> folderIds);
 
     /// <summary>
     /// Search the list of folders containing text in title
@@ -421,7 +428,7 @@ public interface IFolderDao<T>
     Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
         T roomId = default, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All);
     Task<FilesStatisticsResultDto> GetFilesUsedSpace();
-    Task<bool> ContainsFormsInFolder (Folder<T> folder);
+    Task<bool> ContainsFormsInFolder(Folder<T> folder);
     Task<int> SetCustomOrder(T folderId, T parentFolderId, int order);
 
     Task InitCustomOrder(Dictionary<T, int> folderIds, T parentFolderId);
@@ -429,12 +436,16 @@ public interface IFolderDao<T>
     Task<WatermarkSettings> GetWatermarkSettings(Folder<T> room);
     Task<Folder<T>> DeleteWatermarkSettings(Folder<T> room);
     Task<Folder<T>> DeleteLifetimeSettings(Folder<T> room);
-    
+
     IAsyncEnumerable<Folder<T>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, bool excludeSubject, Location? location, OrderBy orderBy, int offset = 0, int count = -1);
+        string searchText, bool excludeSubject, Location? location, int trashId, OrderBy orderBy, int offset, int count);
     Task<int> GetFoldersByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, bool excludeSubject, Location? location);
-    
+        string searchText, bool excludeSubject, Location? location, int trashId);
+
+    Task<int> GetSharedFoldersCountAsync(T parentId);
+
+    IAsyncEnumerable<Folder<T>> GetSharedFoldersAsync(T parentId, int offset = 0, int count = -1);
+
     #endregion
 }
 

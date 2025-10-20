@@ -44,7 +44,7 @@ public class UpdateRoomsQuotaRequestDto<T>
 }
 
 /// <summary>
-/// The request parameters for updating the room.
+/// The request parameters for updating the rooms.
 /// </summary>
 public class UpdateRoomsRoomIdsRequestDto<T>
 {

@@ -45,7 +45,7 @@ public class IpRestrictionsDto
     /// <summary>
     /// The list of IP restriction addresses.
     /// </summary>
-    public IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
+    public required IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
 
     /// <summary>
     /// Specifies whether to enable IP restrictions or not.

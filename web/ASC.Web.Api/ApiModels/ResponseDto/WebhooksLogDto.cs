@@ -29,12 +29,12 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The webhook log parameters.
 /// </summary>
-public class WebhooksLogDto : IMapFrom<DbWebhooksLog>
+public class WebhooksLogDto
 {
     /// <summary>
     /// The webhook log ID.
     /// </summary>
-    public int Id { get; set; }
+    public required int Id { get; set; }
 
     /// <summary>
     /// The webhook configuration name.
@@ -90,36 +90,13 @@ public class WebhooksLogDto : IMapFrom<DbWebhooksLog>
     /// The webhook delivery time.
     /// </summary>
     public DateTime? Delivery { get; set; }
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<DbWebhooksLog, WebhooksLogDto>()
-              .ConvertUsing<WebhooksLogConverter>();
-    }
 }
 
 [Scope]
-public class WebhooksLogConverter(TenantUtil tenantUtil) : ITypeConverter<DbWebhooksLog, WebhooksLogDto>
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class WebhooksLogDtoMapper(TenantUtil tenantUtil)
 {
-    public WebhooksLogDto Convert(DbWebhooksLog source, WebhooksLogDto destination, ResolutionContext context)
-    {
-        var result = new WebhooksLogDto
-        {
-             Id = source.Id,
-             CreationTime = tenantUtil.DateTimeFromUtc(source.CreationTime),
-             Status = source.Status,
-             RequestHeaders = source.RequestHeaders,
-             RequestPayload = source.RequestPayload,
-             ResponseHeaders = source.ResponseHeaders,
-             ResponsePayload = source.ResponsePayload,
-             Trigger = source.Trigger
-        };
+    public partial WebhooksLogDto Map(DbWebhooksLog source);
 
-        if (source.Delivery.HasValue)
-        {
-            result.Delivery = tenantUtil.DateTimeFromUtc(source.Delivery.Value);
-        }
-        
-        return result;
-    }
+    private DateTime MapDateToUtc(DateTime source) => tenantUtil.DateTimeToUtc(source);
 }

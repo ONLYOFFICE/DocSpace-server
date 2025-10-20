@@ -1221,4 +1221,46 @@
   <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
     <value>GB</value>
   </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>The number of plugins exceeds the limit</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Enable the application to sign in to the portal using a WeChat account.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Enable the application to sign in to the portal using a WeChat account.</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>Client ID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Client Secret</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>First name</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Last name</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Document Service Quota ({0})</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>You have been successfully connected Telegram to receive notifications from your DocSpace.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>An unexpected error occurred. Please try again.</value>
+  </data>
 </root>

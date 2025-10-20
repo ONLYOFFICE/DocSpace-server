@@ -916,4 +916,25 @@
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Peňaženka zákazníka bola dobitá: {0}</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Umiestnenie</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Nastavenia viditeľnosti propagačných bannerov boli zmenené</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Nastavenia služieb s povolenou peňaženkou zákazníka boli aktualizované</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Nastavenia dobíjania zákazníckej peňaženky boli aktualizované</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Overenie LDAP je zakázané</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Autentifikácia LDAP povolená</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Synchronizácia LDAP dokončená</value>
+  </data>
 </root>

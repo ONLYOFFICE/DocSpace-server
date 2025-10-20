@@ -37,7 +37,6 @@ public class SmtpSettingsController(
         PermissionContext permissionContext,
         CoreConfiguration coreConfiguration,
         CoreBaseSettings coreBaseSettings,
-        IMapper mapper,
         SecurityContext securityContext,
         SmtpOperation smtpOperation,
         TenantManager tenantManager)
@@ -65,7 +64,7 @@ public class SmtpSettingsController(
             current = SmtpSettings.Empty;
         }
 
-        var settings = mapper.Map<SmtpSettings, SmtpSettingsDto>(current);
+        var settings = current.MapToDto();
         settings.CredentialsUserPassword = "";
 
         return settings;
@@ -85,18 +84,18 @@ public class SmtpSettingsController(
     public async Task<SmtpSettingsDto> SaveSmtpSettings(SmtpSettingsDto inDto)
     {
         ArgumentNullException.ThrowIfNull(inDto);
-        
+
         await CheckSmtpPermissionsAsync();
 
         //TODO: Add validation check
 
-        
+
 
         var settingConfig = ToSmtpSettingsConfig(inDto);
 
         await coreConfiguration.SetSmtpSettingsAsync(settingConfig);
 
-        var settings = mapper.Map<SmtpSettings, SmtpSettingsDto>(settingConfig);
+        var settings = settingConfig.MapToDto();
         settings.CredentialsUserPassword = "";
 
         return settings;
@@ -149,9 +148,8 @@ public class SmtpSettingsController(
             current = SmtpSettings.Empty;
         }
 
-        var settings = mapper.Map<SmtpSettings, SmtpSettingsDto>(current);
+        var settings = current.MapToDto();
         settings.CredentialsUserPassword = "";
-
         return settings;
     }
 
@@ -170,7 +168,7 @@ public class SmtpSettingsController(
     {
         await CheckSmtpPermissionsAsync();
 
-        var settings = mapper.Map<SmtpSettings, SmtpSettingsDto>(await coreConfiguration.GetDefaultSmtpSettingsAsync());
+        var settings = (await coreConfiguration.GetDefaultSmtpSettingsAsync()).MapToDto();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -198,7 +196,7 @@ public class SmtpSettingsController(
     }
 
     private async Task CheckSmtpPermissionsAsync()
-    {            
+    {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.SmtpSettings)))
         {

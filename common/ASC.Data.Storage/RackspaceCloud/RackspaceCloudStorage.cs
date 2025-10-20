@@ -128,7 +128,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
                              : new Uri(cdnHeaders.CDNSslUri);
 
         DataStoreValidator = dataStoreValidator;
-        
+
         return Task.FromResult<IDataStore>(this);
     }
 
@@ -188,7 +188,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
     }
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream)
     {
-        return SaveAsync(domain, path, Guid.Empty,stream, string.Empty, string.Empty);
+        return SaveAsync(domain, path, Guid.Empty, stream, string.Empty, string.Empty);
     }
 
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl)
@@ -474,7 +474,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
     public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream)
     {
-       var assignedPath = Guid.NewGuid().ToString();
+        var assignedPath = Guid.NewGuid().ToString();
 
         return (await SaveAsync(domain, assignedPath, stream), assignedPath);
     }

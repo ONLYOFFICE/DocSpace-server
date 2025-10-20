@@ -205,7 +205,7 @@ public class SettingsController(CommonMethods commonMethods,
 
             return Ok(new
             {
-                value= false
+                value = false
             });
         }
     }

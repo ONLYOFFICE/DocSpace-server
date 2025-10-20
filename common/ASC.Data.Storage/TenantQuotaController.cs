@@ -68,7 +68,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
             CurrentSize += size;
         }
         await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, ownerId != Guid.Empty ? ownerId : authContext.CurrentAccount.ID);
-        
+
     }
     public async Task QuotaUsedAddAsync(string module, string domain, string dataTag, long size, bool quotaCheckFileSize = true)
     {

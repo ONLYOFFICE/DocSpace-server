@@ -75,17 +75,19 @@ public class TfaManager(
         return _tfa.GenerateSetupCode(tenantManager.GetCurrentTenant().GetTenantDomain(coreSettings), user.Email, await GenerateAccessTokenAsync(user), false, 4);
     }
 
-    public async Task<bool> ValidateAuthCodeAsync(UserInfo user, string code, bool checkBackup = true, bool isEntryPoint = false)
+    public async Task<(bool, string)> ValidateAuthCodeAsync(UserInfo user, string code, bool checkBackup = true, bool isEntryPoint = false)
     {
+        string token = default;
+
         if (!tfaAppAuthSettingsHelper.IsVisibleSettings
             || !(await settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting)
         {
-            return false;
+            return (false, token);
         }
 
         if (user == null || Equals(user, Constants.LostUser))
         {
-            throw new Exception(Resource.ErrorUserNotFound);
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         code = (code ?? "").Trim();
@@ -123,16 +125,16 @@ public class TfaManager(
         if (!securityContext.IsAuthenticated)
         {
             var action = isEntryPoint ? MessageAction.LoginSuccessViaApiTfa : MessageAction.LoginSuccesViaTfaApp;
-            await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action);
+            token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action);
         }
 
         if (!await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
         {
             await GenerateBackupCodesAsync();
-            return true;
+            return (true, token);
         }
 
-        return false;
+        return (false, token);
     }
 
     public async Task<IEnumerable<BackupCode>> GenerateBackupCodesAsync()

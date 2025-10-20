@@ -114,7 +114,7 @@ internal class ProviderFileDao(
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent, bool checkShared = false)
+    public async IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent)
     {
         foreach (var (selectorLocal, matchedIds) in _selectorFactory.GetSelectors(fileIds))
         {
@@ -127,7 +127,7 @@ internal class ProviderFileDao(
             {
                 var fileDao = selectorLocal.GetFileDao(matchedId.FirstOrDefault());
 
-                await foreach (var file in fileDao.GetFilesFilteredAsync(matchedId.Select(selectorLocal.ConvertId).ToArray(), filterType, subjectGroup, subjectID, searchText, 
+                await foreach (var file in fileDao.GetFilesFilteredAsync(matchedId.Select(selectorLocal.ConvertId).ToArray(), filterType, subjectGroup, subjectID, searchText,
                                    extension, searchInContent))
                 {
                     if (file != null)
@@ -181,7 +181,7 @@ internal class ProviderFileDao(
     {
         return await GetFileStreamAsync(file, offset, long.MaxValue);
     }
-    
+
     public async Task<Stream> GetFileStreamAsync(File<string> file, long offset, long length)
     {
         ArgumentNullException.ThrowIfNull(file);
@@ -440,7 +440,7 @@ internal class ProviderFileDao(
         var selector = _selectorFactory.GetSelector(file.Id);
         var fileId = file.Id;
         var parentId = file.ParentId;
-        
+
         var fileDao = selector.GetFileDao(file.Id);
         file.Id = ConvertId(file.Id);
         file.ParentId = ConvertId(file.ParentId);
@@ -449,7 +449,7 @@ internal class ProviderFileDao(
 
         file.Id = fileId;
         file.ParentId = parentId;
-        
+
         return newFileId;
     }
 

@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.EF;
 
-public class DbRoomWatermark : IMapFrom<WatermarkSettings>
+public class DbRoomWatermark
 {
     public string Text { get; set; }
     public WatermarkAdditions Additions { get; set; }

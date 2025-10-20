@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Common.EF.Migration;
-
-using Options = ASC.Core.Common.EF.Migration.Options;
 using ValidationResult = System.ComponentModel.DataAnnotations.ValidationResult;
 
 namespace ASC.Core.Common.EF;
@@ -157,8 +154,8 @@ public static class BaseDbContextExtension
         b.Entry(existingBlog).State = EntityState.Modified;
         return entity;
     }
-    
-    
+
+
     public static async Task<T> AddOrUpdateAsync<T>(this DbSet<T> dbSet, T entity) where T : BaseEntity
     {
         var existingBlog = await dbSet.FindAsync(entity.GetKeys());
@@ -210,14 +207,14 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
                 {
                     var @params = q.GetParameters();
                     var paramsAttr = q.GetCustomAttribute<PreCompileQuery>();
-                    
+
                     if (paramsAttr == null || paramsAttr.Data.Length != @params.Length)
                     {
                         continue;
                     }
-                    
+
                     var paramsToInvoke = new List<object>(@params.Length);
-                    
+
                     for (var i = 0; i < @params.Length; i++)
                     {
                         var p = paramsAttr.Data[i];
@@ -240,19 +237,19 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
                             paramsToInvoke.Add(p);
                         }
                     }
-                    
+
                     var context = createDbContextMethod.Invoke(dbContextFactory, null);
                     if (context == null)
                     {
                         continue;
                     }
-                    
+
                     var res = q.Invoke(context, paramsToInvoke.ToArray());
                     if (res is Task task)
                     {
                         await task.ConfigureAwait(false);
                     }
-                    
+
                     var disposeContext = context.GetType().GetMethod("Dispose");
                     if (disposeContext == null)
                     {

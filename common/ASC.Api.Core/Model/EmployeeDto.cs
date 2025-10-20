@@ -95,7 +95,6 @@ public class EmployeeDto
 
 [Scope]
 public class EmployeeDtoHelper(
-    ApiContext httpContext,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     UserPhotoManager userPhotoManager,
     CommonLinkUtility commonLinkUtility,
@@ -104,7 +103,6 @@ public class EmployeeDtoHelper(
     ILogger<EmployeeDtoHelper> logger)
 {
     private readonly ConcurrentDictionary<Guid, EmployeeDto> _dictionary = new();
-    protected readonly ApiContext _httpContext = httpContext;
     protected readonly UserPhotoManager _userPhotoManager = userPhotoManager;
     protected readonly UserManager _userManager = userManager;
     protected readonly AuthContext _authContext = authContext;
@@ -119,7 +117,7 @@ public class EmployeeDtoHelper(
             _dictionary.AddOrUpdate(userInfo.Id, _ => employee, (_, _) => employee);
 
         }
-        
+
         return employee;
     }
 
@@ -131,7 +129,7 @@ public class EmployeeDtoHelper(
             {
                 return employee;
             }
-            
+
             return await GetAsync(await _userManager.GetUsersAsync(userId));
         }
         catch (Exception e)
@@ -160,7 +158,7 @@ public class EmployeeDtoHelper(
         result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        
+
         if (result.Id != Guid.Empty)
         {
             var profileUrl = await commonLinkUtility.GetUserProfileAsync(userInfo.Id);

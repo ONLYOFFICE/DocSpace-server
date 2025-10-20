@@ -48,12 +48,12 @@ public class IpRestrictionsController(
     public async Task<IEnumerable<IPRestriction>> GetIpRestrictions()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        
+
         var tenant = tenantManager.GetCurrentTenant();
         var etagFromRequest = HttpContext.Request.Headers.IfNoneMatch;
         var result = await iPRestrictionsService.GetAsync(tenant.Id, etagFromRequest);
-        
-        return HttpContext.TryGetFromCache(await HttpContextExtension.CalculateEtagAsync(result.Select(r=> r.Ip))) ? null : result;
+
+        return HttpContext.TryGetFromCache(await HttpContextExtension.CalculateEtagAsync(result.Select(r => r.Ip))) ? null : result;
     }
 
     /// <summary>
@@ -111,9 +111,9 @@ public class IpRestrictionsController(
     public async Task<IPRestrictionsSettings> ReadIpRestrictionsSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        
+
         var settings = await settingsManager.LoadAsync<IPRestrictionsSettings>(HttpContext.GetIfModifiedSince());
-        
+
         return HttpContext.TryGetFromCache(settings.LastModified) ? null : settings;
     }
 

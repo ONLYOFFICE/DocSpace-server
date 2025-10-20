@@ -34,22 +34,22 @@ public record HistoryDto
     /// <summary>
     /// The action performed on the file.
     /// </summary>
-    public HistoryAction Action { get; init; }
+    public required HistoryAction Action { get; init; }
 
     /// <summary>
     /// The action initiator.
     /// </summary>
-    public EmployeeDto Initiator { get; init; }
+    public required EmployeeDto Initiator { get; init; }
 
     /// <summary>
     /// The date and time when an action on the file was performed.
     /// </summary>
-    public ApiDateTime Date { get; init; }
+    public required ApiDateTime Date { get; init; }
 
     /// <summary>
     /// The history data.
     /// </summary>
-    public HistoryData Data { get; init; }
+    public required HistoryData Data { get; init; }
 
     /// <summary>
     /// The list of related history.
@@ -63,7 +63,7 @@ public class HistoryDtoHelper(EmployeeFullDtoHelper employeeFullDtoHelper, UserM
     public async Task<HistoryDto> GetAsync(HistoryEntry entry)
     {
         EmployeeDto initiator;
-        
+
         if (string.IsNullOrEmpty(entry.InitiatorName))
         {
             initiator = await employeeFullDtoHelper.GetAsync(await userManager.GetUsersAsync(entry.InitiatorId));
@@ -75,7 +75,7 @@ public class HistoryDtoHelper(EmployeeFullDtoHelper employeeFullDtoHelper, UserM
                 DisplayName = entry.InitiatorName
             };
         }
-        
+
         return new HistoryDto
         {
             Action = entry.Action,
@@ -87,7 +87,7 @@ public class HistoryDtoHelper(EmployeeFullDtoHelper employeeFullDtoHelper, UserM
 
     public async Task<UserData> GetAsync(Guid? userId)
     {
-        if (userId.HasValue) 
+        if (userId.HasValue)
         {
             var user = await userManager.GetUsersAsync(userId.Value);
 
@@ -113,7 +113,7 @@ public class HistoryApiHelper(
     FileSecurity fileSecurity,
     TenantUtil tenantUtil,
     AuditInterpreter interpreter,
-    IMapper mapper)
+    AuditEventMapper mapper)
 {
     public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId, ApiDateTime fromDate, ApiDateTime toDate, int offset, int count)
     {
@@ -136,18 +136,18 @@ public class HistoryApiHelper(
 
     private async IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> GetEntryEventsAsync(int entryId, FileEntryType entryType, ApiDateTime fromDate, ApiDateTime toDate, int offset, int count, bool setCount = true)
     {
-        var fromDateUtc = fromDate != null 
-            ? tenantUtil.DateTimeToUtc(fromDate) 
+        var fromDateUtc = fromDate != null
+            ? tenantUtil.DateTimeToUtc(fromDate)
             : (DateTime?)null;
-        
-        var toDateUtc = toDate != null 
-            ? tenantUtil.DateTimeToUtc(toDate) 
+
+        var toDateUtc = toDate != null
+            ? tenantUtil.DateTimeToUtc(toDate)
             : (DateTime?)null;
 
         var filterFolderIds = new List<int>();
         var filterFileIds = new List<int>();
         var needFiltering = false;
-        
+
         FileEntry<int> entry = entryType switch
         {
             FileEntryType.File => await daoFactory.GetFileDao<int>().GetFileAsync(entryId),
@@ -182,7 +182,7 @@ public class HistoryApiHelper(
             filterFileIds = await fileDao.GetFilesAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.FilesOnly, false, Guid.Empty, null, null, false, true, false, 0, -1, 0, false, true, f.FolderType).Select(r => r.Id).ToListAsync();
         }
 
-        if (setCount) 
+        if (setCount)
         {
             var totalCountTask = historyService.GetHistoryCountAsync(entryId, entryType, needFiltering, filterFolderIds, filterFileIds, fromDateUtc, toDateUtc);
             var totalCount = await totalCountTask;
@@ -217,7 +217,7 @@ public class HistoryApiHelper(
 
     public async IAsyncEnumerable<AuditEvent> ToEventsAsync(IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> events)
     {
-        await foreach(var e in events)
+        await foreach (var e in events)
         {
             var description = JsonSerializer.Deserialize<List<string>>(e.Item1.DescriptionRaw);
             var query = new AuditEventQuery
@@ -226,7 +226,7 @@ public class HistoryApiHelper(
                 UserData = await historyDtoHelper.GetAsync(e.Item1.UserId)
             };
 
-            yield return mapper.Map<AuditEventQuery, AuditEvent>(query);
+            yield return mapper.ToAuditEvent(query);
         }
     }
 }

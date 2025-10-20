@@ -50,7 +50,7 @@ public class BackupService(
         IDaoFactory daoFactory,
         FileSecurity fileSecurity,
         StorageFactory storageFactory)
-    {
+{
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
     private const int BackupCustomerSessionDuration = 86400; // 60 * 60 * 24;
@@ -662,17 +662,17 @@ public class ScheduleDto
     /// <summary>
     /// The backup storage type.
     /// </summary>
-    public BackupStorageType StorageType { get; set; }
+    public required BackupStorageType StorageType { get; set; }
 
     /// <summary>
     /// The backup storage parameters.
     /// </summary>
-    public Dictionary<string, string> StorageParams { get; set; }
+    public required Dictionary<string, string> StorageParams { get; set; }
 
     /// <summary>
     /// The backup cron parameters.
     /// </summary>
-    public CronParams CronParams { get; init; }
+    public required CronParams CronParams { get; init; }
 
     /// <summary>
     /// The maximum number of the stored backup copies.
@@ -682,13 +682,13 @@ public class ScheduleDto
     /// <summary>
     /// The date and time when the last backup was reated.
     /// </summary>
-    public DateTime LastBackupTime { get; set; }
+    public required DateTime LastBackupTime { get; set; }
 
     /// <summary>
     /// Specifies if a dump will be created or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
-    public bool Dump { get; set; }
+    public required bool Dump { get; set; }
 }
 
 /// <summary>

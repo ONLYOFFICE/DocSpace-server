@@ -94,4 +94,3 @@ public class Module
     public string ValidatorType { get; set; }
     public bool? ContentAsAttachment { get; set; }
 }
-

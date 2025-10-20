@@ -87,7 +87,7 @@ public class CommonChunkedUploadSession(long bytesTotal) : ICloneable
                     {
                         return default;
                     }
-                
+
                     Items[key] = item;
                     return item;
                 }
@@ -135,7 +135,7 @@ public class CommonChunkedUploadSession(long bytesTotal) : ICloneable
                 newItems.Add(item.Key, item.Value);
             }
         }
-        
+
         Items = newItems;
     }
 
