@@ -553,7 +553,7 @@ public partial class McpService(
                 var wrapper = new ToolWrapper
                 {
                     Tool = tool,
-                    Properties = new ToolProperties
+                    Context = new ToolContext
                     {
                         McpServerInfo = new McpServerInfo
                         {

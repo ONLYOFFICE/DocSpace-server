@@ -31,12 +31,12 @@ public class ToolHolder : IAsyncDisposable
     public readonly List<AITool> Tools = [];
     
     private readonly List<McpClient> _clients = [];
-    private readonly Dictionary<string, ToolProperties> _properties = [];
+    private readonly Dictionary<string, ToolContext> _contexts = [];
 
     public void AddTool(ToolWrapper toolWrapper)
     {
         Tools.Add(toolWrapper.Tool);
-        _properties.Add(toolWrapper.Tool.Name, toolWrapper.Properties);
+        _contexts.Add(toolWrapper.Tool.Name, toolWrapper.Context);
     }
 
     public void AddMcpTool(McpClient client, IEnumerable<ToolWrapper> toolWrappers)
@@ -45,20 +45,20 @@ public class ToolHolder : IAsyncDisposable
 
         foreach (var toolWrapper in toolWrappers)
         {
-            if (toolWrapper.Tool is not McpClientTool mcpClientTool || toolWrapper.Properties.McpServerInfo is null)
+            if (toolWrapper.Tool is not McpClientTool mcpClientTool || toolWrapper.Context.McpServerInfo is null)
             {
                 continue;
             }
             
-            if (!_properties.ContainsKey(mcpClientTool.Name))
+            if (!_contexts.ContainsKey(mcpClientTool.Name))
             {
                 Tools.Add(toolWrapper.Tool);
-                _properties.Add(toolWrapper.Tool.Name, toolWrapper.Properties);
+                _contexts.Add(toolWrapper.Tool.Name, toolWrapper.Context);
                 
                 continue;
             }
 
-            var serverName = toolWrapper.Properties.McpServerInfo.ServerName;
+            var serverName = toolWrapper.Context.McpServerInfo.ServerName;
             
             var uniqueName = GetUniqueName(serverName, toolWrapper.Tool.Name);
             if (string.IsNullOrEmpty(uniqueName))
@@ -68,13 +68,13 @@ public class ToolHolder : IAsyncDisposable
 
             toolWrapper.Tool = mcpClientTool.WithName(uniqueName);
             Tools.Add(toolWrapper.Tool);
-            _properties.Add(toolWrapper.Tool.Name, toolWrapper.Properties);
+            _contexts.Add(toolWrapper.Tool.Name, toolWrapper.Context);
         }
     }
     
-    public ToolProperties GetProperties(string toolName)
+    public ToolContext GetContext(string toolName)
     {
-        return !_properties.TryGetValue(toolName, out var properties) 
+        return !_contexts.TryGetValue(toolName, out var properties) 
             ? throw new ArgumentException($"Tool {toolName} not found") 
             : properties;
     }
@@ -117,13 +117,14 @@ public class ToolHolder : IAsyncDisposable
 public class ToolWrapper
 {
     public required AITool Tool { get; set; }
-    public required ToolProperties Properties { get; init; }
+    public required ToolContext Context { get; init; }
 }
 
-public class ToolProperties
+public class ToolContext
 {
     public McpServerInfo? McpServerInfo { get; init; }
     public required string Name { get; init; }
     public int RoomId { get; init; }
     public bool AutoInvoke { get; set; }
+    public Task<ToolExecutionDecision>? PermissionRequest { get; set; }
 }

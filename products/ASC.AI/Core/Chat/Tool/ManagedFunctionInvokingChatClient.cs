@@ -45,15 +45,24 @@ public class ManagedFunctionInvokingChatClient(
                     continue;
                 }
 
-                var properties = toolHolder.GetProperties(functionCallContent.Name);
-                if (!properties.AutoInvoke)
+                var context = toolHolder.GetContext(functionCallContent.Name);
+                if (!context.AutoInvoke)
                 {
                     functionCallContent.MarkAsManaged();
+                    var callData = new CallData
+                    {
+                        ServerId = context.McpServerInfo!.ServerId,
+                        RoomId = context.RoomId,
+                        CallId = functionCallContent.CallId, 
+                        Name = context.Name
+                    };
+                    
+                    context.PermissionRequest = permissionRequester.RequestPermissionAsync(callData, cancellationToken);
                 }
 
-                if (properties.McpServerInfo is not null)
+                if (context.McpServerInfo is not null)
                 {
-                    functionCallContent.AddMcpServerData(properties.McpServerInfo);
+                    functionCallContent.AddMcpServerData(context.McpServerInfo);
                 }
             }
             
@@ -68,26 +77,18 @@ public class ManagedFunctionInvokingChatClient(
             throw new NotSupportedException("Managing function invocations is not supported for non-streaming responses.");
         }
 
-        var properties = toolHolder.GetProperties(context.CallContent.Name);
-        if (properties.AutoInvoke)
+        var toolContext = toolHolder.GetContext(context.CallContent.Name);
+        if (toolContext.AutoInvoke)
         {
             return await base.InvokeFunctionAsync(context, cancellationToken);
         }
 
-        if (properties.McpServerInfo == null)
+        if (toolContext.PermissionRequest == null)
         {
-            throw new ArgumentException("McpServerData is not set for the tool.");
+            throw new ArgumentException("Permission request is not set for the tool.");
         }
 
-        var callData = new CallData
-        {
-            ServerId = properties.McpServerInfo.ServerId,
-            RoomId = properties.RoomId,
-            CallId = context.CallContent.CallId, 
-            Name = properties.Name
-        };
-        
-        var decision = await permissionRequester.RequestPermissionAsync(callData, cancellationToken);
+        var decision = await toolContext.PermissionRequest;
         if (decision is ToolExecutionDecision.Deny)
         {
             return new
@@ -101,7 +102,7 @@ public class ManagedFunctionInvokingChatClient(
 
         if (decision is ToolExecutionDecision.AlwaysAllow)
         {
-            properties.AutoInvoke = true;
+            toolContext.AutoInvoke = true;
         }
         
         return await base.InvokeFunctionAsync(context, cancellationToken);

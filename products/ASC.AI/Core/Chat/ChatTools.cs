@@ -74,7 +74,7 @@ public class ChatTools(
         return new ToolWrapper
         {
             Tool = tool, 
-            Properties = new ToolProperties
+            Context = new ToolContext
             {
                 Name = tool.Name, 
                 RoomId = roomId, 
