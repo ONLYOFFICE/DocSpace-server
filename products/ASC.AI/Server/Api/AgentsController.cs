@@ -27,7 +27,6 @@
 using ASC.Api.Core.Core;
 using ASC.Api.Utils;
 using ASC.Files.Core;
-using ASC.Files.Core.ApiModels;
 using ASC.Files.Core.ApiModels.RequestDto;
 using ASC.Files.Core.ApiModels.ResponseDto;
 using ASC.Files.Core.VirtualRooms;
@@ -44,7 +43,6 @@ namespace ASC.AI.Api
     [ApiController]
     [ControllerName("ai")]
     public class AgentsController(
-        IMapper mapper,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDeleteOperationsManager fileDeleteOperationsManager,
@@ -116,7 +114,7 @@ namespace ASC.AI.Api
         [HttpPost("agents")]
         public async Task<FolderDto<int>> CreateAgent(CreateAgentRequestDto inDto)
         {
-            var lifetime = mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(inDto.Lifetime);
+            var lifetime = inDto.Lifetime.Map();
             if (lifetime != null)
             {
                 lifetime.StartDate = DateTime.UtcNow;
