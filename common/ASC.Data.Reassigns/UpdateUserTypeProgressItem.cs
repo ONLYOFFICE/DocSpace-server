@@ -30,14 +30,12 @@ using ASC.Files.Core.Resources;
 using ASC.People.ApiModels.ResponseDto;
 using ASC.Webhooks.Core;
 
-using Microsoft.OpenApi.Extensions;
-
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Data.Reassigns;
 
 [Transient]
-public class UpdateUserTypeProgressItem: DistributedTaskProgress
+public class UpdateUserTypeProgressItem : DistributedTaskProgress
 {
     public Guid User { get; private set; }
     public Guid ToUser { get; private set; }

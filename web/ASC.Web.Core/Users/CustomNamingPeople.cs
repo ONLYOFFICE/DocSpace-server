@@ -42,7 +42,7 @@ public class PeopleNamesSettings : ISettings<PeopleNamesSettings>
     {
         return new PeopleNamesSettings { ItemId = PeopleNamesItem.DefaultID };
     }
-    
+
     public DateTime LastModified { get; set; }
 }
 
@@ -164,8 +164,8 @@ public class CustomNamingPeople(SettingsManager settingsManager)
     public async Task<PeopleNamesItem> GetCurrent()
     {
         var settings = await settingsManager.LoadAsync<PeopleNamesSettings>();
-        return PeopleNamesItem.CustomID.Equals(settings.ItemId, StringComparison.InvariantCultureIgnoreCase) && settings.Item != null ? 
-            settings.Item : 
+        return PeopleNamesItem.CustomID.Equals(settings.ItemId, StringComparison.InvariantCultureIgnoreCase) && settings.Item != null ?
+            settings.Item :
             await GetPeopleNames(settings.ItemId);
     }
 

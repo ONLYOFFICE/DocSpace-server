@@ -35,14 +35,14 @@ public class GetByStatusRequestDto
     /// The user status.
     /// </summary>
     [FromRoute(Name = "status")]
-    public required EmployeeStatus Status {  get; set; }
+    public required EmployeeStatus Status { get; set; }
 
     /// <summary>
     /// Specifies the criteria used to filter the profiles in the request.
     /// </summary>
     [FromQuery(Name = "filterBy")]
     public string FilterBy { get; set; }
-    
+
     /// <summary>
     /// The maximum number of user profiles to retrieve.
     /// </summary>
@@ -55,7 +55,7 @@ public class GetByStatusRequestDto
     /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
-    
+
     /// <summary>
     /// Specifies the property or field name by which the results should be sorted.
     /// </summary>
@@ -67,7 +67,7 @@ public class GetByStatusRequestDto
     /// </summary>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
-    
+
     /// <summary>
     /// Represents the separator used to split multiple filter criteria in a query string.
     /// </summary>

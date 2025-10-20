@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Notify.Model;
+
 namespace ASC.Notify.Config;
 
 [Singleton]
@@ -34,13 +36,13 @@ public class ConfigureNotifyServiceCfg
     public ConfigureNotifyServiceCfg(IConfiguration configuration, IServiceProvider serviceProvider)
     {
         Value = configuration.GetSection("notify").Get<NotifyServiceCfg>();
-        
+
         Value.Process.Init();
 
         foreach (var s in Value.Senders)
         {
             try
-            {        
+            {
                 var sender = (INotifySender)serviceProvider.GetService(Type.GetType(s.Type, true));
                 if (sender != null)
                 {
@@ -68,53 +70,5 @@ public class ConfigureNotifyServiceCfg
                 }
             }
         }
-    }
-}
-
-public class NotifyServiceCfg
-{
-    public string ConnectionStringName { get; set; }
-    public int StoreMessagesDays { get; set; }
-    public NotifyServiceCfgProcess Process { get; set; }
-    public List<NotifyServiceCfgSender> Senders { get; set; }
-    public List<NotifyServiceCfgScheduler> Schedulers { get; set; }
-}
-
-public class NotifyServiceCfgProcess
-{
-    public int MaxThreads { get; set; }
-    public int BufferSize { get; set; }
-    public int MaxAttempts { get; set; }
-    public string AttemptsInterval { get; set; }
-
-    public void Init()
-    {
-        if (MaxThreads == 0)
-        {
-            MaxThreads = Environment.ProcessorCount;
-        }
-    }
-}
-
-public class NotifyServiceCfgSender
-{
-    public string Name { get; set; }
-    public string Type { get; set; }
-    public Dictionary<string, string> Properties { get; set; }
-    public INotifySender NotifySender { get; set; }
-}
-
-public class NotifyServiceCfgScheduler
-{
-    public string Name { get; set; }
-    public string Register { get; set; }
-    public MethodInfo MethodInfo { get; set; }
-
-    public void Init()
-    {
-        var typeName = Register[..Register.IndexOf(',')];
-        var assemblyName = Register[Register.IndexOf(',')..];
-        var type = Type.GetType(string.Concat(typeName.AsSpan(0, typeName.LastIndexOf('.')), assemblyName), true);
-        MethodInfo = type.GetMethod(typeName[(typeName.LastIndexOf('.') + 1)..], BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
     }
 }

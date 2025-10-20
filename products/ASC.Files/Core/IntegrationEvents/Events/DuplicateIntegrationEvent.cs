@@ -35,13 +35,13 @@ public record DuplicateIntegrationEvent : IntegrationEvent
     {
 
     }
-    
+
     [ProtoMember(1)]
-    public string TaskId { get; set;}
-    
+    public string TaskId { get; set; }
+
     [ProtoMember(2)]
     public FileOperationData<int> Data { get; set; }
-    
+
     [ProtoMember(3)]
     public FileOperationData<string> ThirdPartyData { get; set; }
 }

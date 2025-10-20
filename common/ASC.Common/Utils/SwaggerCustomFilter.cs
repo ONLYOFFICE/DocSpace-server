@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Linq;
-
 using Bogus;
 
 using Microsoft.OpenApi.Any;
@@ -46,7 +44,7 @@ public class SwaggerSchemaCustomAttribute : SwaggerSchemaAttribute
     {
         Description = description;
     }
-    
+
     public object Example { get; set; }
 }
 
@@ -59,14 +57,14 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             UpdateSchema(context.Type, schema);
             return;
         }
-        
+
         if (context.MemberInfo is not PropertyInfo propertyInfo)
         {
             return;
         }
 
         UpdateSchema(propertyInfo.PropertyType, schema);
-        
+
         var swaggerSchemaCustomAttribute = propertyInfo.GetCustomAttributes(true).OfType<SwaggerSchemaCustomAttribute>().FirstOrDefault();
 
         if (swaggerSchemaCustomAttribute != null)
@@ -79,7 +77,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         else
         {
             var example = GenerateFakeData(propertyInfo);
-            if(example != null)
+            if (example != null)
             {
                 schema.Example = example;
             }
@@ -93,11 +91,11 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         {
             checkType = nullableType;
         }
-        
+
         if (checkType == typeof(int))
         {
             result.Example = new OpenApiInteger(SwaggerSchemaCustomAttribute.DefaultIntExample);
-        } 
+        }
         else if (checkType == typeof(long) || checkType == typeof(ulong))
         {
             result.Example = new OpenApiLong(1234);
@@ -122,7 +120,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         {
             result.Example = new OpenApiString(new Guid("{75A5F745-F697-4418-B38D-0FE0D277E258}").ToString());
         }
-        else if(checkType.IsClosedTypeOf(typeof(IDictionary<,>)))
+        else if (checkType.IsClosedTypeOf(typeof(IDictionary<,>)))
         {
             var array = new OpenApiArray();
             if (checkType.IsGenericType)
@@ -154,7 +152,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             {
                 checkType = checkType.GetGenericArguments().FirstOrDefault();
             }
-            else if(checkType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+            else if (checkType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
             {
                 checkType = checkType.GetInterfaces()
                     .FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>))
@@ -174,17 +172,17 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 result.Example = array;
             }
 
-            if(arraySchema.OneOf.Count != 0)
+            if (arraySchema.OneOf.Count != 0)
             {
                 result.Items = new OpenApiSchema { AnyOf = arraySchema.OneOf };
             }
-            else if(checkType == typeof(object))
+            else if (checkType == typeof(object))
             {
                 result.Items = new OpenApiSchema { Type = "object" };
             }
 
         }
-        else if(checkType == typeof(JsonElement))
+        else if (checkType == typeof(JsonElement))
         {
             var oneOfSchema = new List<OpenApiSchema>
             {
@@ -255,7 +253,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 result.Format = null;
             }
         }
-        else if(checkType == typeof(object))
+        else if (checkType == typeof(object))
         {
             result.Example = new OpenApiObject
             {
@@ -264,7 +262,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 ["boolean"] = new OpenApiBoolean(true)
             };
         }
-        else if(checkType == typeof(TimeSpan))
+        else if (checkType == typeof(TimeSpan))
         {
             var timeSpan = TimeSpan.Zero.ToString();
             result.Example = new OpenApiString(timeSpan);
@@ -303,7 +301,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             case "Location":
                 return new OpenApiString(faker.Address.FullAddress());
             case "Password":
-                    return new OpenApiString(faker.Internet.Password());
+                return new OpenApiString(faker.Internet.Password());
             case "Extension":
             case "Ext":
             case "FileExtension":
@@ -318,17 +316,17 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             case "InstanceId":
             case "UserId":
             case "ProductId":
-                if(propertyInfo.PropertyType == typeof(string))
+                if (propertyInfo.PropertyType == typeof(string))
                 {
                     return new OpenApiString(faker.Random.Int(1, 10000).ToString());
                 }
 
-                if(propertyInfo.PropertyType == typeof(int))
+                if (propertyInfo.PropertyType == typeof(int))
                 {
                     return new OpenApiInteger(faker.Random.Int(1, 10000));
                 }
 
-                    return new OpenApiString(faker.Random.Guid().ToString());
+                return new OpenApiString(faker.Random.Guid().ToString());
             default:
                 return null;
         }

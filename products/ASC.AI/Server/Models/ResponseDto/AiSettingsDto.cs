@@ -26,10 +26,17 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class AiSettingsDto : IMapFrom<AiSettings>
+public class AiSettingsDto
 {
     public bool WebSearchEnabled { get; init; }
     public required string KnowledgeSearchToolName { get; init; }
     public required string WebSearchToolName { get; init; }
     public required string WebCrawlingToolName { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class AiSettingsDtoMapper
+{
+    public static partial AiSettingsDto MapToDto(this AiSettings source);
 }

@@ -368,7 +368,7 @@
     <value>Connexion réussie</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Connexion à l'aide du compte social réussie</value>
+    <value>Connexion à l'aide du compte social réussie : {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>La connexion réussie avec l'application sociale</value>
@@ -927,5 +927,20 @@
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>Paramètres de recharge du wallet client mis à jour</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Localisation</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Paramètres de visibilité des bannières promotionnelles modifiés</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Paramètres des services activés via le wallet client mis à jour</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Connexion réussie via OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Connexion réussie via identifiant et mot de passe</value>
   </data>
 </root>

@@ -61,16 +61,16 @@ public sealed class Constants(IConfiguration configuration)
 
     public static readonly GroupInfo GroupUser = new(SysGroupCategoryId)
     {
-        ID = AuthConstants.User.ID, 
+        ID = AuthConstants.User.ID,
         Name = AuthConstants.User.Name
     };
 
     public static readonly GroupInfo[] SystemGroups =
     [
-        GroupEveryone, 
-        GroupGuest, 
-        GroupRoomAdmin, 
-        GroupAdmin, 
+        GroupEveryone,
+        GroupGuest,
+        GroupRoomAdmin,
+        GroupAdmin,
         GroupUser
     ];
 

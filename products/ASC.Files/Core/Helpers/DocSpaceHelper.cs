@@ -37,7 +37,7 @@ public static class DocSpaceHelper
         FolderType.VirtualDataRoom,
         FolderType.AiRoom
     ];
-    
+
     public static bool IsRoom(FolderType folderType)
     {
         return RoomTypes.Contains(folderType);
@@ -54,7 +54,7 @@ public static class DocSpaceHelper
     {
         return FormsFillingSystemFolders.Contains(folderType);
     }
-    
+
     public static bool IsFormsFillingFolder<T>(FileEntry<T> entry)
     {
         return entry is Folder<T> f && (f.FolderType == FolderType.FillingFormsRoom || IsFormsFillingSystemFolder(f.FolderType));
@@ -87,14 +87,14 @@ public static class DocSpaceHelper
             _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, null)
         };
     }
-    
+
     public static IEnumerable<FolderType> MapToFolderTypes(IEnumerable<FilterType> filterTypes)
     {
         if (filterTypes == null)
         {
             return null;
         }
-        
+
         var result = new HashSet<FolderType>();
 
         foreach (var type in filterTypes)
@@ -105,7 +105,7 @@ public static class DocSpaceHelper
                 result.Add(folderType.Value);
             }
         }
-        
+
         return result;
     }
 
@@ -141,7 +141,7 @@ public static class DocSpaceHelper
         {
             return false;
         }
-        
+
         var room = await GetParentRoom(file, folderDao);
 
         return IsWatermarkEnabled(room);

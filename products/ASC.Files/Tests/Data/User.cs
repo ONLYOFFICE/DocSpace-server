@@ -28,5 +28,6 @@ namespace ASC.Files.Tests.Data;
 
 public record User(string Email, string Password)
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
+    public string? PasswordHash { get; set; }
 }

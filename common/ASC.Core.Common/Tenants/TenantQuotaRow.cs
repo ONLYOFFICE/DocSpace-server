@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Tenants;
 
-public class TenantQuotaRow : IMapFrom<DbQuotaRow>
+public class TenantQuotaRow
 {
     public int TenantId { get; init; }
     public string Path { get; init; }
@@ -34,4 +34,12 @@ public class TenantQuotaRow : IMapFrom<DbQuotaRow>
     public string Tag { get; init; }
     public Guid UserId { get; init; }
     public DateTime LastModified { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class TenantQuotaRowMapper
+{
+    public static partial TenantQuotaRow Map(this DbQuotaRow source);
+    public static partial DbQuotaRow Map(this TenantQuotaRow source);
+    public static partial IQueryable<TenantQuotaRow> Project(this IQueryable<DbQuotaRow> q);
 }

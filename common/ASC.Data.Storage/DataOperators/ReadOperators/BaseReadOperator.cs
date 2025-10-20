@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Data.Storage.DataOperators;
-public abstract class BaseReadOperator: IDataReadOperator
+public abstract class BaseReadOperator : IDataReadOperator
 {
     internal string _tmpdir;
 

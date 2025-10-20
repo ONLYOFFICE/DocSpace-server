@@ -54,13 +54,13 @@ public class AuthService
             Instruction = ConsumerExtension.GetResourceString(consumer.Name + "Instruction")?.Replace("{LogoText}", logoText),
             Props = []
         };
-        
+
         foreach (var item in consumer.ManagedKeys)
         {
             result.Props.Add(new AuthKey
             {
-                Name = item, 
-                Value = await consumer.GetAsync(item), 
+                Name = item,
+                Value = await consumer.GetAsync(item),
                 Title = ConsumerExtension.GetResourceString(item) ?? item
             });
         }
@@ -86,24 +86,24 @@ public static class ConsumerExtension
 }
 
 /// <summary>
-/// The authentication key parameters.
+/// The authorization key parameters.
 /// </summary>
 [DebuggerDisplay("({Name},{Value})")]
 public class AuthKey
 {
     /// <summary>
-    /// The authentication key name.
+    /// The authorization key name.
     /// </summary>
-    public string Name { get; init; }
+    public required string Name { get; init; }
 
     /// <summary>
-    /// The authentication key value.
+    /// The authorization key value.
     /// </summary>
     [StringLength(255)]
-    public string Value { get; init; }
+    public required string Value { get; init; }
 
     /// <summary>
-    /// The authentication key title.
+    /// The authorization key title.
     /// </summary>
     public string Title { get; set; }
 }

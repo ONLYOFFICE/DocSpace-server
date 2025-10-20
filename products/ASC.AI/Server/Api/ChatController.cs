@@ -36,7 +36,6 @@ public class ChatController(
     EmployeeDtoHelper employeeDtoHelper,
     ApiDateTimeHelper apiDateTimeHelper,
     ApiContext apiContext,
-    IMapper mapper,
     MessageExporter exporter,
     McpService mcpService,
     MessageDtoConverter dtoConverter) : ControllerBase
@@ -132,7 +131,7 @@ public class ChatController(
     public async Task<IEnumerable<ModelDto>> GetChatModelsAsync(GetChatModelsRequestDto inDto)
     {
         var models = await chatService.GetModelsAsync(inDto.ProviderId);
-        return mapper.Map<IEnumerable<ModelData>, IEnumerable<ModelDto>>(models);
+        return models.Select(x => x.MapToDto()).ToList();
     }
 
     [HttpPost("chats/tool-permissions/{callId}/decision")]
@@ -145,14 +144,14 @@ public class ChatController(
     public async Task<UserChatSettingsDto> SetUserChatsSettingsAsync(SetUserChatsSettingsRequestDto inDto)
     {
         var settings = await chatService.SetUserChatsSettingsAsync(inDto.RoomId, inDto.Body.WebSearchEnabled);
-        return mapper.Map<UserChatSettings, UserChatSettingsDto>(settings);
+        return settings.MapToDto();
     }
     
     [HttpGet("rooms/{roomId}/chats/config")]
     public async Task<UserChatSettingsDto> GetUserChatsSettingsAsync(GetUserChatsSettingsRequestDto inDto)
     {
         var settings = await chatService.GetUserChatsSettingsAsync(inDto.RoomId);
-        return mapper.Map<UserChatSettings, UserChatSettingsDto>(settings);
+        return settings.MapToDto();
     }
     
     private async Task StreamSentEventAsync(

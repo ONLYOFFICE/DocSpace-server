@@ -137,7 +137,7 @@ public class DiscDataStore(
     {
         return GetReadStreamAsync(domain, path, offset);
     }
-    
+
     public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition)
     {
         return SaveAsync(domain, path, stream, ownerId);
@@ -399,7 +399,7 @@ public class DiscDataStore(
 
     public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true)
     {
-       return await MoveAsync(srcDomain, srcPath, newDomain, newPath, Guid.Empty, quotaCheckFileSize);
+        return await MoveAsync(srcDomain, srcPath, newDomain, newPath, Guid.Empty, quotaCheckFileSize);
     }
 
     public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, Guid ownerId, bool quotaCheckFileSize = true)
@@ -578,7 +578,7 @@ public class DiscDataStore(
 
     public override string GetRootDirectory(string domain)
     {
-        var targetDir = GetTarget(domain , "");
+        var targetDir = GetTarget(domain, "");
         var dir = GetTarget("", "");
         if (!string.IsNullOrEmpty(targetDir) && !targetDir.EndsWith(Path.DirectorySeparatorChar.ToString()))
         {
@@ -621,7 +621,7 @@ public class DiscDataStore(
         if (Directory.Exists(targetDir))
         {
             var entries = Directory.EnumerateFiles(targetDir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-                .Select(e=> e[targetDir.Length..]);
+                .Select(e => e[targetDir.Length..]);
             return entries.ToAsyncEnumerable();
         }
         return AsyncEnumerable.Empty<string>();

@@ -26,11 +26,18 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class McpServerStatusDto : IMapFrom<McpServerStatus>
+public class McpServerStatusDto
 {
     public Guid Id { get; init; }
     public required string Name { get; init; }
     public ServerType ServerType { get; init; }
     public bool Connected { get; init; }
     public Icon? Icon { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class McpServerStatusDtoMapper
+{
+    public static partial McpServerStatusDto MapToStatusDto(this McpServerStatus source);
 }

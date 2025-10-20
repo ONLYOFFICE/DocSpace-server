@@ -26,10 +26,17 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class McpServerShortDto : IMapFrom<McpServer>
+public class McpServerShortDto
 {
     public Guid Id { get; init; }
     public string? Name { get; init; }
     public ServerType ServerType { get; init; }
     public Icon? Icon { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class McpServerShortDtoMapper
+{
+    public static partial McpServerShortDto MapToShortDto(this McpServer source);
 }

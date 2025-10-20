@@ -25,14 +25,14 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Diagnostics;
+
 using ASC.Api.Core.Cors;
 using ASC.Api.Core.Cors.Enums;
 using ASC.Api.Core.Cors.Middlewares;
-using ASC.Common.Mapping;
 using ASC.MessagingSystem;
+
 using Flurl.Util;
 
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
 
 namespace ASC.Api.Core;
@@ -72,7 +72,7 @@ public abstract class BaseStartup
         {
             AppContext.SetSwitch("System.Net.Security.UseManagedNtlm", true);
         }
-        
+
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
@@ -369,11 +369,11 @@ public abstract class BaseStartup
         }
 
         DIHelper.Configure(services);
-        
+
         services.ConfigureOptions<ConfigureJsonOptions>();
 
         services.AddControllers();
-        
+
         DIHelper.Scan();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
@@ -492,36 +492,25 @@ public abstract class BaseStartup
         services.AddApiKeyBearerAuthentication()
                 .AddJwtBearerAuthentication();
 
-        services.AddAutoMapper(GetAutoMapperProfileAssemblies());
-
         services.AddBillingHttpClient();
         services.AddAccountingHttpClient();
 
-        services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
-        services.AddHostedService<NotifySenderService>();
+        services.ConfigureNotificationServices();
 
         services.AddSingleton(Channel.CreateUnbounded<SocketData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
-        
+
         services.RegisterQueue<ResizeWorkerItem>(2);
 
         services
             .AddStartupTask<WarmupServicesStartupTask>()
             .AddStartupTask<WarmupProtobufStartupTask>()
             .AddStartupTask<WarmupBaseDbContextStartupTask>()
-            .AddStartupTask<WarmupMappingStartupTask>()
             .TryAddSingleton(services);
-        
-        services.AddTransient<DistributedTaskProgress>();
-    }
 
-    public static IEnumerable<Assembly> GetAutoMapperProfileAssemblies()
-    {
-        return AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GetName().Name.StartsWith("ASC."));
+        services.AddTransient<DistributedTaskProgress>();
     }
 
     public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -557,12 +546,12 @@ public abstract class BaseStartup
         app.UseSynchronizationContextMiddleware();
 
         app.UseTenantMiddleware();
-        
+
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
             app.UseDynamicCorsMiddleware(CorsPoliciesEnums.DynamicCorsPolicyName);
         }
-        
+
         app.UseAuthentication();
 
         // TODO: if some client requests very slow, this line will need to remove
@@ -591,7 +580,7 @@ public abstract class BaseStartup
 
             endpoints.MapHealthChecks("/health", new HealthCheckOptions
             {
-                Predicate = _ => true, 
+                Predicate = _ => true,
                 ResponseWriter = DefaultHealthChecksResponseWriter
             }).ShortCircuit();
 
@@ -624,14 +613,14 @@ public abstract class BaseStartup
 
             foreach (var entry in healthReport.Entries.Where(e => e.Value.Status != HealthStatus.Healthy))
             {
-                logger.ErrorHealthCheckEntry(entry.Key, 
-                    entry.Value.Status.ToString(), 
-                    entry.Value.Duration.TotalMilliseconds, 
+                logger.ErrorHealthCheckEntry(entry.Key,
+                    entry.Value.Status.ToString(),
+                    entry.Value.Duration.TotalMilliseconds,
                     entry.Value.Description);
             }
         }
 
-        await UIResponseWriter.WriteHealthCheckUIResponse(httpContext, healthReport); 
+        await UIResponseWriter.WriteHealthCheckUIResponse(httpContext, healthReport);
     }
 
     public void ConfigureContainer(ContainerBuilder builder)

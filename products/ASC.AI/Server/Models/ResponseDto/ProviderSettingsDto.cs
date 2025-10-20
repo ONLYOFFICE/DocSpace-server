@@ -26,8 +26,15 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class ProviderSettingsDto : IMapFrom<ProviderSettingsData>
+public class ProviderSettingsDto
 {
     public ProviderType Type { get; init; }
     public required string Url { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class ProviderSettingsMapper
+{
+    public static partial ProviderSettingsDto MapToDto(this ProviderSettingsData settings);
 }

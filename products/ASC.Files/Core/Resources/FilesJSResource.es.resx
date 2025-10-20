@@ -67,4 +67,7 @@
   <data name="TitleNewFileText" xml:space="preserve">
     <value>Nuevo documento</value>
   </data>
+  <data name="TitleNewFilePdfFormText" xml:space="preserve">
+    <value>Nuevo formulario PDF</value>
+  </data>
 </root>

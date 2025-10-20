@@ -24,11 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.AuditTrail.Models;
 
-public class BaseEvent : IMapFrom<DbLoginEvent>
+public class BaseEvent
 {
     public int Id { get; set; }
     public int TenantId { get; set; }
@@ -62,13 +60,35 @@ public class BaseEvent : IMapFrom<DbLoginEvent>
 
     [Event("ActionCol")]
     public string ActionText { get; set; }
-
-    public virtual void Mapping(Profile profile)
-    {
-        profile.CreateMap<DbLoginEvent, BaseEvent>()
-            .ForMember(r => r.IP, opt => opt.MapFrom<BaseEventTypeIpResolver>())
-            .ForMember(r => r.Date, opt => opt.MapFrom<BaseEventTypeDateResolver>())
-            ;
-    }
 }
 
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class BaseEventMapper(TenantUtil tenantUtil)
+{
+    [MapPropertyFromSource(nameof(BaseEvent.IP), Use = nameof(Resolve))]
+    [MapPropertyFromSource(nameof(BaseEvent.Date), Use = nameof(ResolveDate))]
+    public partial BaseEvent Map(DbLoginEvent source);
+    public partial List<BaseEvent> Map(List<DbLoginEvent> source);
+
+    [UserMapping(Default = false)]
+    private static string Resolve(DbLoginEvent source)
+    {
+        if (!string.IsNullOrEmpty(source.Ip))
+        {
+            var ipSplited = source.Ip.Split(':');
+            if (ipSplited.Length > 1)
+            {
+                return ipSplited[0];
+            }
+        }
+
+        return null;
+    }
+
+    [UserMapping(Default = false)]
+    private DateTime ResolveDate(DbLoginEvent source)
+    {
+        return tenantUtil.DateTimeFromUtc(source.Date);
+    }
+}

@@ -27,6 +27,7 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("customnavigation")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class CustomNavigationController(
     MessageService messageService,
     PermissionContext permissionContext,

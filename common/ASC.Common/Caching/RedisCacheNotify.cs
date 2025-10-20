@@ -87,7 +87,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient, ILogger<RedisCac
 
         var redisChannel = new RedisChannel(pattern, RedisChannel.PatternMode.Pattern);
 
-        return redisChannel; 
+        return redisChannel;
     }
 
     private List<Action<T>> GetInvocationList(CacheNotifyAction action)

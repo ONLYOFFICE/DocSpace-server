@@ -121,10 +121,24 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
         return false;
     }
 
-    public override void PrepareData(DataTable data)
+    public override void PrepareData(DataTable data, BackupCorrection backupCorrection)
     {
         switch (data.TableName)
         {
+            case "files_folder":
+                {
+                    for (var i = 0; i < data.Rows.Count; i++)
+                    {
+                        var folderId = Convert.ToInt32(data.Rows[i]["id"]);
+
+                        if (backupCorrection.FoldersTable.TryGetValue(folderId, out var correction))
+                        {
+                            data.Rows[i]["counter"] = correction;
+                        }
+                    }
+
+                    break;
+                }
             case "files_file":
                 {
                     for (var i = 0; i < data.Rows.Count; i++)
@@ -174,7 +188,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
 
     protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper,
         TableInfo table, DataRowInfo row)
-    { 
+    {
         if (row.TableName == "files_thirdparty_id_mapping")
         {
             //todo: think...

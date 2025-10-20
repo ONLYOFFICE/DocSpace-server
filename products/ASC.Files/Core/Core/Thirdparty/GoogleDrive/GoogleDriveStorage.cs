@@ -62,7 +62,7 @@ internal class GoogleDriveStorage(
     private readonly ILogger _logger = monitor.CreateLogger("ASC.Files");
     private DriveService _driveService;
     private OAuth20Token _token;
-    
+
     private static readonly Lazy<CachedHttpClientFactory> _cachedHttpClientFactory = new(() => new CachedHttpClientFactory());
 
     public void Open(AuthData authData)
@@ -118,7 +118,7 @@ internal class GoogleDriveStorage(
         using var response = await SendDownloadRequestAsync(file, HttpCompletionOption.ResponseHeadersRead);
         return response.Content.Headers.ContentLength ?? 0;
     }
-    
+
     public async Task<bool> CheckAccessAsync()
     {
         try
@@ -178,7 +178,7 @@ internal class GoogleDriveStorage(
         return tempBuffer;
     }
 
-    private async Task<HttpResponseMessage> SendDownloadRequestAsync(DriveFile file, 
+    private async Task<HttpResponseMessage> SendDownloadRequestAsync(DriveFile file,
         HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
     {
         var downloadArg = $"{file.Id}?alt=media";
@@ -197,7 +197,7 @@ internal class GoogleDriveStorage(
             RequestUri = new Uri(GoogleLoginProvider.GoogleUrlFile + downloadArg),
             Method = HttpMethod.Get
         };
-        
+
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
 
         var httpClient = clientFactory.CreateClient();
@@ -330,7 +330,7 @@ internal class GoogleDriveStorage(
             RequestUri = new Uri(GoogleLoginProvider.GoogleUrlFileUpload + fileId + "?uploadType=resumable"),
             Method = new HttpMethod(method)
         };
-        
+
         request.Headers.Add("X-Upload-Content-Type", MimeMapping.GetMimeMapping(driveFile.Name));
         request.Headers.Add("X-Upload-Content-Length", contentLength.ToString(CultureInfo.InvariantCulture));
         request.Headers.Add("Authorization", "Bearer " + AccessToken);
@@ -379,7 +379,7 @@ internal class GoogleDriveStorage(
         else
         {
             var bytesToTransfer = googleDriveSession.BytesTransferred + chunkLength;
-            
+
             if (lastChunk)
             {
 
@@ -411,27 +411,27 @@ internal class GoogleDriveStorage(
         if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
         {
             googleDriveSession.BytesTransferred += chunkLength;
-            
+
             var locationHeader = response.Headers.Location;
 
             if (locationHeader != null)
             {
                 googleDriveSession.Location = locationHeader.ToString();
             }
-            
+
         }
         else
         {
             googleDriveSession.BytesTransferred += chunkLength;
             googleDriveSession.Status = RenewableUploadSessionStatus.Completed;
 
-            var responseString =  await response.Content.ReadAsStringAsync();
+            var responseString = await response.Content.ReadAsStringAsync();
             var responseJson = JObject.Parse(responseString);
 
             googleDriveSession.FileId = responseJson.Value<string>("id");
         }
     }
-    
+
     public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
     {
         return new ChunkZipWriteOperator(tempStream, chunkedUploadSession, sessionHolder);
@@ -586,7 +586,7 @@ internal class GoogleDriveStorage(
 
         var request = _driveService.Files.Update(file, fileId, fileStream, mimeType);
         request.Fields = GoogleLoginProvider.FilesFields;
-        
+
         var result = await request.UploadAsync();
         if (result.Exception == null)
         {
@@ -606,12 +606,12 @@ internal class GoogleDriveStorage(
     private sealed class CachedHttpClientFactory : Google.Apis.Http.HttpClientFactory
     {
         private static HttpMessageHandler _handler;
-        
+
         protected override HttpMessageHandler CreateHandler(Google.Apis.Http.CreateHttpClientArgs args)
         {
             return _handler ??= base.CreateHandler(args);
         }
-        
+
         ~CachedHttpClientFactory()
         {
             _handler?.Dispose();

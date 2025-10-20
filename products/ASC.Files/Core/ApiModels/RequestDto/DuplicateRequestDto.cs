@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The duplicate request parameters.
+/// The request parameters for duplicating files and fodlers.
 /// </summary>
 public class DuplicateRequestDto : FileOperationRequestBaseDto
 {

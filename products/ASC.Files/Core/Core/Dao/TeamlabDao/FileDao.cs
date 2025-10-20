@@ -38,7 +38,6 @@ internal class FileDao(
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
-        TenantLogoManager tenantLogoManager,
         TenantUtil tenantUtil,
         SetupInfo setupInfo,
         MaxTotalSizeStatistic maxTotalSizeStatistic,
@@ -53,7 +52,7 @@ internal class FileDao(
         SelectorFactory selectorFactory,
         CrossDao crossDao,
         Settings settings,
-        IMapper mapper,
+        FileMapper mapper,
         ThumbnailSettings thumbnailSettings,
         IQuotaService quotaService,
         EmailValidationKeyProvider emailValidationKeyProvider,
@@ -99,24 +98,24 @@ internal class FileDao(
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var userId = _authContext.CurrentAccount.ID;
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var dbFile = await filesDbContext.DbFileQueryAsync(tenantId, userId, fileId);
 
-        return mapper.Map<DbFileQuery, File<int>>(dbFile);
+        return mapper.MapDbFileQueryToDbFileInternal(dbFile);
     }
 
     public async Task<File<int>> GetFileAsync(int fileId, int fileVersion)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var userId = _authContext.CurrentAccount.ID;
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var dbFile = await filesDbContext.DbFileQueryByFileVersionAsync(tenantId, userId, fileId, fileVersion);
 
-        return mapper.Map<DbFileQuery, File<int>>(dbFile);
+        return mapper.MapDbFileQueryToDbFileInternal(dbFile);
     }
 
     public async Task<File<int>> GetFileAsync(int parentId, string title)
@@ -129,19 +128,19 @@ internal class FileDao(
 
         var dbFile = await filesDbContext.DbFileQueryByTitleAsync(tenantId, title, parentId);
 
-        return mapper.Map<DbFileQuery, File<int>>(dbFile);
+        return mapper.MapDbFileQueryToDbFileInternal(dbFile);
     }
 
     public async Task<File<int>> GetFileStableAsync(int fileId, int fileVersion = -1)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var userId = _authContext.CurrentAccount.ID;
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var dbFile = await filesDbContext.DbFileQueryFileStableAsync(tenantId, userId, fileId, fileVersion);
 
-        return mapper.Map<DbFileQuery, File<int>>(dbFile);
+        return mapper.MapDbFileQueryToDbFileInternal(dbFile);
     }
 
     public async IAsyncEnumerable<File<int>> GetFileHistoryAsync(int fileId)
@@ -152,7 +151,7 @@ internal class FileDao(
 
         await foreach (var e in filesDbContext.DbFileQueriesAsync(tenantId, fileId))
         {
-            yield return mapper.Map<DbFileQuery, File<int>>(e);
+            yield return mapper.MapDbFileQueryToDbFileInternal(e);
         }
     }
 
@@ -169,12 +168,11 @@ internal class FileDao(
 
         await foreach (var e in filesDbContext.DbFileQueriesByFileIdsAsync(tenantId, fileIds))
         {
-            yield return mapper.Map<DbFileQuery, File<int>>(e);
+            yield return mapper.MapDbFileQueryToDbFileInternal(e);
         }
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesFilteredAsync(IEnumerable<int> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent, bool checkShared = false)
+    public async IAsyncEnumerable<File<int>> GetFilesFilteredAsync(IEnumerable<int> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
         {
@@ -186,7 +184,7 @@ internal class FileDao(
 
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
-        
+
         if (extension.IsNullOrEmpty())
         {
             extension = [""];
@@ -201,8 +199,8 @@ internal class FileDao(
                 var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
 
                 (success, var result) = await factoryIndexer.TrySelectIdsAsync(s => func(s).In(r => r.Id, fileIds.ToArray()));
-                
-                if(!success)
+
+                if (!success)
                 {
                     break;
                 }
@@ -261,7 +259,7 @@ internal class FileDao(
 
         await foreach (var e in FromQuery(filesDbContext, query).AsAsyncEnumerable())
         {
-            yield return mapper.Map<DbFileQuery, File<int>>(e);
+            yield return mapper.MapDbFileQueryToDbFileInternal(e);
         }
     }
 
@@ -277,7 +275,7 @@ internal class FileDao(
         }
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
+    public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
         bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
@@ -288,7 +286,7 @@ internal class FileDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto);
-        
+
         if (containingMyFiles)
         {
             q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.MyFilesAndFolders);
@@ -313,7 +311,7 @@ internal class FileDao(
 
         await foreach (var e in result.AsAsyncEnumerable())
         {
-            yield return mapper.Map<DbFileQuery, File<int>>(e);
+            yield return mapper.MapDbFileQueryToDbFileInternal(e);
         }
     }
 
@@ -331,7 +329,7 @@ internal class FileDao(
     {
         return await (await globalStore.GetStoreAsync()).GetFileSizeAsync(string.Empty, GetUniqFilePath(file));
     }
-    
+
     public async Task<string> GetPreSignedUriAsync(File<int> file, TimeSpan expires, string shareKey = null)
     {
         var storage = await globalStore.GetStoreAsync();
@@ -377,14 +375,14 @@ internal class FileDao(
     {
         return await GetFileStreamAsync(file, 0);
     }
-    
+
     private async Task<Stream> GetFileStreamForTenantAsync(File<int> file, int? tenantId)
     {
         if (!tenantId.HasValue)
         {
             return await GetFileStreamAsync(file);
         }
-        
+
         return await (await globalStore.GetStoreAsync(tenantId.Value)).GetReadStreamAsync(string.Empty, GetUniqFilePath(file), 0);
     }
     public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream)
@@ -405,6 +403,7 @@ internal class FileDao(
         {
             throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
         }
+
         var tenantId = _tenantManager.GetCurrentTenantId();
         var folderDao = daoFactory.GetFolderDao<int>();
         var fileDao = daoFactory.GetFileDao<int>();
@@ -449,7 +448,7 @@ internal class FileDao(
                 {
                     var userQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(user);
 
-                    var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota ;
+                    var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
 
                     if (userQuotaLimit != UserQuotaSettings.NoQuota)
                     {
@@ -462,13 +461,13 @@ internal class FileDao(
                     }
                 }
             }
-       
+
             var isNew = false;
             DbFile toInsert = null;
             var cloneStreamForSave = new MemoryStream();
             var streamChange = false;
             await using (var filesDbContext = await _dbContextFactory.CreateDbContextAsync())
-            {                
+            {
                 var parentFolders = await filesDbContext.DbFolderTreesAsync(file.ParentId).ToListAsync();
 
                 var parentFoldersIds = parentFolders.Select(r => r.ParentId).ToList();
@@ -654,9 +653,7 @@ internal class FileDao(
                                 var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
                                 await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
 
-                                var logoText = await tenantLogoManager.GetLogoTextAsync();
-
-                                throw new Exception(string.Format(FilesCommonResource.ErrorMessage_UploadToFormRoom, logoText));
+                                throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                             }
                         }
                     }
@@ -710,7 +707,7 @@ internal class FileDao(
         }
     }
 
-    public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
+    public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent,
         bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
     {
         if (filterType == FilterType.FoldersOnly)
@@ -737,6 +734,36 @@ internal class FileDao(
         }
 
         return await q.CountAsync();
+    }
+
+    public async Task<int> GetSharedFilesCountAsync(int parentId)
+    {
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var q = GetSharedFilesQuery(parentId, filesDbContext);
+
+        return await q.CountAsync();
+    }
+
+    public async IAsyncEnumerable<File<int>> GetSharedFilesAsync(int parentId, int offset = 0, int count = -1)
+    {
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var q = GetSharedFilesQuery(parentId, filesDbContext);
+
+        q = q.Skip(offset);
+
+        if (count > 0)
+        {
+            q = q.Take(count);
+        }
+
+        var result = FromQuery(filesDbContext, q);
+
+        await foreach (var e in result.AsAsyncEnumerable())
+        {
+            yield return mapper.MapDbFileQueryToDbFileInternal(e);
+        }
     }
 
     public async Task<File<int>> ReplaceFileVersionAsync(File<int> file, Stream fileStream)
@@ -847,8 +874,8 @@ internal class FileDao(
 
     public async Task DeleteFileVersionAsync(File<int> file, int version = 0)
     {
-        if (file == null || 
-            file.Id == 0 || 
+        if (file == null ||
+            file.Id == 0 ||
             file.Version <= 1 ||
             version < 0)
         {
@@ -859,7 +886,7 @@ internal class FileDao(
         {
             version = file.Version;
         }
-        
+
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -955,7 +982,7 @@ internal class FileDao(
             await tx.CommitAsync();
 
             foreach (var folderId in fromFolders)
-            {                
+            {
                 await DecrementCountAsync(context, folderId, tenantId, FileEntryType.File);
             }
 
@@ -969,7 +996,7 @@ internal class FileDao(
             if (toDeleteFile != null)
             {
                 await factoryIndexer.DeleteAsync(toDeleteFile);
-                await factoryIndexerFormData.DeleteAsync(r=> r.Where(a => a.Id, toDeleteFile.Id));
+                await factoryIndexerFormData.DeleteAsync(r => r.Where(a => a.Id, toDeleteFile.Id));
             }
         });
     }
@@ -1070,7 +1097,7 @@ internal class FileDao(
         }
         else
         {
-            if (toUser != fromUser && toFolder.RootFolderType is FolderType.USER && fromFolder.RootFolderType is FolderType.USER) 
+            if (toUser != fromUser && toFolder.RootFolderType is FolderType.USER && fromFolder.RootFolderType is FolderType.USER)
             {
                 var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
                 if (quotaUserSettings.EnableQuota)
@@ -1107,7 +1134,7 @@ internal class FileDao(
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
 
                 await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
-                
+
                 if (trashId.Equals(toFolderId))
                 {
                     await q.ExecuteUpdateAsync(f => f
@@ -1132,7 +1159,7 @@ internal class FileDao(
                 {
                     var tagList = new List<Tag>();
 
-                    if(roomId != -1)
+                    if (roomId != -1)
                     {
                         tagList.Add(Tag.FromRoom(fileId, FileEntryType.File, _authContext.CurrentAccount.ID));
                     }
@@ -1143,8 +1170,8 @@ internal class FileDao(
                 }
                 else if (oldParentId == trashId || roomId != -1 || toFolderRoomId != -1)
                 {
-                    if ((toFolderId != archiveId && oldFolder.Id != archiveId) && 
-                        toFolderRoomId == -1 && 
+                    if ((toFolderId != archiveId && oldFolder.Id != archiveId) &&
+                        toFolderRoomId == -1 &&
                         ((oldParentId == trashId && fromRoomTag != null) || roomId != -1))
                     {
                         file.RootCreateBy = toFolder.RootCreateBy;
@@ -1152,17 +1179,17 @@ internal class FileDao(
                         await storageFactory.QuotaUsedAddAsync(
                             _tenantManager.GetCurrentTenantId(),
                             FileConstant.ModuleId, "",
-                            WebItemManager.DocumentsProductID.ToString(), 
+                            WebItemManager.DocumentsProductID.ToString(),
                             file.ContentLength, file.GetFileQuotaOwner());
                     }
-                    if ((toFolderId != archiveId && oldFolder.Id != archiveId) && 
-                        toFolderRoomId != -1 && 
+                    if ((toFolderId != archiveId && oldFolder.Id != archiveId) &&
+                        toFolderRoomId != -1 &&
                         ((oldParentId == trashId && fromRoomTag == null) || roomId == -1))
                     {
                         await storageFactory.QuotaUsedDeleteAsync(
                             _tenantManager.GetCurrentTenantId(),
                             FileConstant.ModuleId, "",
-                            WebItemManager.DocumentsProductID.ToString(), 
+                            WebItemManager.DocumentsProductID.ToString(),
                             file.ContentLength, file.GetFileQuotaOwner());
                     }
                     if (oldParentId == trashId)
@@ -1190,7 +1217,7 @@ internal class FileDao(
                 if (deleteLinks)
                 {
                     var id = fileId.ToString();
-                    
+                    await filesDbContext.Security.Where(x => x.TenantId == tenantId && x.EntryId == id && x.EntryType == FileEntryType.File).ExecuteDeleteAsync();
                     await filesDbContext.DeleteTagLinksByTypeAsync(tenantId, id, FileEntryType.File, TagType.RecentByLink);
                     await filesDbContext.DeleteTagsAsync(tenantId);
                     await filesDbContext.DeleteLinksAsync(tenantId, id, FileEntryType.File);
@@ -1202,12 +1229,12 @@ internal class FileDao(
                 }
 
                 await tx.CommitAsync();
-                
+
                 foreach (var f in fromFolders)
                 {
                     await DecrementCountAsync(context, f, tenantId, FileEntryType.File);
                 }
-                
+
 
                 if (oldParentId.HasValue)
                 {
@@ -1217,7 +1244,7 @@ internal class FileDao(
                         toFolder,
                         file);
                 }
-                
+
                 await IncrementCountAsync(context, toFolderId, tenantId, FileEntryType.File);
             }
 
@@ -1444,11 +1471,11 @@ internal class FileDao(
     public static bool TryGetFileId(string path, out int fileId)
     {
         fileId = 0;
-        
+
         ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
 
         var match = _pattern.Match(path);
-        
+
         return match.Success && match.Groups.TryGetValue(FileIdGroupName, out var group) && int.TryParse(group.Value, out fileId);
     }
 
@@ -1544,7 +1571,7 @@ internal class FileDao(
 
         return formRole;
     }
-    
+
     public async Task DeleteFormRolesAsync(int formId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -1716,7 +1743,7 @@ internal class FileDao(
 
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
-        
+
         if (extension.IsNullOrEmpty())
         {
             extension = [""];
@@ -1792,7 +1819,7 @@ internal class FileDao(
 
         await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
         {
-            yield return mapper.Map<DbFileQuery, File<int>>(e);
+            yield return mapper.MapDbFileQueryToDbFileInternal(e);
         }
     }
 
@@ -1806,7 +1833,7 @@ internal class FileDao(
         if (success)
         {
             var files = filesDbContext.DbFileQueriesByFileIdsAsync(tenantId, ids)
-                .Select(mapper.Map<DbFileQuery, File<int>>)
+                .Select(mapper.MapDbFileQueryToDbFileInternal)
                 .Where(
                     f =>
                     bunch
@@ -1820,7 +1847,7 @@ internal class FileDao(
         else
         {
             var files = filesDbContext.DbFileQueriesByTextAsync(tenantId, GetSearchText(searchText))
-                .Select(mapper.Map<DbFileQuery, File<int>>)
+                .Select(mapper.MapDbFileQueryToDbFileInternal)
                 .Where(f =>
                        bunch
                             ? f.RootFolderType == FolderType.BUNCH
@@ -1836,7 +1863,7 @@ internal class FileDao(
     {
         return await (await globalStore.GetStoreAsync()).IsFileAsync(string.Empty, GetUniqFilePath(file));
     }
-    
+
     private const string DiffTitle = "diff.zip";
 
     public async Task SaveEditHistoryAsync(File<int> file, string changes, Stream differenceStream)
@@ -1952,17 +1979,29 @@ internal class FileDao(
         return await storage.GetReadStreamAsync(string.Empty, path, 0);
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, OrderBy orderBy, int offset = 0, int count = -1)
+    public async IAsyncEnumerable<File<int>> GetFilesByTagAsync(Guid tagOwner,
+        IEnumerable<TagType> tagType,
+        FilterType filterType,
+        bool subjectGroup,
+        Guid subjectId,
+        string searchText,
+        string[] extension,
+        bool searchInContent,
+        bool excludeSubject,
+        Location? location,
+        int trashId,
+        OrderBy orderBy,
+        int offset,
+        int count)
     {
         if (filterType == FilterType.FoldersOnly)
         {
             yield break;
         }
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        
-        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location);
+
+        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId);
 
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
@@ -1972,7 +2011,7 @@ internal class FileDao(
             {
                 SortedByType.Author => orderBy.IsAsc ? q.OrderBy(r => r.Entry.CreateBy) : q.OrderByDescending(r => r.Entry.CreateBy),
                 SortedByType.Size => orderBy.IsAsc ? q.OrderBy(r => r.Entry.ContentLength) : q.OrderByDescending(r => r.Entry.ContentLength),
-                SortedByType.AZ => orderBy.IsAsc 
+                SortedByType.AZ => orderBy.IsAsc
                     ? q.OrderBy(r => Convert.ToInt32(DbFunctionsExtension.SubstringIndex(r.Entry.Title, '.', 1)))
                         .ThenBy(r => r.Entry.Title)
                     : q.OrderByDescending(r => Convert.ToInt32(DbFunctionsExtension.SubstringIndex(r.Entry.Title, '.', 1)))
@@ -1985,7 +2024,7 @@ internal class FileDao(
                 SortedByType.LastOpened => orderBy.IsAsc ? q.OrderBy(r => r.LastOpened) : q.OrderByDescending(r => r.LastOpened),
                 _ => q.OrderBy(r => r.Entry.Title)
             };
-        
+
         if (offset > 0)
         {
             q = q.Skip(offset);
@@ -1998,22 +2037,31 @@ internal class FileDao(
 
         await foreach (var file in FromQuery(filesDbContext, q).AsAsyncEnumerable())
         {
-            yield return mapper.Map<DbFileQuery, File<int>>(file);
+            yield return mapper.MapDbFileQueryToDbFileInternal(file);
         }
     }
 
-    public async Task<int> GetFilesByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location)
+    public async Task<int> GetFilesByTagCountAsync(Guid tagOwner,
+        IEnumerable<TagType> tagType,
+        FilterType filterType,
+        bool subjectGroup,
+        Guid subjectId,
+        string searchText,
+        string[] extension,
+        bool searchInContent,
+        bool excludeSubject,
+        Location? location,
+        int trashId)
     {
         if (filterType == FilterType.FoldersOnly)
         {
             return 0;
         }
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        
-        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location);
-        
+
+        var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId);
+
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
         return await q.CountAsync();
@@ -2022,7 +2070,7 @@ internal class FileDao(
     public async Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<int> uploadSession)
     {
         var chunks = await chunkedUploadSessionHolder.GetChunksAsync(uploadSession);
-        
+
         return chunks.Sum(c => c.Value?.Length ?? 0);
     }
 
@@ -2045,7 +2093,7 @@ internal class FileDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var properties = await filesDbContext.FilesPropertiesAsync(tenantId, filesIds.Select(f => f.ToString())).ToListAsync();
-        
+
         var propertiesMap = new Dictionary<int, EntryProperties<int>>(properties.Count);
         foreach (var property in properties)
         {
@@ -2081,12 +2129,12 @@ internal class FileDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await SetCustomOrder(filesDbContext, fileId, parentFolderId, order);
     }
-    
+
     public async Task InitCustomOrder(Dictionary<int, int> fileIds, int parentFolderId)
     {
         await InitCustomOrder(fileIds, parentFolderId, FileEntryType.File);
     }
-    
+
     private async Task<int> SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, int order = 0)
     {
         return await SetCustomOrder(filesDbContext, fileId, parentFolderId, FileEntryType.File, order);
@@ -2114,7 +2162,7 @@ internal class FileDao(
             if (!string.IsNullOrEmpty(extension))
             {
                 var pattern = $"*{extension}";
-                
+
                 if (result != null)
                 {
                     result.Match(r => r.Title, pattern);
@@ -2194,7 +2242,7 @@ internal class FileDao(
         return s =>
         {
             s.Where(r => r.ParentId, parentId);
-            s.Nested(a => a.FormsData, b => b.Term(c => c.FormsData.Select(r=> r.Key), char.ToLower(formsItemDto.Key[0]) + formsItemDto.Key[1..]) && b.Term(c => c.FormsData.Select(r=> r.Value), char.ToLower(searchText[0]) + searchText[1..]));
+            s.Nested(a => a.FormsData, b => b.Term(c => c.FormsData.Select(r => r.Key), char.ToLower(formsItemDto.Key[0]) + formsItemDto.Key[1..]) && b.Term(c => c.FormsData.Select(r => r.Value), char.ToLower(searchText[0]) + searchText[1..]));
 
             return s;
         };
@@ -2284,12 +2332,12 @@ internal class FileDao(
                 Order = (
                     from f in filesDbContext.FileOrder
                     where (
-                        from rs in filesDbContext.RoomSettings 
+                        from rs in filesDbContext.RoomSettings
                         where rs.TenantId == f.TenantId && rs.RoomId ==
                             (from t in filesDbContext.Tree
-                                where t.FolderId == r.ParentId
-                                orderby t.Level descending
-                                select t.ParentId
+                             where t.FolderId == r.ParentId
+                             orderby t.Level descending
+                             select t.ParentId
                             ).Skip(1).FirstOrDefault()
                         select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
                     select f.Order
@@ -2310,9 +2358,9 @@ internal class FileDao(
                 Root = (from f in filesDbContext.Folders
                         where f.Id ==
                               (from t in filesDbContext.Tree
-                                  where t.FolderId == r.Entry.ParentId
-                                  orderby t.Level descending
-                                  select t.ParentId
+                               where t.FolderId == r.Entry.ParentId
+                               orderby t.Level descending
+                               select t.ParentId
                               ).FirstOrDefault()
                         where f.TenantId == r.Entry.TenantId
                         select f
@@ -2323,7 +2371,7 @@ internal class FileDao(
                 Origin = r.Origin
             });
     }
-    
+
     private static IQueryable<DbFileQuery> FromQueryWithShared(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles, bool attachVectorizationStatus = false)
     {
         return dbFiles
@@ -2333,31 +2381,31 @@ internal class FileDao(
                 Root = (from f in filesDbContext.Folders
                         where f.Id ==
                               (from t in filesDbContext.Tree
-                                  where t.FolderId == r.ParentId
-                                  orderby t.Level descending
-                                  select t.ParentId
+                               where t.FolderId == r.ParentId
+                               orderby t.Level descending
+                               select t.ParentId
                               ).FirstOrDefault()
                         where f.TenantId == r.TenantId
                         select f
                     ).FirstOrDefault(),
-                Shared = filesDbContext.Security.Any(x => 
-                    x.TenantId == r.TenantId && 
+                UserShared = filesDbContext.Security.Where(x =>
+                    x.TenantId == r.TenantId &&
+                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File)
+                    .Select(s => s.SubjectType).ToList(),
+                ParentShared = filesDbContext.Security.Any(x =>
+                    x.TenantId == r.TenantId &&
                     (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File),
-                ParentShared = filesDbContext.Security.Any(x => 
-                    x.TenantId == r.TenantId && 
-                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                    x.EntryType == FileEntryType.Folder && 
+                    x.EntryType == FileEntryType.Folder &&
                     filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                 Order = (
                     from f in filesDbContext.FileOrder
                     where (
-                        from rs in filesDbContext.RoomSettings 
+                        from rs in filesDbContext.RoomSettings
                         where rs.TenantId == f.TenantId && rs.RoomId ==
                             (from t in filesDbContext.Tree
-                                where t.FolderId == r.ParentId
-                                orderby t.Level descending
-                                select t.ParentId
+                             where t.FolderId == r.ParentId
+                             orderby t.Level descending
+                             select t.ParentId
                             ).Skip(1).FirstOrDefault()
                         select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
                     select f.Order
@@ -2368,9 +2416,9 @@ internal class FileDao(
                     : null
             });
     }
-    
+
     private readonly ConcurrentDictionary<int, bool> _currentTenantStore = new();
-    
+
     protected internal async Task<DbFile> InitDocumentAsync(DbFile dbFile, int? tenantId = null)
     {
         dbFile.Document = new Document
@@ -2389,7 +2437,7 @@ internal class FileDao(
         file.Version = dbFile.Version;
         file.ContentLength = dbFile.ContentLength;
 
-        
+
         if (file.ContentLength > settings.MaxFileSize)
         {
             return dbFile;
@@ -2405,7 +2453,7 @@ internal class FileDao(
             }
 
             if (!result)
-            {            
+            {
                 return dbFile;
             }
         }
@@ -2413,7 +2461,7 @@ internal class FileDao(
         try
         {
             byte[] buffer;
-            await using(var stream = await GetFileStreamForTenantAsync(file, tenantId))
+            await using (var stream = await GetFileStreamForTenantAsync(file, tenantId))
             {
                 if (stream == null)
                 {
@@ -2424,13 +2472,13 @@ internal class FileDao(
                 await stream.CopyToAsync(ms);
                 buffer = ms.GetBuffer();
             }
-        
+
             dbFile.Document = new Document
             {
                 Data = Convert.ToBase64String(buffer)
             };
         }
-        catch (FileNotFoundException )
+        catch (FileNotFoundException)
         {
         }
 
@@ -2438,23 +2486,26 @@ internal class FileDao(
     }
 
     private async Task<IQueryable<DbFile>> GetFilesQueryWithFilters(
-        int parentId, 
-        OrderBy orderBy, 
-        FilterType filterType, 
-        bool subjectGroup, 
-        Guid subjectID, 
-        string searchText, 
+        int parentId,
+        OrderBy orderBy,
+        FilterType filterType,
+        bool subjectGroup,
+        Guid subjectID,
+        string searchText,
         bool searchInContent,
-        bool withSubfolders, 
-        bool excludeSubject, 
-        int roomId, 
-        string[] extension, 
+        bool withSubfolders,
+        bool excludeSubject,
+        int roomId,
+        string[] extension,
         FilesDbContext filesDbContext,
         FormsItemDto formsItemDto)
     {
-        var tenantId = _tenantManager.GetCurrentTenantId();        
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var currentUserId = _authContext.CurrentAccount.ID;
         var q = GetFileQuery(filesDbContext, r => r.ParentId == parentId && r.CurrentVersion);
-        
+
+        q = q.Where(r => !filesDbContext.Security.Any(x => x.TenantId == r.TenantId && x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File && x.Share == FileShare.Restrict && x.Subject == currentUserId));
+
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
 
@@ -2462,7 +2513,7 @@ internal class FileDao(
         {
             extension = [""];
         }
-        
+
         if (withSubfolders && (searchByText || searchByExtension || filterType != FilterType.None || subjectID != Guid.Empty))
         {
             q = GetFileQuery(filesDbContext, r => r.CurrentVersion)
@@ -2470,12 +2521,12 @@ internal class FileDao(
                 .Where(r => r.tree.ParentId == parentId)
                 .Select(r => r.file);
         }
-        
+
         if (searchByText || searchByExtension)
         {
             var searchIds = new List<int>();
             var success = false;
-            
+
             foreach (var e in extension)
             {
                 var func = GetFuncForSearch(parentId, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
@@ -2496,8 +2547,8 @@ internal class FileDao(
                 Expression<Func<Selector<DbFormsItemDataSearch>, Selector<DbFormsItemDataSearch>>> expressionSearchText = s => funcForSearchInFormsData(s);
 
                 (success, var resultForm) = await factoryIndexerFormData.TrySelectIdsAsync(expressionSearchText);
-            if (success)
-            {
+                if (success)
+                {
                     searchIds = searchIds.Intersect(resultForm).ToList();
                 }
             }
@@ -2526,7 +2577,7 @@ internal class FileDao(
             {
                 SortedByType.Author => orderBy.IsAsc ? q.OrderBy(r => r.CreateBy) : q.OrderByDescending(r => r.CreateBy),
                 SortedByType.Size => orderBy.IsAsc ? q.OrderBy(r => r.ContentLength) : q.OrderByDescending(r => r.ContentLength),
-                SortedByType.AZ => orderBy.IsAsc 
+                SortedByType.AZ => orderBy.IsAsc
                     ? q.OrderBy(r => Convert.ToInt32(DbFunctionsExtension.SubstringIndex(r.Title, '.', 1)))
                         .ThenBy(r => r.Title)
                     : q.OrderByDescending(r => Convert.ToInt32(DbFunctionsExtension.SubstringIndex(r.Title, '.', 1)))
@@ -2600,14 +2651,14 @@ internal class FileDao(
 
         return q;
     }
-    
-    private async Task<IQueryable<T>> GetFilesQueryWithFilters<T>(IQueryable<T> q, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, 
-        string[] extension, bool searchInContent, bool excludeSubject) 
-        where T: IQueryResult<DbFile>
+
+    private async Task<IQueryable<T>> GetFilesQueryWithFilters<T>(IQueryable<T> q, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText,
+        string[] extension, bool searchInContent, bool excludeSubject)
+        where T : IQueryResult<DbFile>
     {
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
-        
+
         if (extension.IsNullOrEmpty())
         {
             extension = [string.Empty];
@@ -2686,19 +2737,19 @@ internal class FileDao(
 
         return q;
     }
-    
-    private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location)
+
+    private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        
+
         var initQuery = filesDbContext.Tag
             .Where(x => x.TenantId == tenantId && x.Owner == tagOwner && tagType.Contains(x.Type))
             .Join(filesDbContext.TagLink,
                 t => new
                 {
                     t.TenantId,
-                    TagId = t.Id 
-                }, 
+                    TagId = t.Id
+                },
                 l => new
                 {
                     l.TenantId,
@@ -2711,18 +2762,23 @@ internal class FileDao(
                 f => f.Id,
                 (x, f) => new { f, x.l, x.t })
             .Where(x => x.f.CurrentVersion);
-        
+
+        if (trashId != 0)
+        {
+            initQuery = initQuery.Where(r => !filesDbContext.Tree.Any(a => a.FolderId == r.f.ParentId && a.ParentId == trashId));
+        }
+
         var query = initQuery.Select(x => new FileByTagQuery
         {
-            Entry = x.f, 
-            Tag = x.t, 
+            Entry = x.f,
+            Tag = x.t,
             LastOpened = x.l.CreateOn,
             Security = filesDbContext.Security
-                .FirstOrDefault(s => s.TenantId == tenantId && 
-                                     s.EntryType == FileEntryType.File && 
-                                     s.EntryId == x.f.Id.ToString()  && 
+                .FirstOrDefault(s => s.TenantId == tenantId &&
+                                     s.EntryType == FileEntryType.File &&
+                                     s.EntryId == x.f.Id.ToString() &&
                                      s.Subject.ToString() == x.t.Name),
-            OriginRoom = x.t.Type != TagType.RecentByLink ? 
+            OriginRoom = x.t.Type != TagType.RecentByLink ?
                 filesDbContext.Folders
                 .Where(f => f.TenantId == tenantId && f.FolderType != FolderType.VirtualRooms)
                 .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
@@ -2731,7 +2787,7 @@ internal class FileDao(
                 .Select(t => new DbFolder { Id = t.folder.Id, Title = t.folder.Title })
                 .FirstOrDefault() :
                 null,
-            Origin = x.t.Type != TagType.RecentByLink ? 
+            Origin = x.t.Type != TagType.RecentByLink ?
                 filesDbContext.Folders
                     .Where(f => f.TenantId == tenantId && f.FolderType != FolderType.VirtualRooms)
                     .Join(filesDbContext.Tree, f => f.Id, t => t.FolderId, (folder, tree) => new { folder, tree })
@@ -2741,53 +2797,72 @@ internal class FileDao(
                     .FirstOrDefault() :
                 null,
         });
-        
+
         if (tagType.Any(r => r is TagType.RecentByLink or TagType.Recent or TagType.Favorite))
         {
             var documentsTagType = tagType.Contains(TagType.Favorite) ? TagType.Favorite : TagType.Recent;
-            
+
             query = location switch
             {
-                Location.Documents => 
-                    query.Where(x => x.Tag.Type == documentsTagType && 
+                Location.Documents =>
+                    query.Where(x => x.Tag.Type == documentsTagType &&
                        filesDbContext.Folders
                         .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.USER)
                         .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
                         .Where(t => t.tree.FolderId == x.Entry.ParentId)
                         .OrderByDescending(t => t.tree.Level)
-                        .Select(t =>  t.folder.Id)
+                        .Select(t => t.folder.Id)
                         .Any()),
-                Location.Room => 
-                    query.Where(x => x.Tag.Type == documentsTagType && 
+                Location.Room =>
+                    query.Where(x => x.Tag.Type == documentsTagType &&
                          filesDbContext.Folders
                              .Where(f => f.TenantId == tenantId && (f.FolderType == FolderType.CustomRoom || f.FolderType == FolderType.EditingRoom || f.FolderType == FolderType.FillingFormsRoom || f.FolderType == FolderType.PublicRoom || f.FolderType == FolderType.VirtualDataRoom))
                              .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
                              .Where(t => t.tree.FolderId == x.Entry.ParentId)
                              .OrderByDescending(t => t.tree.Level)
-                             .Select(t =>  t.folder.Id)
+                             .Select(t => t.folder.Id)
                              .Any()),
-                Location.Link => query.Where(x => 
+                Location.Link => query.Where(x =>
                     (x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)) &&
                      !filesDbContext.Folders
                          .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.TRASH)
                          .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
                          .Where(t => t.tree.FolderId == x.Entry.ParentId)
                          .OrderByDescending(t => t.tree.Level)
-                         .Select(t =>  t.folder.Id)
+                         .Select(t => t.folder.Id)
                          .Any())),
-                _ => documentsTagType == TagType.Favorite ? query : query.Where(x => 
+                _ => documentsTagType == TagType.Favorite ? query : query.Where(x =>
                     (x.Tag.Type == TagType.Recent || x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow))) &&
                         !filesDbContext.Folders
                         .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.TRASH)
                         .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
                         .Where(t => t.tree.FolderId == x.Entry.ParentId)
                         .OrderByDescending(t => t.tree.Level)
-                        .Select(t =>  t.folder.Id)
+                        .Select(t => t.folder.Id)
                         .Any())
             };
         }
 
         return query;
+    }
+
+    private IQueryable<DbFile> GetSharedFilesQuery(int parentId, FilesDbContext filesDbContext)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        var q = GetFileQuery(filesDbContext, file => file.CurrentVersion)
+                .Join(filesDbContext.Tree, file => file.ParentId, tree => tree.FolderId, (file, tree) => new { file, tree })
+                .Where(r => r.tree.ParentId == parentId)
+                .Join(filesDbContext.Security, r => r.file.Id.ToString(), security => security.EntryId, (r, security) => new { r.file, security })
+                .Where(r => r.security.TenantId == tenantId
+                    && r.security.EntryType == FileEntryType.File
+                    && (r.security.SubjectType == SubjectType.ExternalLink
+                        || r.security.SubjectType == SubjectType.PrimaryExternalLink
+                        || r.security.SubjectType == SubjectType.User
+                        || r.security.SubjectType == SubjectType.Group))
+                .Select(r => r.file);
+
+        return q;
     }
     
     private async ValueTask DeleteVectorsAsync(int tenantId, int fileId)
@@ -2804,10 +2879,10 @@ public class DbFileQuery
 {
     public DbFile File { get; init; }
     public DbFolder Root { get; set; }
-    public bool Shared { get; set; }
     public bool ParentShared { get; set; }
     public int Order { get; set; }
-    
+
+    public List<SubjectType> UserShared { get; set; }
     public DbFolder Origin { get; set; }
     public DbFolder OriginRoom { get; set; }
     public DbFilesSecurity SharedRecord { get; set; }
@@ -2819,7 +2894,7 @@ public class FileByTagQuery : IQueryResult<DbFile>
 {
     public DbFile Entry { get; set; }
     public DbFilesTag Tag { get; set; }
-    
+
     public DbFolder Origin { get; set; }
     public DbFolder OriginRoom { get; set; }
     public DateTime? LastOpened { get; set; }
@@ -2832,7 +2907,7 @@ public class DbFileQueryWithSecurity
     public DbFilesSecurity Security { get; init; }
 }
 
-public record FileReassignInfo 
+public record FileReassignInfo
 {
     public int FileId { get; init; }
     public Guid RoomOwnerId { get; init; }
@@ -2846,7 +2921,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
-        TenantLogoManager tenantLogoManager,
         TenantUtil tenantUtil,
         SetupInfo setupInfo,
         MaxTotalSizeStatistic maxTotalSizeStatistic,
@@ -2861,7 +2935,7 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         SelectorFactory selectorFactory,
         CrossDao crossDao,
         Settings settings,
-        IMapper mapper,
+        FileMapper mapper,
         ThumbnailSettings thumbnailSettings,
         IQuotaService quotaService,
         EmailValidationKeyProvider emailValidationKeyProvider,
@@ -2887,7 +2961,7 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         fileUtility,
         dbContextManager,
         tenantManager,
-        tenantLogoManager,
+        
         tenantUtil,
         setupInfo,
         maxTotalSizeStatistic,
@@ -2974,5 +3048,5 @@ internal class CacheFileDao(ILogger<FileDao> logger,
 
         return result;
     }
-   
+
 }

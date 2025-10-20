@@ -49,10 +49,12 @@ global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 global using System.Web;
 global using System.Xml;
+
 global using Amazon;
 global using Amazon.Runtime;
 global using Amazon.SimpleEmail;
 global using Amazon.SimpleEmail.Model;
+
 global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Models;
 global using ASC.Collections;
@@ -125,38 +127,43 @@ global using ASC.Notify.Sinks;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Studio.Utility;
+
 global using Autofac;
-global using AutoMapper;
-global using AutoMapper.QueryableExtensions;
+
 global using Google.Apis.Auth.OAuth2;
+
 global using MailKit.Security;
+
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Infrastructure;
-global using Microsoft.EntityFrameworkCore.Metadata;
-global using Microsoft.EntityFrameworkCore.Migrations;
-global using Microsoft.EntityFrameworkCore.Migrations.Operations;
 global using Microsoft.EntityFrameworkCore.Query;
 global using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
-global using Microsoft.EntityFrameworkCore.Update;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using Microsoft.Net.Http.Headers;
+
 global using MimeKit;
+
 global using NetEscapades.EnumGenerators;
+
 global using NVelocity;
 global using NVelocity.App.Events;
+
 global using Polly;
 global using Polly.Registry;
 global using Polly.Retry;
-global using Pomelo.EntityFrameworkCore.MySql.Infrastructure.Internal;
-global using Pomelo.EntityFrameworkCore.MySql.Migrations;
+
 global using ProtoBuf;
+
+global using Riok.Mapperly.Abstractions;
+
 global using Telegram.Bot;
+
 global using Textile;
 global using Textile.Blocks;
 global using Textile.States;

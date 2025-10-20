@@ -1145,7 +1145,7 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace a été &lt;span style="color: #FF6F3D;"&gt;deactivated&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace a été &lt;span style="color: #FF6F3D;"&gt;supprimé&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Votre ${LetterLogoText} DocSpace a été désactivé avec succès. Veuillez noter que toutes vos données seront supprimées conformément à notre &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Politique de confidentialité&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1370,7 +1370,7 @@ $TrulyYours</value>
     <value>Votre ${LetterLogoText} DocSpace sera supprimé</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace a été désactivé</value>
+    <value>DocSpace ${LetterLogoText} a été supprimé</value>
   </data>
   <data name="subject_saas_user_activation_v1" xml:space="preserve">
     <value>Obtenez des applications ${LetterLogoText} gratuites</value>
@@ -1972,5 +1972,29 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Action requise : Impossible de recharger automatiquement le solde de Wallet dans votre ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Ouvrir DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Mot de passe modifié avec succès
+
+Votre mot de passe pour le compte *$UserName*, *$UserEmail* a été modifié avec succès le *$Date* dans DocSpace : "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP : *$IP*
+Appareil : *$Device*
+#if($Location != "")
+Localisation : *$Location*
+#end
+Navigateur : *$Browser*
+
+Si cette action a été effectuée par vous, aucune autre action n'est requise. Si ce changement vous semble suspect ou n'a pas été autorisé par vous, veuillez réinitialiser votre mot de passe immédiatement et désactiver l'accès à DocSpace pour cet appareil.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Votre mot de passe a été modifié avec succès</value>
   </data>
 </root>

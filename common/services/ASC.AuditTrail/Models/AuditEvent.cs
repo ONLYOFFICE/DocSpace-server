@@ -26,7 +26,7 @@
 
 namespace ASC.AuditTrail.Models;
 
-public class AuditEvent : BaseEvent, IMapFrom<AuditEventQuery>
+public class AuditEvent : BaseEvent
 {
     public string Initiator { get; set; }
 
@@ -38,15 +38,37 @@ public class AuditEvent : BaseEvent, IMapFrom<AuditEventQuery>
 
     [Event("TargetIdCol", 34)]
     public MessageTarget Target { get; set; }
-    
+
     [Event("LocationCol", 32)]
     public string Context { get; set; }
+}
 
-    public override void Mapping(Profile profile)
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class AuditEventMapper(EventTypeConverter eventTypeConverter)
+{
+    [MapperIgnoreSource(nameof(DbAuditEvent.Target))]
+    private partial AuditEvent ToAuditEvent(DbAuditEvent auditEventQuery);
+
+    public partial List<AuditEvent> ToAuditEvents(List<AuditEventQuery> auditEventQuery);
+
+    [UserMapping(Default = true)]
+    public AuditEvent ToAuditEvent(AuditEventQuery auditEventQuery)
     {
-        profile.CreateMap<DbAuditEvent, AuditEvent>();
+        var result = ToAuditEvent(auditEventQuery.Event);
+        eventTypeConverter.Convert(auditEventQuery, result, false);
+        return result;
+    }
 
-        profile.CreateMap<AuditEventQuery, AuditEvent>()
-            .ConvertUsing<EventTypeConverter>();
+    public List<AuditEvent> ToLimitedAuditEvents(List<AuditEventQuery> auditEventQuery)
+    {
+        return auditEventQuery?.Select(ToLimitedAuditEvent).ToList();
+    }
+
+    public AuditEvent ToLimitedAuditEvent(AuditEventQuery auditEventQuery)
+    {
+        var result = ToAuditEvent(auditEventQuery.Event);
+        eventTypeConverter.Convert(auditEventQuery, result, true);
+        return result;
     }
 }

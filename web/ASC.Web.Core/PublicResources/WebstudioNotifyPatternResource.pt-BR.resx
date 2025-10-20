@@ -1287,7 +1287,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;O ${LetterLogoText} DocSpace foi &lt;span style="color: #FF6F3D;"&gt;desativado&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;O ${LetterLogoText} DocSpace foi &lt;span style="color: #FF6F3D;"&gt;excluído&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Seu ${LetterLogoText} DocSpace foi desativado com sucesso. Observe que todos os seus dados serão excluídos de acordo com nossa &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Política de Privacidade&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1441,7 +1441,7 @@ $TrulyYours</value>
     <value>Solicitação do departamento de vendas</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>O ${LetterLogoText} DocSpace foi desativado</value>
+    <value>O DocSpace ${LetterLogoText} foi excluído</value>
   </data>
   <data name="subject_saas_admin_modules_v1" xml:space="preserve">
     <value>Configure seu ${LetterLogoText} DocSpace</value>
@@ -1978,5 +1978,56 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Ação necessária: Não é possível recarregar automaticamente o saldo da Carteira no seu ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Abrir DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Senha alterada com sucesso
+
+Sua senha para a conta *$UserName*, *$UserEmail* foi alterada com sucesso em *$Date* no DocSpace: "${__VirtualRootPath}": "${__VirtualRootPath}".
+
+IP: *$IP*
+Dispositivo: *$Device*
+#if($Location != "")
+Local: *$Location*
+#end
+Navegador: *$Browser*
+
+Se esta ação foi realizada por você, nenhuma outra etapa é necessária. Se esta alteração parecer suspeita ou não tiver sido autorizada por você, redefina sua senha imediatamente e desative o acesso ao DocSpace para este dispositivo.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Sua senha foi alterada com sucesso</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Falha no backup automático do seu DocSpace</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Olá, $UserName,
+
+O processo de backup agendado para o seu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" falhou.
+
+Recomendamos verificar as configurações de "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" e "Serviços":"${__VirtualRootPath}/portal-settings/services".
+
+Se tiver alguma dúvida ou precisar de ajuda, entre em contato conosco pelo "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Olá, $UserName,
+
+O processo de backup agendado para o seu DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) falhou.
+
+Recomendamos verificar as configurações de [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) e [Serviços](${__VirtualRootPath}/portal-settings/services).
+
+Caso tenha alguma dúvida ou precise de ajuda, entre em contato conosco pelo [${__SupportLink}](${__SupportLink})
+
+Atenciosamente,
+Equipe de Suporte da ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
   </data>
 </root>

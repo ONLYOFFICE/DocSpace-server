@@ -68,7 +68,7 @@ public class SessionRequest
 public class SessionRequestDto<T>
 {
     /// <summary>
-    /// The folder ID of the session.
+    /// The session folder ID.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
@@ -77,5 +77,5 @@ public class SessionRequestDto<T>
     /// The session parameters.
     /// </summary>
     [FromBody]
-    public SessionRequest Session {  get; set; }
+    public required SessionRequest Session { get; set; }
 }

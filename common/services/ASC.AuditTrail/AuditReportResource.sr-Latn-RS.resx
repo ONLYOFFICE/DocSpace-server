@@ -451,7 +451,7 @@
     <value>Uspešna prijava putem API i SMS koda</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Prijava putem društvenog naloga upešna</value>
+    <value>Uspešna prijava putem društvenog naloga: {0}</value>
   </data>
   <data name="LoginSuccessViaApiTfa" xml:space="preserve">
     <value>Uspešna prijava putem API i autentifikator aplikacije</value>
@@ -986,5 +986,62 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP sinhronizacija završena</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Podešavanja vidljivosti promotivnih banera su promenjena</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Podešavanja usluga omogućenih za korisnički novčanik su ažurirana</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Lokacija</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Uspešna prijava putem OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Uspešna prijava putem korisničkog imena i lozinke</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Datoteke [{0}]. Kreirana je eksterna veza: {1}. Uloga: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Datoteke [{0}]. Eksterna veza obrisana: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Datoteke [{0}]. Eksterna veza ažurirana: {1}. Uloga: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Datoteka označena kao omiljena: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Datoteka uklonjena iz omiljenih: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Datoteka uklonjena iz „Deljeno sa mnom“: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Datoteke [{0}]. Pristup ažuriran za {1}. Uloga: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Fascikla preuzeta: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Fascikle [{0}]. Kreirana je eksterna veza: {1}. Uloga: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Fascikle [{0}]. Eksterna veza obrisana: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Fascikle [{0}]. Eksterna veza ažurirana: {1}. Uloga: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Fascikla uklonjena iz „Deljeno sa mnom“: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Fascikle [{0}]. Pristup ažuriran za {1}. Uloga: {2}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Eksterna veza opozvana: {1}</value>
   </data>
 </root>

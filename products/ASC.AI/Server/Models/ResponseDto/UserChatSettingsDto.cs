@@ -26,7 +26,14 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class UserChatSettingsDto : IMapFrom<UserChatSettings>
+public class UserChatSettingsDto
 {
     public bool WebSearchEnabled { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class UserChatSettingsDtoMapper
+{
+    public static partial UserChatSettingsDto MapToDto(this UserChatSettings source);
 }

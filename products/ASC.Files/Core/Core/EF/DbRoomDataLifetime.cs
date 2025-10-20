@@ -29,7 +29,7 @@ namespace ASC.Files.Core.EF;
 /// <summary>
 /// The room data lifetime database.
 /// </summary>
-public class DbRoomDataLifetime : IMapFrom<RoomDataLifetime>
+public class DbRoomDataLifetime
 {
     /// <summary>
     /// Specifies whether to permanently delete the room data or not.

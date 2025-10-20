@@ -48,7 +48,7 @@ public class TariffSettings : ISettings<TariffSettings>
             LicenseAcceptSetting = DateTime.MinValue.ToString(_cultureInfo)
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 
     [JsonIgnore]

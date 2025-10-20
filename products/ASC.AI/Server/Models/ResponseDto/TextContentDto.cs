@@ -26,8 +26,15 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class TextContentDto : MessageContentDto, IMapFrom<TextMessageContent>
+public class TextContentDto : MessageContentDto
 {
     public override ContentType Type => ContentType.Text;
     public string? Text { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class TextContentDtoMapper
+{
+    public static partial TextContentDto MapToDto(this TextMessageContent source);
 }

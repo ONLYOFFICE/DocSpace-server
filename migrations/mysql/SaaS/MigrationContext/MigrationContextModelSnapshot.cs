@@ -18,7 +18,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.AI.Core.Database.Models.DbAiProvider", b =>
@@ -1032,7 +1032,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             TenantId = -12,
                             Features = "backup",
                             Name = "backup",
-                            Price = 12m,
+                            Price = 10m,
                             ProductId = "10006",
                             Visible = false,
                             Wallet = true
@@ -1135,7 +1135,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "asc.web.studio",
                             Action = "send_whats_new",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender"
+                            Sender = "email.sender|telegram.sender"
                         },
                         new
                         {
@@ -1199,7 +1199,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6fe286a4-479e-4c25-a8d9-0156e332b0c0",
                             Action = "sharedocument",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender|messanger.sender|telegram.sender"
                         },
                         new
                         {
@@ -1207,7 +1207,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6fe286a4-479e-4c25-a8d9-0156e332b0c0",
                             Action = "sharefolder",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender|messanger.sender|telegram.sender"
                         },
                         new
                         {
@@ -1215,7 +1215,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6fe286a4-479e-4c25-a8d9-0156e332b0c0",
                             Action = "updatedocument",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender|messanger.sender|telegram.sender"
                         },
                         new
                         {
@@ -1327,7 +1327,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "asc.web.studio",
                             Action = "admin_notify",
                             Recipient = "cd84e66b-b803-40fc-99f9-b2969a54a1de",
-                            Sender = "email.sender"
+                            Sender = "email.sender|telegram.sender"
                         },
                         new
                         {
@@ -1383,7 +1383,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "asc.web.studio",
                             Action = "periodic_notify",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender"
+                            Sender = "email.sender|telegram.sender"
                         });
                 });
 
@@ -1711,9 +1711,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.Core.Common.EF.Model.Chat.DbChatMessage", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("bigint")
                         .HasColumnName("id")
                         .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
 
@@ -2489,11 +2489,20 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("telegram_user_id");
 
+                    b.Property<string>("TelegramUsername")
+                        .HasColumnType("varchar(35)")
+                        .HasColumnName("telegram_username")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.HasKey("TenantId", "PortalUserId")
                         .HasName("PRIMARY");
 
                     b.HasIndex("TelegramUserId")
                         .HasDatabaseName("tgId");
+
+                    b.HasIndex("TelegramUsername")
+                        .HasDatabaseName("tgUsername");
 
                     b.ToTable("telegram_users", (string)null);
 
@@ -3798,6 +3807,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasIndex("Owner")
                         .HasDatabaseName("owner");
+
+                    b.HasIndex("TenantId", "Subject")
+                        .HasDatabaseName("tenant_id_subject");
 
                     b.HasIndex("TenantId", "EntryType", "EntryId", "Owner")
                         .HasDatabaseName("tenant_id");

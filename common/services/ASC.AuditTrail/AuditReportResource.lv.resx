@@ -928,4 +928,13 @@
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP sinhronizācija pabeigta</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Novietojums</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Reklāmas baneru redzamības iestatījumi ir mainīti</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Klienta maka iespējoto pakalpojumu iestatījumi ir atjaunināti</value>
+  </data>
 </root>

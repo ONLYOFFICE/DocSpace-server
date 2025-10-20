@@ -123,6 +123,6 @@ public static class DbTariffExtension
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });
-        
+
     }
 }

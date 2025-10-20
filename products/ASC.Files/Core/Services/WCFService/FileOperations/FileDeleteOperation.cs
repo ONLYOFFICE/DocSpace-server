@@ -33,19 +33,19 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
 {
     [ProtoMember(7)]
     public bool IgnoreException { get; set; }
-    
+
     [ProtoMember(8)]
     public bool Immediately { get; set; }
-    
+
     [ProtoMember(9)]
     public bool IsEmptyTrash { get; set; }
 
     [ProtoMember(10)]
     public IEnumerable<int> FilesVersions { get; set; }
-    
+
     public FileDeleteOperationData()
     {
-        
+
     }
 
     public FileDeleteOperationData(
@@ -72,7 +72,7 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
 public class FileDeleteOperation : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>
 {
     public FileDeleteOperation() { }
-    
+
     public FileDeleteOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Delete;
@@ -94,9 +94,9 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
     private readonly bool _isEmptyTrash;
     private readonly Dictionary<string, StringValues> _headers;
     private readonly IEnumerable<int> _filesVersions;
-    
+
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Delete;
-    
+
     public FileDeleteOperation(IServiceProvider serviceProvider, FileDeleteOperationData<T> fileOperationData)
     : base(serviceProvider, fileOperationData)
     {
@@ -106,17 +106,17 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         _isEmptyTrash = fileOperationData.IsEmptyTrash;
         _filesVersions = fileOperationData.FilesVersions;
     }
-    
+
     protected override int InitTotalProgressSteps()
     {
         if (_filesVersions != null && _filesVersions.Any() && Files.Count > 0)
         {
             return _filesVersions.Count();
         }
-        
+
         return base.InitTotalProgressSteps();
     }
-    
+
     protected override async Task DoJob(AsyncServiceScope serviceScope)
     {
         var folderDao = serviceScope.ServiceProvider.GetService<IFolderDao<int>>();
@@ -194,12 +194,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             if (folder == null)
             {
                 Err = FilesCommonResource.ErrorMessage_FolderNotFound;
-            }
-            else if (folder.FolderType != FolderType.DEFAULT && folder.FolderType != FolderType.BUNCH
-                && !DocSpaceHelper.IsRoom(folder.FolderType)
-                && (folder.FolderType is FolderType.InProcessFormFolder or FolderType.ReadyFormFolder && (folder.RootFolderType != FolderType.Archive && folder.RootFolderType != FolderType.RoomTemplates)))
-            {
-                Err = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
             }
             else if (!_ignoreException && checkPermissions && !canDelete)
             {
@@ -314,7 +308,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                             await Task.WhenAll(tasks);
                         }
-                       
+
                         if (folder.ParentRoomType == FolderType.VirtualDataRoom)
                         {
                             var tasks = files.Where(file => file.IsForm).Select(async file =>

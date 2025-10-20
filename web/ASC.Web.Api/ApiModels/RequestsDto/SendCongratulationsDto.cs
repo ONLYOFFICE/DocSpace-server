@@ -34,12 +34,12 @@ public class SendCongratulationsDto
     /// <summary>
     /// The user ID to receive the congratulatory message.
     /// </summary>
-    public Guid Userid { get; set; }
+    public required Guid Userid { get; set; }
 
     /// <summary>
     /// The template identifier or email configuration key.
     /// </summary>
-    public string Key { get; set; }
+    public required string Key { get; set; }
 }
 
 ///<summary>
@@ -50,10 +50,10 @@ public class SendRemoveInstructionsDto
     ///<summary>
     /// The ID of the user requesting account removal.
     ///</summary>
-    public Guid Userid { get; set; }
+    public required Guid Userid { get; set; }
 
     ///<summary>
     /// The email configuration key.
     ///</summary>
-    public string Key { get; set; }
+    public required string Key { get; set; }
 }

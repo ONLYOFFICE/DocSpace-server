@@ -29,5 +29,5 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class AllBackupStoragesDto
 {
     [FromQuery]
-    public bool Dump { get;set; }
+    public bool Dump { get; set; }
 }

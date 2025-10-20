@@ -928,4 +928,13 @@
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP sinxronizasiyası tamamlandı</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Məkan</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Tanıtım bannerlərinin görünmə parametrləri dəyişdirildi</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Müştəri pulqabı aktivləşdirilmiş xidmətlər parametrləri yeniləndi</value>
+  </data>
 </root>

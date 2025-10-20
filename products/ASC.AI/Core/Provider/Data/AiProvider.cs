@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Core.Provider.Data;
 
-public class AiProvider : IMapFrom<DbAiProvider>
+public class AiProvider
 {
     public int Id { get; set; }
     public required string Title { get; set; }
@@ -35,4 +35,11 @@ public class AiProvider : IMapFrom<DbAiProvider>
     public ProviderType Type { get; init; }
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class AiProviderMapper
+{
+    public static partial AiProvider Map(this DbAiProvider source);
 }

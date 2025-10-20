@@ -110,7 +110,7 @@ public class FFmpegService
                 {
                     continue;
                 }
-                
+
                 foreach (var name in _fFmpegExecutables)
                 {
                     var path = CrossPlatform.PathCombine(folder, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? name + ".exe" : name);

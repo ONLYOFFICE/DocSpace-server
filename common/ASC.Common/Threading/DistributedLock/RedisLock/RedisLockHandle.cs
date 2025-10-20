@@ -31,7 +31,7 @@ public class RedisLockHandle(IDistributedSynchronizationHandle handle) : LockHan
     public override void Dispose()
     {
         CheckDispose();
-        
+
         handle?.Dispose();
 
         _disposed = true;

@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using DocSpace.API.SDK.Api.Group;
+using FileShareLink = DocSpace.API.SDK.Model.FileShareLink;
+using RoomsApi = DocSpace.API.SDK.Api.Rooms.RoomsApi;
+
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -35,13 +39,15 @@ public class BaseTest(
     ) : IAsyncLifetime
 {
     protected readonly HttpClient _filesClient = filesFactory.HttpClient;
+    protected readonly HttpClient _peopleClient = peopleFactory.HttpClient;
     protected readonly FoldersApi _foldersApi = filesFactory.FoldersApi;
     protected readonly FilesApi _filesApi = filesFactory.FilesApi;
     protected readonly OperationsApi _filesOperationsApi = filesFactory.OperationsApi;
     protected readonly RoomsApi _roomsApi = filesFactory.RoomsApi;
     protected readonly SettingsApi _filesSettingsApi = filesFactory.SettingsApi;
     protected readonly QuotaApi _quotaApi = filesFactory.QuotaApi;
-    protected readonly SharingApi _filesSharingApi = filesFactory.SharingApi;
+    protected readonly SharingApi _sharingApi = filesFactory.SharingApi;
+    protected readonly GroupApi _groupApi = peopleFactory.GroupApi;
     protected readonly DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = apiFactory.SettingsQuotaApi;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
 
@@ -53,7 +59,7 @@ public class BaseTest(
     
     public static TheoryData<FileShare> InvalidFileShare =>
     [
-        FileShare.None, FileShare.ReadWrite, FileShare.Varies, FileShare.RoomManager, FileShare.ContentCreator
+       FileShare.ReadWrite, FileShare.Varies, FileShare.RoomManager, FileShare.ContentCreator
     ];
     
     public static TheoryData<FileShare> InvalidFileShareFillingForms =>
@@ -189,10 +195,6 @@ public class BaseTest(
         return statuses;
     }
     
-    protected static FileShareLink DeserializeSharedToLink(FileShareDto updatedLink1Response)
-    {
-        return JsonSerializer.Deserialize<FileShareLink>(((JsonElement)updatedLink1Response.SharedTo).ToString(), JsonSerializerOptions.Web)!;
-    }
     
     protected async Task<(string, int)> CreateFileAndShare(FileShare fileShare, bool primary = true, bool varInternal = false, DateTime? expirationDate = null)
     {
@@ -213,9 +215,8 @@ public class BaseTest(
         }
         
         var initialLink = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
-        var fileShareLink = DeserializeSharedToLink(initialLink);
         
-        return (fileShareLink.RequestToken, file.Id);
+        return (initialLink.SharedLink.RequestToken, file.Id);
     }
     
     protected async Task<FileDtoInteger> TryOpenEditAsync(string share, int fileId, User? user = null, bool throwException = false)

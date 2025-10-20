@@ -70,7 +70,7 @@ public class RestoreDbModuleTask : PortalTaskBase
         _logger.DebugBeginRestoreDataForModule(_module.ModuleName);
         SetStepsCount(_module.Tables.Count(t => !_ignoredTables.Contains(t.Name)));
 
-        await using (var connection = DbFactory.OpenConnection(region:_region))
+        await using (var connection = DbFactory.OpenConnection(region: _region))
         {
             foreach (var table in _module.GetTablesOrdered().Where(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None))
             {
@@ -112,7 +112,7 @@ public class RestoreDbModuleTask : PortalTaskBase
         {
             return;
         }
-        
+
         var lowImportanceRelations = _module
             .TableRelations
             .Where(r => string.Equals(r.ParentTable, tableInfo.Name, StringComparison.InvariantCultureIgnoreCase))

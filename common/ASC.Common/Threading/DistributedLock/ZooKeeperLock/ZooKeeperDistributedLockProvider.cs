@@ -31,13 +31,13 @@ public class ZooKeeperDistributedLockProvider : Abstractions.IDistributedLockPro
     private readonly Medallion.Threading.IDistributedLockProvider _distributedLockProvider;
     private readonly ILogger<ZooKeeperDistributedLockProvider> _logger;
     private readonly TimeSpan _minTimeout;
-    
+
     private static readonly TimeSpan _defaultMinTimeout = TimeSpan.FromSeconds(30);
     private static readonly IDistributedLockHandle _emptyHandle = new DefaultHandle();
 
     public ZooKeeperDistributedLockProvider(
-        Medallion.Threading.IDistributedLockProvider distributedLockProvider, 
-        ILogger<ZooKeeperDistributedLockProvider> logger, 
+        Medallion.Threading.IDistributedLockProvider distributedLockProvider,
+        ILogger<ZooKeeperDistributedLockProvider> logger,
         TimeSpan? minTimeout = null)
     {
         _distributedLockProvider = distributedLockProvider;
@@ -53,16 +53,16 @@ public class ZooKeeperDistributedLockProvider : Abstractions.IDistributedLockPro
         }
     }
 
-    public async Task<IDistributedLockHandle> TryAcquireFairLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, 
+    public async Task<IDistributedLockHandle> TryAcquireFairLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true,
         CancellationToken cancellationToken = default)
     {
         if (timeout < _minTimeout || timeout == Timeout.InfiniteTimeSpan || timeout == TimeSpan.MaxValue)
         {
             timeout = _minTimeout;
         }
-        
+
         var timestamp = TimeProvider.System.GetTimestamp();
-        
+
         var handle = await _distributedLockProvider.TryAcquireLockAsync(resource, timeout, cancellationToken);
 
         return GetHandle(handle, resource, (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds, throwIfNotAcquired);
@@ -86,7 +86,7 @@ public class ZooKeeperDistributedLockProvider : Abstractions.IDistributedLockPro
         {
             throw new DistributedLockException(LockStatus.NotAcquired, resource, elapsedMilliseconds);
         }
-        
+
         _logger.ErrorTryAcquireLock(resource, elapsedMilliseconds);
 
         return _emptyHandle;

@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Threading.Channels;
-
-using ASC.Core.Notify.Socket;
-
 namespace ASC.ApiSystem;
 
 public class Startup
@@ -56,7 +52,7 @@ public class Startup
         {
             builder.ConfigureOpenTelemetry();
         }
-        
+
         var services = builder.Services;
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
@@ -80,6 +76,7 @@ public class Startup
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddBaseDbContextPool<ApiKeysDbContext>();
 
         services.AddSession();
 
@@ -129,11 +126,11 @@ public class Startup
                 .AddDistributedLock(_configuration)
                 .AddHeartBeat(_configuration);
 
+
+
         services.RegisterFeature();
         services.RegisterQuotaFeature();
 
-        services.AddAutoMapper(BaseStartup.GetAutoMapperProfileAssemblies());
-        
         if (_configuration.GetValue<bool>("openApi:enable"))
         {
             services.AddOpenApi(_configuration);
@@ -143,16 +140,20 @@ public class Startup
             services.AddStartupTask<WarmupServicesStartupTask>()
                     .TryAddSingleton(services);
         }
-        
+
         services.AddSingleton(Channel.CreateUnbounded<SocketData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddScoped<AuthHandler>();
         services.AddScoped<ApiSystemAuthHandler>();
         services.AddScoped<ApiSystemBasicAuthHandler>();
+        services.AddScoped(_ => UrlEncoder.Default);
 
         services.AddBillingHttpClient();
         services.AddAccountingHttpClient();
+        services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
 
         services
             .AddAuthentication()
@@ -174,12 +175,12 @@ public class Startup
         app.UseSynchronizationContextMiddleware();
 
         app.UseTenantMiddleware();
-        
+
         if (!string.IsNullOrEmpty(_corsOrigin))
-        { 
+        {
             app.UseCors(CustomCorsPolicyName);
         }
-        
+
         app.UseAuthentication();
 
         app.UseAuthorization();

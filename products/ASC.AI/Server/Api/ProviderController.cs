@@ -36,14 +36,14 @@ public class ProviderController(
     AiProviderService providerService, 
     ApiDateTimeHelper apiDateTimeHelper,
     ApiContext apiContext,
-    IMapper mapper) : ControllerBase
+    ProviderMapper providerMapper) : ControllerBase
 {
     [HttpPost("providers")]
     public async Task<ProviderDto> AddProviderAsync(CreateProviderRequestDto inDto)
     {
         var provider = await providerService.AddProviderAsync(inDto.Title, inDto.Url, inDto.Key, inDto.Type);
 
-        return provider.ToDto(apiDateTimeHelper);
+        return providerMapper.MapToDto(provider);
     }
 
     [HttpGet("providers")]
@@ -52,7 +52,7 @@ public class ProviderController(
         var totalCountTask = providerService.GetProvidersTotalCountAsync();
         
         var providers = await providerService.GetProvidersAsync(inDto.StartIndex, inDto.Count)
-            .Select(x => x.ToDto(apiDateTimeHelper))
+            .Select(providerMapper.MapToDto)
             .ToListAsync();
 
         var totalCount = await totalCountTask;
@@ -67,7 +67,7 @@ public class ProviderController(
     {
         var provider = await providerService.UpdateProviderAsync(inDto.Id, inDto.Body.Title, inDto.Body.Url, inDto.Body.Key);
 
-        return provider.ToDto(apiDateTimeHelper);
+        return providerMapper.MapToDto(provider);
     }
 
     [HttpDelete("providers")]
@@ -82,7 +82,7 @@ public class ProviderController(
     public async Task<List<ProviderSettingsDto>> GetAvailableProvidersAsync()
     {
         var providers = await providerService.GetAvailableProvidersAsync();
-        
-        return mapper.Map<List<ProviderSettingsData>, List<ProviderSettingsDto>>(providers);
+
+        return providers.Select(x => x.MapToDto()).ToList();
     }
 }

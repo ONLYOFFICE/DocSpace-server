@@ -37,7 +37,7 @@ public class GoogleWorkspaceMigrator : Migrator
     private readonly Regex _emailRegex = new(@"(\S*@\S*\.\S*)");
     private readonly Regex _phoneRegex = new(@"(\+?\d+)");
 
-    private  readonly Regex _workspacesRegex = new(@"Workspaces(\(\d+\))?.json");
+    private readonly Regex _workspacesRegex = new(@"Workspaces(\(\d+\))?.json");
     private readonly Regex _pinnedRegex = new(@".*-at-.*-pinned\..*");
     private const string CommentsFile = "-comments.html";
     private const string InfoFile = "-info.json";
@@ -312,7 +312,7 @@ public class GoogleWorkspaceMigrator : Migrator
         }
         user.Storage.Folders.AddRange(foldersdictionary.Select(f => f.Value));
 
-        foreach(var file in user.Storage.Files)
+        foreach (var file in user.Storage.Files)
         {
             ParseShare(user.Storage.Securities, file.Path, file.Id, 2);
         }

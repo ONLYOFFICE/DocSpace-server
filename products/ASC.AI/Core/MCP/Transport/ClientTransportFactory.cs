@@ -36,7 +36,7 @@ public class ClientTransportFactory(
     IHttpMessageHandlerFactory messageHandlerFactory,
     OAuth20TokenHelper tokenHelper)
 {
-    public async Task<SseClientTransport> CreateAsync(McpServerConnection connection)
+    public async Task<HttpClientTransport> CreateAsync(McpServerConnection connection)
     {
         if (connection.ServerType is ServerType.DocSpace)
         {
@@ -50,7 +50,7 @@ public class ClientTransportFactory(
             return await oauthGenericBuilder.BuildAsync(connection);
         }
 
-        var options = new SseClientTransportOptions
+        var options = new HttpClientTransportOptions
         {
             Name = connection.Name,
             Endpoint = new Uri(connection.Endpoint),
@@ -59,6 +59,6 @@ public class ClientTransportFactory(
             ConnectionTimeout = TimeSpan.FromSeconds(5)
         };
 
-        return new SseClientTransport(options, clientFactory.CreateClient());
+        return new HttpClientTransport(options, clientFactory.CreateClient());
     }
 }

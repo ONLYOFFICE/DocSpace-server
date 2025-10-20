@@ -29,7 +29,7 @@ namespace ASC.Core.Users;
 /// <summary>
 /// The user information.
 /// </summary>
-public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
+public sealed class UserInfo : IDirectRecipient, ICloneable
 {
     /// <summary>
     /// The user ID.
@@ -264,4 +264,13 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
 
         return this;
     }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class UserInfoMapper
+{
+    public static partial User Map(this UserInfo source);
+    public static partial UserInfo Map(this User source);
+    public static partial List<UserInfo> Map(this List<User> source);
+    public static partial IQueryable<UserInfo> Project(this IQueryable<User> source);
 }

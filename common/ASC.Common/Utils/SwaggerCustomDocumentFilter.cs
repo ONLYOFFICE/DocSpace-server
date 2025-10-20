@@ -24,12 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Web.Services.Description;
-
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 
-using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
@@ -207,7 +204,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
 
         swaggerDoc.Tags = customTags
             .Where(tag => _tagDescriptions.ContainsKey(tag))
-            .Select(tag => 
+            .Select(tag =>
             {
                 var tagParts = tag.Split(" / ");
                 var displayName = tagParts.Length > 1 ? tagParts[1] : tagParts[0];
@@ -233,7 +230,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
             var groupObject = new OpenApiObject();
             var tagsArray = new OpenApiArray();
 
-            foreach(var tag in group.Value)
+            foreach (var tag in group.Value)
             {
                 tagsArray.Add(new OpenApiString(tag));
             }

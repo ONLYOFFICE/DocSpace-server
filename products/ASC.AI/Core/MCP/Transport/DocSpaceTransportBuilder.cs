@@ -31,9 +31,9 @@ public class DocSpaceTransportBuilder(
     CommonLinkUtility commonLinkUtility,
     IHttpClientFactory httpClientFactory) : ITransportBuilder
 {
-    public ValueTask<SseClientTransport> BuildAsync(McpServerConnection connection)
+    public ValueTask<HttpClientTransport> BuildAsync(McpServerConnection connection)
     {
-        var options = new SseClientTransportOptions
+        var options = new HttpClientTransportOptions
         {
             Name = connection.Name,
             Endpoint = new Uri(connection.Endpoint),
@@ -44,7 +44,7 @@ public class DocSpaceTransportBuilder(
             }
         };
         
-        var transport = new SseClientTransport(options, httpClientFactory.CreateClient());
+        var transport = new HttpClientTransport(options, httpClientFactory.CreateClient());
         return ValueTask.FromResult(transport);
     }
 }

@@ -83,7 +83,7 @@ public static class DbFilesBunchObjectsExtension
                 .UseCollation("utf8_general_ci");
         });
     }
-    
+
     public static void PgSqlAddDbFilesBunchObjects(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFilesBunchObjects>(entity =>

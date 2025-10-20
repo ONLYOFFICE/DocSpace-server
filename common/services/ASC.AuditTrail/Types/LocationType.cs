@@ -115,7 +115,7 @@ public enum LocationType
 
     [SwaggerEnum("Rooms")]
     Rooms,
-    
+
     [SwaggerEnum("OAuth")]
     OAuth
 }

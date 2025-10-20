@@ -26,16 +26,37 @@
 
 namespace ASC.AuditTrail.Models;
 
-public class LoginEvent : BaseEvent, IMapFrom<LoginEventQuery>
+public class LoginEvent : BaseEvent
 {
     public string Login { get; set; }
     public int Action { get; set; }
+}
 
-    public override void Mapping(Profile profile)
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class LoginEventMapper(EventTypeConverter eventTypeConverter)
+{
+    private partial LoginEvent ToLoginEvent(DbLoginEvent loginEventQuery);
+
+    public partial List<LoginEvent> ToLoginEvents(List<LoginEventQuery> loginEventQuery);
+
+    [UserMapping(Default = true)]
+    private LoginEvent ToLoginEvent(LoginEventQuery source)
     {
-        profile.CreateMap<DbLoginEvent, LoginEvent>();
+        var dto = ToLoginEvent(source.Event);
+        eventTypeConverter.Convert(source, dto, false);
+        return dto;
+    }
 
-        profile.CreateMap<LoginEventQuery, LoginEvent>()
-            .ConvertUsing<EventTypeConverter>();
+    public List<LoginEvent> ToLimitedLoginEvents(List<LoginEventQuery> loginEventQuery)
+    {
+        return loginEventQuery?.Select(ToLimitedLoginEvent).ToList();
+    }
+
+    private LoginEvent ToLimitedLoginEvent(LoginEventQuery source)
+    {
+        var dto = ToLoginEvent(source.Event);
+        eventTypeConverter.Convert(source, dto, true);
+        return dto;
     }
 }

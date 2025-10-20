@@ -36,11 +36,12 @@ public class WhitelabelController(
     CoreBaseSettings coreBaseSettings,
     CommonLinkUtility commonLinkUtility,
     IFusionCache fusionCache,
-    IMapper mapper,
     CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper,
     TenantManager tenantManager,
     TenantExtra tenantExtra,
-    StorageFactory storageFactory)
+    StorageFactory storageFactory,
+    AdditionalWhiteLabelSettingsMapper additionalWhiteLabelSettingsMapper,
+    CompanyWhiteLabelSettingsDtoMapper companyWhiteLabelSettingsDtoMapper)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     #region Logos
@@ -431,13 +432,12 @@ public class WhitelabelController(
     }
 
     /// <summary>
-    /// Specifies if the white label logo text are default or not.
+    /// Specifies if the white label logo text is default or not.
     /// </summary>
     /// <short>
     /// Check the default white label logo text
     /// </short>
     /// <path>api/2.0/settings/whitelabel/logotext/isdefault</path>
-    /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Request properties of white label logos", typeof(IsDefaultWhiteLabelLogosDto))]
     [HttpGet("whitelabel/logotext/isdefault")]
@@ -575,8 +575,8 @@ public class WhitelabelController(
     public async Task<CompanyWhiteLabelSettingsDto> GetCompanyWhiteLabelSettings()
     {
         var settings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>(HttpContext.GetIfModifiedSince());
-        
-        return HttpContext.TryGetFromCache(settings.LastModified) ? null :   mapper.Map<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>(settings);
+
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null : companyWhiteLabelSettingsDtoMapper.Map(settings);
     }
 
     /// <summary>
@@ -641,7 +641,7 @@ public class WhitelabelController(
     {
         var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
 
-        return mapper.Map<AdditionalWhiteLabelSettings, AdditionalWhiteLabelSettingsDto>(settings);
+        return additionalWhiteLabelSettingsMapper.Map(settings);
     }
 
     /// <summary>
@@ -707,7 +707,7 @@ public class WhitelabelController(
     {
         var settings = await settingsManager.LoadForDefaultTenantAsync<MailWhiteLabelSettings>();
 
-        return mapper.Map<MailWhiteLabelSettings, MailWhiteLabelSettingsDto>(settings);
+        return settings.MapToDto();
     }
 
     /// <summary>

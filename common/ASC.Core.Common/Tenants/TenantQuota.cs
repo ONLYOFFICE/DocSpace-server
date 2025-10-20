@@ -24,15 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core.Tenants;
 
 /// <summary>
 /// The current tenant quota.
 /// </summary>
 [DebuggerDisplay("{TenantId} {Name}")]
-public class TenantQuota : IMapFrom<DbQuota>
+public class TenantQuota
 {
     public static readonly TenantQuota Default = new(Tenant.DefaultTenant)
     {
@@ -607,12 +605,6 @@ public class TenantQuota : IMapFrom<DbQuota>
         return newQuota;
     }
 
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<DbQuota, TenantQuota>()
-            .ForMember(dest => dest.Price, o => o.MapFrom<TenantQuotaPriceResolver>());
-    }
-
     public TenantQuotaFeature<T> GetFeature<T>(string name)
     {
         return TenantQuotaFeatures.OfType<TenantQuotaFeature<T>>().FirstOrDefault(f => string.Equals(f.Name.Split(':')[0], $"{name}", StringComparison.OrdinalIgnoreCase));
@@ -637,5 +629,43 @@ public class TenantQuota : IMapFrom<DbQuota>
         {
             _featuresList.Add(value is bool ? $"{name}" : $"{name}:{value}");
         }
+    }
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class TenantQuotaMapper(IServiceProvider provider)
+{
+    private partial TenantQuota Map(DbQuota source);
+    public partial List<TenantQuota> Map(List<DbQuota> source);
+    public partial DbQuota Map(TenantQuota source);
+
+    [UserMapping(Default = true)]
+    public TenantQuota MapDbQuotaToTenantQuota(DbQuota quota)
+    {
+        var dto = Map(quota);
+        (dto.Price, dto.PriceCurrencySymbol, dto.PriceISOCurrencySymbol) = Resolve(quota);
+        return dto;
+    }
+
+    private (decimal, string, string) Resolve(DbQuota source)
+    {
+        var tenantManager = provider.GetService<TenantManager>();
+        var regionHelper = provider.GetService<RegionHelper>();
+
+        var priceInfo = tenantManager.GetProductPriceInfo(source.ProductId, source.Wallet);
+
+        if (priceInfo != null)
+        {
+            var currentRegion = regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { source.ProductId, priceInfo } }).Result;
+
+            if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolve))
+            {
+                return (resolve, currentRegion.CurrencySymbol, currentRegion.ISOCurrencySymbol);
+            }
+        }
+
+        var defaultRegion = regionHelper.GetDefaultRegionInfo();
+        return (source.Price, defaultRegion.CurrencySymbol, defaultRegion.ISOCurrencySymbol);
     }
 }

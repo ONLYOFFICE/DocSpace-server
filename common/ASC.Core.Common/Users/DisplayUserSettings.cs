@@ -40,7 +40,7 @@ public class DisplayUserSettings : ISettings<DisplayUserSettings>
             IsDisableGettingStarted = false
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 }
 
@@ -49,9 +49,9 @@ public class DisplayUserSettingsHelper(UserManager userManager, UserFormatter us
 {
     private string RemovedProfileName => configuration["web:removed-profile-name"] ?? "profile removed";
 
-    public async Task<string> GetFullUserNameAsync(Guid userID, bool withHtmlEncode = true)
+    public async Task<string> GetFullUserNameAsync(Guid userID, bool withHtmlEncode = true, bool returnLostUserIfRemoved = true)
     {
-        return GetFullUserName(await userManager.GetUsersAsync(userID), withHtmlEncode);
+        return GetFullUserName(await userManager.GetUsersAsync(userID, returnLostUserIfRemoved), withHtmlEncode);
     }
 
     public string GetFullUserName(UserInfo userInfo, bool withHtmlEncode = true)

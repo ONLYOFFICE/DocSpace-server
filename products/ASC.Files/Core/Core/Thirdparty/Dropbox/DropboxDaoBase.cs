@@ -174,7 +174,7 @@ internal class DropboxDaoBase(
         {
             folder.ModifiedOn = _tenantUtil.DateTimeFromUtc(folder.ModifiedOn);
         }
-        
+
         folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return folder;
@@ -242,7 +242,7 @@ internal class DropboxDaoBase(
     {
         return ToFolder(await GetFolderAsync(string.Empty));
     }
-    
+
     public async Task<FolderMetadata> CreateFolderAsync(string title, string folderId)
     {
         return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);

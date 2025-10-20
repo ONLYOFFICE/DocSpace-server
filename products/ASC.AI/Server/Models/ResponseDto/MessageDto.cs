@@ -26,9 +26,9 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class MessageDto(int id,Role role, IEnumerable<MessageContentDto> contents, ApiDateTime createdOn)
+public class MessageDto(long id,Role role, IEnumerable<MessageContentDto> contents, ApiDateTime createdOn)
 {
-    public int Id { get; } = id;
+    public long Id { get; } = id;
     public Role Role { get; } = role;
     public IEnumerable<MessageContentDto> Contents { get; } = contents;
     public ApiDateTime CreatedOn { get; } = createdOn;
@@ -39,8 +39,7 @@ public class MessageDtoConverter(
     TenantManager tenantManager,
     ApiDateTimeHelper dateTimeHelper,
     McpService mcpService,
-    McpIconStore iconStore, 
-    IMapper mapper)
+    McpIconStore iconStore)
 {
     public async Task<MessageDto> ConvertAsync(Message message)
     {
@@ -54,7 +53,7 @@ public class MessageDtoConverter(
             {
                 case ToolCallMessageContent toolCall:
                     {
-                        var toolDto = mapper.Map<ToolContentDto>(toolCall);
+                        var toolDto = toolCall.MapToDto();
                         contents.Add(toolDto);
 
                         if (toolCall.McpServerInfo != null)
@@ -72,10 +71,10 @@ public class MessageDtoConverter(
                         continue;
                     }
                 case AttachmentMessageContent attachment:
-                    contents.Add(mapper.Map<AttachmentContentDto>(attachment));
+                    contents.Add(attachment.MapToDto());
                     continue;
                 case TextMessageContent text:
-                    contents.Add(mapper.Map<TextContentDto>(text));
+                    contents.Add(text.MapToDto());
                     break;
             }
         }

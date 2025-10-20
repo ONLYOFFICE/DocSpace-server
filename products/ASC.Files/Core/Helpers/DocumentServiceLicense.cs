@@ -78,6 +78,8 @@ public class DocumentServiceLicense(ICache cache,
     {
         var pipeline = resiliencePipelineProvider.GetPipeline<LicenseValidationResult>(LicenseResiliencePipelineName);
 
+        var errorMsg = string.Empty;
+
         var response = await pipeline.ExecuteAsync(async (_) =>
         {
             var commandResponse = await GetDocumentServiceLicenseAsync(false);
@@ -85,6 +87,12 @@ public class DocumentServiceLicense(ICache cache,
             if (commandResponse == null)
             {
                 return new LicenseValidationResult(true, null);
+            }
+
+            if (commandResponse.Error == ErrorTypes.ParseError)
+            {
+                errorMsg = commandResponse.ErrorString;
+                return null; // Possible DocumentService behavior without a license when the response contains "end_date":null
             }
 
             if (commandResponse.Error != ErrorTypes.NoError)
@@ -109,14 +117,14 @@ public class DocumentServiceLicense(ICache cache,
             return null;
         });
 
-        return response ?? new LicenseValidationResult(false, "Failure after several attempts");
+        return response ?? new LicenseValidationResult(false, $"Failure after several attempts. {errorMsg}");
     }
 
-    public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync()
+    public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync(bool useCache = true)
     {
-        var commandResponse = await GetDocumentServiceLicenseAsync(true);
-        return commandResponse == null ? 
-            (null, null) : 
-            (commandResponse.Quota?.Users?.ToDictionary(r=> r.UserId, r=> r.Expire), commandResponse.License);
+        var commandResponse = await GetDocumentServiceLicenseAsync(useCache);
+        return commandResponse == null ?
+            (null, null) :
+            (commandResponse.Quota?.Users?.ToDictionary(r => r.UserId, r => r.Expire), commandResponse.License);
     }
 }

@@ -50,7 +50,8 @@ internal class LoginNoneModuleActionMapper : ILocationActionMapper
             MessageAction.LoginFailDisabledProfile, MessageAction.LoginFail,MessageAction.LoginFailViaSms,MessageAction.LoginFailViaApi,
             MessageAction.LoginFailViaApiSms,MessageAction.LoginFailViaApiTfa,MessageAction.LoginFailViaApiSocialAccount,
             MessageAction.LoginFailViaTfaApp,MessageAction.LoginFailIpSecurity,MessageAction.LoginFailViaSSO,MessageAction.LoginFailBruteForce,
-            MessageAction.LoginFailRecaptcha,MessageAction.Logout,MessageAction.SessionStarted,MessageAction.SessionCompleted,MessageAction.AuthLinkActivated
+            MessageAction.LoginFailRecaptcha,MessageAction.Logout,MessageAction.SessionStarted,MessageAction.SessionCompleted,
+            MessageAction.AuthLinkActivated,MessageAction.LoginSuccessViaOAuth,MessageAction.LoginSuccessViaPassword
         };
 
         Actions.Add(MessageAction.LoginSuccessViaSocialAccount, new MessageMaps("LoginSuccessSocialAccount"));

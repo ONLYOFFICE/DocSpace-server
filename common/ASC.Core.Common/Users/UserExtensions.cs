@@ -84,7 +84,7 @@ public static class UserExtensions
     {
         return userInfo != null && await userManager.IsUserInGroupAsync(userInfo.Id, Constants.GroupUser.ID);
     }
-    
+
     public static async Task<bool> IsUserAsync(this UserManager userManager, Guid id)
     {
         var userInfo = await userManager.GetUsersAsync(id);
@@ -133,10 +133,10 @@ public static class UserExtensions
         {
             return EmployeeType.Guest;
         }
-        
-        return 
-            await userManager.IsDocSpaceAdminAsync(user) ? EmployeeType.DocSpaceAdmin : 
-            await userManager.IsGuestAsync(user) ? EmployeeType.Guest : 
+
+        return
+            await userManager.IsDocSpaceAdminAsync(user) ? EmployeeType.DocSpaceAdmin :
+            await userManager.IsGuestAsync(user) ? EmployeeType.Guest :
             await userManager.IsUserAsync(user) ? EmployeeType.User :
             EmployeeType.RoomAdmin;
     }

@@ -29,8 +29,7 @@ namespace ASC.AI.Core.Provider.Data;
 [Scope]
 public class AiProviderDao(
     IDbContextFactory<AiDbContext> dbContextFactory, 
-    InstanceCrypto crypto,
-    IMapper mapper)
+    InstanceCrypto crypto)
 {
     public async Task<AiProvider> AddProviderAsync(int tenantId, AiProvider provider)
     {
@@ -77,8 +76,8 @@ public class AiProviderDao(
         }
         
         provider.Key = await crypto.DecryptAsync(provider.Key);
-        
-        return mapper.Map<DbAiProvider, AiProvider>(provider);
+
+        return provider.Map();
     }
     
     public async IAsyncEnumerable<AiProvider> GetProvidersAsync(int tenantId, int offset, int limit)
@@ -87,7 +86,7 @@ public class AiProviderDao(
         await foreach (var provider in dbContext.GetProvidersAsync(tenantId, offset, limit))
         {
             provider.Key = await crypto.DecryptAsync(provider.Key);
-            yield return mapper.Map<DbAiProvider, AiProvider>(provider);
+            yield return provider.Map();
         }
     }
 

@@ -51,7 +51,7 @@ public class DynamicCorsPolicyResolver(
     private string ApiBaseUrl
     {
         get
-        {        
+        {
             var apiBaseUrl = setupInfo.WebApiBaseUrl;
             if (Uri.IsWellFormedUriString(apiBaseUrl, UriKind.Relative))
             {
@@ -64,7 +64,7 @@ public class DynamicCorsPolicyResolver(
     public async Task<bool> ResolveForOrigin(CorsPolicy policy, StringValues origin)
     {
         logger.DebugCheckOrigin(origin);
-        
+
         var accessToken = _context.Request.Headers.Authorization.ToString();
 
         if (string.IsNullOrEmpty(accessToken) || accessToken.IndexOf("Bearer", 0, StringComparison.Ordinal) == -1)
@@ -85,17 +85,17 @@ public class DynamicCorsPolicyResolver(
             {
                 return DefaultResolveForOrigin(policy, origin);
             }
-            
+
             return origins.Any(x => x.Equals(origin, StringComparison.InvariantCultureIgnoreCase));
         }
-        
+
         return DefaultResolveForOrigin(policy, origin);
     }
 
     private bool DefaultResolveForOrigin(CorsPolicy policy, StringValues origin) => policy.AllowAnyOrigin || policy.IsOriginAllowed(origin);
-    
+
     private async Task<IEnumerable<string>> GetOriginsFromOAuth2App(string accessToken)
-    {        
+    {
         // Validated token early in JwtBearerAuthHandler
         var token = new JwtSecurityToken(accessToken);
 

@@ -132,19 +132,19 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
         if (offset > 0 && file.Size.HasValue)
         {
             var streamWithOffset = await _boxClient.FilesManager.DownloadAsync(file.Id, startOffsetInBytes: offset, endOffsetInBytes: (int)file.Size - 1);
-            
+
             return new ResponseStream(streamWithOffset, Math.Max(file.Size.Value - offset, 0));
         }
 
         var stream = await _boxClient.FilesManager.DownloadAsync(file.Id);
-        
+
         if (offset == 0)
         {
             return file.Size.HasValue ? new ResponseStream(stream, file.Size.Value) : stream;
         }
 
         var tempBuffer = tempStream.Create();
-        
+
         if (stream == null)
         {
             return tempBuffer;
@@ -183,12 +183,12 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
                 Id = parentId
             }
         };
-        
+
         if (fileStream.CanSeek)
         {
             return await _boxClient.FilesManager.UploadAsync(boxFileRequest, fileStream, _boxFields, setStreamPositionToZero: false);
         }
-        
+
         await using var tempBuffer = tempStream.Create();
         await fileStream.CopyToAsync(tempBuffer);
         await tempBuffer.FlushAsync();
@@ -287,12 +287,12 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
     {
         return await _boxClient.FilesManager.UploadNewVersionAsync(null, fileId, fileStream, fields: _boxFields, setStreamPositionToZero: false);
     }
-    
+
     public Task<long> GetFileSizeAsync(BoxFile file)
     {
         return Task.FromResult(file.Size ?? 0);
     }
-    
+
     public async Task<long> GetMaxUploadSizeAsync()
     {
         var boxUser = await _boxClient.UsersManager.GetCurrentUserInformationAsync(new List<string> { "max_upload_size" });

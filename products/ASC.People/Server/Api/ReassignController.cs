@@ -40,7 +40,7 @@ public class ReassignController(
     WebItemSecurity webItemSecurity,
     FileStorageService fileStorageService)
     : ApiControllerBase
-    {
+{
     /// <summary>
     /// Returns the progress of the started data reassignment for the user with the ID specified in the request.
     /// </summary>
@@ -86,12 +86,12 @@ public class ReassignController(
 
         var fromUser = await userManager.GetUsersAsync(inDto.FromUserId);
         var tenant = tenantManager.GetCurrentTenant();
-        
-        if (userManager.IsSystemUser(fromUser.Id) || 
-            fromUser.IsOwner(tenant) || 
-            fromUser.IsMe(authContext) || 
-            await userManager.IsGuestAsync(toUser) || 
-            fromUser.Status != EmployeeStatus.Terminated || 
+
+        if (userManager.IsSystemUser(fromUser.Id) ||
+            fromUser.IsOwner(tenant) ||
+            fromUser.IsMe(authContext) ||
+            await userManager.IsGuestAsync(toUser) ||
+            fromUser.Status != EmployeeStatus.Terminated ||
             ((await userManager.IsDocSpaceAdminAsync(inDto.FromUserId) || await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, inDto.FromUserId)) && tenant.OwnerId != authContext.CurrentAccount.ID))
         {
             throw new ArgumentException("Can not reassign data from user with id = " + fromUser.Id);
@@ -129,9 +129,9 @@ public class ReassignController(
     }
 
     /// <summary>
-    /// Checks if the reassignment of rooms and shared files is necessary or not.
+    /// Checks whether the reassignment of rooms and shared files is required.
     /// </summary>
-    /// <short>Check the data reassignment need</short>
+    /// <short>Check data for reassignment need</short>
     /// <path>api/2.0/people/reassign/necessary</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Boolean value: true if neccessary reassign", typeof(bool))]
@@ -154,7 +154,7 @@ public class ReassignController(
 
         if (inDto.Type is EmployeeType.Guest && !result)
         {
-            result = (await fileStorageService.GetSharedFilesAsync(inDto.UserId)).Any();
+            result = (await fileStorageService.GetSharedEntriesCountAsync(inDto.UserId)) > 0;
         }
 
         return result;

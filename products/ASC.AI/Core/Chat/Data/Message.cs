@@ -26,9 +26,9 @@
 
 namespace ASC.AI.Core.Chat.Data;
 
-public class Message(int id, Role role, List<MessageContent> contents, DateTime createdOn)
+public class Message(long id, Role role, List<MessageContent> contents, DateTime createdOn)
 {
-    public int Id { get; } = id;
+    public long Id { get; } = id;
     public Role Role { get; } = role;
     public List<MessageContent> Contents { get; } = contents;
     public DateTime CreatedOn { get; } = createdOn;

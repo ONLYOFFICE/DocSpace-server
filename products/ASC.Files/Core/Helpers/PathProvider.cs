@@ -73,10 +73,13 @@ public class PathProvider(WebImageSupplier webImageSupplier,
                 result = string.Format($"rooms/personal/filter?folder={urlPathEncode}");
                 break;
             case FolderType.Recent:
-                result =  string.Format($"recent/filter?folder={urlPathEncode}");
+                result = string.Format($"recent/filter?folder={urlPathEncode}");
                 break;
             case FolderType.Archive:
                 result = string.Format($"rooms/archived/filter?folder={urlPathEncode}");
+                break;
+            case FolderType.SHARE:
+                result = string.Format($"shared-with-me/filter?folder={urlPathEncode}");
                 break;
             case FolderType.VirtualRooms:
             case FolderType.RoomTemplates:
@@ -88,7 +91,7 @@ public class PathProvider(WebImageSupplier webImageSupplier,
         {
             result += $"&key={key}";
         }
-        
+
         return commonLinkUtility.GetFullAbsolutePath(string.Format($"{filesLinkUtility.FilesBaseAbsolutePath}{result}"));
     }
 
@@ -119,12 +122,12 @@ public class PathProvider(WebImageSupplier webImageSupplier,
         }
 
         query += FilesLinkUtility.AuthKey + "=" + emailValidationKeyProvider.GetEmailKey(file.Id.ToString() + version);
-        
+
         query = AddKey(query);
 
         return uriBuilder.Uri + "?" + query;
     }
-    
+
     public string GetFileChangesUrl<T>(File<T> file)
     {
         if (file == null)

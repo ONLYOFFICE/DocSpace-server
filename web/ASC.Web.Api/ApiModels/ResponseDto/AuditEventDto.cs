@@ -120,7 +120,7 @@ public class AuditEventDto
     /// The audit event context.
     /// </summary>
     public string Context { get; set; }
-    
+
     public AuditEventDto(AuditEvent auditEvent, AuditActionMapper auditActionMapper, ApiDateTimeHelper apiDateTimeHelper)
     {
         Id = auditEvent.Id;

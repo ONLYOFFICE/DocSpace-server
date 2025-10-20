@@ -42,6 +42,7 @@ namespace ASC.Web.Api.Controllers;
 [AllowNotPayment]
 [ControllerName("portal")]
 public class PaymentController(
+    CoreSettings coreSettings,
     UserManager userManager,
     TenantManager tenantManager,
     SettingsManager settingsManager,
@@ -316,10 +317,10 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Calculate amount of the wallet payment with the parameters specified in the request.
+    /// Calculates an amount of the wallet payment with the parameters specified in the request.
     /// </summary>
     /// <short>
-    /// Calculate amount of the wallet payment
+    /// Calculate the wallet payment amount
     /// </short>
     /// <path>api/2.0/portal/payment/calculatewallet</path>
     [Tags("Portal / Payment")]
@@ -433,9 +434,9 @@ public class PaymentController(
     /// </short>
     /// <path>api/2.0/portal/payment/prices</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "List of available portal prices", typeof(object))]
+    [SwaggerResponse(200, "List of available portal prices", typeof(Dictionary<string, decimal>))]
     [HttpGet("prices")]
-    public async Task<object> GetPortalPrices()
+    public async Task<Dictionary<string, decimal>> GetPortalPrices()
     {
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
         var result = (await tenantManager.GetProductPriceInfoAsync())
@@ -514,7 +515,7 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Returns the wallet services.
+    /// Returns the specified wallet service.
     /// </summary>
     /// <short>
     /// Get wallet service
@@ -560,7 +561,7 @@ public class PaymentController(
         {
             throw new SecurityException();
         }
-        
+
         return await tariffHelper.GetCurrentQuotaAsync(inDto.Refresh);
     }
 
@@ -644,10 +645,10 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Returns the customer info.
+    /// Returns the customer information.
     /// </summary>
     /// <short>
-    /// Get the customer info
+    /// Get the customer information
     /// </short>
     /// <path>api/2.0/portal/payment/customerinfo</path>
     [Tags("Portal / Payment")]
@@ -684,7 +685,7 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Returns result of putting money on deposit.
+    /// Returns the result of putting money on deposit.
     /// </summary>
     /// <short>
     /// Put money on deposit
@@ -718,7 +719,9 @@ public class PaymentController(
 
         await DemandPayerAsync(customerInfo);
 
-        var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), null, true);
+        var siteName = tenant.GetTenantDomain(coreSettings);
+
+        var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), siteName, null, true);
 
         if (result)
         {
@@ -804,10 +807,10 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Start generating the customer operations report as xlsx file and save in Documents.
+    /// Starts generating a customer operations report as an "xlsx" file and saves it in Documents.
     /// </summary>
     /// <short>
-    /// Start generating the customer operations report
+    /// Start the customer operations report generation
     /// </short>
     /// <path>api/2.0/portal/payment/customer/operationsreport</path>
     [Tags("Portal / Payment")]
@@ -852,9 +855,9 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Get the status of generating a customer operations report.
+    /// Returns the status of generating a customer operations report.
     /// </summary>
-    /// <short>Get the status of generating a customer operations report</short>
+    /// <short>Get the status of the customer operations report generation</short>
     /// <path>api/2.0/portal/payment/customer/operationsreport</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
@@ -882,9 +885,9 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Terminates the generating a customer operations report.
+    /// Terminates generating a customer operations report.
     /// </summary>
-    /// <short>Terminate the generating a customer operations report</short>
+    /// <short>Terminate the customer operations report generation</short>
     /// <path>api/2.0/portal/payment/customer/operationsreport</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Ok")]
@@ -912,12 +915,13 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Returns the list of currencies from accounting service.
+    /// Returns the list of available currencies from the accounting service.
     /// </summary>
     /// <short>
-    /// Get list of currencies
+    /// Get currencies from the accounting service
     /// </short>
     /// <path>api/2.0/portal/payment/accounting/currencies</path>
+    /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The list of currencies", typeof(List<Currency>))]
@@ -936,14 +940,14 @@ public class PaymentController(
 
         var allCurrencies = await tariffService.GetAllAccountingCurrenciesAsync();
 
-        return allCurrencies.Where(x=> supportedCurrencies.Contains(x.Code)).ToList();
+        return allCurrencies.Where(x => supportedCurrencies.Contains(x.Code)).ToList();
     }
 
     /// <summary>
-    /// Returns the wallet auto top up settings.
+    /// Returns the wallet auto top-up settings.
     /// </summary>
     /// <short>
-    /// Get wallet auto top up settings
+    /// Get wallet auto top-up settings
     /// </short>
     /// <path>api/2.0/portal/payment/topupsettings</path>
     [Tags("Portal / Payment")]
@@ -959,10 +963,10 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Set the wallet auto top up settings.
+    /// Sets the wallet auto top-up settings.
     /// </summary>
     /// <short>
-    /// Set wallet auto top up settings
+    /// Set wallet auto top-up settings
     /// </short>
     /// <path>api/2.0/portal/payment/topupsettings</path>
     [Tags("Portal / Payment")]
@@ -1002,7 +1006,7 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Get the wallet services settings.
+    /// Returns the wallet services settings.
     /// </summary>
     /// <short>
     /// Get wallet services settings
@@ -1027,7 +1031,7 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Change wallet service state.
+    /// Changes the wallet service state.
     /// </summary>
     /// <short>
     /// Change wallet service state

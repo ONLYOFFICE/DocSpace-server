@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -419,9 +419,9 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:update-history", { id, type });
   }
 
-  function logoutSession({ room, loginEventId } = {}) {
-    logger.info(`logout user ${room} session ${loginEventId}`);
-    filesIO.to(room).emit("s:logout-session", loginEventId);
+  function logoutSession({ room, loginEventId, redirectUrl } = {}) {
+    logger.info(`logout user ${room} session ${loginEventId}, redirectUrl ${redirectUrl}`);
+    filesIO.to(room).emit("s:logout-session", { loginEventId, redirectUrl });
   }
 
   function backupProgress({ tenantId, dump, percentage } = {}) 
@@ -490,6 +490,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:delete-guest", guestId);
   }
 
+  function updateTelegram({ tenantId, userId, username } = {}) {
+    var room = `${tenantId}-telegram-${userId}`;
+    filesIO.to(room).emit("s:update-telegram", username);
+  }
+
   function restoreProgress({ tenantId, dump, percentage } = {})
   {
     if(dump)
@@ -535,6 +540,16 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:encryption-progress", { percentage, error });
   }
 
+  function selfRestrictionForFile({ id, room, data } = {}) {
+    logger.info(`self restriction for file ${id} in room ${room}`);
+    filesIO.to(room).emit("s:self-restriction-file", { id, data });
+  }
+
+  function selfRestrictionForFolder({ id, room, data } = {}) {
+    logger.info(`self restriction for folder ${id} in room ${room}`);
+    filesIO.to(room).emit("s:self-restriction-folder", { id, data });
+  }
+
   function commitChatMessage({ room, messageId }) {
     logger.info(`commit chat message ${messageId} in room ${room}`);
     filesIO.to(room).emit("s:commit-chat-message", { messageId });
@@ -574,11 +589,14 @@ module.exports = (io) => {
     addGuest,
     updateGuest,
     deleteGuest,
+    updateTelegram,
     backupProgress,
     restoreProgress,
     endBackup,
     endRestore,
     encryptionProgress,
+    selfRestrictionForFile,
+    selfRestrictionForFolder,
     commitChatMessage,
     updateChat
   };

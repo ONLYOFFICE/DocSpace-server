@@ -34,12 +34,12 @@ public class StorageDto
     /// <summary>
     /// The storage ID.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// The storage title.
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// The list of storage authentication keys.
@@ -49,20 +49,20 @@ public class StorageDto
     /// <summary>
     /// Specifies if this is the current portal storage or not.
     /// </summary>
-    public bool Current { get; set; }
+    public required bool Current { get; set; }
 
     /// <summary>
     /// Specifies if this storage can be set or not.
     /// </summary>
-    public bool IsSet { get; set; }
+    public required bool IsSet { get; set; }
 
     public static async Task<StorageDto> StorageWrapperInit<T>(DataStoreConsumer consumer, BaseStorageSettings<T> current) where T : class, ISettings<T>, new()
     {
         var result = new StorageDto
         {
-            Id = consumer.Name, 
-            Title = ConsumerExtension.GetResourceString(consumer.Name) ?? consumer.Name, 
-            Current = consumer.Name == current.Module, 
+            Id = consumer.Name,
+            Title = ConsumerExtension.GetResourceString(consumer.Name) ?? consumer.Name,
+            Current = consumer.Name == current.Module,
             IsSet = await consumer.GetIsSetAsync()
         };
 
@@ -77,7 +77,7 @@ public class StorageDto
                 Value = r.Value,
                 Title = ConsumerExtension.GetResourceString(consumer.Name + r.Key) ?? r.Key
             }).ToList();
-        
+
         return result;
     }
 }

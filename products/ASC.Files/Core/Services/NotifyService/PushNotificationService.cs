@@ -45,7 +45,7 @@ public class PushNotificationService<T>(
             var queues = roomNotifyEventQueue.GetQueues();
             foreach (var queue in queues)
             {
-               await queue.Value.ProcessQueueAsync();
+                await queue.Value.ProcessQueueAsync();
             }
         }
         catch (Exception e)

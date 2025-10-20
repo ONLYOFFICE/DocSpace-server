@@ -794,7 +794,7 @@
     <value>Branding e personalizzazione</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Monitoraggio degli accessi e delle azioni degli utenti</value>
+    <value>Tracciamento accessi e azioni</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Dimensione massima del file</value>
@@ -809,7 +809,7 @@
     <value>Numero di amministratori</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Backup e ripristino automatici</value>
+    <value>Recupero dati</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Backup e ripristino automatici</value>
@@ -836,7 +836,7 @@
     <value>Utenti presenti nella stanza:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Numero illimitato di utenti</value>
+    <value>Numero illimitato di utenti e ospiti</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Il numero di utenti non deve superare {0}</value>
@@ -1116,5 +1116,92 @@
   </data>
   <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
     <value>Ricarica del saldo</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Ricarica automatica</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Pagamento richiesto</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Il numero di backup gratuiti non deve superare {0} in un mese</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} backup gratuiti al mese</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contatto</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Addebito</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Dettagli</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Cronologia delle transazioni</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Rinnovo automatico</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Abilita i backup per il tuo DocSpace. I costi verranno addebitati automaticamente.</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID client</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Segreto client</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Abilita l’applicazione per accedere al portale usando un account WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Abilita l’applicazione per accedere al portale usando un account WeChat.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Cognome</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Quota servizio documenti ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Il numero di plugin supera il limite</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Si è verificato un errore imprevisto. Riprova.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Hai collegato con successo Telegram per ricevere notifiche dal tuo DocSpace.</value>
   </data>
 </root>

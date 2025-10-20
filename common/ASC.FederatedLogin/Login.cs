@@ -30,7 +30,6 @@ namespace ASC.FederatedLogin;
 public class Login(
     IWebHostEnvironment webHostEnvironment,
     ProviderManager providerManager,
-    TenantManager tenantManager,
     LoginProfileTransport loginProfileTransport)
 {
     private string Callback => _params.Get("callback") ?? "loginCallback";
@@ -69,12 +68,6 @@ public class Login(
 
     public async Task InvokeAsync(HttpContext context)
     {
-        var currentTenant = tenantManager.GetCurrentTenant(false);
-        if (currentTenant == null)
-        {
-            throw new ItemNotFoundException("tenant");
-        }
-
         _ = context.PushRewritenUri();
 
         if (string.IsNullOrEmpty(context.Request.Query["p"]))

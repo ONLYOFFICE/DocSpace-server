@@ -50,7 +50,7 @@ class RoleProvider(IServiceProvider serviceProvider) : IRoleProvider
                                    .ToList();
             }
         }
-        
+
         if (roles.Any(r => r.ID == AuthConstants.User.ID || r.ID == AuthConstants.Guest.ID))
         {
             roles = roles.Where(r => r.ID != AuthConstants.RoomAdmin.ID).ToList();

@@ -41,12 +41,12 @@ public class IpSecurityFilter(
             {
                 StatusCode = (int)HttpStatusCode.Forbidden
             };
-            
+
             logger.WarningIPSecurity(authContext.CurrentAccount.ID);
-            
+
             return;
         }
-        
+
         await next();
     }
 }

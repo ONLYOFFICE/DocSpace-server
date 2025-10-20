@@ -32,7 +32,7 @@ public class DistributedLockException : Exception
     public string Resource { get; }
     public LockStatus LockStatus { get; }
     public long ElapsedMilliseconds { get; }
-    
+
     public DistributedLockException(LockStatus lockStatus, string resource, long elapsedMilliseconds)
     {
         LockStatus = lockStatus;

@@ -26,8 +26,14 @@
 
 namespace ASC.Files.Core.EF;
 
-public record ChatParameters : IMapFrom<ChatSettings>
+public record ChatParameters
 {
     public string ModelId { get; init; }
     public string Prompt { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class RoomDataLifetimeMapper
+{
+    public static partial ChatParameters Map(this ChatSettings source);
 }

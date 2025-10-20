@@ -127,7 +127,8 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             Resource.AccountingCustomerOperationCurrency
         };
 
-        var options = new JsonSerializerOptions {
+        var options = new JsonSerializerOptions
+        {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };

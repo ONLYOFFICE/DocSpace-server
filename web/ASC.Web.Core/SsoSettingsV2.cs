@@ -93,7 +93,7 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
             DisableEmailVerification = false
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 
     /// <summary>
@@ -350,7 +350,7 @@ public class SsoSpCertificateAdvanced
     /// The certificate decryption algorithm.
     /// </summary>
     public string DecryptAlgorithm { get; set; }
-   
+
     /// <summary>
     /// Specifies if the assertions will be encrypted or not.
     /// </summary>

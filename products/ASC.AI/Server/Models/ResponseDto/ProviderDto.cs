@@ -36,18 +36,15 @@ public class ProviderDto
     public required ApiDateTime ModifiedOn { get; init; }
 }
 
-public static class ProviderDtoExtensions
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class ProviderMapper(ApiDateTimeHelper helper)
 {
-    public static ProviderDto ToDto(this AiProvider provider, ApiDateTimeHelper apiDateTimeHelper)
+    public partial ProviderDto MapToDto(AiProvider provider);
+
+    private ApiDateTime MapDateTime(DateTime dateTime)
     {
-        return new ProviderDto
-        {
-            Id = provider.Id, 
-            Title = provider.Title, 
-            Url = provider.Url,
-            Type = provider.Type,
-            CreatedOn = apiDateTimeHelper.Get(provider.CreatedOn),
-            ModifiedOn = apiDateTimeHelper.Get(provider.ModifiedOn)
-        };
+        return helper.Get(dateTime);
     }
 }

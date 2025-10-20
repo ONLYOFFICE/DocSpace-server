@@ -32,7 +32,7 @@ public class OauthGenericTransportBuilder(
     AuthContext authContext,
     IHttpMessageHandlerFactory httpMessageHandlerFactory) : ITransportBuilder
 {
-    public ValueTask<SseClientTransport> BuildAsync(McpServerConnection connection)
+    public ValueTask<HttpClientTransport> BuildAsync(McpServerConnection connection)
     {
         ArgumentNullException.ThrowIfNull(connection);
         ArgumentNullException.ThrowIfNull(connection.Settings);
@@ -57,13 +57,13 @@ public class OauthGenericTransportBuilder(
         
         var client = new HttpClient(oauthHandler);
 
-        var transportOptions = new SseClientTransportOptions
+        var transportOptions = new HttpClientTransportOptions
         {
             Name = connection.Name, 
             Endpoint = new Uri(connection.Endpoint), 
             TransportMode = HttpTransportMode.AutoDetect
         };
         
-        return ValueTask.FromResult(new SseClientTransport(transportOptions, client));
+        return ValueTask.FromResult(new HttpClientTransport(transportOptions, client));
     }
 }

@@ -38,12 +38,12 @@ public static class ServiceCollectionExtension
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddEventBus(configuration); // only for healthcheck. need refactoring
         services.AddCustomHealthCheck(configuration);
-        
+
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(configuration, @namespace);
 
         services.AddHybridCache(connectionMultiplexer);
         services.AddMemoryCache(connectionMultiplexer);
-            
+
         return services;
 
     }

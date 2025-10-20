@@ -120,18 +120,18 @@ public class AuthHandler(
 
             return Task.FromResult(AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.InternalServerError))));
         }
-        
+
         var identity = new ClaimsIdentity(Scheme.Name);
 
         log.LogInformation("Auth success {SchemeName}", Scheme.Name);
-        
+
         if (httpContextAccessor?.HttpContext != null)
         {
             httpContextAccessor.HttpContext.User = new CustomClaimsPrincipal(new ClaimsIdentity(Scheme.Name), identity);
         }
 
         Authenticate();
-        
+
         return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(Context.User, new AuthenticationProperties(), Scheme.Name)));
     }
 

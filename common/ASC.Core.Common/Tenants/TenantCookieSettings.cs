@@ -36,7 +36,7 @@ public class TenantCookieSettings : ISettings<TenantCookieSettings>
     {
         return GetInstance();
     }
-    
+
     public DateTime LastModified { get; set; }
 
     public bool IsDefault()

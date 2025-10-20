@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class McpServerDto : IMapFrom<McpServer>
+public class McpServerDto
 {
     public Guid Id { get; init; }
     public string? Name { get; init; }
@@ -36,4 +36,11 @@ public class McpServerDto : IMapFrom<McpServer>
     public IDictionary<string, string>? Headers { get; init; }
     public bool Enabled { get; init; }
     public Icon? Icon { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class McpServerDtoMapper
+{
+    public static partial McpServerDto MapToDto(this McpServer source);
 }

@@ -527,19 +527,19 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
     <value>Otvori fajl</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Datoteka ne može biti otpremljena u ovu prostoriju. Molimo pokušajte da otpremite {0} PDF formular.</value>
+    <value>Datoteka ne može biti otpremljena u ovu prostoriju. Molimo pokušajte da otpremite ONLYOFFICE PDF formular.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Link za popunjavanje</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Pomeranje nekoliko datoteka u prostoriju za Popunjavanje Formulara nije podržano. Pomerajte jedan po jedan {0} PDF.</value>
+    <value>Pomeranje nekoliko datoteka u prostoriju za Popunjavanje Formulara nije podržano. Pomerajte jedan po jedan ONLYOFFICE PDF.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Pomeranje foldera u prostoriju za Popunjavanje Formulara nije podržano. Pomerajte jedan po jedan {0} PDF.</value>
+    <value>Pomeranje foldera u prostoriju za Popunjavanje Formulara nije podržano. Pomerajte jedan po jedan ONLYOFFICE PDF.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Datoteka ne može biti pomerena u ovu prostoriju. Molimo pokušajte da pomerite {0} PDF formular.</value>
+    <value>Datoteka ne može biti pomerena u ovu prostoriju. Molimo pokušajte da pomerite ONLYOFFICE PDF formular.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Broj formulara</value>
@@ -573,5 +573,8 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   </data>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Gost</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Dokumenti korisnika {0} {1}</value>
   </data>
 </root>

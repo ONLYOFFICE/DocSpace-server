@@ -31,7 +31,7 @@ public record FolderIndexChangedData : EntryData
     public int OldIndex { get; }
     public int NewIndex { get; }
     private readonly string _context;
-    
+
     public FolderIndexChangedData(
         int oldIndex,
         int newIndex,
@@ -57,7 +57,7 @@ public record FolderIndexChangedData : EntryData
         {
             return _context.GetHashCode();
         }
-        
+
         return ParentId.HasValue ? ParentId.GetHashCode() : 0;
     }
 }
@@ -97,8 +97,8 @@ public class FolderRenamedInterpreter : ActionInterpreter
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
-        
-        return new ValueTask<HistoryData>(new RenameEntryData(target, description[1], description[0], desc.ParentId, 
+
+        return new ValueTask<HistoryData>(new RenameEntryData(target, description[1], description[0], desc.ParentId,
             desc.ParentTitle, desc.ParentType));
     }
 }
@@ -112,10 +112,10 @@ public class FolderCopiedInterpreter : ActionInterpreter
 
         return new ValueTask<HistoryData>(
             new EntryOperationData(
-                splitTarget[0], 
-                description[0], 
-                splitTarget[1], 
-                desc.ParentTitle, 
+                splitTarget[0],
+                description[0],
+                splitTarget[1],
+                desc.ParentTitle,
                 desc.ParentType,
                 desc.FromParentTitle,
                 desc.FromParentType,
@@ -137,12 +137,12 @@ public class FolderIndexReorderedInterpreter : ActionInterpreter
     {
         var desc = GetAdditionalDescription(description);
         var title = description[0];
-        
+
         var isRoom = desc.ParentType is (int)FolderType.VirtualRooms or (int)FolderType.RoomTemplates or (int)FolderType.Archive;
         var parentId = isRoom ? int.Parse(target) : desc.ParentId;
         var parentTitle = isRoom ? title : desc.ParentTitle;
         var parentType = isRoom ? (int)FolderType.VirtualDataRoom : desc.ParentType;
-        
+
         return new ValueTask<HistoryData>(new EntryData(target, title, parentId, parentTitle, parentType));
     }
 }
@@ -159,16 +159,16 @@ public class FolderIndexChangedInterpreter : ActionInterpreter
         {
             context = description[3];
         }
-        
+
         var desc = GetAdditionalDescription(description);
-        
+
         return new ValueTask<HistoryData>(new FolderIndexChangedData(
-            oldIndex, 
-            newIndex, 
-            target, 
-            description[0], 
-            desc.ParentId, 
-            desc.ParentTitle, 
+            oldIndex,
+            newIndex,
+            target,
+            description[0],
+            desc.ParentId,
+            desc.ParentTitle,
             desc.ParentType,
             context));
     }

@@ -45,10 +45,10 @@ public class DbFolder : IDbFile, IDbSearch, ISearchItem
     public int FoldersCount { get; set; }
     public int FilesCount { get; set; }
     public long Counter { get; set; }
-    
+
     [Ignore]
     public DbRoomSettings Settings { get; set; }
-    
+
     [Ignore]
     public DbTenant Tenant { get; set; }
 
@@ -157,7 +157,7 @@ public static class DbFolderExtension
 
             entity.HasKey(e => e.Id)
                 .HasName("PK_files_folder");
-            
+
             entity.Ignore(r => r.IndexName);
 
             entity.HasIndex(e => e.ModifiedOn)

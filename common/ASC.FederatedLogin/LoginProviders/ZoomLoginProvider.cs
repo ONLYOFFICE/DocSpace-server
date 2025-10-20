@@ -39,7 +39,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
     // used in ZoomService
     public const string ApiUrl = "https://api.zoom.us/v2";
     private const string UserProfileUrl = $"{ApiUrl}/users/me";
-    
+
     private readonly RequestHelper _requestHelper;
 
     public ZoomLoginProvider() { }
@@ -112,7 +112,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         }
 
         var json = _requestHelper.PerformRequest(AccessTokenUrl, "application/x-www-form-urlencoded", "POST",
-            body: string.Join("&", body.Select(kv => $"{HttpUtility.UrlEncode(kv.Key)}={HttpUtility.UrlEncode(kv.Value)}" )),
+            body: string.Join("&", body.Select(kv => $"{HttpUtility.UrlEncode(kv.Key)}={HttpUtility.UrlEncode(kv.Value)}")),
             headers: new Dictionary<string, string> { { "Authorization", $"Basic {base64ClientPair}" } }
         );
 

@@ -406,7 +406,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace가&lt;span style="color: #FF6F3D;"&gt;비활성화&lt;/span&gt;되었습니다&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace가&lt;span style="color: #FF6F3D;"&gt;삭제되었습니다&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;고객님의 ${LetterLogoText} DocSpace가 성공적으로 비활성화되었습니다. 고객님의 모든 데이터는 저희의&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;개인 정보 보호 정책&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -770,7 +770,7 @@ $TrulyYours</value>
     <value>${__VirtualRootHost} 포털 삭제</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace가 비활성화되었습니다</value>
+    <value>${LetterLogoText} DocSpace가 삭제되었습니다</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. 포털 주소 변경</value>
@@ -2030,5 +2030,29 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>조치가 필요합니다: 고객님의 ${LetterLogoText} DocSpace에서 지갑 잔액을 자동으로 충전할 수 없습니다</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>오픈 DocSpace</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>비밀번호가 성공적으로 변경되었습니다</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.비밀번호가 성공적으로 변경되었습니다.
+
+*$UserName*, *$UserEmail* 계정의 비밀번호가 *$Date* 에 DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}" 에서 성공적으로 변경되었습니다.
+
+IP: *$IP*
+기기: *$Device*
+#if($Location != "")
+위치: *$Location*
+#end
+브라우저: *$Browser*
+
+본인이 직접 변경한 경우 추가 단계는 필요하지 않습니다. 변경 내용이 의심스럽거나 본인의 승인 없이 변경된 경우, 즉시 비밀번호를 재설정하고 이 기기의 DocSpace 접근 권한을 비활성화하세요.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

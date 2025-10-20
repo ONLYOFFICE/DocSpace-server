@@ -442,7 +442,7 @@
     <value>Fshirja e portalit ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace është çaktivizuar</value>
+    <value>DocSpace ${LetterLogoText} është fshirë</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Ndryshimi i adresës së portalit</value>
@@ -1766,7 +1766,7 @@ $TrulyYours</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace është &lt;span style="color: #FF6F3D;"&gt;çaktivizuar&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace është &lt;span style="color: #FF6F3D;"&gt;fshirë&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;${LetterLogoText} DocSpace juaj është çaktivizuar me sukses. Ju lutemi vini re se të gjitha të dhënat tuaja do të fshihen në përputhje me &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Politikën tonë të Privatësisë&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -2033,5 +2033,56 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Kërkohet veprim: Nuk mund të rimbushet automatikisht balanca e portofolit në DocSpace-in tuaj ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Password u ndryshua me sukses
+
+Fjalëkalimi juaj për llogarinë *$UserName*, *$UserEmail* u ndryshua me sukses më *$Date* në DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Pajisja: *$Device*
+#if($Location != "")
+Vendndodhja: *$Location*
+#end
+Shfletuesi: *$Browser*
+
+Nëse ky veprim është bërë nga ju — nuk kërkohen hapa të mëtejshëm. Nëse ky ndryshim duket i dyshimtë ose nuk është autorizuar nga ju, ju lutemi rivendosni menjëherë fjalëkalimin tuaj dhe çaktivizoni qasjen në DocSpace për këtë pajisje.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Fjalëkalimi juaj u ndryshua me sukses</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Hapni DocSpace-in tuaj</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Kopja rezervë automatike për DocSpace-in tuaj dështoi</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Përshëndetje, $UserName,
+
+Procesi i planifikuar i kopjes rezervë për DocSpace-in tuaj "${__VirtualRootPath}":"${__VirtualRootPath}" ka dështuar.
+
+Ju rekomandojmë të kontrolloni cilësimet e "Ruajtjes automatike të të dhënave":"${__VirtualRootPath}/portal-settings/backup/data-backup" dhe "Shërbimeve":"${__VirtualRootPath}/portal-settings/services" settings.
+
+Në qoftë se keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutem mos hezitoni të na kontaktoni "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Përshëndetje, $UserName,
+
+Procesi i planifikuar i kopjes rezervë për DocSpace-in tuaj [${__VirtualRootPath}](${__VirtualRootPath}) ka dështuar.
+
+Ju rekomandojmë të kontrolloni cilësimet e [Ruajtjes automatike të të dhënave](${__VirtualRootPath}/portal-settings/backup/data-backup) dhe [Shërbimeve](${__VirtualRootPath}/portal-settings/services) settings.
+
+Nëse keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutem mos hezitoni të na kontaktoni përmes [${__SupportLink}](${__SupportLink})
+
+Gjithë të mirat,
+${LetterLogoText} Support Team
+[${__SiteLink}](${__SiteLink})</value>
   </data>
 </root>

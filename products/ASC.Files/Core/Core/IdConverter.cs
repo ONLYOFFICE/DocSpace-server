@@ -35,7 +35,7 @@ public static class IdConverter
             return (T)(object)i;
         }
 
-        if(type == typeof(string))
+        if (type == typeof(string))
         {
             return (T)(object)i.ToString();
         }

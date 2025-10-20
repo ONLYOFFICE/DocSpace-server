@@ -27,7 +27,7 @@
 namespace ASC.Files.Core;
 
 /// <summary>
-/// The file filter type.
+/// The filter type.
 /// </summary>
 public enum FilterType
 {

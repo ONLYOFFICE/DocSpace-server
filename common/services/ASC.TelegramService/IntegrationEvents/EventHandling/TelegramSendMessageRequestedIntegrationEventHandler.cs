@@ -24,13 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.TelegramService.Services;
+
 namespace ASC.TelegramService.IntegrationEvents.EventHandling;
 
 [Scope]
 public class TelegramSendMessageRequestedIntegrationEventHandler : IIntegrationEventHandler<NotifySendTelegramMessageRequestedIntegrationEvent>
 {
     private readonly ILogger _logger;
-    private readonly TelegramHandler _telegramHandler;
+    private readonly TelegramHandlerService _telegramHandler;
 
     private TelegramSendMessageRequestedIntegrationEventHandler() : base()
     {
@@ -39,7 +41,7 @@ public class TelegramSendMessageRequestedIntegrationEventHandler : IIntegrationE
 
     public TelegramSendMessageRequestedIntegrationEventHandler(
         ILogger<TelegramSendMessageRequestedIntegrationEventHandler> logger,
-        TelegramHandler telegramHandler
+        TelegramHandlerService telegramHandler
       )
     {
         _logger = logger;

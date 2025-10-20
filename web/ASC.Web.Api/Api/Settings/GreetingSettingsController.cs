@@ -84,7 +84,14 @@ public class GreetingSettingsController(
             var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
             if (quota.Free || quota.Trial)
             {
-                tenantManager.ValidateTenantName(inDto.Title);
+                try
+                {
+                    tenantManager.ValidateTenantName(inDto.Title);
+                }
+                catch (Exception ex)
+                {
+                    throw new ArgumentException(ex.Message, nameof(inDto.Title));
+                }
             }
         }
 
@@ -111,7 +118,7 @@ public class GreetingSettingsController(
         await tenantInfoSettingsHelper.RestoreDefaultTenantNameAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
-        
+
         return tenant.Name == "" ? Resource.PortalName : tenant.Name;
     }
 }

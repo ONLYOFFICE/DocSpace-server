@@ -71,8 +71,7 @@ public class AuthenticationController(
     InvitationService invitationService,
     UserSocketManager socketManager,
     LoginProfileTransport loginProfileTransport,
-    AuditEventsRepository auditEventsRepository,
-    IMapper mapper)
+    AuditEventsRepository auditEventsRepository)
     : ControllerBase
 {
     /// <summary>
@@ -108,21 +107,39 @@ public class AuthenticationController(
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthRequestsDto inDto)
     {
-        var tenant = (tenantManager.GetCurrentTenant()).Id;
+        var tenantId = tenantManager.GetCurrentTenant().Id;
         var user = (await GetUserAsync(inDto)).UserInfo;
+
+        if (user == null || Equals(user, Constants.LostUser))
+        {
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
+        }
+
+        if (user.Status != EmployeeStatus.Active)
+        {
+            throw new InvalidOperationException(Resource.ErrorUserDisabled);
+        }
+
         var sms = false;
+        string token = default;
 
         try
         {
             if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
             {
                 sms = true;
-                await smsManager.ValidateSmsCodeAsync(user, inDto.Code, true);
+                var (smsValidationResult, smsAuthToken) = await smsManager.ValidateSmsCodeAsync(user, inDto.Code, true);
+                if (smsValidationResult)
+                {
+                    token = smsAuthToken;
+                }
             }
             else if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
             {
-                if (await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true))
+                var (tfaValidationResult, tfaAuthToken) = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true);
+                if (tfaValidationResult)
                 {
+                    token = tfaAuthToken;
                     messageService.Send(MessageAction.UserConnectedTfaApp, MessageTarget.Create(user.Id));
                     await socketManager.UpdateUserAsync(userManager.GetUsers(authContext.CurrentAccount.ID));
                 }
@@ -132,8 +149,8 @@ public class AuthenticationController(
                 throw new SecurityException("Auth code is not available");
             }
 
-            var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
-            var expires = await tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
+            token = string.IsNullOrEmpty(token) ? await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id) : token;
+            var expires = await tenantCookieSettingsHelper.GetExpiresTimeAsync(tenantId);
 
             var result = new AuthenticationTokenDto
             {
@@ -185,7 +202,6 @@ public class AuthenticationController(
     public async Task<AuthenticationTokenDto> AuthenticateMe(AuthRequestsDto inDto)
     {
         var wrapper = await GetUserAsync(inDto);
-        var viaEmail = wrapper.ViaEmail;
         var user = wrapper.UserInfo;
         var session = inDto.Session;
 
@@ -224,7 +240,7 @@ public class AuthenticationController(
         if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
             var tfaExpired = await TfaAppUserSettings.TfaExpiredAndResetAsync(settingsManager, auditEventsRepository, user.Id);
-            
+
             if (tfaExpired || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
             {
                 var (urlActivation, keyActivation) = commonLinkUtility.GetConfirmationUrlAndKey(user.Id, ConfirmType.TfaActivation);
@@ -248,10 +264,35 @@ public class AuthenticationController(
 
         try
         {
-            var action = viaEmail ? MessageAction.LoginSuccessViaApi : MessageAction.LoginSuccessViaApiSocialAccount;
-            var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session);
+            MessageAction action;
+            string initiator = null;
+            string[] description = null;
 
-            if (!string.IsNullOrEmpty(inDto.Culture))
+            switch (wrapper.LoginType)
+            {
+                case LoginType.EmailAndPassword:
+                    action = MessageAction.LoginSuccessViaApi;
+                    break;
+                case LoginType.EmailAndPasswordHash:
+                    action = MessageAction.LoginSuccessViaPassword;
+                    break;
+                case LoginType.ConfirmLink:
+                    action = MessageAction.AuthLinkActivated;
+                    initiator = inDto.ConfirmData?.Email;
+                    description = [inDto.ConfirmData?.Key];
+                    break;
+                case LoginType.SocialAccount:
+                    action = MessageAction.LoginSuccessViaApiSocialAccount;
+                    description = [ConsumerExtension.GetResourceString(wrapper.Provider) ?? wrapper.Provider];
+                    break;
+                default:
+                    action = MessageAction.LoginSuccess;
+                    break;
+            }
+
+            var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session, initiator, description);
+
+            if (!string.IsNullOrEmpty(inDto.Culture) && user.CultureName != inDto.Culture)
             {
                 await userManager.ChangeUserCulture(user, inDto.Culture);
                 messageService.Send(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
@@ -274,7 +315,25 @@ public class AuthenticationController(
         }
         catch (Exception ex)
         {
-            messageService.SendLoginMessage(viaEmail ? MessageAction.LoginFailViaApi : MessageAction.LoginFailViaApiSocialAccount, user.DisplayUserName(false, displayUserSettingsHelper));
+            MessageAction action;
+            var loginName = user.DisplayUserName(false, displayUserSettingsHelper);
+            string[] description = null;
+
+            switch (wrapper.LoginType)
+            {
+                case LoginType.EmailAndPassword:
+                    action = MessageAction.LoginFailViaApi;
+                    break;
+                case LoginType.SocialAccount:
+                    action = MessageAction.LoginFailViaApiSocialAccount;
+                    description = [wrapper.Provider];
+                    break;
+                default:
+                    action = MessageAction.LoginFail;
+                    break;
+            }
+
+            messageService.SendLoginMessage(action, loginName, description);
             throw new AuthenticationException("User authentication failed", ex);
         }
         finally
@@ -298,7 +357,7 @@ public class AuthenticationController(
     public async Task<string> Logout()
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
-        var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
+        var (loginEventId, _) = cookieStorage.GetLoginEventIdFromCookie(cookie);
         var tenantId = tenantManager.GetCurrentTenantId();
         await dbLoginEventsManager.LogOutEventAsync(tenantId, loginEventId);
         await quotaSocketManager.LogoutSession(securityContext.CurrentAccount.ID, loginEventId);
@@ -363,7 +422,7 @@ public class AuthenticationController(
 
         var result = await invitationService.ConfirmAsync(inDto.Key, email, inDto.EmplType ?? default, inDto.RoomId, inDto.UiD);
 
-        return mapper.Map<Validation, ConfirmDto>(result);
+        return result.Map();
     }
 
     /// <summary>
@@ -411,6 +470,17 @@ public class AuthenticationController(
     public async Task<AuthenticationTokenDto> SendSmsCode(AuthRequestsDto inDto)
     {
         var user = (await GetUserAsync(inDto)).UserInfo;
+
+        if (user == null || Equals(user, Constants.LostUser))
+        {
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
+        }
+
+        if (user.Status != EmployeeStatus.Active)
+        {
+            throw new InvalidOperationException(Resource.ErrorUserDisabled);
+        }
+
         await smsManager.PutAuthCodeAsync(user, true);
 
         return new AuthenticationTokenDto
@@ -420,13 +490,10 @@ public class AuthenticationController(
             Expires = new ApiDateTime(tenantManager, timeZoneConverter, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
         };
     }
-    
+
     private async Task<UserInfoWrapper> GetUserAsync(AuthRequestsDto inDto)
     {
-        var wrapper = new UserInfoWrapper
-        {
-            ViaEmail = true
-        };
+        var wrapper = new UserInfoWrapper();
 
         var action = MessageAction.LoginFailViaApi;
         UserInfo user = null;
@@ -435,6 +502,8 @@ public class AuthenticationController(
         {
             if (inDto.ConfirmData != null)
             {
+                wrapper.LoginType = LoginType.ConfirmLink;
+
                 var email = inDto.ConfirmData.Email;
 
                 var (checkKeyResult, _) = await emailValidationKeyModelHelper.ValidateAsync(new EmailValidationKeyModel { Key = inDto.ConfirmData.Key, Email = email, Type = ConfirmType.Auth, First = inDto.ConfirmData.First.ToString() });
@@ -444,8 +513,6 @@ public class AuthenticationController(
                     user = email.Contains('@')
                                    ? await userManager.GetUserByEmailAsync(email)
                                    : await userManager.GetUsersAsync(new Guid(email));
-
-                    messageService.SendLoginMessage(MessageAction.AuthLinkActivated, email, inDto.ConfirmData.Key);
 
                     if (securityContext.IsAuthenticated && securityContext.CurrentAccount.ID != user.Id)
                     {
@@ -457,6 +524,8 @@ public class AuthenticationController(
             }
             else if ((string.IsNullOrEmpty(inDto.Provider) && string.IsNullOrEmpty(inDto.SerializedProfile)) || inDto.Provider == "email")
             {
+                wrapper.LoginType = LoginType.EmailAndPasswordHash;
+
                 inDto.UserName.ThrowIfNull(new ArgumentException(@"userName empty", "userName"));
                 if (!string.IsNullOrEmpty(inDto.Password))
                 {
@@ -471,6 +540,8 @@ public class AuthenticationController(
 
                 if (string.IsNullOrEmpty(inDto.PasswordHash))
                 {
+                    wrapper.LoginType = LoginType.EmailAndPassword;
+
                     inDto.Password = (inDto.Password ?? "").Trim();
 
                     if (!string.IsNullOrEmpty(inDto.Password))
@@ -485,10 +556,10 @@ public class AuthenticationController(
 
                 if (ldapSettings.EnableLdapAuthentication)
                 {
-                    user = await ldapUserManager.TryGetAndSyncLdapUserInfo(inDto.UserName, inDto.Password);  
+                    user = await ldapUserManager.TryGetAndSyncLdapUserInfo(inDto.UserName, inDto.Password);
                 }
 
-                if(user == null || Equals(user, Constants.LostUser))
+                if (user == null || Equals(user, Constants.LostUser))
                 {
                     user = await userManager.GetUsersByPasswordHashAsync(tenantManager.GetCurrentTenantId(), inDto.UserName, inDto.PasswordHash);
                 }
@@ -501,14 +572,18 @@ public class AuthenticationController(
                 {
                     throw new Exception(Resource.ErrorNotAllowedOption);
                 }
-                wrapper.ViaEmail = false;
+
                 action = MessageAction.LoginFailViaApiSocialAccount;
-                var thirdPartyProfile = !string.IsNullOrEmpty(inDto.SerializedProfile) ? 
-                    await loginProfileTransport.FromTransport(inDto.SerializedProfile) : 
+
+                var thirdPartyProfile = !string.IsNullOrEmpty(inDto.SerializedProfile) ?
+                    await loginProfileTransport.FromTransport(inDto.SerializedProfile) :
                     providerManager.GetLoginProfile(inDto.Provider, inDto.AccessToken, inDto.CodeOAuth);
 
+                wrapper.LoginType = LoginType.SocialAccount;
+                wrapper.Provider = inDto.Provider ?? thirdPartyProfile.Provider;
+
                 inDto.UserName = thirdPartyProfile.EMail;
-                
+
                 user = await bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.RecaptchaType, inDto.RecaptchaResponse, await GetUserByThirdParty(thirdPartyProfile));
             }
         }
@@ -530,7 +605,7 @@ public class AuthenticationController(
         wrapper.UserInfo = user;
         return wrapper;
     }
-    
+
     private async Task<UserInfo> GetUserByThirdParty(LoginProfile loginProfile)
     {
         try
@@ -552,7 +627,7 @@ public class AuthenticationController(
             {
                 userInfo = await userManager.GetUsersAsync(userId);
             }
-            else if(!string.IsNullOrEmpty(loginProfile.EMail) && !string.IsNullOrEmpty(loginProfile.HashId))
+            else if (!string.IsNullOrEmpty(loginProfile.EMail) && !string.IsNullOrEmpty(loginProfile.HashId))
             {
                 userInfo = await userManager.GetUserByEmailAsync(loginProfile.EMail);
                 if (userInfo.Id != Constants.LostUser.Id)
@@ -601,7 +676,7 @@ public class AuthenticationController(
             throw;
         }
     }
-    
+
     private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
     {
         if (string.IsNullOrEmpty(loginProfile.EMail))
@@ -630,7 +705,7 @@ public class AuthenticationController(
 
         return userInfo;
     }
-    
+
     private UserInfo ProfileToUserInfo(LoginProfile loginProfile)
     {
         if (string.IsNullOrEmpty(loginProfile.EMail))
@@ -663,7 +738,7 @@ public class AuthenticationController(
 
         return userInfo;
     }
-    
+
     private async Task<(bool, Guid)> TryGetUserByHashAsync(string hashId)
     {
         var userId = Guid.Empty;
@@ -673,7 +748,7 @@ public class AuthenticationController(
         }
 
         var linkedProfiles = await accountLinker.GetLinkedObjectsByHashIdAsync(hashId);
-        
+
         foreach (var profileId in linkedProfiles)
         {
             if (Guid.TryParse(profileId, out var tmp) && await userManager.UserExistsAsync(tmp))
@@ -689,5 +764,14 @@ public class AuthenticationController(
 class UserInfoWrapper
 {
     public UserInfo UserInfo { get; set; }
-    public bool ViaEmail { get; set; }
+    public LoginType LoginType { get; set; }
+    public string Provider { get; set; }
+}
+
+enum LoginType
+{
+    EmailAndPassword,
+    EmailAndPasswordHash,
+    ConfirmLink,
+    SocialAccount
 }

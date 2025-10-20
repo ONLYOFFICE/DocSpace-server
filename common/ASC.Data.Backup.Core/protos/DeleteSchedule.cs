@@ -33,6 +33,3 @@ public record DeleteSchedule
     public int TenantId { get; set; }
 
 }
-
-
-

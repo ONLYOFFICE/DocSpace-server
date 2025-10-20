@@ -52,5 +52,5 @@ public class CheckUploadRequestDto<T>
     /// The request parameters for checking file uploads.
     /// </summary>
     [FromBody]
-    public CheckUploadRequest Check { get; set; }
+    public required CheckUploadRequest Check { get; set; }
 }

@@ -54,8 +54,6 @@ global using ASC.Files.Core.Vectorization;
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
 
-global using AutoMapper;
-
 global using Microsoft.AspNetCore.Mvc;
 
 global using System.ComponentModel.DataAnnotations;
@@ -63,3 +61,5 @@ global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Threading.Channels;
+
+global using Riok.Mapperly.Abstractions;

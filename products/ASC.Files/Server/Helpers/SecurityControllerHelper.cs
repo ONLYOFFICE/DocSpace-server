@@ -41,7 +41,8 @@ public class SecurityControllerHelper(
     IDaoFactory daoFactory,
     IEventBus eventBus,
     TenantManager tenantManager,
-    AuthContext authContext)
+    AuthContext authContext,
+    FileSharing fileSharing)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -56,19 +57,10 @@ public class SecurityControllerHelper(
         tenantManager,
         authContext)
 {
-    public IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync<T>(T fileId)
-    {
-        return GetSecurityInfoAsync(new List<T> { fileId }, []);
-    }
-
-    public IAsyncEnumerable<FileShareDto> GetFolderSecurityInfoAsync<T>(T folderId)
-    {
-        return GetSecurityInfoAsync([], new List<T> { folderId });
-    }
 
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfoAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds)
     {
-        var fileShares = await _fileStorageService.GetSharedInfoAsync(fileIds, folderIds);
+        var fileShares = await fileSharing.GetSharedInfoAsync(fileIds, folderIds);
 
         foreach (var fileShareDto in fileShares)
         {
@@ -76,33 +68,32 @@ public class SecurityControllerHelper(
         }
     }
 
-    public async Task<bool> RemoveSecurityInfoAsync<T>(List<T> fileIds, List<T> folderIds)
-    {
-        await _fileStorageService.RemoveAceAsync(fileIds, folderIds);
-
-        return true;
-    }
-
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfoAsync<T>(List<T> fileIds, List<T> folderIds, List<FileShareParams> share, bool notify, string sharingMessage)
     {
-        if (share != null && share.Count != 0)
+        if (share == null || share.Count == 0)
         {
-            var list = await share.ToAsyncEnumerable().SelectAwait(async s => await fileShareParamsHelper.ToAceObjectAsync(s)).ToListAsync();
-
-            var aceCollection = new AceCollection<T>
-            {
-                Files = fileIds,
-                Folders = folderIds,
-                Aces = list,
-                Message = sharingMessage
-            };
-
-            await _fileStorageService.SetAceObjectAsync(aceCollection, notify);
+            yield break;
         }
 
-        await foreach (var s in GetSecurityInfoAsync(fileIds, folderIds))
+        var fileShares = await share.ToAsyncEnumerable().SelectAwait(async s => await fileShareParamsHelper.ToAceObjectAsync(s)).ToListAsync();
+
+        var aceCollection = new AceCollection<T>
         {
-            yield return s;
+            Files = fileIds,
+            Folders = folderIds,
+            Aces = fileShares,
+            Message = sharingMessage
+        };
+
+        var subjects = share.Select(s => s.ShareTo).Distinct().ToList();
+        var result = await _fileStorageService.SetAceObjectAsync(aceCollection, notify);
+
+        foreach (var r in result.SelectMany(a => a.ProcessedItems))
+        {
+            await foreach (var s in fileSharing.GetPureSharesAsync(r.Entry, subjects))
+            {
+                yield return await fileShareDtoHelper.Get(s);
+            }
         }
     }
 }

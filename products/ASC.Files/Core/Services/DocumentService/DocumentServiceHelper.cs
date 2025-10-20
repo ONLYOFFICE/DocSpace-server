@@ -48,9 +48,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         SecurityContext securityContext,
         SettingsManager settingsManager,
         IQuotaService quotaService,
-        TenantManager tenantManager)
-    {
-
+        TenantManager tenantManager,
+        CoreSettings coreSettings)
+{
     public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
     {
         var lastVersion = true;
@@ -60,8 +60,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var file = await fileDao.GetFileAsync(fileId);
         if (file != null && 0 < version && version < file.Version)
         {
-                file = await fileDao.GetFileAsync(fileId, version);
-                lastVersion = false;
+            file = await fileDao.GetFileAsync(fileId, version);
+            lastVersion = false;
         }
 
         if (file == null)
@@ -70,7 +70,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         return (file, lastVersion);
-            }
+    }
 
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit,
         bool tryCoauth, bool fillFormsPossible, EditorType editorType, bool isSubmitOnly = false)
@@ -143,7 +143,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     private async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion,
         bool rightToEdit, bool editPossible, bool tryEdit, bool tryCoAuthoring, bool fillFormsPossible)
     {
-
         if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
@@ -273,7 +272,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                     var editingBy = (await fileTracker.GetEditingByAsync(file.Id)).FirstOrDefault();
                     strError = string.Format(FilesCommonResource.ErrorMessage_EditingMobile, await global.GetUserNameAsync(editingBy, true));
                 }
-                
+
                 rightToEdit = editPossible = reviewPossible = fillFormsPossible = commentPossible = false;
             }
         }
@@ -309,16 +308,16 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             Download = rightToDownload && noWatermark,
             Copy = rightToDownload && noWatermark,
             Protect = authContext.IsAuthenticated,
-            Chat = file.Access != FileShare.Read   
+            Chat = file.Access != FileShare.Read
         };
-        
+
         configuration.Document.Options = options;
         configuration.EditorConfig.ModeWrite = modeWrite;
         configuration.Error = strError;
 
         if (!lastVersion)
         {
-            configuration.Document.Title =  $"{file.Title} ({file.CreateOnString})";
+            configuration.Document.Title = $"{file.Title} ({file.CreateOnString})";
         }
 
         if (fileUtility.CanWebRestrictedEditing(file.Title))
@@ -386,7 +385,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             runs.Add(new Run(userInfo.DisplayUserName(false, displayUserSettingsHelper)));
             runs.Add(new Run(Environment.NewLine, false));
         }
-        if(watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserEmail))
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserEmail))
         {
             runs.Add(new Run(userInfo.Email));
             runs.Add(new Run(Environment.NewLine, false));
@@ -419,7 +418,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var options = new Options
         {
-            WatermarkOnDraw = new WatermarkOnDraw(watermarkSettings.ImageWidth * watermarkSettings.ImageScale / 100, watermarkSettings.ImageHeight * watermarkSettings.ImageScale / 100 , watermarkSettings.ImageUrl, watermarkSettings.Rotate, paragrahs)
+            WatermarkOnDraw = new WatermarkOnDraw(watermarkSettings.ImageWidth * watermarkSettings.ImageScale / 100, watermarkSettings.ImageHeight * watermarkSettings.ImageScale / 100, watermarkSettings.ImageUrl, watermarkSettings.Rotate, paragrahs)
         };
         return options;
     }
@@ -431,7 +430,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public async Task<string> GetDocKeyAsync<T>(T fileId, int fileVersion, DateTime modified, string extraKey = null)
     {
-        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}_{await global.GetDocDbKeyAsync()}";
+        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}_{await coreSettings.GetDocDbKeyAsync()}";
 
         if (!string.IsNullOrEmpty(extraKey))
         {
@@ -549,7 +548,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             }
         }
 
-        if(folder.RootFolderType == FolderType.USER)
+        if (folder.RootFolderType == FolderType.USER)
         {
             return await folderDao.GetRootFolderAsync(folder.Id);
         }
@@ -643,9 +642,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             if (myRoles.Count == 0)
             {
+                result.CanFill = false;
+                result.CanStartFilling = false;
                 return result;
             }
-
+            result.HasRole = true;
             var role = myRoles.FirstOrDefault(role => !role.Submitted && currentStep == role.Sequence);
             if (role != null)
             {
@@ -673,9 +674,15 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
         else
         {
-            result.CanEdit = true;
-            result.CanFill = false;
-            result.EditorType = editorType;
+            var canEdit = await fileSecurity.CanEditAsync(file);
+            var canFill = await fileSecurity.CanFillFormsAsync(file);
+
+            result.CanEdit = canEdit;
+            result.CanFill = canFill;
+            result.CanEditRoom = await fileSecurity.CanEditRoomAsync(room);
+            result.EditorType = !canEdit && canFill && editorType != EditorType.Mobile
+                        ? EditorType.Embedded
+                        : editorType;
         }
         return result;
     }
@@ -686,7 +693,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var canFill = await fileSecurity.CanFillFormsAsync(file);
 
         FormOpenSetup<T> result = null;
-        if (file.CreateBy == securityContext.CurrentAccount.ID) 
+        if (file.CreateBy == securityContext.CurrentAccount.ID)
         {
             result = new FormOpenSetup<T>
             {

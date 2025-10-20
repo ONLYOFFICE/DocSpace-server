@@ -50,7 +50,7 @@ public sealed class UserManagerWrapper(
     TenantManager tenantManager,
     WebItemSecurityCache webItemSecurityCache,
     QuotaSocketManager quotaSocketManager,
-    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper, 
+    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
     IDistributedLockProvider distributedLockProvider,
     PasswordSettingsManager passwordSettingsManager,
     AccountLinker accountLinker,
@@ -99,18 +99,18 @@ public sealed class UserManagerWrapper(
         {
             throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
         }
-        
+
         var result = await emailLinkedCheckTask;
         if (result.Linked)
         {
             var linkedUser = await userManager.GetUsersAsync(result.UserId);
             var pattern = await customNamingPeople.Substitute<Resource>("ErrorEmailLinked");
-            
+
             throw new Exception(string.Format(pattern, linkedUser.DisplayUserName(displayUserSettingsHelper)));
         }
 
         var currentUserId = securityContext.CurrentAccount.ID;
-        
+
         var user = new UserInfo
         {
             Email = mail.Address,
@@ -139,13 +139,13 @@ public sealed class UserManagerWrapper(
         {
             await userManager.AddUserIntoGroupAsync(newUser.Id, groupId, true);
         }
-        
+
         if (groupId == Guid.Empty && type == EmployeeType.RoomAdmin || type == EmployeeType.DocSpaceAdmin && user.Status == EmployeeStatus.Pending)
         {
             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
         }
-        
+
         await userManager.AddUserRelationAsync(currentUserId, newUser.Id);
 
         return newUser;
@@ -275,7 +275,7 @@ public sealed class UserManagerWrapper(
                 else if (currentType is EmployeeType.User)
                 {
                     lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
-                    
+
                     await countPaidUserChecker.CheckAppend();
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
                     await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
@@ -285,7 +285,7 @@ public sealed class UserManagerWrapper(
                 else if (currentType is EmployeeType.Guest)
                 {
                     lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
-                    
+
                     await countPaidUserChecker.CheckAppend();
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
                     await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
@@ -304,7 +304,7 @@ public sealed class UserManagerWrapper(
                 else if (currentType is EmployeeType.User)
                 {
                     lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
-                    
+
                     await countPaidUserChecker.CheckAppend();
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
                     await webItemSecurityCache.ClearCacheAsync(tenant.Id);
@@ -313,7 +313,7 @@ public sealed class UserManagerWrapper(
                 else if (currentType is EmployeeType.Guest)
                 {
                     lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
-                    
+
                     await countPaidUserChecker.CheckAppend();
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
                     await webItemSecurityCache.ClearCacheAsync(tenant.Id);
@@ -376,20 +376,20 @@ public sealed class UserManagerWrapper(
         {
             return Resource.CouldNotRecoverPasswordForSsoUser;
         }
-        
+
         if (userInfo.ActivationStatus == EmployeeActivationStatus.Pending && userInfo.Status == EmployeeStatus.Pending)
         {
             var type = await userManager.GetUserTypeAsync(userInfo.Id);
 
             var @event = await auditEventsRepository.GetByFilterAsync(action: MessageAction.SendJoinInvite, target: userInfo.Email);
             var createBy = @event.LastOrDefault()?.UserId;
-            var link = commonLinkUtility.GetInvitationLink(userInfo.Email, type, createBy ??  (tenantManager.GetCurrentTenant()).OwnerId, userInfo.GetCulture()?.Name);
+            var link = commonLinkUtility.GetInvitationLink(userInfo.Email, type, createBy ?? (tenantManager.GetCurrentTenant()).OwnerId, userInfo.GetCulture()?.Name);
             var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
             await studioNotifyService.SendDocSpaceRegistration(userInfo.Email, shortenLink);
             return null;
         }
-        
+
         await studioNotifyService.UserPasswordChangeAsync(userInfo, false);
         return null;
     }
@@ -410,17 +410,17 @@ public sealed class UserManagerWrapper(
         }
         return sb.ToString();
     }
-    
+
     private async Task<(bool Linked, Guid UserId)> IsEmailLinkedAsync(string email)
     {
         var profiles = await accountLinker.GetLinkedProfilesAsync();
-        
+
         var profile = profiles.FirstOrDefault(x => x.EMail.Equals(email));
         if (profile == null)
         {
             return (false, Guid.Empty);
         }
-        
+
         var providerType = ProviderManager.AuthProviders.FirstOrDefault(x => x.Equals(profile.Provider));
         var provider = providerManager.GetLoginProvider(providerType);
 

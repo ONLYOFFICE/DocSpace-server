@@ -29,22 +29,21 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="ARSoft.Tools.NetStandard.DXSdata" Version="1.0.0" />
     <PackageReference Include="Autofac.Configuration" Version="7.0.0" />
-    <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="AWS.Logger.NLog" Version="3.3.4" />
-    <PackageReference Include="Bogus" Version="35.6.3" />
+    <PackageReference Include="Bogus" Version="35.6.4" />
     <PackageReference Include="Confluent.Kafka" Version="2.11.1" />
     <PackageReference Include="DistributedLock.Redis" Version="1.0.3" />
     <PackageReference Include="DistributedLock.ZooKeeper" Version="1.0.0" />
     <PackageReference Include="JWT" Version="11.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="9.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.8.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Primitives" Version="9.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Resilience" Version="9.8.0" />
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="9.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.10.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Resilience" Version="9.10.0" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="9.0.10" />
     <PackageReference Include="EtaEmre.NetEscapades.EnumGenerators" Version="1.0.0-beta07" />
 <!-- <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.9.4">
       <PrivateAssets>all</PrivateAssets>
@@ -59,11 +58,12 @@
     <PackageReference Include="NLog.Targets.Syslog" Version="7.0.0" />
     <PackageReference Include="NVelocity" Version="1.2.0" />
     <PackageReference Include="protobuf-net" Version="3.2.56" />
+    <PackageReference Include="Riok.Mapperly" Version="4.2.1" />
     <PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
-    <PackageReference Include="StackExchange.Redis" Version="2.9.11" />
+    <PackageReference Include="StackExchange.Redis" Version="2.9.32" />
     <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="11.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.6" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.6" />
     <PackageReference Include="System.Linq.Async" Version="6.0.3" />
     <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.4.0" />
   </ItemGroup>

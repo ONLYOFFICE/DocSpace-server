@@ -44,7 +44,7 @@ public class TenantInfoSettings : ISettings<TenantInfoSettings>
             IsDefault = true
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 
     [JsonIgnore]
@@ -63,7 +63,7 @@ public class Size
     {
         return new Size
         {
-            Height = cache.Height, 
+            Height = cache.Height,
             Width = cache.Width
         };
     }

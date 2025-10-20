@@ -28,13 +28,13 @@ namespace ASC.Api.Core.Core;
 
 public static class CustomHealthCheck
 {
-    public static bool Running { get; set;}
+    public static bool Running { get; set; }
 
     static CustomHealthCheck()
     {
         Running = true;
     }
-    
+
     public static IServiceCollection AddCustomHealthCheck(this IServiceCollection services, IConfiguration configuration)
     {
         var hcBuilder = services.AddHealthChecks();
@@ -43,7 +43,7 @@ public static class CustomHealthCheck
                                     : HealthCheckResult.Unhealthy())
                  .AddDatabase(configuration)
                  .AddDistibutedCache(configuration);
-                 //.AddMessageQueue(configuration);
+        //.AddMessageQueue(configuration);
 
         return services;
     }
@@ -75,8 +75,8 @@ public static class CustomHealthCheck
         {
             hcBuilder.AddMySql(connectionString.ConnectionString,
                 healthQuery: "SELECT 1;",
-                name: "mysqldb", 
-                tags: ["mysqldb", "services"], 
+                name: "mysqldb",
+                tags: ["mysqldb", "services"],
                 timeout: new TimeSpan(0, 0, 30));
         }
         else if (string.Equals(connectionString.ProviderName, "Npgsql"))
@@ -97,11 +97,12 @@ public static class CustomHealthCheck
 
         if (rabbitMQConfiguration != null)
         {
-            hcBuilder.AddRabbitMQ(async sp => {
-                                        var rabbitMqPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
+            hcBuilder.AddRabbitMQ(async sp =>
+            {
+                var rabbitMqPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
 
-                                        return await rabbitMqPersistentConnection.GetConnection();
-                                },
+                return await rabbitMqPersistentConnection.GetConnection();
+            },
                                 name: "rabbitMQ",
                                 tags: ["rabbitMQ", "services"],
                                 timeout: new TimeSpan(0, 0, 30));

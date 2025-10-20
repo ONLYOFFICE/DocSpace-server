@@ -26,8 +26,6 @@
 
 using System.Threading.Channels;
 
-using ASC.Core.Billing;
-
 namespace ASC.Web.Files.Utils;
 
 public class SocketManager(
@@ -100,31 +98,32 @@ public class SocketManager(
     public async Task ExecMarkAsNewFilesAsync(IEnumerable<Tag> tags)
     {
         var result = new List<object>();
-        
+
         foreach (var g in tags.GroupBy(r => r.EntryId))
         {
             var room = FileRoom(g.Key);
             result.Add(new { room, fileId = g.Key });
         }
-        
+
         await MakeRequest("mark-as-new-file", result);
     }
 
     public async Task ExecMarkAsNewFoldersAsync(IEnumerable<Tag> tags)
-    { 
+    {
         var result = new List<object>();
-        
+
         foreach (var g in tags.GroupBy(r => r.EntryId))
         {
             var room = FolderRoom(g.Key);
-            result.Add(             
-                new {
+            result.Add(
+                new
+                {
                     room,
                     folderId = g.Key,
-                    userIds = g.Select(r=> new { owner = r.Owner, count = r.Count }).DistinctBy(r => r.owner).ToList()
+                    userIds = g.Select(r => new { owner = r.Owner, count = r.Count }).DistinctBy(r => r.owner).ToList()
                 });
         }
-        
+
         await MakeRequest("mark-as-new-folder", result);
     }
 
@@ -149,36 +148,48 @@ public class SocketManager(
     {
         await MakeRequest("end-restore", new { tenantId, dump, result });
     }
-    
-    public async Task AddFileToRecentAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+
+    public async Task AddToRecentAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("add-recent-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderRecentAsync<T>());
-    }
-    
-    public async Task RemoveFileFromRecentAsync<T>(File<T> file, IEnumerable<Guid> users = null)
-    {
-        await MakeRequest("delete-recent-file", file, true, users);
-        await MakeRequest("delete-recent-file", file, true, users, folderIdDisplay: await globalFolderHelper.GetFolderRecentAsync<T>());
+        await MakeRequest($"add-recent-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderRecentAsync<T>());
     }
 
-    public async Task AddFileToFavoritesAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+    public async Task RemoveFromRecentAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("add-favorites-file", file, true, users);
+        await MakeRequest($"delete-recent-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderRecentAsync<T>());
     }
-    
-    public async Task RemoveFileFromFavoritesAsync<T>(File<T> file, IEnumerable<Guid> users = null)
+
+    public async Task AddToFavoritesAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("delete-favorites-file", file, true, users);
+        await MakeRequest($"add-favorites-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderFavoritesAsync<T>());
     }
-    
-    public async Task AddFolderToFavoritesAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
+
+    public async Task RemoveFromFavoritesAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("add-favorites-folder", folder, true, users);
+        await MakeRequest($"delete-favorites-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderFavoritesAsync<T>());
     }
-    
-    public async Task RemoveFolderFromFavoritesAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
+
+    public async Task AddToSharedAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("delete-favorites-folder", folder, true, users);
+        await MakeRequest($"add-shared-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
+    }
+
+    public async Task RemoveFromSharedAsync<T>(FileEntry<T> fileEntry, IEnumerable<Guid> users = null)
+    {
+        await MakeRequest($"delete-shared-{fileEntry.FileEntryType.ToStringLowerFast()}", fileEntry, true, users, folderIdDisplay: await globalFolderHelper.GetFolderShareAsync<T>());
+    }
+
+    public async Task SelfRestrictionAsync<T>(FileEntry<T> fileEntry, Guid subject, FileShare access)
+    {
+        var room = fileEntry.FileEntryType == FileEntryType.File ? FileRoom(fileEntry.Id) : FolderRoom(fileEntry.Id);
+        var data = JsonSerializer.Serialize(new Dictionary<Guid, FileShare> { { subject, access } });
+
+        await base.MakeRequest($"self-restriction-{fileEntry.FileEntryType.ToStringLowerFast()}", new
+        {
+            room,
+            fileEntry.Id,
+            data
+        });
     }
 
     public async Task UpdateChatAsync<T>(Folder<T> folder, Guid chatId, string chatTitle, Guid userId)
@@ -188,7 +199,7 @@ public class SocketManager(
         await base.MakeRequest("update-chat", new { room, chatId, chatTitle, userId });
     }
     
-    public async Task CommitMessageAsync(Guid chatId, int messageId)
+    public async Task CommitMessageAsync(Guid chatId, long messageId)
     {
         var room = ChatRoom(chatId);
         await MakeRequest("commit-chat-message", new { room, messageId });
@@ -222,7 +233,7 @@ public class SocketManager(
             userIds,
             isOneMember
         });
-        
+
     }
     private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null, T folderIdDisplay = default)
     {
@@ -230,9 +241,15 @@ public class SocketManager(
         {
             folderIdDisplay = entry.FolderIdDisplay;
         }
-        
+
         var room = FolderRoom(folderIdDisplay);
-        var whoCanRead = users ?? await WhoCanRead(entry);
+
+        IEnumerable<Guid> sharedUsers = null;
+
+        if (users == null)
+        {
+            (users, sharedUsers) = await WhoCanRead(entry);
+        }
 
         if (action != null)
         {
@@ -244,21 +261,25 @@ public class SocketManager(
         {
             case "add-recent-file":
             case "add-favorites-file":
+            case "add-shared-file":
                 method = "create-file";
                 entry.ParentId = folderIdDisplay;
                 break;
             case "delete-recent-file":
             case "delete-favorites-file":
+            case "delete-shared-file":
                 method = "delete-file";
                 entry.ParentId = folderIdDisplay;
                 break;
             case "add-favorites-folder":
+            case "add-shared-folder":
                 method = "create-folder";
-                entry.ParentId = entry.FolderIdDisplay;
+                entry.ParentId = folderIdDisplay;
                 break;
             case "delete-favorites-folder":
+            case "delete-shared-folder":
                 method = "delete-folder";
-                entry.ParentId = entry.FolderIdDisplay;
+                entry.ParentId = folderIdDisplay;
                 break;
         }
 
@@ -269,7 +290,7 @@ public class SocketManager(
             data = await Serialize(entry);
         }
 
-        foreach (var userIds in whoCanRead.Chunk(1000))
+        foreach (var userIds in users.Chunk(1000))
         {
             await base.MakeRequest(method, new
             {
@@ -279,7 +300,34 @@ public class SocketManager(
                 userIds
             });
         }
-        
+
+        if (sharedUsers != null)
+        {
+            var sharedFolder = await globalFolderHelper.GetFolderShareAsync<T>();
+
+            if (!EqualityComparer<T>.Default.Equals(folderIdDisplay, sharedFolder))
+            {
+                room = FolderRoom(sharedFolder);
+
+                if (withData)
+                {
+                    entry.ParentId = sharedFolder;
+                    data = await Serialize(entry);
+                }
+
+                foreach (var userIds in sharedUsers.Chunk(1000))
+                {
+                    await base.MakeRequest(method, new
+                    {
+                        room,
+                        entry.Id,
+                        data,
+                        userIds
+                    });
+                }
+            }
+        }
+
         entry.ParentId = parentId;
     }
 
@@ -303,32 +351,32 @@ public class SocketManager(
     }
 
     private async Task<string> Serialize<T>(FileEntry<T> entry)
-    { 
+    {
         var externalMediaAccess = entry.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink };
         string requestToken = null;
-            
+
         if (externalMediaAccess)
         {
             requestToken = await externalShare.CreateShareKeyAsync(entry.ShareRecord.Subject);
         }
-        
+
         return entry switch
         {
             File<T> file => JsonSerializer.Serialize(new FileDto<T>
             {
-                Id = file.Id, 
-                FolderId = file.ParentId, 
-                Title = file.Title, 
-                Version = file.Version, 
+                Id = file.Id,
+                FolderId = file.ParentId,
+                Title = file.Title,
+                Version = file.Version,
                 VersionGroup = file.VersionGroup,
                 RequestToken = requestToken
             }, _jsonSerializerOptions),
             Folder<T> folder => JsonSerializer.Serialize(new FolderDto<T>
             {
-                Id = folder.Id, 
-                ParentId = folder.ParentId, 
-                Title = folder.Title, 
-                RoomType = DocSpaceHelper.MapToRoomType(folder.FolderType), 
+                Id = folder.Id,
+                ParentId = folder.ParentId,
+                Title = folder.Title,
+                RoomType = DocSpaceHelper.MapToRoomType(folder.FolderType),
                 CreatedBy = new EmployeeDto
                 {
                     Id = folder.CreateBy
@@ -339,22 +387,23 @@ public class SocketManager(
         };
     }
 
-    private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
+    private async Task<(IEnumerable<Guid> directAccess, IEnumerable<Guid> sharedAccess)> WhoCanRead<T>(FileEntry<T> entry)
     {
-        var whoCanReadTask = fileSecurity.WhoCanReadAsync(entry, true);
-        var adminsTask = Admins();
+        var (direct, shared) = await fileSecurity.WhoCanReadSeparatelyAsync(entry);
 
-        var whoCanRead = await Task.WhenAll(whoCanReadTask, adminsTask);
-        
-        var userIds = whoCanRead
-            .SelectMany(r => r)
-            .Concat([entry.CreateBy])
-            .Distinct()
-            .ToList();
+        if (entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+        {
+            var admins = await Admins();
+            direct = direct.Concat(admins);
+        }
 
-        return userIds;
+        direct = direct.Concat([entry.CreateBy]).Distinct();
+
+        shared = shared.Where(x => !direct.Contains(x));
+
+        return (direct, shared);
     }
-    
+
     private List<Guid> _admins;
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
@@ -364,17 +413,17 @@ public class SocketManager(
 
     private Task<IEnumerable<Guid>> Admins()
     {
-        return _admins != null 
-            ? Task.FromResult<IEnumerable<Guid>>(_admins) 
+        return _admins != null
+            ? Task.FromResult<IEnumerable<Guid>>(_admins)
             : AdminsFromDb();
     }
-    
+
     private async Task<IEnumerable<Guid>> AdminsFromDb()
     {
         _admins = (await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
             .Select(x => x.Id)
             .ToList();
-        
+
         _admins.Add((_tenantManager.GetCurrentTenant()).OwnerId);
 
         return _admins;

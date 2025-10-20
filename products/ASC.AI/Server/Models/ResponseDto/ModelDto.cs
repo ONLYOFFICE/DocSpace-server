@@ -26,9 +26,16 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class ModelDto : IMapFrom<ModelData>
+public class ModelDto
 {
     public int ProviderId { get; init; }
     public required string ProviderTitle { get; init; }
     public required string ModelId { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class ModelDtoMapper
+{
+    public static partial ModelDto MapToDto(this ModelData source);
 }

@@ -26,18 +26,21 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class McpServerOptionsDto : IMapFrom<McpServer>
+public class McpServerOptionsDto
 {
     public Guid Id { get; init; }
     public required string Name { get; init; }
     public string? Description { get; init; }
     public required string Endpoint { get; init; }
     public Dictionary<string, string>? Headers { get; init; }
-    
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<McpServer, McpServerOptionsDto>()
-            .ForMember(dest => dest.Endpoint, opt => 
-                opt.MapFrom(src => src.Endpoint.ToString()));
-    }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class McpServerMapper
+{
+    [MapProperty(nameof(McpServer.Endpoint), nameof(McpServerOptionsDto.Endpoint))]
+    private static partial string MapEndpoint(Uri endpoint);
+
+    public static partial McpServerOptionsDto Map(McpServer server);
 }

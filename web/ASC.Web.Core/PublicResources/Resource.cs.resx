@@ -368,7 +368,7 @@
     <value>Co je nového</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Sledování přihlášení a akcí uživatelů</value>
+    <value>Sledování přihlášení a akcí</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Maximální velikost souboru</value>
@@ -383,7 +383,7 @@
     <value>Počet správců</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Automatické zálohování a obnovení</value>
+    <value>Obnova dat</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Neomezený počet aktivních místností</value>
@@ -410,7 +410,7 @@
     <value>Uživatelé v místnosti:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Neomezený počet uživatelů</value>
+    <value>Neomezený počet uživatelů a hostů</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Počet uživatelů by neměl překročit {0}</value>
@@ -1116,5 +1116,50 @@
   </data>
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Využitý úložný prostor:</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Automatické obnovení</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Počet bezplatných záloh by neměl v průběhu měsíce překročit {0}</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Povolte zálohování pro váš DocSpace. Náklady budou účtovány automaticky.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Záloha</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Záloha</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Záloha</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debet</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Kontakt</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Transakční historie</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Automatické dobíjení</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} bezplatných záloh měsíčně</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Platba je vyžadována</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Typ</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Podrobnosti</value>
   </data>
 </root>

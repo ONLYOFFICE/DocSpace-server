@@ -171,7 +171,7 @@ internal class GoogleDriveDaoBase(
         {
             folder.ModifiedOn = _tenantUtil.DateTimeFromUtc(folder.ModifiedOn);
         }
-        
+
         folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return folder;
@@ -259,7 +259,7 @@ internal class GoogleDriveDaoBase(
             return new ErrorDriveEntry(ex, driveId);
         }
     }
-    
+
     public async Task<DriveFile> CreateFolderAsync(string title, string folderId)
     {
         return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);

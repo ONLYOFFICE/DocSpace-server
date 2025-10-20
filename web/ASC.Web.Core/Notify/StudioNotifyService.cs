@@ -187,8 +187,8 @@ public class StudioNotifyService(
     public async Task SendEmailActivationInstructionsAsync(UserInfo user, string email)
     {
         var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(email, ConfirmType.EmailActivation, null, user.Id);
-        var shortLink  = await urlShortener.GetShortenLinkAsync(confirmationUrl);
-        
+        var shortLink = await urlShortener.GetShortenLinkAsync(confirmationUrl);
+
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonActivateEmail", GetCulture(user));
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
@@ -209,7 +209,7 @@ public class StudioNotifyService(
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         var tags = new List<ITagValue>
-        { 
+        {
             new TagValue(Tags.Message, roomTitle),
             new TagValue(Tags.InviteLink, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
@@ -344,7 +344,7 @@ public class StudioNotifyService(
     {
         var inviteUrl = commonLinkUtility.GetConfirmationEmailUrl(email, ConfirmType.EmpInvite, (int)emplType + "trust") + $"&emplType={(int)emplType}";
         var shortLink = await urlShortener.GetShortenLinkAsync(inviteUrl);
-        
+
         var orangeButtonText = WebstudioNotifyPatternResource.ButtonJoin;
 
         List<ITagValue> tags =
@@ -357,13 +357,13 @@ public class StudioNotifyService(
         {
             tags.Add(new TagValue(CommonTags.Culture, culture));
         }
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(
             Actions.JoinUsers,
             await studioNotifyHelper.RecipientFromEmailAsync(email, false),
             [EMailSenderName],
             tags.ToArray());
-        
+
         if (limitation)
         {
             await userInvitationLimitHelper.ReduceLimit();
@@ -521,7 +521,7 @@ public class StudioNotifyService(
            await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
            [EMailSenderName],
         new TagValue(Tags.ActivateUrl, confirmationUrl),
-        TagValues.OrangeButton(orangeButtonText, confirmationUrl), 
+        TagValues.OrangeButton(orangeButtonText, confirmationUrl),
         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
         new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
@@ -930,7 +930,7 @@ public class StudioNotifyService(
     {
         var confirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.Activation, user.Id, user.Id);
 
-        return  await urlShortener.GetShortenLinkAsync(confirmUrl + $"&firstname={HttpUtility.UrlEncode(user.FirstName)}&lastname={HttpUtility.UrlEncode(user.LastName)}");
+        return await urlShortener.GetShortenLinkAsync(confirmUrl + $"&firstname={HttpUtility.UrlEncode(user.FirstName)}&lastname={HttpUtility.UrlEncode(user.LastName)}");
     }
 
 

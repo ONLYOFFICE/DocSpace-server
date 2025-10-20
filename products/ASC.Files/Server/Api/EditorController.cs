@@ -153,7 +153,6 @@ public abstract class EditorController<T>(
         var rootFolder = await documentServiceHelper.GetRootFolderAsync(file);
         if (file.IsForm && rootFolder.RootFolderType != FolderType.RoomTemplates)
         {
-
             formOpenSetup = rootFolder.FolderType switch
             {
                 FolderType.FillingFormsRoom => await documentServiceHelper.GetFormOpenSetupForFillingRoomAsync(file, rootFolder, inDto.EditorType, inDto.Edit, entryManager),
@@ -167,14 +166,15 @@ public abstract class EditorController<T>(
                     CanFill = inDto.Fill,
                 }
             };
+
             formOpenSetup.RootFolder = rootFolder;
         }
 
         var docParams = await documentServiceHelper.GetParamsAsync(
-            formOpenSetup is { Draft: not null } ? formOpenSetup.Draft : file, 
+            formOpenSetup is { Draft: not null } ? formOpenSetup.Draft : file,
             lastVersion,
             await documentServiceHelper.CheckCustomQuota(rootFolder) && (formOpenSetup?.CanEdit ?? !file.IsCompletedForm),
-            !inDto.View, 
+            !inDto.View,
             true, formOpenSetup == null || formOpenSetup.CanFill,
             formOpenSetup?.EditorType ?? inDto.EditorType,
             formOpenSetup is { IsSubmitOnly: true });
@@ -194,6 +194,10 @@ public abstract class EditorController<T>(
                 };
             }
         }
+        if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
+        {
+            file.FormInfo = new FormInfo<T> { FillingSessionId = formOpenSetup.FillingSessionId };
+        }
 
         var result = await configurationConverter.Convert(configuration, file);
 
@@ -203,7 +207,7 @@ public abstract class EditorController<T>(
             result.EditorConfig.Embedded.ShareUrl = "";
             result.EditorConfig.Customization.Goback = await configuration.EditorConfig?.Customization.GetGoBack(inDto.EditorType, file);
         }
-        
+
         if (formOpenSetup != null)
         {
             if (formOpenSetup.RootFolder.FolderType is FolderType.VirtualDataRoom)
@@ -218,6 +222,10 @@ public abstract class EditorController<T>(
                 {
                     result.EditorConfig.User.Roles = [formOpenSetup.RoleName];
                     result.FillingStatus = true;
+                }
+                if (!formOpenSetup.HasRole)
+                {
+                    result.EditorConfig.Customization.SubmitForm.Visible = false;
                 }
             }
             else
@@ -235,13 +243,6 @@ public abstract class EditorController<T>(
         if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
         {
             result.FillingSessionId = formOpenSetup.FillingSessionId;
-            if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
-            {
-                result.EditorConfig.User = new UserConfig
-                {
-                    Id = formOpenSetup.FillingSessionId
-                };
-            }
         }
 
         if (rootFolder.RootFolderType == FolderType.RoomTemplates)
@@ -273,9 +274,14 @@ public abstract class EditorController<T>(
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionWrapper>))]
     [HttpGet("{fileId}/sharedusers")]
-    public async Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
+    public Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
     {
-        return await fileStorageService.SharedUsersAsync(inDto.FileId);
+        if (!securityContext.IsAuthenticated)
+        {
+            return Task.FromResult<List<MentionWrapper>>(null);
+        }
+
+        return fileStorageService.SharedUsersAsync(inDto.FileId);
     }
 
     /// <summary>
@@ -449,7 +455,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             DocServiceUrlApi = url,
             DocServicePreloadUrl = preloadUrl,
             DocServiceUrl = filesLinkUtility.GetDocServiceUrl(),
-            DocServiceUrlInternal =filesLinkUtility.GetDocServiceUrlInternal(),
+            DocServiceUrlInternal = filesLinkUtility.GetDocServiceUrlInternal(),
             DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),
             DocServiceSignatureHeader = await filesLinkUtility.GetDocServiceSignatureHeaderAsync(),
             DocServiceSslVerification = await filesLinkUtility.GetDocServiceSslVerificationAsync(),

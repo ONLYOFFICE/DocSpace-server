@@ -58,5 +58,5 @@ public class UpdateFileRequestDto<T>
     /// The parameters for updating a file.
     /// </summary>
     [FromBody]
-    public UpdateFile File { get; set; }
+    public required UpdateFile File { get; set; }
 }
