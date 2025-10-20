@@ -28,8 +28,8 @@ namespace ASC.Web.Core.Log;
 internal static partial class WebItemManagerLogger
 {
     [LoggerMessage(LogLevel.Debug, "Web item {webitem} loaded")]
-    public static partial void DebugWebItemLoaded(this ILogger logger, string webitem);  
-    
+    public static partial void DebugWebItemLoaded(this ILogger logger, string webitem);
+
     [LoggerMessage(LogLevel.Error, "Couldn't load web item {file}")]
     public static partial void ErrorCouldntLoadWebItem(this ILogger logger, string file, Exception exception);
 }

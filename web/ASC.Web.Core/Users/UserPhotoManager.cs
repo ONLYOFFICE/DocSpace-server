@@ -34,9 +34,9 @@ public sealed class ResizeWorkerItem : DistributedTask
 
     public ResizeWorkerItem()
     {
-        
+
     }
-    
+
     public ResizeWorkerItem(IServiceScopeFactory serviceScopeFactory, UserPhotoManagerCache userPhotoManagerCache)
     {
         _serviceScopeFactory = serviceScopeFactory;
@@ -47,7 +47,7 @@ public sealed class ResizeWorkerItem : DistributedTask
 
     public IDataStore DataStore { get; set; }
 
-    public long MaxFileSize { get;set;  }
+    public long MaxFileSize { get; set; }
 
     public byte[] Data { get; set; }
     public int TenantId { get; set; }
@@ -55,7 +55,7 @@ public sealed class ResizeWorkerItem : DistributedTask
     public UserPhotoThumbnailSettings Settings { get; set; }
 
     public string Key { get; set; }
-    
+
     public void Init(int tenantId, Guid userId, byte[] data, long maxFileSize, IMagickGeometry size, IDataStore dataStore, UserPhotoThumbnailSettings settings)
     {
         TenantId = tenantId;
@@ -66,7 +66,7 @@ public sealed class ResizeWorkerItem : DistributedTask
         DataStore = dataStore;
         Settings = settings;
     }
-    
+
     public override bool Equals(object obj)
     {
         if (obj is null)
@@ -106,7 +106,7 @@ public sealed class ResizeWorkerItem : DistributedTask
     {
         return HashCode.Combine(UserId, MaxFileSize, Size);
     }
-    
+
     protected override async Task DoJob()
     {
         try
@@ -217,7 +217,7 @@ public class UserPhotoManagerCache
         {
             return null;
         }
-        
+
         if (string.IsNullOrEmpty(fileName))
         {
             fileName = val.Values.FirstOrDefault(x => !string.IsNullOrEmpty(x) && x.Contains("_orig_"));
@@ -235,7 +235,7 @@ public class UserPhotoManager
             new(@"^(?'module'\{{0,1}([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\}{0,1}){0,1}" +
                 @"(?'user'\{{0,1}([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\}{0,1}){1}" +
                 @"_(?'kind'orig|size){1}_(?'size'(?'width'[0-9]{1,5})-{1}(?'height'[0-9]{1,5})){0,1}\..*", RegexOptions.Compiled);
-    
+
     private string _defaultAbsoluteWebPath;
     public string GetDefaultPhotoAbsoluteWebPath()
     {
@@ -266,7 +266,7 @@ public class UserPhotoManager
     {
         return await GetSizedPhotoAbsoluteWebPath(userID, SmallFotoSize);
     }
-    
+
     public static IMagickGeometry OriginalFotoSize { get; } = new MagickGeometry(1280, 1280);
 
     public static IMagickGeometry RetinaFotoSize { get; } = new MagickGeometry(360, 360);
@@ -422,11 +422,11 @@ public class UserPhotoManager
                                 //Parse size
                                 size = new MagickGeometry(uint.Parse(match.Groups["width"].Value), uint.Parse(match.Groups["height"].Value));
                             }
-                            await _userPhotoManagerCache.AddToCache(parsedUserId, size, fileName,tenantId);
+                            await _userPhotoManagerCache.AddToCache(parsedUserId, size, fileName, tenantId);
                         }
                     }
                 }
-                _userPhotoManagerCache.SetCacheLoadedForTenant(true,tenantId);
+                _userPhotoManagerCache.SetCacheLoadedForTenant(true, tenantId);
             }
             catch (Exception err)
             {
@@ -518,9 +518,9 @@ public class UserPhotoManager
 
             await Task.WhenAll(t1, t2, t3, t4, t5);
         }
-        
+
         await _userPhotoManagerCache.AddToCache(userID, SizeExtend.Empty, fileName, _tenantManager.GetCurrentTenantId());
-        
+
         return (photoUrl, fileName);
     }
 
@@ -635,7 +635,7 @@ public class UserPhotoManager
 
         var resizeTask = _serviceProvider.GetRequiredService<ResizeWorkerItem>();
         resizeTask.Init(_tenantManager.GetCurrentTenantId(), userID, data, maxFileSize, size, await GetDataStoreAsync(), await _settingsManager.LoadAsync<UserPhotoThumbnailSettings>(userID));
-        
+
         var key = $"{userID}{size}";
         resizeTask.Key = key;
 
@@ -645,13 +645,13 @@ public class UserPhotoManager
             await resizeTask.RunJob(CancellationToken.None);
             return await GetSizedPhotoAbsoluteWebPath(userID, size);
         }
-        
+
         await _userPhotoResizeManager.EnqueueTaskAsync(key, resizeTask);
         return GetDefaultPhotoAbsoluteWebPath(size);
         //NOTE: return default photo here. Since task will update cache
     }
 
-   
+
 
     public async Task<string> SaveTempPhoto(byte[] data, long maxFileSize, uint maxWidth, uint maxHeight)
     {
@@ -773,7 +773,7 @@ public class UserPhotoManager
 
                 await data.WriteAsync(buffer.AsMemory(0, count));
             }
-            
+
             return data.ToArray();
         }
         catch (Exception err)

@@ -55,8 +55,8 @@ if (!string.IsNullOrEmpty(connectionString))
     var migrationCreator = new MigrationRunner(app.Services);
     migrationCreator.RunApplyMigrations(new ProviderInfo
     {
-        Provider = Provider.MySql, 
-        ConnectionString = connectionString, 
+        Provider = Provider.MySql,
+        ConnectionString = connectionString,
         ProviderFullName = "MySql.Data.MySqlClient"
     }, configurationInfo, typeof(MigrationContext), targetMigration);
 }

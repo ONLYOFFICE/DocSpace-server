@@ -63,7 +63,7 @@ public class CommonMethods(
             tenantId = t.Id,
             timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
             quotaUsage,
-            customQuota = tenantQuotaSettings.EnableQuota && tenantQuotaSettings.Quota <= tariffMaxTotalSize ? 
+            customQuota = tenantQuotaSettings.EnableQuota && tenantQuotaSettings.Quota <= tariffMaxTotalSize ?
                     tenantQuotaSettings.Quota :
                     tariffMaxTotalSize == long.MaxValue ? -1 : tariffMaxTotalSize,
             owner,
@@ -360,11 +360,11 @@ public class CommonMethods(
             {
                 return true;
             }
-            
+
 
 
             log.LogDebug("Recaptcha error: {0}", resp);
-            
+
             if (recaptchData.ErrorCodes is { Count: > 0 })
             {
                 log.LogDebug("Recaptcha api returns errors: {0}", resp);
@@ -381,8 +381,7 @@ public class CommonMethods(
 public class RecaptchData
 {
     public bool? Success { get; set; }
-    
+
     [JsonPropertyName("error-codes")]
     public List<string> ErrorCodes { get; set; }
 }
-

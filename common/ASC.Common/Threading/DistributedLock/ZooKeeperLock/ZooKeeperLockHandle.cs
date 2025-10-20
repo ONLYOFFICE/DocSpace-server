@@ -31,7 +31,7 @@ public class ZooKeeperLockHandle(IDistributedSynchronizationHandle handle) : Loc
     public override async ValueTask DisposeAsync()
     {
         CheckDispose();
-        
+
         if (handle != null)
         {
             await handle.DisposeAsync();
@@ -43,9 +43,9 @@ public class ZooKeeperLockHandle(IDistributedSynchronizationHandle handle) : Loc
     public override void Dispose()
     {
         CheckDispose();
-        
+
         handle?.Dispose();
-        
+
         _disposed = true;
     }
 }

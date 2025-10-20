@@ -27,13 +27,14 @@
 namespace ASC.Files.Core.Security;
 
 [Scope]
-public class ExternalShare(Global global, 
-    IDaoFactory daoFactory, 
+public class ExternalShare(
+    IDaoFactory daoFactory,
     CookiesManager cookiesManager,
     IHttpContextAccessor httpContextAccessor,
     BaseCommonLinkUtility commonLinkUtility,
     FilesLinkUtility filesLinkUtility,
-    FileUtility fileUtility)
+    FileUtility fileUtility,
+    CoreSettings coreSettings)
 {
     private ExternalSessionSnapshot _snapshot;
     private string _dbKey;
@@ -44,7 +45,7 @@ public class ExternalShare(Global global,
     {
         var key = await CreateShareKeyAsync(linkId);
         string url = null;
-        
+
         switch (entry)
         {
             case File<T> file:
@@ -77,14 +78,14 @@ public class ExternalShare(Global global,
             Token = key
         };
     }
-    
+
     public async Task<Status> ValidateAsync(Guid linkId, bool isAuthenticated)
     {
         var record = await daoFactory.GetSecurityDao<string>().GetSharesAsync([linkId]).FirstOrDefaultAsync();
 
         return record == null ? Status.Invalid : await ValidateRecordAsync(record, null, isAuthenticated);
     }
-    
+
     public async Task<Status> ValidateRecordAsync<T>(FileShareRecord<T> record, string password, bool isAuthenticated, FileEntry entry = null)
     {
         if (record.SubjectType is not (SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) ||
@@ -92,7 +93,7 @@ public class ExternalShare(Global global,
         {
             return Status.Ok;
         }
-        
+
         if (record.Options.IsExpired)
         {
             return Status.Expired;
@@ -127,7 +128,7 @@ public class ExternalShare(Global global,
                 }
             }
         }
-        
+
         if (passwordKey == record.Options.Password)
         {
             return Status.Ok;
@@ -145,10 +146,10 @@ public class ExternalShare(Global global,
         }
 
         cookiesManager.ClearCookies(CookiesType.ShareLink, record.Subject.ToString());
-        
+
         return Status.InvalidPassword;
     }
-    
+
     public async Task<string> CreatePasswordKeyAsync(string password)
     {
         ArgumentException.ThrowIfNullOrEmpty(password);
@@ -171,7 +172,7 @@ public class ExternalShare(Global global,
 
         return string.IsNullOrEmpty(key) ? null : key;
     }
-    
+
     public async Task<TokenData> ParseShareKeyAsync(string key)
     {
         if (string.IsNullOrEmpty(key))
@@ -210,13 +211,13 @@ public class ExternalShare(Global global,
         {
             return _snapshot.LinkId;
         }
-        
+
         var key = GetKey();
         if (string.IsNullOrEmpty(key))
         {
             return Guid.Empty;
         }
-        
+
         var data = await ParseShareKeyAsync(key);
         return data?.Id ?? Guid.Empty;
     }
@@ -225,7 +226,7 @@ public class ExternalShare(Global global,
     {
         return GetSessionIdAsync().Result;
     }
-    
+
     public async Task<Guid> GetSessionIdAsync()
     {
         if (_snapshot != null && _snapshot.SessionId != Guid.Empty)
@@ -237,13 +238,13 @@ public class ExternalShare(Global global,
         {
             return anonymous.SessionId;
         }
-        
+
         var sessionKey = cookiesManager.GetCookies(CookiesType.AnonymousSessionKey);
         if (string.IsNullOrEmpty(sessionKey))
         {
             return Guid.Empty;
         }
-        
+
         var id = Signature.Read<Guid>(sessionKey, await GetDbKeyAsync());
         return id == Guid.Empty ? Guid.Empty : id;
     }
@@ -252,7 +253,7 @@ public class ExternalShare(Global global,
     {
         var linkId = await GetLinkIdAsync();
         var sessionId = await GetSessionIdAsync();
-        
+
         var session = new DownloadSession
         {
             Id = sessionId,
@@ -266,7 +267,7 @@ public class ExternalShare(Global global,
     {
         return Signature.Read<DownloadSession>(sessionKey, await GetDbKeyAsync());
     }
-    
+
     public string GetAnonymousSessionKey()
     {
         return cookiesManager.GetCookies(CookiesType.AnonymousSessionKey);
@@ -276,7 +277,7 @@ public class ExternalShare(Global global,
     {
         await cookiesManager.SetCookiesAsync(CookiesType.AnonymousSessionKey, Signature.Create(Guid.NewGuid(), await GetDbKeyAsync()), true);
     }
-    
+
     public string GetUrlWithShare(string url, string key = null)
     {
         if (string.IsNullOrEmpty(url))
@@ -306,12 +307,12 @@ public class ExternalShare(Global global,
 
         return new ExternalSessionSnapshot(linkId, sessionId, passwordKey);
     }
-    
+
     public void Initialize(ExternalSessionSnapshot snapshot)
     {
         _snapshot = snapshot;
     }
-    
+
     public async Task<string> CreateShareKeyAsync(Guid linkId, string password = null)
     {
         if (string.IsNullOrEmpty(password))
@@ -321,16 +322,16 @@ public class ExternalShare(Global global,
 
         var data = new TokenData
         {
-            Id = linkId, 
+            Id = linkId,
             Password = password
         };
-        
+
         return Signature.Create(JsonSerializer.Serialize(data), await GetDbKeyAsync());
     }
 
     private async Task<string> GetDbKeyAsync()
     {
-        return _dbKey ??= await global.GetDocDbKeyAsync();
+        return _dbKey ??= await coreSettings.GetDocDbKeyAsync();
     }
 }
 
@@ -359,22 +360,22 @@ public class ValidationInfo
     /// The external data status.
     /// </summary>
     public Status Status { get; set; }
-   
+
     /// <summary>
     /// The external data ID.
     /// </summary>
     public string Id { get; set; }
-   
+
     /// <summary>
     /// The external data title.
     /// </summary>
     public string Title { get; set; }
-    
+
     /// <summary>
     /// The type of the external data.
     /// </summary>
     public FileEntryType? Type { get; set; }
-    
+
     /// <summary>
     /// The entity ID of the external data.
     /// </summary>
@@ -384,12 +385,12 @@ public class ValidationInfo
     /// The entry title of the external data.
     /// </summary>
     public string EntityTitle { get; set; }
-    
+
     /// <summary>
     /// The entry type of the external data.
     /// </summary>
     public FileEntryType? EntityType { get; set; }
-    
+
     /// <summary>
     /// Indicates whether the entity represents a room.
     /// </summary>
@@ -414,12 +415,12 @@ public class ValidationInfo
     /// The link ID of the external data.
     /// </summary>
     public Guid LinkId { get; set; }
-    
+
     /// <summary>
     /// Specifies whether the user is authenticated or not.
     /// </summary>
     public bool IsAuthenticated { get; set; }
-    
+
     /// <summary>
     /// The room ID of the external data.
     /// </summary>
@@ -437,9 +438,9 @@ public class ExternalSessionSnapshot
 {
     public ExternalSessionSnapshot()
     {
-        
+
     }
-    
+
     public ExternalSessionSnapshot(Guid linkId, Guid sessionId, string passwordKey)
     {
         this.LinkId = linkId;
@@ -449,10 +450,10 @@ public class ExternalSessionSnapshot
 
     [ProtoMember(1)]
     public Guid LinkId { get; init; }
-    
+
     [ProtoMember(2)]
     public Guid SessionId { get; init; }
-    
+
     [ProtoMember(3)]
     public string PasswordKey { get; init; }
 }

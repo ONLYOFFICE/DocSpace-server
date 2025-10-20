@@ -30,13 +30,13 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// The form role parameters.
 /// </summary>
 public class FormRoleDto
-{ 
+{
 
     /// <summary>
     /// The role name.
     /// </summary>
     public required string RoleName { get; set; }
-    
+
     /// <summary>
     /// The role color.
     /// </summary>

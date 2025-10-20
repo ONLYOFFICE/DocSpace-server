@@ -146,7 +146,7 @@ public class CustomColorThemesSettingsColorItem
     /// </summary>
     [SwaggerSchemaCustom(Example = "#4781D1")]
     public string Accent { get; init; }
-    
+
     /// <summary>
     /// The button color.
     /// </summary>

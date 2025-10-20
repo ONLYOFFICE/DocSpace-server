@@ -89,10 +89,10 @@ public class WebhookSender(
 
             var status = 0;
             DateTime? delivery = null;
-            DateTime requestDate = webhookPayload.GetShortUtcNow();
+            var requestDate = webhookPayload.GetShortUtcNow();
             string responsePayload = null;
             string responseHeaders = null;
-            string requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
+            var requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
             string requestHeaders = null;
 
             var clientName = entry.Config.SSL ? WebhookClientName : WebhookClientNameSkipSSL;

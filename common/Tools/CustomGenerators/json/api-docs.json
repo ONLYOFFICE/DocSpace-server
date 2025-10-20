@@ -118,11 +118,6 @@
       "x-displayName": "Cookies"
     },
     {
-      "name": "Settings / Custom Navigation",
-      "description": "Operations for working with custom navigation settings.",
-      "x-displayName": "Custom Navigation"
-    },
-    {
       "name": "Settings / Encryption",
       "description": "Operations for working with encryption settings.",
       "x-displayName": "Encryption"
@@ -341,6 +336,26 @@
       "name": "Backup",
       "description": "Operations for working with backup",
       "x-displayName": "Backup"
+    },
+    {
+      "name": "OAuth 2.0 / Authorization",
+      "description": "APIs for managing OAuth2 authorization, including authorization and consent.",
+      "x-displayName": "Authorization"
+    },
+    {
+      "name": "OAuth 2.0 / Client Management",
+      "description": "APIs for managing OAuth2 clients, including creation, updates, deletion, and activation.",
+      "x-displayName": "Client Management"
+    },
+    {
+      "name": "OAuth 2.0 / Scope Management",
+      "description": "APIs for retrieving OAuth2 scopes and their permissions.",
+      "x-displayName": "Scope Management"
+    },
+    {
+      "name": "OAuth 2.0 / Client Querying",
+      "description": "APIs for retrieving OAuth2 client information and user consents.",
+      "x-displayName": "Client Querying"
     }
   ],
   "paths": {
@@ -1282,7 +1297,7 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Calculate amount of the wallet payment",
+        "summary": "Calculate the wallet payment amount",
         "operationId": "calculateWalletPayment",
         "requestBody": {
           "content": {
@@ -1340,7 +1355,7 @@
             "OpenId": []
           }
         ],
-        "description": "Calculate amount of the wallet payment with the parameters specified in the request."
+        "description": "Calculates an amount of the wallet payment with the parameters specified in the request."
       }
     },
     "/api/2.0/portal/payment/account": {
@@ -1530,7 +1545,7 @@
           {
             "name": "wallet",
             "in": "query",
-            "description": "Get wallet quotas only",
+            "description": "Specifies whether to return the wallet quotas only.",
             "schema": {
               "type": "boolean",
               "example": true
@@ -1649,7 +1664,7 @@
           {
             "name": "service",
             "in": "query",
-            "description": "Wallet service",
+            "description": "The wallet service type.",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/TenantWalletService"
@@ -1700,7 +1715,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the wallet services."
+        "description": "Returns the specified wallet service."
       }
     },
     "/api/2.0/portal/payment/quota": {
@@ -1844,7 +1859,7 @@
           {
             "name": "BackUrl",
             "in": "query",
-            "description": "Back URL",
+            "description": "The URL where the user will be redirected after completing the setup.",
             "schema": {
               "type": "string",
               "example": "some text"
@@ -1906,7 +1921,7 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Get the customer info",
+        "summary": "Get the customer information",
         "operationId": "getCustomerInfo",
         "parameters": [
           {
@@ -1966,7 +1981,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the customer info."
+        "description": "Returns the customer information."
       }
     },
     "/api/2.0/portal/payment/deposit": {
@@ -2032,7 +2047,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns result of putting money on deposit."
+        "description": "Returns the result of putting money on deposit."
       }
     },
     "/api/2.0/portal/payment/customer/balance": {
@@ -2114,7 +2129,7 @@
           {
             "name": "startDate",
             "in": "query",
-            "description": "Start date",
+            "description": "The report start date.",
             "schema": {
               "type": "string",
               "format": "date-time",
@@ -2124,7 +2139,7 @@
           {
             "name": "endDate",
             "in": "query",
-            "description": "End date",
+            "description": "The report end date.",
             "schema": {
               "type": "string",
               "format": "date-time",
@@ -2134,7 +2149,7 @@
           {
             "name": "participantName",
             "in": "query",
-            "description": "Participant name",
+            "description": "The participant name.",
             "schema": {
               "type": "string",
               "example": "some text"
@@ -2143,7 +2158,7 @@
           {
             "name": "credit",
             "in": "query",
-            "description": "Include credit operations (true by default)",
+            "description": "Specifies whether to include credit operations in the report. The default value is true.",
             "schema": {
               "type": "boolean",
               "example": true
@@ -2152,7 +2167,7 @@
           {
             "name": "debit",
             "in": "query",
-            "description": "Include debit operations (true by default)",
+            "description": "Specifies whether to include debit operations in the report. The default value is true.",
             "schema": {
               "type": "boolean",
               "example": true
@@ -2161,7 +2176,7 @@
           {
             "name": "offset",
             "in": "query",
-            "description": "Offset (0 by default)",
+            "description": "The number of items to skip for pagination. The default value is 0.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2171,7 +2186,7 @@
           {
             "name": "limit",
             "in": "query",
-            "description": "Limit (25 by default)",
+            "description": "The maximum number of items to return for pagination. The default value is 25.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2234,7 +2249,7 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Start generating the customer operations report",
+        "summary": "Start the customer operations report generation",
         "operationId": "createCustomerOperationsReport",
         "requestBody": {
           "content": {
@@ -2289,13 +2304,13 @@
             "OpenId": []
           }
         ],
-        "description": "Start generating the customer operations report as xlsx file and save in Documents."
+        "description": "Starts generating a customer operations report as an xlsx file and saves it in Documents."
       },
       "get": {
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Get the status of generating a customer operations report",
+        "summary": "Get the status of the customer operations report generation",
         "operationId": "getCustomerOperationsReport",
         "responses": {
           "200": {
@@ -2341,13 +2356,13 @@
             "OpenId": []
           }
         ],
-        "description": "Get the status of generating a customer operations report."
+        "description": "Returns the status of generating a customer operations report."
       },
       "delete": {
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Terminate the generating a customer operations report",
+        "summary": "Terminate the customer operations report generation",
         "operationId": "terminateCustomerOperationsReport",
         "responses": {
           "200": {
@@ -2386,7 +2401,7 @@
             "OpenId": []
           }
         ],
-        "description": "Terminates the generating a customer operations report."
+        "description": "Terminates generating a customer operations report."
       }
     },
     "/api/2.0/portal/payment/topupsettings": {
@@ -2394,7 +2409,7 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Get wallet auto top up settings",
+        "summary": "Get wallet auto top-up settings",
         "operationId": "getTenantWalletSettings",
         "responses": {
           "200": {
@@ -2443,13 +2458,13 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the wallet auto top up settings."
+        "description": "Returns the wallet auto top-up settings."
       },
       "post": {
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Set wallet auto top up settings",
+        "summary": "Set wallet auto top-up settings",
         "operationId": "setTenantWalletSettings",
         "requestBody": {
           "content": {
@@ -2507,7 +2522,7 @@
             "OpenId": []
           }
         ],
-        "description": "Set the wallet auto top up settings."
+        "description": "Sets the wallet auto top-up settings."
       }
     },
     "/api/2.0/portal/payment/servicessettings": {
@@ -2564,7 +2579,7 @@
             "OpenId": []
           }
         ],
-        "description": "Get the wallet services settings."
+        "description": "Returns the wallet services settings."
       }
     },
     "/api/2.0/portal/payment/servicestate": {
@@ -2630,7 +2645,7 @@
             "OpenId": []
           }
         ],
-        "description": "Change wallet service state."
+        "description": "Changes the wallet service state."
       }
     },
     "/api/2.0/portal/usedspace": {
@@ -4360,7 +4375,7 @@
         "tags": [
           "Security / Banners visibility"
         ],
-        "summary": "Set the promotional banners visibility settings",
+        "summary": "Set the banners visibility",
         "operationId": "setTenantBannerSettings",
         "requestBody": {
           "content": {
@@ -4415,13 +4430,13 @@
             "OpenId": []
           }
         ],
-        "description": "Sets the promotional banners visibility settings settings for the portal."
+        "description": "Sets the visibility settings of the promotional banners in the portal."
       },
       "get": {
         "tags": [
           "Settings / Banners visibility"
         ],
-        "summary": "Get the promotional banners visibility settings",
+        "summary": "Get the banners visibility",
         "operationId": "getTenantBannerSettings",
         "responses": {
           "200": {
@@ -4467,7 +4482,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the promotional banners visibility settings settings for the portal."
+        "description": "Returns the visibility settings of the promotional banners in the portal."
       }
     },
     "/api/2.0/security/csp": {
@@ -5553,40 +5568,8 @@
                 }
               }
             }
-          },
-          "401": {
-            "description": "Unauthorized"
           }
         },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ],
         "description": "Returns the deep link settings."
       }
     },
@@ -5609,7 +5592,7 @@
             }
           }
         },
-        "description": "Returns a list of all the available portal languages in the format of a two-letter or four-letter language code (e.g. \"de\", \"en-US\", etc.)."
+        "description": "Returns a list of all the available portal languages in the format of a two-letter or four-letter language code (e.g. de, en-US, etc.)."
       }
     },
     "/api/2.0/settings/timezones": {
@@ -6483,304 +6466,6 @@
           }
         ],
         "description": "Updates the cookies lifetime value in minutes."
-      }
-    },
-    "/api/2.0/settings/customnavigation/getall": {
-      "get": {
-        "tags": [
-          "Settings / Custom Navigation"
-        ],
-        "summary": "Get the custom navigation items",
-        "operationId": "getCustomNavigationItems",
-        "responses": {
-          "200": {
-            "description": "List of the custom navigation items",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CustomNavigationItemArrayWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ],
-        "description": "Returns a list of the custom navigation items."
-      }
-    },
-    "/api/2.0/settings/customnavigation/getsample": {
-      "get": {
-        "tags": [
-          "Settings / Custom Navigation"
-        ],
-        "summary": "Get a custom navigation item sample",
-        "operationId": "getCustomNavigationItemSample",
-        "responses": {
-          "200": {
-            "description": "Custom navigation item",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CustomNavigationItemWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ],
-        "description": "Returns a sample of the custom navigation item."
-      }
-    },
-    "/api/2.0/settings/customnavigation/get/{id}": {
-      "get": {
-        "tags": [
-          "Settings / Custom Navigation"
-        ],
-        "summary": "Get a custom navigation item by ID",
-        "operationId": "getCustomNavigationItem",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "The ID extracted from the route parameters.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Custom navigation item",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CustomNavigationItemWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ],
-        "description": "Returns a custom navigation item by the ID specified in the request."
-      }
-    },
-    "/api/2.0/settings/customnavigation/create": {
-      "post": {
-        "tags": [
-          "Settings / Custom Navigation"
-        ],
-        "summary": "Add a custom navigation item",
-        "operationId": "createCustomNavigationItem",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CustomNavigationItem"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Custom navigation item",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CustomNavigationItemWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ],
-        "description": "Adds a custom navigation item with the parameters specified in the request."
-      }
-    },
-    "/api/2.0/settings/customnavigation/delete/{id}": {
-      "delete": {
-        "tags": [
-          "Settings / Custom Navigation"
-        ],
-        "summary": "Delete a custom navigation item",
-        "operationId": "deleteCustomNavigationItem",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "The ID extracted from the route parameters.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Ok"
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ],
-        "description": "Deletes a custom navigation item with the ID specified in the request."
       }
     },
     "/api/2.0/settings/encryption/start": {
@@ -7872,7 +7557,7 @@
             "OpenId": []
           }
         ],
-        "description": "Displays the contact form on the \"Sign In\" page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace."
+        "description": "Displays the contact form on the Sign In page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace."
       }
     },
     "/api/2.0/settings/sendadmmail": {
@@ -8200,7 +7885,7 @@
         "tags": [
           "Settings / Notifications"
         ],
-        "summary": "Gets notification channel settings",
+        "summary": "Get notification channels",
         "operationId": "getNotificationChannels",
         "responses": {
           "200": {
@@ -8246,7 +7931,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns a list of notification channels"
+        "description": "Returns a list of notification channels."
       }
     },
     "/api/2.0/settings/owner": {
@@ -9157,7 +8842,7 @@
             "OpenId": []
           }
         ],
-        "description": "Specifies if the white label logo text are default or not."
+        "description": "Specifies if the white label logo text is default or not."
       }
     },
     "/api/2.0/settings/whitelabel/logotext/restore": {
@@ -13002,7 +12687,7 @@
         "tags": [
           "Api keys"
         ],
-        "summary": "Get user API keys",
+        "summary": "Get current user's API keys",
         "operationId": "getApiKeys",
         "responses": {
           "200": {
@@ -13110,7 +12795,7 @@
         "tags": [
           "Api keys"
         ],
-        "summary": "Get user API key info",
+        "summary": "Get current user's API key",
         "operationId": "getApiKey",
         "responses": {
           "200": {
@@ -13156,7 +12841,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns current user API key info."
+        "description": "Returns information about the current user's API key."
       }
     },
     "/api/2.0/keys/{keyId}": {
@@ -13234,7 +12919,7 @@
             "OpenId": []
           }
         ],
-        "description": "Updates an existing API key changing its name, permissions and status."
+        "description": "Updates an existing API key changing its name, permissions, and status."
       },
       "delete": {
         "tags": [
@@ -13298,7 +12983,7 @@
             "OpenId": []
           }
         ],
-        "description": "Delete a user API key by its ID."
+        "description": "Deletes a user API key by its ID."
       }
     },
     "/api/2.0/group": {
@@ -15168,7 +14853,7 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Returns the user claims.",
+        "summary": "Get user claims",
         "operationId": "getClaims",
         "responses": {
           "200": {
@@ -15611,7 +15296,7 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Get a profile by user name",
+        "summary": "Get a profile by user ID",
         "operationId": "getProfileByUserId",
         "parameters": [
           {
@@ -15675,7 +15360,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the detailed information about a profile of the user with the name specified in the request."
+        "description": "Returns the detailed information about a profile of the user with the ID specified in the request."
       },
       "put": {
         "tags": [
@@ -16959,7 +16644,7 @@
         "tags": [
           "People / Search"
         ],
-        "summary": "Search users with detaailed information by extended filter",
+        "summary": "Search users with detailed information by extended filter",
         "operationId": "searchUsersByExtendedFilter",
         "parameters": [
           {
@@ -18711,7 +18396,7 @@
         "tags": [
           "People / User data"
         ],
-        "summary": "Check the data reassignment need",
+        "summary": "Check data for reassignment need",
         "operationId": "necessaryReassign",
         "parameters": [
           {
@@ -18777,7 +18462,7 @@
             "OpenId": []
           }
         ],
-        "description": "Checks if the reassignment of rooms and shared files is necessary or not."
+        "description": "Checks whether the reassignment of rooms and shared files is required."
       }
     },
     "/api/2.0/people/remove/progress/{userid}": {
@@ -19505,7 +19190,7 @@
         "tags": [
           "People / User type"
         ],
-        "summary": "Update user type",
+        "summary": "Start updating user type",
         "operationId": "starUserTypetUpdate",
         "requestBody": {
           "content": {
@@ -19638,7 +19323,7 @@
         "tags": [
           "People / User type"
         ],
-        "summary": "Terminate update user type",
+        "summary": "Terminate updating user type",
         "operationId": "terminateUserTypeUpdate",
         "requestBody": {
           "content": {
@@ -20091,7 +19776,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -20153,7 +19838,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -20308,7 +19993,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -20341,7 +20026,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -20374,7 +20059,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -20799,7 +20484,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -21023,7 +20708,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -21081,7 +20766,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -21266,7 +20951,7 @@
           }
         ],
         "requestBody": {
-          "description": "The parameters for saving file as PDF.",
+          "description": "The parameters for saving the file as PDF.",
           "content": {
             "application/json": {
               "schema": {
@@ -21338,7 +21023,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -21575,7 +21260,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -21733,6 +21418,136 @@
                 }
               }
             }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Files / Folders"
+        ],
+        "operationId": "getFolderRecent",
+        "parameters": [
+          {
+            "name": "userIdOrGroupId",
+            "in": "query",
+            "description": "The user or group ID.",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            }
+          },
+          {
+            "name": "filterType",
+            "in": "query",
+            "description": "The filter type.",
+            "schema": {
+              "$ref": "#/components/schemas/FilterType"
+            }
+          },
+          {
+            "name": "excludeSubject",
+            "in": "query",
+            "description": "Specifies whether to exclude search by user or group ID.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "applyFilterOption",
+            "in": "query",
+            "description": "Specifies whether to return only files, only folders or all elements.",
+            "schema": {
+              "$ref": "#/components/schemas/ApplyFilterOption"
+            }
+          },
+          {
+            "name": "searchArea",
+            "in": "query",
+            "description": "The search area.",
+            "schema": {
+              "$ref": "#/components/schemas/SearchArea"
+            }
+          },
+          {
+            "name": "extension",
+            "in": "query",
+            "description": "Specifies whether to search for a specific file extension in the Recent folder.",
+            "style": "deepObject",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": ".txt"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "The maximum number of items to return.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "description": "The starting position of the results to be returned in the query response.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Specifies the sorting criteria for the folder request.",
+            "schema": {
+              "type": "string",
+              "example": "some text"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "The order in which the results are sorted.",
+            "schema": {
+              "$ref": "#/components/schemas/SortOrder"
+            }
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "The text used for filtering or searching folder contents.",
+            "schema": {
+              "type": "string",
+              "example": "some text"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Recent section contents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderContentIntegerWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You don't have enough permission to view the folder content"
+          },
+          "404": {
+            "description": "The required folder was not found"
           }
         }
       }
@@ -21907,7 +21722,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The request folder ID.",
+            "description": "The folder unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -22024,7 +21839,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The request folder ID.",
+            "description": "The folder unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -22145,7 +21960,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The folder ID of the request.",
+            "description": "The folder ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -22193,7 +22008,7 @@
           {
             "name": "applyFilterOption",
             "in": "query",
-            "description": "Specifies whether to return only files, only folders or all elements from the specified folder.",
+            "description": "Specifies whether to return only files, only folders, or all elements from the specified folder.",
             "schema": {
               "$ref": "#/components/schemas/ApplyFilterOption"
             }
@@ -22258,7 +22073,7 @@
           {
             "name": "sortBy",
             "in": "query",
-            "description": "Specifies the property used for sorting the folder request results.",
+            "description": "The property used for sorting the folder request results.",
             "schema": {
               "type": "string",
               "example": "some text"
@@ -22284,7 +22099,7 @@
           {
             "name": "Location",
             "in": "query",
-            "description": "Represents the location context of the request, specifying the area\r\nwhere the operation is performed, such as a room, documents, or a link.",
+            "description": "The location context of the request, specifying the area\r\nwhere the operation is performed, such as a room, documents, or a link.",
             "schema": {
               "$ref": "#/components/schemas/Location"
             }
@@ -22320,7 +22135,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The request folder ID.",
+            "description": "The folder unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -22356,7 +22171,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The request folder ID.",
+            "description": "The folder unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -22392,7 +22207,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The request folder ID.",
+            "description": "The folder unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -22493,7 +22308,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The request folder ID.",
+            "description": "The folder unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -22692,7 +22507,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The \"Favorites\" section contents",
+            "description": "The Favorites section contents",
             "content": {
               "application/json": {
                 "schema": {
@@ -22794,7 +22609,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The \"My documents\" section contents",
+            "description": "The My documents section contents",
             "content": {
               "application/json": {
                 "schema": {
@@ -22888,7 +22703,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The \"Private Room\" section contents",
+            "description": "The Private Room section contents",
             "content": {
               "application/json": {
                 "schema": {
@@ -22959,7 +22774,7 @@
           {
             "name": "extension",
             "in": "query",
-            "description": "Specifies whether to search for a specific file extension in the \"Recent\" folder.",
+            "description": "Specifies whether to search for a specific file extension in the Recent folder.",
             "style": "deepObject",
             "schema": {
               "type": "array",
@@ -23020,7 +22835,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The \"Recent\" section contents",
+            "description": "The Recent section contents",
             "content": {
               "application/json": {
                 "schema": {
@@ -23066,7 +22881,7 @@
           {
             "name": "withoutTrash",
             "in": "query",
-            "description": "Specifies whether to return the \"Trash\" section or not.",
+            "description": "Specifies whether to return the Trash section or not.",
             "schema": {
               "type": "boolean",
               "example": true
@@ -23225,7 +23040,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The \"Trash\" section contents",
+            "description": "The Trash section contents",
             "content": {
               "application/json": {
                 "schema": {
@@ -24168,7 +23983,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The operation ID of the request.",
+            "description": "The operation unique identifier.",
             "required": true,
             "schema": {
               "type": "string",
@@ -24259,7 +24074,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The folder ID of the session.",
+            "description": "The session folder ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -25104,7 +24919,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -25137,7 +24952,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The file ID of the request.",
+            "description": "The file unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -25192,7 +25007,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The request folder ID.",
+            "description": "The folder unique identifier.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -25335,7 +25150,7 @@
           {
             "name": "fileId",
             "in": "path",
-            "description": "The file ID of the mention message.",
+            "description": "The file ID with the mention message.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -25379,6 +25194,81 @@
             "name": "folderId",
             "in": "path",
             "description": "The folder ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 9846
+            }
+          },
+          {
+            "name": "groupId",
+            "in": "path",
+            "description": "The group ID.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "The number of items to be retrieved in the current query.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "description": "The starting index for the query result set.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "The filter value used for searching or querying group members based on text input.",
+            "schema": {
+              "type": "string",
+              "example": "some text"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupMemberSecurityRequestArrayWrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/files/file/{fileId}/group/{groupId}/share": {
+      "get": {
+        "tags": [
+          "Files / Sharing"
+        ],
+        "operationId": "getGroupsMembersWithFileSecurity",
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "description": "The file ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -26068,7 +25958,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns the contents of the \"Rooms\" section",
+            "description": "Returns the contents of the Rooms section",
             "content": {
               "application/json": {
                 "schema": {
@@ -26142,7 +26032,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -26542,7 +26432,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -26588,7 +26478,7 @@
           }
         ],
         "requestBody": {
-          "description": "The parameters for adding tags.",
+          "description": "The parameters for managing tags.",
           "content": {
             "application/json": {
               "schema": {
@@ -26632,7 +26522,7 @@
           }
         ],
         "requestBody": {
-          "description": "The parameters for adding tags.",
+          "description": "The parameters for managing tags.",
           "content": {
             "application/json": {
               "schema": {
@@ -26713,7 +26603,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -26816,7 +26706,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -26849,7 +26739,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -26919,7 +26809,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -26952,7 +26842,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -27180,7 +27070,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "The room ID of the request.",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -28063,6 +27953,1486 @@
         ],
         "description": "Returns the backup service state."
       }
+    },
+    "/oauth2/authorize": {
+      "get": {
+        "tags": [
+          "OAuth 2.0 / Authorization"
+        ],
+        "summary": "OAuth2 authorization endpoint",
+        "description": "Initiates the OAuth2 authorization flow.",
+        "operationId": "authorizeOAuth",
+        "parameters": [
+          {
+            "name": "response_type",
+            "in": "query",
+            "description": "The OAuth 2.0 response type, must be 'code' for authorization code flow.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "code"
+            }
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "description": "The client identifier issued to the client during registration.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+            }
+          },
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "description": "The URL to redirect to after authorization is complete.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "https://example.com"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "description": "The space-separated list of requested scope permissions.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "files:read"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorization page"
+          },
+          "400": {
+            "description": "Invalid request parameters"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "OAuth 2.0 / Authorization"
+        ],
+        "summary": "OAuth2 consent endpoint",
+        "description": "Sends a consent request with the specified parameters.",
+        "operationId": "submitConsent",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "client_id": {
+                    "type": "string",
+                    "description": "The client identifier issued to the client during registration.",
+                    "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+                  },
+                  "state": {
+                    "type": "string",
+                    "description": "The random string used to solve the CSRF vulnerability problem.",
+                    "example": "abcde"
+                  },
+                  "scope": {
+                    "type": "string",
+                    "description": "The space-separated list of requested scope permissions.",
+                    "example": "files:read"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to the client's redirect URI with authorization code"
+          },
+          "400": {
+            "description": "Invalid request parameters"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          }
+        ]
+      }
+    },
+    "/oauth2/token": {
+      "post": {
+        "tags": [
+          "OAuth 2.0 / Authorization"
+        ],
+        "summary": "OAuth2 token endpoint",
+        "description": "Exchanges an authorization code specified in the request for the access token.",
+        "operationId": "exchangeToken",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "grant_type": {
+                    "type": "string",
+                    "description": "The OAuth2 grant type, must be 'authorization_code' for the authorization code flow.",
+                    "example": "authorization_code"
+                  },
+                  "code": {
+                    "type": "string",
+                    "description": "A temporary authorization code that is sent to the client to be exchanged for a token.",
+                    "example": "abcde"
+                  },
+                  "redirect_uri": {
+                    "type": "string",
+                    "description": "The URL where the user will be redirected after successful or unsuccessful authentication.",
+                    "example": "https://example.com"
+                  },
+                  "client_id": {
+                    "type": "string",
+                    "description": "The client identifier issued to the client during registration.",
+                    "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+                  },
+                  "client_secret": {
+                    "type": "string",
+                    "description": "The client secret issued to the client during registration.",
+                    "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The authorization code was successfully exchanged for the access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "access_token": {
+                      "type": "string",
+                      "description": "The access token issued by the authorization server.",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    },
+                    "token_type": {
+                      "type": "string",
+                      "description": "The type of token issued, typically 'Bearer'.",
+                      "example": "Bearer"
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "description": "The number of seconds until the access token expires.",
+                      "example": 3600
+                    },
+                    "refresh_token": {
+                      "type": "string",
+                      "description": "The token used to obtain a new access token when the current one expires.",
+                      "example": "def502..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters"
+          }
+        }
+      }
+    },
+    "/api/2.0/clients/{clientId}": {
+      "get": {
+        "tags": [
+          "OAuth 2.0 / Client Querying"
+        ],
+        "summary": "Get client details",
+        "description": "Retrieves detailed information about a specific OAuth2 client including its name, description, redirect URIs, and scopes.",
+        "operationId": "getClient",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "description": "The client identifier.",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Client details successfully retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientResponse"
+                },
+                "example": {
+                  "name": "Example Name",
+                  "description": "Example Description",
+                  "tenant": 1,
+                  "scopes": [
+                    "files:read",
+                    "files:write"
+                  ],
+                  "enabled": true,
+                  "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                  "client_secret": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                  "website_url": "http://example.com",
+                  "terms_url": "http://example.com",
+                  "policy_url": "http://example.com",
+                  "logo": "data:image/png;base64,ivBOR",
+                  "authentication_methods": [
+                    "client_secret_post"
+                  ],
+                  "redirect_uris": [
+                    "https://example.com"
+                  ],
+                  "allowed_origins": [
+                    "https://example.com"
+                  ],
+                  "logout_redirect_uris": [
+                    "https://example.com"
+                  ],
+                  "created_on": "2024-04-04T12:00:00Z",
+                  "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                  "modified_on": "2024-04-04T12:00:00Z",
+                  "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                  "is_public": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid client ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to view client",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Client not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "OAuth 2.0 / Client Management"
+        ],
+        "summary": "Update an existing OAuth2 client",
+        "description": "Updates the configuration of an existing OAuth2 client, allowing modifications to the client name, description, redirect URIs, and other settings. The client ID cannot be modified.",
+        "operationId": "updateClient",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "description": "The client identifier.",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateClientRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Client successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request - missing required fields or validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to update client",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Client not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "OAuth 2.0 / Client Management"
+        ],
+        "summary": "Delete an OAuth2 client",
+        "description": "Permanently deletes an OAuth2 client and all associated data. All access and refresh tokens issued to this client will be invalidated. This operation cannot be undone.",
+        "operationId": "deleteClient",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "description": "The client identifier.",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Client successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid client ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to delete client",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Client not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/clients": {
+      "get": {
+        "tags": [
+          "OAuth 2.0 / Client Querying"
+        ],
+        "summary": "Get clients",
+        "description": "Retrieves a paginated list of OAuth2 clients. The results can be paginated using the 'limit' parameter and the last seen client ID or creation date.",
+        "operationId": "getClients",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of results returned per page.",
+            "required": true,
+            "schema": {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 1
+          },
+          {
+            "name": "last_client_id",
+            "in": "query",
+            "description": "The ID of the last retrieved client.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          },
+          {
+            "name": "last_created_on",
+            "in": "query",
+            "description": "The creation date of the last retrieved client.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "example": "2024-04-04T12:00:00Z"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Client list successfully retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageableResponse"
+                },
+                "example": {
+                  "data": [
+                    {
+                      "name": "Example Name",
+                      "description": "Example Description",
+                      "tenant": 1,
+                      "scopes": [
+                        "files:read",
+                        "files:write"
+                      ],
+                      "enabled": true,
+                      "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "client_secret": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "website_url": "http://example.com",
+                      "terms_url": "http://example.com",
+                      "policy_url": "http://example.com",
+                      "logo": "data:image/png;base64,ivBOR",
+                      "authentication_methods": [
+                        "client_secret_post"
+                      ],
+                      "redirect_uris": [
+                        "https://example.com"
+                      ],
+                      "allowed_origins": [
+                        "https://example.com"
+                      ],
+                      "logout_redirect_uris": [
+                        "https://example.com"
+                      ],
+                      "created_on": "2024-04-04T12:00:00Z",
+                      "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "modified_on": "2024-04-04T12:00:00Z",
+                      "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "is_public": true
+                    }
+                  ],
+                  "limit": 50,
+                  "last_client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                  "last_created_on": "2024-04-04T12:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid pagination parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to create a client list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "OAuth 2.0 / Client Management"
+        ],
+        "summary": "Create a new OAuth2 client",
+        "description": "Creates a new OAuth2 client with the specified configuration. The client will be created with the provided scopes, redirect URIs, and other settings. Returns the created client details including the generated client ID.",
+        "operationId": "createClient",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClientRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Client successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientResponse"
+                },
+                "example": {
+                  "name": "Example Name",
+                  "description": "Example Description",
+                  "tenant": 1,
+                  "scopes": [
+                    "files:read",
+                    "files:write"
+                  ],
+                  "enabled": true,
+                  "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                  "client_secret": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                  "website_url": "http://example.com",
+                  "terms_url": "http://example.com",
+                  "policy_url": "http://example.com",
+                  "logo": "data:image/png;base64,ivBOR",
+                  "authentication_methods": [
+                    "client_secret_post"
+                  ],
+                  "redirect_uris": [
+                    "https://example.com"
+                  ],
+                  "allowed_origins": [
+                    "https://example.com"
+                  ],
+                  "logout_redirect_uris": [
+                    "https://example.com"
+                  ],
+                  "created_on": "2024-04-04T12:00:00Z",
+                  "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                  "modified_on": "2024-04-04T12:00:00Z",
+                  "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                  "is_public": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request - missing required fields or validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to create a client",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/clients/{clientId}/regenerate": {
+      "patch": {
+        "tags": [
+          "OAuth 2.0 / Client Management"
+        ],
+        "summary": "Regenerate the client secret",
+        "description": "Generates a new client secret for the specified OAuth2 client. The old secret will be immediately invalidated. This operation should be used with caution as it requires updating the secret in all client applications.",
+        "operationId": "regenerateSecret",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "description": "The client identifier.",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Client secret successfully regenerated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientSecretResponse"
+                },
+                "example": {
+                  "client_secret": "2c53294c-57fa-4d5b-b9db-e49ebb97f25f"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid client ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to regenerate client secret",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Client not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/clients/{clientId}/activation": {
+      "patch": {
+        "tags": [
+          "OAuth 2.0 / Client Management"
+        ],
+        "summary": "Change the client activation status",
+        "description": "Activates or deactivates an OAuth2 client. When deactivated, the client cannot request new access tokens, but existing tokens will remain valid until they expire.",
+        "operationId": "changeActivation",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "description": "The client identifier.",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeClientActivationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Client activation status successfully changed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid client ID format or activation status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to change client activation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Client not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/scopes": {
+      "get": {
+        "tags": [
+          "OAuth 2.0 / Scope Management"
+        ],
+        "summary": "Get available OAuth2 scopes",
+        "description": "Retrieves a list of all available OAuth2 scopes for the specified tenant. The scopes define the permissions that can be requested by OAuth2 clients. The list is ordered alphabetically, with the 'openid' scope always appearing first.",
+        "operationId": "getScopes",
+        "responses": {
+          "200": {
+            "description": "Scopes successfully retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopeResponse"
+                },
+                "example": [
+                  {
+                    "name": "scope_name",
+                    "type": "scope_type",
+                    "group": "scope_group"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to get a list of scopes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/clients/{clientId}/public/info": {
+      "get": {
+        "tags": [
+          "OAuth 2.0 / Client Querying"
+        ],
+        "summary": "Get public client information",
+        "description": "Returns the public information for a client with the ID secified din the request.",
+        "operationId": "getPublicClientInfo",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "description": "The client identifier.",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved client public info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientInfoResponse"
+                },
+                "example": {
+                  "name": "Example Name",
+                  "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                  "description": "Example Description",
+                  "website_url": "http://example.com",
+                  "terms_url": "http://example.com",
+                  "policy_url": "http://example.com",
+                  "logo": "data:image/png;base64,ivBOR",
+                  "authentication_methods": [
+                    "client_secret_post"
+                  ],
+                  "scopes": [
+                    "files:read",
+                    "files:write"
+                  ],
+                  "is_public": true,
+                  "created_on": "2024-04-04T12:00:00Z",
+                  "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                  "modified_on": "2024-04-04T12:00:00Z",
+                  "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/2.0/clients/{clientId}/info": {
+      "get": {
+        "tags": [
+          "OAuth 2.0 / Client Querying"
+        ],
+        "operationId": "getClientInfo",
+        "summary": "Get detailed client information",
+        "description": "Retrieves the detailed information for a client with the ID specified in the request.",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "description": "The client identifier.",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved client info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientInfoResponse"
+                },
+                "example": {
+                  "name": "Example Name",
+                  "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                  "description": "Example Description",
+                  "website_url": "http://example.com",
+                  "terms_url": "http://example.com",
+                  "policy_url": "http://example.com",
+                  "logo": "data:image/png;base64,ivBOR",
+                  "authentication_methods": [
+                    "client_secret_post"
+                  ],
+                  "scopes": [
+                    "files:read",
+                    "files:write"
+                  ],
+                  "is_public": true,
+                  "created_on": "2024-04-04T12:00:00Z",
+                  "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                  "modified_on": "2024-04-04T12:00:00Z",
+                  "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/clients/info": {
+      "get": {
+        "tags": [
+          "OAuth 2.0 / Client Querying"
+        ],
+        "summary": "Get detailed information of clients",
+        "description": "Retrieves a paginated list of information for all clients.",
+        "operationId": "getClientsInfo",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of results returned per page.",
+            "required": true,
+            "schema": {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 1
+          },
+          {
+            "name": "last_client_id",
+            "in": "query",
+            "description": "The identifier of the last retrieved client.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          },
+          {
+            "name": "last_created_on",
+            "in": "query",
+            "description": "The creation date of the last retrieved client.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "example": "2024-04-04T12:00:00Z"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved clients info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageableResponseClientInfoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/clients/consents": {
+      "get": {
+        "tags": [
+          "OAuth 2.0 / Client Querying"
+        ],
+        "summary": "Get user consents",
+        "description": "Retrieves a paginated list of user consents.",
+        "operationId": "getConsents",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of results returned per page.",
+            "required": true,
+            "schema": {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 1
+          },
+          {
+            "name": "last_modified_on",
+            "in": "query",
+            "description": "The date when the user consent was last modified.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "example": "2024-04-04T12:00:00Z"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved user consents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageableModificationResponse"
+                },
+                "example": {
+                  "data": [
+                    {
+                      "registered_client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "scopes": [
+                        "files:read",
+                        "files:write"
+                      ],
+                      "modified_at": "2024-04-04T12:00:00Z",
+                      "client": {
+                        "name": "Example Name",
+                        "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                        "description": "Example Description",
+                        "website_url": "http://example.com",
+                        "terms_url": "http://example.com",
+                        "policy_url": "http://example.com",
+                        "logo": "data:image/png;base64,ivBOR",
+                        "authentication_methods": [
+                          "client_secret_post"
+                        ],
+                        "scopes": [
+                          "files:read",
+                          "files:write"
+                        ],
+                        "is_public": true,
+                        "created_on": "2024-04-04T12:00:00Z",
+                        "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                        "modified_on": "2024-04-04T12:00:00Z",
+                        "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+                      }
+                    }
+                  ],
+                  "limit": 50,
+                  "last_modified_on": "2024-04-04T12:00:00Z"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/clients/{clientId}/revoke": {
+      "delete": {
+        "tags": [
+          "OAuth 2.0 / Client Management"
+        ],
+        "summary": "Revoke client consent",
+        "description": "Revokes all user consents for the specified OAuth2 client. This will invalidate all access tokens and refresh tokens issued to this client for the current user. The user will need to re-authorize the client to access their resources.",
+        "operationId": "revokeUserClient",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "description": "The client identifier.",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Client consent successfully revoked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid client ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to revoke consent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Client not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Authorization service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -28285,7 +29655,7 @@
           },
           "feedbackAndSupportEnabled": {
             "type": "boolean",
-            "description": "Specifies if the \"Feedback & Support\" link is available or not.",
+            "description": "Specifies if the Feedback & Support link is available or not.",
             "example": true
           },
           "userForumEnabled": {
@@ -28336,7 +29706,7 @@
           },
           "feedbackAndSupportEnabled": {
             "type": "boolean",
-            "description": "Specifies if the \"Feedback & Support\" link is available or not.",
+            "description": "Specifies if the Feedback & Support link is available or not.",
             "example": true
           },
           "userForumEnabled": {
@@ -28425,6 +29795,15 @@
           "culture": {
             "type": "string",
             "description": "Culture",
+            "nullable": true,
+            "example": "some text"
+          },
+          "recaptchaType": {
+            "$ref": "#/components/schemas/RecaptchaType"
+          },
+          "recaptchaResponse": {
+            "type": "string",
+            "description": "The user's response to the CAPTCHA challenge.",
             "nullable": true,
             "example": "some text"
           }
@@ -28598,11 +29977,15 @@
         "description": "The audit event parameters."
       },
       "AuthKey": {
+        "required": [
+          "name",
+          "value"
+        ],
         "type": "object",
         "properties": {
           "name": {
             "type": "string",
-            "description": "The authentication key name.",
+            "description": "The authorization key name.",
             "nullable": true,
             "example": "Winfield Upton"
           },
@@ -28610,19 +29993,19 @@
             "maxLength": 255,
             "minLength": 0,
             "type": "string",
-            "description": "The authentication key value.",
+            "description": "The authorization key value.",
             "nullable": true,
             "example": "some text"
           },
           "title": {
             "type": "string",
-            "description": "The authentication key title.",
+            "description": "The authorization key title.",
             "nullable": true,
             "example": "legacy_1080p_small_wooden_mouse"
           }
         },
         "additionalProperties": false,
-        "description": "The authentication key parameters."
+        "description": "The authorization key parameters."
       },
       "AuthRequestsDto": {
         "type": "object",
@@ -28744,31 +30127,31 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "The name of the authentication service.",
+            "description": "The name of the authorization service.",
             "nullable": true,
             "example": "Winfield Upton"
           },
           "title": {
             "type": "string",
-            "description": "The user-friendly display title of the authentication service.",
+            "description": "The user-friendly display title of the authorization service.",
             "nullable": true,
             "example": "legacy_1080p_small_wooden_mouse"
           },
           "description": {
             "type": "string",
-            "description": "The brief description of the authentication service.",
+            "description": "The brief description of the authorization service.",
             "nullable": true,
             "example": "some text"
           },
           "instruction": {
             "type": "string",
-            "description": "The detailed instructions for configuring or using the authentication service.",
+            "description": "The detailed instructions for configuring or using the authorization service.",
             "nullable": true,
             "example": "some text"
           },
           "canSet": {
             "type": "boolean",
-            "description": "Specifies whether the authentication service can be configured by the user.",
+            "description": "Specifies whether the authorization service can be configured by the user.",
             "example": true
           },
           "props": {
@@ -28776,7 +30159,7 @@
             "items": {
               "$ref": "#/components/schemas/AuthKey"
             },
-            "description": "The collection of authorization keys associated with the authentication service.",
+            "description": "The collection of authorization keys associated with the authorization service.",
             "nullable": true
           }
         },
@@ -29173,12 +30556,12 @@
           },
           "enabled": {
             "type": "boolean",
-            "description": "Service state",
+            "description": "Specifies whether the wallet service is enabled.",
             "example": true
           }
         },
         "additionalProperties": false,
-        "description": "Tenant wallet service state request parameters"
+        "description": "The request parameters for changing the tenant wallet service state."
       },
       "CompanyWhiteLabelSettings": {
         "type": "object",
@@ -29987,124 +31370,6 @@
           }
         }
       },
-      "CustomNavigationItem": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "The ID of the custom navigation item.",
-            "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
-          },
-          "label": {
-            "type": "string",
-            "description": "The label of the custom navigation item.",
-            "nullable": true,
-            "example": "Label"
-          },
-          "url": {
-            "type": "string",
-            "description": "The URL of the custom navigation item.",
-            "nullable": true,
-            "example": "Url"
-          },
-          "bigImg": {
-            "type": "string",
-            "description": "The big image of the custom navigation item.",
-            "nullable": true,
-            "example": "data:image\\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkAgMAAAANjH3HAAAADFBMVEUAAADJycnJycnJycmiuNtHAAAAA3RSTlMAf4C\\/aSLHAAAAyElEQVR4Xu3NsQ3CMBSE4YubFB4ilHQegdGSjWACvEpGoEyBYiL05AdnXUGHolx10lf82MmOpfLeo5UoJUhBlpKkRCnhUy7b9XCWkqQMUkYlXVHSf8kTvkHKqKQrSnopg5SRxTMklLmS1MwaSWpmCSQ1MyOzWGZCYrEMEFksA4QqlAFuJJYBcCKxjM3FMySeIfEMC2dMOONCGZZgmdr1ly3TSrJMK9EyJBaaGrHQikYstAiJZRYSyiQEdyg5S8Evckih\\/YPscsdej0H6dc0TYw4AAAAASUVORK5CYII="
-          },
-          "smallImg": {
-            "type": "string",
-            "description": "The small image of the custom navigation item.",
-            "nullable": true,
-            "example": "data:image\\/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8\\/9hAAAAUUlEQVR4AWMY\\/KC5o\\/cAEP9HxxgKcSpCGELYADyu2E6mAQjNxBlAWPNxkHdwGkBIM3KYYDUAr2ZCAE+oH8eujrAXDsA0k2EAAtDXAGLx4MpsADUgvkRKUlqfAAAAAElFTkSuQmCC"
-          },
-          "showInMenu": {
-            "type": "boolean",
-            "description": "Specifies whether to show the custom navigation item in menu or not.",
-            "example": true
-          },
-          "showOnHomePage": {
-            "type": "boolean",
-            "description": "Specifies whether to show the custom navigation item on home page or not.",
-            "example": true
-          }
-        },
-        "additionalProperties": false,
-        "description": "The custom navigation item parameters."
-      },
-      "CustomNavigationItemArrayWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CustomNavigationItem"
-            }
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string"
-                },
-                "action": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "CustomNavigationItemWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "$ref": "#/components/schemas/CustomNavigationItem"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string"
-                },
-                "action": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
       "CustomerInfoDto": {
         "type": "object",
         "properties": {
@@ -30120,7 +31385,7 @@
           },
           "email": {
             "type": "string",
-            "description": "The email address of the customer.",
+            "description": "The customer email address.",
             "nullable": true,
             "readOnly": true,
             "example": "Sydney_Roberts4@hotmail.com"
@@ -30171,39 +31436,39 @@
         "properties": {
           "startDate": {
             "type": "string",
-            "description": "Start date",
+            "description": "The report start date.",
             "format": "date-time",
             "nullable": true,
             "example": "2008-04-10T06:30:00.0000000+04:00"
           },
           "endDate": {
             "type": "string",
-            "description": "End date",
+            "description": "The report end date.",
             "format": "date-time",
             "nullable": true,
             "example": "2008-04-10T06:30:00.0000000+04:00"
           },
           "participantName": {
             "type": "string",
-            "description": "Participant name",
+            "description": "The participant name.",
             "nullable": true,
             "example": "some text"
           },
           "credit": {
             "type": "boolean",
-            "description": "Include credit operations",
+            "description": "Specifies whether to include credit operations in the report.",
             "nullable": true,
             "example": true
           },
           "debit": {
             "type": "boolean",
-            "description": "Include debit operations",
+            "description": "Specifies whether to include debit operations in the report.",
             "nullable": true,
             "example": true
           }
         },
         "additionalProperties": false,
-        "description": "Parameters of the request for generating the report on client operations"
+        "description": "The request parameters for generating a report on client operations."
       },
       "DbTenant": {
         "type": "object",
@@ -30380,6 +31645,11 @@
         "description": "The request parameters for managing the deep link configuration."
       },
       "DeepLinkDto": {
+        "required": [
+          "androidPackageName",
+          "iosPackageId",
+          "url"
+        ],
         "type": "object",
         "properties": {
           "androidPackageName": {
@@ -30470,28 +31740,32 @@
       },
       "DocumentBuilderTaskDto": {
         "required": [
+          "error",
           "id",
           "isCompleted",
           "percentage",
+          "resultFileId",
+          "resultFileName",
+          "resultFileUrl",
           "status"
         ],
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
-            "description": "The document builder ID.",
+            "description": "The Document Builder task ID.",
             "nullable": true,
             "example": "9846"
           },
           "error": {
             "type": "string",
-            "description": "The error message occured while the document building process.",
+            "description": "The error message occurred during the document building process.",
             "nullable": true,
             "example": "some text"
           },
           "percentage": {
             "type": "integer",
-            "description": "The percentage of the progress of the document building process.",
+            "description": "The progress percentage of the document building process.",
             "format": "int32",
             "example": 1234
           },
@@ -30526,7 +31800,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The document builder task parameters."
+        "description": "The Document Builder task parameters."
       },
       "DocumentBuilderTaskWrapper": {
         "type": "object",
@@ -30601,7 +31875,7 @@
         "properties": {
           "show": {
             "type": "boolean",
-            "description": "Specifies whether the email activation settings is shown or hidden.",
+            "description": "Specifies whether the email activation settings are shown or hidden.",
             "example": true
           },
           "lastModified": {
@@ -30993,7 +32267,6 @@
       },
       "FeatureUsedDto": {
         "required": [
-          "title",
           "value"
         ],
         "type": "object",
@@ -31018,6 +32291,9 @@
         "description": "The used space parameters of the tenant quota feature."
       },
       "FinishDto": {
+        "required": [
+          "isSendWelcomeEmail"
+        ],
         "type": "object",
         "properties": {
           "isSendWelcomeEmail": {
@@ -31198,6 +32474,7 @@
         "required": [
           "domain",
           "ext",
+          "path",
           "uploadDashboard",
           "uploadDomain",
           "uploadExt",
@@ -31270,6 +32547,10 @@
         "description": "The request parameters for managing the greeting settings."
       },
       "GroupSummaryDto": {
+        "required": [
+          "id",
+          "name"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -31507,6 +32788,9 @@
         }
       },
       "IpRestrictionBase": {
+        "required": [
+          "ip"
+        ],
         "type": "object",
         "properties": {
           "ip": {
@@ -31522,6 +32806,9 @@
         "additionalProperties": false
       },
       "IpRestrictionsDto": {
+        "required": [
+          "ipRestrictions"
+        ],
         "type": "object",
         "properties": {
           "ipRestrictions": {
@@ -31633,7 +32920,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The default white label logos parameters."
+        "description": "The default white label logo parameters."
       },
       "IsDefaultWhiteLabelLogosWrapper": {
         "type": "object",
@@ -33285,19 +34572,26 @@
         "description": "The parameters required for the mobile phone verification."
       },
       "NotificationChannelDto": {
+        "required": [
+          "isEnabled",
+          "name"
+        ],
         "type": "object",
         "properties": {
           "name": {
             "type": "string",
+            "description": "The notification channel name.",
             "nullable": true,
             "example": "Winfield Upton"
           },
           "isEnabled": {
             "type": "boolean",
+            "description": "Specifies whether the notification channel is enabled.",
             "example": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The notification channel information."
       },
       "NotificationChannelStatusDto": {
         "type": "object",
@@ -33307,10 +34601,12 @@
             "items": {
               "$ref": "#/components/schemas/NotificationChannelDto"
             },
+            "description": "The list of notification channels.",
             "nullable": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The notification channel settings."
       },
       "NotificationChannelStatusWrapper": {
         "type": "object",
@@ -33515,31 +34811,31 @@
           },
           "service": {
             "type": "string",
-            "description": "Service related to the operation.",
+            "description": "The service related to the operation.",
             "nullable": true,
             "example": "some text"
           },
           "description": {
             "type": "string",
-            "description": "Brief description of the operation.",
+            "description": "The brief operation description.",
             "nullable": true,
             "example": "some text"
           },
           "details": {
             "type": "string",
-            "description": "Brief details of the operation.",
+            "description": "The detailed information about the operation.",
             "nullable": true,
             "example": "some text"
           },
           "serviceUnit": {
             "type": "string",
-            "description": "Unit of the service.",
+            "description": "The service unit.",
             "nullable": true,
             "example": "some text"
           },
           "quantity": {
             "type": "integer",
-            "description": "Quantity of the service used.",
+            "description": "The quantity of the service used.",
             "format": "int32",
             "example": 1234
           },
@@ -33551,23 +34847,23 @@
           },
           "credit": {
             "type": "number",
-            "description": "Credit amount of the operation.",
+            "description": "The credit amount of the operation.",
             "format": "double"
           },
           "debit": {
             "type": "number",
-            "description": "Debit amount of the operation.",
+            "description": "The debit amount of the operation.",
             "format": "double"
           },
           "participantName": {
             "type": "string",
-            "description": "Original name of the participant.",
+            "description": "The participant original name.",
             "nullable": true,
             "example": "some text"
           },
           "participantDisplayName": {
             "type": "string",
-            "description": "Display name of the participant.",
+            "description": "The participant display name.",
             "nullable": true,
             "example": "some text"
           }
@@ -33800,18 +35096,18 @@
         "properties": {
           "operationId": {
             "type": "integer",
-            "description": "Unique identifier of the operation.",
+            "description": "The operation unique identifier.",
             "format": "int64",
             "example": 1234
           },
           "amount": {
             "type": "number",
-            "description": "The amount of the payment calculation.",
+            "description": "The calculated payment amount.",
             "format": "double"
           },
           "currency": {
             "type": "string",
-            "description": "The three-character ISO 4217 currency symbol of the payment calculation.",
+            "description": "The three-character ISO 4217 currency symbol used for the payment calculation.",
             "nullable": true,
             "example": "some text"
           },
@@ -33823,7 +35119,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The payment calculation."
+        "description": "The parameters of the calculated payment amount."
       },
       "PaymentCalculationWrapper": {
         "type": "object",
@@ -33974,7 +35270,7 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "The quantity of payment",
+            "description": "The payment quantity.",
             "nullable": true,
             "example": [
               {
@@ -34159,7 +35455,7 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "The mapping of item identifiers with their respective quantities in the payment.",
+            "description": "The mapping of item identifiers to their respective quantities in the payment.",
             "nullable": true,
             "example": [
               {
@@ -34170,7 +35466,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The request parameters for the payment quantity specifications."
+        "description": "The request parameters for specifying payment quantity."
       },
       "Quota": {
         "type": "object",
@@ -34440,36 +35736,36 @@
             "items": {
               "$ref": "#/components/schemas/OperationDto"
             },
-            "description": "Collection of operations.",
+            "description": "A collection of operations.",
             "nullable": true
           },
           "offset": {
             "type": "integer",
-            "description": "Offset of the report data.",
+            "description": "The report data offset.",
             "format": "int32",
             "example": 1234
           },
           "limit": {
             "type": "integer",
-            "description": "Limit of the report data.",
+            "description": "The report data limit.",
             "format": "int32",
             "example": 1234
           },
           "totalQuantity": {
             "type": "integer",
-            "description": "Total quantity of operations in the report.",
+            "description": "The total quantity of operations in the report.",
             "format": "int32",
             "example": 1234
           },
           "totalPage": {
             "type": "integer",
-            "description": "Total number of pages in the report.",
+            "description": "The total number of pages in the report.",
             "format": "int32",
             "example": 1234
           },
           "currentPage": {
             "type": "integer",
-            "description": "Current page number of the report.",
+            "description": "The current page number of the report.",
             "format": "int32",
             "example": 1234
           }
@@ -34763,7 +36059,10 @@
       },
       "SettingsDto": {
         "required": [
-          "culture"
+          "baseDomain",
+          "cookieSettingsEnabled",
+          "culture",
+          "deepLink"
         ],
         "type": "object",
         "properties": {
@@ -34909,7 +36208,7 @@
           },
           "displayAbout": {
             "type": "boolean",
-            "description": "Specifies whether to display the \"About\" portal section.",
+            "description": "Specifies whether to display the About portal section.",
             "example": true
           },
           "domainValidator": {
@@ -35801,14 +37100,18 @@
           },
           "amount": {
             "type": "number",
-            "description": "The amount of the sub-account.",
+            "description": "The balance of the sub-account in the specified currency.",
             "format": "double"
           }
         },
         "additionalProperties": false,
-        "description": "Represents a sub-account with a specific currency and amount."
+        "description": "Represents a sub-account with a specific currency and balance."
       },
       "Tariff": {
+        "required": [
+          "dueDate",
+          "quotas"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -35922,6 +37225,9 @@
         }
       },
       "TelegramStatusDto": {
+        "required": [
+          "status"
+        ],
         "type": "object",
         "properties": {
           "status": {
@@ -36018,7 +37324,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The promotional banners visibility settings."
+        "description": "The visibility settings of the promotional banners."
       },
       "TenantBannerSettingsDto": {
         "type": "object",
@@ -36030,7 +37336,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The request parameters for managing the promotional banners visibility settings for the current tenant."
+        "description": "The request parameters for managing the visibility settings of the promotional banners for the current tenant."
       },
       "TenantBannerSettingsWrapper": {
         "type": "object",
@@ -36927,34 +38233,34 @@
         "properties": {
           "allowInvitingMembers": {
             "type": "boolean",
-            "description": "Allow invite new DocSpace members through the Contacts section.",
+            "description": "Specifies whether to allow inviting new DocSpace members through the Contacts section.",
             "example": true
           },
           "allowInvitingGuests": {
             "type": "boolean",
-            "description": "Allow all DocSpace members to invite external guests to rooms.",
+            "description": "Specifies whether to allow all DocSpace members to invite external guests to the rooms.",
             "example": true
           }
         },
         "additionalProperties": false,
-        "description": "User invitation settings"
+        "description": "The user invitation settings."
       },
       "TenantUserInvitationSettingsRequestDto": {
         "type": "object",
         "properties": {
           "allowInvitingMembers": {
             "type": "boolean",
-            "description": "Allow invite new DocSpace members through the Contacts section.",
+            "description": "Specifies whether to allow inviting new DocSpace members through the Contacts section.",
             "example": true
           },
           "allowInvitingGuests": {
             "type": "boolean",
-            "description": "Allow all DocSpace members to invite external guests to rooms.",
+            "description": "Specifies whether to allow all DocSpace members to invite external guests to the rooms.",
             "example": true
           }
         },
         "additionalProperties": false,
-        "description": "User invitation settings"
+        "description": "The request parameters for updating the user invitation settings."
       },
       "TenantUserInvitationSettingsWrapper": {
         "type": "object",
@@ -37080,18 +38386,20 @@
                 "Backup",
                 "Storage"
               ],
-              "description": "Enabled services"
+              "description": "The list of the enabled wallet services."
             },
-            "description": "Enabled services",
+            "description": "The list of the enabled wallet services.",
             "nullable": true
           },
           "lastModified": {
             "type": "string",
+            "description": "The date and time when the wallet services settings were last modified.",
             "format": "date-time",
             "example": "2008-04-10T06:30:00.0000000+04:00"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The wallet services settings."
       },
       "TenantWalletServiceSettingsWrapper": {
         "type": "object",
@@ -37132,14 +38440,14 @@
         "properties": {
           "enabled": {
             "type": "boolean",
-            "description": "Enabled",
+            "description": "Specifies whether automatic top-up for the tenant wallet is enabled.",
             "example": true
           },
           "minBalance": {
             "maximum": 1000,
             "minimum": 5,
             "type": "integer",
-            "description": "Minimun balance",
+            "description": "The minimum wallet balance at which automatic top-up will be triggered. Must be between 5 and 1000.",
             "format": "int32",
             "example": 1234
           },
@@ -37147,7 +38455,7 @@
             "maximum": 5000,
             "minimum": 6,
             "type": "integer",
-            "description": "Up to balance",
+            "description": "The maximum wallet balance at which automatic top-up will be triggered. Must be between 6 and 5000.",
             "format": "int32",
             "example": 1234
           },
@@ -37159,11 +38467,13 @@
           },
           "lastModified": {
             "type": "string",
+            "description": "The date and time when the tenant wallet settings were last modified.",
             "format": "date-time",
             "example": "2008-04-10T06:30:00.0000000+04:00"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The tenant wallet settings."
       },
       "TenantWalletSettingsWrapper": {
         "type": "object",
@@ -37173,7 +38483,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "Tenant wallet settings"
+        "description": "The wrapper for the tenant wallet settings."
       },
       "TenantWrapper": {
         "type": "object",
@@ -37319,6 +38629,8 @@
       },
       "TfaSettingsDto": {
         "required": [
+          "avaliable",
+          "enabled",
           "id",
           "title"
         ],
@@ -37468,19 +38780,19 @@
             "maximum": 999999,
             "minimum": 1,
             "type": "integer",
-            "description": "Amount",
+            "description": "The amount of money for the operation.",
             "format": "int32",
             "example": 1234
           },
           "currency": {
             "type": "string",
-            "description": "The three-character ISO 4217 currency symbol",
+            "description": "The three-character ISO 4217 currency symbol.",
             "nullable": true,
             "example": "some text"
           }
         },
         "additionalProperties": false,
-        "description": "Put money on deposit request parameters"
+        "description": "The request parameters for putting money on deposit."
       },
       "TurnOnAdminMessageSettingsRequestDto": {
         "type": "object",
@@ -37892,7 +39204,7 @@
               "format": "int32",
               "nullable": true
             },
-            "description": "The mapping of item identifiers with their respective quantities in the payment.",
+            "description": "The mapping of item identifiers to their respective quantities in the payment.",
             "nullable": true,
             "example": [
               {
@@ -37906,7 +39218,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The request parameters for the wallet payment quantity specifications."
+        "description": "The request parameters for specifying wallet payment quantity."
       },
       "WebItemSecurityRequestsDto": {
         "required": [
@@ -37999,6 +39311,7 @@
           "createBy",
           "createOn",
           "description",
+          "enabled",
           "homePage",
           "image",
           "license",
@@ -38024,15 +39337,9 @@
             "nullable": true,
             "example": "some text"
           },
-          "sdkVersion": {
+          "minDocSpaceVersion": {
             "type": "string",
-            "description": "The Plugin SDK version the current plugin is developed with.",
-            "nullable": true,
-            "example": "some text"
-          },
-          "docspaceVersions": {
-            "type": "string",
-            "description": "The list of supported DocSpace versions that current plugin is guaranteed to work with.",
+            "description": "The minimum version of DocSpace with which the plugin is guaranteed to work.",
             "nullable": true,
             "example": "some text"
           },
@@ -38114,6 +39421,9 @@
         "description": "The web plugin information."
       },
       "WebPluginRequests": {
+        "required": [
+          "settings"
+        ],
         "type": "object",
         "properties": {
           "enabled": {
@@ -38213,7 +39523,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The request parameters for requesting the webhook delivery retries."
+        "description": "The parameters for requesting the webhook delivery retries."
       },
       "WebhookTrigger": {
         "description": "[0 - *, 1 - user.created, 2 - user.invited, 4 - user.updated, 8 - user.deleted, 16 - group.created, 32 - group.updated, 64 - group.deleted, 128 - file.created, 256 - file.uploaded, 512 - file.updated, 1024 - file.trashed, 2048 - file.deleted, 4096 - file.restored, 8192 - file.copied, 16384 - file.moved, 32768 - folder.created, 65536 - folder.updated, 131072 - folder.trashed, 262144 - folder.deleted, 524288 - folder.restored, 1048576 - folder.copied, 2097152 - folder.moved, 4194304 - room.created, 8388608 - room.updated, 16777216 - room.archived, 33554432 - room.deleted, 67108864 - room.restored, 134217728 - room.copied]",
@@ -38984,11 +40294,18 @@
         }
       },
       "ApiKeyResponseDto": {
+        "required": [
+          "id",
+          "isActive",
+          "key",
+          "name",
+          "permissions"
+        ],
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
-            "description": "The unique identifier of the API key.",
+            "description": "The API key unique identifier.",
             "format": "uuid",
             "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
           },
@@ -39261,6 +40578,15 @@
             "description": "The user email address.",
             "format": "email",
             "example": "Sydney_Roberts4@hotmail.com"
+          },
+          "recaptchaType": {
+            "$ref": "#/components/schemas/RecaptchaType"
+          },
+          "recaptchaResponse": {
+            "type": "string",
+            "description": "The user's response to the CAPTCHA challenge.",
+            "nullable": true,
+            "example": "some text"
           }
         },
         "additionalProperties": false,
@@ -39676,6 +41002,12 @@
         }
       },
       "GroupDto": {
+        "required": [
+          "category",
+          "id",
+          "isLDAP",
+          "name"
+        ],
         "type": "object",
         "properties": {
           "name": {
@@ -39761,7 +41093,7 @@
           },
           "groupManager": {
             "type": "string",
-            "description": "Group manager ID",
+            "description": "The group manager ID.",
             "format": "uuid",
             "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
           },
@@ -39769,7 +41101,7 @@
             "maxLength": 128,
             "minLength": 0,
             "type": "string",
-            "description": "Group name",
+            "description": "The group name.",
             "nullable": true,
             "example": "some text"
           }
@@ -40211,7 +41543,6 @@
       },
       "SignupAccountRequestDto": {
         "required": [
-          "email",
           "key",
           "serializedProfile"
         ],
@@ -40259,7 +41590,7 @@
           },
           "serializedProfile": {
             "type": "string",
-            "description": "Third-party profile in the serialized format",
+            "description": "The third-party profile in the serialized format",
             "nullable": true,
             "example": "some text"
           }
@@ -40268,6 +41599,7 @@
         "description": "The request parameters for creating a third-party account."
       },
       "SortOrder": {
+        "description": "[0 - Ascending, 1 - Descending]",
         "enum": [
           0,
           1
@@ -40281,8 +41613,7 @@
         "x-enum-descriptions": [
           "Ascending",
           "Descending"
-        ],
-        "description": "[0 - Ascending, 1 - Descending]"
+        ]
       },
       "StartReassignRequestDto": {
         "required": [
@@ -40832,7 +42163,7 @@
           },
           "permissions": {
             "type": "string",
-            "description": "The access rights for the user with the name above.\r\nCan be \"Full Access\", \"Read Only\", or \"Deny Access\".",
+            "description": "The access rights for the user with the name above.\r\nCan be Full Access, Read Only, or Deny Access.",
             "nullable": true,
             "example": "some text"
           },
@@ -40912,6 +42243,9 @@
         "description": "The config parameter which contains the information about the action in the document that will be scrolled to."
       },
       "AnonymousConfigDto": {
+        "required": [
+          "request"
+        ],
         "type": "object",
         "properties": {
           "request": {
@@ -40924,6 +42258,7 @@
         "description": "The anonymous config parameters."
       },
       "ApplyFilterOption": {
+        "description": "[0 - All, 1 - Files, 2 - Folders]",
         "enum": [
           0,
           1,
@@ -40940,8 +42275,7 @@
           "All",
           "Files",
           "Folders"
-        ],
-        "description": "[0 - All, 1 - Files, 2 - Folders]"
+        ]
       },
       "ArchiveRoomRequest": {
         "type": "object",
@@ -41098,7 +42432,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The auto-clearing request parameters."
+        "description": "The request parameters for updating the trash bin auto-clearing setting."
       },
       "BaseBatchRequestDto": {
         "allOf": [
@@ -41243,7 +42577,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The parameters for adding tags."
+        "description": "The parameters for managing room tags."
       },
       "ChangeHistory": {
         "required": [
@@ -41373,12 +42707,12 @@
             "items": {
               "$ref": "#/components/schemas/FileEntryBaseDto"
             },
-            "description": "The list of files of the destination folder.",
+            "description": "The list of files in the destination folder.",
             "nullable": true
           }
         },
         "additionalProperties": false,
-        "description": "The destination folder checking information."
+        "description": "The result of checking whether files can be moved or copied to the specified folder."
       },
       "CheckDestFolderResult": {
         "description": "[0 - All allowed, 1 - Part allowed, 2 - None allowed]",
@@ -41575,7 +42909,8 @@
           "documentType",
           "editorConfig",
           "editorType",
-          "editorUrl"
+          "editorUrl",
+          "file"
         ],
         "type": "object",
         "properties": {
@@ -42468,7 +43803,7 @@
           },
           "immediately": {
             "type": "boolean",
-            "description": "Specifies whether to move a file to the \\\"Trash\\\" folder or delete it immediately.",
+            "description": "Specifies whether to move a file to the \\Trash\\ folder or delete it immediately.",
             "example": true
           }
         },
@@ -42524,7 +43859,7 @@
               },
               "immediately": {
                 "type": "boolean",
-                "description": "Specifies whether to move a file to the \\\"Trash\\\" folder or delete it immediately.",
+                "description": "Specifies whether to move a file to the \\Trash\\ folder or delete it immediately.",
                 "example": true
               }
             }
@@ -42543,7 +43878,7 @@
           },
           "immediately": {
             "type": "boolean",
-            "description": "Specifies whether to move a folder to the \\\"Trash\\\" folder or delete it immediately.",
+            "description": "Specifies whether to move a folder to the \\Trash\\ folder or delete it immediately.",
             "example": true
           }
         },
@@ -42619,6 +43954,8 @@
         "required": [
           "docServicePortalUrl",
           "docServicePreloadUrl",
+          "docServiceSignatureHeader",
+          "docServiceSslVerification",
           "docServiceUrl",
           "docServiceUrlApi",
           "docServiceUrlInternal",
@@ -42952,7 +44289,7 @@
           }
         ],
         "additionalProperties": false,
-        "description": "The duplicate request parameters."
+        "description": "The request parameters for duplicating files and fodlers."
       },
       "EditHistoryArrayWrapper": {
         "type": "object",
@@ -43033,6 +44370,12 @@
         "description": "The parameters of the file editing history."
       },
       "EditHistoryDataDto": {
+        "required": [
+          "fileType",
+          "key",
+          "url",
+          "version"
+        ],
         "type": "object",
         "properties": {
           "changesUrl": {
@@ -43337,7 +44680,7 @@
           },
           "toolbarDocked": {
             "type": "string",
-            "description": "The place for the embedded viewer toolbar, can be either \"top\" or \"bottom\".",
+            "description": "The place for the embedded viewer toolbar, can be either top or bottom.",
             "nullable": true,
             "readOnly": true,
             "example": "some text"
@@ -43374,13 +44717,13 @@
       },
       "ExternalShareDto": {
         "required": [
-          "entityId",
-          "entityTitle",
           "id",
+          "isAuthenticated",
           "linkId",
           "shared",
           "status",
-          "tenantId"
+          "tenantId",
+          "title"
         ],
         "type": "object",
         "properties": {
@@ -43506,19 +44849,19 @@
         "properties": {
           "url": {
             "type": "string",
-            "description": "The absolute URL to the website address which will be opened when clicking the \"Feedback & Support\" menu button.",
+            "description": "The absolute URL to the website address which will be opened when clicking the Feedback & Support menu button.",
             "nullable": true,
             "example": "some text"
           },
           "visible": {
             "type": "boolean",
-            "description": "Shows or hides the \"Feedback & Support\" menu button.",
+            "description": "Shows or hides the Feedback & Support menu button.",
             "readOnly": true,
             "example": true
           }
         },
         "additionalProperties": false,
-        "description": "The settings for the \"Feedback & Support\" menu button."
+        "description": "The settings for the Feedback & Support menu button."
       },
       "FileConflictResolveType": {
         "description": "[0 - Skip, 1 - Overwrite, 2 - Duplicate]",
@@ -43799,7 +45142,12 @@
           },
           "shared": {
             "type": "boolean",
-            "description": "Specifies if the file entry is shared or not.",
+            "description": "Specifies if the file entry is shared via link or not.",
+            "example": false
+          },
+          "sharedForUser": {
+            "type": "boolean",
+            "description": "Specifies if the file entry is shared for user or not.",
             "example": false
           },
           "parentShared": {
@@ -44121,7 +45469,7 @@
                   }
                 },
                 "additionalProperties": false,
-                "description": "The actions that can be perforrmed with the file entry.",
+                "description": "The actions that can be performed with the file entry.",
                 "nullable": true,
                 "example": [
                   {
@@ -44129,17 +45477,48 @@
                   }
                 ]
               },
-              "availableExternalRights": {
+              "availableShareRights": {
                 "type": "object",
-                "additionalProperties": {
-                  "type": "boolean"
+                "properties": {
+                  "User": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "ExternalLink": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "Group": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "InvitationLink": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "PrimaryExternalLink": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
                 },
+                "additionalProperties": false,
                 "description": "The available external rights of the file entry.",
                 "nullable": true,
                 "example": [
                   {
-                    "key": "some text",
-                    "value": true
+                    "value": [
+                      "some text"
+                    ]
                   }
                 ]
               },
@@ -44148,6 +45527,21 @@
                 "description": "The request token of the file entry.",
                 "nullable": true,
                 "example": "some text"
+              },
+              "external": {
+                "type": "boolean",
+                "description": "Specifies if the folder can be accessed via an external link or not.",
+                "nullable": true,
+                "example": true
+              },
+              "expirationDate": {
+                "$ref": "#/components/schemas/ApiDateTime"
+              },
+              "isLinkExpired": {
+                "type": "boolean",
+                "description": "Indicates whether the shareable link associated with the file or folder has expired.",
+                "nullable": true,
+                "example": true
               }
             }
           }
@@ -44362,7 +45756,7 @@
                   }
                 },
                 "additionalProperties": false,
-                "description": "The actions that can be perforrmed with the file entry.",
+                "description": "The actions that can be performed with the file entry.",
                 "nullable": true,
                 "example": [
                   {
@@ -44370,17 +45764,48 @@
                   }
                 ]
               },
-              "availableExternalRights": {
+              "availableShareRights": {
                 "type": "object",
-                "additionalProperties": {
-                  "type": "boolean"
+                "properties": {
+                  "User": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "ExternalLink": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "Group": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "InvitationLink": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "PrimaryExternalLink": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
                 },
+                "additionalProperties": false,
                 "description": "The available external rights of the file entry.",
                 "nullable": true,
                 "example": [
                   {
-                    "key": "some text",
-                    "value": true
+                    "value": [
+                      "some text"
+                    ]
                   }
                 ]
               },
@@ -44389,6 +45814,21 @@
                 "description": "The request token of the file entry.",
                 "nullable": true,
                 "example": "some text"
+              },
+              "external": {
+                "type": "boolean",
+                "description": "Specifies if the folder can be accessed via an external link or not.",
+                "nullable": true,
+                "example": true
+              },
+              "expirationDate": {
+                "$ref": "#/components/schemas/ApiDateTime"
+              },
+              "isLinkExpired": {
+                "type": "boolean",
+                "description": "Indicates whether the shareable link associated with the file or folder has expired.",
+                "nullable": true,
+                "example": true
               }
             }
           }
@@ -44522,6 +45962,10 @@
         }
       },
       "FileLink": {
+        "required": [
+          "filetype",
+          "url"
+        ],
         "type": "object",
         "properties": {
           "filetype": {
@@ -44670,8 +46114,11 @@
       },
       "FileOperationDto": {
         "required": [
+          "error",
+          "finished",
           "id",
           "Operation",
+          "processed",
           "progress"
         ],
         "type": "object",
@@ -45023,6 +46470,7 @@
           "canEditDenyDownload",
           "canEditExpirationDate",
           "canEditInternal",
+          "canRevoke",
           "isLocked",
           "isOwner",
           "subjectType"
@@ -45079,6 +46527,11 @@
           "canEditExpirationDate": {
             "type": "boolean",
             "description": "Indicates whether the expiration date of access permissions can be edited.",
+            "example": true
+          },
+          "canRevoke": {
+            "type": "boolean",
+            "description": "Specifies whether the file sharing access can be revoked by the current user.",
             "example": true
           },
           "subjectType": {
@@ -45719,17 +47172,17 @@
           },
           "recentSection": {
             "type": "boolean",
-            "description": "Specifies if the \"Recent\" section is displayed or not.",
+            "description": "Specifies if the Recent section is displayed or not.",
             "example": true
           },
           "favoritesSection": {
             "type": "boolean",
-            "description": "Specifies if the \"Favorites\" section is displayed or not.",
+            "description": "Specifies if the Favorites section is displayed or not.",
             "example": true
           },
           "templatesSection": {
             "type": "boolean",
-            "description": "Specifies if the \"Templates\" section is displayed or not.",
+            "description": "Specifies if the Templates section is displayed or not.",
             "example": true
           },
           "downloadTarGz": {
@@ -46068,9 +47521,7 @@
       },
       "FolderContentDtoInteger": {
         "required": [
-          "count",
           "pathParts",
-          "startIndex",
           "total"
         ],
         "type": "object",
@@ -46313,12 +47764,6 @@
                 "nullable": true,
                 "example": 1234
               },
-              "external": {
-                "type": "boolean",
-                "description": "Specifies if the folder can be accessed via an external link or not.",
-                "nullable": true,
-                "example": true
-              },
               "passwordProtected": {
                 "type": "boolean",
                 "description": "Specifies if the folder is password protected or not.",
@@ -46329,7 +47774,8 @@
                 "type": "boolean",
                 "description": "Specifies if an external link to the folder is expired or not.",
                 "nullable": true,
-                "example": true
+                "example": true,
+                "deprecated": true
               }
             }
           }
@@ -46452,12 +47898,6 @@
                 "nullable": true,
                 "example": 1234
               },
-              "external": {
-                "type": "boolean",
-                "description": "Specifies if the folder can be accessed via an external link or not.",
-                "nullable": true,
-                "example": true
-              },
               "passwordProtected": {
                 "type": "boolean",
                 "description": "Specifies if the folder is password protected or not.",
@@ -46468,7 +47908,8 @@
                 "type": "boolean",
                 "description": "Specifies if an external link to the folder is expired or not.",
                 "nullable": true,
-                "example": true
+                "example": true,
+                "deprecated": true
               }
             }
           }
@@ -47047,13 +48488,13 @@
         "properties": {
           "url": {
             "type": "string",
-            "description": "The absolute URL to the website address which will be opened when clicking the \"Open file location\" menu button.",
+            "description": "The absolute URL to the website address which will be opened when clicking the Open file location menu button.",
             "nullable": true,
             "example": "some text"
           }
         },
         "additionalProperties": false,
-        "description": "The settings for the \"Open file location\" menu button and upper right corner button."
+        "description": "The settings for the Open file location menu button and upper right corner button."
       },
       "GroupMemberSecurityRequestArrayWrapper": {
         "type": "object",
@@ -47128,7 +48569,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The security request parameters of the group member."
+        "description": "The group member security information."
       },
       "HideConfirmConvertRequestDto": {
         "type": "object",
@@ -47413,6 +48854,7 @@
           3
         ],
         "type": "integer",
+        "description": "The location context of the request.",
         "format": "int32"
       },
       "LockFileParameters": {
@@ -47428,6 +48870,12 @@
         "description": "The parameters for locking a file."
       },
       "Logo": {
+        "required": [
+          "large",
+          "medium",
+          "original",
+          "small"
+        ],
         "type": "object",
         "properties": {
           "original": {
@@ -47597,7 +49045,7 @@
             "items": {
               "type": "string"
             },
-            "description": "A list of emails which will receive the mention message.",
+            "description": "A list of emails that will receive the mention message.",
             "nullable": true,
             "example": [
               "some text"
@@ -47605,7 +49053,7 @@
           },
           "message": {
             "type": "string",
-            "description": "The comment message.",
+            "description": "The mention message.",
             "nullable": true,
             "example": "some text"
           }
@@ -47621,7 +49069,7 @@
           },
           "email": {
             "type": "string",
-            "description": "The email address of the user.",
+            "description": "The user email address.",
             "format": "email",
             "nullable": true,
             "readOnly": true,
@@ -47629,7 +49077,7 @@
           },
           "id": {
             "type": "string",
-            "description": "The identification of the user.",
+            "description": "The user unique identification.",
             "nullable": true,
             "readOnly": true,
             "example": "9846"
@@ -47643,20 +49091,20 @@
           },
           "hasAccess": {
             "type": "boolean",
-            "description": "Specifies if the user has the access to the file or not.",
+            "description": "Specifies whether the user has the access to the file where they are mentioned.",
             "readOnly": true,
             "example": true
           },
           "name": {
             "type": "string",
-            "description": "The full name of the user.",
+            "description": "The user full name.",
             "nullable": true,
             "readOnly": true,
             "example": "Winfield Upton"
           }
         },
         "additionalProperties": false,
-        "description": "The mention message parameters."
+        "description": "The parameters of a user mentioned in a message."
       },
       "MentionWrapperArrayWrapper": {
         "type": "object",
@@ -47790,6 +49238,10 @@
         }
       },
       "NewItemsDtoFileEntryBaseDto": {
+        "required": [
+          "date",
+          "items"
+        ],
         "type": "object",
         "properties": {
           "date": {
@@ -47808,6 +49260,10 @@
         "description": "The new item parameters."
       },
       "NewItemsDtoRoomNewItemsDto": {
+        "required": [
+          "date",
+          "items"
+        ],
         "type": "object",
         "properties": {
           "date": {
@@ -48016,6 +49472,9 @@
         "description": "An item in the ordering request with its entry type and ID."
       },
       "OrdersRequestDtoInteger": {
+        "required": [
+          "items"
+        ],
         "type": "object",
         "properties": {
           "items": {
@@ -48086,7 +49545,7 @@
           },
           "protect": {
             "type": "boolean",
-            "description": "Defines if the \"Protection\" tab on the toolbar and the \"Protect\" button in the left menu are displayedor hidden.",
+            "description": "Defines if the Protection tab on the toolbar and the Protect button in the left menu are displayedor hidden.",
             "example": true
           },
           "print": {
@@ -48275,7 +49734,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The presence or absence of the documents in the \"Open Recent...\" menu option."
+        "description": "The presence or absence of the documents in the Open Recent... menu option."
       },
       "ReviewConfig": {
         "type": "object",
@@ -48290,6 +49749,10 @@
         "additionalProperties": false
       },
       "RoomDataLifetimeDto": {
+        "required": [
+          "deletePermanently",
+          "period"
+        ],
         "type": "object",
         "properties": {
           "deletePermanently": {
@@ -48341,6 +49804,7 @@
       },
       "RoomFromTemplateStatusDto": {
         "required": [
+          "error",
           "isCompleted",
           "progress",
           "roomId"
@@ -48848,7 +50312,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The parameters for saving the file as PDF."
+        "description": "The parameters for saving a file as PDF."
       },
       "SaveFormRoleMappingDtoInteger": {
         "required": [
@@ -49285,7 +50749,7 @@
         "properties": {
           "visible": {
             "type": "boolean",
-            "description": "Specifies whether the \"Complete  & Submit\" button will be displayed or hidden on the top toolbar.",
+            "description": "Specifies whether the Complete  & Submit button will be displayed or hidden on the top toolbar.",
             "example": true
           },
           "resultMessage": {
@@ -49296,7 +50760,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The \"Complete & Submit\" button settings."
+        "description": "The Complete & Submit button settings."
       },
       "TemplatesConfig": {
         "type": "object",
@@ -49309,7 +50773,7 @@
           },
           "title": {
             "type": "string",
-            "description": "The template title that will be displayed in the \"Create New...\" menu option.",
+            "description": "The template title that will be displayed in the Create New... menu option.",
             "nullable": true,
             "example": "legacy_1080p_small_wooden_mouse"
           },
@@ -49322,7 +50786,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The presence or absence of the templates in the \"Create New...\" menu option."
+        "description": "The presence or absence of the templates in the Create New... menu option."
       },
       "TemplatesRequestDto": {
         "type": "object",
@@ -49463,6 +50927,10 @@
         }
       },
       "ThirdPartyRequestDto": {
+        "required": [
+          "customerTitle",
+          "providerKey"
+        ],
         "type": "object",
         "properties": {
           "url": {
@@ -49703,7 +51171,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The request parameters for updating the room."
+        "description": "The request parameters for updating the rooms."
       },
       "UploadRequestDto": {
         "type": "object",
@@ -49904,7 +51372,11 @@
       },
       "WatermarkDto": {
         "required": [
-          "additions"
+          "additions",
+          "imageHeight",
+          "imageScale",
+          "imageWidth",
+          "rotate"
         ],
         "type": "object",
         "properties": {
@@ -50086,6 +51558,13 @@
         "description": "The backup parameters."
       },
       "BackupHistoryRecord": {
+        "required": [
+          "createdOn",
+          "expiresOn",
+          "fileName",
+          "id",
+          "storageType"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -50507,6 +51986,13 @@
         "additionalProperties": false
       },
       "ScheduleDto": {
+        "required": [
+          "cronParams",
+          "dump",
+          "lastBackupTime",
+          "storageParams",
+          "storageType"
+        ],
         "type": "object",
         "properties": {
           "storageType": {
@@ -50580,6 +52066,465 @@
             "format": "int32"
           }
         }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "description": "The human-readable error explanation.",
+            "type": "string"
+          }
+        },
+        "description": "The error response containing the human-readable error explanation."
+      },
+      "UpdateClientRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The client name.",
+            "example": "Updated Client"
+          },
+          "description": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "The client description",
+            "example": "Updated description of the client"
+          },
+          "logo": {
+            "minLength": 1,
+            "pattern": "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
+            "type": "string",
+            "description": "The client logo in base64 format.",
+            "example": "data:image/png;base64,..."
+          },
+          "allow_pkce": {
+            "type": "boolean",
+            "description": "Indicates whether PKCE is allowed for the client.",
+            "example": true
+          },
+          "is_public": {
+            "type": "boolean",
+            "description": "Indicates whether the client is accessible by third-party tenants.",
+            "example": false
+          },
+          "allowed_origins": {
+            "uniqueItems": true,
+            "type": "array",
+            "description": "The allowed origins for the client.",
+            "example": [
+              "http://allowed.origin"
+            ],
+            "items": {
+              "type": "string",
+              "description": "The allowed origins for the client.",
+              "example": "[\"http://allowed.origin\"]"
+            }
+          }
+        },
+        "description": "The request for updating client details."
+      },
+      "ClientResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The client name."
+          },
+          "description": {
+            "type": "string",
+            "description": "The client description."
+          },
+          "tenant": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The tenant ID associated with the client."
+          },
+          "scopes": {
+            "uniqueItems": true,
+            "type": "array",
+            "description": "The client scopes.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Specifies if the client is currently enabled or not."
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The client identifier issued to the client during registration."
+          },
+          "client_secret": {
+            "type": "string",
+            "description": "The client secret issued to the client during registration."
+          },
+          "website_url": {
+            "type": "string",
+            "description": "The URL to the client's website."
+          },
+          "terms_url": {
+            "type": "string",
+            "description": "The URL to the client's terms of service."
+          },
+          "policy_url": {
+            "type": "string",
+            "description": "The URL to the client's privacy policy."
+          },
+          "logo": {
+            "type": "string",
+            "description": "The URL to the client's logo."
+          },
+          "authentication_methods": {
+            "uniqueItems": true,
+            "type": "array",
+            "description": "The authentication methods supported by the client.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "redirect_uris": {
+            "uniqueItems": true,
+            "type": "array",
+            "description": "The list of allowed redirect URIs.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allowed_origins": {
+            "uniqueItems": true,
+            "type": "array",
+            "description": "The list of allowed CORS origins.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "logout_redirect_uris": {
+            "uniqueItems": true,
+            "type": "array",
+            "description": "The list of allowed logout redirect URIs.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "created_on": {
+            "type": "string",
+            "description": "The date and time when the client was created.",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "The user who created the client."
+          },
+          "modified_on": {
+            "type": "string",
+            "description": "The date and time when the client was last modified.",
+            "format": "date-time"
+          },
+          "modified_by": {
+            "type": "string",
+            "description": "The user who last modified the client."
+          },
+          "is_public": {
+            "type": "boolean",
+            "description": "Indicates whether the client is accessible by third-party tenants."
+          }
+        }
+      },
+      "CreateClientRequest": {
+        "required": [
+          "allowed_origins",
+          "redirect_uris"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 256,
+            "minLength": 3,
+            "type": "string",
+            "description": "The client name.",
+            "example": "Example Client"
+          },
+          "description": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "The client description.",
+            "example": "Description of the client"
+          },
+          "logo": {
+            "minLength": 1,
+            "pattern": "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
+            "type": "string",
+            "description": "The client logo in base64 format.",
+            "example": "data:image/png;base64,..."
+          },
+          "scopes": {
+            "minItems": 1,
+            "uniqueItems": true,
+            "type": "array",
+            "description": "The client scopes.",
+            "example": [
+              "read",
+              "write"
+            ],
+            "items": {
+              "type": "string",
+              "description": "The client scopes.",
+              "example": "[\"read\",\"write\"]"
+            }
+          },
+          "allow_pkce": {
+            "type": "boolean",
+            "description": "Indicates whether PKCE is allowed for the client.",
+            "example": true
+          },
+          "is_public": {
+            "type": "boolean",
+            "description": "Indicates whether the client is accessible by third-party tenants.",
+            "example": false
+          },
+          "website_url": {
+            "minLength": 1,
+            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "type": "string",
+            "description": "The URL to the client's website.",
+            "example": "http://example.com"
+          },
+          "terms_url": {
+            "minLength": 1,
+            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "type": "string",
+            "description": "The URL to the client's terms of service.",
+            "example": "http://example.com/terms"
+          },
+          "policy_url": {
+            "minLength": 1,
+            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "type": "string",
+            "description": "The URL to the client's privacy policy.",
+            "example": "http://example.com/policy"
+          },
+          "redirect_uris": {
+            "uniqueItems": true,
+            "type": "array",
+            "description": "The list of allowed redirect URIs.",
+            "example": [
+              "http://example.com/redirect"
+            ],
+            "items": {
+              "type": "string",
+              "description": "The list of allowed redirect URIs.",
+              "example": "[\"http://example.com/redirect\"]"
+            }
+          },
+          "allowed_origins": {
+            "uniqueItems": true,
+            "type": "array",
+            "description": "The list of allowed CORS origins.",
+            "example": [
+              "http://example.com"
+            ],
+            "items": {
+              "type": "string",
+              "description": "The list of allowed CORS origins.",
+              "example": "[\"http://example.com\"]"
+            }
+          },
+          "logout_redirect_uri": {
+            "minLength": 1,
+            "pattern": "^(https?://)?(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}|localhost|[a-zA-Z0-9-]+)(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
+            "type": "string",
+            "description": "The list of allowed logout redirect URIs.",
+            "example": "http://example.com/logout"
+          }
+        },
+        "description": "The request parameters for creating a client."
+      },
+      "ClientSecretResponse": {
+        "type": "object",
+        "description": "The response containing the regenerated client secret.",
+        "properties": {
+          "client_secret": {
+            "type": "string",
+            "description": "The newly generated client secret."
+          }
+        }
+      },
+      "ChangeClientActivationRequest": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "boolean",
+            "description": "The client activation status.",
+            "example": true
+          }
+        },
+        "description": "The request parameters for changing the client activation status."
+      },
+      "ScopeResponse": {
+        "type": "object",
+        "description": "The response containing the scope information.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The scope name."
+          },
+          "group": {
+            "type": "string",
+            "description": "The group the scope belongs to."
+          },
+          "type": {
+            "type": "string",
+            "description": "The scope type."
+          }
+        }
+      },
+      "PageableResponse": {
+        "type": "object",
+        "description": "The response containing paginated data.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "description": "The paginated data."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "The maximum number of results returned per page.",
+            "format": "int32"
+          },
+          "last_client_id": {
+            "type": "string",
+            "description": "The identifier of the last retrieved client."
+          },
+          "last_created_on": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The creation date of the last retrieved client."
+          }
+        }
+      },
+      "ClientInfoResponse": {
+        "type": "object",
+        "description": "The response containing public client information.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The client name."
+          },
+          "description": {
+            "type": "string",
+            "description": "The client description."
+          },
+          "scopes": {
+            "uniqueItems": true,
+            "type": "array",
+            "description": "The client scopes.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The client ID."
+          },
+          "website_url": {
+            "type": "string",
+            "description": "The URL to the client's website"
+          },
+          "terms_url": {
+            "type": "string",
+            "description": "The URL to the client's terms of service."
+          },
+          "policy_url": {
+            "type": "string",
+            "description": "The URL to the client's privacy policy."
+          },
+          "logo": {
+            "type": "string",
+            "description": "The client logo in base64 format."
+          },
+          "authentication_methods": {
+            "uniqueItems": true,
+            "type": "array",
+            "description": "The authentication methods supported by the client.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "is_public": {
+            "type": "boolean",
+            "description": "Indicates whether the client is accessible by third-party tenants."
+          },
+          "created_on": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the client was created."
+          },
+          "created_by": {
+            "type": "string",
+            "description": "The user who created the client."
+          },
+          "modified_on": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the client was last modified."
+          },
+          "modified_by": {
+            "type": "string",
+            "description": "The user who last modified the client."
+          }
+        }
+      },
+      "PageableResponseClientInfoResponse": {
+        "type": "object",
+        "description": "The response containing paginated client information.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "description": "The paginated client data."
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The maximum number of results returned per page."
+          },
+          "last_client_id": {
+            "type": "string",
+            "description": "The identifier of the last retrieved client."
+          },
+          "last_created_on": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The creation date of the last retrieved client."
+          }
+        }
+      },
+      "PageableModificationResponse": {
+        "type": "object",
+        "description": "The response containing paginated modification information.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "description": "The paginated modification data."
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The maximum number of results returned per page."
+          },
+          "last_modified_on": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date when the user consent was last modified."
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -50624,6 +52569,12 @@
         "type": "openIdConnect",
         "description": "OpenID Connect authentication",
         "openIdConnectUrl": ""
+      },
+      "x-signature": {
+        "type": "apiKey",
+        "description": "JWT signature used for authentication. The token must be obtained via the `api/2.0/security/oauth2/token` endpoint. It is passed as a cookie with the name `x-signature`.",
+        "name": "x-signature",
+        "in": "cookie"
       }
     }
   },
@@ -50675,6 +52626,15 @@
       "name": "Migration",
       "tags": [
         "Migration"
+      ]
+    },
+    {
+      "name": "OAuth 2.0",
+      "tags": [
+        "OAuth 2.0 / Authorization",
+        "OAuth 2.0 / Client Management",
+        "OAuth 2.0 / Client Querying",
+        "OAuth 2.0 / Scope Management"
       ]
     },
     {
@@ -50731,7 +52691,6 @@
         "Settings / Banners visibility",
         "Settings / Common settings",
         "Settings / Cookies",
-        "Settings / Custom Navigation",
         "Settings / Encryption",
         "Settings / Greeting settings",
         "Settings / IP restrictions",

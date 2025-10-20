@@ -52,7 +52,7 @@ public class DarkThemeSettings : ISettings<DarkThemeSettings>
             Theme = DarkThemeSettingsType.System
         };
     }
-    
+
     /// <summary>
     /// The last modified date.
     /// </summary>

@@ -129,7 +129,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
         _connection = await _factory.CreateConnectionAsync();
         _connection.ConnectionShutdownAsync += async (_, _) => await TryConnect();
-        _connection.CallbackExceptionAsync += async (_, _) =>  await TryConnect();
+        _connection.CallbackExceptionAsync += async (_, _) => await TryConnect();
         _connection.ConnectionBlockedAsync += async (_, _) => await TryConnect();
 
     }
@@ -166,7 +166,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
         objAsByteArray.CopyTo(body, 0);
 
         body[^1] = (byte)action;
-     
+
         await _consumerChannel.BasicPublishAsync(
                              exchange: _exchangeName,
                              routingKey: string.Empty,

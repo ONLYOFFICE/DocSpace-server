@@ -42,14 +42,14 @@ public class GroupMemberSecurityFolderRequestDto<T>
     /// </summary>
     [FromRoute(Name = "groupId")]
     public required Guid GroupId { get; set; }
-    
+
     /// <summary>
     /// The number of items to be retrieved in the current query.
     /// </summary>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
-    
+
     /// <summary>
     /// The starting index for the query result set.
     /// </summary>
@@ -78,14 +78,14 @@ public class GroupMemberSecurityFileRequestDto<T>
     /// </summary>
     [FromRoute(Name = "groupId")]
     public required Guid GroupId { get; set; }
-    
+
     /// <summary>
     /// The number of items to be retrieved in the current query.
     /// </summary>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
-    
+
     /// <summary>
     /// The starting index for the query result set.
     /// </summary>

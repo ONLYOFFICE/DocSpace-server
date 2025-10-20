@@ -225,12 +225,16 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         {
             throw;
         }
+        catch (FusionCacheSerializationException)
+        {
+            throw;
+        }
         catch (FileNotFoundException error)
         {
             logger.ErrorChunkedUploaderHandlerService(error);
             await WriteError(context, FilesCommonResource.ErrorMessage_FileNotFound);
         }
-        catch (InvalidCastException e) when(e.Message.Contains($"'{typeof(ChunkedUploadSession<string>)}'") && e.Message.Contains($"'{typeof(ChunkedUploadSession<int>)}'"))
+        catch (InvalidCastException e) when (e.Message.Contains($"'{typeof(ChunkedUploadSession<string>)}'") && e.Message.Contains($"'{typeof(ChunkedUploadSession<int>)}'"))
         {
             throw;
         }

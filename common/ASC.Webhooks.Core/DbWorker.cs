@@ -147,7 +147,7 @@ public class DbWorker(
         updateObj.ModifiedBy = dbWebhooksConfig.ModifiedBy ?? authContext.CurrentAccount.ID;
         updateObj.ModifiedOn = DateTime.UtcNow;
 
-        updateObj.LastFailureOn =  dbWebhooksConfig.LastFailureOn;
+        updateObj.LastFailureOn = dbWebhooksConfig.LastFailureOn;
         updateObj.LastFailureContent = dbWebhooksConfig.LastFailureContent;
         updateObj.LastSuccessOn = dbWebhooksConfig.LastSuccessOn;
 

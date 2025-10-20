@@ -49,9 +49,9 @@ public class ErrorApiResponse : CommonApiResponse
 
     public ErrorApiResponse()
     {
-        
+
     }
-    
+
     protected internal ErrorApiResponse(HttpStatusCode statusCode, Exception error, string message, bool withStackTrace) : base(statusCode)
     {
         Status = 1;
@@ -139,9 +139,9 @@ public class CommonApiError
 
     public CommonApiError()
     {
-        
+
     }
-    
+
     public static CommonApiError FromException(Exception exception, string message, bool withStackTrace)
     {
         var result = new CommonApiError

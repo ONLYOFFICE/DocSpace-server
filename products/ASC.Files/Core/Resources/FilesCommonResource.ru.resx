@@ -574,4 +574,7 @@
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Гость</value>
   </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Документы пользователя {0} {1}</value>
+  </data>
 </root>

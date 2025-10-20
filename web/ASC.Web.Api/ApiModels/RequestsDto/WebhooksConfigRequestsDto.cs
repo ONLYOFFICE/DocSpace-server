@@ -74,7 +74,7 @@ public class CreateWebhooksConfigRequestsDto
 /// <summary>
 /// The request parameters for updating the webhook configuration.
 /// </summary>
-public class UpdateWebhooksConfigRequestsDto: CreateWebhooksConfigRequestsDto
+public class UpdateWebhooksConfigRequestsDto : CreateWebhooksConfigRequestsDto
 {
     /// <summary>
     /// The webhook configuration ID.

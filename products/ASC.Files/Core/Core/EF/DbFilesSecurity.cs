@@ -69,12 +69,15 @@ public static class DbFilesSecurityExtension
 
             entity.ToTable("files_security")
                 .HasCharSet("utf8");
-                
+
             entity.HasIndex(e => e.Owner)
                 .HasDatabaseName("owner");
 
             entity.HasIndex(e => new { e.TenantId, e.EntryType, e.EntryId, e.Owner })
                 .HasDatabaseName("tenant_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.Subject })
+                .HasDatabaseName("tenant_id_subject");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
@@ -132,6 +135,9 @@ public static class DbFilesSecurityExtension
 
             entity.HasIndex(e => new { e.TenantId, e.EntryType, e.EntryId, e.Owner })
                 .HasDatabaseName("idx_tenant_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.Subject })
+                .HasDatabaseName("idx_tenant_id_subject");
 
             // Mapping Entity Properties to PostgreSQL Database Columns
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");

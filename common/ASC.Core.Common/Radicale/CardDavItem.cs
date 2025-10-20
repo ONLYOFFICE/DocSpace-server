@@ -57,4 +57,4 @@ public class CardDavItem(Guid iD, string firstName, string lastName, string user
     {
         return ID.GetHashCode();
     }
-    }
+}

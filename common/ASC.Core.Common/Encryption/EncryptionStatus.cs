@@ -39,4 +39,3 @@ public enum EncryprtionStatus
     [SwaggerEnum("Decryption started")]
     DecryptionStarted
 }
-

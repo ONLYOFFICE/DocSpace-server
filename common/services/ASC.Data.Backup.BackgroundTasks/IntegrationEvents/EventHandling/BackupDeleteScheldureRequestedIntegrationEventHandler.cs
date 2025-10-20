@@ -31,7 +31,7 @@ public class BackupDeleteScheldureRequestedIntegrationEventHandler(
         ILogger<BackupDeleteScheldureRequestedIntegrationEventHandler> logger,
         BackupService backupService)
     : IIntegrationEventHandler<IntegrationEvent>
-    {
+{
     public async Task Handle(IntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();

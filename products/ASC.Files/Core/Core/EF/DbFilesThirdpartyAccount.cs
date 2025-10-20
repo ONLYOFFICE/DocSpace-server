@@ -151,7 +151,7 @@ public static class DbFilesThirdpartyAccountExtension
             entity.Property(e => e.Private).HasColumnName("private");
 
             entity.Property(e => e.HasLogo).HasColumnName("has_logo");
-            
+
             entity.Property(e => e.Color)
                 .HasColumnName("color")
                 .HasColumnType("char")
@@ -164,7 +164,7 @@ public static class DbFilesThirdpartyAccountExtension
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
     }
-    
+
     public static void PgSqlAddDbFilesThirdpartyAccount(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFilesThirdpartyAccount>(entity =>
@@ -224,6 +224,6 @@ public static class DbFilesThirdpartyAccountExtension
                 .HasColumnType("timestamptz")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
-        
+
     }
 }

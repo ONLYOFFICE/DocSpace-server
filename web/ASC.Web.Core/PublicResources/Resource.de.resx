@@ -1162,4 +1162,46 @@
   <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
     <value>Die Anzahl der kostenlosen Backups sollte innerhalb eines Monats {0} nicht überschreiten</value>
   </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>Client-ID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Client-Geheimnis</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Aktivieren Sie die Anwendung für die Anmeldung im Portal mit einem WeChat-Konto.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Aktivieren Sie die Anwendung für die Anmeldung im Portal mit einem WeChat-Konto.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-Mail</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Vorname</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Nachname</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Dokumentendienst-Kontingent ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Die Anzahl der Plugins überschreitet das Limit</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Sie wurden erfolgreich mit Telegram verbunden, um Benachrichtigungen von Ihrem DocSpace zu erhalten.</value>
+  </data>
 </root>

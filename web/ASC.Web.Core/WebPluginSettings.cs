@@ -89,7 +89,7 @@ public class WebPluginSettings : ISettings<WebPluginSettings>
     {
         return new WebPluginSettings();
     }
-    
+
     public DateTime LastModified { get; set; }
 }
 

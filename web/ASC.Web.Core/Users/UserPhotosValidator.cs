@@ -34,16 +34,16 @@ public class UserPhotosValidator(SecurityContext securityContext, UserManager us
         {
             return true;
         }
-        
+
         var userId = securityContext.CurrentAccount.ID;
         var currentUser = await userManager.GetUsersAsync(userId);
         var userType = await userManager.GetUserTypeAsync(currentUser);
-        
+
         if (userType == EmployeeType.Guest && !path.Contains(userId.ToString()))
         {
             return false;
         }
-        
+
         return true;
     }
 }

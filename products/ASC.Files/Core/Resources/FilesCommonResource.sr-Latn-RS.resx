@@ -574,4 +574,7 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Gost</value>
   </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Dokumenti korisnika {0} {1}</value>
+  </data>
 </root>

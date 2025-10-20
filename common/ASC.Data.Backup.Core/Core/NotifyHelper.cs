@@ -129,7 +129,7 @@ public class NotifyHelper(UserManager userManager,
             var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", user.GetCulture());
 
             await client.SendNoticeToAsync(
-                Actions.RestoreStarted, 
+                Actions.RestoreStarted,
                 user,
                 StudioNotifyService.EMailSenderName,
                 TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));

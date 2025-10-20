@@ -2020,4 +2020,31 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>您的协作空间自动备份失败</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>您好，$UserName，
+
+您的协作空间 "${__VirtualRootPath}":"${__VirtualRootPath}" 的计划备份过程失败。
+
+我们建议您检查 "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" 和 "Services":"${__VirtualRootPath}/portal-settings/services" 设置。
+
+如果您有任何疑问或需要帮助，请随时通过 "${__SupportLink}":"${__SupportLink}" 与我们联系。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>您好，$UserName，
+
+您的协作空间 [${__VirtualRootPath}](${__VirtualRootPath}) 的计划备份过程失败。
+
+我们建议您检查 [备份](${__VirtualRootPath}/portal-settings/backup/data-backup) 和 [服务](${__VirtualRootPath}/portal-settings/services) 设置。
+
+如有任何疑问或需要帮助，请随时通过 [${__SupportLink}](${__SupportLink}) 联系我们。
+
+此致，
+${LetterLogoText} 支持团队
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
 </root>

@@ -53,7 +53,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// Specifies if the folder can be shared or not.
     /// </summary>
     public bool? IsShareable { get; set; }
-    
+
     /// <summary>
     /// The new element index in the folder.
     /// </summary>
@@ -133,7 +133,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// How much folder space is used (counter).
     /// </summary>
     public long? UsedSpace { get; set; }
-    
+
     /// <summary>
     /// Specifies if the folder is password protected or not.
     /// </summary>
@@ -142,6 +142,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// Specifies if an external link to the folder is expired or not.
     /// </summary>
+    [Obsolete("Use IsLinkExpired instead")]
     public bool? Expired { get; set; }
 
     /// <summary>
@@ -221,7 +222,7 @@ public class FolderDtoHelper(
             {
                 currentUserRecords ??= await _fileSecurity.GetUserRecordsAsync().ToListAsync();
 
-                result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.User) && 
+                result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.User) &&
                                 !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.Group);
             }
 
@@ -239,18 +240,20 @@ public class FolderDtoHelper(
                     result.QuotaLimit = folder.SettingsQuota > -2 ? folder.SettingsQuota : quotaRoomSettings.DefaultQuota;
                 }
             }
-            
+
             result.Watermark = watermarkHelper.Get(folder.SettingsWatermark);
         }
-        
+
         if (folder.ShareRecord is { IsLink: true })
         {
             result.External = true;
-            result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) && 
-                                       folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && 
+            result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) &&
+                                       folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) &&
                                        !canRead;
 
+#pragma warning disable CS0618 // Type or member is obsolete
             result.Expired = folder.ShareRecord.Options?.IsExpired;
+            result.IsLinkExpired = folder.ShareRecord.Options?.IsExpired;
             result.RequestToken = await _externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
             var expirationDate = folder.ShareRecord?.Options?.ExpirationDate;
             if (expirationDate != null && expirationDate != DateTime.MinValue)
@@ -264,14 +267,14 @@ public class FolderDtoHelper(
                 result.RootFolderType = FolderType.SHARE;
             }
         }
-        
+
         if (folder.Order != 0)
         {
             if (string.IsNullOrEmpty(order) && (contextFolder == null || !DocSpaceHelper.IsRoom(contextFolder.FolderType)))
             {
                 order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(folder.ParentId);
             }
-            
+
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, folder.Order) : folder.Order.ToString();
         }
 
@@ -281,7 +284,7 @@ public class FolderDtoHelper(
         }
 
         result.Lifetime = folder.SettingsLifetime.MapToDto();
-        result.AvailableShareRights =  (await _fileSecurity.GetAccesses(folder)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
+        result.AvailableShareRights = (await _fileSecurity.GetAccesses(folder)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
 
         if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })
         {
@@ -305,7 +308,7 @@ public class FolderDtoHelper(
 
             foreach (var action in forbiddenActions)
             {
-                result.Security[action] = false;   
+                result.Security[action] = false;
             }
 
             result.CanShare = false;
@@ -314,17 +317,17 @@ public class FolderDtoHelper(
 
             var myId = await _globalFolderHelper.GetFolderMyAsync<T>();
             result.OriginTitle = Equals(result.OriginId, myId) ? FilesUCResource.MyFiles : result.OriginTitle;
-            
+
             if (Equals(result.OriginRoomId, myId))
             {
                 result.OriginRoomTitle = FilesUCResource.MyFiles;
             }
-            else if(Equals(result.OriginRoomId,  await _globalFolderHelper.FolderArchiveAsync))
+            else if (Equals(result.OriginRoomId, await _globalFolderHelper.FolderArchiveAsync))
             {
                 result.OriginRoomTitle = result.OriginTitle;
             }
         }
-        
+
         if (folder.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID))
         {
             switch (contextFolder)
@@ -343,10 +346,10 @@ public class FolderDtoHelper(
                     break;
             }
         }
-        
+
         return result;
     }
-    
+
     public async Task<FolderDto<T>> GetShortAsync<T>(Folder<T> folder)
     {
         var result = await GetFolderWrapperAsync(folder);
@@ -376,16 +379,16 @@ public class FolderDtoHelper(
                 newBadges = 0;
             }
         }
-        
+
         var result = await GetAsync<FolderDto<T>, T>(folder);
         if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates)
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;
         }
-        
+
         await entryStatusManager.SetIsFavoriteFolderAsync(folder);
-        
+
         result.IsShareable = folder.Shareable.NullIfDefault();
         result.IsFavorite = folder.IsFavorite;
         result.New = newBadges;

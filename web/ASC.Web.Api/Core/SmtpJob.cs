@@ -45,9 +45,9 @@ public class SmtpJob : DistributedTaskProgress
 
     public SmtpJob()
     {
-        
+
     }
-    
+
     public SmtpJob(UserManager userManager,
         SecurityContext securityContext,
         TenantManager tenantManager,

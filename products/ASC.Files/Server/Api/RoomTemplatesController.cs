@@ -28,8 +28,8 @@ namespace ASC.Files.Api;
 
 [DefaultRoute("roomtemplate")]
 public class RoomTemplatesController(IEventBus eventBus,
-    AuthContext authContext, 
-    TenantManager tenantManager, 
+    AuthContext authContext,
+    TenantManager tenantManager,
     FolderDtoHelper folderDtoHelper,
     FileStorageService fileStorageService,
     FileDtoHelper fileDtoHelper,
@@ -157,7 +157,7 @@ public class RoomTemplatesController(IEventBus eventBus,
 
         await foreach (var share in shared)
         {
-            if (share.Id != authContext.CurrentAccount.ID) 
+            if (share.Id != authContext.CurrentAccount.ID)
             {
                 wrappers.Add(new AceWrapper { Id = share.Id, Access = FileShare.None, SubjectType = share.SubjectType });
             }

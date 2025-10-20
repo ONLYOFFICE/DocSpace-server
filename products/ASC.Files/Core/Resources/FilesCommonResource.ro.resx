@@ -574,4 +574,7 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Invitat</value>
   </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Documentele utilizatorului {0} {1}</value>
+  </data>
 </root>

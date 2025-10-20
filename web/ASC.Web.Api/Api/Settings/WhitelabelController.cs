@@ -575,7 +575,7 @@ public class WhitelabelController(
     public async Task<CompanyWhiteLabelSettingsDto> GetCompanyWhiteLabelSettings()
     {
         var settings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>(HttpContext.GetIfModifiedSince());
-        
+
         return HttpContext.TryGetFromCache(settings.LastModified) ? null : companyWhiteLabelSettingsDtoMapper.Map(settings);
     }
 

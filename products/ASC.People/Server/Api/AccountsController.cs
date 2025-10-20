@@ -124,13 +124,19 @@ public class AccountsController<T>(
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-        
+
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var text = inDto.Text;
         var separator = inDto.FilterSeparator;
 
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
+        var parentUserIds = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(fileEntry.ParentId).Where(r => r.FolderType != FolderType.VirtualRooms).Select(r => r.CreateBy).Where(r => !r.Equals(fileEntry.CreateBy)).Distinct().ToListAsync();
+
+        if (!parentUserIds.Contains(fileEntry.CreateBy))
+        {
+            parentUserIds.Add(fileEntry.CreateBy);
+        }
 
         if (string.IsNullOrEmpty(text))
         {
@@ -152,10 +158,11 @@ public class AccountsController<T>(
             inDto.Area,
             inDto.InvitedByMe,
             inDto.InviterId,
-            inDto.EmployeeTypes);
-        
+            inDto.EmployeeTypes,
+            parentUserIds);
+
         var total = totalGroups + totalUsers;
-        
+
         apiContext.SetCount(Math.Min(Math.Max(total - offset, 0), count)).SetTotalCount(total);
 
         var groupsCount = 0;
@@ -165,7 +172,7 @@ public class AccountsController<T>(
             groupsCount++;
             yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);
         }
-        
+
         var usersCount = count - groupsCount;
         var usersOffset = Math.Max(groupsCount > 0 ? 0 : offset - totalGroups, 0);
 
@@ -181,6 +188,7 @@ public class AccountsController<T>(
                            inDto.InvitedByMe,
                            inDto.InviterId,
                            inDto.EmployeeTypes,
+                           parentUserIds,
                            usersOffset,
                            usersCount))
         {

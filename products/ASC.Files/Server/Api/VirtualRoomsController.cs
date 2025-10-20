@@ -64,7 +64,7 @@ public class VirtualRoomsInternalController(
         filesMessageService,
         settingsManager,
         apiDateTimeHelper,
-        userManager, 
+        userManager,
         daoFactory)
 {
     /// <summary>
@@ -229,7 +229,7 @@ public class VirtualRoomsThirdPartyController(
         filesMessageService,
         settingsManager,
         apiDateTimeHelper,
-        userManager, 
+        userManager,
         daoFactory)
 {
     /// <summary>
@@ -427,7 +427,7 @@ public abstract class VirtualRoomsController<T>(
 
         var taskId = await fileMoveCopyOperationsManager.Publish([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter, false);
         var tasks = await fileMoveCopyOperationsManager.GetOperationResults(id: taskId);
-        
+
         return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
 
@@ -457,14 +457,14 @@ public abstract class VirtualRoomsController<T>(
                 .Where(r => r.Id != Guid.Empty && r.Access != FileShare.None)
                 .ToAsyncEnumerable()
                 .AnyAwaitAsync(async i => await userManager.IsGuestAsync(i.Id));
-        
+
         var usersInvited =
             inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email) && i.Access != FileShare.None) ||
             await inDto.RoomInvitation.Invitations
                 .Where(r => r.Id != Guid.Empty && r.Access != FileShare.None)
                 .ToAsyncEnumerable()
                 .AnyAwaitAsync(async i => await userManager.IsUserAsync(i.Id));
-        
+
         if (guestsInvited)
         {
             var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
@@ -476,8 +476,8 @@ public abstract class VirtualRoomsController<T>(
 
         var room = await _fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
 
-        if (room.RootId is int root && 
-            root == await globalFolderHelper.FolderRoomTemplatesAsync && 
+        if (room.RootId is int root &&
+            root == await globalFolderHelper.FolderRoomTemplatesAsync &&
             (inDto.RoomInvitation.Invitations.Any(i => i.Access != FileShare.None && i.Access != FileShare.Read) || guestsInvited || usersInvited))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
@@ -499,7 +499,7 @@ public abstract class VirtualRoomsController<T>(
 
         var aceCollection = new AceCollection<T> { Files = [], Folders = [inDto.Id], Aces = wrappers, Message = inDto.RoomInvitation.Message };
 
-        result.Warning = (await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.RoomInvitation.Notify, inDto.RoomInvitation.Culture)).Select(r=> r.Warning).FirstOrDefault();
+        result.Warning = (await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.RoomInvitation.Notify, inDto.RoomInvitation.Culture)).Select(r => r.Warning).FirstOrDefault();
         result.Members = await _fileStorageService.GetRoomSharedInfoAsync(inDto.Id, inDto.RoomInvitation.Invitations.Select(s => s.Id))
             .SelectAwait(async a => await fileShareDtoHelper.Get(a))
             .ToListAsync();
@@ -545,13 +545,13 @@ public abstract class VirtualRoomsController<T>(
         {
             LinkType.Invitation => await _fileStorageService.SetInvitationLinkAsync(inDto.Id, inDto.RoomLink.LinkId, inDto.RoomLink.Title, inDto.RoomLink.Access),
             LinkType.External => await _fileStorageService.SetExternalLinkAsync(
-                inDto.Id, 
-                FileEntryType.Folder, 
-                inDto.RoomLink.LinkId, 
+                inDto.Id,
+                FileEntryType.Folder,
+                inDto.RoomLink.LinkId,
                 inDto.RoomLink.Title,
-                inDto.RoomLink.Access, 
-                inDto.RoomLink.ExpirationDate, 
-                inDto.RoomLink.Password?.Trim(), 
+                inDto.RoomLink.Access,
+                inDto.RoomLink.ExpirationDate,
+                inDto.RoomLink.Password?.Trim(),
                 inDto.RoomLink.DenyDownload,
                 inDto.RoomLink.Internal),
             _ => throw new InvalidOperationException()
@@ -564,7 +564,7 @@ public abstract class VirtualRoomsController<T>(
 
         var result = await fileShareDtoHelper.Get(linkAce);
 
-        if (inDto.RoomLink.LinkId != Guid.Empty && linkAce.Id != inDto.RoomLink.LinkId  && result.SharedLink != null)
+        if (inDto.RoomLink.LinkId != Guid.Empty && linkAce.Id != inDto.RoomLink.LinkId && result.SharedLink != null)
         {
             result.SharedLink.RequestToken = null;
         }
@@ -796,7 +796,7 @@ public abstract class VirtualRoomsController<T>(
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(inDto.Id);
-        
+
         var newItems = await _fileStorageService.GetNewRoomFilesAsync(folder);
         var result = new List<NewItemsDto<FileEntryBaseDto>>();
 

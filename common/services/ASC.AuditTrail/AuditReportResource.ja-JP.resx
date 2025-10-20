@@ -928,4 +928,10 @@
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>顧客ウォレット対応サービス設定が更新されました</value>
   </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>OAuth 2.0による成功したログイン</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>ログインとパスワードによるログイン成功</value>
+  </data>
 </root>

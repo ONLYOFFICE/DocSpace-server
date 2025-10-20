@@ -257,7 +257,7 @@
     <value>Папки [{0}]. Перемещены с перезаписью в папку: {1}</value>
   </data>
   <data name="FolderRenamed" xml:space="preserve">
-    <value>Переименована папка: {0}</value>
+    <value>Папка переименована: {0}</value>
   </data>
   <data name="FoldersModule" xml:space="preserve">
     <value>Папки</value>
@@ -338,7 +338,7 @@
     <value>Неудачная попытка входа с помощью API</value>
   </data>
   <data name="LoginFailViaApiSms" xml:space="preserve">
-    <value>Неудачная попытка входа с помощью API и СМС-кода</value>
+    <value>Неудачная попытка входа с помощью API и SMS-кода</value>
   </data>
   <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
     <value>Неудачная попытка входа с помощью API и социальных сетей</value>
@@ -365,16 +365,16 @@
     <value>Успешный вход в систему</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Успешный вход через аккаунт социальной сети</value>
+    <value>Успешный вход в систему с помощью аккаунта социальной сети: {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
-    <value>Успешный вход через приложение для социальной сети</value>
+    <value>Успешный вход в систему с помощью приложения для социальной сети</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Успешный вход в систему с помощью API</value>
   </data>
   <data name="LoginSuccessViaApiSms" xml:space="preserve">
-    <value>Успешный вход в систему с помощью API и СМС-кода</value>
+    <value>Успешный вход в систему с помощью API и SMS-кода</value>
   </data>
   <data name="LoginSuccessViaApiTfa" xml:space="preserve">
     <value>Успешный вход в систему с помощью API и приложения для аутентификации</value>
@@ -383,13 +383,13 @@
     <value>Успешный вход в систему с помощью SMS</value>
   </data>
   <data name="LoginSuccessViaSocialAccount" xml:space="preserve">
-    <value>Успешный вход с помощью API и социальных сетей</value>
+    <value>Успешный вход в систему с помощью API и социальных сетей</value>
   </data>
   <data name="LoginSuccessViaSSO" xml:space="preserve">
     <value>Успешный вход в систему с помощью SSO</value>
   </data>
   <data name="LoginSuccesViaTfaApp" xml:space="preserve">
-    <value>Успешный вход с помощью приложения для аутентификации</value>
+    <value>Успешный вход в систему с помощью приложения для аутентификации</value>
   </data>
   <data name="Logout" xml:space="preserve">
     <value>Выход из системы</value>
@@ -927,5 +927,53 @@
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Обновлены настройки сервисов, подключенных через кошелек клиента</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Файлы [{0}]. Внешняя ссылка создана: {1}. Роль: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Файлы [{0}]. Внешняя ссылка удалена: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Файлы [{0}]. Внешняя ссылка обновлена: {1}. Роль: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Файл отмечен как избранный: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Файл удален из избранного: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Файл удален из "Доступно для меня": {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Файлы [{0}]. Доступ обновлен для {1}. Роль: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Папка загружена: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Папки [{0}]. Внешняя ссылка создана: {1}. Роль: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Папки [{0}]. Внешняя ссылка удалена: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Папки [{0}]. Внешняя ссылка обновлена: {1}. Роль: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Папка удалена из "Доступно для меня": {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Папки [{0}]. Доступ обновлен для {1}. Роль: {2}</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Успешный вход в систему с помощью OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Успешный вход в систему с помощью логина и пароля</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Внешняя ссылка отменена: {1}</value>
   </data>
 </root>

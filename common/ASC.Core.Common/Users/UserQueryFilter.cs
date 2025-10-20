@@ -49,9 +49,9 @@ public record UserQueryFilter
     public Guid OwnerId { get; set; }
     public bool? InvitedByMe { get; set; }
     public Guid? InviterId { get; set; }
-    
+
     public UserQueryFilter() { }
-    
+
     public UserQueryFilter(
         bool isDocSpaceAdmin,
         EmployeeStatus? employeeStatus,
@@ -91,15 +91,15 @@ public record UserQueryFilter
         Offset = offset;
         InvitedByMe = invitedByMe;
         InviterId = inviterId;
-        
-        SortType = !UserSortTypeExtensions.TryParse(sortBy, true, out var sortType) 
-            ? UserSortType.FirstName 
+
+        SortType = !UserSortTypeExtensions.TryParse(sortBy, true, out var sortType)
+            ? UserSortType.FirstName
             : sortType;
 
         if (sortType == UserSortType.DisplayName)
         {
-            SortType = UserFormatter.GetUserDisplayDefaultOrder() == DisplayUserNameFormat.FirstLast 
-                ? UserSortType.FirstName 
+            SortType = UserFormatter.GetUserDisplayDefaultOrder() == DisplayUserNameFormat.FirstLast
+                ? UserSortType.FirstName
                 : UserSortType.LastName;
         }
     }

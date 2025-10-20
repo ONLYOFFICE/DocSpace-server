@@ -106,9 +106,9 @@ public class FileUploader(
 
         if (!updateIfExists && file != null)
         {
-            fileName =  await global.GetAvailableTitleAsync(fileName, folderId, fileDao.IsExistAsync, FileEntryType.File);
+            fileName = await global.GetAvailableTitleAsync(fileName, folderId, fileDao.IsExistAsync, FileEntryType.File);
         }
-        
+
         var newFile = serviceProvider.GetService<File<T>>();
         newFile.ParentId = folderId;
         newFile.Title = fileName;
@@ -262,7 +262,7 @@ public class FileUploader(
         uploadSession.CultureName = CultureInfo.CurrentUICulture.Name;
         uploadSession.Encrypted = encrypted;
         uploadSession.KeepVersion = keepVersion;
-        
+
         await chunkedUploadSessionHolder.StoreSessionAsync(uploadSession);
 
         return uploadSession;
@@ -354,14 +354,14 @@ public class FileUploader(
 
         return uploadSession;
     }
-    
+
     public async Task<ChunkedUploadSession<T>> FinalizeUploadSessionAsync<T>(string uploadId)
     {
         var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
         var dao = daoFactory.GetFileDao<T>();
 
         uploadSession.File = await dao.FinalizeUploadSessionAsync(uploadSession);
-        
+
         await chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
 
         return uploadSession;
@@ -370,7 +370,7 @@ public class FileUploader(
     public async Task DeleteLinkAndMarkAsync<T>(File<T> file)
     {
         var linkDao = daoFactory.GetLinkDao<T>();
-        
+
         var t1 = linkDao.DeleteAllLinkAsync(file.Id);
         var t2 = fileMarker.MarkAsNewAsync(file).AsTask();
 
@@ -381,7 +381,7 @@ public class FileUploader(
     {
         await AbortUploadAsync(await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId));
     }
-    
+
     public Task<long> GetTransferredBytesCountAsync<T>(ChunkedUploadSession<T> uploadSession)
     {
         var dao = daoFactory.GetFileDao<T>();

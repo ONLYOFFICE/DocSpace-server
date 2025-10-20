@@ -205,14 +205,14 @@ public class WebPluginManager(
 
         if (system)
         {
-            if (tenantWebPlugins.Any(x => 
+            if (tenantWebPlugins.Any(x =>
                     x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) ||
                     x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 throw new Exception(Resource.ErrorWebPluginExist);
             }
 
-            if (systemWebPlugins.Any(x => 
+            if (systemWebPlugins.Any(x =>
                     x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
                     !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {

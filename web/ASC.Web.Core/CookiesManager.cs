@@ -75,13 +75,13 @@ public class CookiesManager(
         if (type is CookiesType.AuthKey or CookiesType.ConfirmKey or CookiesType.AnonymousSessionKey or CookiesType.ShareLink)
         {
             options.HttpOnly = true;
-            
+
             SameSiteMode? sameSiteMode = null;
             if (Enum.TryParse<SameSiteMode>(configuration["web:samesite"], out var sameSiteModeFromConfig))
             {
                 sameSiteMode = sameSiteModeFromConfig;
             }
-            
+
             if (sameSiteMode.HasValue && sameSiteMode.Value != SameSiteMode.None)
             {
                 options.SameSite = sameSiteMode.Value;
@@ -96,7 +96,7 @@ public class CookiesManager(
                 if (sameSiteMode is SameSiteMode.None)
                 {
                     options.SameSite = sameSiteMode.Value;
-                } 
+                }
                 else if (!sameSiteMode.HasValue)
                 {
                     var cspSettings = await settingsManager.LoadAsync<CspSettings>();
@@ -139,7 +139,7 @@ public class CookiesManager(
         }
 
         var cookieName = GetFullCookiesName(type, itemId);
-        
+
         if (allowHeader && httpContextAccessor.HttpContext.Request.Headers.TryGetValue(cookieName, out var cookieHeader))
         {
             return cookieHeader;
@@ -149,7 +149,7 @@ public class CookiesManager(
         {
             return cookie;
         }
-        
+
         return string.Empty;
     }
 
@@ -298,12 +298,12 @@ public class CookiesManager(
     {
         return GetCookiesName(CookiesType.ConfirmKey);
     }
-    
+
     public static string GetAnonymousSessionKeyCookiesName()
     {
         return GetCookiesName(CookiesType.AnonymousSessionKey);
     }
-    
+
     private string GetFullCookiesName(CookiesType type, string itemId = null)
     {
         var name = GetCookiesName(type);
@@ -337,11 +337,11 @@ public class CookiesManager(
 
         try
         {
-            if ( request.Headers.TryGetValue(HeaderNames.Origin, out var origin))
+            if (request.Headers.TryGetValue(HeaderNames.Origin, out var origin))
             {
                 var originUri = new Uri(origin);
                 var baseDomain = coreBaseSettings.Basedomain;
-                
+
                 if (!string.IsNullOrEmpty(baseDomain) && urlRewriter.Host != originUri.Host && originUri.Host.EndsWith(baseDomain))
                 {
                     return true;

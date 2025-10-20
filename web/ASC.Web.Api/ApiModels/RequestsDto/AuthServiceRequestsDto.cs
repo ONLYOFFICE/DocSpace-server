@@ -64,11 +64,11 @@ public class AuthServiceRequestsDto
     public static async Task<AuthServiceRequestsDto> From(Consumer consumer, string logoText)
     {
         var authService = await AuthService.From(consumer, logoText);
-        var result = new AuthServiceRequestsDto 
-        { 
-            Name = authService.Name, 
-            Title = authService.Title, 
-            Description = authService.Description, 
+        var result = new AuthServiceRequestsDto
+        {
+            Name = authService.Name,
+            Title = authService.Title,
+            Description = authService.Description,
             Instruction = authService.Instruction,
             CanSet = authService.CanSet
         };

@@ -60,7 +60,7 @@ public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = 
     /// The required connection URL flag.
     /// </summary>
     public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
-    
+
     /// <summary>
     /// The provider OAuth client ID.
     /// </summary>

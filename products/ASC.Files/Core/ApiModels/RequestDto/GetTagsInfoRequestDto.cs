@@ -38,7 +38,7 @@ public class GetTagsInfoRequestDto
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
-    
+
     /// <summary>
     /// Represents the starting index from which the tags' information will be retrieved.
     /// This property is used to define the offset for pagination when retrieving a list of tags. It determines

@@ -238,7 +238,7 @@ public abstract class FilesController<T>(
     public async IAsyncEnumerable<FileOperationDto> DeleteFile(DeleteRequestDto<T> inDto)
     {
         await fileOperationsManager.Publish([], [inDto.FileId], false, !inDto.File.DeleteAfter, inDto.File.Immediately);
-        
+
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
@@ -350,7 +350,9 @@ public abstract class FilesController<T>(
     [HttpPut("file/{fileId}/customfilter")]
     public async Task<FileDto<T>> SetCustomFilterTag(FileCustomFilterRequestDto<T> inDto)
     {
-        return await filesControllerHelper.SetCustomFilterTagAsync(inDto.FileId, inDto.Parameters.Enabled);
+        var result = await fileStorageService.SetCustomFilterTagAsync(inDto.FileId, inDto.Parameters.Enabled);
+
+        return await _fileDtoHelper.GetAsync(result);
     }
 
     /// <summary>
@@ -448,15 +450,15 @@ public abstract class FilesController<T>(
     public async Task<FileShareDto> CreateFilePrimaryExternalLink(FileLinkRequestDto<T> inDto)
     {
         var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(
-            inDto.Id, 
-            FileEntryType.File, 
-            inDto.File.Access, 
-            expirationDate: inDto.File.ExpirationDate, 
-            requiredAuth: inDto.File.Internal, 
+            inDto.Id,
+            FileEntryType.File,
+            inDto.File.Access,
+            expirationDate: inDto.File.ExpirationDate,
+            requiredAuth: inDto.File.Internal,
             allowUnlimitedDate: true,
-            denyDownload: inDto.File.DenyDownload, 
+            denyDownload: inDto.File.DenyDownload,
             password: inDto.File.Password);
-        
+
         return await fileShareDtoHelper.Get(linkAce);
     }
 
@@ -513,10 +515,10 @@ public abstract class FilesController<T>(
     public async Task<FileShareDto> SetFileExternalLink(FileLinkRequestDto<T> inDto)
     {
         var linkAce = await fileStorageService.SetExternalLinkAsync(
-            inDto.Id, 
-            FileEntryType.File, 
-            inDto.File.LinkId, 
-            inDto.File.Title, 
+            inDto.Id,
+            FileEntryType.File,
+            inDto.File.LinkId,
+            inDto.File.Title,
             inDto.File.Access,
             inDto.File.ExpirationDate,
             inDto.File.Password,
@@ -526,7 +528,7 @@ public abstract class FilesController<T>(
 
         return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
     }
-    
+
     /// <summary>
     /// Sets the order of the file with the ID specified in the request.
     /// </summary>
@@ -560,11 +562,11 @@ public abstract class FilesController<T>(
     public IAsyncEnumerable<FileEntryDto<T>> SetFilesOrder(OrdersRequestDto<T> inDto)
     {
         return fileStorageService.SetOrderAsync(inDto.Items).SelectAwait<FileEntry<T>, FileEntryDto<T>>(
-            async e => e.FileEntryType == FileEntryType.Folder ? 
-                await _folderDtoHelper.GetAsync(e as Folder<T>) : 
+            async e => e.FileEntryType == FileEntryType.Folder ?
+                await _folderDtoHelper.GetAsync(e as Folder<T>) :
                 await _fileDtoHelper.GetAsync(e as File<T>));
     }
-    
+
     /// <summary>
     /// Saves a file with the identifier specified in the request as a PDF document.
     /// </summary>

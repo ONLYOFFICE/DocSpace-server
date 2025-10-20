@@ -52,9 +52,9 @@ internal class UsersActionMapper : ILocationActionMapper
                 EntryType.User,
                 new Dictionary<ActionType, MessageAction[]>
                 {
-                    { 
+                    {
                         ActionType.Create, [
-                            MessageAction.UserCreated, MessageAction.GuestCreated, 
+                            MessageAction.UserCreated, MessageAction.GuestCreated,
                             MessageAction.UserCreatedViaInvite, MessageAction.GuestCreatedViaInvite,
                             MessageAction.SendJoinInvite
                         ]
@@ -67,7 +67,7 @@ internal class UsersActionMapper : ILocationActionMapper
                             MessageAction.UsersUpdatedStatus, MessageAction.UsersSentActivationInstructions
                         ]
                     },
-                    { 
+                    {
                         ActionType.Delete, [MessageAction.UserDeletedAvatar, MessageAction.UserDeleted, MessageAction.UsersDeleted, MessageAction.UserDataRemoving]
                     },
                     { ActionType.Import, [MessageAction.UserImported, MessageAction.GuestImported] },

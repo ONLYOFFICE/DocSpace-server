@@ -60,7 +60,7 @@ public abstract class FileEntryBaseDto
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool Shared { get; set; }
-    
+
     /// <summary>
     /// Specifies if the file entry is shared for user or not.
     /// </summary>
@@ -143,7 +143,7 @@ public abstract class FileEntryBaseDto
     /// Specifies if the file is a favorite or not.
     /// </summary>
     public bool? IsFavorite { get; set; }
-    
+
     /// <summary>
     /// The file entry type.
     /// </summary>
@@ -208,7 +208,7 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// Specifies if the file entry can be shared or not.
     /// </summary>
     public bool CanShare { get; set; }
-    
+
     /// <summary>
     /// A dictionary representing the sharing settings for the file entry.
     /// </summary>
@@ -218,7 +218,7 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// The actions that can be performed with the file entry.
     /// </summary>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
-    
+
     /// <summary>
     /// The available external rights of the file entry.
     /// </summary>
@@ -228,17 +228,22 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// The request token of the file entry.
     /// </summary>
     public string RequestToken { get; set; }
-    
+
     /// <summary>
     /// Specifies if the folder can be accessed via an external link or not.
     /// </summary>
     public bool? External { get; set; }
-    
+
     /// <summary>
     /// Represents the expiration date of the file entry.
     /// </summary>
     public ApiDateTime ExpirationDate { get; set; }
-    
+
+    /// <summary>
+    /// Indicates whether the shareable link associated with the file or folder has expired.
+    /// </summary>
+    public bool? IsLinkExpired { get; set; }
+
     protected FileEntryDto(FileEntry<T> entry)
         : base(entry)
     {
@@ -270,7 +275,7 @@ public class FileEntryDtoHelper(
     protected readonly ExternalShare _externalShare = externalShare;
     protected readonly IUrlShortener _urlShortener = urlShortener;
     protected readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
-    
+
     protected async Task<T> GetAsync<T, TId>(FileEntry<TId> entry) where T : FileEntryDto<TId>, new()
     {
         if (entry.Security == null)
@@ -312,32 +317,32 @@ public class FileEntryDtoHelper(
         {
             canSetAccess = false;
         }
-        
+
         Dictionary<SubjectType, int> shareSettings = null;
-        
+
         if (canSetAccess)
         {
-            
+
             var primaryCount = await _fileSecurity.GetLinksSettings(entry, SubjectType.PrimaryExternalLink);
             var additionalCount = await _fileSecurity.GetLinksSettings(entry, SubjectType.ExternalLink);
 
             if (primaryCount > 0)
             {
-                shareSettings = new Dictionary<SubjectType, int> 
+                shareSettings = new Dictionary<SubjectType, int>
                 {
                     {
                         SubjectType.PrimaryExternalLink, primaryCount
-                    } 
+                    }
                 };
             }
 
             if (additionalCount > 0)
-            {                
+            {
                 shareSettings ??= new Dictionary<SubjectType, int>();
                 shareSettings.Add(SubjectType.ExternalLink, additionalCount);
             }
         }
-        
+
         return new T
         {
             Id = entry.Id,
@@ -363,7 +368,7 @@ public class FileEntryDtoHelper(
             OriginId = entry.OriginId,
             OriginTitle = entry.OriginTitle,
             OriginRoomId = entry.OriginRoomId,
-            OriginRoomTitle = entry.OriginRoomTitle, 
+            OriginRoomTitle = entry.OriginRoomTitle,
             AutoDelete = permanentlyDeletedOn != default ? _apiDateTimeHelper.Get(permanentlyDeletedOn) : null
         };
     }

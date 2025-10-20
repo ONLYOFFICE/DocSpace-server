@@ -371,11 +371,11 @@ public class FileConverter(
         var fileUri = pathProvider.GetFileStreamUrl(file);
         var fileExtension = file.ConvertedExtension;
         var toExtension = fileUtility.GetInternalConvertExtension(file.Title);
-        if (!string.IsNullOrEmpty(outputType)  && await EnableConvertAsync(file, outputType, false))
+        if (!string.IsNullOrEmpty(outputType) && await EnableConvertAsync(file, outputType, false))
         {
             toExtension = outputType;
         }
-        
+
         var docKey = await documentServiceHelper.GetDocKeyAsync(file);
 
         fileUri = documentServiceConnector.ReplaceCommunityAddress(fileUri);
@@ -439,14 +439,14 @@ public class FileConverter(
         await fileMarker.RemoveMarkAsNewAsync(file);
 
         await fileConverterQueue.AddAsync(
-            file, 
-            password, 
+            file,
+            password,
             outputType,
-            (tenantManager.GetCurrentTenant()).Id, 
-            authContext.CurrentAccount, 
-            deleteAfter, 
+            (tenantManager.GetCurrentTenant()).Id,
+            authContext.CurrentAccount,
+            deleteAfter,
             httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),
-            baseCommonLinkUtility.ServerRootPath, 
+            baseCommonLinkUtility.ServerRootPath,
             updateIfExist,
             GetHttpHeaders());
     }
@@ -567,7 +567,7 @@ public class FileConverter(
             var errorString = $"HttpRequestException: {e.StatusCode}";
 
             if (e.StatusCode != HttpStatusCode.NotFound)
-            { 
+            {
                 errorString += $" Error {e.Message}";
             }
 
@@ -596,5 +596,4 @@ public class FileConverter(
 
         return newFile;
     }
-    }
-
+}

@@ -29,13 +29,13 @@ namespace ASC.Core;
 public class AzRecord
 {
     public Guid Subject { get; set; }
-    
+
     public Guid Action { get; set; }
-    
+
     public string Object { get; set; }
-    
+
     public AceType AceType { get; set; }
-    
+
     public int TenantId { get; set; }
 
     public AzRecord() { }
@@ -80,4 +80,3 @@ public static partial class AzRecordMapper
     public static partial IQueryable<AzRecord> Project(this IQueryable<Acl> source);
     public static partial Acl Map(this AzRecord source);
 }
-

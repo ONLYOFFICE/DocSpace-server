@@ -41,10 +41,10 @@ public class IPRestrictionsService(IPRestrictionsRepository iPRestrictionsReposi
                 {
                     return ctx.NotModified();
                 }
-            
+
                 var result = await iPRestrictionsRepository.GetAsync(tenant, token);
                 var etag = await CalculateEtagAsync(result, token);
-                
+
                 return ctx.Modified(result, etag: etag);
             },
             opt => opt.SetDuration(_timeout).SetFailSafe(true));
@@ -61,7 +61,7 @@ public class IPRestrictionsService(IPRestrictionsRepository iPRestrictionsReposi
     {
         using var md5 = MD5.Create();
         using var memoryStream = new MemoryStream();
-                
+
         foreach (var restriction in ips)
         {
             var ip = IPAddress.Parse(restriction.Ip);

@@ -44,7 +44,7 @@ public class TenantManager(
     private const string CurrentTenant = "CURRENT_TENANT";
 
     private static readonly List<string> _thisCompAddresses = [];
-    
+
 
     static TenantManager()
     {
@@ -66,7 +66,7 @@ public class TenantManager(
     {
         return (await tenantService.GetTenantsAsync(default, active)).ToList();
     }
-    
+
     public Task<IEnumerable<Tenant>> GetTenantsAsync(List<int> ids)
     {
         return tenantService.GetTenantsAsync(ids);
@@ -99,9 +99,9 @@ public class TenantManager(
                 t = await tenantService.GetTenantAsync(domain[..(domain.Length - baseUrl.Length - 1)]);
             }
         }
-         
+
         t ??= await tenantService.GetTenantAsync(domain);
-         
+
         if (t == null && coreBaseSettings.Standalone && !isAlias && firstIfNotFoundForStandalone)
         {
             t = await tenantService.GetTenantForStandaloneWithoutAliasAsync(domain);
@@ -109,7 +109,7 @@ public class TenantManager(
 
         return t;
     }
-    
+
 
     public async Task SetTenantVersionAsync(Tenant tenant, int version)
     {
@@ -136,7 +136,7 @@ public class TenantManager(
 
         return newTenant;
     }
-    
+
     public async Task<Tenant> RestoreTenantAsync(Tenant oldTenant, Tenant newTenant)
     {
         newTenant = await tenantService.RestoreTenantAsync(oldTenant, newTenant, coreSettings);
@@ -152,8 +152,8 @@ public class TenantManager(
 
     public Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound, HttpContext context)
     {
-        return _currentTenant != null ? 
-            Task.FromResult(_currentTenant) : 
+        return _currentTenant != null ?
+            Task.FromResult(_currentTenant) :
             GetCurrentTenantFromDbAsync(throwIfNotFound, context);
     }
 
@@ -203,8 +203,8 @@ public class TenantManager(
     {
         return GetCurrentTenant().Id;
     }
-    
-    
+
+
     public Tenant GetCurrentTenant(bool throwIfNotFound = true)
     {
         if (_currentTenant != null)
@@ -249,7 +249,7 @@ public class TenantManager(
             CultureInfo.CurrentUICulture = tenant.GetCulture();
         }
     }
-    
+
     public async Task SetCurrentTenantAsync()
     {
         var context = httpContextAccessor?.HttpContext;

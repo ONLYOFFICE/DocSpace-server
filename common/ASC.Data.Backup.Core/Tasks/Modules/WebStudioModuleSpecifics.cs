@@ -41,7 +41,7 @@ public class WebStudioModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(hel
         new("webhooks_logs", "tenant_id", "id")
     ];
 
-    private readonly RelationInfo[] _relations = 
+    private readonly RelationInfo[] _relations =
     [
         new("webhooks_config", "id", "webhooks_logs", "config_id")
     ];

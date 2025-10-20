@@ -142,14 +142,14 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (BackupsContext ctx, int tenantId, string hash) =>
                 ctx.Backups
-                    
+
                     .SingleOrDefault(b => b.Hash == hash && b.TenantId == tenantId));
 
     public static readonly Func<BackupsContext, IAsyncEnumerable<BackupRecord>> ExpiredBackupsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (BackupsContext ctx) =>
                 ctx.Backups
-                    
+
                     .Where(b => b.ExpiresOn != DateTime.MinValue
                                 && b.ExpiresOn <= DateTime.UtcNow
                                 && b.Removed == false));
@@ -158,21 +158,21 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (BackupsContext ctx) =>
                 ctx.Backups
-                    
+
                     .Where(b => b.IsScheduled == true && b.Removed == false));
 
     public static readonly Func<BackupsContext, int, IAsyncEnumerable<BackupRecord>> BackupsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (BackupsContext ctx, int tenantId) =>
                 ctx.Backups
-                    
+
                     .Where(b => b.TenantId == tenantId && b.Removed == false));
 
     public static readonly Func<BackupsContext, int, IAsyncEnumerable<BackupRecord>> BackupsForMigrationAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (BackupsContext ctx, int tenantId) =>
                 ctx.Backups
-                    
+
                     .Where(b => b.TenantId == tenantId));
 
     public static readonly Func<BackupsContext, int, string, Task<int>> DeleteSchedulesAsync =

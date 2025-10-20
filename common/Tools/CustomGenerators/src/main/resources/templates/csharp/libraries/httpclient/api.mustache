@@ -320,6 +320,22 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
             set => _exceptionFactory = value; 
         }
 
+        {{#x-supportsFields}}
+        private string? _fields;
+
+        /// <summary>
+        /// Specifies which fields should be included in the API response.
+        /// </summary>
+        /// <param name="fields">A comma-separated list of field paths to include in the response</param>
+        /// <returns></returns>
+
+        public {{x-classname}} WithFields(string fields)
+        {
+            _fields = fields;
+            return this;
+        }
+        {{/x-supportsFields}}
+
         {{#operation}}
         /// <summary>
         /// {{summary}}
@@ -438,6 +454,12 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
             }
             {{/required}}
             {{/headerParams}}
+            {{#vendorExtensions.x-hasFieldsParam}}
+            if (_fields != null)
+            {
+                localVarRequestOptions.HeaderParameters.Add("fields", _fields); // header parameter
+            }
+            {{/vendorExtensions.x-hasFieldsParam}}
             {{#formParams}}
             {{#required}}
             {{#isFile}}
@@ -649,6 +671,12 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
             // Set client side default value of Header Param "{{baseName}}".
             localVarRequestOptions.HeaderParameters.Add("{{baseName}}", ClientUtils.ParameterToString({{#_enum}}"{{{.}}}"{{/_enum}})); // Constant header parameter
             {{/isHeaderParam}}
+            {{#vendorExtensions.x-hasFieldsParam}}
+            if (_fields != null)
+            {
+                localVarRequestOptions.HeaderParameters.Add("fields", _fields); // header parameter
+            }
+            {{/vendorExtensions.x-hasFieldsParam}}
             {{/constantParams}}
             {{#headerParams}}
             {{#required}}

@@ -40,7 +40,7 @@ public class CustomNavigationSettings : ISettings<CustomNavigationSettings>
     {
         return new CustomNavigationSettings { Items = [] };
     }
-    
+
     public DateTime LastModified { get; set; }
 }
 

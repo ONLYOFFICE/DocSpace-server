@@ -28,7 +28,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ASC.Common.Threading;
 
-public class DefaultDistributedTaskQueueFactory(IServiceProvider serviceProvider, IOptionsMonitor<DistributedTaskQueueFactoryOptions> options) : IDistributedTaskQueueFactory 
+public class DefaultDistributedTaskQueueFactory(IServiceProvider serviceProvider, IOptionsMonitor<DistributedTaskQueueFactoryOptions> options) : IDistributedTaskQueueFactory
 {
     public DistributedTaskQueue<T> CreateQueue<T>() where T : DistributedTask
     {
@@ -46,11 +46,11 @@ public class DefaultDistributedTaskQueueFactory(IServiceProvider serviceProvider
 public static class DefaultDistributedTaskQueueFactoryExtension
 {
     public static void RegisterQueue<T>(this IServiceCollection services, int? maxThreadsCount = 0, int? timeUntilUnregisterInSeconds = 60) where T : DistributedTask
-    { 
+    {
         services.TryAddSingleton(svc => svc.GetRequiredService<Channel<T>>().Reader);
         services.TryAddSingleton<DistributedTaskQueueService<T>>();
         services.AddHostedService<DistributedTaskQueueService<T>>();
-        
+
         services.Configure<DistributedTaskQueueFactoryOptions>(typeof(T).FullName ?? typeof(T).Name, options =>
         {
             if (maxThreadsCount.HasValue)

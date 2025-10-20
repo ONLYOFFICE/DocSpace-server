@@ -3504,6 +3504,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex("Owner")
                         .HasDatabaseName("owner");
 
+                    b.HasIndex("TenantId", "Subject")
+                        .HasDatabaseName("tenant_id_subject");
+
                     b.HasIndex("TenantId", "EntryType", "EntryId", "Owner")
                         .HasDatabaseName("tenant_id");
 

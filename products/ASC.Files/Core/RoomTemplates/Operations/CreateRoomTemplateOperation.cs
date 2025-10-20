@@ -47,17 +47,17 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
     public int TenantId { get; set; }
 
     public int TemplateId { get; set; }
-    
+
     public CreateRoomTemplateOperation()
     {
-        
+
     }
-    
+
     public CreateRoomTemplateOperation(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
-    
+
     public void Init(int tenantId,
         Guid userId,
         int roomId,
@@ -120,7 +120,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
             TemplateId = template.Id;
 
             List<AceWrapper> wrappers = null;
-            
+
             if (_emails != null)
             {
                 wrappers = _emails.Select(e => new AceWrapper { Email = e, Access = FileShare.Read }).ToList();
@@ -163,7 +163,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
                         await folderDao.SaveFolderAsync(template);
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     logger.WarningCanNotCopyLogo(ex);
                 }
@@ -171,8 +171,8 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
 
             _totalCount = await fileDao.GetFilesCountAsync(_roomId, FilterType.None, false, Guid.Empty, string.Empty, null, false, true);
             var files = fileDao.GetFilesAsync(_roomId);
-            var folders = folderDao.GetFoldersAsync(_roomId).Where(f=> f.FolderType == FolderType.DEFAULT).Select(r => r.Id);
-            
+            var folders = folderDao.GetFoldersAsync(_roomId).Where(f => f.FolderType == FolderType.DEFAULT).Select(r => r.Id);
+
             await foreach (var file in files)
             {
                 try
@@ -180,7 +180,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
                     await fileDao.CopyFileAsync(file, TemplateId);
                     await PublishAsync();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     logger.WarningCanNotCopyFile(ex);
                 }
@@ -222,7 +222,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
             logger.ErrorCreateRoomTemplate(ex);
             Exception = ex;
             IsCompleted = true;
-            if (TemplateId != -1) 
+            if (TemplateId != -1)
             {
                 await folderDao.DeleteFolderAsync(TemplateId);
             }

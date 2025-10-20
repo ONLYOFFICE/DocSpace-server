@@ -365,7 +365,7 @@
     <value>Erfolgreiche Anmeldung</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Login über Konto im sozialen Netzwerk ist erfolgreich</value>
+    <value>Anmeldung über Social-Media-Konto erfolgreich: {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Erfolgreiche Anmeldung über soziale Anwendung</value>
@@ -927,5 +927,53 @@
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Vom Kunden-Wallet aktivierte Serviceeinstellungen aktualisiert</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Erfolgreiche Anmeldung über OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Anmeldung mit Benutzername und Passwort erfolgreich</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Dateien [{0}]. Externer Link erstellt: {1}. Rolle: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Dateien [{0}]. Externer Link gelöscht: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Dateien [{0}]. Externer Link aktualisiert: {1}. Rolle: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Datei als Favorit markiert: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Datei aus Favoriten entfernt: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Datei aus "Für mich freigegeben" entfernt: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Dateien [{0}]. Zugriff aktualisiert für {1}. Rolle: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Ordner heruntergeladen: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Ordner [{0}]. Externer Link erstellt: {1}. Rolle: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Ordner [{0}]. Externer Link gelöscht: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Ordner [{0}]. Externer Link aktualisiert: {1}. Rolle: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Ordner aus "Für mich freigegeben" entfernt: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Ordner [{0}]. Zugriff aktualisiert für {1}. Rolle: {2}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>xterner Link widerrufen: {1}</value>
   </data>
 </root>

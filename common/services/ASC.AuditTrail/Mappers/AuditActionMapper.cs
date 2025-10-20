@@ -54,12 +54,12 @@ public class AuditActionMapper(ILogger<AuditActionMapper> logger)
             {
                 return string.Format(actionText, evt.Target.GetItems().ToArray<object>());
             }
-            
+
             if (evt.Description == null || evt.Description.Count == 0)
             {
                 return actionText;
             }
-            
+
             var description = evt.Description
                 .Select(t => t.Split([','], StringSplitOptions.RemoveEmptyEntries))
                 .Select(split => string.Join(", ", limited ? split.Select(ToLimitedText) : split))

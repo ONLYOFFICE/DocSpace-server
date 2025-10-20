@@ -43,7 +43,7 @@ internal class SharePointFileDao(
     : SharePointDaoBase(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, fileUtility, regexDaoSelectorBase), IFileDao<string>
 {
     private const string BytesTransferredKey = "BytesTransferred";
-    
+
     public async Task InvalidateCacheAsync(string fileId)
     {
         await SharePointProviderInfo.InvalidateStorageAsync();
@@ -280,7 +280,7 @@ internal class SharePointFileDao(
         return fileStream;
     }
 
-    
+
     public async Task<Stream> GetFileStreamAsync(File<string> file, long offset, long length)
     {
         return await GetFileStreamAsync(file, offset);
@@ -296,7 +296,7 @@ internal class SharePointFileDao(
 
         return SharePointProviderInfo.ToFile(fileToDownload).ContentLength;
     }
-    
+
     public Task<string> GetPreSignedUriAsync(File<string> file, TimeSpan expires, string shareKey = null)
     {
         throw new NotSupportedException();
@@ -360,7 +360,7 @@ internal class SharePointFileDao(
     {
         await DeleteFileAsync(fileId);
     }
-    
+
     public async Task DeleteFileAsync(string fileId)
     {
         await SharePointProviderInfo.DeleteFileAsync(fileId);
@@ -490,7 +490,7 @@ internal class SharePointFileDao(
         }
 
         uploadSession.File = await SaveFileAsync(uploadSession.File, chunkStream);
-            
+
         uploadSession.Items[BytesTransferredKey] = chunkLength.ToString();
 
         return uploadSession.File;
@@ -540,7 +540,7 @@ internal class SharePointFileDao(
         }
 
         uploadSession.File = FixId(uploadSession.File);
-        
+
         return Task.FromResult(transferred);
     }
 

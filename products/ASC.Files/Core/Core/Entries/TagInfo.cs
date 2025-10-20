@@ -64,7 +64,7 @@ public class TagInfo
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class TagInfoMapper
-{       
+{
     public static partial DbFilesTag MapToDbFilesTag(this TagInfo source);
     public static partial TagInfo MapToTagInfo(this DbFilesTag source);
     public static partial void ApplyUpdate(DbFilesTagLink link, TagInfo source);

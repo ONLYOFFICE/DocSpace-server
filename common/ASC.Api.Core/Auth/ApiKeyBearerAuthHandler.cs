@@ -52,26 +52,26 @@ public class ApiKeyBearerAuthHandler(
         {
             token = token["Bearer ".Length..];
         }
-        
+
         var apiKey = await apiKeyManager.ValidateApiKeyAsync(token);
-        
+
         try
         {
             if (apiKey == null)
             {
                 throw new AuthenticationException("Api key is invalid");
             }
-            
+
             var claims = new List<Claim>
             {
                 AuthConstants.Claim_ScopeGlobalWrite
             };
 
-            if (apiKey.Permissions is { Count: > 0 } && !apiKey.Permissions.Exists(x=> x == "*"))
+            if (apiKey.Permissions is { Count: > 0 } && !apiKey.Permissions.Exists(x => x == "*"))
             {
                 claims = apiKey.Permissions.ConvertAll(x => new Claim("scope", x));
             }
-            
+
             await securityContext.AuthenticateMeWithoutCookieAsync(apiKey.CreateBy, claims);
         }
         catch (Exception ex)

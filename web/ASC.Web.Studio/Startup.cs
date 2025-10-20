@@ -45,10 +45,10 @@ public class Startup : BaseStartup
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         base.Configure(app, env);
-        
+
         if (OpenApiEnabled && _configuration.GetValue<bool>("openApi:enableUI"))
         {
-            var endpoints = new Dictionary<string,string>();
+            var endpoints = new Dictionary<string, string>();
             _configuration.Bind("openApi:endpoints", endpoints);
             app.UseOpenApiUI(endpoints);
         }
@@ -95,7 +95,7 @@ public class Startup : BaseStartup
         services.AddScoped<EventDataIntegrationEventHandler>();
         services.AddSingleton<MessageSenderService>();
         services.AddHostedService<MessageSenderService>();
-        
+
         services.RegisterQueue<RemovePortalOperation>();
         services.RegisterQueue<MigrationOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
 

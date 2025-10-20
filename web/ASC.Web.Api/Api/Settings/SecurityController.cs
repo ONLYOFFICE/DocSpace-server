@@ -84,7 +84,7 @@ public class SecurityController(
             {
                 s.Groups.Add(await groupSummaryDtoHelper.GetAsync(e));
             }
-            
+
             foreach (var e in i.Users)
             {
                 s.Users.Add(await employeeWrapperHelper.GetAsync(e));
@@ -143,10 +143,10 @@ public class SecurityController(
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Everyone")]
     public async Task<PasswordSettingsDto> GetPasswordSettings()
-    {        
+    {
         var settings = await settingsManager.LoadAsync<PasswordSettings>(HttpContext.GetIfModifiedSince());
-        
-        return HttpContext.TryGetFromCache(settings.LastModified) ? null :  passwordSettingsConverter.Convert(settings);
+
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null : passwordSettingsConverter.Convert(settings);
     }
 
     /// <summary>
@@ -170,7 +170,7 @@ public class SecurityController(
         {
             throw new ArgumentException(nameof(inDto.MinLength));
         }
-        
+
         userPasswordSettings.MinLength = inDto.MinLength;
         userPasswordSettings.UpperCase = inDto.UpperCase;
         userPasswordSettings.Digits = inDto.Digits;
@@ -324,7 +324,7 @@ public class SecurityController(
     [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(ProductAdministratorDto))]
     [HttpGet("administrator")]
     public async Task<ProductAdministratorDto> GetIsProductAdministrator(UserProductIdsRequestDto inDto)
-    {        
+    {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var result = await webItemSecurity.IsProductAdministratorAsync(inDto.ProductId, inDto.UserId);
         return new ProductAdministratorDto { ProductId = inDto.ProductId, UserId = inDto.UserId, Administrator = result };
@@ -393,8 +393,8 @@ public class SecurityController(
 
         var settings = new LoginSettings
         {
-            AttemptCount = inDto.AttemptCount, 
-            CheckPeriod = inDto.CheckPeriod, 
+            AttemptCount = inDto.AttemptCount,
+            CheckPeriod = inDto.CheckPeriod,
             BlockTime = inDto.BlockTime
         };
 
@@ -418,8 +418,8 @@ public class SecurityController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var settings = await settingsManager.LoadAsync<LoginSettings>(HttpContext.GetIfModifiedSince());
-        
-        return HttpContext.TryGetFromCache(settings.LastModified) ? null :  settings.Map();
+
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null : settings.Map();
     }
 
     /// <summary>
@@ -437,7 +437,7 @@ public class SecurityController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var defaultSettings = new LoginSettings().GetDefault();
-        
+
         await settingsManager.SaveAsync(defaultSettings);
 
         return defaultSettings.Map();

@@ -56,7 +56,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(
         var mapping = daoFactory.GetMapping<string>();
         var folderId = daoSelector.ConvertId(parentFolder.Id);
         var tenantId = tenantManager.GetCurrentTenantId();
-        
+
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var entryIds = await Queries.HashIdsAsync(filesDbContext, PathPrefix)
             .ToDictionaryAsync(x => x.HashId, x => x.Id);
@@ -77,8 +77,8 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(
                 Name = r.Tag.Name,
                 Type = r.Tag.Type,
                 Owner = r.Tag.Owner,
-                EntryId = entryIds.TryGetValue(r.TagLink.EntryId, out var entryId) 
-                    ? entryId 
+                EntryId = entryIds.TryGetValue(r.TagLink.EntryId, out var entryId)
+                    ? entryId
                     : await mapping.MappingIdAsync(r.TagLink.EntryId),
                 EntryType = r.TagLink.EntryType,
                 Count = r.TagLink.Count,
@@ -94,7 +94,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem>(
             }
             yield break;
         }
-        
+
         var children = (await dao.GetChildrenAsync(folderId)).Select(dao.MakeId);
 
         var folderFileIds = new[] { parentFolder.Id }

@@ -79,6 +79,6 @@ public class LdapStatusDto
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class LdapStatusDtoMapper
-{       
+{
     public static partial LdapStatusDto MapToDto(this LdapOperationStatus source);
 }

@@ -168,7 +168,7 @@ public static class IdentityExtension
             entity.Property(e => e.IdTokenClaims)
                 .HasColumnType("text")
                 .HasColumnName("id_token_claims");
-            
+
             entity.Property(e => e.IdTokenMetadata)
                 .HasColumnType("text")
                 .HasColumnName("id_token_metadata");

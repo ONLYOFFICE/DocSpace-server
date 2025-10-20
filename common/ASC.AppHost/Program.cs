@@ -103,7 +103,7 @@ builder.Eventing.Subscribe(redis.Resource, (Func<ConnectionStringAvailableEvent,
         }
 
         if (hostAndPassword.Length > 1)
-        {        
+        {
             var splittedHostAndPassword = hostAndPassword[1].Split('=');
             if (splittedHostAndPassword.Length == 2)
             {
@@ -148,7 +148,7 @@ if (isDocker)
     var socketIoResourceBuilder = builder
         .AddDockerfile(ascSocketio, "../ASC.Socket.IO/")
         .WithImageTag("dev")
-        .WithEnvironment("log:name", "socketIO")   
+        .WithEnvironment("log:name", "socketIO")
         .WithEnvironment("API_HOST", $"http://{openRestyContainer}:{restyPort.ToString()}")
         .WithEnvironment("Redis:Hosts:0:Host", () => SubstituteLocalhost(redisHost) ?? string.Empty)
         .WithEnvironment("Redis:Hosts:0:Port", () => redisPort ?? string.Empty)
@@ -200,12 +200,12 @@ else
         .WithHttpEndpoint(targetPort: socketIoPort)
         .WithHttpHealthCheck("/health")
         .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
-    
+
     builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build")
         .WithHttpEndpoint(targetPort: 9834)
         .WithHttpHealthCheck("/health")
         .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
-    
+
     builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build")
         .WithHttpEndpoint(targetPort: 1900)
         .WithHttpHealthCheck("/health")
@@ -293,7 +293,7 @@ foreach (var d in dict)
 }
 
 openResty
-    .WithArgs("/bin/sh", "-c", $"envsubst '{string.Join(',', dict.Select(r=> $"${r.Key}"))}' < /etc/nginx/templates/upstream-aspire.conf.template > /etc/nginx/includes/onlyoffice-upstream.conf && /usr/local/openresty/bin/openresty -g 'daemon off;'");
+    .WithArgs("/bin/sh", "-c", $"envsubst '{string.Join(',', dict.Select(r => $"${r.Key}"))}' < /etc/nginx/templates/upstream-aspire.conf.template > /etc/nginx/includes/onlyoffice-upstream.conf && /usr/local/openresty/bin/openresty -g 'daemon off;'");
 
 await builder.Build().RunAsync();
 
@@ -313,7 +313,7 @@ void AddProjectWithDefaultConfiguration<TProject>(bool includeHealthCheck = true
     {
         project.WithEnvironment("core:hosting:singletonMode", true.ToString());
     }
-    
+
     AddBaseConfig(project, includeHealthCheck);
 }
 
@@ -358,7 +358,7 @@ void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true)
     resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES", "true");
     resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES", "true");
     resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY", "in_memory");
-    
+
     if (resourceBuilder.ApplicationBuilder.ExecutionContext.IsRunMode && resourceBuilder.ApplicationBuilder.Environment.IsDevelopment())
     {
         resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_ASPNETCORE_DISABLE_URL_QUERY_REDACTION", "true");
@@ -374,7 +374,7 @@ void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool includeHealthChe
     {
         resourceBuilder.WithHttpHealthCheck("/health");
     }
-    
+
     resourceBuilder
         .WithEnvironment("openTelemetry:enable", "true")
         .WithEnvironment("files:docservice:url:portal", SubstituteLocalhost("http://localhost"))
@@ -386,7 +386,7 @@ void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool includeHealthChe
         resourceBuilder
             .WithEnvironment("files:docservice:url:internal", $"http://{editorsContainer}");
     }
-    
+
     resourceBuilder
         .WithEnvironment("RabbitMQ:Hostname", () => rabbitMqUri != null ? isDocker ? $"{SubstituteLocalhost(rabbitMqUri.Host)}" : rabbitMqUri.Host : "")
         .WithEnvironment("RabbitMQ:Port", () => rabbitMqUri != null ? $"{rabbitMqUri.Port}" : "")
@@ -403,8 +403,8 @@ void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool includeHealthChe
         resourceBuilder
             .WithEnvironment("Redis:Password", () => (isDocker ? SubstituteLocalhost(redisHost) : redisHost) ?? string.Empty);
     }
-    
-    
+
+
     AddWaitFor(resourceBuilder);
 }
 
@@ -451,7 +451,7 @@ void AddIdentityEnv<T>(IResourceBuilder<T> resourceBuilder) where T : ContainerR
     {
         resourceBuilder.WithEnvironment("REDIS_PASSWORD", () => redisPassword ?? string.Empty);
     }
-    
+
     AddWaitFor(resourceBuilder, includeEditors: false);
 }
 

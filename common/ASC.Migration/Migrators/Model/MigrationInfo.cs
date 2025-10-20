@@ -88,7 +88,7 @@ public class MigrationInfo
             CommonStorage.ShouldImport = apiInfo.ImportSharedFiles;
         }
         if (ProjectStorage != null)
-        { 
+        {
             ProjectStorage.ShouldImport = apiInfo.ImportSharedFolders;
             ProjectStorage.ShouldImportSharedFiles = true;
             ProjectStorage.ShouldImportSharedFolders = true;

@@ -75,7 +75,7 @@ public class FileShareRecord<T>
     /// The parent ID of the file entry.
     /// </summary>
     public T ParentId { get; set; }
-    
+
     /// <summary>
     /// The level of the file entry access right.
     /// </summary>
@@ -106,7 +106,7 @@ public class FileShareRecord<T>
             (int)FileShare.Varies,
             (int)FileShare.Restrict
         ];
-        
+
         private static readonly int[] _filesShareOrder =
         [
             (int)FileShare.None,
@@ -124,7 +124,7 @@ public class FileShareRecord<T>
             (int)FileShare.ContentCreator,
             (int)FileShare.Varies
         ];
-        
+
         private readonly int[] _shareOrder = rootFolderType is FolderType.VirtualRooms or FolderType.Archive
             ? _roomShareOrder
             : _filesShareOrder;
@@ -176,11 +176,11 @@ public class SmallShareRecord
 public static class ShareCompareHelper
 {
     private static readonly ConcurrentDictionary<string, Expression> _predicates = new();
-    
+
     public static Expression<Func<TType, int>> GetCompareExpression<TType>(Expression<Func<TType, FileShare>> memberExpression, FolderType rootFolderType)
     {
         var key = $"{typeof(TType)}-{rootFolderType}";
-        
+
         if (_predicates.TryGetValue(key, out var value))
         {
             return (Expression<Func<TType, int>>)value;
@@ -195,10 +195,10 @@ public static class ShareCompareHelper
         for (var i = shares.Count - 1; i >= 0; i--)
         {
             expression = Expression.Condition(
-                Expression.Equal(memberExpression.Body, Expression.Constant(shares[i])), Expression.Constant(i), 
+                Expression.Equal(memberExpression.Body, Expression.Constant(shares[i])), Expression.Constant(i),
                 expression != null ? expression : Expression.Constant(i + 1));
         }
-        
+
         var predicate = Expression.Lambda<Func<TType, int>>(expression!, memberExpression.Parameters[0]);
 
         _predicates.TryAdd(key, predicate);
@@ -209,6 +209,6 @@ public static class ShareCompareHelper
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class FileShareRecordMapper
-{    
+{
     public static partial FileShareRecord<int> MapToFileShareRecordInternal(this FileShareRecord<string> source);
 }

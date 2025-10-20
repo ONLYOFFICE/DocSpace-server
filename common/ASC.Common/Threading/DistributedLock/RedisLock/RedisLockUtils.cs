@@ -37,12 +37,12 @@ public static partial class RedisLockUtils
 
         return prefix + ":{" + name + "}";
     }
-    
+
     public static string RemoveExtraneousWhitespace(string script)
     {
         return RemoveExtraneousWhitespaceRegex().Replace(script.Trim(), " ");
     }
-    
+
     [GeneratedRegex("\\s+")]
     private static partial Regex RemoveExtraneousWhitespaceRegex();
 }

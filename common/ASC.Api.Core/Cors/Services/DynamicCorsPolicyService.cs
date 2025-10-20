@@ -147,7 +147,7 @@ public class DynamicCorsPolicyService : IDynamicCorsPolicyService
         }
 
         if (result.IsPreflightRequest)
-        {   
+        {
             // An HTTP response to a CORS-preflight request can include the following headers:
             // `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers`, `Access-Control-Max-Age`
             if (result.AllowedHeaders.Count > 0)
@@ -201,6 +201,6 @@ public class DynamicCorsPolicyService : IDynamicCorsPolicyService
             return false;
         }
 
-        return  await _dynamicCorsPolicyResolver.ResolveForOrigin(policy, origin);
+        return await _dynamicCorsPolicyResolver.ResolveForOrigin(policy, origin);
     }
 }

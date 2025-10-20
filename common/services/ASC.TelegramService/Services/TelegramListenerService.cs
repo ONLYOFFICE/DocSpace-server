@@ -62,9 +62,9 @@ public class TelegramListenerService(
             cacheDisableClient.Unsubscribe(CacheNotifyAction.Insert);
             eventBus.Unsubscribe<NotifySendTelegramMessageRequestedIntegrationEvent, TelegramSendMessageRequestedIntegrationEventHandler>();
         });
-        
+
         _ = Task.Run(async () => await CreateClientsAsync(), stoppingToken);
-        
+
         return Task.CompletedTask;
     }
 

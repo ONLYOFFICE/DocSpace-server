@@ -95,7 +95,7 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
 
             Percentage = 100;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             logger.ErrorDeletePersonalFolderProgressItem(ex);
             Status = DistributedTaskStatus.Failted;

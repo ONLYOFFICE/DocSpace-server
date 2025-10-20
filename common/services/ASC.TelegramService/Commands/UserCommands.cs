@@ -55,7 +55,7 @@ public class UserCommands(
         {
             await distributedCache.RemoveAsync(token);
             await distributedCache.RemoveAsync($"tg-token:{user}");
-            
+
             var split = user.Split(':');
 
             var portalUserId = Guid.Parse(split[0]);

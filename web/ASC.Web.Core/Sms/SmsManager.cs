@@ -113,7 +113,7 @@ public class SmsManager(UserManager userManager,
         }
     }
 
-    public async Task<(bool,string)> ValidateSmsCodeAsync(UserInfo user, string code, bool isEntryPoint = false)
+    public async Task<(bool, string)> ValidateSmsCodeAsync(UserInfo user, string code, bool isEntryPoint = false)
     {
         string token = default;
 

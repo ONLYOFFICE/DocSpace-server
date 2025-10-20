@@ -165,8 +165,7 @@ public class DocumentServiceTrackerHelper(
     FileTrackerHelper fileTracker,
     IHttpClientFactory clientFactory,
     IHttpContextAccessor httpContextAccessor,
-    WebhookManager webhookManager,
-    FileSecurity fileSecurity)
+    WebhookManager webhookManager)
 {
     public string GetCallbackUrl<T>(T fileId, int? tenantId = null)
     {
@@ -185,8 +184,8 @@ public class DocumentServiceTrackerHelper(
                 queryParams["request-user-agent"] = header.First();
             }
         }
-        
-        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}?{queryParams}"); 
+
+        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}?{queryParams}");
 
         callbackUrl = documentServiceConnector.ReplaceCommunityAddress(callbackUrl);
 
@@ -201,7 +200,7 @@ public class DocumentServiceTrackerHelper(
         {
             callbackUrl = QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.ShareKey, token);
         }
-        logger.Information($"4 File Id: {fileId} Filling session Id {fillingSessionId}");
+
         if (!string.IsNullOrEmpty(fillingSessionId))
         {
             callbackUrl = QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.FillingSessionId, fillingSessionId);
@@ -226,7 +225,7 @@ public class DocumentServiceTrackerHelper(
 
             case TrackerStatus.MustSave:
             case TrackerStatus.Closed:
-                if(fileData.Status == TrackerStatus.Closed)
+                if (fileData.Status == TrackerStatus.Closed)
                 {
                     await fileTracker.RemoveAsync(fileId);
                     await socketManager.StopEditAsync(fileId);
@@ -234,7 +233,7 @@ public class DocumentServiceTrackerHelper(
                 var fileDao = daoFactory.GetFileDao<T>();
                 var folderDao = daoFactory.GetFolderDao<T>();
                 var properties = await fileDao.GetProperties(fileId);
-                if(properties?.FormFilling != null)
+                if (properties?.FormFilling != null)
                 {
                     var fileForDeletion = await documentServiceHelper.CheckNeedDeletion(fileDao, fileId, properties.FormFilling);
                     if (fileForDeletion != null)
@@ -246,12 +245,12 @@ public class DocumentServiceTrackerHelper(
                         await folderDao.ChangeTreeFolderSizeAsync(fileForDeletion.ParentId, (-1) * fileForDeletion.ContentLength);
                         await fileDao.DeleteFileAsync(fileForDeletion.Id, ASC.Core.Configuration.Constants.CoreSystem.ID);
                     }
-                    else if(fileData.Status == TrackerStatus.MustSave)
+                    else if (fileData.Status == TrackerStatus.MustSave)
                     {
                         return await ProcessSaveAsync(fileId, fileData);
                     }
                 }
-                else if(fileData.Status == TrackerStatus.MustSave)
+                else if (fileData.Status == TrackerStatus.MustSave)
                 {
                     return await ProcessSaveAsync(fileId, fileData);
                 }
@@ -309,7 +308,6 @@ public class DocumentServiceTrackerHelper(
 
                 try
                 {
-                    logger.Information($"2 File Id: {fileId} Filling session Id {httpContextAccessor.HttpContext.Request.QueryString}");
                     file = await entryManager.TrackEditingAsync(fileId, userId, userId, tenantManager.GetCurrentTenant(), fillingSessionId: httpContextAccessor.HttpContext.Request.Query[FilesLinkUtility.FillingSessionId].FirstOrDefault());
                 }
                 catch (Exception e)
@@ -341,7 +339,7 @@ public class DocumentServiceTrackerHelper(
                     await securityContext.AuthenticateMeWithoutCookieAsync(userId); //hack
                 }
                 catch
-                { 
+                {
                     // ignored
                 }
             }
@@ -356,12 +354,7 @@ public class DocumentServiceTrackerHelper(
             {
                 await filesMessageService.SendAsync(MessageAction.FileOpenedForChange, file, file.Title);
             }
-            
-            if (securityContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry && await fileSecurity.CanReadAsync(file))
-            {
-                await entryManager.MarkAsRecent(file);
-            }
-            
+
             securityContext.Logout();
         }
     }
@@ -522,9 +515,9 @@ public class DocumentServiceTrackerHelper(
                     .FirstOrDefault();
 
                 nameInEditor = RemoveGuestPart(nameInEditor);
-                
-                userName = string.IsNullOrEmpty(nameInEditor) 
-                    ? AuditReportResource.GuestAccount 
+
+                userName = string.IsNullOrEmpty(nameInEditor)
+                    ? AuditReportResource.GuestAccount
                     : nameInEditor;
             }
             catch
@@ -532,7 +525,7 @@ public class DocumentServiceTrackerHelper(
                 userName = AuditReportResource.GuestAccount;
             }
         }
-        
+
         await filesMessageService.SendAsync(forceSave && fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit ? MessageAction.FormSubmit : MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, userName, file.Title);
 
         await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
@@ -543,14 +536,14 @@ public class DocumentServiceTrackerHelper(
         }
 
         return new TrackResponse { Message = saveMessage };
-        
+
         string RemoveGuestPart(string name)
         {
             if (string.IsNullOrEmpty(name))
             {
                 return name;
             }
-            
+
             var index = name.LastIndexOf('(');
             if (index != -1)
             {

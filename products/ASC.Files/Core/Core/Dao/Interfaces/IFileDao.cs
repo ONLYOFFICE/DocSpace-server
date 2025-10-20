@@ -139,7 +139,7 @@ public interface IFileDao<T>
     /// <param name="offset"></param>
     /// <returns>Stream</returns>
     Task<Stream> GetFileStreamAsync(File<T> file, long offset);
-    
+
     Task<Stream> GetFileStreamAsync(File<T> file, long offset, long length);
 
     Task<long> GetFileSizeAsync(File<T> file);
@@ -206,7 +206,7 @@ public interface IFileDao<T>
     /// <param name="fileId">file id</param>
     Task DeleteFileAsync(T fileId);
     Task DeleteFileVersionAsync(File<T> file, int version);
-    
+
     /// <summary>
     ///   Deletes a file including all previous versions
     /// </summary>
@@ -347,7 +347,7 @@ public interface IFileDao<T>
     Task<File<T>> FinalizeUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
     Task AbortUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
     Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<T> uploadSession);
-    
+
     #endregion
 
     #region Only in TMFileDao
@@ -378,7 +378,7 @@ public interface IFileDao<T>
     /// <param name="extension"></param>
     /// <param name="searchInContent"></param>
     /// <returns></returns>
-    IAsyncEnumerable<File<T>> GetFilesAsync(IEnumerable<T> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
+    IAsyncEnumerable<File<T>> GetFilesAsync(IEnumerable<T> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
         bool searchInContent);
     /// <summary>
     /// Search the list of files containing text
@@ -418,7 +418,7 @@ public interface IFileDao<T>
 
     Task SaveProperties(T fileId, EntryProperties<T> entryProperties);
 
-    Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
+    Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent,
         bool withSubfolders = false, bool excludeSubject = false, T roomId = default,
         FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All);
 

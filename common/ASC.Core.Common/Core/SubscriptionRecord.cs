@@ -40,7 +40,7 @@ public static partial class SubscriptionRecordMapper
     [MapProperty(nameof(Subscription.TenantId), nameof(SubscriptionRecord.Tenant))]
     [MapProperty(nameof(Subscription.Unsubscribed), nameof(SubscriptionRecord.Subscribed), Use = nameof(MapSubscribedToUnsubscribed))]
     public static partial SubscriptionRecord Map(this Subscription source);
-    
+
     public static bool MapSubscribedToUnsubscribed(bool unsubscribed)
     {
         return !unsubscribed;

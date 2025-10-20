@@ -75,17 +75,17 @@ public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
         {
             return;
         }
-        
+
         memoryCache.Remove(key);
     }
 
     public void Remove(ConcurrentDictionary<string, object> keys, Regex pattern)
-    {       
+    {
         if (_disposed)
         {
             return;
         }
-        
+
         var copy = keys.ToDictionary(p => p.Key, p => p.Value);
         var matchedKeys = copy.Select(p => p.Key).Where(k => pattern.IsMatch(k));
 
@@ -101,7 +101,7 @@ public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
         {
             return;
         }
-        
+
         if (_resetCacheToken is { IsCancellationRequested: false, Token.CanBeCanceled: true })
         {
             _resetCacheToken.Cancel();
@@ -119,7 +119,7 @@ public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
         {
             return default;
         }
-        
+
         if (memoryCache.TryGetValue<ConcurrentDictionary<string, T>>(key, out var dic)
             && dic.TryGetValue(field, out var value))
         {
@@ -130,12 +130,12 @@ public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
     }
 
     public void HashSet<T>(string key, string field, T value)
-    {       
+    {
         if (_disposed)
         {
             return;
         }
-        
+
         var options = new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(DateTime.MaxValue)
                 .AddExpirationToken(new CancellationChangeToken(_resetCacheToken.Token));
@@ -169,7 +169,7 @@ public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
         {
             return;
         }
-        
+
         var options = new MemoryCacheEntryOptions()
             .AddExpirationToken(new CancellationChangeToken(_resetCacheToken.Token));
 
@@ -190,14 +190,14 @@ public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
 
         memoryCache.Set(key, value, options);
     }
-    
+
     private void Dispose(bool disposing)
     {
         if (_disposed)
         {
             return;
         }
-        
+
         if (disposing)
         {
             _disposed = true;

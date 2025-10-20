@@ -173,24 +173,24 @@ public static partial class DbTenantMapper
     {
         return alias.ToLower();
     }
-    
+
     public static DateTime MapLastModified()
     {
         return DateTime.UtcNow;
     }
-    
+
     [UserMapping(Default = false)]
     public static string GetTrustedDomains(Tenant source)
     {
         return source.GetTrustedDomains();
     }
-    
+
     [UserMapping(Default = false)]
     public static string MapName(string name)
     {
         return name ?? "";
     }
-    
+
     [UserMapping(Default = false)]
     public static string MapMappedDomain(string mappedDomain)
     {

@@ -39,7 +39,7 @@ public class RoomNotifyQueueManager<T> : INotifyQueueManager<T>
     private readonly NotifyClient _notifyClient;
     private readonly TenantManager _tenantManager;
     private readonly FileSecurity _fileSecurity;
-    
+
 
     public RoomNotifyQueueManager(NotifyClient notifyClient, TenantManager tenantManager, FileSecurity fileSecurity)
     {
@@ -50,7 +50,8 @@ public class RoomNotifyQueueManager<T> : INotifyQueueManager<T>
 
     public IRoomNotifyQueue<T> GetOrCreateRoomQueue(int tenantId, Folder<T> room, Guid currentAccountId)
     {
-        return _queues.GetOrAdd(room.Id.ToString(), _ => {
+        return _queues.GetOrAdd(room.Id.ToString(), _ =>
+        {
             var roomNotifyQueue = new RoomNotifyQueue<T>(tenantId, room, _notifyClient, currentAccountId, _tenantManager, _fileSecurity);
             roomNotifyQueue.RegisterCallback(RemoveRoomQueue);
             return roomNotifyQueue;

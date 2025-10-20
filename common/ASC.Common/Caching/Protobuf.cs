@@ -47,7 +47,7 @@ public class ProtobufDeserializer<T> : IDeserializer<T> where T : new()
 }
 
 
-public class RedisProtobufSerializer: ISerializer
+public class RedisProtobufSerializer : ISerializer
 {
     public byte[] Serialize<T>(T item)
     {
@@ -98,7 +98,7 @@ public class WarmupProtobufStartupTask(ILogger<WarmupProtobufStartupTask> logger
         {
             return Task.CompletedTask;
         }
-        
+
         foreach (var t in types)
         {
             try
@@ -110,7 +110,7 @@ public class WarmupProtobufStartupTask(ILogger<WarmupProtobufStartupTask> logger
 
                 var genericMethod = methodInfo.MakeGenericMethod(t);
                 genericMethod.Invoke(null, null);
-                    
+
                 if (!t.IsSubclassOf(integrationEvent))
                 {
                     var redis = redisGeneric.MakeGenericType(t, t);

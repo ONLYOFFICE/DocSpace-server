@@ -222,7 +222,7 @@ internal class SubscriptionsStore
     {
         var objId = objectId ?? string.Empty;
         return recipientId != null ?
-            _recordsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : [] : 
+            _recordsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : [] :
             _recordsByObj.TryGetValue(objId, out var value1) ? value1.ToList() : [];
     }
 

@@ -91,7 +91,7 @@ public static class DbFilesThirdpartyAppExtension
                 .UseCollation("utf8_general_ci");
         });
     }
-    
+
     public static void PgSqlAddDbFilesThirdpartyApp(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFilesThirdpartyApp>(entity =>

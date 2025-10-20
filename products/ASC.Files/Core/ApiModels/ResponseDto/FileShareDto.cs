@@ -42,17 +42,17 @@ public class FileShareDto
     /// </summary>
     [Obsolete]
     public object SharedTo { get; set; }
-    
+
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
     public EmployeeFullDto SharedToUser { get; set; }
-    
+
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
     public GroupSummaryDto SharedToGroup { get; set; }
-    
+
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
@@ -83,12 +83,16 @@ public class FileShareDto
     /// Determines whether the user has permission to modify the deny download setting for the file share.
     /// </summary>
     public required bool CanEditDenyDownload { get; set; }
-    
+
     /// <summary>
     /// Indicates whether the expiration date of access permissions can be edited.
     /// </summary>
     public required bool CanEditExpirationDate { get; set; }
 
+    /// <summary>
+    /// Specifies whether the file sharing access can be revoked by the current user.
+    /// </summary>
+    public required bool CanRevoke { get; set; }
     /// <summary>
     /// The subject type.
     /// </summary>
@@ -181,7 +185,7 @@ public class FileShareDtoHelper(
         {
             return null;
         }
-        
+
         var result = new FileShareDto
         {
             IsOwner = aceWrapper.Owner,
@@ -190,6 +194,7 @@ public class FileShareDtoHelper(
             CanEditInternal = aceWrapper.CanEditInternal,
             CanEditDenyDownload = aceWrapper.CanEditDenyDownload,
             CanEditExpirationDate = aceWrapper.CanEditExpirationDate,
+            CanRevoke = aceWrapper.CanRevoke,
             SubjectType = aceWrapper.SubjectType
         };
 

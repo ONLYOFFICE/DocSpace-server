@@ -69,6 +69,6 @@ public class FormGalleryDto
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class FormGalleryDtoMapper
-{       
+{
     public static partial FormGalleryDto Map(this OFormSettings source);
 }

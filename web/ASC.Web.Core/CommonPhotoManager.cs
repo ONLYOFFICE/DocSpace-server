@@ -51,11 +51,11 @@ public static class CommonPhotoManager
 
         var finalWidth = (uint)(realWidth / scaleFactor);
         var finalHeight = (uint)(realHeight / scaleFactor);
-        
+
         var thumbnail = new MagickImage(MagickColors.None, width, height);
-        
+
         image.Resize(finalWidth, finalHeight);
-        
+
         new Drawables()
             .Draw(image)
             .Draw(thumbnail);
@@ -63,7 +63,7 @@ public static class CommonPhotoManager
         return thumbnail;
     }
 
-    public static async Task<byte[]> SaveToBytes(IMagickImage img, MagickFormat imageFormat =  MagickFormat.Png)
+    public static async Task<byte[]> SaveToBytes(IMagickImage img, MagickFormat imageFormat = MagickFormat.Png)
     {
         using var memoryStream = new MemoryStream();
         await img.WriteAsync(memoryStream, imageFormat);

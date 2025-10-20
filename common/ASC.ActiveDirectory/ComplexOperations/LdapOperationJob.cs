@@ -68,9 +68,9 @@ public class LdapOperationJob : DistributedTaskProgress
 
     public LdapOperationJob()
     {
-        
+
     }
-    
+
     public LdapOperationJob(LdapUserManager ldapUserManager,
         UserManager userManager,
         TenantManager tenantManager,

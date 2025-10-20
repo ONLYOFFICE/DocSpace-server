@@ -84,12 +84,12 @@ public class SmtpSettingsController(
     public async Task<SmtpSettingsDto> SaveSmtpSettings(SmtpSettingsDto inDto)
     {
         ArgumentNullException.ThrowIfNull(inDto);
-        
+
         await CheckSmtpPermissionsAsync();
 
         //TODO: Add validation check
 
-        
+
 
         var settingConfig = ToSmtpSettingsConfig(inDto);
 
@@ -196,7 +196,7 @@ public class SmtpSettingsController(
     }
 
     private async Task CheckSmtpPermissionsAsync()
-    {            
+    {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.SmtpSettings)))
         {

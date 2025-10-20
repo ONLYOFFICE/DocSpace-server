@@ -153,7 +153,7 @@ public class RenewSubscriptionService(
 
             var walletQuotaFeatureName = walletQuota.Features.Split(':').FirstOrDefault(); // wallet quota must contains only one feature
 
-            var nextQuantity = data.NextQuantity.HasValue ?  data.NextQuantity.Value : data.Quantity;
+            var nextQuantity = data.NextQuantity.HasValue ? data.NextQuantity.Value : data.Quantity;
 
             var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync(refresh: true);
 
@@ -252,7 +252,8 @@ static file class Queries
                         (tariffRow, tenant) => tariffRow
                     )
                     .GroupBy(tariffRow => tariffRow.TenantId)
-                    .Select(group => new {
+                    .Select(group => new
+                    {
                         TenantId = group.Key,
                         MaxTariffId = group.Max(tariffRow => tariffRow.TariffId)
                     })

@@ -1162,4 +1162,46 @@
   <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
     <value>Recarga de saldo</value>
   </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID do cliente</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Segredo do cliente</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Habilite o aplicativo para fazer login no portal usando uma conta WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Habilite o aplicativo para fazer login no portal usando uma conta WeChat.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Primeiro nome</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Sobrenome</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Cota de Serviço de Documentos ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>O número de plugins excede o limite</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Ocorreu um erro inesperado. Tente novamente.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Você se conectou com sucesso ao Telegram para receber notificações do seu DocSpace.</value>
+  </data>
 </root>

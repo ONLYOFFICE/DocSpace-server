@@ -28,5 +28,5 @@ namespace ASC.Core.Common.Quota.Custom;
 
 public class CustomQuotaFeature
 {
-     public virtual string Name { get; init; }
+    public virtual string Name { get; init; }
 }

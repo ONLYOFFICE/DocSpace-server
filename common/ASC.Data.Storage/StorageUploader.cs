@@ -32,7 +32,7 @@ public class StorageUploader(
     TempStream tempStream,
     ICacheNotify<MigrationProgress> cacheMigrationNotify,
     IDistributedTaskQueueFactory queueFactory,
-    ILogger<StorageUploader> logger, 
+    ILogger<StorageUploader> logger,
     IDistributedLockProvider distributedLockProvider,
     IFusionCache cache)
 {
@@ -97,9 +97,9 @@ public class MigrateOperation : DistributedTaskProgress
 
     public MigrateOperation()
     {
-        
+
     }
-    
+
     public MigrateOperation(
         IServiceProvider serviceProvider,
         ICacheNotify<MigrationProgress> cacheMigrationNotify,

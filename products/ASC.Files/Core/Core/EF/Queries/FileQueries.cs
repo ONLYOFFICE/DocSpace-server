@@ -33,109 +33,109 @@ public partial class FilesDbContext
     {
         return FileQueries.DbFileQueryAsync(this, tenantId, userId, fileId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFileQuery> DbFileQueryByFileVersionAsync(int tenantId, Guid userId, int fileId, int fileVersion)
     {
         return FileQueries.DbFileQueryByFileVersionAsync(this, tenantId, userId, fileId, fileVersion);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFileQuery> DbFileQueryFileStableAsync(int tenantId, Guid userId, int fileId, int fileVersion)
     {
         return FileQueries.DbFileQueryFileStableAsync(this, tenantId, userId, fileId, fileVersion);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
     public Task<DbFileQuery> DbFileQueryByTitleAsync(int tenantId, string title, int parentId)
     {
         return FileQueries.DbFileQueryByTitleAsync(this, tenantId, title, parentId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFileQuery> DbFileQueriesAsync(int tenantId, int fileId)
     {
         return FileQueries.DbFileQueriesAsync(this, tenantId, fileId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<DbFileQuery> DbFileQueriesByFileIdsAsync(int tenantId, IEnumerable<int> fileIds)
     {
         return FileQueries.DbFileQueriesByFileIdsAsync(this, tenantId, fileIds);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<int> FileIdsAsync(int tenantId, int parentId)
     {
         return FileQueries.FileIdsAsync(this, tenantId, parentId);
     }
-    
+
     [PreCompileQuery([])]
     public Task<int> FileMaxIdAsync()
     {
         return FileQueries.FileMaxIdAsync(this);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> DisableCurrentVersionAsync(int tenantId, int fileId)
     {
         return FileQueries.DisableCurrentVersionAsync(this, tenantId, fileId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFolderTree> DbFolderTreesAsync(int folderId)
     {
         return FileQueries.DbFolderTreesAsync(this, folderId);
     }
-    
+
     [PreCompileQuery([null, PreCompileQuery.DefaultDateTime, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
     public Task<int> UpdateFoldersAsync(IEnumerable<int> parentFoldersIds, DateTime modifiedOn, Guid modifiedBy, int tenantId)
     {
         return FileQueries.UpdateFoldersAsync(this, parentFoldersIds, modifiedOn, modifiedBy, tenantId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFile> DbFileByVersionAsync(int tenantId, int id, int version)
     {
         return FileQueries.DbFileByVersionAsync(this, tenantId, id, version);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public  IAsyncEnumerable<DbFolderTree> DbFolderTeesAsync(int parentId)
+    public IAsyncEnumerable<DbFolderTree> DbFolderTeesAsync(int parentId)
     {
         return FileQueries.DbFolderTeesAsync(this, parentId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> DeleteDbFilesByVersionAsync(int tenantId, int fileId, int version)
     {
         return FileQueries.DeleteDbFilesByVersionAsync(this, tenantId, fileId, version);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> UpdateDbFilesByVersionAsync(int tenantId, int fileId, int version)
     {
         return FileQueries.UpdateDbFilesByVersionAsync(this, tenantId, fileId, version);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<int> ParentIdsAsync(int tenantId, int fileId)
     {
         return FileQueries.ParentIdsAsync(this, tenantId, fileId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteTagLinksAsync(int tenantId, string fileId)
     {
         return FileQueries.DeleteTagLinksAsync(this, tenantId, fileId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, TagType.Custom])]
     public Task<int> DeleteTagLinksByTypeAsync(int tenantId, string entryId, FileEntryType entryType, TagType type)
     {
         return FileQueries.DeleteTagLinksByTypeAsync(this, tenantId, entryId, entryType, type);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFile> DbFilesAsync(int tenantId, int fileId)
     {
@@ -152,43 +152,43 @@ public partial class FilesDbContext
     {
         return FileQueries.DeleteSecurityAsync(this, tenantId, fileId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
-    public  Task<bool> DbFilesAnyAsync(int tenantId, string title, int category, int folderId)
+    public Task<bool> DbFilesAnyAsync(int tenantId, string title, int category, int folderId)
     {
         return FileQueries.DbFilesAnyAsync(this, tenantId, title, category, folderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFile> DbFileAsync(int tenantId, int fileId)
     {
         return FileQueries.DbFileAsync(this, tenantId, fileId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
     public Task<int> UpdateDbFilesCommentAsync(int tenantId, int fileId, int fileVersion, string comment)
     {
         return FileQueries.UpdateDbFilesCommentAsync(this, tenantId, fileId, fileVersion, comment);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> UpdateDbFilesVersionGroupAsync(int tenantId, int fileId, int fileVersion)
     {
         return FileQueries.UpdateDbFilesVersionGroupAsync(this, tenantId, fileId, fileVersion);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> VersionGroupAsync(int tenantId, int fileId, int fileVersion)
     {
         return FileQueries.VersionGroupAsync(this, tenantId, fileId, fileVersion);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> UpdateVersionGroupAsync(int tenantId, int fileId, int fileVersion, int versionGroup)
     {
         return FileQueries.UpdateVersionGroupAsync(this, tenantId, fileId, fileVersion, versionGroup);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
     public Task<int> ReassignFilesByCreateByAsync(int tenantId, Guid oldOwnerId, Guid newOwnerId)
     {
@@ -206,85 +206,85 @@ public partial class FilesDbContext
     {
         return FileQueries.ReassignFilesPartiallyAsync(this, tenantId, oldOwnerId, newOwnerId, exceptFolderIds);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
     public Task<int> ReassignSpecificFilesAsync(int tenantId, IEnumerable<int> filesIds, Guid newOwnerId)
     {
         return FileQueries.ReassignSpecificFilesAsync(this, tenantId, filesIds, newOwnerId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
     public IAsyncEnumerable<FileReassignInfo> GetRoomsFilesReassignInfoAsync(int tenantId, Guid ownerId)
     {
         return FileQueries.GetRoomsFilesReassignInfoAsync(this, tenantId, ownerId, DocSpaceHelper.RoomTypes);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<DbFileQuery> DbFileQueriesByTextAsync(int tenantId, string text)
     {
         return FileQueries.DbFileQueriesByTextAsync(this, tenantId, text);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
     public Task<int> UpdateChangesAsync(int tenantId, int fileId, int version, string changes)
     {
         return FileQueries.UpdateChangesAsync(this, tenantId, fileId, version, changes);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFile> DbFilesByVersionAndWithoutForcesaveAsync(int tenantId, int fileId, int version)
     {
         return FileQueries.DbFilesByVersionAndWithoutForcesaveAsync(this, tenantId, fileId, version);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<bool> DbFileAnyAsync(int tenantId, int fileId, int version)
     {
         return FileQueries.DbFileAnyAsync(this, tenantId, fileId, version);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultDateTime, PreCompileQuery.DefaultDateTime])]
     public IAsyncEnumerable<DbFileQueryWithSecurity> DbFileQueryWithSecurityByPeriodAsync(int tenantId, DateTime from, DateTime to)
     {
         return FileQueries.DbFileQueryWithSecurityByPeriodAsync(this, tenantId, from, to);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFileQueryWithSecurity> DbFileQueryWithSecurityAsync(int tenantId)
     {
         return FileQueries.DbFileQueryWithSecurityAsync(this, tenantId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultDateTime])]
     public IAsyncEnumerable<int> TenantIdsByFilesAsync(DateTime fromTime)
     {
         return FileQueries.TenantIdsByFilesAsync(this, fromTime);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultDateTime])]
     public IAsyncEnumerable<int> TenantIdsBySecurityAsync(DateTime fromTime)
     {
         return FileQueries.TenantIdsBySecurityAsync(this, fromTime);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, Thumbnail.Created])]
     public Task<int> UpdateThumbnailStatusAsync(int tenantId, int fileId, int version, Thumbnail status)
     {
         return FileQueries.UpdateThumbnailStatusAsync(this, tenantId, fileId, version, status);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<string> DataAsync(int tenantId, string entryId)
     {
         return FileQueries.DataAsync(this, tenantId, entryId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<DbFilesProperties> FilesPropertiesAsync(int tenantId, IEnumerable<string> filesIds)
     {
         return FileQueries.FilesPropertiesAsync(this, tenantId, filesIds);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteFilesPropertiesAsync(int tenantId, string entryId)
     {
@@ -336,8 +336,8 @@ public partial class FilesDbContext
         return FileQueries.FilesFormRoleAsyncAsync(this, tenantId, formId, roleName, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt,PreCompileQuery.DefaultInt,PreCompileQuery.DefaultInt,PreCompileQuery.DefaultInt])]
-    public Task<int> UpdateDbFilesCategoryForcesaveAsync(int tenantId,int fileId,int fileVersion,int category, ForcesaveType forcesave)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<int> UpdateDbFilesCategoryForcesaveAsync(int tenantId, int fileId, int fileVersion, int category, ForcesaveType forcesave)
     {
         return FileQueries.UpdateDbFilesCategoryForcesaveAsync(this, tenantId, fileId, fileVersion, category, forcesave);
     }
@@ -365,31 +365,31 @@ static file class FileQueries
                                 where f.TenantId == r.TenantId
                                 select f
                             ).FirstOrDefault(),
-                        UserShared = ctx.Security.Where(x => 
-                                x.TenantId == r.TenantId && 
+                        UserShared = ctx.Security.Where(x =>
+                                x.TenantId == r.TenantId &&
                                 x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File)
                             .Select(s => s.SubjectType).ToList(),
-                        ParentShared = ctx.Security.Any(x => 
-                            x.TenantId == r.TenantId && 
+                        ParentShared = ctx.Security.Any(x =>
+                            x.TenantId == r.TenantId &&
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                            x.EntryType == FileEntryType.Folder && 
+                            x.EntryType == FileEntryType.Folder &&
                             ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                         Order = (
                             from f in ctx.FileOrder
                             where (
-                                from rs in ctx.RoomSettings 
+                                from rs in ctx.RoomSettings
                                 where rs.TenantId == f.TenantId && rs.RoomId ==
                                     (from t in ctx.Tree
-                                        where t.FolderId == r.ParentId
-                                        orderby t.Level descending
-                                        select t.ParentId
+                                     where t.FolderId == r.ParentId
+                                     orderby t.Level descending
+                                     select t.ParentId
                                     ).Skip(1).FirstOrDefault()
                                 select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
                             select f.Order
                         ).FirstOrDefault(),
-                        LastOpened =  ctx.TagLink
-                            .Where(a => a.EntryId == fileId.ToString() && 
-                                        a.CreateBy == userId && 
+                        LastOpened = ctx.TagLink
+                            .Where(a => a.EntryId == fileId.ToString() &&
+                                        a.CreateBy == userId &&
                                         a.TenantId == tenantId)
                             .Select(a => a.CreateOn)
                             .FirstOrDefault()
@@ -415,18 +415,18 @@ static file class FileQueries
                                 where f.TenantId == r.TenantId
                                 select f
                             ).FirstOrDefault(),
-                        UserShared = ctx.Security.Where(x => 
-                                x.TenantId == r.TenantId && 
+                        UserShared = ctx.Security.Where(x =>
+                                x.TenantId == r.TenantId &&
                                 x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File)
                             .Select(s => s.SubjectType).ToList(),
-                        ParentShared = ctx.Security.Any(x => 
-                            x.TenantId == r.TenantId && 
+                        ParentShared = ctx.Security.Any(x =>
+                            x.TenantId == r.TenantId &&
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                            x.EntryType == FileEntryType.Folder && 
+                            x.EntryType == FileEntryType.Folder &&
                             ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                         LastOpened = ctx.TagLink
-                            .Where(a => a.EntryId == fileId.ToString() && 
-                                        a.CreateBy == userId && 
+                            .Where(a => a.EntryId == fileId.ToString() &&
+                                        a.CreateBy == userId &&
                                         a.TenantId == tenantId)
                             .Select(a => a.CreateOn)
                             .FirstOrDefault()
@@ -455,8 +455,8 @@ static file class FileQueries
                                 select f
                             ).FirstOrDefault(),
                         LastOpened = ctx.TagLink
-                            .Where(a => a.EntryId == fileId.ToString() && 
-                                        a.CreateBy == userId && 
+                            .Where(a => a.EntryId == fileId.ToString() &&
+                                        a.CreateBy == userId &&
                                         a.TenantId == tenantId)
                             .Select(a => a.CreateOn)
                             .FirstOrDefault()
@@ -532,12 +532,12 @@ static file class FileQueries
                         Order = (
                             from f in ctx.FileOrder
                             where (
-                                from rs in ctx.RoomSettings 
+                                from rs in ctx.RoomSettings
                                 where rs.TenantId == f.TenantId && rs.RoomId ==
                                     (from t in ctx.Tree
-                                        where t.FolderId == r.ParentId
-                                        orderby t.Level descending
-                                        select t.ParentId
+                                     where t.FolderId == r.ParentId
+                                     orderby t.Level descending
+                                     select t.ParentId
                                     ).Skip(1).FirstOrDefault()
                                 select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
                             select f.Order
@@ -554,8 +554,8 @@ static file class FileQueries
 
     public static readonly Func<FilesDbContext, Task<int>> FileMaxIdAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx) => 
-                ctx.Files.OrderByDescending(r => r.Id).Select(r=> r.Id).FirstOrDefault());
+            (FilesDbContext ctx) =>
+                ctx.Files.OrderByDescending(r => r.Id).Select(r => r.Id).FirstOrDefault());
 
     public static readonly Func<FilesDbContext, int, int, Task<int>> DisableCurrentVersionAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -745,7 +745,7 @@ static file class FileQueries
                     .Where(f => f.CreateBy == oldOwnerId)
                     .Where(f => ctx.Tree.FirstOrDefault(t => t.FolderId == f.ParentId && exceptFolderIds.Contains(t.ParentId)) == null)
                     .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
-    
+
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, Guid, Task<int>> ReassignSpecificFilesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<int> filesIds, Guid newOwnerId) =>
@@ -806,7 +806,7 @@ static file class FileQueries
                     .Where(r => r.Version == version)
                     .ExecuteUpdate(f => f.SetProperty(p => p.Changes, changes)));
 
-    public static readonly Func<FilesDbContext, int, int, int, IAsyncEnumerable<DbFile>> DbFilesByVersionAndWithoutForcesaveAsync = 
+    public static readonly Func<FilesDbContext, int, int, int, IAsyncEnumerable<DbFile>> DbFilesByVersionAndWithoutForcesaveAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int fileId, int version) =>
                 ctx.Files
@@ -826,7 +826,7 @@ static file class FileQueries
                               r.Version == version &&
                               r.Changes != null));
 
-    public static readonly Func<FilesDbContext, int, DateTime, DateTime, IAsyncEnumerable<DbFileQueryWithSecurity>> DbFileQueryWithSecurityByPeriodAsync = 
+    public static readonly Func<FilesDbContext, int, DateTime, DateTime, IAsyncEnumerable<DbFileQueryWithSecurity>> DbFileQueryWithSecurityByPeriodAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, DateTime from, DateTime to) =>
                 ctx.Files
@@ -849,7 +849,7 @@ static file class FileQueries
                     })
                     .Select(r => new DbFileQueryWithSecurity { DbFileQuery = r, Security = null }));
 
-    public static readonly Func<FilesDbContext, int, IAsyncEnumerable<DbFileQueryWithSecurity>> DbFileQueryWithSecurityAsync = 
+    public static readonly Func<FilesDbContext, int, IAsyncEnumerable<DbFileQueryWithSecurity>> DbFileQueryWithSecurityAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId) =>
                 ctx.Files
@@ -906,7 +906,7 @@ static file class FileQueries
                     .Where(r => r.EntryId == entryId)
                     .Select(r => r.Data)
                     .FirstOrDefault());
-    
+
     public static readonly Func<FilesDbContext, int, IEnumerable<string>, IAsyncEnumerable<DbFilesProperties>> FilesPropertiesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<string> filesIds) =>

@@ -66,14 +66,14 @@ public class IPSecurity(
             {
                 return _ipSecurityEnabled.Value;
             }
-            
+
             var hideSettings = configuration.GetSection("web:hide-settings").Get<string[]>() ?? [];
             _ipSecurityEnabled = !hideSettings.Contains("IpSecurity", StringComparer.CurrentCultureIgnoreCase);
             return _ipSecurityEnabled.Value;
         }
     }
-    
-    
+
+
     public async Task<bool> VerifyAsync()
     {
         var tenant = tenantManager.GetCurrentTenant();
@@ -82,14 +82,14 @@ public class IPSecurity(
         {
             return true;
         }
-        
+
         var enable = (await settingsManager.LoadAsync<IPRestrictionsSettings>()).Enable;
 
         if (!enable)
         {
             return true;
         }
-        
+
         if (httpContextAccessor?.HttpContext == null)
         {
             return true;
@@ -127,7 +127,7 @@ public class IPSecurity(
             {
                 return true;
             }
-            
+
             if (IsMyNetwork(ips))
             {
                 return true;
