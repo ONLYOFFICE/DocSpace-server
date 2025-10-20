@@ -503,7 +503,7 @@ public class FileDeleteOperationsManager(
     {
         if ((folders == null || folders.Count == 0) && (files == null || files.Count == 0))
         {
-            return null;
+            return Task.FromResult<string>(null);
         }
 
         var folderIds = (folders.OfType<int>().ToList(), folders.OfType<string>().ToList());
@@ -523,7 +523,7 @@ public class FileDeleteOperationsManager(
     {
         if ((folders == null || folders.Count == 0) && (files == null || files.Count == 0))
         {
-            return null;
+            return Task.FromResult<string>(null);
         }
 
         var folderIds = FileOperationsManager.GetIds(folders);
