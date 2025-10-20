@@ -67,16 +67,16 @@ public partial class McpService(
         
         await ThrowIfServerNameNotValid(tenantId, name);
 
-        var options = new SseClientTransportOptions
+        var options = new HttpClientTransportOptions
         {
             Name = name,
             Endpoint = new Uri(endpoint),
             AdditionalHeaders = headers,
             TransportMode = HttpTransportMode.AutoDetect,
-            ConnectionTimeout = TimeSpan.FromSeconds(15)
+            ConnectionTimeout = TimeSpan.FromSeconds(30)
         };
         
-        var transport = new SseClientTransport(options, httpClientFactory.CreateClient());
+        var transport = new HttpClientTransport(options, httpClientFactory.CreateClient());
         
         await ThrowIfNotConnectAsync(transport);
         
@@ -139,7 +139,7 @@ public partial class McpService(
             return await mcpDao.UpdateServerAsync(server, updateIcon, iconBase64);
         }
 
-        var options = new SseClientTransportOptions
+        var options = new HttpClientTransportOptions
         {
             Name = server.Name,
             Endpoint = new Uri(server.Endpoint),
@@ -148,7 +148,7 @@ public partial class McpService(
             ConnectionTimeout = TimeSpan.FromSeconds(30)
         };
             
-        var transport = new SseClientTransport(options, httpClientFactory.CreateClient());
+        var transport = new HttpClientTransport(options, httpClientFactory.CreateClient());
             
         await ThrowIfNotConnectAsync(transport);
 
@@ -290,7 +290,7 @@ public partial class McpService(
 
         try
         {
-            await using var client = await McpClientFactory.CreateAsync(transport);
+            await using var client = await McpClient.CreateAsync(transport);
             await client.PingAsync();
         }
         catch (Exception e)
@@ -468,7 +468,7 @@ public partial class McpService(
     {
         var transport = await clientTransportFactory.CreateAsync(connection);
 
-        await using var mcpClient = await McpClientFactory.CreateAsync(transport);
+        await using var mcpClient = await McpClient.CreateAsync(transport);
         
         var tools = await mcpClient.ListToolsAsync();
         
@@ -516,11 +516,11 @@ public partial class McpService(
         }
     }
     
-    private async Task ThrowIfNotConnectAsync(SseClientTransport transport)
+    private async Task ThrowIfNotConnectAsync(HttpClientTransport transport)
     {
         try
         {
-            await using var client = await McpClientFactory.CreateAsync(transport);
+            await using var client = await McpClient.CreateAsync(transport);
             await client.PingAsync();
         }
         catch (Exception e)
@@ -536,7 +536,7 @@ public partial class McpService(
         
         try
         {
-            var mcpClient = await McpClientFactory.CreateAsync(transport);
+            var mcpClient = await McpClient.CreateAsync(transport);
 
             var tools = await mcpClient.ListToolsAsync();
 
@@ -580,9 +580,9 @@ public partial class McpService(
         }
     }
     
-    private class McpContainer(IMcpClient client, IEnumerable<ToolWrapper> tools)
+    private class McpContainer(McpClient client, IEnumerable<ToolWrapper> tools)
     {
-        public IMcpClient Client { get; } = client;
+        public McpClient Client { get; } = client;
         public IEnumerable<ToolWrapper> Tools { get; } = tools;
     }
 

@@ -20,10 +20,10 @@
     <PackageReference Include="Dropbox.Api" Version="7.0.0" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.70.0.3856" />
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="9.8.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.8.0-preview.1.25412.6" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="9.10.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.10.0-preview.1.25513.3" />
     <PackageReference Include="Microsoft.OneDriveSDK" Version="2.1.0" />
-    <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.59.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.66.0" />
     <PackageReference Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
     <PackageReference Include="SharpZipLib" Version="2.4.3" />
     <PackageReference Include="WebDav.Client" Version="2.9.0" />

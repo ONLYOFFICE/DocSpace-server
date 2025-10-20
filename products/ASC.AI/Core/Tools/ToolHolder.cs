@@ -30,7 +30,7 @@ public class ToolHolder : IAsyncDisposable
 {
     public readonly List<AITool> Tools = [];
     
-    private readonly List<IMcpClient> _clients = [];
+    private readonly List<McpClient> _clients = [];
     private readonly Dictionary<string, ToolProperties> _properties = [];
 
     public void AddTool(ToolWrapper toolWrapper)
@@ -39,7 +39,7 @@ public class ToolHolder : IAsyncDisposable
         _properties.Add(toolWrapper.Tool.Name, toolWrapper.Properties);
     }
 
-    public void AddMcpTool(IMcpClient client, IEnumerable<ToolWrapper> toolWrappers)
+    public void AddMcpTool(McpClient client, IEnumerable<ToolWrapper> toolWrappers)
     {
         _clients.Add(client);
 
