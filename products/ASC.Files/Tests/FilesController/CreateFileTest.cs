@@ -45,7 +45,16 @@ public class CreateFileTest(
         "test.xlsx",
         "test.pdf"
     ];
-
+    
+    public static TheoryData<string, EmployeeType> DataWithEmployeeType => new MatrixTheoryData<string, EmployeeType>(
+        [
+            "test.docx",
+            "test.pptx",
+            "test.xlsx",
+            "test.pdf"
+        ],
+        [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User]
+    );
     public static TheoryData<FolderType> FolderTypesData =>
     [
         FolderType.Archive,
@@ -69,30 +78,13 @@ public class CreateFileTest(
     }
     
     [Theory]
-    [MemberData(nameof(Data))]
-    public async Task CreateFile_FolderMy_RoomAdmin_ReturnsOk(string fileName)
+    [MemberData(nameof(DataWithEmployeeType))]
+    public async Task CreateFile_FolderMy_Admin_ReturnsOk(string fileName, EmployeeType employeeType)
     {
-        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin = await Initializer.InviteContact(employeeType);
         
         var createdFile = await CreateFileInMy(fileName, roomAdmin);
         
-        createdFile.Should().NotBeNull();
-        createdFile.Title.Should().Be(fileName);
-        
-        // Verify the file was created
-        var file = await GetFile(createdFile.Id);
-        file.Should().NotBeNull();
-        file.Title.Should().Be(fileName);
-    }
-    
-    [Theory]
-    [MemberData(nameof(Data))]
-    public async Task CreateFile_FolderMy_User_ReturnsOk(string fileName)
-    {
-        var user = await Initializer.InviteContact(EmployeeType.User);
-        
-        var createdFile = await CreateFileInMy(fileName, user);
-
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
         
@@ -178,20 +170,20 @@ public class CreateFileTest(
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
-        
+
         var userFolderId = await GetUserFolderIdAsync(Initializer.Owner);
         var fileName = "new_html_file";
         var content = "<html><body><h1>Test HTML</h1><p>This is a test HTML file.</p></body></html>";
-        
+
         // Act
         var createParams = new CreateTextOrHtmlFile(
             title: fileName,
             content: content,
             createNewIfExist: true
         );
-        
+
         var result = (await _filesApi.CreateHtmlFileAsync(userFolderId, createParams, TestContext.Current.CancellationToken)).Response;
-        
+
         // Assert
         result.Should().NotBeNull();
         result.Title.Should().Be(fileName + ".html");
