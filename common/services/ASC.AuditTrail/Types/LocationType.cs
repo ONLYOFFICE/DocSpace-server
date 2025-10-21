@@ -33,23 +33,23 @@ namespace ASC.AuditTrail.Types;
 public enum LocationType
 {
     [SwaggerEnum("None")]
-    None,
+    None = 0,
 
     [SwaggerEnum("Files")]
-    Files,
+    Files = 1,
 
     [SwaggerEnum("Folders")]
-    Folders,
+    Folders = 2,
 
     [SwaggerEnum("Documents settings")]
-    DocumentsSettings,
+    DocumentsSettings = 3,
 
     [SwaggerEnum("Rooms")]
-    Rooms,
+    Rooms = 27,
 
     [SwaggerEnum("Settings")]
-    Settings,
+    Settings = 29,
 
     [SwaggerEnum("Contacts")]
-    Contacts
+    Contacts = 30
 }
