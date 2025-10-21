@@ -171,6 +171,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Është ndryshuar tema e ngjyrës</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kontaktet</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Cilësimet e biskotës u përditësuar</value>
   </data>
@@ -390,9 +393,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Cilësimet e Sphinx u perditësuan</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Gjeneral</value>
-  </data>
   <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
     <value>Kodi i gjeneruar i autorizimit për klientin {0}</value>
   </data>
@@ -407,9 +407,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Grup i fshirë: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Grupe</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Grupi u përditësua: {0}</value>
@@ -534,9 +531,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Lëvizni</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Pronari u ndryshua: {0}</value>
   </data>
@@ -599,9 +593,6 @@
   </data>
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista e produkteve u përditësua</value>
-  </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Produktet</value>
   </data>
   <data name="QuotaPerPortalChanged" xml:space="preserve">
     <value>Caktoni kuotën e paracaktuar të ruajtje: {0}</value>
@@ -737,6 +728,9 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesioni filloi</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Cilësimet</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO u çaktivizua</value>
@@ -875,9 +869,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Përdoruesit [{0}]. Udhëzimet për ndryshimin e fjalëkalimit është dërguar</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Përdoruesit</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Përdoruesit [{0}]. Udhëzimet e aktivizimit u dërguan</value>

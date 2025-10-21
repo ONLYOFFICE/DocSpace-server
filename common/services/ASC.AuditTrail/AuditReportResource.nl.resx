@@ -94,6 +94,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Kleurthema Veranderd</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Contacten</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Cookie Instellingen Geüpdatet</value>
   </data>
@@ -253,9 +256,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sphinx instellingen geüpdatet</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Algemeen</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Welkomstpagina Instellingen Geüpdatet</value>
   </data>
@@ -264,9 +264,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Groep Verwijderd: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Groepen</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Groep Geüpdatet: {0}</value>
@@ -424,9 +421,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Productenlijst Geüpdatet</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Producten</value>
-  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Verzenden</value>
   </data>
@@ -438,6 +432,9 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sessie Gestart</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Instellingen</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO Uitgeschakeld</value>
@@ -540,9 +537,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Gebruikers [{0}]. Verzonden Instructies voor Wachtwoord Veranderen</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Gebruikers</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Gebruikers [{0}]. Activeringsinstructies Verzonden</value>
@@ -795,9 +789,6 @@
   </data>
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Uitnodigingen opnieuw verstuurd: {0}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Activatie van client {0} gewijzigd</value>

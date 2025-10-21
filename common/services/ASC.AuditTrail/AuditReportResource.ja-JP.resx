@@ -100,6 +100,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>配色テーマは変更されました</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>連絡先</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>クッキー設定は変更されました</value>
   </data>
@@ -265,9 +268,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sphinx設定は更新されました</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>一般的</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>ようこそページ設定は更新されました</value>
   </data>
@@ -276,9 +276,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>グループは削除されました：{0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>グループ</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>グループは更新されました：{0}</value>
@@ -463,9 +460,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>製品リストが更新された</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>製品</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>再割当て</value>
   </data>
@@ -480,6 +474,9 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>セションは開始です</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>設定</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSOは無効です</value>
@@ -585,9 +582,6 @@
   </data>
   <data name="UserSentDeleteInstructions" xml:space="preserve">
     <value>「プロファイル削除」指導は送信されました</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>ユーザー</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>ユーザー [{0}]。登録指導は送信された</value>
@@ -795,9 +789,6 @@
   </data>
   <data name="RoomInviteResend" xml:space="preserve">
     <value>招待状を再度送信しました：{0}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>クライアントの{0}アクティベーションが変更されました</value>

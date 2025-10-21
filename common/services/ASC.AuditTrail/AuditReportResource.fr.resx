@@ -100,6 +100,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Thème de couleurs changé</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Contacts</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Paramètres de cookies mis à jour</value>
   </data>
@@ -268,9 +271,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Paramètres Sphinx ont été mis à jour</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Général</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Paramètres de la page d'accueil mis à jour</value>
   </data>
@@ -279,9 +279,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Groupe supprimé : {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Groupes</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Groupe mis à jour : {0}</value>
@@ -466,9 +463,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Liste de produits mise à jour</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Produits</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Réaffectations</value>
   </data>
@@ -483,6 +477,9 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Session a débuté</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Paramètres</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Authentification unique (SSO) désactivée</value>
@@ -609,9 +606,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Utilisateurs [{0}]. Instructions de changement de mot de passe envoyées</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Utilisateurs</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Utilisateurs [{0}]. Instructions d'activation envoyées</value>
@@ -804,9 +798,6 @@
   </data>
   <data name="FolderIndexReordered" xml:space="preserve">
     <value>Dossier : {0}. Index réorganisés</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="RoomDenyDownloadDisabled" xml:space="preserve">
     <value>Salle : {0}. Téléchargement restreint désactivé</value>

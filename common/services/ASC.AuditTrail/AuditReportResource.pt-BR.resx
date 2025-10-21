@@ -100,6 +100,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Tema da cor alterado</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Contatos</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Configurações de cookie atualizadas</value>
   </data>
@@ -268,9 +271,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Configurações do Sphinx atualizadas</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Geral</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Configurações da página de boas-vindas foram atualizadas</value>
   </data>
@@ -279,9 +279,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Grupo excluído: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Grupos</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Grupo atualizado: {0}</value>
@@ -466,9 +463,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista de produtos atualizada</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Produtos</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Reassinar</value>
   </data>
@@ -483,6 +477,9 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Seção iniciada</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Configurações</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO desabilitado</value>
@@ -609,9 +606,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Usuários [{0}]. Instruções de alteração de senha enviadas</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Usuários</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Usuários [{0}]. Instruções de ativação enviadas</value>
@@ -822,9 +816,6 @@
   </data>
   <data name="GeneratePersonalAccessToken" xml:space="preserve">
     <value>Token de acesso pessoal gerado para o cliente {0}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Segredo do cliente {0} regenerado</value>
