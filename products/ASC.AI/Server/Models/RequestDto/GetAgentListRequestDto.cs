@@ -34,7 +34,7 @@ namespace ASC.AI.Models.RequestDto
         /// The filter by user ID.
         /// </summary>
         [FromQuery(Name = "subjectId")]
-        public string SubjectId { get; set; }
+        public string? SubjectId { get; set; }
 
         /// <summary>
         /// Specifies whether to search by tags or not.
@@ -46,7 +46,7 @@ namespace ASC.AI.Models.RequestDto
         /// The tags in the serialized format.
         /// </summary>
         [FromQuery(Name = "tags")]
-        public string Tags { get; set; }
+        public string? Tags { get; set; }
 
         /// <summary>
         /// Specifies whether to exclude search by user or group ID.
@@ -83,7 +83,7 @@ namespace ASC.AI.Models.RequestDto
         /// Specifies the field by which the room content should be sorted.
         /// </summary>
         [FromQuery(Name = "sortBy")]
-        public string SortBy { get; set; }
+        public string? SortBy { get; set; }
 
         /// <summary>
         /// The order in which the results are sorted.
@@ -95,6 +95,6 @@ namespace ASC.AI.Models.RequestDto
         /// The text filter value used to refine search or query operations.
         /// </summary>
         [FromQuery(Name = "filterValue")]
-        public string Text { get; set; }
+        public string? Text { get; set; }
     }
 }

@@ -55,34 +55,34 @@ namespace ASC.AI.Models.RequestDto
         /// <summary>
         /// The room data lifetime information.
         /// </summary>
-        public RoomDataLifetimeDto Lifetime { get; set; }
+        public RoomDataLifetimeDto? Lifetime { get; set; }
 
         /// <summary>
         /// The watermark settings.
         /// </summary>
-        public WatermarkRequestDto Watermark { get; set; }
+        public WatermarkRequestDto? Watermark { get; set; }
 
         /// <summary>
         /// The room logo.
         /// </summary>
-        public LogoRequest Logo { get; set; }
+        public LogoRequest? Logo { get; set; }
 
         /// <summary>
         /// The list of tags.
         /// </summary>
-        public IEnumerable<string> Tags { get; set; }
+        public IEnumerable<string>? Tags { get; set; }
 
         /// <summary>
         /// The room color.
         /// </summary>
         [StringLength(6)]
-        public string Color { get; set; }
+        public string? Color { get; set; }
 
         /// <summary>
         /// The room cover.
         /// </summary>
         [StringLength(50)]
-        public string Cover { get; set; }
+        public string? Cover { get; set; }
 
         /// <summary>
         /// Specifies whether the room to be created is private or not.
@@ -92,8 +92,8 @@ namespace ASC.AI.Models.RequestDto
         /// <summary>
         /// The collection of sharing parameters.
         /// </summary>
-        public IEnumerable<FileShareParams> Share { get; set; }
+        public IEnumerable<FileShareParams>? Share { get; set; }
 
-        public ChatSettings ChatSettings { get; set; }
+        public ChatSettings? ChatSettings { get; set; }
     }
 }
