@@ -227,6 +227,16 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
             {
                 _logger.ErrorWithException(closeCustomerSessionError);
             }
+
+            try
+            {
+                _notifyHelper.SetServerBaseUri(_serverBaseUri);
+                await _notifyHelper.SendAboutBackupFailedAsync(TenantId, _userId, error.Message);
+            }
+            catch (Exception notifyError)
+            {
+                _logger.ErrorWithException(notifyError);
+            }
         }
         finally
         {
