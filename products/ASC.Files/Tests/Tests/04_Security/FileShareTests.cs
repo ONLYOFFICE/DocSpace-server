@@ -24,12 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Tests.ApiFactories;
+
 using SecurityInfoSimpleRequestDto = DocSpace.API.SDK.Model.SecurityInfoSimpleRequestDto;
 
-namespace ASC.Files.Tests.FilesController;
+namespace ASC.Files.Tests.Tests._04_Security;
 
 [Collection("Test Collection")]
-public class ShareFileTest(
+[Trait("Category", "Security")]
+[Trait("Feature", "Sharing")]
+public class FileShareTests(
     FilesApiFactory filesFactory, 
     WepApiFactory apiFactory, 
     PeopleFactory peopleFactory,

@@ -26,11 +26,14 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
+using ASC.Files.Tests.ApiFactories;
 
-namespace ASC.Files.Tests.FilesController;
+namespace ASC.Files.Tests.Tests._02_Folders;
 
 [Collection("Test Collection")]
-public class CreateFolderTest(
+[Trait("Category", "CRUD")]
+[Trait("Feature", "Folders")]
+public class FolderCreateTests(
     FilesApiFactory filesFactory, 
     WepApiFactory apiFactory, 
     PeopleFactory peopleFactory,

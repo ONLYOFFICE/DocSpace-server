@@ -24,11 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Tests.ApiFactories;
+
 using DocSpace.API.SDK.Api.Group;
-using FileShareLink = DocSpace.API.SDK.Model.FileShareLink;
+
 using RoomsApi = DocSpace.API.SDK.Api.Rooms.RoomsApi;
 
-namespace ASC.Files.Tests.FilesController;
+namespace ASC.Files.Tests.Tests;
 
 [Collection("Test Collection")]
 public class BaseTest(

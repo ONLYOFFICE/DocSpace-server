@@ -24,10 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Tests.FilesController;
+using ASC.Files.Tests.ApiFactories;
+
+namespace ASC.Files.Tests.Tests._05_Features;
 
 [Collection("Test Collection")]
-public class FormFilesTest(
+[Trait("Category", "Features")]
+[Trait("Feature", "Forms")]
+public class FormFilesTests(
     FilesApiFactory filesFactory,
     WepApiFactory apiFactory,
     PeopleFactory peopleFactory,

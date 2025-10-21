@@ -24,18 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-extern alias ASCPeople;
-using DocSpace.API.SDK.Api.Group;
-using DocSpace.API.SDK.Api.People;
+extern alias ASCWebApi;
+using DocSpace.API.SDK.Api.Authentication;
+using DocSpace.API.SDK.Api.Portal;
+using DocSpace.API.SDK.Api.Settings;
 
-namespace ASC.Files.Tests.Factory;
+using QuotaApi = DocSpace.API.SDK.Api.Settings.QuotaApi;
 
-public class PeopleFactory : WebApplicationFactory<PeopleProgram>, IAsyncLifetime
+namespace ASC.Files.Tests.ApiFactories;
+
+public class WepApiFactory : WebApplicationFactory<WebApiProgram>, IAsyncLifetime
 {
     public HttpClient HttpClient { get; private set; } = null!;
-    public ProfilesApi  ProfilesApi { get; private set; } = null!;
-    public GroupApi  GroupApi { get; private set; } = null!;
-    
+    public QuotaApi SettingsQuotaApi { get; private set; } = null!;
+    public AuthenticationApi AuthenticationApi { get; private set; } = null!;
+    public CommonSettingsApi CommonSettingsApi { get; private set; } = null!;
+    public UsersApi PortalUsersApi { get; private set; } = null!;
+
     protected override IHost CreateHost(IHostBuilder builder)
     {
         builder.ConfigureHostConfiguration(configBuilder =>
@@ -51,8 +56,10 @@ public class PeopleFactory : WebApplicationFactory<PeopleProgram>, IAsyncLifetim
         HttpClient = CreateClient();
 
         var configuration = new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') };
-        ProfilesApi = new ProfilesApi(HttpClient, configuration);
-        GroupApi = new GroupApi(HttpClient, configuration);
+        SettingsQuotaApi = new QuotaApi(HttpClient, configuration);
+        AuthenticationApi = new AuthenticationApi(HttpClient, configuration);
+        CommonSettingsApi = new CommonSettingsApi(HttpClient, configuration);
+        PortalUsersApi = new UsersApi(HttpClient, configuration);
 
         return ValueTask.CompletedTask;
     }

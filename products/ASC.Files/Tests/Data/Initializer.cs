@@ -26,6 +26,8 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
+using ASC.Files.Tests.ApiFactories;
+
 using MemberRequestDto = ASCPeople::ASC.People.ApiModels.RequestDto.MemberRequestDto;
 using PasswordHasher = ASC.Security.Cryptography.PasswordHasher;
 using WizardRequestsDto = DocSpace.API.SDK.Model.WizardRequestsDto;
@@ -174,7 +176,7 @@ public static class Initializer
             LastName = fakeMember.LastName,
             
             Type = parsedEmployeeType,
-            Key = parsedQuery["key"],
+            Key = parsedQuery["key"] ?? "",
         }, TestContext.Current.CancellationToken);
         
         _peopleFactory.HttpClient.DefaultRequestHeaders.Remove("confirm");

@@ -24,9 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Tests.FilesController;
+using ASC.Files.Tests.ApiFactories;
 
-public class FilesSettingsTest(
+namespace ASC.Files.Tests.Tests._07_Settings;
+
+public class SettingsTests(
     FilesApiFactory filesFactory,
     WepApiFactory apiFactory,
     PeopleFactory peopleFactory,

@@ -26,7 +26,7 @@
 
 extern alias ASCFilesService;
 
-namespace ASC.Files.Tests.Factory;
+namespace ASC.Files.Tests.ApiFactories;
 
 public class FilesServiceFactory : WebApplicationFactory<FilesServiceProgram>, IAsyncLifetime
 {    
