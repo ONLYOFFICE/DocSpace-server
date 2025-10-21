@@ -607,9 +607,9 @@ public class ShareFolderTest(
         var sharedFolderId = await GetFolderIdAsync(FolderType.SHARE, user2);
         var sharedFolder = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        // Step 7: Check New for equality 0 for empty folder
+        // Step 7: Check New for equality 1 for empty folder
         sharedFolder.Should().NotBeNull();
-        sharedFolder.New.Should().Be(0);
+        sharedFolder.New.Should().Be(1);
 
         // Step 8: Authenticate as user1
         await _filesClient.Authenticate(user1);
@@ -633,9 +633,9 @@ public class ShareFolderTest(
         var sharedFolderId2 = await GetFolderIdAsync(FolderType.SHARE, user2);
         var sharedFolder2 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderId2, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        // Step 12: Check New for equality 1
+        // Step 12: Check New for equality 2
         sharedFolder2.Should().NotBeNull();
-        sharedFolder2.New.Should().Be(1);
+        sharedFolder2.New.Should().Be(2);
 
         // Step 13: Authenticate as user1
         await _filesClient.Authenticate(user1);
@@ -650,8 +650,8 @@ public class ShareFolderTest(
         var sharedFolderId3 = await GetFolderIdAsync(FolderType.SHARE, user2);
         var sharedFolder3 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderId3, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        // Step 17: Check New for equality 2
+        // Step 17: Check New for equality 3
         sharedFolder3.Should().NotBeNull();
-        sharedFolder3.New.Should().Be(2);
+        sharedFolder3.New.Should().Be(3);
     }
 }
