@@ -1,11 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyTitle>ASC.Files</AssemblyTitle>
-    <Company>Ascensio System SIA</Company>
     <Product>ASC.Files</Product>
-    <Copyright>(c) Ascensio System SIA. All rights reserved</Copyright>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <NoWarn>1591</NoWarn>
