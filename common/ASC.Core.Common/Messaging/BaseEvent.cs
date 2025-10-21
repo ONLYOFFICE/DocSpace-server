@@ -83,7 +83,7 @@ public partial class BaseEventMapper(TenantUtil tenantUtil)
             }
         }
 
-        return null;
+        return source.Ip;
     }
 
     [UserMapping(Default = false)]
