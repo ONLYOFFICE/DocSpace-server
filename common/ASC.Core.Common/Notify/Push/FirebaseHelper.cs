@@ -89,7 +89,7 @@ public class FirebaseHelper(AuthContext authContext,
                 var credentials = GetFirebaseCredentials();
                 FirebaseApp.Create(new AppOptions
                 {
-                    Credential = GoogleCredential.FromJson(credentials)
+                    Credential = CredentialFactory.FromJson<GoogleCredential>(credentials)
                 });
                 _firebaseInitialized = true;
             }
