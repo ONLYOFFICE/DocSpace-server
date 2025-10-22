@@ -241,7 +241,7 @@ public abstract class BaseIndexer<T>(Client client,
                         }
                         catch (OpenSearchClientException e)
                         {
-                            if (e.Response.HttpStatusCode == 429)
+                            if (e.Response.HttpStatusCode is 429 or 502)
                             {
                                 throw;
                             }
