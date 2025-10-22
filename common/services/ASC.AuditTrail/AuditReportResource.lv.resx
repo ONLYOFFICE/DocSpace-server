@@ -928,4 +928,7 @@
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Klienta maka iespējoto pakalpojumu iestatījumi ir atjaunināti</value>
   </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Ieeja ar sociālā tīkla kontu izdevās</value>
+  </data>
 </root>

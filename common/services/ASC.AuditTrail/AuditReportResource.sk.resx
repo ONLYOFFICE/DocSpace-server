@@ -928,4 +928,7 @@
   <data name="LdapSync" xml:space="preserve">
     <value>Synchronizácia LDAP dokončená</value>
   </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Prihlásenie prostredníctvom účtu sociálnej siete bolo úspešné </value>
+  </data>
 </root>

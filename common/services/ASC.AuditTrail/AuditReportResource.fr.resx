@@ -934,4 +934,7 @@
   <data name="LoginSuccessViaPassword" xml:space="preserve">
     <value>Connexion réussie via identifiant et mot de passe</value>
   </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Connexion à l'aide du compte social réussie</value>
+  </data>
 </root>

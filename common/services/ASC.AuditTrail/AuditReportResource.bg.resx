@@ -928,4 +928,7 @@
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Актуализирани са настройките за услуги с активиран клиентски портфейл</value>
   </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Вход чрез социален профил Успех</value>
+  </data>
 </root>

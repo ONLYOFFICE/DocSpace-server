@@ -928,4 +928,7 @@
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Asiakkaan lompakkoa käyttävien palveluiden asetukset päivitetty</value>
   </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Kirjautuminen sosiaalisella tilillä onnistui</value>
+  </data>
 </root>

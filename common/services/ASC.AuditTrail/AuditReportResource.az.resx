@@ -928,4 +928,7 @@
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Müştəri pulqabı aktivləşdirilmiş xidmətlər parametrləri yeniləndi</value>
   </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Sosial Hesab vasitəsilə Uğurlu Giriş</value>
+  </data>
 </root>

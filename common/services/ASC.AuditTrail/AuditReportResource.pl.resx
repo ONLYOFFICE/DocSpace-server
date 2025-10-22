@@ -928,4 +928,7 @@
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Zaktualizowano ustawienia usług obsługujących portfel klienta</value>
   </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Zaloguj się za pomocą konta społecznościowego</value>
+  </data>
 </root>
