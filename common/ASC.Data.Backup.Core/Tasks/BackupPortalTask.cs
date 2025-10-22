@@ -602,6 +602,12 @@ public class BackupPortalTask(
         await using var tmpFile = tempStream.Create();
         var bytes = "<storage_restore>"u8.ToArray();
         await tmpFile.WriteAsync(bytes);
+
+        await using var tmpErrorsFile = tempStream.Create();
+        bytes = "<storage_errors>"u8.ToArray();
+        await tmpErrorsFile.WriteAsync(bytes);
+        var hasErrors = false;
+
         var storages = new Dictionary<string, IDataStore>();
 
         foreach (var file in files)
@@ -616,15 +622,32 @@ public class BackupPortalTask(
             {
                 path = Path.Combine("storage", path);
             }
-            await writer.WriteEntryAsync(path, file.Domain, file.Path, storage, SetProgress);
 
             var restoreInfoXml = file.ToXElement();
-            await restoreInfoXml.WriteToAsync(tmpFile);
+
+            try
+            {
+                await writer.WriteEntryAsync(path, file.Domain, file.Path, storage, SetProgress);
+                await restoreInfoXml.WriteToAsync(tmpFile);
+            }
+            catch (Exception ex)
+            {
+                restoreInfoXml.Add(new XElement("error", ex.Message));
+                await restoreInfoXml.WriteToAsync(tmpErrorsFile);
+                hasErrors = true;
+            }
         }
 
         bytes = "</storage_restore>"u8.ToArray();
         await tmpFile.WriteAsync(bytes);
         await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, () => Task.CompletedTask);
+
+        if (hasErrors)
+        {
+            bytes = "</storage_errors>"u8.ToArray();
+            await tmpErrorsFile.WriteAsync(bytes);
+            await writer.WriteEntryAsync(KeyHelper.GetStorageErrorsZipKey(), tmpErrorsFile, () => Task.CompletedTask);
+        }
 
         logger.DebugEndBackupStorage();
     }
