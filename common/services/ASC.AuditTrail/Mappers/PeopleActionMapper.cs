@@ -84,10 +84,10 @@ internal class UsersActionMapper : ILocationActionMapper
                 ActionType.Send, [MessageAction.UserSentActivationInstructions, MessageAction.UserSentDeleteInstructions, MessageAction.SentInviteInstructions]
             },
             { MessageAction.UserUpdatedPassword, ActionType.Update },
-            { MessageAction.UserSentEmailChangeInstructions, new MessageMaps("UserSentEmailInstructions", ActionType.Send, ProductType.Contacts, Location, EntryType.User) },
-            { MessageAction.UserSentPasswordChangeInstructions, new MessageMaps("UserSentPasswordInstructions", ActionType.Send, ProductType.Contacts, Location, EntryType.User) },
-            { MessageAction.UserConnectedTfaApp, new MessageMaps("UserTfaGenerateCodes", ActionType.Link, ProductType.Contacts, Location, EntryType.User) },
-            { MessageAction.UserDisconnectedTfaApp, new MessageMaps("UserTfaDisconnected", ActionType.Delete, ProductType.Contacts, Location, EntryType.User) }
+            { MessageAction.UserSentEmailChangeInstructions, new MessageMaps(nameof(AuditReportResource.UserSentEmailInstructions), ActionType.Send, ProductType.Contacts, Location, EntryType.User) },
+            { MessageAction.UserSentPasswordChangeInstructions, new MessageMaps(nameof(AuditReportResource.UserSentPasswordInstructions), ActionType.Send, ProductType.Contacts, Location, EntryType.User) },
+            { MessageAction.UserConnectedTfaApp, new MessageMaps(nameof(AuditReportResource.UserTfaGenerateCodes), ActionType.Link, ProductType.Contacts, Location, EntryType.User) },
+            { MessageAction.UserDisconnectedTfaApp, new MessageMaps(nameof(AuditReportResource.UserTfaDisconnected), ActionType.Delete, ProductType.Contacts, Location, EntryType.User) }
         };
     }
 }
