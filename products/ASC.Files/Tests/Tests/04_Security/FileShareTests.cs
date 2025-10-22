@@ -668,9 +668,9 @@ public class FileShareTests(
         var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
 
-        // Step 7: Check rights are read-only (not edit)
+        // Step 7: Check rights are edit (not read-only)
         fileInfo.Should().NotBeNull();
-        fileInfo.Access.Should().Be(FileShare.Read);
+        fileInfo.Access.Should().Be(FileShare.Editing);
         fileInfo.Security.Read.Should().BeTrue();
         fileInfo.Security.Edit.Should().BeFalse();
     }
