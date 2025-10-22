@@ -32,7 +32,8 @@ public class ChatTools(
     WebSearchTool webSearchTool,
     WebCrawlingTool webCrawlingTool,
     KnowledgeSearchTool knowledgeSearchTool,
-    WebSearchSettingsStore webSearchSettingsStore)
+    WebSearchSettingsStore webSearchSettingsStore,
+    AiGateway aiGateway)
 {
     public async Task<ToolHolder> GetAsync(int roomId, UserChatSettings chatSettings)
     {
@@ -47,26 +48,41 @@ public class ChatTools(
             return holder;
         }
 
-        var settings = await webSearchSettingsStore.GetSettingsAsync();
-        if (settings is not { Enabled: true, Type: not EngineType.None, Config: not null })
+        var config = await GetConfigAsync();
+        if (config == null)
         {
             return holder;
         }
 
-        var webTool = webSearchTool.Init(settings.Config);
+        var webTool = webSearchTool.Init(config);
         var webWrapper = ToWrapper(roomId, webTool);
         holder.AddTool(webWrapper);
 
-        if (!settings.Config.CrawlingSupported())
+        if (!config.CrawlingSupported())
         {
             return holder;
         }
 
-        var crawlTool = webCrawlingTool.Init(settings.Config);
+        var crawlTool = webCrawlingTool.Init(config);
         var crawlWrapper = ToWrapper(roomId, crawlTool);
         holder.AddTool(crawlWrapper);
 
         return holder;
+    }
+
+    private async Task<EngineConfig?> GetConfigAsync()
+    {
+        if (aiGateway.IsEnabled)
+        {
+            return new DocSpaceWebSearchConfig 
+            { 
+                BaseUrl = aiGateway.Url, 
+                ApiKey = await aiGateway.GetKeyAsync() 
+            };
+        }
+        
+        var settings = await webSearchSettingsStore.GetSettingsAsync();
+        return settings is not { Enabled: true, Type: not EngineType.None, Config: not null } ? null : settings.Config;
     }
 
     private static ToolWrapper ToWrapper(int roomId, AIFunction tool)
