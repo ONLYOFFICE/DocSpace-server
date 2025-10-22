@@ -1049,8 +1049,13 @@ public class FileSecurity(
             return false;
         }
 
-        if (action == FilesSecurityActions.Vectorization && file is { VectorizationStatus: not null })
+        if (action == FilesSecurityActions.Vectorization)
         {
+            if (file?.VectorizationStatus == null)
+            {
+                return false;
+            }
+            
             switch (file.VectorizationStatus)
             {
                 case VectorizationStatus.Completed:
