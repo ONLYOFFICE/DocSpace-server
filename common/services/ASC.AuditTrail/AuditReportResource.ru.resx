@@ -976,4 +976,7 @@
   <data name="RoomExternalLinkRevoked" xml:space="preserve">
     <value>Внешняя ссылка отменена: {1}</value>
   </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Успешный вход через аккаунт социальной сети</value>
+  </data>
 </root>

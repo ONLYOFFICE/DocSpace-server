@@ -1519,6 +1519,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Login Via Social Account Success.
+        /// </summary>
+        public static string LoginSuccessSocialAccount {
+            get {
+                return ResourceManager.GetString("LoginSuccessSocialAccount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Successful login via social application.
         /// </summary>
         public static string LoginSuccessSocialApp {

@@ -1035,4 +1035,7 @@
   <data name="SettingsModule" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Login Via Social Account Success</value>
+  </data>
 </root>

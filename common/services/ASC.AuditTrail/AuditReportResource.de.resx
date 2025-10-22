@@ -976,4 +976,7 @@
   <data name="RoomExternalLinkRevoked" xml:space="preserve">
     <value>xterner Link widerrufen: {1}</value>
   </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Login über Konto im sozialen Netzwerk ist erfolgreich</value>
+  </data>
 </root>

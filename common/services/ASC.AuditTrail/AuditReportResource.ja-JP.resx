@@ -934,4 +934,7 @@
   <data name="LoginSuccessViaPassword" xml:space="preserve">
     <value>ログインとパスワードによるログイン成功</value>
   </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>ソーシャルアカウントを介してログイン成功</value>
+  </data>
 </root>

@@ -928,4 +928,7 @@
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Nastavení služeb s povolenou peněženkou zákazníka bylo aktualizováno</value>
   </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Přihlášení přes účet sociální sítě bylo úspěšné</value>
+  </data>
 </root>

@@ -59,9 +59,9 @@ internal class GeneralActionMapper : ILocationActionMapper
             { ActionType.Send, [MessageAction.ContactAdminMailSent] }
         };
 
-        Actions.Add(MessageAction.TwoFactorAuthenticationDisabled, new MessageMaps("TwoFactorAuthenticationSettingsDisabled", ActionType.Update, ProductType.Settings, Location));
-        Actions.Add(MessageAction.TwoFactorAuthenticationEnabledBySms, new MessageMaps("TwoFactorAuthenticationSettingsEnabledBySms", ActionType.Update, ProductType.Settings, Location));
-        Actions.Add(MessageAction.TwoFactorAuthenticationEnabledByTfaApp, new MessageMaps("TwoFactorAuthenticationSettingsEnabledByTfaApp", ActionType.Update, ProductType.Settings, Location));
+        Actions.Add(MessageAction.TwoFactorAuthenticationDisabled, new MessageMaps(nameof(AuditReportResource.TwoFactorAuthenticationSettingsDisabled), ActionType.Update, ProductType.Settings, Location));
+        Actions.Add(MessageAction.TwoFactorAuthenticationEnabledBySms, new MessageMaps(nameof(AuditReportResource.TwoFactorAuthenticationSettingsEnabledBySms), ActionType.Update, ProductType.Settings, Location));
+        Actions.Add(MessageAction.TwoFactorAuthenticationEnabledByTfaApp, new MessageMaps(nameof(AuditReportResource.TwoFactorAuthenticationSettingsEnabledByTfaApp), ActionType.Update, ProductType.Settings, Location));
     }
 }
 
@@ -123,11 +123,11 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.LoginHistoryReportDownloaded, MessageAction.AuditTrailReportDownloaded, MessageAction.CustomerOperationsReportDownloaded
                 ]
             }
-        };
+        }; 
 
-        Actions.Add(MessageAction.UsersOpenedProductAccess, new MessageMaps("ProductAccessOpenedForUsers", ActionType.UpdateAccess, ProductType.Settings, Location));
-        Actions.Add(MessageAction.GroupsOpenedProductAccess, new MessageMaps("ProductAccessOpenedForGroups", ActionType.UpdateAccess, ProductType.Settings, Location));
-        Actions.Add(MessageAction.OwnerUpdated, new MessageMaps("OwnerChanged", ActionType.Update, ProductType.Settings, Location));
+        Actions.Add(MessageAction.UsersOpenedProductAccess, new MessageMaps(nameof(AuditReportResource.ProductAccessOpenedForUsers), ActionType.UpdateAccess, ProductType.Settings, Location));
+        Actions.Add(MessageAction.GroupsOpenedProductAccess, new MessageMaps(nameof(AuditReportResource.ProductAccessOpenedForGroups), ActionType.UpdateAccess, ProductType.Settings, Location));
+        Actions.Add(MessageAction.OwnerUpdated, new MessageMaps(nameof(AuditReportResource.OwnerChanged), ActionType.Update, ProductType.Settings, Location));
     }
 }
 
