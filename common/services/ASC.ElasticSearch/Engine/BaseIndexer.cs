@@ -285,11 +285,15 @@ public abstract class BaseIndexer<T>(Client client,
                             doc.Document.Data = null;
                             doc.Document = null;
                         }
+
+                        data[j] = null;
                     }
 
                     portionStart = i;
                     portion = [];
                     currentLength = 0L;
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
                     GC.Collect();
                 }
             }

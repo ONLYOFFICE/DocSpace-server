@@ -55,6 +55,7 @@ public class Client(ILogger<Client> logger, Settings settings)
 
                 var uri = new Uri($"{settings.Scheme}://{settings.Host}:{settings.Port}");
                 var connectionSettings = new ConnectionSettings(new SingleNodeConnectionPool(uri))
+                    .TransferEncodingChunked()
                     .RequestTimeout(TimeSpan.FromMinutes(5))
                     .MaximumRetries(10)
                     .ThrowExceptions();

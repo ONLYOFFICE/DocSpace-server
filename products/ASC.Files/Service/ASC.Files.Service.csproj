@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+      <ServerGarbageCollection>true</ServerGarbageCollection>
+      <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
