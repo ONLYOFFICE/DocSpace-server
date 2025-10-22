@@ -3942,16 +3942,14 @@ public class FileStorageService //: IFileStorageService
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
 
-        foreach (var fileId in filesId)
+        await foreach (var entry in fileDao.GetFilesAsync(filesId))
         {
-            var entry = await fileDao.GetFileAsync(fileId);
             await fileSharingAceHelper.RemoveAceAsync(entry);
             await filesMessageService.SendAsync(MessageAction.FileRemovedFromList, entry, entry.Title);
         }
 
-        foreach (var folderId in foldersId)
+        await foreach (var entry in folderDao.GetFoldersAsync(filesId))
         {
-            var entry = await folderDao.GetFolderAsync(folderId);
             await fileSharingAceHelper.RemoveAceAsync(entry);
             await filesMessageService.SendAsync(MessageAction.FolderRemovedFromList, entry, entry.Title);
         }
