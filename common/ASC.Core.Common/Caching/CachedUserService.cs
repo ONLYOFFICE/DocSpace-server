@@ -247,9 +247,10 @@ public class CachedUserService : IUserService
 
     public async Task<Group> SaveGroupAsync(int tenant, Group group)
     {
+        var tag = CacheExtention.GetGroupTag(tenant, group.Id);
+
         group = await _service.SaveGroupAsync(tenant, group);
 
-        var tag = CacheExtention.GetGroupTag(tenant, group.Id);
         await _cache.RemoveByTagAsync(tag);
 
         return group;
@@ -340,7 +341,7 @@ public class CachedUserService : IUserService
         var groups = await _cache.GetOrSetAsync<IEnumerable<Group>>(key, async (ctx, token) =>
         {
             var groups = await _service.GetGroupsAsync(tenant);
-            ctx.Tags = groups.Select(g => CacheExtention.GetGroupTag(tenant, g.Id)).ToArray();
+            ctx.Tags = [CacheExtention.GetGroupTag(tenant, Guid.Empty), .. groups.Select(g => CacheExtention.GetGroupTag(tenant, g.Id))];
 
             return ctx.Modified(groups);
         }, _cacheExpiration);
