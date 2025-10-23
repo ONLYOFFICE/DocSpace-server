@@ -142,7 +142,7 @@ internal abstract class SecurityBaseDao<T>(
 
                 if (r.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
                 {
-                    await context.DeleteTagLinksByTypeAsync(tenantId, entryId, r.EntryType, TagType.RecentByLink);
+                    await context.DeleteTagLinksByTypeAsync(tenantId, entryId, r.EntryType, TagType.RecentByLink, r.Subject != Guid.Empty ? r.Subject.ToString() : null);
                     await context.DeleteTagsAsync(tenantId);
                 }
 

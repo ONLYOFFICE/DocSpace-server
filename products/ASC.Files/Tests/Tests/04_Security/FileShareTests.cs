@@ -736,4 +736,61 @@ public class FileShareTests(
         sharedFolder2.Should().NotBeNull();
         sharedFolder2.New.Should().Be(2);
     }
+    
+
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "77819")]
+    public async Task FileAccessViaLink_DeletingUnusedLink_FileRemainsInSharedWithMe()
+    {
+        // Step 1: Authenticate as Owner and create file in "My Documents"
+        await _filesClient.Authenticate(Initializer.Owner);
+        var file = await CreateFileInMy("file_multiple_links.docx", Initializer.Owner);
+
+        // Step 2: Create two external read links for the file
+        var firstLinkRequest = new FileLinkRequest(access: FileShare.Read);
+        var firstLinkResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, firstLinkRequest, TestContext.Current.CancellationToken)).Response;
+        var firstLinkToken = firstLinkResponse.SharedLink.RequestToken;
+
+        var secondLinkRequest = new FileLinkRequest(access: FileShare.Read);
+        var secondLinkResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, secondLinkRequest, TestContext.Current.CancellationToken)).Response;
+        var secondLinkId = secondLinkResponse.SharedLink.Id;
+
+        // Step 3: Invite a User and authenticate as that user
+        var user = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(user);
+
+        // Step 4: Access the file using the first link
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, firstLinkToken);
+        var fileAccessedViaLink = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        await _filesApi.AddFileToRecentAsync(file.Id, TestContext.Current.CancellationToken);
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        fileAccessedViaLink.Should().NotBeNull();
+        fileAccessedViaLink.Access.Should().Be(FileShare.Read);
+
+        // Step 5: Authenticate back as Owner and delete the second link
+        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesApi.SetFileExternalLinkAsync(file.Id, new FileLinkRequest()
+        {
+            Access = FileShare.None,
+            LinkId = secondLinkId
+        }, TestContext.Current.CancellationToken);
+
+        // Verify the second link is deleted
+        var allLinksAfterDeletion = (await _filesApi.GetFileLinksAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        allLinksAfterDeletion.Should().NotContain(link => link.SharedLink.Id == secondLinkId);
+
+        // Step 6: Authenticate as User and get "Shared With Me" folder
+        await _filesClient.Authenticate(user);
+        var sharedFolderId = await GetFolderIdAsync(FolderType.SHARE, user);
+        var sharedFolder = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Step 7: Verify the file is still present in "Shared With Me" folder
+        sharedFolder.Should().NotBeNull();
+        sharedFolder.Files.Should().Contain(f => f.Title == file.Title);
+
+        var sharedFile = sharedFolder.Files.First(f => f.Title == file.Title);
+        sharedFile.Access.Should().Be(FileShare.Read);
+    }
 }
