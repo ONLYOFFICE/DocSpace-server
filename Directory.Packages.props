@@ -42,9 +42,9 @@
     <PackageVersion Include="OpenTelemetry.Exporter.InfluxDB" Version="1.0.0-alpha.4" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.13.1" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.13.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.13.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.13.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.13.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="1.10.0-beta.1" />
     <PackageVersion Include="RedisRateLimiting" Version="1.2.0" />
     <PackageVersion Include="RedisRateLimiting.AspNetCore" Version="1.2.0" />
@@ -62,7 +62,7 @@
     <PackageVersion Include="Autofac.Configuration" Version="7.0.0" />
     <PackageVersion Include="AWS.Logger.NLog" Version="3.3.4" />
     <PackageVersion Include="Bogus" Version="35.6.4" />
-    <PackageVersion Include="Confluent.Kafka" Version="2.11.1" />
+    <PackageVersion Include="Confluent.Kafka" Version="2.12.0" />
     <PackageVersion Include="DistributedLock.Redis" Version="1.0.3" />
     <PackageVersion Include="DistributedLock.ZooKeeper" Version="1.0.0" />
     <PackageVersion Include="JWT" Version="11.0.0" />
@@ -81,7 +81,7 @@
     <PackageVersion Include="NLog.Targets.Syslog" Version="7.0.0" />
     <PackageVersion Include="NVelocity" Version="1.2.0" />
     <PackageVersion Include="protobuf-net" Version="3.2.56" />
-    <PackageVersion Include="Riok.Mapperly" Version="4.2.1" />
+    <PackageVersion Include="Riok.Mapperly" Version="4.3.0" />
     <PackageVersion Include="RabbitMQ.Client" Version="7.1.2" />
     <PackageVersion Include="StackExchange.Redis" Version="2.9.32" />
     <PackageVersion Include="StackExchange.Redis.Extensions.Core" Version="11.0.0" />
@@ -105,17 +105,17 @@
     <PackageVersion Include="CommandLineParser" Version="2.9.1" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
-    <PackageVersion Include="DocuSign.eSign.dll" Version="8.3.0" />
+    <PackageVersion Include="DocuSign.eSign.dll" Version="8.4.0" />
     <PackageVersion Include="DotNetOpenAuth.Ultimate" Version="4.3.4.13329" />
     <PackageVersion Include="Dropbox.Api" Version="7.0.0" />
-    <PackageVersion Include="FirebaseAdmin" Version="3.3.0" />
+    <PackageVersion Include="FirebaseAdmin" Version="3.4.0" />
     <PackageVersion Include="FluentAssertions" Version="7.0.0" />
     <PackageVersion Include="FolkerKinzel.VCards" Version="8.1.1" />
     <PackageVersion Include="Google.Api.Gax" Version="4.12.1" />
     <PackageVersion Include="Google.Api.Gax.Rest" Version="4.12.1" />
     <PackageVersion Include="Google.Apis.Auth" Version="1.72.0" />
     <PackageVersion Include="Google.Apis.Core" Version="1.72.0" />
-    <PackageVersion Include="Google.Apis.Drive.v3" Version="1.70.0.3856" />
+    <PackageVersion Include="Google.Apis.Drive.v3" Version="1.72.0.3938" />
     <PackageVersion Include="Google.Apis.Storage.v1" Version="1.71.0.3920" />
     <PackageVersion Include="Google.Cloud.Storage.V1" Version="4.13.0" />
     <PackageVersion Include="GoogleAuthenticator" Version="3.2.0" />
@@ -125,7 +125,7 @@
     <PackageVersion Include="Joonasw.AspNetCore.SecurityHeaders" Version="6.0.0" />
     <PackageVersion Include="log4net" Version="3.0.3" />
     <PackageVersion Include="Magick.NET-Q8-AnyCPU" Version="14.9.0" />
-    <PackageVersion Include="MailKit" Version="4.13.0" />
+    <PackageVersion Include="MailKit" Version="4.14.1" />
     <PackageVersion Include="Microsoft.AspNet.WebApi.Core" Version="5.3.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="9.0.8" />
@@ -169,7 +169,7 @@
     <PackageVersion Include="SkiaSharp.Svg" Version="1.60.0" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
     <PackageVersion Include="System.ServiceModel.Primitives" Version="8.1.2" />
-    <PackageVersion Include="Telegram.Bot" Version="22.6.2" />
+    <PackageVersion Include="Telegram.Bot" Version="22.7.2" />
     <PackageVersion Include="Testcontainers" Version="4.6.0" />
     <PackageVersion Include="Testcontainers.MySql" Version="4.6.0" />
     <PackageVersion Include="Testcontainers.OpenSearch" Version="4.6.0" />
