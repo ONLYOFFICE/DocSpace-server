@@ -872,8 +872,7 @@ static file class FolderQueries
                 ctx.TagLink
                     .Where(l => l.TenantId == tenantId)
                     .Where(l => entriesIds.Contains(Convert.ToInt32(l.EntryId)))
-                    .Join(ctx.Tag
-                            .Where(t => t.Type == TagType.Origin), l => l.TagId, t => t.Id,
+                    .Join(ctx.Tag.Where(t => t.Type == TagType.Origin && t.TenantId == tenantId), l => l.TagId, t => t.Id,
                         (l, t) => new { t.Name, t.Type, l.EntryType, l.EntryId })
                     .GroupBy(r => r.Name, r => new { r.EntryId, r.EntryType })
                     .Select(r => new OriginData
