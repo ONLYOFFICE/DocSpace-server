@@ -28,18 +28,25 @@
 
 namespace ASC.Files.Core.Vectorization.Embedding;
 
-[Singleton]
+[Scope]
 public class EmbeddingGeneratorFactory
 {
     public EmbeddingModel Model => _model ?? throw new ArgumentNullException(nameof(_model));
     
-    private readonly EmbeddingSettings? _settings;
-    private readonly EmbeddingModel? _model;
+    private static EmbeddingSettings? _settings;
+    private static EmbeddingModel? _model;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly AiGateway _gateway;
     
-    public EmbeddingGeneratorFactory(IConfiguration configuration, IHttpClientFactory httpClientFactory)
+    public EmbeddingGeneratorFactory(IConfiguration configuration, IHttpClientFactory httpClientFactory, AiGateway gateway)
     {
         _httpClientFactory = httpClientFactory;
+        _gateway = gateway;
+
+        if (_settings != null)
+        {
+            return;
+        }
 
         _settings = configuration.GetSection("ai:embedding").Get<EmbeddingSettings>();
         if (_settings != null)
@@ -53,14 +60,26 @@ public class EmbeddingGeneratorFactory
         }
     }
     
-    public IEmbeddingGenerator<string, Embedding<float>> Create()
+    public async Task<IEmbeddingGenerator<string, Embedding<float>>> CreateAsync()
     {
         if (_settings == null)
         {
             throw new ArgumentNullException(nameof(_settings));
         }
 
-        if (!_settings.Url.Contains("api.openai.com"))
+        var url = _settings.Url;
+        var key = _settings.Key;
+
+        if (_gateway.IsEnabled)
+        {
+            url = _gateway.Url;
+            key = await _gateway.GetKeyAsync();
+        }
+
+        ArgumentException.ThrowIfNullOrEmpty(url);
+        ArgumentException.ThrowIfNullOrEmpty(key);
+
+        if (!url.Contains("api.openai.com") && !_gateway.IsEnabled)
         {
             return new OpenAiFloatEmbeddingGenerator(_httpClientFactory.CreateClient(),
                 new GeneratorConfiguration
@@ -71,10 +90,10 @@ public class EmbeddingGeneratorFactory
                 });
         }
 
-        var credential = new ApiKeyCredential(_settings.Key);
+        var credential = new ApiKeyCredential(key);
         var options = new OpenAIClientOptions
         {
-            Endpoint = new Uri(_settings.Url),
+            Endpoint = new Uri(url),
             Transport = new HttpClientPipelineTransport(_httpClientFactory.CreateClient())
         };
         

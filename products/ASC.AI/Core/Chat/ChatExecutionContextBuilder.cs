@@ -33,7 +33,7 @@ public class ChatExecutionContextBuilder(
     ChatDao chatDao,
     TenantManager tenantManager,
     AuthContext authContext,
-    AiProviderDao providerDao,
+    AiProviderService providerService,
     ChatTools chatTools,
     UserManager userManager)
 {
@@ -55,7 +55,7 @@ public class ChatExecutionContextBuilder(
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
         
-        var providerTask = providerDao.GetProviderAsync(tenantId, room.SettingsChatProviderId);
+        var providerTask = providerService.GetProviderAsync(room.SettingsChatProviderId);
         var resultStorageTask = folderDao.GetFoldersAsync(room.Id, FolderType.ResultStorage).FirstAsync();
         var chatSettingsTask = chatDao.GetUserChatSettingsAsync(tenantId, roomId, userId);
         var userTask = userManager.GetUsersAsync(userId);

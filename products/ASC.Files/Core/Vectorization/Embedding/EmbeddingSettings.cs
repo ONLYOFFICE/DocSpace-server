@@ -31,8 +31,8 @@ public class EmbeddingSettings
     private readonly int _dimension;
     private readonly int _contextLength;
     
-    public required string Url { get; init; }
-    public required string Key { get; init; }
+    public string Url { get; init; }
+    public string Key { get; init; }
     public required string ModelId { get; init; }
     public int Dimension
     {

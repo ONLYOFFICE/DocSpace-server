@@ -31,11 +31,12 @@ public class WebSearchEngineFactory(IHttpClientFactory httpClientFactory)
 {
     public IWebSearchEngine Create(EngineConfig config)
     {
-        if (config is ExaConfig exaConfig)
+        return config switch
         {
-            return new ExaWebSearchEngine(httpClientFactory.CreateClient(), exaConfig);
-        }
-        
-        throw new ArgumentException("Invalid engine config");
+            DocSpaceWebSearchConfig docSpaceConfig => new DocSpaceWebSearchEngine(httpClientFactory.CreateClient(),
+                docSpaceConfig),
+            ExaConfig exaConfig => new ExaWebSearchEngine(httpClientFactory.CreateClient(), exaConfig),
+            _ => throw new ArgumentException("Invalid engine config")
+        };
     }
 }

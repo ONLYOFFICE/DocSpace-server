@@ -300,7 +300,7 @@ public class FolderDtoHelper(
             result.ChatSettings = new ChatSettings
             {
                 ProviderId = folder.SettingsChatProviderId,
-                ModelId = folder.SettingsChatProviderId > 0 ? folder.SettingsChatParameters.ModelId : null,
+                ModelId = string.IsNullOrEmpty(folder.SettingsChatParameters.ModelId) ? null : folder.SettingsChatParameters.ModelId,
                 Prompt = folder.SettingsChatParameters.Prompt,
             };
         }

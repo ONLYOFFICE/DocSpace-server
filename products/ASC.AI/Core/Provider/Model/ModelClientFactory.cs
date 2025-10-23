@@ -33,12 +33,14 @@ public class ModelClientFactory(IHttpClientFactory httpClientFactory)
     {
         return type switch
         {
-            ProviderType.OpenAi or ProviderType.OpenAiCompatible or ProviderType.DocSpaceAi => 
+            ProviderType.OpenAi or ProviderType.OpenAiCompatible => 
                 new OpenAiModelClient(httpClientFactory.CreateClient()),
             ProviderType.TogetherAi => 
                 new TogetherAiModelClient(httpClientFactory.CreateClient()),
             ProviderType.Anthropic =>
                 new AnthropicModelClient(httpClientFactory.CreateClient()),
+            ProviderType.DocSpaceAi =>
+                new DocSpaceModelClient(httpClientFactory.CreateClient()),
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
     }

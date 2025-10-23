@@ -98,7 +98,8 @@ public class FileStorageService //: IFileStorageService
     ICacheNotify<ClearMyFolderItem> notifyMyFolder,
     FormRoleDtoHelper formRoleDtoHelper,
     WebhookManager webhookManager,
-    FileSharingHelper fileSharingHelper)
+    FileSharingHelper fileSharingHelper,
+    AiGateway gateway)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -892,10 +893,17 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettings != null)
             {
-                ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(
-                    chatSettings.ProviderId, 
-                    0, 
-                    nameof(chatSettings.ProviderId));
+                if (gateway.IsEnabled)
+                {
+                    chatSettings.ProviderId = 0;
+                }
+                else
+                {
+                    ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(
+                        chatSettings.ProviderId, 
+                        0, 
+                        nameof(chatSettings.ProviderId));
+                }
                 
                 ArgumentException.ThrowIfNullOrEmpty(chatSettings.ModelId);
                 
@@ -1126,10 +1134,17 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettingsChanged)
             {
-                ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(
-                    updateData.ChatSettings.ProviderId, 
-                    0, 
-                    nameof(updateData.ChatSettings.ProviderId));
+                if (gateway.IsEnabled)
+                {
+                    updateData.ChatSettings.ProviderId = 0;
+                }
+                else
+                {
+                    ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(
+                        updateData.ChatSettings.ProviderId, 
+                        0, 
+                        nameof(updateData.ChatSettings.ProviderId));
+                }
                 
                 ArgumentException.ThrowIfNullOrEmpty(updateData.ChatSettings.ModelId);
             }

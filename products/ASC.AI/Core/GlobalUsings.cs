@@ -44,12 +44,12 @@ global using ASC.AI.Core.Utils;
 
 global using ASC.Common;
 global using ASC.Common.Log;
-global using ASC.Common.Mapping;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Web;
 
 global using ASC.Core;
 global using ASC.Core.Billing;
+global using ASC.Core.Common.AI;
 global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
