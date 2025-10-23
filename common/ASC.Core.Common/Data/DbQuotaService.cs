@@ -53,7 +53,7 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, TenantQu
             await coreDbContext.AddOrUpdateAsync(q => q.Quotas, tenantQuotaMapper.Map(quota));
             await coreDbContext.SaveChangesAsync();
         }
-        catch (DbUpdateException e)
+        catch (DbUpdateException)
         { 
             await using var coreDbContext = await dbContextManager.CreateDbContextAsync();
             var fromDb = await coreDbContext.QuotaAsync(quota.TenantId);
