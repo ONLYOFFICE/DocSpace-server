@@ -38,7 +38,7 @@ public class SystemMcpConfig
     private readonly FrozenDictionary<string, StaticServerInfo> _staticInfos =
         new Dictionary<string, StaticServerInfo>
         {
-            {"onlyoffice-docspace", new StaticServerInfo
+            {"docspace", new StaticServerInfo
             {
                 Id = new Guid("883da87d-5ae0-49fd-8cb9-2cb82181667e"),
                 ServerType = ServerType.DocSpace,
