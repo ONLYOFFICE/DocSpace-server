@@ -599,7 +599,7 @@ public class TariffService(
 
                         foreach (var productId in productIds)
                         {
-                            if (int.TryParse(productId, out var id) && id > 10000)
+                            if (!int.TryParse(productId, out var _))
                             {
                                 accountingServices.Add(productId);
                             }
@@ -1209,10 +1209,10 @@ public class TariffService(
         return balance;
     }
 
-    public async Task<Session> OpenCustomerSessionAsync(int tenantId, int serviceAccount, string externalRef, int quantity, int duration)
+    public async Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await accountingClient.OpenCustomerSessionAsync(portalId, serviceAccount, externalRef, quantity, duration);
+        return await accountingClient.OpenCustomerSessionAsync(portalId, serviceName, externalRef, quantity, duration);
     }
 
     public async Task<bool> CloseCustomerSessionAsync(int tenantId, int sessionId)
@@ -1229,10 +1229,10 @@ public class TariffService(
         return session;
     }
 
-    public async Task<bool> CompleteCustomerSessionAsync(int tenantId, int serviceAccount, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
+    public async Task<bool> CompleteCustomerSessionAsync(int tenantId, string serviceName, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        await accountingClient.CompleteCustomerSessionAsync(portalId, serviceAccount, sessionId, quantity, customerParticipantName, metadata);
+        await accountingClient.CompleteCustomerSessionAsync(portalId, serviceName, sessionId, quantity, customerParticipantName, metadata);
         await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         return true;
     }
