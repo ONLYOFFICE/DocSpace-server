@@ -30,7 +30,8 @@ namespace ASC.AI.Core.Settings;
 public class AiSettingsService(
     UserManager userManager,
     AuthContext authContext,
-    WebSearchSettingsStore webSearchSettingsStore)
+    WebSearchSettingsStore webSearchSettingsStore,
+    AiGateway aiGateway)
 {
     public async Task<WebSearchSettings> SetWebSearchSettingsAsync(
         bool enabled, 
@@ -87,7 +88,7 @@ public class AiSettingsService(
     {
         return new AiSettings
         {
-            WebSearchEnabled = await webSearchSettingsStore.IsEnabledAsync(),
+            WebSearchEnabled = aiGateway.IsEnabled || await webSearchSettingsStore.IsEnabledAsync()
         };
     }
 }
