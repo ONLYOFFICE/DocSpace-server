@@ -29,7 +29,7 @@ using Newtonsoft.Json;
 namespace ASC.Data.Backup.Tasks;
 
 [Scope]
-public class BackupPortalTask(
+public partial class BackupPortalTask(
     DbFactory dbFactory,
     IDbContextFactory<BackupsContext> dbContextFactory,
     ILogger<BackupPortalTask> logger,
@@ -50,6 +50,8 @@ public class BackupPortalTask(
     private const int BatchLimit = 5000;
 
     private bool _dump = coreBaseSettings.Standalone;
+
+    private string _missingFilesInfo;
 
     public void Init(int tenantId, string toFilePath, int limit, IDataWriteOperator writeOperator, bool dump)
     {
@@ -96,6 +98,8 @@ public class BackupPortalTask(
 
         logger.DebugEndBackup(TenantId);
     }
+
+    public string GetMissingFilesInfo() => _missingFilesInfo;
 
     private List<object[]> ExecuteList(DbCommand command)
     {
@@ -602,6 +606,12 @@ public class BackupPortalTask(
         await using var tmpFile = tempStream.Create();
         var bytes = "<storage_restore>"u8.ToArray();
         await tmpFile.WriteAsync(bytes);
+
+        await using var tmpErrorsFile = tempStream.Create();
+        bytes = "<storage_missing>"u8.ToArray();
+        await tmpErrorsFile.WriteAsync(bytes);
+        var hasMissingFiles = false;
+
         var storages = new Dictionary<string, IDataStore>();
 
         foreach (var file in files)
@@ -616,18 +626,50 @@ public class BackupPortalTask(
             {
                 path = Path.Combine("storage", path);
             }
-            await writer.WriteEntryAsync(path, file.Domain, file.Path, storage, SetProgress);
 
             var restoreInfoXml = file.ToXElement();
-            await restoreInfoXml.WriteToAsync(tmpFile);
+
+            try
+            {
+                await writer.WriteEntryAsync(path, file.Domain, file.Path, storage, SetProgress);
+                await restoreInfoXml.WriteToAsync(tmpFile);
+            }
+            catch (FileNotFoundException ex)
+            {
+                var match = FileIdRegex().Match(file.Path);
+                if (match.Success && match.Groups.Count > 1 && int.TryParse(match.Groups[1].Value, out var fileId))
+                {
+                    await using var backupContext = await dbContextFactory.CreateDbContextAsync();
+                    var exist = await Queries.CheckFileExistenceAsync(backupContext, file.Tenant, fileId);
+                    if (exist)
+                    {
+                        throw;
+                    }
+                }
+
+                restoreInfoXml.Add(new XElement("error", ex.Message));
+                await restoreInfoXml.WriteToAsync(tmpErrorsFile);
+                hasMissingFiles = true;
+            }
         }
 
         bytes = "</storage_restore>"u8.ToArray();
         await tmpFile.WriteAsync(bytes);
         await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, () => Task.CompletedTask);
 
+        if (hasMissingFiles)
+        {
+            _missingFilesInfo = KeyHelper.GetStoragestoraMissingZipKey();
+            bytes = "</storage_missing>"u8.ToArray();
+            await tmpErrorsFile.WriteAsync(bytes);
+            await writer.WriteEntryAsync(_missingFilesInfo, tmpErrorsFile, () => Task.CompletedTask);
+        }
+
         logger.DebugEndBackupStorage();
     }
+
+    [GeneratedRegex(@"\\file_(\d+)\\")]
+    private static partial Regex FileIdRegex();
 
     /// <summary>
     /// Recalculating quota when excluding old backup files.
@@ -717,4 +759,8 @@ static file class Queries
             ctx.Backups.Where(b => b.TenantId == tenantId
                                    && b.StorageType == 0
                                    && b.StoragePath != null));
+
+    public static readonly Func<BackupsContext, int, int, Task<bool>> CheckFileExistenceAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (BackupsContext ctx, int tenantId, int fileId) =>
+            ctx.Files.Any(f => f.TenantId == tenantId && f.Id == fileId));
 }

@@ -202,6 +202,11 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
                 await _notifyHelper.SendAboutBackupCompletedAsync(TenantId, _userId);
             }
 
+            var missingFilesInfo = backupPortalTask.GetMissingFilesInfo();
+            if (!string.IsNullOrEmpty(missingFilesInfo))
+            {
+                Warning = string.Format(BackupResource.BackupMissingFilesWarning, missingFilesInfo);
+            }
 
             IsCompleted = true;
             await socketManager.BackupProgressAsync((int)Percentage, Dump);
