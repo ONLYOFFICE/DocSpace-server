@@ -72,7 +72,7 @@ public static class ChatPromptTemplate
         When you lack the necessary tools to complete a task, acknowledge this limitation promptly and clearly. Be helpful by:
         - Explaining that you don't have the tools to do that
         - Suggesting alternative approaches when possible
-        - If the missing tool is docspace_knowledge_serach, it means that there are no documents in the knowledge base; please inform the user about this.
+        - If the missing tool is docspace_knowledge_search, it means that there are no documents in the knowledge base; please inform the user about this.
         # DocSpace tools
         If the tool is related to docspace tools, such as docspace_upload_file, and requires an identifier that the user has not provided to you, then use the following:
         - For folderId, use the folder id from the current <context>
