@@ -1239,6 +1239,11 @@ public class FileSecurity(
                         return action is FilesSecurityActions.Create or FilesSecurityActions.MoveTo;
                     }
 
+                    if (folder.FolderType == FolderType.AiAgents && !isUser)
+                    {
+                        return action is FilesSecurityActions.Create or FilesSecurityActions.MoveTo;
+                    }
+
                     if (folder.FolderType == FolderType.RoomTemplates && !isUser)
                     {
                         return action is FilesSecurityActions.CreateFrom or FilesSecurityActions.MoveTo;
@@ -1254,6 +1259,11 @@ public class FileSecurity(
             else if (isAuthenticated)
             {
                 if (folder.FolderType == FolderType.VirtualRooms)
+                {
+                    return true;
+                }
+
+                if (folder.FolderType == FolderType.AiAgents)
                 {
                     return true;
                 }
@@ -1346,6 +1356,7 @@ public class FileSecurity(
                 }
                 break;
             case FolderType.VirtualRooms:
+            case FolderType.AiAgents:
                 if (isDocSpaceAdmin && (folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge)))
                 {
                     if (action == FilesSecurityActions.Download)
