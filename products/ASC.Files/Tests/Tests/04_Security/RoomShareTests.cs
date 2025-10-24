@@ -627,4 +627,28 @@ public class RoomShareTests(
 
         primaryLink.CanEditInternal.Should().BeTrue();
     }
+    
+   public static TheoryData<RoomType> Bug77820Data => [RoomType.CustomRoom, RoomType.PublicRoom];
+
+   
+    [Theory]
+    [MemberData(nameof(Bug77820Data))]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "77820")]
+    public async Task RoomRemovedFromList_DeletingRoomLink_StatusOk(RoomType roomType)
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
+        
+        var primaryLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        
+        var user = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(user);
+        await _sharingApi.GetExternalShareDataAsync(primaryLink.SharedLink.RequestToken, cancellationToken: TestContext.Current.CancellationToken);
+        await _sharingApi.RemoveSecurityInfoAsync(new BaseBatchRequestDto { FolderIds = [new(room.Id)] }, cancellationToken: TestContext.Current.CancellationToken);
+
+        var response = (await _roomsApi.GetRoomsFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        response.Should().NotBeNull();
+        response.Folders.Should().BeEmpty();
+    }
 }

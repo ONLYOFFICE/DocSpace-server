@@ -3948,7 +3948,7 @@ public class FileStorageService //: IFileStorageService
             await filesMessageService.SendAsync(MessageAction.FileRemovedFromList, entry, entry.Title);
         }
 
-        await foreach (var entry in folderDao.GetFoldersAsync(filesId))
+        await foreach (var entry in folderDao.GetFoldersAsync(foldersId))
         {
             await fileSharingAceHelper.RemoveAceAsync(entry);
             await filesMessageService.SendAsync(MessageAction.FolderRemovedFromList, entry, entry.Title);
