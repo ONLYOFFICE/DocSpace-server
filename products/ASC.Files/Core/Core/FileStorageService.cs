@@ -4659,7 +4659,7 @@ public class FileStorageService //: IFileStorageService
 
         await foreach (var folder in folders)
         {
-            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates)
+            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.AiAgents)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
