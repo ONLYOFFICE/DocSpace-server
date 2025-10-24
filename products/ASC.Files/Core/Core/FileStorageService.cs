@@ -3809,17 +3809,8 @@ public class FileStorageService //: IFileStorageService
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
 
-        var entries = new List<FileEntry<T>>();
-
-        foreach (var fileId in aceCollection.Files)
-        {
-            entries.Add(await fileDao.GetFileAsync(fileId));
-        }
-
-        foreach (var folderId in aceCollection.Folders)
-        {
-            entries.Add(await folderDao.GetFolderAsync(folderId));
-        }
+        var entries = await fileDao.GetFilesAsync(aceCollection.Files).Select(FileEntry<T> (file) => file).ToListAsync();
+        entries.AddRange(await folderDao.GetFoldersAsync(aceCollection.Folders).ToListAsync());
 
         foreach (var entry in entries)
         {
