@@ -31,5 +31,4 @@ public class ChatSettings
     public int ProviderId { get; internal set; }
     public string ModelId { get; init; }
     public string Prompt { get; init; }
-    public bool IsAgent { get; init; }
 }

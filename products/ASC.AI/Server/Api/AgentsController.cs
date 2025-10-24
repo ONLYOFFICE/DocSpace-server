@@ -68,7 +68,7 @@ namespace ASC.AI.Api
                 ? JsonSerializer.Deserialize<IEnumerable<string>>(inDto.Tags)
                 : null;
 
-            OrderBy orderBy = null;
+            OrderBy? orderBy = null;
             if (SortedByTypeExtensions.TryParse(inDto.SortBy, true, out var sortBy))
             {
                 orderBy = new OrderBy(sortBy, inDto.SortOrder == SortOrder.Ascending);
@@ -120,15 +120,9 @@ namespace ASC.AI.Api
                 lifetime.StartDate = DateTime.UtcNow;
             }
 
-            var room = await fileStorageService.CreateRoomAsync(inDto.Title, RoomType.AiRoom, inDto.Private,
+            var room = await fileStorageService.CreateAiAgentAsync(inDto.Title, inDto.Private,
                 inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover,
-                inDto.Tags, inDto.Logo, new ChatSettings()
-                {
-                    ProviderId = inDto.ChatSettings.ProviderId,
-                    Prompt = inDto.ChatSettings.Prompt,
-                    ModelId = inDto.ChatSettings.ModelId,
-                    IsAgent = true
-                });
+                inDto.Tags, inDto.Logo, inDto.ChatSettings);
 
             return await folderDtoHelper.GetAsync(room);
         }
