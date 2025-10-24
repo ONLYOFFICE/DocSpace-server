@@ -550,6 +550,16 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:self-restriction-folder", { id, data });
   }
 
+  function changeAccessRightsForFile({ id, room, data, userId } = {}) {
+    logger.info(`change access rights for file ${id} in room ${room} to user ${userId}`);
+    filesIO.to(`${room}-${userId}`).emit("s:change-access-rights-file", { id, data });
+  }
+
+  function changeAccessRightsForFolder({ id, room, data, userId } = {}) {
+    logger.info(`change access rights for folder ${id} in room ${room} to user ${userId}`);
+    filesIO.to(`${room}-${userId}`).emit("s:change-access-rights-folder", { id, data });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -585,6 +595,8 @@ module.exports = (io) => {
     endRestore,
     encryptionProgress,
     selfRestrictionForFile,
-    selfRestrictionForFolder
+    selfRestrictionForFolder,
+    changeAccessRightsForFile,
+    changeAccessRightsForFolder
   };
 };

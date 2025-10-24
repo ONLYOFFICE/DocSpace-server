@@ -358,6 +358,10 @@ public class FileSharingAceHelper(
                 {
                     await socketManager.CreateFolderAsync(room, [w.Id]);
                 }
+                else
+                {
+                    await socketManager.ChangeAccessRightsAsync(room, w.Id, w.Access);
+                }
             }
 
             changed = true;

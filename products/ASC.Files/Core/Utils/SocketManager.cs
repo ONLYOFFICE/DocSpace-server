@@ -192,6 +192,20 @@ public class SocketManager(
         });
     }
 
+    public async Task ChangeAccessRightsAsync<T>(FileEntry<T> fileEntry, Guid userId, FileShare access)
+    {
+        var room = fileEntry.FileEntryType == FileEntryType.File ? FileRoom(fileEntry.Id) : FolderRoom(fileEntry.Id);
+        var data = JsonSerializer.Serialize(new Dictionary<Guid, FileShare> { { userId, access } });
+
+        await base.MakeRequest($"change-access-rights-{fileEntry.FileEntryType.ToStringLowerFast()}", new
+        {
+            room,
+            fileEntry.Id,
+            data,
+            userId
+        });
+    }
+
     private async Task<IEnumerable<Guid>> GetRecipientListForForm<T>(File<T> form)
     {
         List<Guid> users = null;
