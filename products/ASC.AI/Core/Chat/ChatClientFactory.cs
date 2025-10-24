@@ -75,6 +75,7 @@ public class ChatClientFactory(
             {
                 x.Tools = toolHolder.Tools;
                 x.ToolMode = ChatToolMode.Auto;
+                x.AllowMultipleToolCalls = true;
             });
             
             builder = builder.Use((innerClient, _) =>
@@ -84,7 +85,8 @@ public class ChatClientFactory(
                     toolHolder,
                     toolPermissionRequester);
 
-                funcClient.MaximumIterationsPerRequest = 128;
+                funcClient.MaximumIterationsPerRequest = 32;
+                funcClient.AllowConcurrentInvocation = true;
                 
                 return funcClient;
             });
