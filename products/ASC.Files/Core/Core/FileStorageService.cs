@@ -552,9 +552,7 @@ public class FileStorageService //: IFileStorageService
     public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool? indexing, IEnumerable<FileShareParams> share, long? quota, RoomDataLifetime lifetime, bool? denyDownload, WatermarkRequestDto watermark, string color, string cover, IEnumerable<string> tags, LogoRequest logo, ChatSettings chatSettings = null)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        var parentId = chatSettings != null && chatSettings.IsAgent
-            ? await globalFolderHelper.GetFolderAiAgentsAsync()
-            : await globalFolderHelper.GetFolderVirtualRooms();
+        var parentId = await globalFolderHelper.GetFolderVirtualRooms();
 
         return await CreateRoomAsync(async () =>
         {
