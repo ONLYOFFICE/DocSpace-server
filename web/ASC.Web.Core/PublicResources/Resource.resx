@@ -1263,4 +1263,13 @@
   <data name="TelegramOnGenericError" xml:space="preserve">
     <value>An unexpected error occurred. Please try again.</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>AI features</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vectorization</value>
+  </data>
 </root>
