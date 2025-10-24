@@ -35,13 +35,16 @@ public class ChatTools(
     WebSearchSettingsStore webSearchSettingsStore,
     AiGateway aiGateway)
 {
-    public async Task<ToolHolder> GetAsync(int roomId, UserChatSettings chatSettings)
+    public async Task<ToolHolder> GetAsync(int roomId, UserChatSettings chatSettings, bool knowledgeEnabled)
     {
         var holder = await mcpService.GetToolsAsync(roomId);
-        
-        var knowledgeFunc = knowledgeSearchTool.Init(roomId);
-        var knowledgeWrapper = ToWrapper(roomId, knowledgeFunc);
-        holder.AddTool(knowledgeWrapper);
+
+        if (knowledgeEnabled)
+        {
+            var knowledgeFunc = knowledgeSearchTool.Init(roomId);
+            var knowledgeWrapper = ToWrapper(roomId, knowledgeFunc);
+            holder.AddTool(knowledgeWrapper);
+        }
 
         if (!chatSettings.WebSearchEnabled)
         {

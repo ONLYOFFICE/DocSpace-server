@@ -57,6 +57,7 @@ public class ChatExecutionContextBuilder(
         
         var providerTask = providerService.GetProviderAsync(room.SettingsChatProviderId);
         var resultStorageTask = folderDao.GetFoldersAsync(room.Id, FolderType.ResultStorage).FirstAsync();
+        var knowledgeTask = folderDao.GetFoldersAsync(room.Id, FolderType.Knowledge).FirstAsync();
         var chatSettingsTask = chatDao.GetUserChatSettingsAsync(tenantId, roomId, userId);
         var userTask = userManager.GetUsersAsync(userId);
         
@@ -67,8 +68,9 @@ public class ChatExecutionContextBuilder(
         }
         
         var chatSettings = await chatSettingsTask;
+        var knowledge = await knowledgeTask;
         
-        var toolsTask = chatTools.GetAsync(roomId, chatSettings);
+        var toolsTask = chatTools.GetAsync(roomId, chatSettings, knowledge.FilesCount > 0);
         
         var resultStorage = await resultStorageTask;
         var tools = await toolsTask;
