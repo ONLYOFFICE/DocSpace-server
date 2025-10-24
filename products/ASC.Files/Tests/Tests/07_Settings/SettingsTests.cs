@@ -28,6 +28,7 @@ using ASC.Files.Tests.ApiFactories;
 
 namespace ASC.Files.Tests.Tests._07_Settings;
 
+[Trait("Category", "Settings")]
 public class SettingsTests(
     FilesApiFactory filesFactory,
     WepApiFactory apiFactory,
