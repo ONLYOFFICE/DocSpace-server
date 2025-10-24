@@ -51,6 +51,8 @@ public partial class BackupPortalTask(
 
     private bool _dump = coreBaseSettings.Standalone;
 
+    private string _missingFilesInfo;
+
     public void Init(int tenantId, string toFilePath, int limit, IDataWriteOperator writeOperator, bool dump)
     {
         ArgumentException.ThrowIfNullOrEmpty(toFilePath);
@@ -96,6 +98,8 @@ public partial class BackupPortalTask(
 
         logger.DebugEndBackup(TenantId);
     }
+
+    public string GetMissingFilesInfo() => _missingFilesInfo;
 
     private List<object[]> ExecuteList(DbCommand command)
     {
@@ -603,6 +607,11 @@ public partial class BackupPortalTask(
         var bytes = "<storage_restore>"u8.ToArray();
         await tmpFile.WriteAsync(bytes);
 
+        await using var tmpErrorsFile = tempStream.Create();
+        bytes = "<storage_missing>"u8.ToArray();
+        await tmpErrorsFile.WriteAsync(bytes);
+        var hasMissingFiles = false;
+
         var storages = new Dictionary<string, IDataStore>();
 
         foreach (var file in files)
@@ -618,14 +627,14 @@ public partial class BackupPortalTask(
                 path = Path.Combine("storage", path);
             }
 
+            var restoreInfoXml = file.ToXElement();
+
             try
             {
                 await writer.WriteEntryAsync(path, file.Domain, file.Path, storage, SetProgress);
-
-                var restoreInfoXml = file.ToXElement();
                 await restoreInfoXml.WriteToAsync(tmpFile);
             }
-            catch (FileNotFoundException)
+            catch (FileNotFoundException ex)
             {
                 var match = FileIdRegex().Match(file.Path);
                 if (match.Success && match.Groups.Count > 1 && int.TryParse(match.Groups[1].Value, out var fileId))
@@ -637,12 +646,24 @@ public partial class BackupPortalTask(
                         throw;
                     }
                 }
+
+                restoreInfoXml.Add(new XElement("error", ex.Message));
+                await restoreInfoXml.WriteToAsync(tmpErrorsFile);
+                hasMissingFiles = true;
             }
         }
 
         bytes = "</storage_restore>"u8.ToArray();
         await tmpFile.WriteAsync(bytes);
         await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, () => Task.CompletedTask);
+
+        if (hasMissingFiles)
+        {
+            _missingFilesInfo = KeyHelper.GetStoragestoraMissingZipKey();
+            bytes = "</storage_missing>"u8.ToArray();
+            await tmpErrorsFile.WriteAsync(bytes);
+            await writer.WriteEntryAsync(_missingFilesInfo, tmpErrorsFile, () => Task.CompletedTask);
+        }
 
         logger.DebugEndBackupStorage();
     }
