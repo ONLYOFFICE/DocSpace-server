@@ -139,21 +139,26 @@ public class FolderContentDtoHelper(
                 }
             }
 
-            var foldersTask = GetFoldersDto(folders, contextFolder: folderItems.FolderInfo).ToListAsync();
-            var filesTask = GetFilesDto(files, contextFolder: folderItems.FolderInfo).ToListAsync();
-            result.Files = await filesTask;
-            result.Folders = await foldersTask;
+            var foldersTask = GetFoldersDto(folders, contextFolder: folderItems.FolderInfo).ToListAsync().AsTask();
+            var filesTask = GetFilesDto(files, contextFolder: folderItems.FolderInfo).ToListAsync().AsTask();
+
+            await Task.WhenAll(foldersTask, filesTask);
+
+            result.Files = filesTask.Result;
+            result.Folders = foldersTask.Result;
         }
         
         
         var currentTask = GetFolderDto(folderItems.FolderInfo, contextFolder: folderItems.FolderInfo);
         var isEnableBadges = badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
+        await Task.WhenAll(currentTask, isEnableBadges);
+
         result.PathParts = folderItems.FolderPathParts;
         result.StartIndex = startIndex;
         result.Total = folderItems.Total;
-        result.New = (await isEnableBadges) ? folderItems.New : 0;
-        result.Current = (FolderDto<T>)(await currentTask);
+        result.New = (isEnableBadges.Result) ? folderItems.New : 0;
+        result.Current = (FolderDto<T>)(currentTask.Result);
 
         return result;
 

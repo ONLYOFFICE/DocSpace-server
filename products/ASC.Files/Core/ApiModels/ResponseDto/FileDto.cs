@@ -333,19 +333,41 @@ public class FileDtoHelper(
 
     private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, string order, TimeSpan? expiration, IFolder contextFolder = null)
     {
-        var result = await GetAsync<FileDto<T>, T>(file);
-        result.FolderId = file.ParentId;
-        
-        var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
+        var fileDao = _daoFactory.GetFileDao<T>();
+        var folderDao = _daoFactory.GetCacheFolderDao<T>();
+
+        var getFileTask = GetAsync<FileDto<T>, T>(file);
+        var badgesTask = badgesSettingsHelper.GetEnabledForCurrentUserAsync();
+        var fileStatusTask = file.GetFileStatus();
+
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-        var fileDao = _daoFactory.GetFileDao<T>();
+        await Task.WhenAll(getFileTask, badgesTask, fileStatusTask);
+
+        var result = getFileTask.Result;
+        var isEnabledBadges = badgesTask.Result;
+        result.FolderId = file.ParentId;
+        result.FileExst = extension;
+        result.FileType = fileType;
+        result.Version = file.Version;
+        result.VersionGroup = file.VersionGroup;
+        result.ContentLength = file.ContentLengthString;
+        result.FileStatus = fileStatusTask.Result;
+        result.Mute = !isEnabledBadges;
+        result.PureContentLength = file.ContentLength.NullIfDefault();
+        result.Comment = file.Comment;
+        result.Encrypted = file.Encrypted.NullIfDefault();
+        result.IsFavorite = file.IsFavorite.NullIfDefault();
+        result.Locked = file.Locked.NullIfDefault();
+        result.LockedBy = file.LockedBy;
+        result.Access = file.Access;
+        result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
+        result.CustomFilterEnabled = file.CustomFilterEnabled.NullIfDefault();
+        result.CustomFilterEnabledBy = file.CustomFilterEnabledBy;
 
         if (fileType == FileType.Pdf)
         {
-            var folderDao = _daoFactory.GetCacheFolderDao<T>();
-
             Task<T> linkedIdTask;
             Task<EntryProperties<T>> propertiesTask;
             
@@ -387,13 +409,10 @@ public class FileDtoHelper(
                 _ = await _fileSecurity.SetSecurity(new[] { currentRoom }.ToAsyncEnumerable()).ToListAsync();
             }
 
-            if (FileUtility.GetFileTypeByExtention(FileUtility.GetFileExtension(file.Title)) == FileType.Pdf && !file.IsForm && (FilterType)file.Category == FilterType.None)
+            result.IsForm = file.IsForm;
+            if (fileType == FileType.Pdf && !file.IsForm && (FilterType)file.Category == FilterType.None)
             {
                 result.IsForm = await fileChecker.IsFormPDFFile(file);
-            }
-            else
-            {
-                result.IsForm = file.IsForm;
             }
 
             if (DocSpaceHelper.IsFormsFillingSystemFolder(currentFolder.FolderType) || currentFolder.FolderType == FolderType.FillingFormsRoom)
@@ -467,27 +486,8 @@ public class FileDtoHelper(
             }
         }
 
-        result.FileExst = extension;
-        result.FileType = fileType;
-        result.Version = file.Version;
-        result.VersionGroup = file.VersionGroup;
-        result.ContentLength = file.ContentLengthString;
-        result.FileStatus = await file.GetFileStatus();
-        result.Mute = !isEnabledBadges;
-        result.PureContentLength = file.ContentLength.NullIfDefault();
-        result.Comment = file.Comment;
-        result.Encrypted = file.Encrypted.NullIfDefault();
-        result.IsFavorite = file.IsFavorite.NullIfDefault();
-        result.Locked = file.Locked.NullIfDefault();
-        result.LockedBy = file.LockedBy;
-        result.Access = file.Access;
-        result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
-        result.CustomFilterEnabled = file.CustomFilterEnabled.NullIfDefault();
-        result.CustomFilterEnabledBy = file.CustomFilterEnabledBy;
-
         if (!file.ProviderEntry && file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
         {
-            var folderDao = _daoFactory.GetCacheFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
             if (room?.SettingsLifetime != null)
             {
@@ -534,7 +534,7 @@ public class FileDtoHelper(
                     result.ExpirationDate = _apiDateTimeHelper.Get(expirationDate);
                 }
 
-                var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.FolderId);
+                var parent = await folderDao.GetFolderAsync(result.FolderId);
                 if (!await _fileSecurity.CanReadAsync(parent))
                 {
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
