@@ -87,11 +87,10 @@ public class FilesLinkUtility
         get { return FilesBaseAbsolutePath + "filehandler.ashx"; }
     }
 
-    private const string PublicUrlKey = "public";
-
+    
     public string GetDocServiceUrl()
     {
-        var url = GetUrlSetting(PublicUrlKey);
+        var url = GetUrlSetting(FilesUrlKeys.Public);
         if (!string.IsNullOrEmpty(url) && url != "/")
         {
             url = url.TrimEnd('/') + "/";
@@ -102,7 +101,7 @@ public class FilesLinkUtility
 
     public async Task SetDocServiceUrlAsync(string value)
     {
-        await SetUrlSettingAsync(ApiUrlKey, null);
+        await SetUrlSettingAsync(FilesUrlKeys.Api);
 
         value = (value ?? "").Trim().ToLowerInvariant();
         if (!string.IsNullOrEmpty(value))
@@ -114,14 +113,12 @@ public class FilesLinkUtility
             }
         }
 
-        await SetUrlSettingAsync(PublicUrlKey, value);
+        await SetUrlSettingAsync(FilesUrlKeys.Public, value);
     }
-
-    private const string InternalUrlKey = "internal";
-
+    
     public string GetDocServiceUrlInternal()
     {
-        var url = GetUrlSetting(InternalUrlKey);
+        var url = GetUrlSetting(FilesUrlKeys.Internal);
         if (string.IsNullOrEmpty(url))
         {
             url = GetDocServiceUrl();
@@ -136,10 +133,10 @@ public class FilesLinkUtility
 
     public async Task SetDocServiceUrlInternalAsync(string value)
     {
-        await SetUrlSettingAsync("converter", null);
-        await SetUrlSettingAsync("storage", null);
-        await SetUrlSettingAsync("command", null);
-        await SetUrlSettingAsync("docbuilder", null);
+        await SetUrlSettingAsync(FilesUrlKeys.Converter);
+        await SetUrlSettingAsync(FilesUrlKeys.Storage);
+        await SetUrlSettingAsync(FilesUrlKeys.Command);
+        await SetUrlSettingAsync(FilesUrlKeys.Docbuilder);
 
         value = (value ?? "").Trim().ToLowerInvariant();
         if (!string.IsNullOrEmpty(value))
@@ -153,16 +150,16 @@ public class FilesLinkUtility
 
         if (GetDocServiceUrlInternal() != value)
         {
-            await SetUrlSettingAsync(InternalUrlKey, value);
+            await SetUrlSettingAsync(FilesUrlKeys.Internal, value);
         }
     }
 
-    private const string ApiUrlKey = "api";
+
     public string DocServiceApiUrl
     {
         get
         {
-            var url = GetUrlSetting(ApiUrlKey);
+            var url = GetUrlSetting(FilesUrlKeys.Api);
             if (string.IsNullOrEmpty(url))
             {
                 url = GetDocServiceUrl();
@@ -174,13 +171,12 @@ public class FilesLinkUtility
             return url;
         }
     }
-
-    private const string PreloadUrlKey = "preload";
+    
     public string DocServicePreloadUrl
     {
         get
         {
-            var url = GetUrlSetting(PreloadUrlKey);
+            var url = GetUrlSetting(FilesUrlKeys.Preload);
             if (string.IsNullOrEmpty(url))
             {
                 url = GetDocServiceUrl();
@@ -197,7 +193,7 @@ public class FilesLinkUtility
     {
         get
         {
-            var url = GetUrlSetting("converter");
+            var url = GetUrlSetting(FilesUrlKeys.Converter);
             if (string.IsNullOrEmpty(url))
             {
                 url = GetDocServiceUrlInternal();
@@ -214,7 +210,7 @@ public class FilesLinkUtility
     {
         get
         {
-            var url = GetUrlSetting("command");
+            var url = GetUrlSetting(FilesUrlKeys.Command);
             if (string.IsNullOrEmpty(url))
             {
                 url = GetDocServiceUrlInternal();
@@ -231,7 +227,7 @@ public class FilesLinkUtility
     {
         get
         {
-            var url = GetUrlSetting("docbuilder");
+            var url = GetUrlSetting(FilesUrlKeys.Docbuilder);
             if (string.IsNullOrEmpty(url))
             {
                 url = GetDocServiceUrlInternal();
@@ -248,7 +244,7 @@ public class FilesLinkUtility
     {
         get
         {
-            var url = GetUrlSetting("healthcheck");
+            var url = GetUrlSetting(FilesUrlKeys.Healthcheck);
             if (string.IsNullOrEmpty(url))
             {
                 url = GetDocServiceUrlInternal();
@@ -290,12 +286,10 @@ public class FilesLinkUtility
             return result;
         }
     }
-
-    private const string PortalUrlKey = "portal";
-
+    
     public string GetDocServicePortalUrl()
     {
-        return GetUrlSetting(PortalUrlKey);
+        return GetUrlSetting(FilesUrlKeys.Portal);
     }
 
     public async Task SetDocServicePortalUrlAsync(string value)
@@ -310,7 +304,7 @@ public class FilesLinkUtility
             }
         }
 
-        await SetUrlSettingAsync(PortalUrlKey, value);
+        await SetUrlSettingAsync(FilesUrlKeys.Portal, value);
     }
 
     private const string SignatureSecretKey = "secret:value";
@@ -351,17 +345,17 @@ public class FilesLinkUtility
 
     public async Task<bool> IsDefaultAsync()
     {
-        if (!await IsDefaultUrlSettingAsync(PublicUrlKey))
+        if (!await IsDefaultUrlSettingAsync(FilesUrlKeys.Public.ToStringLowerFast()))
         {
             return false;
         }
 
-        if (!await IsDefaultUrlSettingAsync(InternalUrlKey))
+        if (!await IsDefaultUrlSettingAsync(FilesUrlKeys.Internal.ToStringLowerFast()))
         {
             return false;
         }
 
-        if (!await IsDefaultUrlSettingAsync(PortalUrlKey))
+        if (!await IsDefaultUrlSettingAsync(FilesUrlKeys.Portal.ToStringLowerFast()))
         {
             return false;
         }
@@ -504,13 +498,13 @@ public class FilesLinkUtility
         return _filesUploaderUrl.EndsWith(".ashx") ? _filesUploaderUrl : _filesUploaderUrl.TrimEnd('/') + "/ChunkedUploader.ashx";
     }
 
-    private string GetUrlSetting(string key)
+    private string GetUrlSetting(FilesUrlKeys key)
     {
         var value = string.Empty;
 
         if (_coreBaseSettings.Standalone)
         {
-            value = _coreSettings.GetSetting(GetSettingsKey(key));
+            value = _coreSettings.GetSetting(GetSettingsKey(key.ToStringLowerFast()));
         }
 
         if (string.IsNullOrEmpty(value))
@@ -521,13 +515,13 @@ public class FilesLinkUtility
         return value;
     }
 
-    private async Task<string> GetUrlSettingAsync(string key)
+    private async Task<string> GetUrlSettingAsync(FilesUrlKeys key)
     {
         var value = string.Empty;
 
         if (_coreBaseSettings.Standalone)
         {
-            value = await _coreSettings.GetSettingAsync(GetSettingsKey(key));
+            value = await _coreSettings.GetSettingAsync(GetSettingsKey(key.ToStringLowerFast()));
         }
 
         if (string.IsNullOrEmpty(value))
@@ -550,9 +544,12 @@ public class FilesLinkUtility
         return string.IsNullOrEmpty(value);
     }
 
-    private string GetDefaultUrlSetting(string key)
+    private readonly ConcurrentDictionary<string, string> _urlSettings = new();
+    
+    private string GetDefaultUrlSetting(FilesUrlKeys key)
     {
-        var value = _configuration[$"files:docservice:url:{key}"];
+        var confKey = $"files:docservice:url:{key.ToStringLowerFast()}";
+        var value = _urlSettings.GetOrAdd(confKey, (c) => _configuration[c]);
         if (!string.IsNullOrEmpty(value))
         {
             value = value.TrimEnd('/') + "/";
@@ -560,12 +557,13 @@ public class FilesLinkUtility
         return value;
     }
 
-    private async Task SetUrlSettingAsync(string key, string value)
+    private async Task SetUrlSettingAsync(FilesUrlKeys key, string value = null)
     {
         if (!_coreBaseSettings.Standalone)
         {
             throw new NotSupportedException("Method for server edition only.");
         }
+        
         value = (value ?? "").Trim();
         if (string.IsNullOrEmpty(value))
         {
@@ -583,7 +581,7 @@ public class FilesLinkUtility
 
         if (await GetUrlSettingAsync(key) != value)
         {
-            await _coreSettings.SaveSettingAsync(GetSettingsKey(key), value);
+            await _coreSettings.SaveSettingAsync(GetSettingsKey(key.ToStringLowerFast()), value);
         }
     }
 
@@ -763,4 +761,20 @@ public class FilesLinkUtility
         sb.Append(anchorText);
         return sb.ToString();
     }
+}
+
+
+[EnumExtensions]
+internal enum FilesUrlKeys
+{
+    Public,
+    Api,
+    Internal,
+    Portal,
+    Preload,
+    Converter,
+    Command,
+    Docbuilder,
+    Healthcheck,
+    Storage
 }

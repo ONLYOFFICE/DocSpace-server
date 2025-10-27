@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.EF;
+
 namespace ASC.Data.Backup.EF.Context;
 
 public class BackupsContext(DbContextOptions<BackupsContext> options) : BaseDbContext(options)
@@ -31,6 +33,7 @@ public class BackupsContext(DbContextOptions<BackupsContext> options) : BaseDbCo
     public DbSet<BackupRecord> Backups { get; set; }
     public DbSet<BackupSchedule> Schedules { get; set; }
     public DbSet<DbTenant> Tenants { get; set; }
+    public DbSet<DbFile> Files { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -38,6 +41,7 @@ public class BackupsContext(DbContextOptions<BackupsContext> options) : BaseDbCo
             .From(modelBuilder, Database)
             .AddDbTenant()
             .AddBackupSchedule()
-            .AddBackupRecord();
+            .AddBackupRecord()
+            .AddDbFiles();
     }
 }

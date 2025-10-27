@@ -163,6 +163,8 @@ internal class WebDavDaoBase(
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
+        folder.SettingsCover = ProviderInfo.Cover;
+        
         ProcessFolderAsRoom(folder);
         SetDateTime(webDavFolder, folder);
         folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;

@@ -100,6 +100,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Tema de colores cambiada</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Contactos</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Ajustes de archivos cookie han sido actualizados</value>
   </data>
@@ -268,9 +271,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Los ajustes de Sphinx se han actualizado</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>General</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Ajustes de bienvenida actualizados</value>
   </data>
@@ -279,9 +279,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Grupo borrado: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Grupos</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Grupo actualizado: {0}</value>
@@ -466,9 +463,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista de productos actualizada</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Productos</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Reasigna</value>
   </data>
@@ -483,6 +477,9 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesión comenzada</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Ajustes</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO desactivada</value>
@@ -609,9 +606,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Usuarios [{0}]. Instrucciones sobre cambio de contraseña enviadas</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Usuarios</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Usuarios [{0}]. Instrucciones de activación enviadas</value>
@@ -802,9 +796,6 @@
   <data name="RoomWatermarkSet" xml:space="preserve">
     <value>Sala: {0}. Marca de agua activada</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="RoomDenyDownloadDisabled" xml:space="preserve">
     <value>Sala: {0}. La opción Denegar descarga está desactivada</value>
   </data>
@@ -984,5 +975,8 @@
   </data>
   <data name="RoomExternalLinkRevoked" xml:space="preserve">
     <value>Enlace externo revocado: {1}</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Conexión vía cuenta social exitosa</value>
   </data>
 </root>

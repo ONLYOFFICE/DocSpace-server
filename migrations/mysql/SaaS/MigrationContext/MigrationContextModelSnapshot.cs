@@ -3928,6 +3928,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<string>("Cover")
+                        .HasMaxLength(50)
+                        .HasColumnType("char")
+                        .HasColumnName("cover")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<DateTime>("CreateOn")
                         .HasColumnType("datetime")
                         .HasColumnName("create_on");

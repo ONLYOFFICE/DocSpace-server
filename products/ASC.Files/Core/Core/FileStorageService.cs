@@ -627,7 +627,9 @@ public class FileStorageService //: IFileStorageService
                     Title = title,
                     FolderId = folder.Id,
                     FolderType = folderType,
-                    Private = privacy
+                    Private = privacy,
+                    Color = color,
+                    Cover = cover
                 });
 
                 folder.FolderType = folderType;
@@ -3898,17 +3900,8 @@ public class FileStorageService //: IFileStorageService
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
 
-        var entries = new List<FileEntry<T>>();
-
-        foreach (var fileId in aceCollection.Files)
-        {
-            entries.Add(await fileDao.GetFileAsync(fileId));
-        }
-
-        foreach (var folderId in aceCollection.Folders)
-        {
-            entries.Add(await folderDao.GetFolderAsync(folderId));
-        }
+        var entries = await fileDao.GetFilesAsync(aceCollection.Files).Select(FileEntry<T> (file) => file).ToListAsync();
+        entries.AddRange(await folderDao.GetFoldersAsync(aceCollection.Folders).ToListAsync());
 
         foreach (var entry in entries)
         {
@@ -4031,16 +4024,14 @@ public class FileStorageService //: IFileStorageService
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
 
-        foreach (var fileId in filesId)
+        await foreach (var entry in fileDao.GetFilesAsync(filesId))
         {
-            var entry = await fileDao.GetFileAsync(fileId);
             await fileSharingAceHelper.RemoveAceAsync(entry);
             await filesMessageService.SendAsync(MessageAction.FileRemovedFromList, entry, entry.Title);
         }
 
-        foreach (var folderId in foldersId)
+        await foreach (var entry in folderDao.GetFoldersAsync(foldersId))
         {
-            var entry = await folderDao.GetFolderAsync(folderId);
             await fileSharingAceHelper.RemoveAceAsync(entry);
             await filesMessageService.SendAsync(MessageAction.FolderRemovedFromList, entry, entry.Title);
         }

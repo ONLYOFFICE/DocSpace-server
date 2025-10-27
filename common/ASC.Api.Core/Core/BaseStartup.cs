@@ -46,9 +46,7 @@ public abstract class BaseStartup
     private readonly string _corsOrigin;
     private static readonly JsonSerializerOptions _serializerOptions = new() { PropertyNameCaseInsensitive = true };
 
-    protected bool AddAndUseSession { get; }
-
-    protected DIHelper DIHelper { get; }
+    private protected DIHelper DIHelper { get; }
 
     protected bool OpenApiEnabled { get; init; }
 
@@ -363,11 +361,6 @@ public abstract class BaseStartup
             .AddBaseDbContextPool<WebhooksDbContext>()
             .AddBaseDbContextPool<ApiKeysDbContext>();
 
-        if (AddAndUseSession)
-        {
-            services.AddSession();
-        }
-
         DIHelper.Configure(services);
 
         services.ConfigureOptions<ConfigureJsonOptions>();
@@ -537,11 +530,6 @@ public abstract class BaseStartup
 
             await next(context);
         });
-
-        if (AddAndUseSession)
-        {
-            app.UseSession();
-        }
 
         app.UseSynchronizationContextMiddleware();
 

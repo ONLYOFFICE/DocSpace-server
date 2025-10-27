@@ -132,7 +132,7 @@ public class ThirdpartyController(
 
         if (!(coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Oauth))
         {
-            throw new Exception("ErrorNotAllowedOption");
+            throw new SecurityException(Resource.ErrorNotAllowedOption);
         }
 
         if (string.IsNullOrEmpty(profile.AuthorizationError))

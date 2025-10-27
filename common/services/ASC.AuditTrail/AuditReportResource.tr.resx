@@ -94,6 +94,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Renk Teması Değiştirildi</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kişiler</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Çerez Ayarları Güncellendi</value>
   </data>
@@ -253,9 +256,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sphinx ayarları güncellendi</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Genel</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Hoş Geldiniz Sayfası Ayarları Güncellendi</value>
   </data>
@@ -264,9 +264,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Grup Silindi: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Gruplar</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Grup Güncellendi: {0}</value>
@@ -424,9 +421,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Ürünler Listesi Güncellendi</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Ürünler</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Yeniden atamalar</value>
   </data>
@@ -441,6 +435,9 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Seans Başlatıldı</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Ayarlar</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO Devre Dışı Bırakıldı</value>
@@ -546,9 +543,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Kullanıcılar [{0}]. Şifre Değiştirme Kılavuzu Gönderildi</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Kullanıcılar</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Kullanıcılar [{0}]. Aktivasyon Kılavuzu Gönderildi</value>
@@ -796,9 +790,6 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Davetiyeler yeniden gönderildi: {0}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>İstemcinin {0} etkinleştirmesi değişti</value>
   </data>
@@ -936,5 +927,8 @@
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Müşteri cüzdanı etkinleştirilmiş hizmet ayarları güncellendi</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Sosyal Hesapla Giriş Başarılı</value>
   </data>
 </root>

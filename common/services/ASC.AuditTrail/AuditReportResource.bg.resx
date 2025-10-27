@@ -100,6 +100,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Променена е цветната тема</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Контакти</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Настройки на 'бисквитките' Актуализирани</value>
   </data>
@@ -262,9 +265,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Настройките на сфинкса са актуализирани</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Общ</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Актуализирани настройки на началната страница</value>
   </data>
@@ -273,9 +273,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Групата е изтрита: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Групи</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Групата се актуализира: {0}</value>
@@ -445,9 +442,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Списък на продуктите актуализиран</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Продукти</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Преназначава</value>
   </data>
@@ -462,6 +456,9 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Започна сесия</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Настройки</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO инвалиди</value>
@@ -582,9 +579,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Потребители [{0}]. Изпратени са инструкции за промяна на паролата</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Потребители</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Потребители [{0}]. Изпратени са указания за активиране</value>
@@ -796,9 +790,6 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Повторно изпратени покани: {0}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Активирането на {0} на клиента е променено</value>
   </data>
@@ -936,5 +927,8 @@
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Актуализирани са настройките за услуги с активиран клиентски портфейл</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Вход чрез социален профил Успех</value>
   </data>
 </root>

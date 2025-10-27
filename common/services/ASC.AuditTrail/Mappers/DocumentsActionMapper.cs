@@ -89,8 +89,8 @@ internal class FilesActionMapper : ILocationActionMapper
             }
         };
 
-        Actions.Add(MessageAction.DocumentSignComplete, new MessageMaps("FilesDocumentSigned", ActionType.Send, ProductType.Documents, Location, EntryType.File));
-        Actions.Add(MessageAction.DocumentSendToSign, new MessageMaps("FilesRequestSign", ActionType.Send, ProductType.Documents, Location, EntryType.File));
+        Actions.Add(MessageAction.DocumentSignComplete, new MessageMaps(nameof(AuditReportResource.FilesDocumentSigned), ActionType.Send, ProductType.Documents, Location, EntryType.File));
+        Actions.Add(MessageAction.DocumentSendToSign, new MessageMaps(nameof(AuditReportResource.FilesRequestSign), ActionType.Send, ProductType.Documents, Location, EntryType.File));
     }
 }
 

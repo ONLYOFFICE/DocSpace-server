@@ -89,7 +89,7 @@ public class AccountLinker(
 
         if (await Queries.ExistAccountAsync(accountLinkContext, tenant, profile.HashId))
         {
-            throw new Exception("ErrorAccountAlreadyUse");
+            throw new ArgumentException("The account is already in use");
         }
         await accountLinkContext.AddOrUpdateAsync(a => a.AccountLinks, accountLink);
         await accountLinkContext.SaveChangesAsync();

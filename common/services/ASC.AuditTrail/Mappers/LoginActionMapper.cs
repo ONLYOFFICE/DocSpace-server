@@ -54,7 +54,7 @@ internal class LoginNoneModuleActionMapper : ILocationActionMapper
             MessageAction.AuthLinkActivated,MessageAction.LoginSuccessViaOAuth,MessageAction.LoginSuccessViaPassword
         };
 
-        Actions.Add(MessageAction.LoginSuccessViaSocialAccount, new MessageMaps("LoginSuccessSocialAccount"));
-        Actions.Add(MessageAction.LoginSuccessViaSocialApp, new MessageMaps("LoginSuccessSocialApp"));
+        Actions.Add(MessageAction.LoginSuccessViaSocialAccount, new MessageMaps(nameof(AuditReportResource.LoginSuccessSocialAccount)));
+        Actions.Add(MessageAction.LoginSuccessViaSocialApp, new MessageMaps(nameof(AuditReportResource.LoginSuccessSocialApp)));
     }
 }

@@ -88,6 +88,33 @@ public class NotifyHelper(UserManager userManager,
             TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
     }
 
+    public async Task SendAboutBackupFailedAsync(int tenantId, Guid userId, string errorMessage)
+    {
+        var tenant = await tenantManager.SetCurrentTenantAsync(tenantId);
+
+        var admins = userId != Guid.Empty
+            ? [await userManager.GetUsersAsync(userId)]
+            : await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID, EmployeeStatus.Active);
+
+        var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
+
+        foreach (var user in admins.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
+        {
+            var culture = user.GetCulture();
+
+            var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
+
+            await client.SendNoticeToAsync(
+                Actions.BackupFailed,
+                user,
+                StudioNotifyService.EMailSenderName,
+                new TagValue(CommonTags.Culture, culture.Name),
+                new TagValue(Tags.UserName, user.DisplayUserName(displayUserSettingsHelper)),
+                new TagValue(Tags.Message, errorMessage),
+                TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
+        }
+    }
+
     public async Task SendAboutScheduledBackupFailedAsync(int tenantId, string errorMessage)
     {
         var tenant = await tenantManager.SetCurrentTenantAsync(tenantId);

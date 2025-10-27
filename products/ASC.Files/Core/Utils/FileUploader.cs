@@ -53,11 +53,6 @@ public class FileUploader(
 {
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
-        if (contentLength <= 0)
-        {
-            throw new ArgumentException(FilesCommonResource.ErrorMessage_EmptyFile);
-        }
-
         var file = await VerifyFileUploadAsync(folderId, title, contentLength, !createNewIfExist);
 
         var dao = daoFactory.GetFileDao<T>();
@@ -119,11 +114,6 @@ public class FileUploader(
 
     private async Task<File<T>> VerifyFileUploadAsync<T>(T folderId, string fileName, long fileSize, bool updateIfExists)
     {
-        if (fileSize <= 0)
-        {
-            throw new Exception(FilesCommonResource.ErrorMessage_EmptyFile);
-        }
-
         var maxUploadSize = await GetMaxFileSizeAsync(folderId);
 
         if (fileSize > maxUploadSize)
@@ -292,10 +282,6 @@ uploadSession.RequiredVectorization = requiredVectorization;
         var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
         uploadSession.Expired = DateTime.UtcNow + ChunkedUploadSessionHolder.SlidingExpiration;
 
-        if (chunkLength <= 0)
-        {
-            throw new Exception(FilesCommonResource.ErrorMessage_EmptyFile);
-        }
         if (chunkLength > setupInfo.ChunkUploadSize)
         {
             throw FileSizeComment.GetFileSizeException(await setupInfo.MaxUploadSize(tenantManager, maxTotalSizeStatistic));

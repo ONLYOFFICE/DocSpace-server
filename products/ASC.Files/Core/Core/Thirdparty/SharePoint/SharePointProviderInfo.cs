@@ -53,6 +53,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
     public string Color { get; set; }
+    public string Cover { get; set; }
 
     public Selector Selector => Selectors.SharePoint;
     public ProviderFilter ProviderFilter => ProviderFilter.SharePoint;
@@ -569,6 +570,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
             result.SettingsPrivate = Private;
             result.SettingsHasLogo = HasLogo;
             result.SettingsColor = Color;
+            result.SettingsCover = Cover;
 
             return result;
         }

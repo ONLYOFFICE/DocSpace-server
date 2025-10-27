@@ -2612,4 +2612,27 @@ ${LetterLogoText} Support Team
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
     <value>Auto backup for your DocSpace failed</value>
   </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Hello, $UserName,
+
+The backup process for your DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" has failed.
+
+If you have any questions or need assistance, please don’t hesitate to contact us via "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Hello, $UserName,
+
+The backup process for your DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) has failed.
+
+If you have any questions or need assistance, please don’t hesitate to contact us via [${__SupportLink}](${__SupportLink})
+
+Best regards,
+${LetterLogoText} Support Team
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Backup for your DocSpace failed</value>
+  </data>
 </root>

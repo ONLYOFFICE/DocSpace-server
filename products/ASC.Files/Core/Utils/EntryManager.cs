@@ -620,7 +620,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var foldersToUpdate = entries.OfType<Folder<T>>().ToList();
             var folderStatusTask = entryStatusManager.SetIsFavoriteFoldersAsync(foldersToUpdate);
 
-            var tagsNewTask = fileMarker.SetTagsNewAsync(parent, entries);
+            var tagsNewTask = fileMarker.SetTagsNewAsync(parent, foldersToUpdate);
             var originsTask = SetOriginsAsync(parent, entries);
 
             await Task.WhenAll(fileStatusTask, folderStatusTask, tagsNewTask, originsTask, formInfoTask);
