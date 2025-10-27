@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20251020094553_MigrationContext_Upgrade63")]
-    partial class MigrationContext_Upgrade63
+    [Migration("20251027142616_MigrationContext_Upgrade64")]
+    partial class MigrationContext_Upgrade64
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3928,6 +3928,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(6)
                         .HasColumnType("char")
                         .HasColumnName("color")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Cover")
+                        .HasMaxLength(50)
+                        .HasColumnType("char")
+                        .HasColumnName("cover")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
