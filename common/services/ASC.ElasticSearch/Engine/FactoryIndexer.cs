@@ -205,7 +205,7 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
                         await Index(r, immediately);
                     }
                 }
-                else if (e.Response.HttpStatusCode == 429)
+                else if (e.Response.HttpStatusCode is 429 or 502)
                 {
                     await Task.Delay(60000);
                     if (retry < 10)
@@ -240,7 +240,7 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
                         await Index(r, immediately);
                     }
                 }
-                else if (inner.Response.HttpStatusCode == 429)
+                else if (inner.Response.HttpStatusCode is 429 or 502)
                 {
                     await Task.Delay(60000);
                     if (retry < 10)
