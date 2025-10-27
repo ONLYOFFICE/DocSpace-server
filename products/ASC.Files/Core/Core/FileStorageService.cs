@@ -595,7 +595,9 @@ public class FileStorageService //: IFileStorageService
                     Title = title,
                     FolderId = folder.Id,
                     FolderType = folderType,
-                    Private = privacy
+                    Private = privacy,
+                    Color = color,
+                    Cover = cover
                 });
 
                 folder.FolderType = folderType;

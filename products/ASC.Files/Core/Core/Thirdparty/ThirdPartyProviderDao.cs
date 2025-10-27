@@ -681,6 +681,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
         folder.ProviderId = ProviderInfo.ProviderId;
         folder.ProviderKey = ProviderInfo.ProviderKey;
         folder.SettingsColor = ProviderInfo.Color;
+        folder.SettingsCover = ProviderInfo.Cover;
         folder.RootCreateBy = ProviderInfo.Owner;
         folder.RootId = MakeId();
         folder.ParentId = MakeId();

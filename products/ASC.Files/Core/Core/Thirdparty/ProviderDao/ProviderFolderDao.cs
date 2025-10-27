@@ -648,6 +648,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         folder.MutableId = providerInfo.MutableEntityId;
         folder.Shared = shared;
         folder.SettingsColor = providerInfo.Color;
+        folder.SettingsCover = providerInfo.Cover;
         folder.ProviderMapped = !string.IsNullOrEmpty(providerInfo.FolderId);
 
         return folder;
