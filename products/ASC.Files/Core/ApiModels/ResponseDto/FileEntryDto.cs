@@ -303,12 +303,15 @@ public class FileEntryDtoHelper(
         if (entry.FullShared)
         {
             var linkId = await _externalShare.GetLinkIdAsync();
-            var securityDao = _daoFactory.GetSecurityDao<string>();
-            var record = await securityDao.GetSharesAsync([linkId]).FirstOrDefaultAsync();
-            if (record != null)
+            if (linkId != Guid.Empty)
             {
-                var linkData = await _externalShare.GetLinkDataAsync(entry, record.Subject);
-                shortWebUrl = await _urlShortener.GetShortenLinkAsync(linkData.Url);
+                var securityDao = _daoFactory.GetSecurityDao<string>();
+                var record = await securityDao.GetSharesAsync([linkId]).FirstOrDefaultAsync();
+                if (record != null)
+                {
+                    var linkData = await _externalShare.GetLinkDataAsync(entry, record.Subject);
+                    shortWebUrl = await _urlShortener.GetShortenLinkAsync(linkData.Url);
+                }
             }
         }
 
