@@ -1040,6 +1040,18 @@ public class FileSecurity(
             }
         }
 
+        if (folder is { FolderType: FolderType.AiRoom } && 
+            action is FilesSecurityActions.Create or 
+                FilesSecurityActions.Copy or 
+                FilesSecurityActions.CopyTo or 
+                FilesSecurityActions.Move or 
+                FilesSecurityActions.MoveTo or 
+                FilesSecurityActions.Duplicate
+            )
+        {
+            return false;
+        }
+
         if (action is FilesSecurityActions.UseChat && folder is not { FolderType: FolderType.AiRoom })
         {
             return false;
