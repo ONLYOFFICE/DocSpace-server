@@ -436,6 +436,8 @@ public interface IFileDao<T>
 
     IAsyncEnumerable<File<T>> GetSharedFilesAsync(T parentId, int offset = 0, int count = -1);
 
+    Task SetVectorizationStatusAsync(T fileId, VectorizationStatus status, Func<Task> action = null);
+
     #endregion
 }
 public interface ICacheFileDao<T> : IFileDao<T>;

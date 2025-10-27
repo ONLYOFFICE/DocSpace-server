@@ -44,7 +44,7 @@ public abstract class FileOperation : DistributedTaskProgress
 
     public bool Finish { get; set; }
     public bool Hold { get; set; }
-
+    
     protected readonly IPrincipal _principal;
     protected readonly string _culture;
 
@@ -424,3 +424,15 @@ public record FileOperationScope(
     IDaoFactory DaoFactory,
     FileSecurity FileSecurity,
     ILogger<FileOperationScope> Options);
+
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "operationType")]
+[JsonDerivedType(typeof(VectorizationSpawnedOperation), "vectorization")]
+public class SpawnedOperation
+{
+    public string Id { get; init; }
+}
+
+public class VectorizationSpawnedOperation : SpawnedOperation
+{
+    public int FileId { get; init; }
+}

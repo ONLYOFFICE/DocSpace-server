@@ -853,6 +853,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         return Task.FromResult(0);
     }
+    
+    public Task SetVectorizationStatusAsync(string fileId, VectorizationStatus status, Func<Task> action = null)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 static file class Queries

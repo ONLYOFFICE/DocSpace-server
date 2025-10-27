@@ -133,7 +133,7 @@ public class OperationDto
         Date = apiDateTimeHelper.Get(operation.Date);
         Service = operation.Service;
         Description = description;
-        Details = operation.Metadata != null && operation.Metadata.TryGetValue(BillingClient.MetadataDetails, out var details) ? details : string.Empty;
+        Details = GetDetails(operation.Metadata);
         ServiceUnit = unitOfMeasurement;
         Quantity = operation.Quantity;
         Currency = operation.Currency;
@@ -160,6 +160,32 @@ public class OperationDto
 
         return (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}"),
             Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"));
+    }
+
+    private static string GetDetails(Dictionary<string, string> metadata)
+    {
+        if (metadata == null)
+        {
+            return string.Empty;
+        }
+        
+        if (metadata.TryGetValue(BillingClient.MetadataDetails, out var details))
+        {
+            return details;
+        }
+
+        if (metadata.TryGetValue("type", out var type))
+        {
+            switch (type)
+            {
+                case "chat":
+                    return metadata.GetValueOrDefault("model");
+                case "embedding":
+                    return Resource.AccountingAIServiceVectorizationDetails;
+            }
+        }
+        
+        return string.Empty;
     }
 }
 

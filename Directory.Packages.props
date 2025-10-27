@@ -89,6 +89,7 @@
     <PackageVersion Include="ZiggyCreatures.FusionCache" Version="2.4.0" />
     <!-- Additional packages centralized from various projects -->
     <PackageVersion Include="Amazon.Extensions.S3.Encryption" Version="2.2.1" />
+    <PackageVersion Include="Anthropic.SDK" Version="5.8.0" />
     <PackageVersion Include="Apache.NMS.AMQP" Version="2.4.0" />
     <PackageVersion Include="Aspire.Hosting.MySql" Version="9.5.1" />
     <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.5.1" />
@@ -135,6 +136,9 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.8" />
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="9.10.1" />
+    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="9.10.1" />
+    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="9.10.1-preview.1.25521.4" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.CommandLine" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
@@ -145,7 +149,9 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.10" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="Microsoft.OneDriveSDK" Version="2.1.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Core" Version="1.66.0" />
     <PackageVersion Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
+    <PackageVersion Include="ModelContextProtocol" Version="0.4.0-preview.3" />
     <PackageVersion Include="Moq" Version="4.18.4" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.6.3" />
     <PackageVersion Include="MySql.Data" Version="9.2.0" />

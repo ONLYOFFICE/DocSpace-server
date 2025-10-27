@@ -146,6 +146,15 @@ internal abstract class SecurityBaseDao<T>(
                     await context.DeleteTagsAsync(tenantId);
                 }
 
+                if (r.EntryType is FileEntryType.Folder && 
+                    r.EntryId is int entryIdInt && 
+                    r.SubjectType is SubjectType.User or SubjectType.Group)
+                {
+                    await context.RemoveUserRoomChatsAsync(tenantId, entryIdInt, r.Subject);
+                    await context.RemoveUserRoomChatsSettingsAsync(tenantId, entryIdInt, r.Subject);
+                    await context.RemoveUserRoomMcpSettingsAsync(tenantId, entryIdInt, r.Subject);
+                }
+
                 await context.SaveChangesAsync();
                 await tr.CommitAsync();
             });

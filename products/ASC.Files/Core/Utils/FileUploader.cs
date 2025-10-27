@@ -48,7 +48,8 @@ public class FileUploader(
     SocketManager socketManager,
     FileChecker fileChecker,
     TempStream tempStream,
-    WebhookManager webhookManager)
+    WebhookManager webhookManager,
+    VectorizationSettings vectorizationSettings)
 {
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
@@ -240,8 +241,25 @@ public class FileUploader(
         file.Title = fileName;
         file.ContentLength = contentLength;
         file.CreateOn = createOn;
+        
+        var requiredVectorization = false;
 
         var dao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+        
+        var folder = await folderDao.GetFolderAsync(folderId);
+        
+        if (folder is { FolderType: FolderType.Knowledge })
+        {
+            if (!vectorizationSettings.SupportedFormats.Contains(FileUtility.GetFileExtension(fileName)))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+            }
+
+            file.VectorizationStatus = VectorizationStatus.InProgress;
+            requiredVectorization = true;
+        }
+        
         var uploadSession = await dao.CreateUploadSessionAsync(file, contentLength);
 
         uploadSession.Expired = uploadSession.Created + ChunkedUploadSessionHolder.SlidingExpiration;
@@ -252,7 +270,8 @@ public class FileUploader(
         uploadSession.CultureName = CultureInfo.CurrentUICulture.Name;
         uploadSession.Encrypted = encrypted;
         uploadSession.KeepVersion = keepVersion;
-
+uploadSession.RequiredVectorization = requiredVectorization;
+        
         await chunkedUploadSessionHolder.StoreSessionAsync(uploadSession);
 
         return uploadSession;

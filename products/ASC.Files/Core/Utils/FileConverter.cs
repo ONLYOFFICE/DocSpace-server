@@ -262,7 +262,8 @@ public class FileConverter(
     IHttpClientFactory clientFactory,
     SocketManager socketManager,
     FileConverterQueue fileConverterQueue,
-    IHttpContextAccessor httpContextAccessor)
+    IHttpContextAccessor httpContextAccessor,
+    Global global)
 {
     public bool EnableAsUploaded => fileUtility.ExtsMustConvert.Count > 0 && !string.IsNullOrEmpty(filesLinkUtility.DocServiceConverterUrl);
 
@@ -593,6 +594,97 @@ public class FileConverter(
         {
             await tagDao.SaveTagsAsync(Tag.Template(authContext.CurrentAccount.ID, newFile));
         }
+
+        return newFile;
+    }
+
+    public async Task<File<T>> SaveConvertedFileAsync<T>(Folder<T> folder, string convertedFileUrl, string convertedFileType, string title, bool updateIfExist)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+        File<T> newFile = null;
+        var isNewFile = false;
+        var newFileTitle = FileUtility.ReplaceFileExtension(title, convertedFileType);
+
+        if (Equals(folder.Id, 0))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanCreateAsync(folder))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+
+        if (updateIfExist)
+        {
+            newFile = await fileDao.GetFileAsync(folder.Id, newFileTitle);
+            if (newFile != null && await fileSecurity.CanEditAsync(newFile) && !await lockerManager.FileLockedForMeAsync(newFile.Id) && !await fileTracker.IsEditingAsync(newFile.Id))
+            {
+                newFile.Version++;
+                newFile.VersionGroup++;
+            }
+            else
+            {
+                newFile = null;
+            }
+        }
+
+        if (newFile == null)
+        {
+            newFile = serviceProvider.GetService<File<T>>();
+            newFile.ParentId = folder.Id;
+            isNewFile = true;
+        }
+
+        newFile.Title = await global.GetAvailableTitleAsync(newFileTitle, folder.Id, fileDao.IsExistAsync, FileEntryType.File);
+        newFile.ConvertedType = null;
+        newFile.ThumbnailStatus = Thumbnail.Waiting;
+
+        var request = new HttpRequestMessage
+        {
+            RequestUri = new Uri(convertedFileUrl)
+        };
+
+        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
+
+        try
+        {
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
+            }
+
+            await using var convertedFileStream = await ResponseStream.FromMessageAsync(response);
+            newFile.ContentLength = convertedFileStream.Length;
+            newFile = await fileDao.SaveFileAsync(newFile, convertedFileStream);
+
+            if (!isNewFile)
+            {
+                await socketManager.UpdateFileAsync(newFile);
+            }
+            else
+            {
+                await socketManager.CreateFileAsync(newFile);
+            }
+        }
+        catch (HttpRequestException e)
+        {
+            var errorString = $"HttpRequestException: {e.StatusCode}";
+
+            if (e.StatusCode != HttpStatusCode.NotFound)
+            {
+                errorString += $" Error {e.Message}";
+            }
+
+            throw new Exception(errorString);
+        }
+
+        await filesMessageService.SendAsync(MessageAction.FileConverted, newFile, MessageInitiator.DocsService, newFile.Title);
+
+        await fileMarker.MarkAsNewAsync(newFile);
 
         return newFile;
     }

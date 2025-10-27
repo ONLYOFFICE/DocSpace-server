@@ -69,6 +69,7 @@ internal class FolderDao(
     private const string VirtualRooms = "virtualrooms";
     private const string RoomTemplates = "roomtemplates";
     private const string Archive = "archive";
+    private const string AiAgents = "aiagents";
 
     public virtual async Task<Folder<int>> GetFolderAsync(int folderId)
     {
@@ -328,7 +329,7 @@ internal class FolderDao(
 
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
-        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms, FolderType.RoomTemplates };
+        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms, FolderType.RoomTemplates, FolderType.AiAgents };
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenantId = _tenantManager.GetCurrentTenantId();
         var result = new FilesStatisticsResultDto();
@@ -435,6 +436,31 @@ internal class FolderDao(
         }
     }
 
+    public async Task<int> SaveFolderAsync(Folder<int> folder, IEnumerable<Folder<int>> children)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+        
+        var folderId = folder.Id;
+        
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+
+            folderId = await InternalSaveFolderToDbAsync(filesDbContext, folder);
+
+            foreach (var child in children)
+            {
+                child.ParentId = folderId;
+                await InternalSaveFolderToDbAsync(filesDbContext, child);
+            }
+
+            await tx.CommitAsync();
+        });
+        
+        return folderId;
+    }
+
     public Task<int> SaveFolderAsync(Folder<int> folder)
     {
         return SaveFolderAsync(folder, null, null);
@@ -511,7 +537,9 @@ internal class FolderDao(
                     DenyDownload = folder.SettingsDenyDownload,
                     Watermark = folder.SettingsWatermark.Map(),
                     Quota = folder.SettingsQuota,
-                    Lifetime = folder.SettingsLifetime.Map()
+                    Lifetime = folder.SettingsLifetime.Map(),
+                    ChatProviderId = folder.SettingsChatProviderId,
+                    ChatParameters = folder.SettingsChatParameters
                 };
             }
 
@@ -554,7 +582,9 @@ internal class FolderDao(
                     DenyDownload = folder.SettingsDenyDownload,
                     Watermark = folder.SettingsWatermark.Map(),
                     Quota = folder.SettingsQuota,
-                    Lifetime = folder.SettingsLifetime.Map()
+                    Lifetime = folder.SettingsLifetime.Map(),
+                    ChatProviderId = folder.SettingsChatProviderId,
+                    ChatParameters = folder.SettingsChatParameters
                 };
             }
 
@@ -898,6 +928,7 @@ internal class FolderDao(
             await DeleteCustomOrder(filesDbContext, folderId);
 
             await filesDbContext.DeleteAuditReferencesAsync(folderId, FileEntryType.Folder);
+            await filesDbContext.DeleteChatsAsync(folderId);
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();
@@ -1203,7 +1234,7 @@ internal class FolderDao(
         return folder.Id;
     }
 
-    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover)
+    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -1220,6 +1251,12 @@ internal class FolderDao(
         toUpdate.Settings.Indexing = indexing;
         toUpdate.Settings.DenyDownload = denyDownload;
 
+        if (chatSettings != null)
+        {
+            toUpdate.Settings.ChatProviderId = chatSettings.ProviderId;
+            toUpdate.Settings.ChatParameters = chatSettings.Map();
+        }
+        
         if (lifeTime != null)
         {
             if (lifeTime.Enabled.HasValue && !lifeTime.Enabled.Value)
@@ -1531,6 +1568,10 @@ internal class FolderDao(
                         folder.FolderType = FolderType.Archive;
                         folder.Title = Archive;
                         break;
+                    case AiAgents:
+                        folder.FolderType = FolderType.AiAgents;
+                        folder.Title = AiAgents;
+                        break;
                     default:
                         folder.FolderType = FolderType.BUNCH;
                         folder.Title = key;
@@ -1648,6 +1689,10 @@ internal class FolderDao(
                     folder.FolderType = FolderType.Archive;
                     folder.Title = Archive;
                     break;
+                case AiAgents:
+                    folder.FolderType = FolderType.AiAgents;
+                    folder.Title = AiAgents;
+                    break;
                 default:
                     folder.FolderType = FolderType.BUNCH;
                     folder.Title = key;
@@ -1745,6 +1790,11 @@ internal class FolderDao(
     public async Task<int> GetFolderIDArchive(bool createIfNotExists)
     {
         return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, Archive, null, createIfNotExists);
+    }
+
+    public async Task<int> GetFolderIDAiAgentsAsync(bool createIfNotExists)
+    {
+        return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, AiAgents, null, createIfNotExists);
     }
 
     public async IAsyncEnumerable<OriginData> GetOriginsDataAsync(IEnumerable<int> entriesIds)
@@ -1877,7 +1927,8 @@ internal class FolderDao(
     {
         var rootFolderType = entry.RootFolderType;
 
-        if (rootFolderType != FolderType.VirtualRooms && rootFolderType != FolderType.RoomTemplates && rootFolderType != FolderType.Archive)
+        if (rootFolderType != FolderType.VirtualRooms && rootFolderType != FolderType.RoomTemplates
+            && rootFolderType != FolderType.Archive && rootFolderType != FolderType.AiAgents)
         {
             return Task.FromResult((-1, ""));
         }
