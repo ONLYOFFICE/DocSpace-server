@@ -47,6 +47,11 @@ public class PathProvider(WebImageSupplier webImageSupplier,
     {
         get { return "/rooms/shared/{0}/filter?withSubfolders={1}&folder={0}&count=100&page=1&sortby=DateAndTime&sortorder=descending"; }
     }
+    
+    public string AgentUrlString
+    {
+        get { return "/ai-agents/{0}/chat?folder={0}"; }
+    }
 
     public string GetRoomsUrl(int roomId, bool withSubfolders = true)
     {
@@ -56,6 +61,11 @@ public class PathProvider(WebImageSupplier webImageSupplier,
     public string GetRoomsUrl(string roomId, bool withSubfolders = true)
     {
         return commonLinkUtility.GetFullAbsolutePath(string.Format(RoomUrlString, roomId, withSubfolders.ToString().ToLowerInvariant()));//ToDo
+    }
+    
+    public string GetAgentUrl(string agentId)
+    {
+        return commonLinkUtility.GetFullAbsolutePath(string.Format(AgentUrlString, agentId));
     }
 
     public string GetFolderUrl<T>(Folder<T> folder, string key = null)

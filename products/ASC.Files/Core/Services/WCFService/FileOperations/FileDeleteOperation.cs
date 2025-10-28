@@ -238,7 +238,13 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                         if (isNeedSendActions)
                         {
-                            await filesMessageService.SendAsync(isRoom ? MessageAction.RoomDeleted : MessageAction.ThirdPartyDeleted, folder, _headers, folder.Id.ToString(), folder.ProviderKey);
+                            var action = isRoom 
+                                ? folder.FolderType == FolderType.AiRoom 
+                                    ? MessageAction.AgentDeleted 
+                                    : MessageAction.RoomDeleted 
+                                : MessageAction.ThirdPartyDeleted;
+                            
+                            await filesMessageService.SendAsync(action, folder, _headers, folder.Id.ToString(), folder.ProviderKey);
                             await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                         }
                     }
@@ -279,7 +285,11 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                 if (isRoom)
                                 {
                                     await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
-                                    await filesMessageService.SendAsync(MessageAction.RoomDeleted, folder, _headers, folder.Title);
+                                    await filesMessageService.SendAsync(
+                                        folder.FolderType == FolderType.AiRoom ? MessageAction.AgentDeleted : MessageAction.RoomDeleted, 
+                                        folder, 
+                                        _headers, 
+                                        folder.Title);
                                     await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                 }
                                 else
@@ -350,7 +360,11 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                     if (isRoom)
                                     {
                                         await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
-                                        await filesMessageService.SendAsync(MessageAction.RoomDeleted, folder, _headers, folder.Title);
+                                        await filesMessageService.SendAsync(
+                                            folder.FolderType == FolderType.AiRoom ? MessageAction.AgentDeleted : MessageAction.RoomDeleted, 
+                                            folder, 
+                                            _headers, 
+                                            folder.Title);
                                         await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                     }
                                     else

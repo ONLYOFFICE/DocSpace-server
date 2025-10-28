@@ -368,7 +368,7 @@ public class FilesMessageService(
             ? folder
             : parents.FirstOrDefault(x => DocSpaceHelper.IsRoom(x.FolderType));
 
-        var desc = GetEventDescription(action, oldTitle, userid, userRole, room?.Id ?? -1, room?.Title, entry.CreateBy);
+        var desc = GetEventDescription(action, oldTitle, userid, userRole, room?.Id ?? -1, room?.Title, room is { FolderType: FolderType.AiRoom }, entry.CreateBy);
 
         if (!HistoryService.TrackedActions.Contains(action))
         {
@@ -429,26 +429,27 @@ public class FilesMessageService(
     {
         var folderDao = daoFactory.GetFolderDao<string>();
 
-        var (roomId, roomTitle) = await folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
+        var (roomId, roomTitle, folderType) = await folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
 
-        var desc = GetEventDescription(action, oldTitle, userid, userRole, roomId, roomTitle);
+        var desc = GetEventDescription(action, oldTitle, userid, userRole, roomId, roomTitle, folderType == FolderType.AiRoom);
         var json = JsonSerializer.Serialize(desc, _serializerOptions);
 
         return new FileEntryData(json, null);
     }
 
-    private static EventDescription<T> GetEventDescription<T>(MessageAction action, string oldTitle, Guid userid, FileShare userRole, T roomId, string roomTitle, Guid? createBy = null)
+    private static EventDescription<T> GetEventDescription<T>(MessageAction action, string oldTitle, Guid userid, FileShare userRole, T roomId, string roomTitle, bool isAgent, Guid? createBy = null)
     {
         var desc = new EventDescription<T>
         {
             RoomId = roomId,
             RoomTitle = roomTitle,
-            CreateBy = createBy
+            CreateBy = createBy,
+            IsAgent = isAgent
         };
 
         switch (action)
         {
-            case MessageAction.RoomRenamed when !string.IsNullOrEmpty(oldTitle):
+            case MessageAction.RoomRenamed or MessageAction.AgentRenamed when !string.IsNullOrEmpty(oldTitle):
                 desc.RoomOldTitle = oldTitle;
                 break;
             case MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser when userid != Guid.Empty:

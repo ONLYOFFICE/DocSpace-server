@@ -446,11 +446,11 @@ internal class SharePointFolderDao(
         return Task.FromResult("tar.gz");
     }
 
-    public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
+    public Task<(string RoomId, string RoomTitle, FolderType)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
     {
         return Task.FromResult(entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates)
-            ? (string.Empty, string.Empty)
-            : (ProviderInfo.FolderId, ProviderInfo.CustomerTitle));
+            ? (string.Empty, string.Empty, FolderType.DEFAULT)
+            : (ProviderInfo.FolderId, ProviderInfo.CustomerTitle, FolderType.PublicRoom));
     }
 
     public Task<Folder<string>> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)

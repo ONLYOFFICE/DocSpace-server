@@ -409,7 +409,7 @@ internal class FileDao(
         var fileDao = daoFactory.GetFileDao<int>();
         var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
 
-        var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+        var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
         UserInfo user = null;
         string quotaLockKey;
 
@@ -1045,8 +1045,8 @@ internal class FileDao(
         var fileContentLength = file.ContentLength;
         var tenantId = _tenantManager.GetCurrentTenantId();
 
-        var (fromRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);
-        var (toRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
+        var (fromRoomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);
+        var (toRoomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
 
         var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom);
         var fromRoomTag = await fromRoomTags.FirstOrDefaultAsync();
@@ -1151,8 +1151,8 @@ internal class FileDao(
                 }
 
                 var oldFolder = await folderDao.GetFolderAsync(oldParentId.Value);
-                var (toFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
-                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(oldFolder);
+                var (toFolderRoomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
+                var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(oldFolder);
                 var archiveId = await folderDao.GetFolderIDArchive(false);
 
                 if (toFolderId == trashId && oldParentId.HasValue)

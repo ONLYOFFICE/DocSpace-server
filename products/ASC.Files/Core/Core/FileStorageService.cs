@@ -767,7 +767,10 @@ public class FileStorageService //: IFileStorageService
             return null;
         }
 
-        await filesMessageService.SendAsync(MessageAction.RoomCreated, folder, folder.Title);
+        await filesMessageService.SendAsync(
+            folder.FolderType == FolderType.AiRoom ? MessageAction.AgentCreated : MessageAction.RoomCreated, 
+            folder, 
+            folder.Title);
 
         await webhookManager.PublishAsync(WebhookTrigger.RoomCreated, folder);
 
@@ -1250,7 +1253,11 @@ public class FileStorageService //: IFileStorageService
             {
                 if (isRoom)
                 {
-                    await filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, folder, folder.Title);
+                    await filesMessageService.SendAsync(
+                        folder.FolderType == FolderType.AiRoom ? MessageAction.AgentRenamed : MessageAction.RoomRenamed, 
+                        oldTitle, 
+                        folder, 
+                        folder.Title);
                 }
                 else
                 {
@@ -1401,7 +1408,11 @@ public class FileStorageService //: IFileStorageService
 
             if (DocSpaceHelper.IsRoom(renamedFolder.FolderType))
             {
-                await filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, renamedFolder, renamedFolder.Title);
+                await filesMessageService.SendAsync(
+                    folder.FolderType == FolderType.AiRoom ? MessageAction.AgentRenamed : MessageAction.RoomRenamed, 
+                    oldTitle, 
+                    renamedFolder, 
+                    renamedFolder.Title);
 
                 await webhookManager.PublishAsync(WebhookTrigger.RoomUpdated, renamedFolder);
             }
@@ -2393,7 +2404,7 @@ public class FileStorageService //: IFileStorageService
             FileEntry<T> entry = item.EntryType == FileEntryType.File ? files.Get(item.EntryId) : folders.Get(item.EntryId);
             entry.NotFoundIfNull();
 
-            var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
+            var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
             var room = await daoFactory.GetCacheFolderDao<T>().GetFolderAsync(roomId);
 
             if (!await fileSecurity.CanEditRoomAsync(room))
@@ -2927,7 +2938,7 @@ public class FileStorageService //: IFileStorageService
 
         if (!DocSpaceHelper.IsRoom(toRoom.FolderType))
         {
-            var (roomId, _) = await destFolderDao.GetParentRoomInfoFromFileEntryAsync(toRoom);
+            var (roomId, _, _) = await destFolderDao.GetParentRoomInfoFromFileEntryAsync(toRoom);
             toRoom = await destFolderDao.GetFolderAsync(roomId);
         }
 

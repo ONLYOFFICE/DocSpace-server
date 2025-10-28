@@ -182,7 +182,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             if (fileEntry != null)
             {
-                (fromRoomId, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(fileEntry);
+                (fromRoomId, _, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(fileEntry);
             }
 
             if (int.TryParse(fromRoomId?.ToString(), out var frId) &&
@@ -362,7 +362,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             if (parentRoomId == null)
             {
-                var (rId, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(folder);
+                var (rId, _, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(folder);
                 cache.Insert(cacheKey, rId.ToString(), TimeSpan.FromMinutes(5));
                 parentRoomId = rId.ToString();
             }

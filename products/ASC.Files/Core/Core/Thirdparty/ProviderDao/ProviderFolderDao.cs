@@ -667,7 +667,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         return folderDao.GetFirstParentTypeFromFileEntryAsync(entry);
     }
-    public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
+    public Task<(string RoomId, string RoomTitle, FolderType)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
     {
         var selector = _selectorFactory.GetSelector(entry.Id);
         var folderDao = selector.GetFolderDao(entry.Id);

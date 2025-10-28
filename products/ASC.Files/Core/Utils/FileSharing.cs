@@ -79,7 +79,11 @@ public class FileSharingAceHelper(
         var file = entry as File<T>;
         var room = folder != null && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
 
-        var roomUrl = room != null ? pathProvider.GetRoomsUrl(room.Id.ToString(), false) : null;
+        var roomUrl = room != null 
+            ? room.FolderType == FolderType.AiRoom 
+                ? pathProvider.GetAgentUrl(room.Id.ToString())
+                : pathProvider.GetRoomsUrl(room.Id.ToString(), false)
+            : null;
         var entryType = entry.FileEntryType;
         var recipients = new Dictionary<Guid, FileShare>();
         var usersWithoutRight = new List<Guid>();

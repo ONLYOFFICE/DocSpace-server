@@ -44,6 +44,7 @@ public class MessagesRepository(
         MessageAction.RoomRemoveUser,
         MessageAction.PortalRenamed,
         MessageAction.RoomCreated,
+        MessageAction.AgentCreated,
         MessageAction.FileOpenedForChange,
         MessageAction.FormOpenedForFilling
     ];
