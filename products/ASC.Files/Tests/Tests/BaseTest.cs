@@ -27,7 +27,10 @@
 using ASC.Files.Tests.ApiFactories;
 
 using DocSpace.API.SDK.Api.Group;
+using DocSpace.API.SDK.Api.People;
+using DocSpace.API.SDK.Api.Settings;
 
+using QuotaApi = DocSpace.API.SDK.Api.Files.QuotaApi;
 using RoomsApi = DocSpace.API.SDK.Api.Rooms.RoomsApi;
 
 namespace ASC.Files.Tests.Tests;
@@ -49,8 +52,13 @@ public class BaseTest(
     protected readonly SettingsApi _filesSettingsApi = filesFactory.SettingsApi;
     protected readonly QuotaApi _quotaApi = filesFactory.QuotaApi;
     protected readonly SharingApi _sharingApi = filesFactory.SharingApi;
+    
     protected readonly GroupApi _groupApi = peopleFactory.GroupApi;
+    protected readonly UserStatusApi _userStatusApi = peopleFactory.UserStatusApi;
+    
+    protected readonly CommonSettingsApi _commonSettingsApi = apiFactory.CommonSettingsApi;
     protected readonly DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = apiFactory.SettingsQuotaApi;
+    
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
 
     //   FileShare.None

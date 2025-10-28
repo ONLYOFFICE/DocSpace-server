@@ -18,7 +18,10 @@
     <PackageReference Include="Dropbox.Api" />
     <PackageReference Include="Google.Apis.Drive.v3" />
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
     <PackageReference Include="Microsoft.OneDriveSDK" />
+    <PackageReference Include="Microsoft.SemanticKernel.Core" />
     <PackageReference Include="Microsoft.SharePoint.Client" />
     <PackageReference Include="SharpZipLib" />
     <PackageReference Include="WebDav.Client" />

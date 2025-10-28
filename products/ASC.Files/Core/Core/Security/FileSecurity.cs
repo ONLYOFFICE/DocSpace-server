@@ -52,7 +52,9 @@ public class FileSecurity(
     StudioNotifyHelper studioNotifyHelper,
     BadgesSettingsHelper badgesSettingsHelper,
     ExternalShare externalShare,
-    AuthManager authManager)
+    AuthManager authManager,
+    VectorizationSettings vectorizationSettings,
+    VectorizationHelper vectorizationHelper)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -93,7 +95,8 @@ public class FileSecurity(
                 { SubjectType.ExternalLink, [FileShare.FillForms, FileShare.None] },
                 { SubjectType.PrimaryExternalLink, [FileShare.FillForms, FileShare.None] }
             }.ToFrozenDictionary()
-        }
+        },
+        { FolderType.AiRoom, _defaultFileShareDictionary }
     }.ToFrozenDictionary();
 
     private static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, int>> _linkCountRoomSettingsAccesses =
@@ -139,7 +142,8 @@ public class FileSecurity(
                 { SubjectType.ExternalLink, 5 }
             }.ToFrozenDictionary()
         },
-        { FolderType.FillingFormsRoom, new Dictionary<SubjectType, int> { { SubjectType.PrimaryExternalLink, 1 } }.ToFrozenDictionary() }
+        { FolderType.FillingFormsRoom, new Dictionary<SubjectType, int> { { SubjectType.PrimaryExternalLink, 1 } }.ToFrozenDictionary() },
+        { FolderType.AiRoom, new Dictionary<SubjectType, int> { { SubjectType.ExternalLink, 6 } }.ToFrozenDictionary() },
     }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses =
@@ -209,6 +213,15 @@ public class FileSecurity(
                     { SubjectType.Group, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.FillForms, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.FillForms, FileShare.None] }
                 }.ToFrozenDictionary()
+            },
+            {
+                FolderType.AiRoom,
+                new Dictionary<SubjectType, HashSet<FileShare>>
+                {
+                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.Read, FileShare.None] },
+                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.Read, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Read, FileShare.None] }
+                }.ToFrozenDictionary()
             }
         }.ToFrozenDictionary();
 
@@ -270,7 +283,9 @@ public class FileSecurity(
                     FilesSecurityActions.FillingStatus,
                     FilesSecurityActions.ResetFilling,
                     FilesSecurityActions.StopFilling,
-                    FilesSecurityActions.OpenForm
+                    FilesSecurityActions.OpenForm,
+                    FilesSecurityActions.Vectorization,
+                    FilesSecurityActions.AscAi
                 }
             },
             {
@@ -296,7 +311,8 @@ public class FileSecurity(
                     FilesSecurityActions.CopyLink,
                     FilesSecurityActions.Embed,
                     FilesSecurityActions.ChangeOwner,
-                    FilesSecurityActions.IndexExport
+                    FilesSecurityActions.IndexExport,
+                    FilesSecurityActions.UseChat
                 }
             }
     }.ToFrozenDictionary();
@@ -563,6 +579,16 @@ public class FileSecurity(
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.IndexExport);
     }
 
+    public async Task<bool> CanVectorizationAsync<T>(FileEntry<T> entry)
+    {
+        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.Vectorization);
+    }
+
+    public async Task<bool> CanUseChatAsync<T>(FileEntry<T> entry)
+    {
+        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.UseChat);
+    }
+    
     public async Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry, bool includeLinks = false)
     {
         var (directAccess, sharedAccess) = await WhoCanAsync(entry, FilesSecurityActions.Read, includeLinks);
@@ -902,6 +928,7 @@ public class FileSecurity(
             FolderType.EditingRoom => FileShare.ContentCreator,
             FolderType.PublicRoom => FileShare.ContentCreator,
             FolderType.VirtualDataRoom => FileShare.ContentCreator,
+            FolderType.AiRoom => FileShare.ContentCreator,
             _ => FileShare.None
         };
     }
@@ -1013,6 +1040,59 @@ public class FileSecurity(
             }
         }
 
+        if (folder is { FolderType: FolderType.AiRoom } && 
+            action is FilesSecurityActions.Create or 
+                FilesSecurityActions.Copy or 
+                FilesSecurityActions.CopyTo or 
+                FilesSecurityActions.Move or 
+                FilesSecurityActions.MoveTo or 
+                FilesSecurityActions.Duplicate
+            )
+        {
+            return false;
+        }
+
+        if (action is FilesSecurityActions.UseChat && folder is not { FolderType: FolderType.AiRoom })
+        {
+            return false;
+        }
+
+        if (action is FilesSecurityActions.AscAi &&
+            (file == null || !vectorizationSettings.IsSupportedContentExtraction(file.Title)))
+        {
+            return false;
+        }
+
+        if (action == FilesSecurityActions.Vectorization)
+        {
+            if (file?.VectorizationStatus == null)
+            {
+                return false;
+            }
+            
+            switch (file.VectorizationStatus)
+            {
+                case VectorizationStatus.Completed:
+                case VectorizationStatus.InProgress when await vectorizationHelper.InProcessAsync(file.Id):
+                    return false;
+            }
+        }
+
+        if (file != null && room is { FolderType: FolderType.AiRoom } && parentFolders.Any(x => x.FolderType == FolderType.Knowledge))
+        {
+            if (action is not (FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Delete or FilesSecurityActions.Vectorization))
+            {
+                return false;
+            }
+
+            if (action is FilesSecurityActions.Delete && 
+                file is { VectorizationStatus: VectorizationStatus.InProgress } && 
+                await vectorizationHelper.InProcessAsync(file.Id))
+            {
+                return false;
+            }
+        }
+
         if (action == FilesSecurityActions.IndexExport && (!isRoom || !folder.SettingsIndexing))
         {
             return false;
@@ -1064,6 +1144,18 @@ public class FileSecurity(
         if (e.FileEntryType == FileEntryType.Folder)
         {
             if (folder == null)
+            {
+                return false;
+            }
+
+            if (folder.FolderType == FolderType.Knowledge && 
+                action is not (FilesSecurityActions.Read or FilesSecurityActions.MoveTo or FilesSecurityActions.CopyTo or FilesSecurityActions.Create))
+            {
+                return false;
+            }
+
+            if (folder.FolderType == FolderType.ResultStorage 
+                && action is FilesSecurityActions.Rename or FilesSecurityActions.Delete or FilesSecurityActions.Copy or FilesSecurityActions.Move or FilesSecurityActions.Duplicate)
             {
                 return false;
             }
@@ -1159,6 +1251,11 @@ public class FileSecurity(
                         return action is FilesSecurityActions.Create or FilesSecurityActions.MoveTo;
                     }
 
+                    if (folder.FolderType == FolderType.AiAgents && !isUser)
+                    {
+                        return action is FilesSecurityActions.Create or FilesSecurityActions.MoveTo;
+                    }
+
                     if (folder.FolderType == FolderType.RoomTemplates && !isUser)
                     {
                         return action is FilesSecurityActions.CreateFrom or FilesSecurityActions.MoveTo;
@@ -1174,6 +1271,11 @@ public class FileSecurity(
             else if (isAuthenticated)
             {
                 if (folder.FolderType == FolderType.VirtualRooms)
+                {
+                    return true;
+                }
+
+                if (folder.FolderType == FolderType.AiAgents)
                 {
                     return true;
                 }
@@ -1266,7 +1368,8 @@ public class FileSecurity(
                 }
                 break;
             case FolderType.VirtualRooms:
-                if (isDocSpaceAdmin)
+            case FolderType.AiAgents:
+                if (isDocSpaceAdmin && (folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge)))
                 {
                     if (action == FilesSecurityActions.Download)
                     {
@@ -1464,7 +1567,7 @@ public class FileSecurity(
                     return false;
                 }
 
-                if (isDocSpaceAdmin)
+                if (isDocSpaceAdmin && (folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge)))
                 {
                     if (action == FilesSecurityActions.Download)
                     {
@@ -1586,6 +1689,11 @@ public class FileSecurity(
             case FilesSecurityActions.Pin:
             case FilesSecurityActions.Mute:
             case FilesSecurityActions.CopyLink:
+                if (e is Folder<T> { FolderType: FolderType.Knowledge, Access: FileShare.Read or FileShare.None })
+                {
+                    return false;
+                }
+                
                 return e.Access != FileShare.Restrict;
             case FilesSecurityActions.Comment:
                 switch (e.RootFolderType)
@@ -2051,6 +2159,36 @@ public class FileSecurity(
                         break;
                 }
 
+                break;
+            case FilesSecurityActions.Vectorization:
+                switch (e.RootFolderType)
+                {
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access == FileShare.RoomManager && file is { VectorizationStatus: VectorizationStatus.Failed })
+                        {
+                            return true;
+                        }
+                        
+                        break;
+                }
+                break;
+            case FilesSecurityActions.AscAi:
+                return e.Access != FileShare.Restrict;
+            case FilesSecurityActions.UseChat:
+                switch (e.RootFolderType)
+                {
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
+                        {
+                            return true;
+                        }
+                        
+                        break;
+                }
                 break;
         }
 
@@ -3244,6 +3382,15 @@ public class FileSecurity(
         EditInternal,
 
         [Description("Edit expiration")]
-        EditExpiration
+        EditExpiration,
+        
+        [Description("Vectorization")]
+        Vectorization,
+        
+        [Description("Asc AI")]
+        AscAi,
+        
+        [Description("Use chat")]
+        UseChat
     }
 }

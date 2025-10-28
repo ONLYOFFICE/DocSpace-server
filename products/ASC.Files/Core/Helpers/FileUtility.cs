@@ -425,7 +425,7 @@ public class FileUtility(
                     _extsConvertible[input] = [];
                 }
                 
-                _extsConvertible[input].Add( $".{output.TrimStart('.')}");
+                _extsConvertible[input].Add($".{output.TrimStart('.')}");
             }
         }
 

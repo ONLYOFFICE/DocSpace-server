@@ -103,7 +103,19 @@ public enum FolderType
     VirtualDataRoom = 29,
 
     [SwaggerEnum(Description = "Room templates folder")]
-    RoomTemplates = 30
+    RoomTemplates = 30,
+    
+    [SwaggerEnum(Description = "AI Room")]
+    AiRoom = 31,
+    
+    [SwaggerEnum(Description = "Knowledge")]
+    Knowledge = 32,
+    
+    [SwaggerEnum(Description = "Result storage")]
+    ResultStorage = 33,
+
+    [SwaggerEnum(Description = "AI Agents")]
+    AiAgents = 34,
 }
 
 /// <summary>
@@ -244,7 +256,10 @@ public class Folder<T> : FileEntry<T>, IFolder
     /// The file lifetime in this folder.
     /// </summary>
     public RoomDataLifetime SettingsLifetime { get; set; }
-
+    
+    public int SettingsChatProviderId { get; set; }
+    public ChatParameters SettingsChatParameters { get; set; }
+    
     /// <summary>
     /// Specifies if the files can be downloaded from this folder or not.
     /// </summary>

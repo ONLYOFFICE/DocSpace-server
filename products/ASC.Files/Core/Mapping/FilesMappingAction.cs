@@ -72,6 +72,9 @@ public class FilesMappingAction(TenantUtil tenantUtil)
             case FolderType.InProcessFormFolder:
                 destination.Title = FilesUCResource.InProcessFormFolder;
                 break;
+            case FolderType.AiAgents:
+                destination.Title = FilesUCResource.AiAgents;
+                break;
             case FolderType.BUNCH:
                 try
                 {

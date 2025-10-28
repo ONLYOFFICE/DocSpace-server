@@ -598,7 +598,8 @@ public class RoomLogoManager(
             {
                 Id = room.ProviderId,
                 HasLogo = room.SettingsHasLogo,
-                Color = room.SettingsColor
+                Color = room.SettingsColor,
+                Cover = room.SettingsCover
             });
 
             room.ModifiedOn = provider.ModifiedOn;

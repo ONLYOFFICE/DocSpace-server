@@ -32,15 +32,21 @@ public class DbRoomSettings
     public int TenantId { get; set; }
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
+    
     [MaxLength(6)]
     public string Color { get; set; }
+    
     [MaxLength(50)]
     public string Cover { get; set; }
+    
     public bool Indexing { get; set; }
     public long Quota { get; set; }
     public DbRoomWatermark Watermark { get; set; }
     public bool DenyDownload { get; set; }
     public DbRoomDataLifetime Lifetime { get; set; }
+    public int ChatProviderId { get; set; }
+    public ChatParameters ChatParameters { get; set; }
+    
     public DbTenant Tenant { get; set; }
     public DbFolder Room { get; set; }
 }
@@ -110,6 +116,18 @@ public static class DbRoomSettingsExtension
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.DenyDownload).HasColumnName("deny_download").HasDefaultValueSql("0");
+            
+            entity.Property(e => e.ChatProviderId)
+                .HasColumnName("chat_provider_id");
+            
+            entity.HasIndex(e => e.ChatProviderId)
+                .HasDatabaseName("IX_chat_provider_id");
+            
+            entity.Property(e => e.ChatParameters)
+                .HasColumnName("chat_settings")
+                .HasColumnType("json")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
         });
     }
 

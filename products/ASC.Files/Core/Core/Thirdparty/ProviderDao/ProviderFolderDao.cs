@@ -173,6 +173,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             SearchArea.Active => q.Where(a => a.FolderType == FolderType.VirtualRooms),
             SearchArea.Archive => q.Where(a => a.FolderType == FolderType.Archive),
             SearchArea.Templates => q.Where(a => a.FolderType == FolderType.RoomTemplates),
+            SearchArea.AiAgents => q.Where(a => a.FolderType == FolderType.AiAgents),
             _ => q
         };
 
@@ -256,6 +257,11 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         {
             yield return await ResolveParentAsync(folder);
         }
+    }
+
+    public Task<string> SaveFolderAsync(Folder<string> folder, IEnumerable<Folder<string>> children)
+    {
+        throw new NotSupportedException();
     }
 
     public async Task<string> SaveFolderAsync(Folder<string> folder)
@@ -400,7 +406,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return folderDao.CanMoveOrCopyAsync(matchedIds, to);
     }
 
-    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover)
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null)
     {
         return await RenameFolderAsync(folder, newTitle);
     }
@@ -552,6 +558,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             SearchArea.Active => q.Where(a => a.FolderType == FolderType.VirtualRooms),
             SearchArea.Archive => q.Where(a => a.FolderType == FolderType.Archive),
             SearchArea.Templates => q.Where(a => a.FolderType == FolderType.RoomTemplates),
+            SearchArea.AiAgents => q.Where(a => a.FolderType == FolderType.AiAgents),
             SearchArea.Any => q.Where(a => a.FolderType == FolderType.VirtualRooms || a.FolderType == FolderType.Archive),
             _ => q
         };
@@ -648,6 +655,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         folder.MutableId = providerInfo.MutableEntityId;
         folder.Shared = shared;
         folder.SettingsColor = providerInfo.Color;
+        folder.SettingsCover = providerInfo.Cover;
         folder.ProviderMapped = !string.IsNullOrEmpty(providerInfo.FolderId);
 
         return folder;
@@ -698,6 +706,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             FolderType.VirtualRooms => IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync),
             FolderType.Archive => IdConverter.Convert<T>(await globalFolderHelper.FolderArchiveAsync),
             FolderType.Templates => IdConverter.Convert<T>(await globalFolderHelper.FolderRoomTemplatesAsync),
+            FolderType.AiAgents => IdConverter.Convert<T>(await globalFolderHelper.FolderRoomTemplatesAsync),
             _ => folder.FolderIdDisplay
         };
 

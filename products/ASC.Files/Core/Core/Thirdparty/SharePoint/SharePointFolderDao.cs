@@ -200,6 +200,11 @@ internal class SharePointFolderDao(
         }
     }
 
+    public Task<string> SaveFolderAsync(Folder<string> folder, IEnumerable<Folder<string>> children)
+    {
+        throw new NotSupportedException();
+    }
+
     public async Task<string> SaveFolderAsync(Folder<string> folder)
     {
         if (folder.Id != null)
@@ -352,7 +357,7 @@ internal class SharePointFolderDao(
     {
         return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
     }
-    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover)
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null)
     {
         return await RenameFolderAsync(folder, newTitle);
     }
