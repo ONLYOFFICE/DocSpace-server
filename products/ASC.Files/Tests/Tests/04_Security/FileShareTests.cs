@@ -769,7 +769,49 @@ public class FileShareTests(
         var sharedFile = sharedFolder.Files.First(f => f.Title == file.Title);
         sharedFile.Access.Should().Be(fileShare);
     }
-    
+
+    [Fact]
+    public async Task SharedFolder_ExternalLinkRead_ChecksReadAccessViaLinkAndManuallyInSharedFolder()
+    {
+        // Step 1: Authenticate as Owner and create file in "My Documents"
+        await _filesClient.Authenticate(Initializer.Owner);
+        var owner = Initializer.Owner;
+        var user2 = await Initializer.InviteContact(EmployeeType.User);
+
+        var file = await CreateFileInMy("file_external_read.docx", owner);
+        var fileShare = FileShare.Read;
+
+        // Step 2: Create external link with Read rights
+        var linkRequest = new FileLinkRequest(access: fileShare);
+        var linkResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, linkRequest, TestContext.Current.CancellationToken)).Response;
+        var requestToken = linkResponse.SharedLink.RequestToken;
+
+        // Step 3: Authenticate as user2 and open file using the external link
+        await _filesClient.Authenticate(user2);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, requestToken);
+        var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        await _filesApi.AddFileToRecentAsync(file.Id, TestContext.Current.CancellationToken);
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        // Step 4: Verify read access via link
+        fileInfo.Should().NotBeNull();
+        fileInfo.Access.Should().Be(fileShare);
+        fileInfo.Security.Read.Should().BeTrue();
+        fileInfo.Security.Edit.Should().BeFalse();
+
+        // Step 5: Get shared folder content
+        var sharedFolderId = await GetFolderIdAsync(FolderType.SHARE, user2);
+        var sharedFolder = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        sharedFolder.Should().NotBeNull();
+        sharedFolder.Files.Should().Contain(f => f.Title == file.Title);
+
+        // Step 6: Verify read access manually in shared folder
+        var sharedFile = sharedFolder.Files.First(f => f.Title == file.Title);
+        sharedFile.Access.Should().Be(fileShare);
+        fileInfo.Security.Read.Should().BeTrue();
+        fileInfo.Security.Edit.Should().BeFalse();
+    }
 
     [Fact]
     [Trait("Category", "Bug")]
