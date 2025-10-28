@@ -160,6 +160,11 @@ public class FolderContentDtoHelper(
         result.New = (isEnableBadges.Result) ? folderItems.New : 0;
         result.Current = (FolderDto<T>)(currentTask.Result);
 
+        if (folderItems.ParentRoom is { FolderType: FolderType.AiRoom })
+        {
+            result.Current.RootRoomType = DocSpaceHelper.MapToRoomType(folderItems.ParentRoom.FolderType);
+        }
+
         return result;
 
         async IAsyncEnumerable<FileEntryBaseDto> GetEntriesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)

@@ -98,6 +98,6 @@ public class SmtpSettingsDto
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class SmtpSettingsDtoMapper
-{       
+{
     public static partial SmtpSettingsDto MapToDto(this SmtpSettings source);
 }

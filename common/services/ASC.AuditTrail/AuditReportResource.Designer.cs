@@ -268,6 +268,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Contacts.
+        /// </summary>
+        public static string ContactsModule {
+            get {
+                return ResourceManager.GetString("ContactsModule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cookie Settings Updated.
         /// </summary>
         public static string CookieSettingsUpdated {
@@ -1177,15 +1186,6 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to General.
-        /// </summary>
-        public static string GeneralModule {
-            get {
-                return ResourceManager.GetString("GeneralModule", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Generated authorization code for client {0}.
         /// </summary>
         public static string GenerateAuthorizationCodeToken {
@@ -1227,15 +1227,6 @@ namespace ASC.AuditTrail {
         public static string GroupDeleted {
             get {
                 return ResourceManager.GetString("GroupDeleted", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Groups.
-        /// </summary>
-        public static string GroupsModule {
-            get {
-                return ResourceManager.GetString("GroupsModule", resourceCulture);
             }
         }
         
@@ -1528,6 +1519,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Login Via Social Account Success.
+        /// </summary>
+        public static string LoginSuccessSocialAccount {
+            get {
+                return ResourceManager.GetString("LoginSuccessSocialAccount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Successful login via social application.
         /// </summary>
         public static string LoginSuccessSocialApp {
@@ -1659,15 +1659,6 @@ namespace ASC.AuditTrail {
         public static string MoveActionType {
             get {
                 return ResourceManager.GetString("MoveActionType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to OAuth.
-        /// </summary>
-        public static string OAuthModule {
-            get {
-                return ResourceManager.GetString("OAuthModule", resourceCulture);
             }
         }
         
@@ -1857,15 +1848,6 @@ namespace ASC.AuditTrail {
         public static string ProductsListUpdated {
             get {
                 return ResourceManager.GetString("ProductsListUpdated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Products.
-        /// </summary>
-        public static string ProductsModule {
-            get {
-                return ResourceManager.GetString("ProductsModule", resourceCulture);
             }
         }
         
@@ -2284,6 +2266,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Settings.
+        /// </summary>
+        public static string SettingsModule {
+            get {
+                return ResourceManager.GetString("SettingsModule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SSO Disabled.
         /// </summary>
         public static string SSODisabled {
@@ -2694,15 +2685,6 @@ namespace ASC.AuditTrail {
         public static string UserSentPasswordInstructions {
             get {
                 return ResourceManager.GetString("UserSentPasswordInstructions", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Users.
-        /// </summary>
-        public static string UsersModule {
-            get {
-                return ResourceManager.GetString("UsersModule", resourceCulture);
             }
         }
         

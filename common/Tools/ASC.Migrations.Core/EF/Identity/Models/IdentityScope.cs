@@ -54,7 +54,7 @@ public static class IdentityScopeExtension
                 Group = "accounts",
                 Type = "write"
             });
-            
+
             entity.HasData(new IdentityScope
             {
                 Name = "accounts.self:read",
@@ -68,28 +68,28 @@ public static class IdentityScopeExtension
                 Group = "profiles",
                 Type = "write"
             });
-            
+
             entity.HasData(new IdentityScope
             {
                 Name = "files:read",
                 Group = "files",
                 Type = "read"
             });
-            
+
             entity.HasData(new IdentityScope
             {
                 Name = "files:write",
                 Group = "files",
                 Type = "write"
             });
-            
+
             entity.HasData(new IdentityScope
             {
                 Name = "openid",
                 Group = "openid",
                 Type = "openid"
             });
-            
+
             entity.HasData(new IdentityScope
             {
                 Name = "rooms:read",

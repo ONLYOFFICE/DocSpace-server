@@ -30,12 +30,12 @@ namespace ASC.People.Api;
 /// Notification API.
 ///</summary>
 public class NotificationController : ApiControllerBase
-    // UserManager userManager,
-    //     SecurityContext securityContext,
-    //     AuthContext authContext,
-    //     PermissionContext permissionContext,
-    //     CommonLinkUtility commonLinkUtility,
-    //     StudioNotifyService studioNotifyService
+// UserManager userManager,
+//     SecurityContext securityContext,
+//     AuthContext authContext,
+//     PermissionContext permissionContext,
+//     CommonLinkUtility commonLinkUtility,
+//     StudioNotifyService studioNotifyService
 
 {
     /// <summary>
@@ -75,5 +75,5 @@ public class NotificationController : ApiControllerBase
         // await studioNotifyService.SendMsgMobilePhoneChangeAsync(user);
         //
         // return string.Empty;
-        }
+    }
 }

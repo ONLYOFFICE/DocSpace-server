@@ -141,7 +141,7 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
             ProviderInfo = providerInfo,
             PathPrefix = Id + "-" + match.Groups["id"].Value
         };
-        
+
         Providers.TryAdd(objectId, info);
         return info;
     }

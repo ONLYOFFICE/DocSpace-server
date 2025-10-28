@@ -45,7 +45,7 @@ public class UserGroup : BaseEntity
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class UserGroupMapper
-{    
+{
     [MapProperty(nameof(UserGroupRef.GroupId), nameof(UserGroup.UserGroupId))]
     public static partial UserGroup Map(this UserGroupRef source);
 }

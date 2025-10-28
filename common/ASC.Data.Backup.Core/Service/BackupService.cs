@@ -50,7 +50,7 @@ public class BackupService(
         IDaoFactory daoFactory,
         FileSecurity fileSecurity,
         StorageFactory storageFactory)
-    {
+{
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
     private const int BackupCustomerSessionDuration = 86400; // 60 * 60 * 24;

@@ -32,7 +32,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         IDbContextFactory<MessagesContext> dbContextFactory,
         AuditEventMapper mapper,
         GeolocationHelper geolocationHelper)
-    {
+{
     public async Task<IEnumerable<AuditEvent>> GetByFilterAsync(
         Guid? userId = null,
         LocationType? moduleType = null,
@@ -118,10 +118,10 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
             }
             else
             {
-                 actionsList = auditActionMapper.Mappers
-                        .SelectMany(r => r.Mappers)
-                        .SelectMany(r => r.Actions)
-                        .ToList();
+                actionsList = auditActionMapper.Mappers
+                       .SelectMany(r => r.Mappers)
+                       .SelectMany(r => r.Actions)
+                       .ToList();
             }
 
             var isNeedFindEntry = entry.HasValue && entry.Value != EntryType.None && target != null;
@@ -162,14 +162,14 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         {
             q1 = q1.Where(r => r.DescriptionRaw.Contains(description));
         }
-        
+
         q1 = q1.OrderByDescending(r => r.Date);
 
         if (startIndex > 0)
         {
             q1 = q1.Skip(startIndex);
         }
-        
+
         if (limit > 0)
         {
             q1 = q1.Take(limit);
@@ -192,7 +192,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         {
             await geolocationHelper.AddGeolocationAsync(e);
         }
-        
+
         return events;
     }
 
@@ -202,7 +202,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
 
         q = q.Where(r => dict.Keys.Contains(r.Action.Value)
             && r.Target.Contains(target));
-        
+
         return q;
     }
 

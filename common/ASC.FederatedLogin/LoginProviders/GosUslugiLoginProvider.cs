@@ -82,7 +82,7 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
         }
         catch (Exception ex)
         {
-            return  new LoginProfile(ex);
+            return new LoginProfile(ex);
         }
     }
 

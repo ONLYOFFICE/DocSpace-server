@@ -194,6 +194,11 @@ public class FileDto<T> : FileEntryDto<T>
     /// The file entry type.
     /// </summary>
     public override FileEntryType FileEntryType { get => FileEntryType.File; }
+    
+    /// <summary>
+    /// The vectorization status of the file.
+    /// </summary>
+    public VectorizationStatus? VectorizationStatus { get; set; }
 }
 
 [Scope]
@@ -226,6 +231,7 @@ public class FileDtoHelper(
         
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableShareRights =  (await _fileSecurity.GetAccesses(file)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
+        result.VectorizationStatus = file.VectorizationStatus;
         
         if (contextFolder == null)
         {
@@ -276,7 +282,8 @@ public class FileDtoHelper(
                 FileSecurity.FilesSecurityActions.StopFilling,
                 FileSecurity.FilesSecurityActions.CopySharedLink,
                 FileSecurity.FilesSecurityActions.CopyLink,
-                FileSecurity.FilesSecurityActions.FillingStatus
+                FileSecurity.FilesSecurityActions.FillingStatus,
+                FileSecurity.FilesSecurityActions.Vectorization
             };
 
             foreach (var action in forbiddenActions)

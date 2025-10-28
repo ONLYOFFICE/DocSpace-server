@@ -61,9 +61,10 @@ public static class DocumentService
 
     private static readonly JsonSerializerOptions _commonSettings = new()
     {
-        AllowTrailingCommas = true, PropertyNameCaseInsensitive = true
+        AllowTrailingCommas = true,
+        PropertyNameCaseInsensitive = true
     };
-    
+
     /// <summary>
     /// Translation key to a supported form.
     /// </summary>
@@ -409,7 +410,7 @@ public static class DocumentService
 
         using (var response = await httpClient.SendAsync(request))
         {
-            dataResponse = await  response.Content.ReadAsStringAsync();
+            dataResponse = await response.Content.ReadAsStringAsync();
         }
 
         if (string.IsNullOrEmpty(dataResponse))

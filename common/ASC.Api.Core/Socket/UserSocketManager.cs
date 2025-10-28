@@ -29,8 +29,8 @@ using SecurityContext = ASC.Core.SecurityContext;
 namespace ASC.Api.Core.Socket;
 
 public class UserSocketManager(ITariffService tariffService,
-    TenantManager tenantManager, 
-    ChannelWriter<SocketData> channelWriter, 
+    TenantManager tenantManager,
+    ChannelWriter<SocketData> channelWriter,
     MachinePseudoKeys machinePseudoKeys,
     IConfiguration configuration,
     EmployeeFullDtoHelper employeeFullDtoHelper,
@@ -62,7 +62,7 @@ public class UserSocketManager(ITariffService tariffService,
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
-        if (dto.Groups != null) 
+        if (dto.Groups != null)
         {
             foreach (var group in dto.Groups)
             {

@@ -250,7 +250,7 @@ public class ProductEntryPoint : Product
 
             result.Add(activityInfo);
         }
-        
+
         return result;
     }
 
@@ -357,9 +357,9 @@ public class ProductEntryPoint : Product
     {
         return employeeType switch
         {
-            EmployeeType.Guest or 
-            EmployeeType.RoomAdmin or 
-            EmployeeType.DocSpaceAdmin or 
+            EmployeeType.Guest or
+            EmployeeType.RoomAdmin or
+            EmployeeType.DocSpaceAdmin or
             EmployeeType.User => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + employeeType.ToStringFast()),
             _ => string.Empty
         };
@@ -369,12 +369,12 @@ public class ProductEntryPoint : Product
     {
         return userRoomRole switch
         {
-            FileShare.Read or 
-            FileShare.Review or 
-            FileShare.Comment or 
-            FileShare.FillForms or 
-            FileShare.RoomManager or 
-            FileShare.Editing or 
+            FileShare.Read or
+            FileShare.Review or
+            FileShare.Comment or
+            FileShare.FillForms or
+            FileShare.RoomManager or
+            FileShare.Editing or
             FileShare.ContentCreator => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + userRoomRole.ToStringFast()),
             _ => string.Empty
         };

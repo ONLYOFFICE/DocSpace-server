@@ -91,7 +91,7 @@ public class WatermarkSettings
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class WatermarkSettingsMapper
-{       
+{
     public static partial WatermarkSettings Map(this WatermarkRequestDto source);
     public static partial DbRoomWatermark Map(this WatermarkSettings source);
     public static partial WatermarkSettings Map(this DbRoomWatermark source);
@@ -106,7 +106,7 @@ public class WatermarkManager(
     public async Task<WatermarkSettings> SetWatermarkAsync<T>(Folder<T> room, WatermarkRequestDto watermarkRequestDto)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
-        if(watermarkRequestDto == null)
+        if (watermarkRequestDto == null)
         {
             return new WatermarkSettings();
         }
@@ -143,13 +143,13 @@ public class WatermarkManager(
         return watermarkSettings;
     }
 
-    public async Task<string> GetWatermarkImageUrlAsync<T>(Folder<T> folder,string imageUrlFromDto)
+    public async Task<string> GetWatermarkImageUrlAsync<T>(Folder<T> folder, string imageUrlFromDto)
     {
         string imageUrl = null;
 
         if (!string.IsNullOrEmpty(imageUrlFromDto))
         {
-            if(Uri.IsWellFormedUriString(imageUrlFromDto, UriKind.Absolute))
+            if (Uri.IsWellFormedUriString(imageUrlFromDto, UriKind.Absolute))
             {
                 imageUrl = imageUrlFromDto;
             }
@@ -164,10 +164,10 @@ public class WatermarkManager(
 
     public async Task<WatermarkSettings> GetWatermarkAsync<T>(Folder<T> room)
     {
-        if (room == null || 
+        if (room == null ||
             !DocSpaceHelper.IsRoom(room.FolderType) ||
             room.ProviderEntry ||
-            room.RootFolderType == FolderType.Archive || 
+            room.RootFolderType == FolderType.Archive ||
             !await fileSecurity.CanEditRoomAsync(room))
         {
             return null;

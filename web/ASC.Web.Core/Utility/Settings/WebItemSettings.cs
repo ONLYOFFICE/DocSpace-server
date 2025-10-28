@@ -59,7 +59,7 @@ public class WebItemSettings() : ISettings<WebItemSettings>
         });
         return settings;
     }
-    
+
     public DateTime LastModified { get; set; }
 
     public class WebItemOption

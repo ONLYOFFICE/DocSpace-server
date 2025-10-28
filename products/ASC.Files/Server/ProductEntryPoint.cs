@@ -47,10 +47,10 @@ public class ApiProductEntryPoint(FilesSpaceUsageStatManager filesSpaceUsageStat
     : ProductEntryPoint(filesSpaceUsageStatManager,
            coreBaseSettings,
            userManager,
-           notifyConfiguration, 
-           auditEventsRepository, 
-           daoFactory, 
-           tenantManager, 
+           notifyConfiguration,
+           auditEventsRepository,
+           daoFactory,
+           tenantManager,
            roomsNotificationSettingsHelper,
            pathProvider,
            filesLinkUtility,
@@ -58,7 +58,7 @@ public class ApiProductEntryPoint(FilesSpaceUsageStatManager filesSpaceUsageStat
            globalFolder,
            commonLinkUtility,
            logger)
-    {
+{
     public override string ApiURL
     {
         get => "api/2.0/files/info.json";

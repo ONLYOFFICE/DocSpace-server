@@ -39,11 +39,11 @@ public class ApiKey : BaseEntity
     public DateTime? ExpiresAt { get; set; }
     public bool IsActive { get; set; } = true;
     public int TenantId { get; set; }
-    
+
     public DbTenant Tenant { get; set; }
-    
+
     public string Key => $"sk-***{KeyPostfix}";
-    
+
     public override object[] GetKeys()
     {
         return [Id];
@@ -67,16 +67,16 @@ public static class DbApiKeyExtension
         {
             entity.HasKey(e => new { e.Id })
                 .HasName("PRIMARY");
-                
+
             entity.ToTable("core_user_api_key")
                 .HasCharSet("utf8");
-            
+
             entity.HasIndex(a => new { a.TenantId, a.HashedKey })
                 .HasDatabaseName("hashed_key");
-            
+
             entity.HasIndex(a => a.ExpiresAt)
                 .HasDatabaseName("expires_at");
-            
+
             entity.Property(e => e.Name)
                 .HasColumnName("name")
                 .HasColumnType("varchar")
@@ -84,7 +84,7 @@ public static class DbApiKeyExtension
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci")
                 .IsRequired();
-            
+
             entity.Property(e => e.KeyPostfix)
                 .HasColumnName("key_postfix")
                 .HasColumnType("varchar")
@@ -100,7 +100,7 @@ public static class DbApiKeyExtension
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci")
                 .IsRequired();
-            
+
             entity.Property(e => e.Permissions)
                   .HasColumnName("permissions")
                   .HasConversion(
@@ -131,7 +131,7 @@ public static class DbApiKeyExtension
                 .HasColumnName("tenant_id")
                 .HasColumnType("int")
                 .IsRequired();
-          
+
         });
     }
     private static void PgSqlAddDbApiKeys(this ModelBuilder modelBuilder)
@@ -140,21 +140,21 @@ public static class DbApiKeyExtension
         {
             entity.HasKey(e => new { e.Id })
                 .HasName("pk_core_user_api_key");
-                
+
             entity.ToTable("core_user_api_key");
-            
+
             entity.HasIndex(a => new { a.TenantId, a.HashedKey })
                 .HasDatabaseName("idx_core_user_api_key_tenant_id_hashed_key");
-            
+
             entity.HasIndex(a => a.ExpiresAt)
                 .HasDatabaseName("idx_core_user_api_key_expires_at");
-            
+
             entity.Property(e => e.Name)
                 .HasColumnName("name")
                 .HasColumnType("varchar")
                 .HasMaxLength(255)
                 .IsRequired();
-            
+
             entity.Property(e => e.KeyPostfix)
                 .HasColumnName("key_postfix")
                 .HasColumnType("varchar")
@@ -166,7 +166,7 @@ public static class DbApiKeyExtension
                 .HasColumnType("varchar")
                 .HasMaxLength(255)
                 .IsRequired();
-            
+
             entity.Property(e => e.Permissions)
                   .HasColumnName("permissions")
                   .HasConversion(
@@ -195,12 +195,12 @@ public static class DbApiKeyExtension
                 .HasColumnName("tenant_id")
                 .HasColumnType("integer")
                 .IsRequired();
-            
+
             entity.HasOne(e => e.Tenant)
                 .WithMany()
                 .HasForeignKey(e => e.TenantId)
                 .OnDelete(DeleteBehavior.Restrict);
-          
+
         });
     }
 }

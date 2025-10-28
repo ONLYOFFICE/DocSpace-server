@@ -258,7 +258,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             {
                 StoreExpressionVals(0, "*", Year);
             }
-           
+
         }
         catch (FormatException)
         {
@@ -1416,7 +1416,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
             var allDayOfMSpec = _daysOfMonth.Contains(AllSpec);
             var allDayOfWSpec = _daysOfWeek.Contains(AllSpec);
-            
+
             if (dayOfMSpec && !dayOfWSpec)
             {
                 d = ProcessDayOfMonth(d, day, mon, afterTimeUtc, _lastdayOfMonth, _nearestWeekday, _daysOfMonth);

@@ -182,7 +182,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
         if (!_persistentConnection.IsConnected)
         {
-           await  _persistentConnection.TryConnectAsync();
+            await _persistentConnection.TryConnectAsync();
         }
 
         var destination = await _consumerSession.GetQueueAsync(_queueName);
@@ -241,7 +241,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             }
 
             await ProcessEventAsync(eventName, @event);
-               
+
             await streamMessage.AcknowledgeAsync();
         }
         catch (IntegrationEventRejectExeption ex)

@@ -124,7 +124,7 @@ public class AccountsController<T>(
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-        
+
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var text = inDto.Text;
@@ -137,7 +137,7 @@ public class AccountsController<T>(
         {
             parentUserIds.Add(fileEntry.CreateBy);
         }
-        
+
         if (string.IsNullOrEmpty(text))
         {
             apiContext.SetCount(0).SetTotalCount(0);
@@ -160,9 +160,9 @@ public class AccountsController<T>(
             inDto.InviterId,
             inDto.EmployeeTypes,
             parentUserIds);
-        
+
         var total = totalGroups + totalUsers;
-        
+
         apiContext.SetCount(Math.Min(Math.Max(total - offset, 0), count)).SetTotalCount(total);
 
         var groupsCount = 0;
@@ -172,7 +172,7 @@ public class AccountsController<T>(
             groupsCount++;
             yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);
         }
-        
+
         var usersCount = count - groupsCount;
         var usersOffset = Math.Max(groupsCount > 0 ? 0 : offset - totalGroups, 0);
 

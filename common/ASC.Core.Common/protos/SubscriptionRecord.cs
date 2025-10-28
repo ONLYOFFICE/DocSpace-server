@@ -47,4 +47,3 @@ public partial class SubscriptionRecord
     [ProtoMember(6)]
     public int Tenant { get; set; }
 }
-

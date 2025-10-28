@@ -33,21 +33,21 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
     protected DIHelper DIHelper { get; } = new();
 
     private bool OpenTelemetryEnabled { get; } = configuration.GetValue<bool>("openTelemetry:enable");
-    
+
     public virtual async Task ConfigureServices(WebApplicationBuilder builder)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             AppContext.SetSwitch("System.Net.Security.UseManagedNtlm", true);
         }
-        
+
         var services = builder.Services;
         services.AddHttpContextAccessor();
         services.AddCustomHealthCheck(Configuration);
-        
+
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddProblemDetails();
-        
+
         if (OpenTelemetryEnabled)
         {
             builder.ConfigureOpenTelemetry();
@@ -70,14 +70,14 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
 
         services.RegisterFeature();
-        
+
         if (!HostEnvironment.IsDevelopment())
         {
             services.AddStartupTask<WarmupServicesStartupTask>().TryAddSingleton(services);
         }
 
         services.AddMemoryCache();
-        
+
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(Configuration, GetType().Namespace);
 
         services.AddHybridCache(connectionMultiplexer)
@@ -86,13 +86,14 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(Configuration)
                 .AddHttpClient()
-                .AddDistributedLock(Configuration);
+                .AddDistributedLock(Configuration)
+                .AddHeartBeat(Configuration);
 
         DIHelper.Configure(services);
         DIHelper.Scan();
-        
+
         services.ConfigureNotificationServices();
-        
+
         services.AddSingleton(Channel.CreateUnbounded<SocketData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);

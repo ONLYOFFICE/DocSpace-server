@@ -85,7 +85,7 @@ public class VersionController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         (await tenantManager.GetTenantVersionsAsync()).FirstOrDefault(r => r.Id == inDto.VersionId).NotFoundIfNull();
-        
+
         var tenant = tenantManager.GetCurrentTenant();
         await tenantManager.SetTenantVersionAsync(tenant, inDto.VersionId);
 

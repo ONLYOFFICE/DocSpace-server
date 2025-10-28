@@ -37,7 +37,7 @@ internal class MappingId : IMappingId<int>
 }
 
 [Scope(typeof(IMappingId<string>))]
-internal class ThirdPartyMappingId(TenantManager tenantManager, IDbContextFactory<FilesDbContext> dbContextFactory): IMappingId<string>
+internal class ThirdPartyMappingId(TenantManager tenantManager, IDbContextFactory<FilesDbContext> dbContextFactory) : IMappingId<string>
 {
     public ValueTask<string> MappingIdAsync(string id, bool saveIfNotExist = false)
     {
@@ -74,7 +74,7 @@ internal class ThirdPartyMappingId(TenantManager tenantManager, IDbContextFactor
         if (saveIfNotExist)
         {
             var tenantId = tenantManager.GetCurrentTenantId();
-            
+
             var newItem = new DbFilesThirdpartyIdMapping
             {
                 Id = id,

@@ -40,9 +40,9 @@ public class RemovePortalOperation : DistributedTaskProgress
 
     public RemovePortalOperation()
     {
-        
+
     }
-    
+
     public RemovePortalOperation(StorageFactory storageFactory,
         StorageFactoryConfig storageFactoryConfig,
         ITenantService tenantService,
@@ -98,7 +98,7 @@ public class RemovePortalOperation : DistributedTaskProgress
             {
                 await indexer.DeleteAsync(tenant.Id);
             }
-            
+
             _logger.DebugEndRemoveTenant(TenantId);
             Percentage = 100;
         }

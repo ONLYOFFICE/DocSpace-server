@@ -35,7 +35,7 @@ class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory) : IAzServic
 
         // row with tenant = -1 - common for all tenants, but equal row with tenant != -1 escape common row for the portal
         var commonAces = await userDbContext.AzRecordAsync()
-            .Select(r=> r.Map())
+            .Select(r => r.Map())
             .ToDictionaryAsync(a => string.Concat(a.TenantId.ToString(), a.Subject.ToString(), a.Action.ToString(), a.Object));
 
         var tenantAces = await

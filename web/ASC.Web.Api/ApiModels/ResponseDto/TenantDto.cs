@@ -155,7 +155,7 @@ public class TenantDto
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class TenantDtoMapper
-{       
+{
     [MapProperty(nameof(Tenant.Id), nameof(TenantDto.TenantId))]
     [MapProperty(nameof(Tenant.Alias), nameof(TenantDto.TenantAlias))]
     public static partial TenantDto MapToDto(this Tenant source);

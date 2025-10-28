@@ -41,22 +41,30 @@ internal class CrossDao //Additional SharpBox
         //Get File from first dao
         var fromFile = await fromFileDao.GetFileAsync(fromConverter(fromFileId));
 
+        return await PerformCrossDaoFileCopyAsync(fromFile, fromFileDao, fromConverter, toFolderId, toFileDao, toConverter, deleteSourceFile);
+    }
+    
+    public async Task<File<TTo>> PerformCrossDaoFileCopyAsync<TFrom, TTo>(
+        File<TFrom> fromFile, IFileDao<TFrom> fromFileDao, Func<TFrom, TFrom> fromConverter,
+        TTo toFolderId, IFileDao<TTo> toFileDao, Func<TTo, TTo> toConverter,
+        bool deleteSourceFile)
+    {
         if (fromFile.ContentLength > setupInfo.AvailableFileSize)
         {
             throw new Exception(string.Format(deleteSourceFile ? FilesCommonResource.ErrorMessage_FileSizeMove : FilesCommonResource.ErrorMessage_FileSizeCopy,
                                               FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
         }
-        
+
         var securityDao = serviceProvider.GetService<ISecurityDao<TFrom>>();
         var securityDaoTo = serviceProvider.GetService<ISecurityDao<TTo>>();
         var tagDao = serviceProvider.GetService<ITagDao<TFrom>>();
 
         var fromFileCopy = (File<TFrom>)fromFile.Clone();
-        
+
         var fromFileShareRecords = securityDao.GetPureShareRecordsAsync(fromFileCopy);
         var fromFileNewTags = tagDao.GetNewTagsAsync(Guid.Empty, fromFileCopy);
-        var fromFileLockTag = await tagDao.GetTagsAsync(fromFileId, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
-        var fromFileCustomFilterTag = await tagDao.GetTagsAsync(fromFileId, FileEntryType.File, TagType.CustomFilter).FirstOrDefaultAsync();
+        var fromFileLockTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
+        var fromFileCustomFilterTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.CustomFilter).FirstOrDefaultAsync();
         var fromFileFavoriteTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Favorite).ToListAsync();
         var fromFileTemplateTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Template).ToListAsync();
 
@@ -66,6 +74,7 @@ internal class CrossDao //Additional SharpBox
         toFile.Encrypted = fromFile.Encrypted;
         toFile.ParentId = toConverter(toFolderId);
         toFile.ThumbnailStatus = Thumbnail.Waiting;
+        toFile.VectorizationStatus = fromFile.VectorizationStatus;
 
         fromFile.Id = fromConverter(fromFile.Id);
 
@@ -97,7 +106,7 @@ internal class CrossDao //Additional SharpBox
                 Options = record.Options,
                 Level = record.Level
             };
-            
+
             await securityDaoTo.SetShareAsync(toRecord);
         }
 
@@ -122,7 +131,7 @@ internal class CrossDao //Additional SharpBox
         }
 
         //Delete source file if needed
-        await fromFileDao.DeleteFileAsync(fromConverter(fromFileId));
+        await fromFileDao.DeleteFileAsync(fromConverter(fromFile.Id));
 
 
         return toFile;
@@ -152,7 +161,7 @@ internal class CrossDao //Additional SharpBox
         var foldersToCopy = await fromFolderDao.GetFoldersAsync(fromConverter(fromFolderId)).ToListAsync();
         var fileIdsToCopy = await fromFileDao.GetFilesAsync(fromConverter(fromFolderId)).ToListAsync();
         Exception copyException = null;
-        
+
         //Copy files first
         foreach (var fileId in fileIdsToCopy)
         {
@@ -169,7 +178,7 @@ internal class CrossDao //Additional SharpBox
                 copyException = ex;
             }
         }
-        
+
         foreach (var folder in foldersToCopy)
         {
             cancellationToken?.ThrowIfCancellationRequested();
@@ -206,7 +215,7 @@ internal class CrossDao //Additional SharpBox
                     Options = record.Options,
                     Level = record.Level
                 };
-                
+
                 await securityDaoTo.SetShareAsync(toRecord);
             }
 

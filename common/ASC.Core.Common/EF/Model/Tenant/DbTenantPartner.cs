@@ -143,6 +143,6 @@ public static class DbTenantPartnerExtension
                 .HasColumnType("character varying")
                 .HasMaxLength(36);
         });
-        
+
     }
 }

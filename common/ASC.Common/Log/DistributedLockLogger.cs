@@ -30,7 +30,7 @@ internal static partial class DistributedLockLogger
 {
     [LoggerMessage(LogLevel.Debug, "Distributed lock acquired. Resource: '{resource}'. Elapsed: {elapsedMilliseconds} ms")]
     public static partial void DebugTryAcquireLock(this ILogger logger, string resource, long elapsedMilliseconds);
-    
+
     [LoggerMessage(LogLevel.Error, "Distributed lock not acquired. Resource: '{resource}'. Elapsed: {elapsedMilliseconds} ms")]
     public static partial void ErrorTryAcquireLock(this ILogger logger, string resource, long elapsedMilliseconds);
 }

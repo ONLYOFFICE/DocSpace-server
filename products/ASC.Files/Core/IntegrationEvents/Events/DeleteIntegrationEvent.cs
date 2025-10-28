@@ -31,17 +31,17 @@ public record DeleteIntegrationEvent : IntegrationEvent
 {
     private DeleteIntegrationEvent() : base() { }
 
-    public  DeleteIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
+    public DeleteIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
 
     }
 
     [ProtoMember(1)]
     public string TaskId { get; set; }
-    
+
     [ProtoMember(2)]
     public FileDeleteOperationData<int> Data { get; set; }
-    
+
     [ProtoMember(3)]
     public FileDeleteOperationData<string> ThirdPartyData { get; set; }
 }

@@ -199,7 +199,7 @@ public class WebItemManager
 [Scope]
 public class WebItemManagerSecurity(WebItemSecurity webItemSecurity, AuthContext authContext, WebItemManager webItemManager)
 {
-    public List<IWebItem> GetItems(WebZoneType webZone, ItemAvailableState availableState =  ItemAvailableState.Normal)
+    public List<IWebItem> GetItems(WebZoneType webZone, ItemAvailableState availableState = ItemAvailableState.Normal)
     {
         var copy = webItemManager.GetItemsAll().ToList();
         var list = copy.Where(item =>

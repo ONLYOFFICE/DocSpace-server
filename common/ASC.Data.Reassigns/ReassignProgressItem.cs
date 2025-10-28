@@ -55,9 +55,9 @@ public class ReassignProgressItem : DistributedTaskProgress
 
     public ReassignProgressItem()
     {
-        
+
     }
-    
+
     /// <summary>
     /// </summary>
     public ReassignProgressItem(IServiceScopeFactory serviceScopeFactory)

@@ -65,7 +65,7 @@ public class ActiveConnectionsItemDto
     /// <summary>
     /// Specifies if the active connection has a mobile phone or not.
     /// </summary>
-    public bool Mobile {  get; set; }
+    public bool Mobile { get; set; }
 
     /// <summary>
     /// The IP address of the active connection.

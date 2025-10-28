@@ -188,7 +188,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
 
     protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper,
         TableInfo table, DataRowInfo row)
-    { 
+    {
         if (row.TableName == "files_thirdparty_id_mapping")
         {
             //todo: think...

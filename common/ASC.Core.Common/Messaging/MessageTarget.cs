@@ -30,7 +30,7 @@ public class MessageTarget
 {
     private IEnumerable<string> _items;
     private string _item;
-    
+
     public static MessageTarget Create<T>(T value)
     {
         return new MessageTarget
@@ -48,7 +48,7 @@ public class MessageTarget
 
         if (value != null)
         {
-            res._items = value.Where(r=> r != null).Select(r => r.ToString()).ToList();
+            res._items = value.Where(r => r != null).Select(r => r.ToString()).ToList();
         }
 
         return res;
@@ -80,7 +80,7 @@ public class MessageTarget
         {
             return _item;
         }
-        
+
         return _items != null ? string.Join(",", _items) : null;
     }
 }

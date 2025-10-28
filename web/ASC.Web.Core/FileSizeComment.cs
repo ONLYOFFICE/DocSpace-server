@@ -63,7 +63,7 @@ public class FileSizeComment(SetupInfo setupInfo)
     {
         return new TenantQuotaException(GetUserFreeSpaceExceptionString(size));
     }
-    
+
 
     /// <summary>
     /// Generates a string the file size

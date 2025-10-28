@@ -59,7 +59,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             eventBus,
             tenantManager,
             authContext)
-    {
+{
     private readonly ILogger _logger = logger;
 
     public async IAsyncEnumerable<FileDto<T>> ChangeHistoryAsync<T>(T fileId, int version, bool continueVersion)
@@ -162,7 +162,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         var extension = ".txt";
         if (!string.IsNullOrEmpty(content) && Regex.IsMatch(content, @"<([^\s>]*)(\s[^<]*)>"))
         {
-                extension = ".html";
+            extension = ".html";
         }
 
         return await CreateFileAsync(folderId, title, content, extension, updateIfExist);
@@ -208,7 +208,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
         return await _fileDtoHelper.GetAsync(result);
     }
-    
+
 
     public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null)
     {

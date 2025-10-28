@@ -73,10 +73,10 @@ public class WebItemSecurity(
     AuthorizationManager authorizationManager,
     WebItemSecurityCache webItemSecurityCache,
     SettingsManager settingsManager,
-    CountPaidUserChecker countPaidUserChecker, 
+    CountPaidUserChecker countPaidUserChecker,
     IDistributedLockProvider distributedLockProvider)
 {
-    
+
     private static readonly SecurityAction _read = new(new Guid("77777777-32ae-425f-99b5-83176061d1ae"), "ReadWebItem", false);
 
     //
@@ -183,7 +183,7 @@ public class WebItemSecurity(
     {
         var info = (await GetSecurityAsync(id)).ToList();
         var module = webItemManager.GetParentItemId(new Guid(id)) != Guid.Empty;
-        
+
         return new WebItemSecurityInfo
         {
             WebItemId = id,
@@ -226,10 +226,10 @@ public class WebItemSecurity(
         }
 
         if (administrator)
-        {            
+        {
             var tenant = tenantManager.GetCurrentTenant();
             var tenantId = tenant.Id;
-            
+
             if (productId == Constants.GroupAdmin.ID && tenant.OwnerId != authContext.CurrentAccount.ID)
             {
                 throw new SecurityException(Resource.ErrorAccessDenied);

@@ -44,6 +44,6 @@ public class TenantUserInvitationSettingsDto
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class TenantUserInvitationSettingsDtoMapper
-{       
+{
     public static partial TenantUserInvitationSettingsDto Map(this TenantUserInvitationSettings source);
 }

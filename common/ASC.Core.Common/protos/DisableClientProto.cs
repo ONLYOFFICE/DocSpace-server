@@ -32,4 +32,3 @@ public record DisableClientProto
     [ProtoMember(1)]
     public int TenantId { get; set; }
 }
-

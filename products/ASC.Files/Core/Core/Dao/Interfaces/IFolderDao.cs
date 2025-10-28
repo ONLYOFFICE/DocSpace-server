@@ -62,7 +62,7 @@ public interface IFolderDao<T>
     IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null);
 
-    IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags, 
+    IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags,
         bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
 
     IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<T> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags,
@@ -130,6 +130,9 @@ public interface IFolderDao<T>
     /// <param name="folder"></param>
     /// <returns></returns>
     Task<T> SaveFolderAsync(Folder<T> folder);
+
+    Task<T> SaveFolderAsync(Folder<T> folder, IEnumerable<Folder<T>> children);
+    
     /// <summary>
     ///     delete folder
     /// </summary>
@@ -191,7 +194,8 @@ public interface IFolderDao<T>
     /// <param name="watermark">watermark</param>
     /// <param name="color">color</param>
     /// <param name="cover">cover</param>
-    Task<T> UpdateFolderAsync(Folder<T> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifetime, WatermarkSettings watermark, string color, string cover);
+    /// <param name="chatSettings">chat settings</param>
+    Task<T> UpdateFolderAsync(Folder<T> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifetime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null);
 
     /// <summary>
     ///    Change folder type
@@ -250,12 +254,12 @@ public interface IFolderDao<T>
             T folderId,
             CommonChunkedUploadSession chunkedUploadSession,
             CommonChunkedUploadSessionHolder sessionHolder);
-    
+
 
     Task<string> GetBackupExtensionAsync(T folderId);
-    
+
     Task<bool> IsExistAsync(string title, T folderId);
-    
+
     #region Only for TMFolderDao
 
     /// <summary>
@@ -404,6 +408,14 @@ public interface IFolderDao<T>
     Task<T> GetFolderIDArchive(bool createIfNotExists);
 
     /// <summary>
+    /// Returns id folder "AiAgents"
+    /// Only in TMFolderDao
+    /// </summary>
+    /// <param name="createIfNotExists"></param>
+    /// <returns></returns>
+    Task<T> GetFolderIDAiAgentsAsync(bool createIfNotExists);
+
+    /// <summary>
     /// Return id of related object
     /// Only in TMFolderDao
     /// </summary>
@@ -424,7 +436,7 @@ public interface IFolderDao<T>
     Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
         T roomId = default, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All);
     Task<FilesStatisticsResultDto> GetFilesUsedSpace();
-    Task<bool> ContainsFormsInFolder (Folder<T> folder);
+    Task<bool> ContainsFormsInFolder(Folder<T> folder);
     Task<int> SetCustomOrder(T folderId, T parentFolderId, int order);
 
     Task InitCustomOrder(Dictionary<T, int> folderIds, T parentFolderId);
@@ -432,7 +444,7 @@ public interface IFolderDao<T>
     Task<WatermarkSettings> GetWatermarkSettings(Folder<T> room);
     Task<Folder<T>> DeleteWatermarkSettings(Folder<T> room);
     Task<Folder<T>> DeleteLifetimeSettings(Folder<T> room);
-    
+
     IAsyncEnumerable<Folder<T>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, bool excludeSubject, Location? location, int trashId, OrderBy orderBy, int offset, int count);
     Task<int> GetFoldersByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,

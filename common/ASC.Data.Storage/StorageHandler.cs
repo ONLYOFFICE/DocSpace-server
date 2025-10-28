@@ -34,11 +34,11 @@ namespace ASC.Data.Storage.DiscStorage;
 public class StorageHandler(string storagePath, string module, string domain, bool checkAuth = true)
 {
     public async Task InvokeAsync(
-        HttpContext context, 
-        TenantManager tenantManager, 
-        AuthContext authContext, 
-        StorageFactory storageFactory, 
-        EmailValidationKeyProvider emailValidationKeyProvider, 
+        HttpContext context,
+        TenantManager tenantManager,
+        AuthContext authContext,
+        StorageFactory storageFactory,
+        EmailValidationKeyProvider emailValidationKeyProvider,
         UserManager userManager,
         CoreSettings coreSettings)
     {
@@ -88,7 +88,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
             context.Response.StatusCode = (int)HttpStatusCode.NotFound;
             return;
         }
-        
+
         if (storage.DataStoreValidator != null && !await storage.DataStoreValidator.Validate(path))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
@@ -134,7 +134,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
         //}
 
         //context.Response.Headers.ETag = etag;
-        
+
         string encoding = null;
 
         if (storage is DiscDataStore && await storage.IsFileAsync(domain, path + ".gz"))
@@ -154,7 +154,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 
             context.Response.Headers[toCopy] = h[(toCopy.Length + 1)..];
         }
-                
+
         try
         {
             context.Response.ContentType = MimeMapping.GetMimeMapping(path);

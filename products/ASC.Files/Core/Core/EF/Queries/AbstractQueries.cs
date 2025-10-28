@@ -33,67 +33,67 @@ public partial class FilesDbContext
     {
         return AbstractQueries.FoldersAsync(this, tenantId, folderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, int.MaxValue])]
     public Task<int> FilesCountAsync(int tenantId, int folderId)
     {
         return AbstractQueries.FilesCountAsync(this, tenantId, folderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<string> IdAsync(int tenantId, string hashId)
     {
         return AbstractQueries.IdAsync(this, tenantId, hashId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File])]
     public Task<bool> IsIndexingAsync(int tenantId, int parentFolderId, FileEntryType entryType)
     {
         return AbstractQueries.IsIndexingAsync(this, tenantId, parentFolderId, entryType);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File])]
     public Task<DbFileOrder> GetFileOrderAsync(int tenantId, int entryId, FileEntryType entryType)
     {
         return AbstractQueries.GetFileOrderAsync(this, tenantId, entryId, entryType);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File])]
     public Task ClearFileOrderAsync(int tenantId, int parentFolderId, FileEntryType entryType)
     {
         return AbstractQueries.ClearFileOrderAsync(this, tenantId, parentFolderId, entryType);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> GetLastFileOrderAsync(int tenantId, int parentFolderId)
     {
         return AbstractQueries.GetLastFileOrderAsync(this, tenantId, parentFolderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task IncreaseFileOrderAsync(int tenantId, int parentFolderId, int newOrder, int currentOrder)
     {
         return AbstractQueries.IncreaseFileOrderAsync(this, tenantId, parentFolderId, newOrder, currentOrder);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task DecreaseFileOrderAsync(int tenantId, int parentFolderId, int newOrder, int currentOrder)
     {
         return AbstractQueries.DecreaseFileOrderAsync(this, tenantId, parentFolderId, newOrder, currentOrder);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task ChangeFilesCountAsync(int tenantId, int folderId, int counter)
     {
         return AbstractQueries.ChangeFilesCountAsync(this, tenantId, folderId, counter);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task ChangeFoldersCountAsync(int tenantId, int folderId, int counter)
     {
         return AbstractQueries.ChangeFoldersCountAsync(this, tenantId, folderId, counter);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File])]
     public Task<int> DeleteAuditReferencesAsync(int entryId, FileEntryType entryType)
     {
@@ -117,6 +117,12 @@ public partial class FilesDbContext
     {
         return AbstractQueries.MarkAuditReferencesAsCorruptedAsync(this, eventsIds);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public Task DeleteChatsAsync(int folderId)
+    {
+        return AbstractQueries.DeleteChatsAsync(this, folderId);
+    }
 }
 
 static file class AbstractQueries
@@ -128,7 +134,7 @@ static file class AbstractQueries
                     .AsTracking()
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => ctx.Tree.Any(a => folderIds.Contains(a.FolderId) && a.ParentId == r.Id)));
-    
+
     public static readonly Func<FilesDbContext, int, int, Task<int>> FilesCountAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int folderId) =>
@@ -152,21 +158,21 @@ static file class AbstractQueries
     public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<bool>> IsIndexingAsync =
     Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
         (FilesDbContext ctx, int tenantId, int parentFolderId, FileEntryType entryType) =>
-            (from rs in ctx.RoomSettings 
-                where rs.TenantId == tenantId && rs.RoomId ==
-                    (from t in ctx.Tree
-                        where t.FolderId == parentFolderId
-                        orderby t.Level descending
-                        select t.ParentId
-                    ).Skip(1).FirstOrDefault()
-                select rs.Indexing).FirstOrDefault());
-    
+            (from rs in ctx.RoomSettings
+             where rs.TenantId == tenantId && rs.RoomId ==
+                 (from t in ctx.Tree
+                  where t.FolderId == parentFolderId
+                  orderby t.Level descending
+                  select t.ParentId
+                 ).Skip(1).FirstOrDefault()
+             select rs.Indexing).FirstOrDefault());
+
     public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<DbFileOrder>> GetFileOrderAsync =
     Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
         (FilesDbContext ctx, int tenantId, int entryId, FileEntryType entryType) =>
             ctx.FileOrder
                 .AsTracking()
-                .FirstOrDefault(r =>  r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == entryType));
+                .FirstOrDefault(r => r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == entryType));
 
     public static readonly Func<FilesDbContext, int, int, FileEntryType, Task> ClearFileOrderAsync =
     Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -204,21 +210,21 @@ static file class AbstractQueries
                     .Where(r => r.ParentFolderId == parentFolderId)
                     .Where(r => r.Order <= newOrder && r.Order > currentOrder)
                     .ExecuteUpdate(f => f.SetProperty(p => p.Order, p => p.Order - 1)));
-    
+
     public static readonly Func<FilesDbContext, int, int, int, Task> ChangeFilesCountAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int folderId, int counter) =>
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
                     .ExecuteUpdate(r => r.SetProperty(a => a.FilesCount, a => a.FilesCount + counter)));
-    
+
     public static readonly Func<FilesDbContext, int, int, int, Task> ChangeFoldersCountAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int folderId, int counter) =>
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
                     .ExecuteUpdate(r => r.SetProperty(a => a.FoldersCount, a => a.FoldersCount + counter)));
-    
+
     public static readonly Func<FilesDbContext, int, FileEntryType, Task<int>> DeleteAuditReferencesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int entryId, FileEntryType entryType) =>
@@ -249,7 +255,13 @@ static file class AbstractQueries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, IEnumerable<int> eventsIds) =>
                 ctx.FilesAuditReference.Where(x => eventsIds.Contains(x.AuditEventId))
-                    .ExecuteUpdate(x => 
+                    .ExecuteUpdate(x =>
                         x.SetProperty(y => y.Corrupted, a => true))
         );
+
+    public static readonly Func<FilesDbContext, int, Task> DeleteChatsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int folderId) =>
+            ctx.Chats
+                .Where(x => x.RoomId == folderId)
+                .ExecuteDelete());
 }

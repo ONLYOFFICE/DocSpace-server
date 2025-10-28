@@ -65,7 +65,7 @@ public class AuditEventRequestDto
     /// The target object affected by the audit event (e.g., document ID, user account).
     /// </summary>
     [FromQuery(Name = "target")]
-    public string Target {  get; set; }
+    public string Target { get; set; }
 
     /// <summary>
     /// The starting date and time for filtering audit events.

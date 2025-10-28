@@ -71,7 +71,7 @@ public class UpdateRoomRequest
     /// The list of tags.
     /// </summary>
     public IEnumerable<string> Tags { get; set; }
-    
+
     /// <summary>
     /// The room color.
     /// </summary>
@@ -83,6 +83,8 @@ public class UpdateRoomRequest
     /// </summary>
     [StringLength(50)]
     public string Cover { get; set; }
+    
+    public ChatSettings ChatSettings { get; set; }
 }
 
 /// <summary>

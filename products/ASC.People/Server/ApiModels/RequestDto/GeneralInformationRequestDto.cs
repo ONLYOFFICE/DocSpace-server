@@ -42,7 +42,7 @@ public class GeneralInformationRequestDto
     /// </summary>
     [FromQuery(Name = "manager")]
     public bool? Manager { get; set; }
-    
+
     /// <summary>
     /// The number of records to retrieve.
     /// </summary>

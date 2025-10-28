@@ -42,7 +42,7 @@ internal class BoxFileDao(UserManager userManager,
     : ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager, global)
 {
     protected override string UploadSessionKey => "BoxSession";
-    
+
     public override Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength)
     {
         if (setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
@@ -72,7 +72,7 @@ internal class BoxFileDao(UserManager userManager,
     {
         await using var fs = new FileStream(uploadSession.TempPath,
             FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
-        
+
         uploadSession.File = await SaveFileAsync(uploadSession.File, fs);
 
         return uploadSession.File;

@@ -204,7 +204,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
 
         swaggerDoc.Tags = customTags
             .Where(tag => _tagDescriptions.ContainsKey(tag))
-            .Select(tag => 
+            .Select(tag =>
             {
                 var tagParts = tag.Split(" / ");
                 var displayName = tagParts.Length > 1 ? tagParts[1] : tagParts[0];
@@ -230,7 +230,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
             var groupObject = new OpenApiObject();
             var tagsArray = new OpenApiArray();
 
-            foreach(var tag in group.Value)
+            foreach (var tag in group.Value)
             {
                 tagsArray.Add(new OpenApiString(tag));
             }

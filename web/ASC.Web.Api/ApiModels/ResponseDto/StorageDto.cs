@@ -60,9 +60,9 @@ public class StorageDto
     {
         var result = new StorageDto
         {
-            Id = consumer.Name, 
-            Title = ConsumerExtension.GetResourceString(consumer.Name) ?? consumer.Name, 
-            Current = consumer.Name == current.Module, 
+            Id = consumer.Name,
+            Title = ConsumerExtension.GetResourceString(consumer.Name) ?? consumer.Name,
+            Current = consumer.Name == current.Module,
             IsSet = await consumer.GetIsSetAsync()
         };
 
@@ -77,7 +77,7 @@ public class StorageDto
                 Value = r.Value,
                 Title = ConsumerExtension.GetResourceString(consumer.Name + r.Key) ?? r.Key
             }).ToList();
-        
+
         return result;
     }
 }

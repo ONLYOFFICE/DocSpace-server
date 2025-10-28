@@ -67,7 +67,7 @@ public class UserManager(
     TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
     IDistributedLockProvider distributedLockProvider,
     CoreBaseSettings coreBaseSettings)
-{    
+{
     private IDictionary<Guid, UserInfo> SystemUsers => userManagerConstants.SystemUsers;
 
     private Tenant Tenant => tenantManager.GetCurrentTenant();
@@ -124,7 +124,7 @@ public class UserManager(
 
         return u ?? Constants.LostUser;
     }
-    
+
     public async Task<UserInfo> GetUserAsync(Guid id, Expression<Func<User, UserInfo>> exp)
     {
         if (IsSystemUser(id))
@@ -136,12 +136,12 @@ public class UserManager(
 
         return u is { Removed: false } ? u : Constants.LostUser;
     }
-    
+
     public Task<int> GetUsersCountAsync(UserQueryFilter filter)
     {
         filter.TenantId = Tenant.Id;
         filter.OwnerId = Tenant.OwnerId;
-        
+
         return userService.GetUsersCountAsync(filter);
     }
 
@@ -149,7 +149,7 @@ public class UserManager(
     {
         filter.TenantId = Tenant.Id;
         filter.OwnerId = Tenant.OwnerId;
-        
+
         return userService.GetUsers(filter);
     }
 
@@ -164,7 +164,7 @@ public class UserManager(
 
         return u is { Removed: false } ? u : Constants.LostUser;
     }
-    
+
     public async Task<string[]> GetUserNamesAsync(EmployeeStatus status)
     {
         return (await GetUsersAsync(status))
@@ -379,13 +379,13 @@ public class UserManager(
             if (type is EmployeeType.Guest or EmployeeType.User)
             {
                 lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(Tenant.Id));
-                
+
                 await activeUsersFeatureChecker.CheckAppend();
             }
             else if (paidUserQuotaCheck)
             {
                 lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id));
-                
+
                 await countPaidUserChecker.CheckAppend();
             }
 
@@ -679,7 +679,7 @@ public class UserManager(
         {
             return;
         }
-        
+
         var isPaidUserAfter = await IsPaidUserAsync(user);
 
         if (await this.IsSystemGroup(groupId) && ((isPaidUserBefore && !isPaidUserAfter) || (!isPaidUserBefore && isPaidUserAfter)))
@@ -705,7 +705,7 @@ public class UserManager(
             Constants.Action_EditGroups);
 
         await userService.RemoveUserGroupRefAsync(Tenant.Id, userId, groupId, UserGroupRefType.Contains);
-        
+
         var managerId = await managerIdTask;
         if (managerId == userId)
         {
@@ -713,12 +713,12 @@ public class UserManager(
         }
 
         ResetGroupCache(userId);
-        
+
         if (!notifyWebSocket)
         {
             return;
         }
-        
+
         var isPaidUserAfter = await IsPaidUserAsync(user);
 
         if (await this.IsSystemGroup(groupId) && ((isPaidUserBefore && !isPaidUserAfter) || (!isPaidUserBefore && isPaidUserAfter)))
@@ -735,31 +735,31 @@ public class UserManager(
     }
 
     public async Task ChangeUserCulture(UserInfo user, string cultureName)
-    {        
+    {
         var curLng = user.CultureName;
-         if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, cultureName, StringComparison.InvariantCultureIgnoreCase)) != null && curLng != cultureName)
-         {
-             user.CultureName = cultureName;
-        
-             try
-             {
-                 await UpdateUserInfoAsync(user);
-             }
-             catch
-             {
-                 user.CultureName = curLng;
-                 throw;
-             }
-         }
+        if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, cultureName, StringComparison.InvariantCultureIgnoreCase)) != null && curLng != cultureName)
+        {
+            user.CultureName = cultureName;
+
+            try
+            {
+                await UpdateUserInfoAsync(user);
+            }
+            catch
+            {
+                user.CultureName = curLng;
+                throw;
+            }
+        }
     }
-    
+
     public async Task AddUserRelationAsync(Guid sourceUserId, Guid targetUserId)
     {
         if (sourceUserId == targetUserId)
         {
             return;
         }
-        
+
         var sourceUser = await GetUsersAsync(sourceUserId);
         if (!IsValidUser(sourceUser))
         {
@@ -771,9 +771,9 @@ public class UserManager(
         {
             return;
         }
-        
+
         await userService.SaveUsersRelationAsync(Tenant.Id, sourceUserId, targetUserId);
-        
+
         return;
 
         bool IsValidUser(UserInfo userInfo)
@@ -781,7 +781,7 @@ public class UserManager(
             return !userInfo.Equals(Constants.LostUser) && userInfo.Status != EmployeeStatus.Terminated;
         }
     }
-    
+
     public Task<Dictionary<Guid, UserRelation>> GetUserRelationsAsync(Guid sourceUserId)
     {
         return userService.GetUserRelationsAsync(Tenant.Id, sourceUserId);
@@ -796,12 +796,12 @@ public class UserManager(
     {
         return userService.DeleteUserRelationAsync(Tenant.Id, sourceUserId, targetUserId);
     }
-    
+
     #endregion Users
 
 
     #region Company
-    
+
     public async Task<Guid> GetDepartmentManagerAsync(Guid deparmentID)
     {
         var groupRef = await userService.GetUserGroupRefAsync(Tenant.Id, deparmentID, UserGroupRefType.Manager);
@@ -847,7 +847,7 @@ public class UserManager(
     {
         return userService.GetGroupsCountAsync(Tenant.Id, text, userId, manager);
     }
-    
+
     public async Task<GroupInfo[]> GetGroupsAsync()
     {
         return await GetGroupsAsync(Guid.Empty);
@@ -862,7 +862,7 @@ public class UserManager(
 
     public async Task<GroupInfo> GetGroupInfoAsync(Guid groupID)
     {
-        var group = await userService.GetGroupAsync(Tenant.Id, groupID) ?? 
+        var group = await userService.GetGroupAsync(Tenant.Id, groupID) ??
                     ToGroup(Constants.SystemGroups.FirstOrDefault(r => r.ID == groupID) ?? Constants.LostGroupInfo);
 
         if (group == null)

@@ -160,6 +160,7 @@ internal class GoogleDriveDaoBase(
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
+        folder.SettingsCover = ProviderInfo.Cover;
         ProcessFolderAsRoom(folder);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)
@@ -171,7 +172,7 @@ internal class GoogleDriveDaoBase(
         {
             folder.ModifiedOn = _tenantUtil.DateTimeFromUtc(folder.ModifiedOn);
         }
-        
+
         folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return folder;
@@ -259,7 +260,7 @@ internal class GoogleDriveDaoBase(
             return new ErrorDriveEntry(ex, driveId);
         }
     }
-    
+
     public async Task<DriveFile> CreateFolderAsync(string title, string folderId)
     {
         return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);

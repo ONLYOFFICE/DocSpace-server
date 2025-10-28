@@ -103,7 +103,7 @@ public class TenantUtil(TenantManager tenantManager, TimeZoneConverter timeZoneC
     {
         return DateTime.SpecifyKind(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone), DateTimeKind.Local);
     }
-    
+
     public DateTime DateTimeNow(string timeZone)
     {
         return DateTimeNow(timeZoneConverter.GetTimeZone(timeZone));

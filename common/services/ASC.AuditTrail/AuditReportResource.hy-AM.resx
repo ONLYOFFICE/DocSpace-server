@@ -159,6 +159,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Գունային ոճ փոխվել է</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Կոնտակտներ</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Թխուկի կարգավորումները թարմացվել են</value>
   </data>
@@ -330,17 +333,11 @@
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Ողջույնի էջի կարգավորումները թարմացվել են</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Ընդհանուր</value>
-  </data>
   <data name="GroupCreated" xml:space="preserve">
     <value>Ստեղծվել է խումբ: {0}</value>
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Խումբը ջնջված է: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Խմբեր</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Խումբը թարմացվել է: {0}</value>
@@ -525,9 +522,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Արտադրանքների ցանկը թարմացվել է</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Արտադրանքներ</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Վերագրումներ</value>
   </data>
@@ -542,6 +536,9 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Աշխատաշրջանը սկսված է</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Կարգավորումներ</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO անջատված</value>
@@ -668,9 +665,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Օգտվողներ [{0}]. Ուղարկված գաղտնաբառի փոփոխման հրահանգներ</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Օգտվողներ</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Օգտվողներ [{0}]. Ակտիվացման հրահանգները ուղարկված են</value>
@@ -848,9 +842,6 @@
   </data>
   <data name="FormSubmit" xml:space="preserve">
     <value>Օգտատերեր [{0}]: Ներկայացված ձևը՝ {1}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Հաճախորդի {0} ակտիվացումը փոխվել է</value>

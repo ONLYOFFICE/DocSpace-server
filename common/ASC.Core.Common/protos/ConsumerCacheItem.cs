@@ -35,4 +35,3 @@ public record ConsumerCacheItem
     [ProtoMember(2)]
     public int TenantId { get; set; }
 }
-

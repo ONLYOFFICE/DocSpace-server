@@ -64,10 +64,10 @@ public record CreateRoomFromTemplateIntegrationEvent : IntegrationEvent
 
     [ProtoMember(17)]
     public RoomLifetime Lifetime { get; set; }
-    
+
     [ProtoMember(18)]
     public WatermarkRequest Watermark { get; set; }
-    
+
     [ProtoMember(19)]
     public bool? Private { get; set; }
 

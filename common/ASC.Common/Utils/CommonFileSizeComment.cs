@@ -38,7 +38,7 @@ public class CommonFileSizeComment
     /// <returns>10 b, 100 Kb, 25 Mb, 1 Gb</returns>
     public static string FilesSizeToString(string fileSizePostfix, long size)
     {
-        var sizeNames = !string.IsNullOrEmpty(fileSizePostfix) ? 
+        var sizeNames = !string.IsNullOrEmpty(fileSizePostfix) ?
             fileSizePostfix.Split(',', '،') : ["bytes", "KB", "MB", "GB", "TB"];
         var power = 0;
 

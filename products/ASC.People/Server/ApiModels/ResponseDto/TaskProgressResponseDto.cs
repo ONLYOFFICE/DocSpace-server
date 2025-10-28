@@ -61,12 +61,12 @@ public class TaskProgressResponseDto
         return progressItem == null
             ? null
             : new TaskProgressResponseDto
-                {
-                    Id = progressItem.Id,
-                    Error = progressItem.Exception?.Message,
-                    Percentage = (int)progressItem.Percentage,
-                    IsCompleted = progressItem.IsCompleted,
-                    Status = progressItem.Status
-                };
+            {
+                Id = progressItem.Id,
+                Error = progressItem.Exception?.Message,
+                Percentage = (int)progressItem.Percentage,
+                IsCompleted = progressItem.IsCompleted,
+                Status = progressItem.Status
+            };
     }
 }

@@ -57,6 +57,6 @@ public class LoginSettingsDto
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class LoginSettingsDtoMapper
-{       
+{
     public static partial LoginSettingsDto Map(this LoginSettings source);
 }

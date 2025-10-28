@@ -52,6 +52,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BE86ABA2-8B71-4E0D-A2A6-3921E0467F09}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		Directory.Packages.props = Directory.Packages.props
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.Migrations.MySql.SaaS", "migrations\mysql\SaaS\ASC.Migrations.MySql.SaaS.csproj", "{109044D0-4EA6-43C1-AA98-7F34887C0142}"
@@ -65,6 +66,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.Core.Common.Tests", "common\Tests\ASC.Core.Common.Tests\ASC.Core.Common.Tests.csproj", "{42185FA3-867B-4D8D-81D1-D5D69204C347}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.People.Tests", "products\ASC.People\Tests\ASC.People.Tests.csproj", "{7DC01258-73C7-4D13-A857-73F7832D61C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AI.Core", "products\ASC.AI\Core\ASC.AI.Core.csproj", "{78B1A138-84F5-455E-A7A2-3C56BD55C5CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AI", "products\ASC.AI\Server\ASC.AI.csproj", "{64729CF2-F980-4398-B4D0-EA24BED0C95E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AI.Service", "products\ASC.AI\Service\ASC.AI.Service.csproj", "{687252DE-8BAE-4FE1-A46E-F4AC29A8AD98}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -188,6 +195,18 @@ Global
 		{7DC01258-73C7-4D13-A857-73F7832D61C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DC01258-73C7-4D13-A857-73F7832D61C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7DC01258-73C7-4D13-A857-73F7832D61C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78B1A138-84F5-455E-A7A2-3C56BD55C5CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78B1A138-84F5-455E-A7A2-3C56BD55C5CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78B1A138-84F5-455E-A7A2-3C56BD55C5CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78B1A138-84F5-455E-A7A2-3C56BD55C5CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64729CF2-F980-4398-B4D0-EA24BED0C95E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64729CF2-F980-4398-B4D0-EA24BED0C95E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64729CF2-F980-4398-B4D0-EA24BED0C95E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64729CF2-F980-4398-B4D0-EA24BED0C95E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{687252DE-8BAE-4FE1-A46E-F4AC29A8AD98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{687252DE-8BAE-4FE1-A46E-F4AC29A8AD98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{687252DE-8BAE-4FE1-A46E-F4AC29A8AD98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{687252DE-8BAE-4FE1-A46E-F4AC29A8AD98}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -150,7 +150,7 @@ public static partial class LdapSettingsDtoMapper
 {
     [MapProperty(nameof(LdapSettings.Server), nameof(LdapSettingsDto.Server), Use = nameof(MapServer))]
     public static partial LdapSettingsDto MapToSettingsDto(this LdapSettings source);
-    
+
     [UserMapping(Default = false)]
     private static string MapServer(string source)
     {

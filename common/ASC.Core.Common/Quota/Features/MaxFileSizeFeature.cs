@@ -26,10 +26,8 @@
 
 namespace ASC.Core.Common.Quota.Features;
 
-public class MaxFileSizeFeature(TenantQuota tenantQuota) : TenantQuotaFeatureSize(tenantQuota)
+public class MaxFileSizeFeature(TenantQuota tenantQuota) : TenantQuotaFeatureSize(tenantQuota, "file_size")
 {
-    public override string Name { get => "file_size"; }
-
     protected internal override void Multiply(int quantity)
     {
 

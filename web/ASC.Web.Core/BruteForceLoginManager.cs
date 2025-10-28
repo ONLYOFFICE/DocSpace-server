@@ -33,13 +33,13 @@ public class BruteForceLoginManager(
     UserManager userManager,
     IFusionCache hybridCache,
     SetupInfo setupInfo,
-    Recaptcha recaptcha, 
+    Recaptcha recaptcha,
     IDistributedLockProvider distributedLockProvider)
 {
     public async Task<(bool Result, bool ShowRecaptcha)> IncrementAsync(string key, string requestIp, bool throwException, string exceptionMessage = null)
     {
         var blockCacheKey = GetBlockCacheKey(key, requestIp);
-        
+
         if (await GetFromCache<string>(blockCacheKey) != null)
         {
             if (throwException)

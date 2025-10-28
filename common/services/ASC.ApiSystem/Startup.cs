@@ -52,7 +52,7 @@ public class Startup
         {
             builder.ConfigureOpenTelemetry();
         }
-        
+
         var services = builder.Services;
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
@@ -123,13 +123,14 @@ public class Startup
                 .AddEventBus(_configuration)
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(_configuration)
-                .AddDistributedLock(_configuration);
-        
+                .AddDistributedLock(_configuration)
+                .AddHeartBeat(_configuration);
 
-        
+
+
         services.RegisterFeature();
         services.RegisterQuotaFeature();
-        
+
         if (_configuration.GetValue<bool>("openApi:enable"))
         {
             services.AddOpenApi(_configuration);
@@ -139,7 +140,7 @@ public class Startup
             services.AddStartupTask<WarmupServicesStartupTask>()
                     .TryAddSingleton(services);
         }
-        
+
         services.AddSingleton(Channel.CreateUnbounded<SocketData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
@@ -174,12 +175,12 @@ public class Startup
         app.UseSynchronizationContextMiddleware();
 
         app.UseTenantMiddleware();
-        
+
         if (!string.IsNullOrEmpty(_corsOrigin))
-        { 
+        {
             app.UseCors(CustomCorsPolicyName);
         }
-        
+
         app.UseAuthentication();
 
         app.UseAuthorization();

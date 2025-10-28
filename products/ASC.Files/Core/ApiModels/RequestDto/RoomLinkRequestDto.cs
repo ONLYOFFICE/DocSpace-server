@@ -50,7 +50,7 @@ public class RoomLinkRequest
     /// The link scope, whether it is internal or not.
     /// </summary>
     public bool Internal { get; set; }
-    
+
     /// <summary>
     /// The link name.
     /// </summary>

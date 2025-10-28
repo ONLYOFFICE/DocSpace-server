@@ -40,7 +40,7 @@ public class CookieAuthHandler(
     {
         try
         {
-            var authorization =Request.Cookies[cookiesManager.GetAscCookiesName()] ?? Request.Headers.Authorization.ToString();
+            var authorization = Request.Cookies[cookiesManager.GetAscCookiesName()] ?? Request.Headers.Authorization.ToString();
 
             if (string.IsNullOrEmpty(authorization))
             {

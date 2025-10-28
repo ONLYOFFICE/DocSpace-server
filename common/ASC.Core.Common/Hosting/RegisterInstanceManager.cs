@@ -64,7 +64,7 @@ public class RegisterInstanceManager<T>(
         }
 
         await registerInstanceRepository.AddOrUpdateAsync(instance);
-        
+
         var oldRegistrations = instances.Where(IsOrphanInstance).ToList();
 
         foreach (var instanceRegistration in oldRegistrations)
@@ -90,7 +90,7 @@ public class RegisterInstanceManager<T>(
         var instance = instances.FirstOrDefault(x => x.InstanceRegistrationId == _options.InstanceId);
 
         return instance is not null && instance.IsActive;
-    }    
+    }
 
     private InstanceRegistration? FirstAliveInstance(IEnumerable<InstanceRegistration> instances)
     {

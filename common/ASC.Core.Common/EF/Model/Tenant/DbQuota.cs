@@ -29,15 +29,15 @@ namespace ASC.Core.Common.EF;
 public class DbQuota : BaseEntity
 {
     public int TenantId { get; set; }
-    
+
     [MaxLength(128)]
     public string Name { get; set; }
-    
+
     [MaxLength(128)]
     public string Description { get; set; }
     public string Features { get; set; }
     public decimal Price { get; set; }
-    
+
     [MaxLength(128)]
     public string ProductId { get; set; }
     public bool Visible { get; set; }
@@ -182,7 +182,7 @@ public static class DbQuotaExtension
                 );
         return modelBuilder;
     }
-    
+
     public static void MySqlAddDbQuota(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbQuota>(entity =>
@@ -278,6 +278,6 @@ public static class DbQuotaExtension
                 .HasColumnType("boolean")
                 .HasDefaultValue(false);
         });
-        
+
     }
 }

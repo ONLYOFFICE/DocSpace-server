@@ -40,7 +40,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
     private readonly RedisLockOptions _options;
     private readonly ILogger<RedisLockProvider> _logger;
     private readonly long _expiryInMilliseconds;
-    
+
     private static readonly string _lockIdPrefix;
     private static readonly IDistributedLockHandle _defaultHandle = new DefaultHandle();
 
@@ -51,7 +51,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
     }
 
     public RedisLockProvider(
-        IRedisClient redisClient, 
+        IRedisClient redisClient,
         ILogger<RedisLockProvider> logger,
         IDistributedLockProvider internalLockProvider,
         Action<RedisLockOptionsBuilder> optionBuilder)
@@ -62,30 +62,30 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         _options = RedisLockOptionsBuilder.GetOptions(optionBuilder);
         _expiryInMilliseconds = (long)_options.Expiry.TotalMilliseconds;
     }
-    
+
     public async Task<IDistributedLockHandle> TryAcquireFairLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, CancellationToken cancellationToken = default)
     {
         if (timeout < _options.MinTimeout || timeout == Timeout.InfiniteTimeSpan || timeout == TimeSpan.MaxValue)
         {
             timeout = _options.MinTimeout;
         }
-        
+
         PeriodicTimer timer;
 
         var database = _redisClient.GetDefaultDatabase();
         var lockId = GetLockId();
         var queueKey = RedisLockUtils.PrefixName(LockQueueName, resource);
         var queueItemTimeoutKey = RedisLockUtils.PrefixName(LockQueueItemTimeoutName, resource);
-        
+
         var timestamp = TimeProvider.System.GetTimestamp();
-        
+
         var status = await TryAcquireLockInternalAsync(database, resource, lockId, queueKey, queueItemTimeoutKey, timeout);
         if (status == LockStatus.Acquired)
         {
             timer = StartExtendLockLoop(database, resource, lockId, cancellationToken);
-            
+
             _logger.DebugTryAcquireLock(resource, (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
-            
+
             return new RedisFairLockHandle(database, resource, lockId, ChannelName, queueKey, queueItemTimeoutKey, timer);
         }
 
@@ -99,7 +99,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         });
 
         var messageWaitingTimeout = timeout / 3;
-        
+
         try
         {
             while (TimeProvider.System.GetElapsedTime(timestamp) <= timeout)
@@ -134,14 +134,14 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
             {
                 throw new DistributedLockException(status, resource, (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             }
-            
+
             _logger.ErrorTryAcquireLock(resource, (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
-            
+
             return _defaultHandle;
         }
-        
+
         _logger.DebugTryAcquireLock(resource, (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
-        
+
         timer = StartExtendLockLoop(database, resource, lockId, cancellationToken);
 
         return new RedisFairLockHandle(database, resource, lockId, ChannelName, queueKey, queueItemTimeoutKey, timer);
@@ -153,9 +153,9 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         {
             timeout = _options.MinTimeout;
         }
-        
+
         var stopWatch = Stopwatch.StartNew();
-        
+
         var internalHandle = await _internalLockProvider.TryAcquireLockAsync(resource, timeout, cancellationToken);
 
         return GetHandle(internalHandle, resource, stopWatch.ElapsedMilliseconds, throwIfNotAcquired);
@@ -178,7 +178,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
 
         return (LockStatus)code;
     }
-    
+
     private PeriodicTimer StartExtendLockLoop(IRedisDatabase database, string resource, string lockId, CancellationToken cancellationToken)
     {
         var timer = new PeriodicTimer(_options.ExtendInterval);
@@ -199,7 +199,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
 
         return timer;
     }
-    
+
     private IDistributedLockHandle GetHandle(IDistributedSynchronizationHandle handle, string resource, long elapsedMilliseconds, bool throwIfNotAcquired)
     {
         if (handle != null)
@@ -213,12 +213,12 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         {
             throw new DistributedLockException(LockStatus.NotAcquired, resource, elapsedMilliseconds);
         }
-        
+
         _logger.ErrorTryAcquireLock(resource, elapsedMilliseconds);
 
         return _defaultHandle;
     }
-    
+
     private static string GetLockId()
     {
         return $"{_lockIdPrefix}_{Guid.NewGuid():n}";
@@ -272,7 +272,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         
         return 1;
         """));
-    
+
     private static readonly LuaScript _lockExtendScript = LuaScript.Prepare(RedisLockUtils.RemoveExtraneousWhitespace(
         """
             local currentLockId = redis.call('get', @lockKey);

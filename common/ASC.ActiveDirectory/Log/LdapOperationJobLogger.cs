@@ -106,7 +106,7 @@ internal static partial class LdapOperationJobLogger
     public static partial void DebugGiveUsersRightsCouldNotFindPortalGroup(this ILogger<LdapOperationJob> logger, string sid);
 
     [LoggerMessage(LogLevel.Debug, "GiveUsersRights() Found '{countUsers}' users for group '{groupName}' ({groupId})")]
-    public static partial void DebugGiveUsersRightsFoundUsersForGroup(this ILogger<LdapOperationJob> logger, int countUsers,string groupName, Guid groupId);
+    public static partial void DebugGiveUsersRightsFoundUsersForGroup(this ILogger<LdapOperationJob> logger, int countUsers, string groupName, Guid groupId);
 
     [LoggerMessage(LogLevel.Debug, "GiveUsersRights() Cleared manually added user rights for '{userName}'")]
     public static partial void DebugGiveUsersRightsClearedAndAddedRights(this ILogger<LdapOperationJob> logger, string userName);
@@ -124,7 +124,7 @@ internal static partial class LdapOperationJobLogger
     public static partial void DebugRemoveOldDbUsersAttemptingExcludeYourself(this ILogger<LdapOperationJob> logger, Guid id);
 
     [LoggerMessage(LogLevel.Information, "Progress: {percentage}% {status} {source}")]
-    public static partial void InfoProgress(this ILogger<LdapOperationJob> logger,double percentage, string status, string source);
+    public static partial void InfoProgress(this ILogger<LdapOperationJob> logger, double percentage, string status, string source);
 
     [LoggerMessage(LogLevel.Error, "Wrong LDAP settings were received from client.")]
     public static partial void ErrorWrongLdapSettings(this ILogger<LdapOperationJob> logger);

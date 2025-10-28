@@ -74,7 +74,7 @@ public class NotificationController(
     [HttpGet("rooms")]
     public async Task<RoomsNotificationSettingsDto> GetRoomsNotificationSettings()
     {
-        var  settings = await roomsNotificationSettingsHelper.GetSettingsForCurrentUserAsync();
+        var settings = await roomsNotificationSettingsHelper.GetSettingsForCurrentUserAsync();
         return settings.Map();
     }
 

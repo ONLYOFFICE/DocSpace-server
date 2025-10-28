@@ -40,6 +40,6 @@ public class PersonalQuotaSettings : ISettings<PersonalQuotaSettings>
             MaxSpace = long.MaxValue
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 }

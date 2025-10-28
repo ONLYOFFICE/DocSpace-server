@@ -33,61 +33,61 @@ public partial class FilesDbContext
     {
         return Queries.ThirdPartyAccountsAsync(this, tenantId, userId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, int.MaxValue, FolderType.ThirdpartyBackup, PreCompileQuery.DefaultGuid, null])]
     public IAsyncEnumerable<DbFilesThirdpartyAccount> ThirdPartyAccountsByFilterAsync(int tenantId, int linkId, FolderType folderType, Guid userId, string searchText)
     {
         return Queries.ThirdPartyAccountsByFilterAsync(this, tenantId, linkId, folderType, userId, searchText);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFilesThirdpartyAccount> ThirdPartyAccountAsync(int tenantId, int linkId)
     {
         return Queries.ThirdPartyAccountAsync(this, tenantId, linkId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null, null, null, null])]
     public Task<int> UpdateThirdPartyAccountsAsync(int tenantId, int linkId, string login, string password, string token, string url)
     {
         return Queries.UpdateThirdPartyAccountsAsync(this, tenantId, linkId, login, password, token, url);
     }
-    
+
     //[PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFilesThirdpartyAccount> ThirdPartyAccountByLinkIdAsync(int tenantId, int linkId)
     {
         return Queries.ThirdPartyAccountByLinkIdAsync(this, tenantId, linkId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFilesThirdpartyAccount> ThirdPartyAccountsByLinkIdAsync(int tenantId, int linkId)
     {
         return Queries.ThirdPartyAccountsByLinkIdAsync(this, tenantId, linkId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> DeleteThirdPartyAccountsByLinkIdAsync(int tenantId, int linkId)
     {
         return Queries.DeleteThirdPartyAccountsByLinkIdAsync(this, tenantId, linkId);
     }
-    
+
     //[PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<DbFilesThirdpartyAccount> ThirdPartyBackupAccountAsync(int tenantId)
     {
         return Queries.ThirdPartyBackupAccountAsync(this, tenantId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<string> HashIdsAsync(int tenantId, string folderId)
     {
         return Queries.HashIdsAsync(this, tenantId, folderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteDbFilesSecuritiesAsync(int tenantId, IEnumerable<string> entryIDs)
     {
         return Queries.DeleteDbFilesSecuritiesAsync(this, tenantId, entryIDs);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteDbFilesTagLinksAsync(int tenantId, IEnumerable<string> entryIDs)
     {
@@ -97,7 +97,7 @@ public partial class FilesDbContext
 
 static file class Queries
 {
-    public static readonly Func<FilesDbContext, int, Guid, IAsyncEnumerable<DbFilesThirdpartyAccount>> ThirdPartyAccountsAsync = 
+    public static readonly Func<FilesDbContext, int, Guid, IAsyncEnumerable<DbFilesThirdpartyAccount>> ThirdPartyAccountsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid userId) =>
                 ctx.ThirdpartyAccount
@@ -105,7 +105,7 @@ static file class Queries
                     .Where(r => r.UserId == userId));
 
     public static readonly
-        Func<FilesDbContext, int, int, FolderType, Guid, string, IAsyncEnumerable<DbFilesThirdpartyAccount>> ThirdPartyAccountsByFilterAsync = 
+        Func<FilesDbContext, int, int, FolderType, Guid, string, IAsyncEnumerable<DbFilesThirdpartyAccount>> ThirdPartyAccountsByFilterAsync =
             Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int linkId, FolderType folderType, Guid userId, string searchText) =>
                 ctx.ThirdpartyAccount
@@ -121,9 +121,9 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int linkId) =>
                 ctx.ThirdpartyAccount
-                    .FirstOrDefault(r =>  r.Id == linkId && r.TenantId == tenantId));
+                    .FirstOrDefault(r => r.Id == linkId && r.TenantId == tenantId));
 
-    public static readonly Func<FilesDbContext, int, int, string, string, string, string, Task<int>> UpdateThirdPartyAccountsAsync = 
+    public static readonly Func<FilesDbContext, int, int, string, string, string, string, Task<int>> UpdateThirdPartyAccountsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int linkId, string login, string password, string token, string url) =>
                 ctx.ThirdpartyAccount
@@ -135,13 +135,13 @@ static file class Queries
                         .SetProperty(p => p.Token, token)
                         .SetProperty(p => p.Url, url)));
 
-    public static readonly Func<FilesDbContext, int, int, Task<DbFilesThirdpartyAccount>> ThirdPartyAccountByLinkIdAsync = 
+    public static readonly Func<FilesDbContext, int, int, Task<DbFilesThirdpartyAccount>> ThirdPartyAccountByLinkIdAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int linkId) =>
                 ctx.ThirdpartyAccount
-                    .Single(r => r.TenantId == tenantId &&r.Id == linkId));
+                    .Single(r => r.TenantId == tenantId && r.Id == linkId));
 
-    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFilesThirdpartyAccount>> ThirdPartyAccountsByLinkIdAsync = 
+    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFilesThirdpartyAccount>> ThirdPartyAccountsByLinkIdAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int linkId) =>
                 ctx.ThirdpartyAccount
@@ -149,7 +149,7 @@ static file class Queries
                     .Where(r => r.Id == linkId)
                     .Where(r => r.TenantId == tenantId));
 
-    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteThirdPartyAccountsByLinkIdAsync = 
+    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteThirdPartyAccountsByLinkIdAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int linkId) =>
                 ctx.ThirdpartyAccount
@@ -178,7 +178,7 @@ static file class Queries
                     .Where(r => entryIDs.Any(a => a == r.EntryId))
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, IEnumerable<string>, Task<int>> DeleteDbFilesTagLinksAsync = 
+    public static readonly Func<FilesDbContext, int, IEnumerable<string>, Task<int>> DeleteDbFilesTagLinksAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<string> entryIDs) =>
                 ctx.TagLink

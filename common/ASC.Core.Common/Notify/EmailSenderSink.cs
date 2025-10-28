@@ -99,7 +99,7 @@ public class EmailSenderSinkMessageCreator(TenantManager tenantManager, CoreConf
         }
         m.Sender = from.ToString();
         var to = message.Recipient.Addresses.Select(address => MailAddressUtils.Create(address, message.Recipient.Name).ToString()).ToArray();
-        m.Reciever = string.Join("|",to);
+        m.Reciever = string.Join("|", to);
 
         var replyTag = message.Arguments.FirstOrDefault(x => x.Tag == "replyto");
         if (replyTag is { Value: string replyTagValue })

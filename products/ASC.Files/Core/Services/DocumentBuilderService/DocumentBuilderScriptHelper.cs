@@ -34,12 +34,12 @@ public class DocumentBuilderScriptHelper
     {
         return $"temp{DateTime.UtcNow.Ticks}{ext}";
     }
-    
+
     public static async Task<string> ReadTemplateFromEmbeddedResource(string templateFileName)
     {
         var templateNamespace = typeof(DocumentBuilderScriptHelper).Namespace;
         var resourceName = $"{templateNamespace}.ScriptTemplates.{templateFileName}";
-        
+
         var assembly = Assembly.GetExecutingAssembly();
         await using var stream = assembly.GetManifestResourceStream(resourceName);
 

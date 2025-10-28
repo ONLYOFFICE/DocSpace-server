@@ -39,6 +39,7 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
     private readonly ILogger _logger;
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancelationToken;
     private readonly ConcurrentDictionary<string, Action<T>> _actions;
+    private readonly ConcurrentDictionary<string, Func<T, Task>> _funcs = new ();
     private readonly ProtobufSerializer<T> _valueSerializer = new();
     private readonly ProtobufDeserializer<T> _valueDeserializer = new();
     private readonly ProtobufSerializer<AscCacheItem> _keySerializer = new();
@@ -74,6 +75,11 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
             {
                 onchange(obj);
             }
+            
+            if (_funcs.TryGetValue(channelName, out var onchangeFunc))
+            {
+                await onchangeFunc(obj);
+            }
 
             var message = new Message<AscCacheItem, T>
             {
@@ -103,53 +109,58 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
         _cancelationToken[channelName] = new CancellationTokenSource();
         _actions[channelName] = onchange;
 
-        Task.Run(ActionAsync);
-        return;
+        Task.Run(async () => await ActionAsync(channelName));
+    }
 
-        async Task ActionAsync()
+    public void Subscribe(Func<T, Task> onchange, CacheNotifyAction notifyAction)
+    {
+        var channelName = GetChannelName(notifyAction);
+
+        _cancelationToken[channelName] = new CancellationTokenSource();
+        _funcs[channelName] = onchange;
+
+        Task.Run(async () => await ActionAsync(channelName));
+    }
+
+    async Task ActionAsync(string channelName)
+    {
+        var conf = new ConsumerConfig(_clientConfig) { GroupId = Guid.NewGuid().ToString() };
+
+
+        using (var adminClient = new AdminClientBuilder(_adminClientConfig)
+                   .SetErrorHandler((_, e) => _logger.Error(e.ToString()))
+                   .Build())
         {
-            var conf = new ConsumerConfig(_clientConfig)
+            try
             {
-                GroupId = Guid.NewGuid().ToString()
-            };
+                //TODO: must add checking exist
+                await adminClient.CreateTopicsAsync(
+                [
+                    new TopicSpecification { Name = channelName, NumPartitions = 1, ReplicationFactor = 1 }
+                ]);
+            }
+            catch (AggregateException) { }
+        }
 
+        using var c = new ConsumerBuilder<AscCacheItem, T>(conf)
+            .SetErrorHandler((_, e) => _logger.Error(e.ToString()))
+            .SetKeyDeserializer(_keyDeserializer)
+            .SetValueDeserializer(_valueDeserializer)
+            .Build();
 
-            using (var adminClient = new AdminClientBuilder(_adminClientConfig)
-                       .SetErrorHandler((_, e) => _logger.Error(e.ToString()))
-                       .Build())
+        c.Assign(new TopicPartition(channelName, new Partition()));
+
+        try
+        {
+            while (true)
             {
                 try
                 {
-                    //TODO: must add checking exist
-                    await adminClient.CreateTopicsAsync(
-                    [
-                        new TopicSpecification
-                        {
-                                Name = channelName,
-                                NumPartitions = 1,
-                                ReplicationFactor = 1
-                            }
-                    ]);
-                }
-                catch (AggregateException) { }
-            }
-
-            using var c = new ConsumerBuilder<AscCacheItem, T>(conf)
-                .SetErrorHandler((_, e) => _logger.Error(e.ToString()))
-                .SetKeyDeserializer(_keyDeserializer)
-                .SetValueDeserializer(_valueDeserializer)
-                .Build();
-
-            c.Assign(new TopicPartition(channelName, new Partition()));
-
-            try
-            {
-                while (true)
-                {
-                    try
+                    var cr = c.Consume(_cancelationToken[channelName].Token);
+                    
+                    if (cr is { Message: not null } && cr.Message.Value != null && !(new Guid(cr.Message.Key.Id)).Equals(_key))
                     {
-                        var cr = c.Consume(_cancelationToken[channelName].Token);
-                        if (cr is { Message: not null } && cr.Message.Value != null && !(new Guid(cr.Message.Key.Id)).Equals(_key) && _actions.TryGetValue(channelName, out var act))
+                        if (_actions.TryGetValue(channelName, out var act))
                         {
                             try
                             {
@@ -160,17 +171,29 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
                                 _logger.ErrorKafkaOnmessage(e);
                             }
                         }
-                    }
-                    catch (ConsumeException e)
-                    {
-                        _logger.ErrorSubscribe(e);
+                        
+                        if (_funcs.TryGetValue(channelName, out var f))
+                        {
+                            try
+                            {
+                                await f(cr.Message.Value);
+                            }
+                            catch (Exception e)
+                            {
+                                _logger.ErrorKafkaOnmessage(e);
+                            }
+                        }
                     }
                 }
+                catch (ConsumeException e)
+                {
+                    _logger.ErrorSubscribe(e);
+                }
             }
-            catch (OperationCanceledException)
-            {
-                c.Close();
-            }
+        }
+        catch (OperationCanceledException)
+        {
+            c.Close();
         }
     }
 

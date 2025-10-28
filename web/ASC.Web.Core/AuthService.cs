@@ -54,13 +54,13 @@ public class AuthService
             Instruction = ConsumerExtension.GetResourceString(consumer.Name + "Instruction")?.Replace("{LogoText}", logoText),
             Props = []
         };
-        
+
         foreach (var item in consumer.ManagedKeys)
         {
             result.Props.Add(new AuthKey
             {
-                Name = item, 
-                Value = await consumer.GetAsync(item), 
+                Name = item,
+                Value = await consumer.GetAsync(item),
                 Title = ConsumerExtension.GetResourceString(item) ?? item
             });
         }

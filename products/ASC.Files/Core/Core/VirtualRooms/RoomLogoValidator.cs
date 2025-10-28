@@ -46,7 +46,7 @@ public class RoomLogoValidator(IDaoFactory daoFactory, FileSecurity fileSecurity
         }
 
         var id = path.Substring(0, path.LastIndexOf(RoomLogoManager.LogosPathSplitter, StringComparison.Ordinal));
-        
+
         if (int.TryParse(id, out var internalId))
         {
             return await CheckRoomAccess(internalId);
@@ -60,7 +60,7 @@ public class RoomLogoValidator(IDaoFactory daoFactory, FileSecurity fileSecurity
 
         return await CheckRoomAccess(id);
     }
-    
+
     private async Task<bool> CheckRoomAccess<T>(T id)
     {
         var folderDao = daoFactory.GetFolderDao<T>();

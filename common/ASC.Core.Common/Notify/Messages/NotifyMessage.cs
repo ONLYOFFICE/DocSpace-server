@@ -78,7 +78,7 @@ public static partial class NotifyMessageMapper
     [MapperIgnoreSource(nameof(NotifyQueue.Attachments))]
     [MapperIgnoreTarget(nameof(NotifyQueue.Attachments))]
     public static partial NotifyMessage Map(this NotifyQueue source);
-    
+
     [MapperIgnoreSource(nameof(NotifyQueue.Attachments))]
     [MapperIgnoreTarget(nameof(NotifyQueue.Attachments))]
     public static partial NotifyQueue Map(this NotifyMessage source);

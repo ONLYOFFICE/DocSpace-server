@@ -35,7 +35,7 @@ public class FormRole
     /// The room ID.
     /// </summary>
     public int RoomId { get; set; }
-    
+
     /// <summary>
     /// The role name.
     /// </summary>
@@ -74,6 +74,6 @@ public class FormRole
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class FormRoleMapper
-{       
+{
     public static partial FormRole Map(this DbFilesFormRoleMapping source);
 }

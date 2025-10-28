@@ -31,7 +31,7 @@ public class RegionHelper(TenantManager tenantManager,
         IHttpContextAccessor httpContextAccessor,
         GeolocationHelper geolocationHelper,
         UserManager userManager)
-    {
+{
     public async Task<RegionInfo> GetCurrentRegionInfoAsync(IDictionary<string, Dictionary<string, decimal>> priceInfo = null)
     {
         var geoInfo = await geolocationHelper.GetIPGeolocationFromHttpContextAsync();
@@ -42,29 +42,29 @@ public class RegionHelper(TenantManager tenantManager,
         {
             currentRegion = GetRegionInfo(geoInfo.Key);
         }
-        
+
         if (currentRegion == null)
         {
-                var tenant = tenantManager.GetCurrentTenant(false);
+            var tenant = tenantManager.GetCurrentTenant(false);
             if (tenant != null)
             {
-                    var owner = await userManager.GetUsersAsync(tenant.OwnerId);
+                var owner = await userManager.GetUsersAsync(tenant.OwnerId);
                 var culture = string.IsNullOrEmpty(owner.CultureName) ? tenant.GetCulture() : owner.GetCulture();
                 currentRegion = GetRegionInfo(culture.Name);
             }
         }
-        
+
         var defaultRegion = GetDefaultRegionInfo();
         if (currentRegion == null || currentRegion.Name.Equals(defaultRegion.Name))
         {
             return defaultRegion;
         }
-        
+
         if (geoInfo != null && !string.IsNullOrEmpty(geoInfo.Continent) && geoInfo.Continent == "EU")
         {
             currentRegion = GetRegionInfo("ES");
         }
-        
+
         priceInfo ??= await tenantManager.GetProductPriceInfoAsync();
         if (priceInfo.Values.Any(value => value.ContainsKey(currentRegion.ISOCurrencySymbol)))
         {

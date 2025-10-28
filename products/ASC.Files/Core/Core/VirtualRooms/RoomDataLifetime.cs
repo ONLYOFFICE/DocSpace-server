@@ -87,7 +87,7 @@ public class RoomDataLifetime
         {
             return false;
         }
-        
+
         return DeletePermanently == lifetime.DeletePermanently && Period == lifetime.Period && Value == lifetime.Value;
     }
 
@@ -104,7 +104,7 @@ public class RoomDataLifetime
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class RoomDataLifetimeMapper
-{       
+{
     public static partial RoomDataLifetime Map(this RoomDataLifetimeDto source);
     public static partial RoomDataLifetime Map(this DbRoomDataLifetime source);
     public static partial DbRoomDataLifetime Map(this RoomDataLifetime source);

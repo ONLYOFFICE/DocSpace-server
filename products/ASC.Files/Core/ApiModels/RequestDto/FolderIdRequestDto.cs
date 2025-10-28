@@ -48,7 +48,7 @@ public class FolderPrimaryIdRequestDto<T>
     /// </summary>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
-    
+
     /// <summary>
     /// The number of items to retrieve in the request.
     /// </summary>

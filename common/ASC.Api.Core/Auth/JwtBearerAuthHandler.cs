@@ -186,5 +186,5 @@ public class JwtBearerAuthHandler(
 
             return null;
         }
-    }  
+    }
 }

@@ -191,7 +191,7 @@ public class Builder<T>(
     }
 
     private async Task MakeThumbnailFromDocs(IFileDao<T> fileDao, File<T> file)
-    {            
+    {
         logger.DebugMakeThumbnail1(file.Id.ToString());
 
         string thumbnailUrl = null;
@@ -201,7 +201,7 @@ public class Builder<T>(
         var maxSize = settings.Sizes.MaxBy(r => r.Width + r.Height);
         var thumbnailHeight = maxSize.Height;
         var thumbnailWidth = maxSize.Width;
-        
+
 
         if (maxSize.Width > maxSize.Height) // change thumbnail orientation
         {
@@ -256,7 +256,7 @@ public class Builder<T>(
             await Task.Delay(settings.AttemptWaitInterval);
         }
         while (string.IsNullOrEmpty(thumbnailUrl));
-        
+
         logger.DebugMakeThumbnail3(file.Id.ToString(), thumbnailUrl);
 
         using var request = new HttpRequestMessage();
@@ -449,7 +449,7 @@ public class Builder<T>(
         });
 
         result.Quality = 50;
-        
+
         return result;
     }
 }

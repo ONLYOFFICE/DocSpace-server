@@ -31,4 +31,4 @@ public class SecurityCallContext
     public object UserData { get; set; }
     public List<ISecurityObjectId> ObjectsStack { get; private set; } = [];
     public List<IRole> RolesList { get; private set; } = [];
-    }
+}

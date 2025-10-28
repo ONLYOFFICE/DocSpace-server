@@ -40,7 +40,7 @@ public class DisplayUserSettings : ISettings<DisplayUserSettings>
             IsDisableGettingStarted = false
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 }
 

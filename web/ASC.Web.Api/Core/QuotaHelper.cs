@@ -34,7 +34,7 @@ public class QuotaHelper(
     IServiceProvider serviceProvider,
     CoreBaseSettings coreBaseSettings,
     SettingsManager settingsManager,
-    UserManager userManager, 
+    UserManager userManager,
     AuthContext authContext)
 {
     public async IAsyncEnumerable<QuotaDto> GetQuotasAsync(bool all = false, bool wallet = false)
@@ -70,7 +70,7 @@ public class QuotaHelper(
     {
         var features = await GetFeatures(quota, employeeType, getUsed, enabledWalletServices).ToListAsync();
 
-        var result =  new QuotaDto
+        var result = new QuotaDto
         {
             Id = quota.TenantId,
             Title = Resource.ResourceManager.GetString($"Tariffs_{quota.Name}"),
@@ -148,8 +148,8 @@ public class QuotaHelper(
 
             object used = null;
             var availableFeature = true;
-            var isUsedAvailable = employeeType != EmployeeType.Guest && 
-                                  (employeeType != EmployeeType.User || 
+            var isUsedAvailable = employeeType != EmployeeType.Guest &&
+                                  (employeeType != EmployeeType.User ||
                                    feature.Name == MaxTotalSizeFeature.MaxTotalSizeFeatureName);
 
             if (feature is TenantQuotaFeatureSize size)

@@ -43,6 +43,6 @@ public class CollaboratorSettings : ISettings<CollaboratorSettings>
             FirstVisit = true
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 }

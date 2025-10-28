@@ -24,8 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.Mapping;
 using System.Text.Json.Serialization;
+
+using ASC.Files.Core.Mapping;
 
 namespace ASC.Files.Core;
 
@@ -75,7 +76,7 @@ public enum FileStatus
 public class File<T> : FileEntry<T>
 {
     private FileStatus _status;
-    
+
     [JsonConstructor]
     protected File()
     {
@@ -83,7 +84,7 @@ public class File<T> : FileEntry<T>
         VersionGroup = 1;
         FileEntryType = FileEntryType.File;
     }
-    
+
     public File(IServiceProvider provider) : base(provider)
     {
         Version = 1;
@@ -199,7 +200,7 @@ public class File<T> : FileEntry<T>
     /// Specifies whether the file is locked or not.
     /// </summary>
     public bool Locked { get; set; }
-    
+
     /// <summary>
     /// The name of the user who locked the file.
     /// </summary>
@@ -208,7 +209,8 @@ public class File<T> : FileEntry<T>
     /// <summary>
     /// Specifies if the file is a form or not.
     /// </summary>
-    public bool IsForm {
+    public bool IsForm
+    {
         get
         {
             return (FilterType)Category == FilterType.PdfForm;
@@ -324,7 +326,7 @@ public class File<T> : FileEntry<T>
     /// The file force save type.
     /// </summary>
     public ForcesaveType Forcesave { get; set; }
-    
+
     /// <summary>
     /// The file converted type.
     /// </summary>
@@ -354,7 +356,7 @@ public class File<T> : FileEntry<T>
             };
         }
     }
-    
+
     /// <summary>
     /// The date and time when the file was last opened.
     /// </summary>
@@ -364,6 +366,8 @@ public class File<T> : FileEntry<T>
     /// The file form information.
     /// </summary>
     public FormInfo<T> FormInfo { get; set; }
+    
+    public VectorizationStatus? VectorizationStatus { get; set; }
 }
 
 /// <summary>
@@ -380,7 +384,7 @@ public record FormInfo<T>
     /// The form properties.
     /// </summary>
     public EntryProperties<T> Properties { get; init; }
-    
+
     /// <summary>
     /// The file filling session ID.
     /// </summary>
@@ -397,7 +401,7 @@ public record FormInfo<T>
 public partial class FileMapper(IServiceProvider serviceProvider, TenantDateTimeConverter tenantDateTimeConverter, SecurityTreeRecordMapper treeRecordMapper)
 {
     private partial File<int> Map(DbFileQuery source);
-    
+
     [MapProperty(nameof(DbFile.Title), nameof(File<int>.PureTitle))]
     private partial void ApplyChanges(DbFile source, File<int> target);
 
@@ -415,7 +419,7 @@ public partial class FileMapper(IServiceProvider serviceProvider, TenantDateTime
         result.ModifiedOn = tenantDateTimeConverter.Convert(dbFileQuery.File.ModifiedOn);
         result.LastOpened = tenantDateTimeConverter.Convert(dbFileQuery.LastOpened);
         result.ShareRecord = treeRecordMapper.MapToInternal(dbFileQuery.SharedRecord);
-        
+
         if (dbFileQuery.UserShared != null)
         {
             result.Shared = dbFileQuery.UserShared.Any(r => r is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
@@ -424,7 +428,7 @@ public partial class FileMapper(IServiceProvider serviceProvider, TenantDateTime
 
         return result;
     }
-    
+
     [ObjectFactory]
     private File<int> CreateFile() => serviceProvider.GetService<File<int>>();
 }

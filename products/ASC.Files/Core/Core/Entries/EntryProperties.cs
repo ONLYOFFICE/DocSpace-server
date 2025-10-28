@@ -109,7 +109,7 @@ public class FormFillingProperties<T>
     /// The ID of the folder where the form filling results are saved.
     /// </summary>
     public T ResultsFolderId { get; set; }
-    
+
     /// <summary>
     /// The ID of the file with form filling results.
     /// </summary>

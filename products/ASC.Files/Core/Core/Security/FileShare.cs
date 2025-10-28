@@ -101,17 +101,17 @@ public static partial class FileShareExtensions
 
         return fileShare switch
         {
-            FileShare.Read or 
-            FileShare.ReadWrite or 
-            FileShare.CustomFilter or 
-            FileShare.Review or 
-            FileShare.FillForms or 
-            FileShare.Comment or 
-            FileShare.Restrict or 
-            FileShare.RoomManager or 
-            FileShare.Editing or 
-            FileShare.ContentCreator or 
-            FileShare.Varies or 
+            FileShare.Read or
+            FileShare.ReadWrite or
+            FileShare.CustomFilter or
+            FileShare.Review or
+            FileShare.FillForms or
+            FileShare.Comment or
+            FileShare.Restrict or
+            FileShare.RoomManager or
+            FileShare.Editing or
+            FileShare.ContentCreator or
+            FileShare.Varies or
             FileShare.None => FilesCommonResource.ResourceManager.GetString(prefix + fileShare.ToStringFast(), cultureInfo),
             _ => string.Empty
         };

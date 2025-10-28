@@ -50,6 +50,6 @@ public class FakeCrypt : ICrypt
     {
         return Task.FromResult<Stream>(File.OpenRead(filePath));
     }
-    
+
     public void Init(string storageName, EncryptionSettings encryptionSettings) { }
 }

@@ -41,4 +41,3 @@ public record DropboxCacheItem
     [ProtoMember(4)]
     public string Key { get; set; }
 }
-

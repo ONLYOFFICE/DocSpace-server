@@ -46,7 +46,7 @@ public class LogoUploader
         {
             await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
             await tenantLogoManager.DemandWhiteLabelPermissionAsync();
-            
+
             var type = (WhiteLabelLogoType)Convert.ToInt32(context.Request.Form["logotype"]);
             var width = Convert.ToUInt32(context.Request.Form["width"]);
             var height = Convert.ToUInt32(context.Request.Form["height"]);

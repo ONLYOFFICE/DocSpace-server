@@ -56,7 +56,7 @@ public class DbTenantService(
     {
         tenantDomainValidator.ValidateTenantName(name);
     }
-    
+
     public async Task<IEnumerable<Tenant>> GetTenantsAsync(DateTime from, bool active = true)
     {
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
@@ -74,7 +74,7 @@ public class DbTenantService(
 
         return await q.Project().ToListAsync();
     }
-    
+
     public async Task<IEnumerable<Tenant>> GetTenantsAsync(List<int> ids)
     {
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
@@ -92,7 +92,7 @@ public class DbTenantService(
         //await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
         await using var userDbContext = await userDbContextFactory.CreateDbContextAsync();//TODO: remove
         IQueryable<TenantUserSecurity> Query() => userDbContext.Tenants
-                
+
                 .Where(r => r.Status == TenantStatus.Active)
                 .Join(userDbContext.Users, r => r.Id, r => r.TenantId, (tenant, user) => new
                 {
@@ -166,7 +166,7 @@ public class DbTenantService(
             .Project()
             .SingleOrDefaultAsync();
     }
-    
+
     public async Task<Tenant> GetTenantAsync(string domain)
     {
         ArgumentException.ThrowIfNullOrEmpty(domain);
@@ -177,7 +177,7 @@ public class DbTenantService(
 
         return (await tenantDbContext.TenantByDomainAsync(domain)).Map();
     }
-    
+
     public Tenant GetTenant(string domain)
     {
         ArgumentException.ThrowIfNullOrEmpty(domain);
@@ -225,7 +225,7 @@ public class DbTenantService(
 
         var dbtenant = await InnerSaveTenantAsync(tenantDbContext, coreSettings, tenant);
 
-        if(dbtenant != null)
+        if (dbtenant != null)
         {
             await tenantDbContext.SaveChangesAsync();
         }

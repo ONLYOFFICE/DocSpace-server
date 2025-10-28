@@ -31,7 +31,7 @@ public class Consumer() : IDictionary<string, string>
     public bool CanSet { get; private set; }
     public int Order { get; private set; }
     public string Name { get; private set; }
-    
+
     protected readonly Dictionary<string, string> _props = new();
     public IEnumerable<string> ManagedKeys => _props.Select(r => r.Key);
 
@@ -79,7 +79,7 @@ public class Consumer() : IDictionary<string, string>
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -143,7 +143,7 @@ public class Consumer() : IDictionary<string, string>
     {
         return AllProps.GetEnumerator();
     }
-    
+
 
     public void Add(KeyValuePair<string, string> item) { }
     public void Clear()
@@ -160,7 +160,7 @@ public class Consumer() : IDictionary<string, string>
 
         foreach (var providerProp in _props)
         {
-            await SetAsync(providerProp.Key,  null);
+            await SetAsync(providerProp.Key, null);
         }
 
         await Cache.PublishAsync(new ConsumerCacheItem { Name = this.Name }, CacheNotifyAction.Remove);
@@ -336,12 +336,12 @@ public class DataStoreConsumer : Consumer, ICloneable
             return null;
         }
 
-        Dictionary<string, string> props = new ();
+        Dictionary<string, string> props = new();
         foreach (var prop in ManagedKeys)
         {
             props.Add(prop, await GetAsync(prop));
         }
-        
+
         Dictionary<string, string> additional = new();
         foreach (var prop in fromConfig.AdditionalKeys)
         {

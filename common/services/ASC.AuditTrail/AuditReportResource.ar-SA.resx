@@ -162,6 +162,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>تم تغيير لون السمات</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>جهات الاتصال</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>تم تحديث إعدادات ملفات تعريف الارتباط</value>
   </data>
@@ -333,9 +336,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>تم تحديث إعدادات Sphinx</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>عام</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>تم تحديث إعدادات البوابة الترحيبية</value>
   </data>
@@ -344,9 +344,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>تم حذف المجموعة: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>المجموعات</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>تم تحديث المجموعات: {0}</value>
@@ -528,9 +525,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>تم تحديث قائمة المنتجات</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>المنتجات</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>إعادات التعيين</value>
   </data>
@@ -587,6 +581,9 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>تم بدء الجلسة</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>الإعدادات</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>تم تعطيل بوابة الدخول الموحد</value>
@@ -723,9 +720,6 @@
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>تم ارسال تعليمات تغيير كلمة المرور بواسطة المستخدمين [{0}]</value>
   </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>المستخدمين</value>
-  </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>تم ارسال تعليمات التفعيل بواسطة المستخدمين [{0}]</value>
   </data>
@@ -851,9 +845,6 @@
   </data>
   <data name="RoomInviteResend" xml:space="preserve">
     <value>تم إرسال الدعوات مرة أخرى: {0}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>تم تغيير تنشيط {0} للعميل</value>

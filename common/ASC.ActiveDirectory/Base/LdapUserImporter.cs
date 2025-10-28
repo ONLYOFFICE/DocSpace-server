@@ -380,7 +380,7 @@ public class LdapUserImporter(
             if (Equals(groupInfo, Constants.LostGroupInfo))
             {
                 logger.DebugTrySyncUserGroupMembershipCreatingPortalGroup(ldapUserGroup.DistinguishedName, ldapUserGroup.Sid);
-                 groupInfo = await UserManager.SaveGroupInfoAsync(ldapObjectExtension.ToGroupInfo(ldapUserGroup, Settings));
+                groupInfo = await UserManager.SaveGroupInfoAsync(ldapObjectExtension.ToGroupInfo(ldapUserGroup, Settings));
 
                 logger.DebugTrySyncUserGroupMembershipAddingUserToGroup(userInfo.UserName, ldapUser.Sid, groupInfo.Name, groupInfo.Sid);
                 await UserManager.AddUserIntoGroupAsync(userInfo.Id, groupInfo.ID);

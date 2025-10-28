@@ -306,4 +306,3 @@ public class Metadata(IConfiguration configuration)
         }
     }
 }
-

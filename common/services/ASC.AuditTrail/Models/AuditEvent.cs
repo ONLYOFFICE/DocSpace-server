@@ -38,7 +38,7 @@ public class AuditEvent : BaseEvent
 
     [Event("TargetIdCol", 34)]
     public MessageTarget Target { get; set; }
-    
+
     [Event("LocationCol", 32)]
     public string Context { get; set; }
 }

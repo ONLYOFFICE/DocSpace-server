@@ -98,7 +98,7 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
 
         await eventBus.PublishAsync(item);
     }
-    
+
     public async Task SendNoticeAsync(INotifyAction action, params ITagValue[] args)
     {
         var subscriptionSource = studioNotifyHelper.NotifySource.GetSubscriptionProvider();

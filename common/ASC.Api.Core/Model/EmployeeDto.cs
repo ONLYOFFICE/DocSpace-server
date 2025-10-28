@@ -117,7 +117,7 @@ public class EmployeeDtoHelper(
             _dictionary.AddOrUpdate(userInfo.Id, _ => employee, (_, _) => employee);
 
         }
-        
+
         return employee;
     }
 
@@ -129,7 +129,7 @@ public class EmployeeDtoHelper(
             {
                 return employee;
             }
-            
+
             return await GetAsync(await _userManager.GetUsersAsync(userId));
         }
         catch (Exception e)
@@ -158,7 +158,7 @@ public class EmployeeDtoHelper(
         result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        
+
         if (result.Id != Guid.Empty)
         {
             var profileUrl = await commonLinkUtility.GetUserProfileAsync(userInfo.Id);

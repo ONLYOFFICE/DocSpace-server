@@ -38,5 +38,5 @@ public static partial class UserRelationMapper
 {
     [MapperIgnoreSource(nameof(DbUserRelation.Tenant))]
     public static partial UserRelation Map(this DbUserRelation source);
-    
+
 }

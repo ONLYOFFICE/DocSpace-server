@@ -15,7 +15,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     ADD COLUMN creator_id VARCHAR(36),
                     ADD COLUMN modifier_id VARCHAR(36);"
             );
-            
+
             migrationBuilder.Sql(
                 @"UPDATE identity_clients c
 	                JOIN core_user u ON c.created_by = u.email
@@ -35,7 +35,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     DROP COLUMN created_by,
                     DROP COLUMN modified_by;"
             );
-            
+
             migrationBuilder.Sql(
                 @"ALTER TABLE identity_clients
                     RENAME COLUMN creator_id TO created_by,

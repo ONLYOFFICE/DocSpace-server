@@ -99,7 +99,7 @@ public class GroupFullDtoHelper(UserManager userManager, EmployeeFullDtoHelper e
             IsLDAP = !string.IsNullOrEmpty(group.Sid),
             IsSystem = await userManager.IsSystemGroup(group.ID) ? true : null
         };
-        
+
         var manager = await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID));
         if (manager != null && !manager.Equals(Constants.LostUser))
         {
@@ -116,7 +116,7 @@ public class GroupFullDtoHelper(UserManager userManager, EmployeeFullDtoHelper e
 
         result.Members = [];
         foreach (var m in members)
-        { 
+        {
             result.Members.Add(await employeeFullDtoHelper.GetFullAsync(m));
         }
 

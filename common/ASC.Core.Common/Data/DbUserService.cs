@@ -304,8 +304,8 @@ public class EFUserService(
         switch (filter.SortType)
         {
             case UserSortType.RegistrationDate:
-                q = filter.SortOrderAsc 
-                    ? q.OrderBy(r => r.CreateDate) 
+                q = filter.SortOrderAsc
+                    ? q.OrderBy(r => r.CreateDate)
                     : q.OrderByDescending(r => r.CreateDate);
                 break;
             case UserSortType.CreatedBy:
@@ -313,17 +313,17 @@ public class EFUserService(
                     var q1 = q.GroupJoin(userDbContext.Users,
                         u1 => new
                         {
-                            Id = u1.CreatedBy, 
+                            Id = u1.CreatedBy,
                             Removed = false
                         },
                         u2 => new
                         {
-                            Id = (Guid?)u2.Id, 
+                            Id = (Guid?)u2.Id,
                             u2.Removed
-                        }, 
+                        },
                         (u, users) => new { u, users })
                         .SelectMany(
-                            x => x.users.DefaultIfEmpty(), 
+                            x => x.users.DefaultIfEmpty(),
                             (x, createdBy) => new { x.u, createdBy });
 
                     if (UserFormatter.GetUserDisplayDefaultOrder() == DisplayUserNameFormat.FirstLast)
@@ -357,7 +357,7 @@ public class EFUserService(
                         u.Group.UserGroupId == Constants.GroupAdmin.ID ? 1 :
                         u.Group.UserGroupId == Constants.GroupUser.ID ? 3 : 4;
 
-                    q = (filter.SortOrderAsc ? q1.OrderBy(orderByUserType).ThenBy(x => x.User.FirstName) 
+                    q = (filter.SortOrderAsc ? q1.OrderBy(orderByUserType).ThenBy(x => x.User.FirstName)
                         : q1.OrderByDescending(orderByUserType)).ThenBy(x => x.User.FirstName).Select(r => r.User);
                     break;
                 }
@@ -376,8 +376,8 @@ public class EFUserService(
                         sum_counter = g.ToList().Sum()
                     });
 
-                    q = filter.SortOrderAsc 
-                        ? q3.OrderBy(r => r.sum_counter).Select(r => r.user) 
+                    q = filter.SortOrderAsc
+                        ? q3.OrderBy(r => r.sum_counter).Select(r => r.user)
                         : q3.OrderByDescending(r => r.sum_counter).Select(r => r.user);
                     break;
                 }
@@ -410,8 +410,8 @@ public class EFUserService(
             case UserSortType.FirstName:
             default:
                 q = filter.SortOrderAsc
-                    ? q.OrderBy(r => r.Status ==  EmployeeStatus.Active ? 0 : r.Status == EmployeeStatus.Pending ? 1 : 2).ThenBy(u => u.Status ==  EmployeeStatus.Pending ? u.Email : u.FirstName)
-                    : q.OrderBy(r => r.Status ==  EmployeeStatus.Active ? 0 : r.Status == EmployeeStatus.Pending ? 1 : 2).ThenByDescending(u => u.Status ==  EmployeeStatus.Pending ? u.Email : u.FirstName);
+                    ? q.OrderBy(r => r.Status == EmployeeStatus.Active ? 0 : r.Status == EmployeeStatus.Pending ? 1 : 2).ThenBy(u => u.Status == EmployeeStatus.Pending ? u.Email : u.FirstName)
+                    : q.OrderBy(r => r.Status == EmployeeStatus.Active ? 0 : r.Status == EmployeeStatus.Pending ? 1 : 2).ThenByDescending(u => u.Status == EmployeeStatus.Pending ? u.Email : u.FirstName);
                 break;
         }
 
@@ -691,7 +691,7 @@ public class EFUserService(
         {
             return;
         }
-        
+
         await userDbContext.UserRelations.AddAsync(relation);
         await userDbContext.SaveChangesAsync();
     }
@@ -699,11 +699,11 @@ public class EFUserService(
     public async Task<Dictionary<Guid, UserRelation>> GetUserRelationsAsync(int tenantId, Guid sourceUserId)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-        
+
         var q = userDbContext.UserRelations
             .Where(r => r.TenantId == tenantId && r.SourceUserId == sourceUserId);
-        
-        return await q.ToDictionaryAsync(r => r.TargetUserId, r=> r.Map());
+
+        return await q.ToDictionaryAsync(r => r.TargetUserId, r => r.Map());
     }
 
     public async Task<Dictionary<Guid, UserRelation>> GetUserRelationsByTargetAsync(int tenantId, Guid targetUserId)
@@ -885,13 +885,13 @@ public class EFUserService(
                         u => new
                         {
                             filter.TenantId,
-                            SourceUserId = authContext.CurrentAccount.ID, 
+                            SourceUserId = authContext.CurrentAccount.ID,
                             TargetUserId = u.Id
                         },
                         ur => new
                         {
                             ur.TenantId,
-                            ur.SourceUserId, 
+                            ur.SourceUserId,
                             ur.TargetUserId
                         },
                         (u, ur) => u);
@@ -903,13 +903,13 @@ public class EFUserService(
                             u => new
                             {
                                 filter.TenantId,
-                                SourceUserId = authContext.CurrentAccount.ID, 
+                                SourceUserId = authContext.CurrentAccount.ID,
                                 TargetUserId = u.Id
                             },
                             ur => new
                             {
                                 ur.TenantId,
-                                ur.SourceUserId, 
+                                ur.SourceUserId,
                                 ur.TargetUserId
                             },
                             (u, ur) => new { u, ur })
@@ -937,7 +937,7 @@ public class EFUserService(
                         .SelectMany(
                             x => x.ug.DefaultIfEmpty(),
                             (x, ug) => new { x.u, x.ur, ug })
-                        .Where(x => 
+                        .Where(x =>
                             x.ug == null ||
                             (x.ur != null && x.ug != null))
                         .Select(x => x.u);

@@ -56,6 +56,6 @@ public class RoomDataLifetimeDto
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class RoomDataLifetimeDtoMapper
-{       
+{
     public static partial RoomDataLifetimeDto MapToDto(this RoomDataLifetime source);
 }

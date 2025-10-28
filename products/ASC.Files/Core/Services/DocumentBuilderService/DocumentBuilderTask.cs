@@ -36,12 +36,12 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
     public TId ResultFileId { get; set; }
     public string ResultFileName { get; set; }
     public string ResultFileUrl { get; set; }
-    
+
     public DocumentBuilderTask()
     {
-        
+
     }
-    
+
     protected DocumentBuilderTask(IServiceScopeFactory serviceProvider)
     {
         _serviceProvider = serviceProvider;
@@ -53,7 +53,7 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
         _tenantId = tenantId;
         _userId = userId;
         _data = data;
-        
+
         Id = DocumentBuilderTaskManager.GetTaskId(tenantId, userId);
         Status = DistributedTaskStatus.Created;
 
@@ -140,7 +140,7 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
             await PublishChanges();
         }
     }
-    
+
     protected abstract Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider);
     protected abstract Task<File<TId>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData);
 }
