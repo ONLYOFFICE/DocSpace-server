@@ -26,9 +26,6 @@
 
 using System.Text.RegularExpressions;
 
-using ASC.AI.Core.Chat.Tool;
-using ASC.AI.Core.Tools;
-
 namespace ASC.AI.Core.MCP;
 
 [Scope]
@@ -45,7 +42,8 @@ public partial class McpService(
     ClientTransportFactory clientTransportFactory,
     OAuth20TokenHelper oauthTokenHelper,
     IToolPermissionProvider toolPermissionProvider,
-    SystemMcpConfig systemMcpConfig)
+    SystemMcpConfig systemMcpConfig,
+    SocketManager socketManager)
 {
     private const int MaxMcpServersByRoom = 5;
     private static readonly Regex _serverNameRegex = ServerNameRegex();
@@ -201,9 +199,15 @@ public partial class McpService(
     
     public async Task<List<McpServerStatus>> AddServersToRoomAsync(int roomId, HashSet<Guid> ids)
     {
-        await ThrowIfNotAccessEditRoomAsync(roomId);
+        var room = await GetRoomAsync(roomId);
+        if (!await fileSecurity.CanEditRoomAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
 
         var tenantId = tenantManager.GetCurrentTenantId();
+
+        var notify = false;
 
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId)))
         {
@@ -219,7 +223,13 @@ public partial class McpService(
                 }
             
                 await mcpDao.AddServersConnectionsAsync(tenantId, roomId, serversToAdd);
+                notify = true;
             }
+        }
+
+        if (notify)
+        {
+            await socketManager.UpdateFolderAsync(room);
         }
         
         return await GetServerStatusesAsync(roomId, tenantId);
@@ -227,7 +237,11 @@ public partial class McpService(
 
     public async Task DeleteServersFromRoomAsync(int roomId, List<Guid> ids)
     {
-        await ThrowIfNotAccessEditRoomAsync(roomId);
+        var room = await GetRoomAsync(roomId);
+        if (!await fileSecurity.CanEditRoomAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
         
         var tenantId = tenantManager.GetCurrentTenantId();
         
@@ -235,6 +249,8 @@ public partial class McpService(
         {
             await mcpDao.DeleteServersConnectionsAsync(tenantId, roomId, ids);
         }
+        
+        await socketManager.UpdateFolderAsync(room);
     }
 
     public async Task<List<McpServerStatus>> GetServersStatusesAsync(int roomId)
@@ -493,16 +509,6 @@ public partial class McpService(
         if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException("Access denied");
-        }
-    }
-    
-    private async Task ThrowIfNotAccessEditRoomAsync(int roomId)
-    {
-        var room = await GetRoomAsync(roomId);
-
-        if (!await fileSecurity.CanEditRoomAsync(room))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
     }
     
