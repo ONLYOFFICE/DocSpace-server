@@ -607,6 +607,12 @@ public enum MessageAction
 
     [SwaggerEnum("Form stopped")]
     FormStopped = 5153,
+    
+    [SwaggerEnum("Agent created")]
+    AgentCreated = 5154,
+
+    [SwaggerEnum("Agent renamed")]
+    AgentRenamed = 5155,
 
     #endregion
 

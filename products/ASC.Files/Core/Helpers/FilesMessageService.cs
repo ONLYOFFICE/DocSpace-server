@@ -448,7 +448,7 @@ public class FilesMessageService(
 
         switch (action)
         {
-            case MessageAction.RoomRenamed when !string.IsNullOrEmpty(oldTitle):
+            case MessageAction.RoomRenamed or MessageAction.AgentRenamed when !string.IsNullOrEmpty(oldTitle):
                 desc.RoomOldTitle = oldTitle;
                 break;
             case MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser when userid != Guid.Empty:

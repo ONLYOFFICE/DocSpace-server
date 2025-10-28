@@ -767,7 +767,10 @@ public class FileStorageService //: IFileStorageService
             return null;
         }
 
-        await filesMessageService.SendAsync(MessageAction.RoomCreated, folder, folder.Title);
+        await filesMessageService.SendAsync(
+            folder.FolderType == FolderType.AiRoom ? MessageAction.AgentCreated : MessageAction.RoomCreated, 
+            folder, 
+            folder.Title);
 
         await webhookManager.PublishAsync(WebhookTrigger.RoomCreated, folder);
 
@@ -1250,7 +1253,11 @@ public class FileStorageService //: IFileStorageService
             {
                 if (isRoom)
                 {
-                    await filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, folder, folder.Title);
+                    await filesMessageService.SendAsync(
+                        folder.FolderType == FolderType.AiRoom ? MessageAction.AgentRenamed : MessageAction.RoomRenamed, 
+                        oldTitle, 
+                        folder, 
+                        folder.Title);
                 }
                 else
                 {

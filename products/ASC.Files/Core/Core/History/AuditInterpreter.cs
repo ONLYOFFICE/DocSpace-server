@@ -45,6 +45,8 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
     private static readonly RoomDenyDownloadInterpreter _roomDenyDownloadInterpreter = new();
     private static readonly UserFileUpdatedInterpreter _userFileUpdatedInterpreter = new();
     private static readonly FileCustomFilterInterpreter _fileCustomFilterInterpreter = new();
+    private static readonly RoomCreateInterpreter _roomCreateInterpreter = new();
+    private static readonly RoomRenamedInterpreter _roomRenamedInterpreter = new();
 
     private static readonly FrozenDictionary<int, ActionInterpreter> _interpreters = new Dictionary<int, ActionInterpreter>
     {
@@ -76,9 +78,9 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomGroupAdded, new RoomGroupAddedInterpreter() },
         { (int)MessageAction.RoomUpdateAccessForGroup, new RoomGroupAccessUpdatedInterpreter() },
         { (int)MessageAction.RoomGroupRemove, new RoomRemovedGroupInterpreter() },
-        { (int)MessageAction.RoomCreated, new RoomCreateInterpreter() },
+        { (int)MessageAction.RoomCreated, _roomCreateInterpreter },
         { (int)MessageAction.RoomCopied, new RoomCopiedInterpreter() },
-        { (int)MessageAction.RoomRenamed, new RoomRenamedInterpreter() },
+        { (int)MessageAction.RoomRenamed, _roomRenamedInterpreter },
         { (int)MessageAction.AddedRoomTags, _roomTagsInterpreter },
         { (int)MessageAction.DeletedRoomTags, _roomTagsInterpreter },
         { (int)MessageAction.RoomLogoCreated, _roomLogoChangedInterpreter },
@@ -113,7 +115,9 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomColorChanged, _roomLogoChangedInterpreter },
         { (int)MessageAction.RoomCoverChanged, _roomLogoChangedInterpreter },
         { (int)MessageAction.RoomIndexExportSaved, new RoomIndexExportSavedInterpreter() },
-        { (int)MessageAction.RoomInviteResend, new RoomInviteResendInterpreter() }
+        { (int)MessageAction.RoomInviteResend, new RoomInviteResendInterpreter() },
+        { (int)MessageAction.AgentCreated, _roomCreateInterpreter },
+        { (int)MessageAction.AgentRenamed, _roomRenamedInterpreter }
     }.ToFrozenDictionary();
 
     public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event, DbFilesAuditReference reference)

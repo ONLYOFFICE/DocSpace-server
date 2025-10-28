@@ -1038,4 +1038,13 @@
   <data name="LoginSuccessSocialAccount" xml:space="preserve">
     <value>Login Via Social Account Success</value>
   </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agent created</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agent renamed: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agents</value>
+  </data>
 </root>

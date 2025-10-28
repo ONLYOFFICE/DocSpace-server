@@ -144,7 +144,7 @@ internal class RoomsActionMapper : ILocationActionMapper
             {
                 EntryType.Room, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Create, [MessageAction.RoomCreated] },
+                    { ActionType.Create, [MessageAction.RoomCreated, MessageAction.AgentCreated] },
                     { ActionType.Copy, [MessageAction.RoomCopied] },
                     {
                         ActionType.Update, [
@@ -176,7 +176,8 @@ internal class RoomsActionMapper : ILocationActionMapper
                             MessageAction.RoomDenyDownloadDisabled,
                             MessageAction.RoomWatermarkSet,
                             MessageAction.RoomWatermarkDisabled,
-                            MessageAction.RoomInviteResend
+                            MessageAction.RoomInviteResend,
+                            MessageAction.AgentRenamed
                         ]
                     },
                     { ActionType.Delete, [MessageAction.RoomDeleted] },

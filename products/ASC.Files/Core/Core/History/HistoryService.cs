@@ -99,7 +99,9 @@ public class HistoryService(
         MessageAction.FormStartedToFill,
         MessageAction.FormPartiallyFilled,
         MessageAction.FormCompletelyFilled,
-        MessageAction.FormStopped
+        MessageAction.FormStopped,
+        MessageAction.AgentCreated,
+        MessageAction.AgentRenamed
     ];
 
     private static HashSet<int> FilterFolderActions => [

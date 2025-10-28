@@ -334,7 +334,7 @@ public class ProductEntryPoint : Product
 
         bool IsRoomAdminAction()
         {
-            if (action is MessageAction.RoomRenamed or MessageAction.RoomArchived or MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser)
+            if (action is MessageAction.RoomRenamed or MessageAction.RoomArchived or MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser or MessageAction.AgentCreated or MessageAction.AgentRenamed)
             {
                 return true;
             }
