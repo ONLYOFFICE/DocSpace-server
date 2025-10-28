@@ -650,7 +650,7 @@ public class BackupService(
 
         var backupQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.Backup);
 
-        return backupQuota == null ? throw new ItemNotFoundException("Backup quota not found") : backupQuota.ProductId;
+        return backupQuota == null ? throw new ItemNotFoundException("Backup quota not found") : backupQuota.GetPaymentId();
     }
 }
 
