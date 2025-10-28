@@ -1007,39 +1007,47 @@ public class FileSecurity(
         var folder = e as Folder<T>;
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
         var cacheFileDao = daoFactory.GetCacheFileDao<T>();
-        if (file != null &&
-            action == FilesSecurityActions.FillForms &&
-            !file.IsForm)
+        
+        if (file != null && action == FilesSecurityActions.FillForms && !file.IsForm)
         {
             return false;
         }
+        
         if (file != null && action == FilesSecurityActions.Edit && file.Category == (int)FilterType.Pdf && file.IsCompletedForm)
         {
             return false;
         }
+        
         var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
-        //
-        if (file != null && room is { FolderType: FolderType.VirtualDataRoom } && !await HasFullAccessAsync(file, userId, isGuest, isRoom, isUser) && !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
-        {
-            var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
-            if (shareRecord is { Share: FileShare.FillForms })
-            {
-                return false;
-            }
-        }
 
-        if (folder != null && room is { FolderType: FolderType.VirtualDataRoom } && !await HasFullAccessAsync(folder, userId, isGuest, isRoom, isUser))
+        if (room is { FolderType: FolderType.VirtualDataRoom })
         {
-            var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
-            if (shareRecord is { Share: FileShare.FillForms })
+            var hasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
+            
+            if (file != null && !hasFullAccess && !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
             {
-                var folderDao = daoFactory.GetCacheFolderDao<T>();
-                if (!await folderDao.ContainsFormsInFolder(folder))
+                var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
+                if (shareRecord is { Share: FileShare.FillForms })
                 {
                     return false;
                 }
             }
+
+            if (folder != null && !hasFullAccess)
+            {
+                var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
+                if (shareRecord is { Share: FileShare.FillForms })
+                {
+                    var folderDao = daoFactory.GetCacheFolderDao<T>();
+                    if (!await folderDao.ContainsFormsInFolder(folder))
+                    {
+                        return false;
+                    }
+                }
+            }
         }
+        
+        
 
         if (folder is { FolderType: FolderType.AiRoom } && 
             action is FilesSecurityActions.Create or 
@@ -1293,7 +1301,7 @@ public class FileSecurity(
             }
         }
 
-        if (file == null || (file != null && !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory)) || (file is { IsForm: true } && e.RootFolderType != FolderType.VirtualRooms))
+        if (file == null || !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory) || (file is { IsForm: true } && e.RootFolderType != FolderType.VirtualRooms))
         {
             switch (action)
             {
@@ -1434,13 +1442,17 @@ public class FileSecurity(
                     FilesSecurityActions.OpenForm)
                     && await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
                 {
-                    var fileFolder = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));//
-                    var fileParentFolder = parentFolders.LastOrDefault();
-                    if (action == FilesSecurityActions.FillForms && (fileParentFolder != null && ((fileParentFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileParentFolder.FolderType == FolderType.FormFillingFolderDone)))
+
+                    if (action == FilesSecurityActions.FillForms)
                     {
-                        return false;
+                        var fileParentFolder = parentFolders.LastOrDefault();
+                        if (fileParentFolder != null && ((fileParentFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileParentFolder.FolderType == FolderType.FormFillingFolderDone))
+                        {
+                            return false;
+                        }
                     }
 
+                    var fileFolder = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
                     if (fileFolder is { FolderType: FolderType.VirtualDataRoom } && !userId.Equals(ASC.Core.Configuration.Constants.Guest.ID))
                     {
                         var (currentStep, myRoles) = await cacheFileDao.GetUserFormRoles(file.Id, userId);
@@ -1482,16 +1494,14 @@ public class FileSecurity(
                             _ => false
                         };
                     }
-                    else
+
+                    switch (action)
                     {
-                        switch (action)
-                        {
-                            case FilesSecurityActions.ResetFilling:
-                            case FilesSecurityActions.StopFilling:
-                            case FilesSecurityActions.StartFilling:
-                            case FilesSecurityActions.FillingStatus:
-                                return false;
-                        }
+                        case FilesSecurityActions.ResetFilling:
+                        case FilesSecurityActions.StopFilling:
+                        case FilesSecurityActions.StartFilling:
+                        case FilesSecurityActions.FillingStatus:
+                            return false;
                     }
                 }
                 else if (file is not { IsForm: true } && action is FilesSecurityActions.OpenForm)
@@ -3169,7 +3179,7 @@ public class FileSecurity(
         return parentFolders;
     }
 
-    private async Task<bool> HasFullAccessAsync<T>(FileEntry<T> entry, Guid userId, bool isGuest, bool isRoom, bool isUser)
+    private async ValueTask<bool> HasFullAccessAsync<T>(FileEntry<T> entry, Guid userId, bool isGuest, bool isRoom, bool isUser)
     {
         if (isGuest || isUser)
         {
@@ -3186,7 +3196,7 @@ public class FileSecurity(
             return roomOwner == userId;
         }
 
-        var folderDao = daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetCacheFolderDao<T>();
         var room = await DocSpaceHelper.GetParentRoom(entry, folderDao);
 
         if (room == null)
