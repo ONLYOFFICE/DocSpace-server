@@ -52,7 +52,7 @@ public static class SystemMcpServerExtensions
             Headers = systemMcpServer.Headers,
             ServerType = systemMcpServer.Type,
             ConnectionType = systemMcpServer.ConnectionType,
-            Enabled = state?.Enabled ?? false
+            Enabled = state?.Enabled ?? true
         };
     }
 }
