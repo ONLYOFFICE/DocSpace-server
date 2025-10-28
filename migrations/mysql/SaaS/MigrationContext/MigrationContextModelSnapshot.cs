@@ -18,7 +18,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "9.0.10")
+                .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.Core.Common.EF.Acl", b =>
@@ -850,7 +850,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Features = "backup",
                             Name = "backup",
                             Price = 10m,
-                            ProductId = "backup",
+                            ProductId = "10006",
                             Visible = false,
                             Wallet = true
                         });
