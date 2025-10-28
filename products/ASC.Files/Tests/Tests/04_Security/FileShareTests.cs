@@ -736,6 +736,39 @@ public class FileShareTests(
         sharedFolder2.Should().NotBeNull();
         sharedFolder2.New.Should().Be(2);
     }
+
+    [Fact]
+    public async Task SharedFolder_ShareFileToUser_ReturnsSharedFile()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        var user1 = Initializer.Owner;
+        var user2 = await Initializer.InviteContact(EmployeeType.User);
+        
+        var file = await CreateFileInMy("file_new_item_1.docx", user1);
+        
+        var fileShare = FileShare.Read;
+        var shareInfo1 = new List<FileShareParams>
+        {
+            new() { ShareTo = user2.Id, Access = fileShare }
+        };
+        var securityRequest1 = new SecurityInfoSimpleRequestDto
+        {
+            Share = shareInfo1
+        };
+        var result1 = (await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest1, TestContext.Current.CancellationToken)).Response;
+        result1.Should().NotBeNull();
+        
+        await _filesClient.Authenticate(user2);
+        
+        var sharedFolderId = await GetFolderIdAsync(FolderType.SHARE, user2);
+        var sharedFolder = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        
+        sharedFolder.Should().NotBeNull();
+        sharedFolder.Files.Should().Contain(f => f.Title == file.Title);
+
+        var sharedFile = sharedFolder.Files.First(f => f.Title == file.Title);
+        sharedFile.Access.Should().Be(fileShare);
+    }
     
 
     [Fact]
