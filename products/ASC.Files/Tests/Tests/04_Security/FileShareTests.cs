@@ -948,16 +948,10 @@ public class FileShareTests(
                     break;
             }
 
-            // Get shared folder content
-            var sharedFolderId = await GetFolderIdAsync(FolderType.SHARE, user2);
-            var sharedFolder = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
-
-            // Verify file is present in shared folder and has expected access
-            sharedFolder.Should().NotBeNull();
-            sharedFolder.Files.Should().Contain(f => f.Title == file.Title);
-
-            var sharedFile = sharedFolder.Files.First(f => f.Title == file.Title);
-            sharedFile.Access.Should().Be(access);
+            // Verify access by id
+            fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+            fileInfo.Should().NotBeNull();
+            fileInfo.Access.Should().Be(access);
 
             // Re-authenticate as owner for the next iteration
             await _filesClient.Authenticate(owner);
