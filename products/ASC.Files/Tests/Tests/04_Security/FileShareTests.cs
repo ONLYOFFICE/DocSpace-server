@@ -773,7 +773,7 @@ public class FileShareTests(
     [Fact]
     public async Task SharedFolder_ExternalLinkRead_ChecksReadAccessViaLinkAndManuallyInSharedFolder()
     {
-        // Step 1: Authenticate as Owner and create file in "My Documents"
+        // Authenticate as Owner and create file in "My Documents"
         await _filesClient.Authenticate(Initializer.Owner);
         var owner = Initializer.Owner;
         var user2 = await Initializer.InviteContact(EmployeeType.User);
@@ -781,36 +781,98 @@ public class FileShareTests(
         var file = await CreateFileInMy("file_external_read.docx", owner);
         var fileShare = FileShare.Read;
 
-        // Step 2: Create external link with Read rights
+        // Create external link with Read rights
         var linkRequest = new FileLinkRequest(access: fileShare);
         var linkResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, linkRequest, TestContext.Current.CancellationToken)).Response;
         var requestToken = linkResponse.SharedLink.RequestToken;
 
-        // Step 3: Authenticate as user2 and open file using the external link
+        // Authenticate as user2 and open file using the external link, then add to recent
         await _filesClient.Authenticate(user2);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, requestToken);
         var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         await _filesApi.AddFileToRecentAsync(file.Id, TestContext.Current.CancellationToken);
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
 
-        // Step 4: Verify read access via link
+        // Verify read access via link
         fileInfo.Should().NotBeNull();
         fileInfo.Access.Should().Be(fileShare);
         fileInfo.Security.Read.Should().BeTrue();
         fileInfo.Security.Edit.Should().BeFalse();
 
-        // Step 5: Get shared folder content
+        // Get shared folder content
         var sharedFolderId = await GetFolderIdAsync(FolderType.SHARE, user2);
         var sharedFolder = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         sharedFolder.Should().NotBeNull();
         sharedFolder.Files.Should().Contain(f => f.Title == file.Title);
 
-        // Step 6: Verify read access manually in shared folder
+        // Verify read access manually in shared folder
         var sharedFile = sharedFolder.Files.First(f => f.Title == file.Title);
         sharedFile.Access.Should().Be(fileShare);
         fileInfo.Security.Read.Should().BeTrue();
         fileInfo.Security.Edit.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task SharedFolder_DifferentExternalLinks_ChecksAccessViaLastLinkAndManuallyInSharedFolder()
+    {
+        // Authenticate as Owner and create file in "My Documents"
+        await _filesClient.Authenticate(Initializer.Owner);
+        var owner = Initializer.Owner;
+        var user2 = await Initializer.InviteContact(EmployeeType.User);
+
+        var accessTypes = new[] { FileShare.Read, FileShare.Comment, FileShare.Editing };
+
+        var file = await CreateFileInMy("file_for_different_external_links.docx", owner);
+
+        foreach (var access in accessTypes)
+        {
+            // Create external link with required rights
+            var linkResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, new FileLinkRequest(access: access), TestContext.Current.CancellationToken)).Response;
+            var requestToken = linkResponse.SharedLink.RequestToken;
+
+            // Authenticate as user2 and open file using the external link, then add to recent
+            await _filesClient.Authenticate(user2);
+            _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, requestToken);
+            var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+            await _filesApi.AddFileToRecentAsync(file.Id, TestContext.Current.CancellationToken);
+            _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+            // Verify access via link
+            fileInfo.Should().NotBeNull();
+            fileInfo.Access.Should().Be(access);
+            fileInfo.Security.Read.Should().BeTrue();
+
+            switch (access)
+            {
+                case FileShare.Read:
+                    fileInfo.Security.Edit.Should().BeFalse();
+                    fileInfo.Security.Comment.Should().BeFalse();
+                    break;
+                case FileShare.Comment:
+                    fileInfo.Security.Edit.Should().BeFalse();
+                    fileInfo.Security.Comment.Should().BeTrue();
+                    break;
+                case FileShare.Editing:
+                    fileInfo.Security.Edit.Should().BeTrue();
+                    fileInfo.Security.Comment.Should().BeTrue();
+                    break;
+            }
+
+            // Get shared folder content
+            var sharedFolderId = await GetFolderIdAsync(FolderType.SHARE, user2);
+            var sharedFolder = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+            // Verify file is present in shared folder and has expected access
+            sharedFolder.Should().NotBeNull();
+            sharedFolder.Files.Should().Contain(f => f.Title == file.Title);
+
+            var sharedFile = sharedFolder.Files.First(f => f.Title == file.Title);
+            sharedFile.Access.Should().Be(access);
+
+            // Re-authenticate as owner for the next iteration
+            await _filesClient.Authenticate(owner);
+        }
     }
 
     [Fact]
