@@ -45,6 +45,7 @@ public class AiGateway(
     UserManager userManager,
     AuthContext authContext)
 {
+    public readonly int ProviderId = -1;
     public string Url => Settings?.Url;
     
     public bool IsEnabled => !string.IsNullOrEmpty(Url) && !string.IsNullOrEmpty(Settings?.Secret);

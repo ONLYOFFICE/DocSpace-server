@@ -110,7 +110,7 @@ public class AiProviderService(
         {
             yield return new AiProvider
             {
-                Id = 0,
+                Id = gateway.ProviderId,
                 Title = "DocSpace AI",
                 Url = string.Empty,
                 Key = string.Empty,
@@ -154,7 +154,7 @@ public class AiProviderService(
     {
         if (gateway.IsEnabled)
         {
-            var provider = await GetProviderAsync(0);
+            var provider = await GetProviderAsync(gateway.ProviderId);
             return await GetProviderModelsAsync(provider, scope);
         }
         
@@ -192,7 +192,7 @@ public class AiProviderService(
         {
             return new AiProvider
             {
-                Id = 0,
+                Id = gateway.ProviderId,
                 Title = "DocSpace AI",
                 Url = gateway.Url,
                 Key = await gateway.GetKeyAsync(),
