@@ -41,6 +41,7 @@ public interface IProviderInfo : IDisposable
     bool Private { get; }
     bool HasLogo { get; }
     string Color { get; }
+    string Cover { get; }
     Task<bool> CheckAccessAsync();
     Task InvalidateStorageAsync();
     Task CacheResetAsync(string id = null, bool? isFile = null);

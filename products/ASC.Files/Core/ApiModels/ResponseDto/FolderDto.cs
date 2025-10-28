@@ -149,6 +149,10 @@ public class FolderDto<T> : FileEntryDto<T>
     /// The file entry type of the folder.
     /// </summary>
     public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
+    
+    public ChatSettings ChatSettings { get; set; }
+    
+    public RoomType? RootRoomType { get; set; }
 }
 
 [Scope]
@@ -285,6 +289,21 @@ public class FolderDtoHelper(
 
         result.Lifetime = folder.SettingsLifetime.MapToDto();
         result.AvailableShareRights = (await _fileSecurity.GetAccesses(folder)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
+        
+        if (folder.FolderType is FolderType.Knowledge or FolderType.ResultStorage)
+        {
+            result.Type = folder.FolderType;
+        }
+        
+        if (folder.SettingsChatParameters != null)
+        {
+            result.ChatSettings = new ChatSettings
+            {
+                ProviderId = folder.SettingsChatProviderId,
+                ModelId = string.IsNullOrEmpty(folder.SettingsChatParameters.ModelId) ? null : folder.SettingsChatParameters.ModelId,
+                Prompt = folder.SettingsChatParameters.Prompt,
+            };
+        }
 
         if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })
         {

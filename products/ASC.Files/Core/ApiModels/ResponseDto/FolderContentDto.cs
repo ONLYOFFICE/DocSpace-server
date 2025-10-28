@@ -154,6 +154,11 @@ public class FolderContentDtoHelper(
         result.Total = folderItems.Total;
         result.New = (await isEnableBadges) ? folderItems.New : 0;
         result.Current = (FolderDto<T>)(await currentTask);
+        
+        if (folderItems.ParentRoom is { FolderType: FolderType.AiRoom })
+        {
+            result.Current.RootRoomType = DocSpaceHelper.MapToRoomType(folderItems.ParentRoom.FolderType);
+        }
 
         return result;
 

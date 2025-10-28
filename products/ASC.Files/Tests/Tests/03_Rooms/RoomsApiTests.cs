@@ -369,4 +369,122 @@ public class RoomsApiTests(
         roomFiles.Files.Should().NotBeEmpty();
         roomFiles.Files.Should().Contain(f => f.Title == fileName);
     }
+    
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "77872")]
+    public async Task AddExistingGuestToRoom_WhenAllowInvitingGuestsDisabled_ShouldSucceed()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        // Create a guest user
+        var guest = await Initializer.InviteContact(EmployeeType.Guest);
+
+        // Disable "Allow inviting guests" setting
+        var invitationSettings = new TenantUserInvitationSettingsRequestDto
+        {
+            AllowInvitingMembers = true,
+            AllowInvitingGuests = false
+        };
+        
+        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, TestContext.Current.CancellationToken);
+
+        // Create a public room
+        var room = await CreatePublicRoom("Test Room For Existing Guest");
+
+        // Act - Add existing guest to the room
+        var invitation = new RoomInvitation
+        {
+            Id = guest.Id,
+            Access = FileShare.ContentCreator
+        };
+
+        var roomInvitation = new RoomInvitationRequest
+        {
+            Invitations = [invitation],
+            Notify = false,
+            Message = "",
+            Culture = "en-US"
+        };
+        
+        await _roomsApi.SetRoomSecurityAsync(room.Id, roomInvitation, 
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        // Verify guest was added to the room
+        var roomSecurity = await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken);
+        var guestAccess = roomSecurity.Response.FirstOrDefault(x => x.SharedToUser.Id == guest.Id);
+        guestAccess.Should().NotBeNull("guest should be added to the room");
+        guestAccess!.Access.Should().Be(FileShare.ContentCreator);
+
+        // Cleanup - Re-enable "Allow inviting guests" setting
+        invitationSettings.AllowInvitingGuests = true;
+        await apiFactory.CommonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, 
+            cancellationToken: TestContext.Current.CancellationToken);
+    }
+    
+    [Fact]
+    public async Task AddNewGuestToRoom_WhenAllowInvitingGuestsDisabled_ShouldDenied()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var email = Initializer.FakerMember.Generate().Email;
+        
+        // Disable "Allow inviting guests" setting
+        var invitationSettings = new TenantUserInvitationSettingsRequestDto
+        {
+            AllowInvitingMembers = true,
+            AllowInvitingGuests = false
+        };
+        
+        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, 
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        // Create a public room
+        var room = await CreatePublicRoom("Test Room For Existing Guest");
+
+        // Act - Add existing guest to the room
+        var invitation = new RoomInvitation
+        {
+            Email = email,
+            Access = FileShare.ContentCreator
+        };
+
+        var roomInvitation = new RoomInvitationRequest
+        {
+            Invitations = [invitation],
+            Notify = false,
+            Message = "",
+            Culture = "en-US"
+        };
+        
+        await Assert.ThrowsAsync<ApiException>(async () =>  await _roomsApi.SetRoomSecurityAsync(room.Id, roomInvitation, 
+            cancellationToken: TestContext.Current.CancellationToken));
+        
+        invitationSettings.AllowInvitingGuests = true;
+        
+        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, 
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await _roomsApi.SetRoomSecurityAsync(room.Id, roomInvitation,
+            cancellationToken: TestContext.Current.CancellationToken);
+        
+        await _peopleClient.Authenticate(Initializer.Owner);
+        
+        var pendingUsers = (await _userStatusApi.GetByStatusAsync(EmployeeStatus.Pending, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        pendingUsers.Should().NotBeNull();
+        pendingUsers.Should().Contain(r => r.Email == email);
+        
+        // Verify guest was added to the room
+        var roomSecurity = await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken);
+        var guestAccess = roomSecurity.Response.FirstOrDefault(x => pendingUsers.Any(r => r.Id == x.SharedToUser.Id));
+        guestAccess.Should().NotBeNull("guest should be added to the room");
+        guestAccess!.Access.Should().Be(FileShare.ContentCreator);
+
+        // Cleanup - Re-enable "Allow inviting guests" setting
+        invitationSettings.AllowInvitingGuests = true;
+        await apiFactory.CommonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, 
+            cancellationToken: TestContext.Current.CancellationToken);
+    }
 }

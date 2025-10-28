@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Threading.HeartBeat.Abstractions;
+using ASC.Common.Threading.HeartBeat.RedisHeartBeat;
+
 using Microsoft.Extensions.Caching.Memory;
 
 using ZiggyCreatures.Caching.Fusion;
@@ -350,6 +353,30 @@ public static class ServiceCollectionExtension
         return services;
     }
 
+    public static IServiceCollection AddHeartBeat(this IServiceCollection services, IConfiguration configuration)
+    {
+        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
+        if (redisConfiguration == null)
+        {
+            throw new NotImplementedException("HeartBeat: Provider not found.");
+        }
+        
+        services.AddSingleton<IHeartBeatFactory, RedisHeartBeatFactory>(sp =>
+        {
+            var redisDatabase = sp.GetRequiredService<IRedisClient>().GetDefaultDatabase();
+            
+            return new RedisHeartBeatFactory(redisDatabase);
+        });
+        
+        services.AddSingleton<IHeartBeatMonitor, RedisHeartBeatMonitor>(sp =>
+        {
+            var redisDatabase = sp.GetRequiredService<IRedisClient>().GetDefaultDatabase();
+            
+            return new RedisHeartBeatMonitor(redisDatabase);
+        });
+        
+        return services;
+    }
 
     private static readonly List<string> _registeredActivePassiveHostedService = [];
     private static readonly Lock _locker = new();

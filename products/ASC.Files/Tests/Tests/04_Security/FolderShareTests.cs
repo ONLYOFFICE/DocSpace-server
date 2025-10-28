@@ -658,4 +658,68 @@ public class FolderShareTests(
         sharedFolder3.Should().NotBeNull();
         sharedFolder3.New.Should().Be(3);
     }
+
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "77476")]
+    public async Task SharedFolderWithFile_RemoveUsersFromFileShare_ReturnsOk()
+    {
+        // Step 1: Authenticate as owner
+        await _filesClient.Authenticate(Initializer.Owner);
+        var owner = Initializer.Owner;
+
+        // Step 2: Share folder in "My Documents" with full access
+        var folder = await CreateFolderInMy("shared_folder", owner);
+        var user2 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+
+        var folderShareInfo = new List<FileShareParams>
+        {
+            new() { ShareTo = user2.Id, Access = FileShare.ReadWrite }
+        };
+        var folderSecurityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = folderShareInfo
+        };
+        var folderShareResult = (await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, folderSecurityRequest, TestContext.Current.CancellationToken)).Response;
+        folderShareResult.Should().NotBeNull();
+
+        // Step 3: Create document inside folder and add users with different access levels
+        var file = await CreateFile("document.docx", folder.Id);
+        var user3 = await Initializer.InviteContact(EmployeeType.User);
+        var user4 = await Initializer.InviteContact(EmployeeType.User);
+
+        var fileShareInfo = new List<FileShareParams>
+        {
+            new() { ShareTo = user3.Id, Access = FileShare.Read },
+            new() { ShareTo = user4.Id, Access = FileShare.Editing }
+        };
+        var fileSecurityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = fileShareInfo
+        };
+        var fileShareResult = (await _sharingApi.SetFileSecurityInfoAsync(file.Id, fileSecurityRequest, TestContext.Current.CancellationToken)).Response;
+        fileShareResult.Should().NotBeNull();
+
+        // Step 4: Authenticate as user2 (who has full access to folder and file)
+        await _filesClient.Authenticate(user2);
+
+        // Step 5: Get file security info to verify initial sharing
+        var initialSecurityInfos = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        initialSecurityInfos.Should().NotBeEmpty();
+        initialSecurityInfos.Should().Contain(s => s.SharedToUser.Id == user3.Id && s.Access == FileShare.Read);
+        initialSecurityInfos.Should().Contain(s => s.SharedToUser.Id == user4.Id && s.Access == FileShare.Editing);
+
+        // Step 6: Remove users from file share list by setting access to None
+        var removeShareInfo = new List<FileShareParams>
+        {
+            new() { ShareTo = user3.Id, Access = FileShare.None },
+            new() { ShareTo = user4.Id, Access = FileShare.None }
+        };
+        var removeSecurityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = removeShareInfo
+        };
+        await Assert.ThrowsAsync<ApiException>(async() => 
+            await _sharingApi.SetFileSecurityInfoAsync(file.Id, removeSecurityRequest, TestContext.Current.CancellationToken));
+    }
 }

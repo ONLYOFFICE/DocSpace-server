@@ -366,6 +366,8 @@ public class File<T> : FileEntry<T>
     /// The file form information.
     /// </summary>
     public FormInfo<T> FormInfo { get; set; }
+    
+    public VectorizationStatus? VectorizationStatus { get; set; }
 }
 
 /// <summary>

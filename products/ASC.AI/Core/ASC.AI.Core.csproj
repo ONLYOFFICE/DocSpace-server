@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <NoWarn>1701;1702;SKEXP0050</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <NoWarn>1701;1702;SKEXP0050</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Anthropic.SDK" />
+      <PackageReference Include="Microsoft.Extensions.AI" />
+      <PackageReference Include="Microsoft.SemanticKernel.Core" />
+      <PackageReference Include="ModelContextProtocol" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\common\ASC.Common\ASC.Common.csproj" />
+      <ProjectReference Include="..\..\..\common\ASC.Core.Common\ASC.Core.Common.csproj" />
+      <ProjectReference Include="..\..\ASC.Files\Core\ASC.Files.Core.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -404,7 +404,8 @@ public abstract class BaseStartup
             .AddEventBus(_configuration)
             .AddDistributedTaskQueue()
             .AddCacheNotify(_configuration)
-            .AddDistributedLock(_configuration);
+            .AddDistributedLock(_configuration)
+            .AddHeartBeat(_configuration);
 
         services.RegisterFeature();
 

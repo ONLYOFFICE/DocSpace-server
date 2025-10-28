@@ -130,6 +130,9 @@ public interface IFolderDao<T>
     /// <param name="folder"></param>
     /// <returns></returns>
     Task<T> SaveFolderAsync(Folder<T> folder);
+
+    Task<T> SaveFolderAsync(Folder<T> folder, IEnumerable<Folder<T>> children);
+    
     /// <summary>
     ///     delete folder
     /// </summary>
@@ -191,7 +194,8 @@ public interface IFolderDao<T>
     /// <param name="watermark">watermark</param>
     /// <param name="color">color</param>
     /// <param name="cover">cover</param>
-    Task<T> UpdateFolderAsync(Folder<T> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifetime, WatermarkSettings watermark, string color, string cover);
+    /// <param name="chatSettings">chat settings</param>
+    Task<T> UpdateFolderAsync(Folder<T> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifetime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null);
 
     /// <summary>
     ///    Change folder type
@@ -402,6 +406,14 @@ public interface IFolderDao<T>
     /// <param name="createIfNotExists"></param>
     /// <returns></returns>
     Task<T> GetFolderIDArchive(bool createIfNotExists);
+
+    /// <summary>
+    /// Returns id folder "AiAgents"
+    /// Only in TMFolderDao
+    /// </summary>
+    /// <param name="createIfNotExists"></param>
+    /// <returns></returns>
+    Task<T> GetFolderIDAiAgentsAsync(bool createIfNotExists);
 
     /// <summary>
     /// Return id of related object

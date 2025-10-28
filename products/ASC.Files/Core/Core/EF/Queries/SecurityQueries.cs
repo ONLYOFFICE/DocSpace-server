@@ -99,6 +99,24 @@ public partial class FilesDbContext
     {
         return SecurityQueries.RemoveSecuritiesAsync(this, tenantId, subject, owner, subjectType);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<int> RemoveUserRoomChatsAsync(int tenantId, int roomId, Guid userId)
+    {
+        return SecurityQueries.RemoveUserRoomChatsAsync(this, tenantId, roomId, userId);
+    }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<int> RemoveUserRoomChatsSettingsAsync(int tenantId, int roomId, Guid userId)
+    {
+        return SecurityQueries.RemoveUserRoomChatsSettingsAsync(this, tenantId, roomId, userId);
+    }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<int> RemoveUserRoomMcpSettingsAsync(int tenantId, int roomId, Guid userId)
+    {
+        return SecurityQueries.RemoveUserRoomMcpSettingsAsync(this, tenantId, roomId, userId);
+    }
 }
 
 static file class SecurityQueries
@@ -191,5 +209,26 @@ static file class SecurityQueries
                         r.Subject == subject &&
                         r.Owner == owner &&
                         r.SubjectType == subjectType)
+                    .ExecuteDelete());
+    
+    public static readonly Func<FilesDbContext, int, int, Guid, Task<int>> RemoveUserRoomChatsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId, Guid userId) =>
+                ctx.Chats
+                    .Where(r => r.TenantId == tenantId && r.RoomId == roomId && r.UserId == userId)
+                    .ExecuteDelete());
+    
+    public static readonly Func<FilesDbContext, int, int, Guid, Task<int>> RemoveUserRoomChatsSettingsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId, Guid userId) =>
+                ctx.UserChatSettings
+                    .Where(r => r.TenantId == tenantId && r.RoomId == roomId && r.UserId == userId)
+                    .ExecuteDelete());
+    
+    public static readonly Func<FilesDbContext, int, int, Guid, Task<int>> RemoveUserRoomMcpSettingsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId, Guid userId) =>
+                ctx.McpServerSettings
+                    .Where(r => r.TenantId == tenantId && r.RoomId == roomId && r.UserId == userId)
                     .ExecuteDelete());
 }

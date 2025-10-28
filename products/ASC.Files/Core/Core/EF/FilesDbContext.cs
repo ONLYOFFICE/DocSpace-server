@@ -51,6 +51,11 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbFilesAuditReference> FilesAuditReference { get; set; }
     public DbSet<DbUserRelation> UserRelations { get; set; }
     public DbSet<DbFilesFormRoleMapping> FilesFormRoleMapping { get; set; }
+    public DbSet<DbChat> Chats { get; set; }
+    public DbSet<DbChatMessage> ChatMessages { get; set; }
+    public DbSet<DbFileVectorization> FileVectorization { get; set; }
+    public DbSet<DbUserChatSettings> UserChatSettings { get; set; }
+    public DbSet<DbMcpServerSettings> McpServerSettings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -77,6 +82,11 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddUserGroup()
             .AddFilesAuditReference()
             .AddUserRelation()
+            .AddDbChats()
+            .AddDbChatsMessages()
+            .AddDbFileVectorization()
+            .AddDbUserChatSettings()
+            .AddDbMcpServerSettings()
             .AddDbFunctions();
     }
 }

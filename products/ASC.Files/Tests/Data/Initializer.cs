@@ -55,7 +55,7 @@ public static class Initializer
         new("license:file:path", Path.Combine(_basePath, "Data", "license", "license.lic"))
     ];
 
-    private static readonly Faker<MemberRequestDto> _fakerMember = new Faker<MemberRequestDto>()
+    public static readonly Faker<MemberRequestDto> FakerMember = new Faker<MemberRequestDto>()
         .RuleFor(x => x.FirstName, f => f.Person.FirstName)
         .RuleFor(x => x.LastName, f => f.Person.LastName)
         .RuleFor(x => x.Email, f => f.Person.Email)
@@ -162,7 +162,7 @@ public static class Initializer
             parsedEmployeeType = EmployeeType.Guest;
         }
         
-        var fakeMember = _fakerMember.Generate();
+        var fakeMember = FakerMember.Generate();
         
         var createMemberResponse = await _peopleFactory.ProfilesApi.AddMemberWithHttpInfoAsync(new DocSpace.API.SDK.Model.MemberRequestDto
         {

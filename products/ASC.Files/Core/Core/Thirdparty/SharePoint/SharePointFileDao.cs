@@ -532,6 +532,11 @@ internal class SharePointFileDao(
         return Task.CompletedTask;
     }
 
+    public Task SetVectorizationStatusAsync(string fileId, VectorizationStatus status, Func<Task> action = null)
+    {
+        return Task.CompletedTask;
+    }
+
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
     {
         if (!long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred))

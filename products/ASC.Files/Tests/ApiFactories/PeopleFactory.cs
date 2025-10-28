@@ -34,6 +34,7 @@ public class PeopleFactory : WebApplicationFactory<PeopleProgram>, IAsyncLifetim
 {
     public HttpClient HttpClient { get; private set; } = null!;
     public ProfilesApi  ProfilesApi { get; private set; } = null!;
+    public UserStatusApi  UserStatusApi { get; private set; } = null!;
     public GroupApi  GroupApi { get; private set; } = null!;
     
     protected override IHost CreateHost(IHostBuilder builder)
@@ -53,6 +54,7 @@ public class PeopleFactory : WebApplicationFactory<PeopleProgram>, IAsyncLifetim
         var configuration = new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') };
         ProfilesApi = new ProfilesApi(HttpClient, configuration);
         GroupApi = new GroupApi(HttpClient, configuration);
+        UserStatusApi = new UserStatusApi(HttpClient, configuration);
 
         return ValueTask.CompletedTask;
     }

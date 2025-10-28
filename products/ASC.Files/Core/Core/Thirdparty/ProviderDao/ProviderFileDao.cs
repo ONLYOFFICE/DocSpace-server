@@ -609,6 +609,13 @@ internal class ProviderFileDao(
         await fileDao.InitCustomOrder(fileIds, parentFolderId);
     }
 
+    public Task SetVectorizationStatusAsync(string fileId, VectorizationStatus status, Func<Task> action = null)
+    {
+        var selector = _selectorFactory.GetSelector(fileId);
+        var fileDao = selector.GetFileDao(fileId);
+        return fileDao.SetVectorizationStatusAsync(selector.ConvertId(fileId), status);
+    }
+
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
     {
         var fileDao = GetFileDao(uploadSession.File);

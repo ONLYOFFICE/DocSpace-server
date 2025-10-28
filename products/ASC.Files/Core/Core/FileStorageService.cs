@@ -98,7 +98,8 @@ public class FileStorageService //: IFileStorageService
     ICacheNotify<ClearMyFolderItem> notifyMyFolder,
     FormRoleDtoHelper formRoleDtoHelper,
     WebhookManager webhookManager,
-    FileSharingHelper fileSharingHelper)
+    FileSharingHelper fileSharingHelper,
+    AiGateway gateway)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -272,6 +273,20 @@ public class FileStorageService //: IFileStorageService
 
                 parent.ParentRoomType = parentRoom.FolderType;
             }
+
+            if (parent.FolderType == FolderType.AiRoom)
+            {
+                parent = searchArea switch
+                {
+                    SearchArea.Knowledge => await folderDao.GetFoldersAsync(parent.Id, FolderType.Knowledge)
+                        .FirstOrDefaultAsync(),
+                    SearchArea.ResultStorage => await folderDao.GetFoldersAsync(parent.Id, FolderType.ResultStorage)
+                        .FirstOrDefaultAsync(),
+                    _ => parent
+                };
+                
+                parentId = parent.Id;
+            }
         }
         catch (Exception e)
         {
@@ -418,21 +433,23 @@ public class FileStorageService //: IFileStorageService
             [
                 ..breadCrumbs.Select(object (f) =>
                 {
-                    if (f.FileEntryType == FileEntryType.Folder)
+                    if (f.FileEntryType != FileEntryType.Folder)
                     {
-                        switch (f)
-                        {
-                            case Folder<string> f1:
-                                return new { f1.Id, f1.Title, RoomType = DocSpaceHelper.MapToRoomType(f1.FolderType) };
-                            case Folder<int> f2:
-                                {
-                                    var title = f2.FolderType is FolderType.Recent && searchArea == SearchArea.RecentByLinks
-                                        ? FilesUCResource.MyFiles
-                                        : f2.Title;
+                        return 0;
+                    }
 
-                                    return new { f2.Id, title, RoomType = DocSpaceHelper.MapToRoomType(f2.FolderType) };
-                                }
-                        }
+                    switch (f)
+                    {
+                        case Folder<string> f1:
+                            return new { f1.Id, f1.Title, RoomType = DocSpaceHelper.MapToRoomType(f1.FolderType), f1.FolderType };
+                        case Folder<int> f2:
+                            {
+                                var title = f2.FolderType is FolderType.Recent && searchArea == SearchArea.RecentByLinks
+                                    ? FilesUCResource.MyFiles
+                                    : f2.Title;
+
+                                return new { f2.Id, title, RoomType = DocSpaceHelper.MapToRoomType(f2.FolderType), f2.FolderType };
+                            }
                     }
 
                     return 0;
@@ -532,7 +549,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool? indexing, IEnumerable<FileShareParams> share, long? quota, RoomDataLifetime lifetime, bool? denyDownload, WatermarkRequestDto watermark, string color, string cover, IEnumerable<string> tags, LogoRequest logo)
+    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool? indexing, IEnumerable<FileShareParams> share, long? quota, RoomDataLifetime lifetime, bool? denyDownload, WatermarkRequestDto watermark, string color, string cover, IEnumerable<string> tags, LogoRequest logo, ChatSettings chatSettings = null)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.GetFolderVirtualRooms();
@@ -542,7 +559,22 @@ public class FileStorageService //: IFileStorageService
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
             {
                 await countRoomChecker.CheckAppend();
-                return await InternalCreateFolderAsync(parentId, title, DocSpaceHelper.MapToFolderType(roomType), privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo);
+                return await InternalCreateFolderAsync(parentId, title, DocSpaceHelper.MapToFolderType(roomType), privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo, chatSettings);
+            }
+        }, privacy, share);
+    }
+
+    public async Task<Folder<int>> CreateAiAgentAsync(string title, bool privacy, bool? indexing, IEnumerable<FileShareParams> share, long? quota, RoomDataLifetime lifetime, bool? denyDownload, WatermarkRequestDto watermark, string color, string cover, IEnumerable<string> tags, LogoRequest logo, ChatSettings chatSettings)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var parentId = await globalFolderHelper.GetFolderAiAgentsAsync();
+
+        return await CreateRoomAsync(async () =>
+        {
+            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
+            {
+                await countRoomChecker.CheckAppend();
+                return await InternalCreateFolderAsync(parentId, title, FolderType.AiRoom, privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo, chatSettings);
             }
         }, privacy, share);
     }
@@ -595,7 +627,9 @@ public class FileStorageService //: IFileStorageService
                     Title = title,
                     FolderId = folder.Id,
                     FolderType = folderType,
-                    Private = privacy
+                    Private = privacy,
+                    Color = color,
+                    Cover = cover
                 });
 
                 folder.FolderType = folderType;
@@ -793,7 +827,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool? indexing = false, long? quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool? denyDownload = false, WatermarkRequestDto watermark = null, string color = null, string cover = null, IEnumerable<string> names = null, LogoRequest logo = null)
+    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool? indexing = false, long? quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool? denyDownload = false, WatermarkRequestDto watermark = null, string color = null, string cover = null, IEnumerable<string> names = null, LogoRequest logo = null, ChatSettings chatSettings = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(title);
         ArgumentNullException.ThrowIfNull(parentId);
@@ -872,11 +906,49 @@ public class FileStorageService //: IFileStorageService
                 newFolder.SettingsQuota = quota.Value;
             }
 
+            if (chatSettings != null)
+            {
+                if (gateway.IsEnabled)
+                {
+                    chatSettings.ProviderId = 0;
+                }
+                else
+                {
+                    ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(
+                        chatSettings.ProviderId, 
+                        0, 
+                        nameof(chatSettings.ProviderId));
+                }
+                
+                ArgumentException.ThrowIfNullOrEmpty(chatSettings.ModelId);
+                
+                newFolder.SettingsChatProviderId = chatSettings.ProviderId;
+                newFolder.SettingsChatParameters = chatSettings.Map();
+            }
+
             newFolder.SettingsLifetime = lifetime;
             _ = RoomLogoManager.ColorChanged(color, newFolder);
             _ = await RoomLogoManager.CoverChanged(cover, newFolder);
 
-            var folderId = await folderDao.SaveFolderAsync(newFolder);
+            T folderId;
+            
+            if (folderType == FolderType.AiRoom)
+            {
+                var knowledge = serviceProvider.GetService<Folder<T>>();
+                knowledge.Title = FilesCommonResource.KnowledgeFolder;
+                knowledge.FolderType = FolderType.Knowledge;
+                
+                var resultStorage = serviceProvider.GetService<Folder<T>>();
+                resultStorage.Title = FilesCommonResource.ResultStorageFolder;
+                resultStorage.FolderType = FolderType.ResultStorage;
+                
+                folderId = await folderDao.SaveFolderAsync(newFolder, [knowledge, resultStorage]);
+            }
+            else
+            {
+                folderId = await folderDao.SaveFolderAsync(newFolder);
+            }
+            
             if (watermark != null)
             {
                 try
@@ -1067,12 +1139,30 @@ public class FileStorageService //: IFileStorageService
         var watermarkChanged = updateData.Watermark != null;
         var colorChanged = updateData.Color != null && folder.SettingsColor != updateData.Color;
         var coverChanged = updateData.Cover != null && folder.SettingsCover != updateData.Cover;
+        var chatSettingsChanged = updateData.ChatSettings != null;
 
-        if (titleChanged || quotaChanged || indexingChanged || denyDownloadChanged || lifetimeChanged || watermarkChanged || colorChanged || coverChanged)
+        if (titleChanged || quotaChanged || indexingChanged || denyDownloadChanged || lifetimeChanged || watermarkChanged || colorChanged || coverChanged || chatSettingsChanged)
         {
             var oldTitle = folder.Title;
             WatermarkSettings watermark = null;
             RoomDataLifetime lifetime = null;
+
+            if (chatSettingsChanged)
+            {
+                if (gateway.IsEnabled)
+                {
+                    updateData.ChatSettings.ProviderId = 0;
+                }
+                else
+                {
+                    ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(
+                        updateData.ChatSettings.ProviderId, 
+                        0, 
+                        nameof(updateData.ChatSettings.ProviderId));
+                }
+                
+                ArgumentException.ThrowIfNullOrEmpty(updateData.ChatSettings.ModelId);
+            }
 
             if (watermarkChanged)
             {
@@ -1095,7 +1185,8 @@ public class FileStorageService //: IFileStorageService
                 lifetimeChanged ? lifetime : folder.SettingsLifetime,
                 watermarkChanged ? (updateData.Watermark.Enabled.HasValue && !updateData.Watermark.Enabled.Value ? null : watermark) : folder.SettingsWatermark,
                 colorChanged ? updateData.Color : folder.SettingsColor,
-                coverChanged ? updateData.Cover : folder.SettingsCover);
+                coverChanged ? updateData.Cover : folder.SettingsCover,
+                chatSettingsChanged ? updateData.ChatSettings : null);
 
             folder = await folderDao.GetFolderAsync(newFolderId);
 
@@ -3809,17 +3900,8 @@ public class FileStorageService //: IFileStorageService
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
 
-        var entries = new List<FileEntry<T>>();
-
-        foreach (var fileId in aceCollection.Files)
-        {
-            entries.Add(await fileDao.GetFileAsync(fileId));
-        }
-
-        foreach (var folderId in aceCollection.Folders)
-        {
-            entries.Add(await folderDao.GetFolderAsync(folderId));
-        }
+        var entries = await fileDao.GetFilesAsync(aceCollection.Files).Select(FileEntry<T> (file) => file).ToListAsync();
+        entries.AddRange(await folderDao.GetFoldersAsync(aceCollection.Folders).ToListAsync());
 
         foreach (var entry in entries)
         {
@@ -4566,7 +4648,7 @@ public class FileStorageService //: IFileStorageService
 
         await foreach (var folder in folders)
         {
-            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates)
+            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.AiAgents)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
