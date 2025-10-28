@@ -3255,24 +3255,32 @@ public class FileStorageService //: IFileStorageService
 
     public async Task ReassignRoomsAsync(Guid user, Guid? reassign)
     {
-        var rooms = (await GetFolderItemsAsync(
-                    await globalFolderHelper.GetFolderVirtualRooms(),
-                    0,
-                    -1,
-                    new List<FilterType>() { FilterType.FoldersOnly },
-                    false,
-                    user.ToString(),
-                    "",
-                    [],
-                    false,
-                    false,
-                    null)).Entries;
+        var entries = await GetEntriesAsync(await globalFolderHelper.GetFolderVirtualRooms());
+        entries.AddRange(await GetEntriesAsync(await globalFolderHelper.GetFolderAiAgentsAsync()));
 
-        var ids = rooms.Where(r => r is Folder<int>).Select(e => ((Folder<int>)e).Id);
-        var thirdIds = rooms.Where(r => r is Folder<string>).Select(e => ((Folder<string>)e).Id);
+        var ids = entries.Where(r => r is Folder<int>).Select(e => ((Folder<int>)e).Id);
+        var thirdIds = entries.Where(r => r is Folder<string>).Select(e => ((Folder<string>)e).Id);
 
         await ChangeOwnerAsync(ids, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
         await ChangeOwnerAsync(thirdIds, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
+        
+        return;
+
+        async Task<List<FileEntry>> GetEntriesAsync(int parentId)
+        {
+            return (await GetFolderItemsAsync(
+                parentId,
+                0,
+                -1,
+                [FilterType.FoldersOnly],
+                false,
+                user.ToString(),
+                "",
+                [],
+                false,
+                false,
+                null)).Entries;
+        }
     }
 
     public async Task<int> GetSharedEntriesCountAsync(Guid user)
