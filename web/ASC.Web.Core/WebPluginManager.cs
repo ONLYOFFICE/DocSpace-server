@@ -443,7 +443,7 @@ public class WebPluginManager(
             throw new InvalidOperationException(Resource.ErrorWebPluginForbiddenSystem);
         }
 
-        var storage = await GetPluginStorageAsync(tenantId);
+        var storage = await GetPluginStorageAsync(webPlugin.System ? Tenant.DefaultTenant : tenantId);
 
         if (!await storage.IsDirectoryAsync(webPlugin.Name))
         {

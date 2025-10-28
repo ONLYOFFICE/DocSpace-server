@@ -550,6 +550,17 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:self-restriction-folder", { id, data });
   }
 
+  function commitChatMessage({ room, messageId }) {
+    logger.info(`commit chat message ${messageId} in room ${room}`);
+    filesIO.to(room).emit("s:commit-chat-message", { messageId });
+  }
+
+  function updateChat({ room, chatId, chatTitle, userId }) {
+    const userRoom = `${room}-${userId}`;
+    logger.info(`update chat ${chatId} in room ${room}`);
+    filesIO.to(userRoom).emit("s:update-chat", { chatId, chatTitle });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -585,6 +596,8 @@ module.exports = (io) => {
     endRestore,
     encryptionProgress,
     selfRestrictionForFile,
-    selfRestrictionForFolder
+    selfRestrictionForFolder,
+    commitChatMessage,
+    updateChat
   };
 };

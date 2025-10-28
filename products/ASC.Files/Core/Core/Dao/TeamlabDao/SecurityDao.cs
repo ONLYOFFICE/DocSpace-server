@@ -142,8 +142,17 @@ internal abstract class SecurityBaseDao<T>(
 
                 if (r.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
                 {
-                    await context.DeleteTagLinksByTypeAsync(tenantId, entryId, r.EntryType, TagType.RecentByLink);
+                    await context.DeleteTagLinksByTypeAsync(tenantId, entryId, r.EntryType, TagType.RecentByLink, r.Subject != Guid.Empty ? r.Subject.ToString() : null);
                     await context.DeleteTagsAsync(tenantId);
+                }
+
+                if (r.EntryType is FileEntryType.Folder && 
+                    r.EntryId is int entryIdInt && 
+                    r.SubjectType is SubjectType.User or SubjectType.Group)
+                {
+                    await context.RemoveUserRoomChatsAsync(tenantId, entryIdInt, r.Subject);
+                    await context.RemoveUserRoomChatsSettingsAsync(tenantId, entryIdInt, r.Subject);
+                    await context.RemoveUserRoomMcpSettingsAsync(tenantId, entryIdInt, r.Subject);
                 }
 
                 await context.SaveChangesAsync();

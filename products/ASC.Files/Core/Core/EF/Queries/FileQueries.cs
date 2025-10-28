@@ -130,10 +130,10 @@ public partial class FilesDbContext
         return FileQueries.DeleteTagLinksAsync(this, tenantId, fileId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, TagType.Custom])]
-    public Task<int> DeleteTagLinksByTypeAsync(int tenantId, string entryId, FileEntryType entryType, TagType type)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, TagType.Custom, null])]
+    public Task<int> DeleteTagLinksByTypeAsync(int tenantId, string entryId, FileEntryType entryType, TagType type, string name = null)
     {
-        return FileQueries.DeleteTagLinksByTypeAsync(this, tenantId, entryId, entryType, type);
+        return FileQueries.DeleteTagLinksByTypeAsync(this, tenantId, entryId, entryType, type, name);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
@@ -341,7 +341,24 @@ public partial class FilesDbContext
     {
         return FileQueries.UpdateDbFilesCategoryForcesaveAsync(this, tenantId, fileId, fileVersion, category, forcesave);
     }
-
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, VectorizationStatus.Completed])]
+    public Task<int> UpdateVectorizationStatusAsync(int tenantId, int fileId, VectorizationStatus status)
+    {
+        return FileQueries.UpdateVectorizationStatusAsync(this, tenantId, fileId, status, DateTime.UtcNow);
+    }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, VectorizationStatus.Completed])]
+    public Task<int> UpdateVectorizationStatusesAsync(int tenantId, IEnumerable<int> fileIds, VectorizationStatus status)
+    {
+        return FileQueries.UpdateVectorizationStatusesAsync(this, tenantId, fileIds, status, DateTime.UtcNow);
+    }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<int> DeleteVectorizationStatusAsync(int tenantId, int fileId)
+    {
+        return FileQueries.DeleteVectorizationStatusAsync(this, tenantId, fileId);
+    }
 }
 
 static file class FileQueries
@@ -392,7 +409,9 @@ static file class FileQueries
                                         a.CreateBy == userId &&
                                         a.TenantId == tenantId)
                             .Select(a => a.CreateOn)
-                            .FirstOrDefault()
+                            .FirstOrDefault(),
+                        VectorizationStatus = ctx.FileVectorization
+                            .FirstOrDefault(x => x.TenantId == r.TenantId && x.FileId == r.Id).Status
                     })
                     .SingleOrDefault());
 
@@ -541,7 +560,9 @@ static file class FileQueries
                                     ).Skip(1).FirstOrDefault()
                                 select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
                             select f.Order
-                        ).FirstOrDefault()
+                        ).FirstOrDefault(),
+                        VectorizationStatus = ctx.FileVectorization
+                            .FirstOrDefault(x => x.TenantId == r.TenantId && x.FileId == r.Id).Status
                     }));
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> FileIdsAsync =
@@ -631,12 +652,13 @@ static file class FileQueries
                     .Where(r => r.EntryId == fileId && r.EntryType == FileEntryType.File)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, string, FileEntryType, TagType, Task<int>> DeleteTagLinksByTypeAsync =
+    public static readonly Func<FilesDbContext, int, string, FileEntryType, TagType, string, Task<int>> DeleteTagLinksByTypeAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string entryId, FileEntryType entryType, TagType type) =>
+            (FilesDbContext ctx, int tenantId, string entryId, FileEntryType entryType, TagType type, string name) =>
                 ctx.Tag
                     .Where(t => t.TenantId == tenantId)
                     .Where(t => t.Type == type)
+                    .Where(r => string.IsNullOrEmpty(name) || r.Name == name)
                     .Join(ctx.TagLink, t => t.Id, l => l.TagId, (t, l) => l)
                     .Where(l => l.EntryId == entryId)
                     .Where(l => l.EntryType == entryType)
@@ -1028,4 +1050,30 @@ static file class FileQueries
                     .ExecuteUpdate(f => f
                         .SetProperty(p => p.Category, category)
                         .SetProperty(p => p.Forcesave, forcesave)));
+    
+    public static readonly Func<FilesDbContext, int, int, VectorizationStatus, DateTime, Task<int>> UpdateVectorizationStatusAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int fileId, VectorizationStatus status, DateTime date) =>
+                ctx.FileVectorization
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.FileId == fileId)
+                    .ExecuteUpdate(f => f
+                        .SetProperty(x => x.Status, status)
+                        .SetProperty(x => x.UpdatedOn, date)));
+    
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, VectorizationStatus, DateTime, Task<int>> UpdateVectorizationStatusesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> filesIds, VectorizationStatus status, DateTime date) =>
+                ctx.FileVectorization
+                    .Where(r => r.TenantId == tenantId && filesIds.Contains(r.FileId))
+                    .ExecuteUpdate(f => f
+                        .SetProperty(x => x.Status, status)
+                        .SetProperty(x => x.UpdatedOn, date)));
+    
+    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteVectorizationStatusAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int fileId) =>
+                ctx.FileVectorization
+                    .Where(r => r.TenantId == tenantId && r.FileId == fileId)
+                    .ExecuteDelete());
 }

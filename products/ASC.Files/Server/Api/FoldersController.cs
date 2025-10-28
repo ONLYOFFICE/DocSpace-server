@@ -658,5 +658,6 @@ public class FoldersControllerCommon(
 
         yield return await globalFolderHelper.FolderVirtualRoomsAsync;
         yield return await globalFolderHelper.FolderArchiveAsync;
+        yield return await globalFolderHelper.FolderAiAgentsAsync;
     }
 }

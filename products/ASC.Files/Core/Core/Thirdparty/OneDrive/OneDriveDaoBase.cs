@@ -147,6 +147,8 @@ internal class OneDriveDaoBase(
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
+        folder.SettingsCover = ProviderInfo.Cover;
+        
         ProcessFolderAsRoom(folder);
         folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 

@@ -30,9 +30,12 @@ namespace ASC.Data.Storage.Encryption;
 public class EncryptionWorker(
     IDistributedTaskQueueFactory queueFactory,
     IServiceProvider serviceProvider,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    IFusionCache cache)
 {
     private readonly DistributedTaskQueue<EncryptionOperation> _queue = queueFactory.CreateQueue<EncryptionOperation>();
+
+    private const string EncryptionProgressCacheKey = "EncryptionProgress";
 
     public async Task StartAsync(EncryptionSettings encryptionSettings, string serverRootPath)
     {
@@ -72,7 +75,17 @@ public class EncryptionWorker(
 
         if (item is { IsCompleted: true })
         {
+            await cache.SetAsync(EncryptionProgressCacheKey, item.Percentage, TimeSpan.FromMinutes(1));
             await _queue.DequeueTask(item.Id);
+        }
+
+        if (item is null)
+        {
+            var previousProgress = await cache.GetOrDefaultAsync<double>(EncryptionProgressCacheKey);
+            if (previousProgress != default)
+            {
+                return previousProgress;
+            }
         }
 
         return item?.Percentage;

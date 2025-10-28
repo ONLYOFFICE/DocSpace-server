@@ -265,7 +265,9 @@ public class EditorConfiguration<T>(
     DocumentServiceTrackerHelper documentServiceTrackerHelper,
     ExternalShare externalShare,
     UserPhotoManager userPhotoManager,
-    GlobalFolderHelper globalFolderHelper)
+    GlobalFolderHelper globalFolderHelper,
+    TariffService tariffService,
+    TenantManager tenantManager)
 {
     public PluginsConfig Plugins { get; } = pluginsConfig;
     public CustomizationConfig<T> Customization { get; } = customizationConfig;
@@ -283,20 +285,20 @@ public class EditorConfiguration<T>(
     private UserConfig _user;
     public async Task<UserConfig> GetUserAsync()
     {
-        if (_user != null)
+        if (_user != null || UserInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
         {
             return _user;
         }
 
-        if (!UserInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
+            
+        _user = new UserConfig
         {
-            _user = new UserConfig
-            {
-                Id = UserInfo.Id.ToString(),
-                Name = UserInfo.DisplayUserName(false, displayUserSettingsHelper),
-                Image = baseCommonLinkUtility.GetFullAbsolutePath(await UserInfo.GetMediumPhotoURLAsync(userPhotoManager))
-            };
-        }
+            Id = UserInfo.Id.ToString(),
+            Name = UserInfo.DisplayUserName(false, displayUserSettingsHelper),
+            Image = baseCommonLinkUtility.GetFullAbsolutePath(await UserInfo.GetMediumPhotoURLAsync(userPhotoManager)),
+            CustomerId = customerInfo?.PortalId
+        };
 
         return _user;
     }
@@ -1343,4 +1345,6 @@ public class UserConfig
     /// Roles
     /// </summary>
     public List<string> Roles { get; set; }
+    
+    public string CustomerId { get; set; }
 }

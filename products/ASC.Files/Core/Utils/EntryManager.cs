@@ -521,6 +521,11 @@ public class EntryManager(IDaoFactory daoFactory,
                 var (parentFolderType, additionalOption) = parent.ShareRecord is { Share: FileShare.FillForms }
                     ? (parent.FolderType, AdditionalFilterOption.FormsWithFillingRole)
                     : (FolderType.DEFAULT, AdditionalFilterOption.All);
+                
+                if (parent.FolderType == FolderType.Knowledge)		
+                {		
+                    parentFolderType = FolderType.Knowledge;
+                }
 
                 allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId, parentFolderType, additionalOption);
                 allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId, formsItemDto, parentFolderType, additionalOption);
@@ -615,7 +620,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var foldersToUpdate = entries.OfType<Folder<T>>().ToList();
             var folderStatusTask = entryStatusManager.SetIsFavoriteFoldersAsync(foldersToUpdate);
 
-            var tagsNewTask = fileMarker.SetTagsNewAsync(parent, entries);
+            var tagsNewTask = fileMarker.SetTagsNewAsync(parent, foldersToUpdate);
             var originsTask = SetOriginsAsync(parent, entries);
 
             await Task.WhenAll(fileStatusTask, folderStatusTask, tagsNewTask, originsTask, formInfoTask);

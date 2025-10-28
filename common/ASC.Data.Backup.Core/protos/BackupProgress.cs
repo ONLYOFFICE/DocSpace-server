@@ -62,6 +62,11 @@ public record BackupProgress
     public string Error { get; set; }
 
     /// <summary>
+    /// The backup warning message.
+    /// </summary>
+    public string Warning { get; set; }
+
+    /// <summary>
     /// The backup link.
     /// </summary>
     public string Link { get; set; }

@@ -83,7 +83,9 @@ public class VirtualRoomsInternalController(
             lifetime.StartDate = DateTime.UtcNow;
         }
 
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover, inDto.Tags, inDto.Logo);
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, 
+            inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover, 
+            inDto.Tags, inDto.Logo, inDto.ChatSettings);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -451,8 +453,10 @@ public abstract class VirtualRoomsController<T>(
             return result;
         }
 
+        var newGuestsInvited =
+            inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email) && i.Access != FileShare.None);
+        
         var guestsInvited =
-            inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email) && i.Access != FileShare.None) ||
             await inDto.RoomInvitation.Invitations
                 .Where(r => r.Id != Guid.Empty && r.Access != FileShare.None)
                 .ToAsyncEnumerable()
@@ -465,7 +469,7 @@ public abstract class VirtualRoomsController<T>(
                 .ToAsyncEnumerable()
                 .AnyAwaitAsync(async i => await userManager.IsUserAsync(i.Id));
 
-        if (guestsInvited)
+        if (newGuestsInvited)
         {
             var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
             if (!invitationSettings.AllowInvitingGuests)
@@ -478,7 +482,7 @@ public abstract class VirtualRoomsController<T>(
 
         if (room.RootId is int root &&
             root == await globalFolderHelper.FolderRoomTemplatesAsync &&
-            (inDto.RoomInvitation.Invitations.Any(i => i.Access != FileShare.None && i.Access != FileShare.Read) || guestsInvited || usersInvited))
+            (inDto.RoomInvitation.Invitations.Any(i => i.Access != FileShare.None && i.Access != FileShare.Read) || guestsInvited || newGuestsInvited || usersInvited))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
         }

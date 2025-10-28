@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <IsPackable>false</IsPackable>
+        <DefaultItemExcludes>$(DefaultItemExcludes);</DefaultItemExcludes>
+        <RazorCompileOnBuild>false</RazorCompileOnBuild>
+        <GenerateMvcApplicationPartsAssemblyAttributes>false</GenerateMvcApplicationPartsAssemblyAttributes>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <Nullable>enable</Nullable>
+        <AssemblyTitle>ASC.AI</AssemblyTitle>
+        <Company>Ascensio System SIA</Company>
+        <Product>ASC.AI</Product>
+        <Copyright>(c) Ascensio System SIA. All rights reserved</Copyright>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <NoWarn>1701;1702;1591</NoWarn>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />
+        <ProjectReference Include="..\Core\ASC.AI.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Properties\PublishProfiles\FolderProfile.pubxml">
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </None>
+      <None Update="Properties\PublishProfiles\ReleaseProfile.pubxml">
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+    </ItemGroup>
+
+</Project>
