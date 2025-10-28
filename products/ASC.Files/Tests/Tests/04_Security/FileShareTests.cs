@@ -632,7 +632,7 @@ public class FileShareTests(
     }
 
     [Fact]
-    public async Task MixingAccessRights_ExternalLinkRead_SecurityEdit_ChecksReadAccessViaLink()
+    public async Task MixingAccessRights_ExternalLinkRead_SecurityEdit_ChecksEditAccessViaLink()
     {
         // Step 1: Authenticate as user1
         await _filesClient.Authenticate(Initializer.Owner);
@@ -672,7 +672,7 @@ public class FileShareTests(
         fileInfo.Should().NotBeNull();
         fileInfo.Access.Should().Be(FileShare.Editing);
         fileInfo.Security.Read.Should().BeTrue();
-        fileInfo.Security.Edit.Should().BeFalse();
+        fileInfo.Security.Edit.Should().BeTrue();
     }
 
     [Fact]
