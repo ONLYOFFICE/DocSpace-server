@@ -493,10 +493,10 @@ public class BackupService(
             return null;
         }
 
-        var serviceAccount = await GetBackupServiceAccountId();
+        var serviceName = await GetBackupServiceName();
         var externalRef = Guid.NewGuid().ToString();
 
-        var result = await tariffService.OpenCustomerSessionAsync(tenantId, serviceAccount, externalRef, 1, BackupCustomerSessionDuration);
+        var result = await tariffService.OpenCustomerSessionAsync(tenantId, serviceName, externalRef, 1, BackupCustomerSessionDuration);
 
         return result;
     }
@@ -550,9 +550,9 @@ public class BackupService(
             return false;
         }
 
-        var serviceAccount = await GetBackupServiceAccountId();
+        var serviceName = await GetBackupServiceName();
 
-        var result = await tariffService.CompleteCustomerSessionAsync(tenantId, serviceAccount, sessionId, 1, customerParticipantName, metadata);
+        var result = await tariffService.CompleteCustomerSessionAsync(tenantId, serviceName, sessionId, 1, customerParticipantName, metadata);
 
         if (result)
         {
@@ -644,13 +644,13 @@ public class BackupService(
         }
     }
 
-    private async Task<int> GetBackupServiceAccountId()
+    private async Task<string> GetBackupServiceName()
     {
         var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
 
         var backupQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.Backup);
 
-        return backupQuota == null ? throw new ItemNotFoundException("Backup quota not found") : int.Parse(backupQuota.ProductId);
+        return backupQuota == null ? throw new ItemNotFoundException("Backup quota not found") : backupQuota.GetPaymentId();
     }
 }
 
