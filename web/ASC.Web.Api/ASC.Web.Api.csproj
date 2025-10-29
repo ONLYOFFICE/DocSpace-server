@@ -32,6 +32,7 @@
 	  <None Remove="img\statistic.svg" />
     </ItemGroup>
     <ItemGroup>
+      <EmbeddedResource Include="img\aitools_wallet.svg" />
       <EmbeddedResource Include="img\audit.svg" />
       <EmbeddedResource Include="img\free_backup.svg" />
       <EmbeddedResource Include="img\restore.svg" />
