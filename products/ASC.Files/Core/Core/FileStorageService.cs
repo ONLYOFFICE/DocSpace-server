@@ -334,6 +334,7 @@ public class FileStorageService //: IFileStorageService
         {
             FolderType.Archive => SearchArea.Archive,
             FolderType.RoomTemplates => SearchArea.Templates,
+            FolderType.AiAgents => SearchArea.AiAgents,
             _ => searchArea
         };
 

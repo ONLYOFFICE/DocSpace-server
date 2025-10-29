@@ -2446,6 +2446,7 @@ public class FileSecurity(
             SearchArea.Active => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
             SearchArea.Archive => [await globalFolder.GetFolderArchiveAsync(daoFactory)],
             SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
+            SearchArea.AiAgents => [await globalFolder.GetFolderAiAgentsAsync(daoFactory)],
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
@@ -2547,6 +2548,7 @@ public class FileSecurity(
             SearchArea.Active => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
             SearchArea.Archive => [await globalFolder.GetFolderArchiveAsync(daoFactory)],
             SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
+            SearchArea.AiAgents => [await globalFolder.GetFolderAiAgentsAsync(daoFactory)],
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
@@ -2605,7 +2607,7 @@ public class FileSecurity(
                         return true;
                     }
                 case SearchArea.Active when entry.RootFolderType == FolderType.VirtualRooms:
-                case SearchArea.Any when entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive:
+                case SearchArea.Any when entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.AiAgents:
                     {
                         entry.ShareRecord = record;
                         entry.Access = record?.Share ?? FileShare.None;
