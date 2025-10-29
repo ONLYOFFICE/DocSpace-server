@@ -878,9 +878,8 @@ public class FileSecurity(
 
     private async IAsyncEnumerable<FileEntry<T>> SetSecurity<T>(IAsyncEnumerable<FileEntry<T>> entries, Guid userId)
     {
-        var user = await userManager.GetUsersAsync(userId);
-        var isOutsider = await userManager.IsOutsiderAsync(user);
-        var userType = await userManager.GetUserTypeAsync(user);
+        var isOutsider = await userManager.IsOutsiderAsync(userId);
+        var userType = await userManager.GetUserTypeAsync(userId);
         var isGuest = userType is EmployeeType.Guest;
         var isAuthenticated = authContext.IsAuthenticated;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
@@ -953,16 +952,15 @@ public class FileSecurity(
         {
             return result;
         }
-
-        var user = await userManager.GetUsersAsync(userId);
-        var isOutsider = await userManager.IsOutsiderAsync(user);
+        
+        var isOutsider = await userManager.IsOutsiderAsync(userId);
 
         if (isOutsider && action != FilesSecurityActions.Read)
         {
             return false;
         }
 
-        var userType = await userManager.GetUserTypeAsync(user);
+        var userType = await userManager.GetUserTypeAsync(userId);
         var isGuest = userType is EmployeeType.Guest;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
         var isUser = userType is EmployeeType.User;
@@ -984,10 +982,9 @@ public class FileSecurity(
 
 
     private async IAsyncEnumerable<Tuple<FileEntry<T>, bool>> CanAsync<T>(IAsyncEnumerable<FileEntry<T>> entries, Guid userId, FilesSecurityActions action)
-    {
-        var user = await userManager.GetUsersAsync(userId);
-        var isOutsider = await userManager.IsOutsiderAsync(user);
-        var userType = await userManager.GetUserTypeAsync(user);
+    { ;
+        var isOutsider = await userManager.IsOutsiderAsync(userId);
+        var userType = await userManager.GetUserTypeAsync(userId);
         var isGuest = userType is EmployeeType.Guest;
         var isAuthenticated = authContext.IsAuthenticated;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;

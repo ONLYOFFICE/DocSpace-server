@@ -334,16 +334,16 @@ public class TfaappController(
     [HttpGet("tfaappcodes")]
     public async Task<IEnumerable<object>> GetTfaAppCodes()
     {
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserId = authContext.CurrentAccount.ID;
 
         if (!tfaAppAuthSettingsHelper.IsVisibleSettings ||
             !(await settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting ||
-            !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
+            !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUserId))
         {
             throw new InvalidOperationException(Resource.TfaAppNotAvailable);
         }
 
-        if (await userManager.IsOutsiderAsync(currentUser))
+        if (await userManager.IsOutsiderAsync(currentUserId))
         {
             throw new InvalidOperationException("Not available.");
         }
@@ -363,20 +363,21 @@ public class TfaappController(
     [HttpPut("tfaappnewcodes")]
     public async Task<IEnumerable<object>> UpdateTfaAppCodes()
     {
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserId = authContext.CurrentAccount.ID;
+        var currentUser = await userManager.GetUsersAsync(currentUserId);
 
-        if (!tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
+        if (!tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUserId))
         {
             throw new InvalidOperationException(Resource.TfaAppNotAvailable);
         }
 
-        if (await userManager.IsOutsiderAsync(currentUser))
+        if (await userManager.IsOutsiderAsync(currentUserId))
         {
             throw new InvalidOperationException("Not available.");
         }
 
         var codes = (await tfaManager.GenerateBackupCodesAsync()).Select(r => new { r.IsUsed, Code = r.GetEncryptedCode(instanceCrypto, signature) }).ToList();
-        messageService.Send(MessageAction.UserConnectedTfaApp, MessageTarget.Create(currentUser.Id), currentUser.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserConnectedTfaApp, MessageTarget.Create(currentUserId), currentUser.DisplayUserName(false, displayUserSettingsHelper));
         return codes;
     }
 
