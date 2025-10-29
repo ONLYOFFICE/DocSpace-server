@@ -1036,16 +1036,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             ProductId = "10006",
                             Visible = false,
                             Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -13,
-                            Features = "aitools",
-                            Name = "aitools",
-                            Price = 0.0002m,
-                            ProductId = "10009",
-                            Visible = false,
-                            Wallet = true
                         });
                 });
 
