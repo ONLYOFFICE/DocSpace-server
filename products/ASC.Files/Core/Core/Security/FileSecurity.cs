@@ -2221,7 +2221,7 @@ public class FileSecurity(
         }
 
         FileShareRecord<T> ace;
-        var subjects = new List<Guid>();
+        var oderedSubjects = new List<OrderedSubject>();
         if (shares == null)
         {
             var includeAvailableLinks = entry switch
@@ -2231,14 +2231,14 @@ public class FileSecurity(
                 _ => false
             };
 
-            subjects = await GetUserSubjectsAsync(userId, includeAvailableLinks);
-            shares = await GetSharesAsync(entry, subjects);
+            oderedSubjects = await GetUserOrderedSubjectsAsync(userId, includeAvailableLinks);
+            shares = await GetSharesAsync(entry, oderedSubjects.Select(s => s.Subject));
         }
 
         if (entry.FileEntryType == FileEntryType.File)
         {
             ace = shares
-                .OrderBy(r => r, new SubjectComparer<T>(subjects))
+                .OrderBy(r => r, new OrderedSubjectComparer<T>(oderedSubjects))
                 .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                 .FirstOrDefault(r => Equals(r.EntryId, entry.Id) && r.EntryType == FileEntryType.File);
 
@@ -2246,7 +2246,7 @@ public class FileSecurity(
             {
                 // share on parent folders
                 ace = shares.Where(r => Equals(r.EntryId, entry.ParentId) && r.EntryType == FileEntryType.Folder)
-                    .OrderBy(r => r, new SubjectComparer<T>(subjects))
+                    .OrderBy(r => r, new OrderedSubjectComparer<T>(oderedSubjects))
                     .ThenBy(r => r.Level)
                     .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                     .FirstOrDefault();
@@ -2255,7 +2255,7 @@ public class FileSecurity(
         else
         {
             ace = shares.Where(r => Equals(r.EntryId, entry.Id) && r.EntryType == FileEntryType.Folder)
-                .OrderBy(r => r, new SubjectComparer<T>(subjects))
+                .OrderBy(r => r, new OrderedSubjectComparer<T>(oderedSubjects))
                 .ThenBy(r => r.Level)
                 .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                 .FirstOrDefault();
@@ -2310,11 +2310,11 @@ public class FileSecurity(
     public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var securityDao = daoFactory.GetSecurityDao<string>();
-        var subjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID, true);
+        var orderedSubjects = await GetUserOrderedSubjectsAsync(authContext.CurrentAccount.ID, true);
         List<FileShareRecord<int>> recordsInternal = [];
         List<FileShareRecord<string>> recordsThirdParty = [];
 
-        await foreach (var r in securityDao.GetSharesAsync(subjects))
+        await foreach (var r in securityDao.GetSharesAsync(orderedSubjects.Select(s => s.Subject)))
         {
             if (int.TryParse(r.EntryId, out _))
             {
@@ -2327,8 +2327,8 @@ public class FileSecurity(
         }
 
 
-        var firstTask = GetSharesForMeAsync(recordsInternal, subjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
-        var secondTask = GetSharesForMeAsync(recordsThirdParty, subjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+        var firstTask = GetSharesForMeAsync(recordsInternal, orderedSubjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+        var secondTask = GetSharesForMeAsync(recordsThirdParty, orderedSubjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
 
         foreach (var items in await Task.WhenAll(firstTask.AsTask(), secondTask.AsTask()))
         {
@@ -2362,15 +2362,15 @@ public class FileSecurity(
 
         var isAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
 
-        List<Guid> currentUserSubjects = [];
+        List<OrderedSubject> currentUserOrderedSubjects = [];
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
 
         if (searchArea != SearchArea.Templates || userType == EmployeeType.RoomAdmin || userType == EmployeeType.DocSpaceAdmin)
         {
-            currentUserSubjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID, searchArea is SearchArea.Active or SearchArea.Any && !isAdmin);
+            currentUserOrderedSubjects = await GetUserOrderedSubjectsAsync(authContext.CurrentAccount.ID, searchArea is SearchArea.Active or SearchArea.Any && !isAdmin);
         }
 
-        var currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects)
+        var currentUsersRecords = await securityDao.GetSharesAsync(currentUserOrderedSubjects.Select(x => x.Subject))
             .Where(x => x.EntryType == FileEntryType.Folder)
             .ToListAsync();
 
@@ -2379,7 +2379,7 @@ public class FileSecurity(
 
         var recordGroup = currentUsersRecords.GroupBy(r => new { r.EntryId, r.EntryType }, (_, group) => new
         {
-            firstRecord = group.OrderBy(r => r, new SubjectComparer<string>(currentUserSubjects))
+            firstRecord = group.OrderBy(r => r, new OrderedSubjectComparer<string>(currentUserOrderedSubjects))
                 .ThenByDescending(r => r.Share, new FileShareRecord<string>.ShareComparer(FolderType.VirtualRooms))
                 .First()
         });
@@ -2654,7 +2654,7 @@ public class FileSecurity(
         }
     }
 
-    private async IAsyncEnumerable<FileEntry> GetSharesForMeAsync<T>(IEnumerable<FileShareRecord<T>> records, List<Guid> subjects, FilterType filterType, bool subjectGroup,
+    private async IAsyncEnumerable<FileEntry> GetSharesForMeAsync<T>(IEnumerable<FileShareRecord<T>> records, List<OrderedSubject> orderedSubjects, FilterType filterType, bool subjectGroup,
         Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -2666,7 +2666,7 @@ public class FileSecurity(
 
         var recordGroup = records.GroupBy(r => new { r.EntryId, r.EntryType }, (_, group) => new
         {
-            firstRecord = group.OrderBy(r => r, new SubjectComparer<T>(subjects))
+            firstRecord = group.OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                 .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(FolderType.SHARE))
                 .First()
         });
@@ -2779,8 +2779,8 @@ public class FileSecurity(
     public async IAsyncEnumerable<FileEntry> GetPrivacyForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var securityDao = daoFactory.GetSecurityDao<string>();
-        var subjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID);
-        var records = await securityDao.GetSharesAsync(subjects).ToListAsync();
+        var orderedSubjects = await GetUserOrderedSubjectsAsync(authContext.CurrentAccount.ID);
+        var records = await securityDao.GetSharesAsync(orderedSubjects.Select(x => x.Subject)).ToListAsync();
         List<FileShareRecord<int>> internalRecords = [];
         List<FileShareRecord<string>> thirdPartyRecords = [];
 
@@ -2807,18 +2807,18 @@ public class FileSecurity(
             }
         }
 
-        await foreach (var e in GetPrivacyForMeAsync(internalRecords, subjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders))
+        await foreach (var e in GetPrivacyForMeAsync(internalRecords, orderedSubjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders))
         {
             yield return e;
         }
 
-        await foreach (var e in GetPrivacyForMeAsync(thirdPartyRecords, subjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders))
+        await foreach (var e in GetPrivacyForMeAsync(thirdPartyRecords, orderedSubjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders))
         {
             yield return e;
         }
     }
 
-    private async IAsyncEnumerable<FileEntry<T>> GetPrivacyForMeAsync<T>(IEnumerable<FileShareRecord<T>> records, List<Guid> subjects, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
+    private async IAsyncEnumerable<FileEntry<T>> GetPrivacyForMeAsync<T>(IEnumerable<FileShareRecord<T>> records, List<OrderedSubject> orderedSubjects, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
@@ -2828,7 +2828,7 @@ public class FileSecurity(
 
         var recordGroup = records.GroupBy(r => new { r.EntryId, r.EntryType }, (_, group) => new
         {
-            firstRecord = group.OrderBy(r => r, new SubjectComparer<T>(subjects))
+            firstRecord = group.OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                 .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(FolderType.Privacy))
                 .First()
         });
@@ -2925,6 +2925,11 @@ public class FileSecurity(
     public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId, bool includeAvailableLinks = false)
     {
         return await GetUserSubjectsAsync<int>(userId, includeAvailableLinks);
+    }
+
+    public async Task<List<OrderedSubject>> GetUserOrderedSubjectsAsync(Guid userId, bool includeAvailableLinks = false)
+    {
+        return await GetUserOrderedSubjectsAsync<int>(userId, includeAvailableLinks);
     }
 
     public async IAsyncEnumerable<FileShareRecord<string>> GetUserRecordsAsync()
@@ -3126,7 +3131,7 @@ public class FileSecurity(
     private async Task<List<Guid>> GetUserSubjectsAsync<T>(Guid userId, bool includeAvailableLinks = false)
     {
         // priority order
-        // User, Departments, admin, everyone
+        // User, Group, admin, everyone
 
         var result = new List<Guid> { userId };
 
@@ -3158,6 +3163,59 @@ public class FileSecurity(
 
         return result;
     }
+
+    private async Task<List<OrderedSubject>> GetUserOrderedSubjectsAsync<T>(Guid userId, bool includeAvailableLinks = false)
+    {
+        // priority order
+        // User, Group, admin, everyone
+
+        var result = new List<OrderedSubject>() { new(userId, SubjectOrderType.User) };
+
+        var groups = await userManager.GetUserGroupsAsync(userId);
+
+        foreach (var g in groups)
+        {
+            result.Add(new(g.ID, SubjectOrderType.Group));
+        }
+
+        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(userId))
+        {
+            result.Add(new(Constants.GroupAdmin.ID, SubjectOrderType.Group));
+        }
+
+        result.Add(new(Constants.GroupEveryone.ID, SubjectOrderType.Group));
+
+        var linkId = await externalShare.GetLinkIdAsync();
+        if (linkId != Guid.Empty)
+        {
+            result.Add(new(linkId, SubjectOrderType.CurrentLink));
+        }
+
+        if (includeAvailableLinks)
+        {
+            await foreach (var tag in daoFactory.GetTagDao<T>().GetTagsAsync(userId, default, TagType.RecentByLink))
+            {
+                if (Guid.TryParse(tag.Name, out var tagId) && linkId != tagId)
+                {
+                    result.Add(new(tagId, SubjectOrderType.RecentByLink));
+                }
+            }
+        }
+
+        return result;
+    }
+
+
+    /// Access priority order
+    public enum SubjectOrderType
+    {
+        User = 0,
+        Group = 1,
+        CurrentLink = 2,
+        RecentByLink = 3
+    }
+
+    public record OrderedSubject(Guid Subject, SubjectOrderType OrderType);
 
     private async Task<List<Folder<T>>> GetFileParentFolders<T>(T fileParentId)
     {
@@ -3241,10 +3299,31 @@ public class FileSecurity(
                 return index1.CompareTo(index2);
             }
 
-            // Departments are equal.
+            // Groups are equal.
             return 0;
         }
     }
+
+    private sealed class OrderedSubjectComparer<T>(List<OrderedSubject> orderedSubjects) : IComparer<FileShareRecord<T>>
+    {
+        public int Compare(FileShareRecord<T> x, FileShareRecord<T> y)
+        {
+            var orderedSubjectX = orderedSubjects.Find(s => s.Subject == x.Subject);
+            if (orderedSubjectX == null)
+            {
+                return -1;
+            }
+
+            var orderedSubjectY = orderedSubjects.Find(s => s.Subject == y.Subject);
+            if (orderedSubjectY == null)
+            {
+                return 1;
+            }
+
+            return orderedSubjectX.OrderType.CompareTo(orderedSubjectY.OrderType);
+        }
+    }
+
     async Task<FileShareRecord<T>> GetShareRecordAsync<T>(Folder<T> room, Guid userId, bool isDocSpaceAdmin, IEnumerable<FileShareRecord<T>> shares)
     {
         var cachedRecords = GetCachedRecords<T>();
