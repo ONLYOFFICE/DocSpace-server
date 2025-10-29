@@ -26,8 +26,17 @@
 
 namespace ASC.AI.Models.RequestDto;
 
-public class ExportChatRequestDto
+public class ExportChatRequestDto<T>
 {
     [FromRoute(Name = "chatId")]
     public Guid ChatId { get; init; }
+
+    [FromBody]
+    public required ExportChatRequestBody<T> Body { get; init; }
+}
+
+public class ExportChatRequestBody<T>
+{
+    public required T FolderId { get; init; }
+    public required string Title { get; init; }
 }

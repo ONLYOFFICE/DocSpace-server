@@ -41,7 +41,7 @@ public class MessageExporter(
         await messageExport.PublishAsync(title, messageId, folderId!.ToString()!, folderId is string);
     }
 
-    public async Task ExportMessagesAsync(Guid chatId)
+    public async Task ExportMessagesAsync<T>(T folderId, string title, Guid chatId)
     {
         var chat = await chatDao.GetChatAsync(tenantManager.GetCurrentTenantId(), chatId);
         if (chat == null || chat.UserId != authContext.CurrentAccount.ID)
@@ -49,6 +49,6 @@ public class MessageExporter(
             throw new ItemNotFoundException("Chat not found");
         }
 
-        await chatExport.PublishAsync(chat.Title, chat.Id, chat.RoomId.ToString(), false);
+        await chatExport.PublishAsync(title, chat.Id, folderId!.ToString()!, folderId is string);
     }
 }
