@@ -195,7 +195,7 @@ public static class DbQuotaExtension
                     Features = "aitools",
                     Price = 0.0002m,
                     ProductId = "10009",
-                    //ServiceName = "ai-service", // TODO wait for #345
+                    ServiceName = "ai-service",
                     Visible = false,
                     Wallet = true
                 },
@@ -207,7 +207,7 @@ public static class DbQuotaExtension
                     Features = "websearch",
                     Price = 0.005m,
                     ProductId = "10010",
-                    //ServiceName = "web_search", // TODO wait for #345
+                    ServiceName = "web_search",
                     Visible = false,
                     Wallet = true
                 }
