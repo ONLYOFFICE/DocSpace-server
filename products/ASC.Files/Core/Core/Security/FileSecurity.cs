@@ -42,6 +42,7 @@ public class FileSecurityCommon(UserManager userManager, WebItemSecurity webItem
 
 [Scope(typeof(IFileSecurity))]
 public class FileSecurity(
+    IHttpContextAccessor httpContextAccessor,
     IDaoFactory daoFactory,
     UserManager userManager,
     TenantManager tenantManager,
@@ -2932,6 +2933,12 @@ public class FileSecurity(
 
     public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId, bool includeAvailableLinks = false)
     {
+        if (string.Equals(httpContextAccessor?.HttpContext?.Request.Method, nameof(HttpMethod.Get), StringComparison.OrdinalIgnoreCase))
+        {
+            return await _subjects.GetOrAdd(new SubjectRecord(userId, includeAvailableLinks), s =>
+                new Lazy<Task<List<Guid>>>(GetUserSubjectsAsync<int>(s.UserId, s.IncludeLinks))).Value;
+        }
+        
         return await GetUserSubjectsAsync<int>(userId, includeAvailableLinks);
     }
 
@@ -3131,6 +3138,9 @@ public class FileSecurity(
                availableRolesBySubject.Contains(share);
     }
 
+    private record SubjectRecord(Guid UserId, bool IncludeLinks);
+    
+    private readonly ConcurrentDictionary<SubjectRecord, Lazy<Task<List<Guid>>>> _subjects = new();
     private async Task<List<Guid>> GetUserSubjectsAsync<T>(Guid userId, bool includeAvailableLinks = false)
     {
         // priority order
