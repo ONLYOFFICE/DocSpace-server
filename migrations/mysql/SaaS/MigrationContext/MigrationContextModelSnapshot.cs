@@ -1036,26 +1036,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             ProductId = "10006",
                             Visible = false,
                             Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -13,
-                            Features = "aitools",
-                            Name = "aitools",
-                            Price = 0.0002m,
-                            ProductId = "10009",
-                            Visible = false,
-                            Wallet = true
-                        },
-                        new
-                        {
-                            TenantId = -14,
-                            Features = "websearch",
-                            Name = "websearch",
-                            Price = 0.005m,
-                            ProductId = "10010",
-                            Visible = false,
-                            Wallet = true
                         });
                 });
 
