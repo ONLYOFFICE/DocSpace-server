@@ -75,6 +75,11 @@ public class TenantQuota
     public string ProductId { get; set; }
 
     /// <summary>
+    /// The service name.
+    /// </summary>
+    public string ServiceName { get; set; }
+
+    /// <summary>
     /// Specifies if the tenant quota is visible or not.
     /// </summary>
     public bool Visible { get; set; }
@@ -496,6 +501,7 @@ public class TenantQuota
         Name = quota.Name;
         Price = quota.Price;
         ProductId = quota.ProductId;
+        ServiceName = quota.ServiceName;
         Visible = quota.Visible;
         MaxFileSize = quota.MaxFileSize;
         Features = quota.Features;
@@ -640,6 +646,10 @@ public class TenantQuota
     {
         return TenantQuotaFeatures.OfType<T>().FirstOrDefault();
     }
+    public string GetPaymentId()
+    {
+        return Wallet && !string.IsNullOrEmpty(ServiceName) ? ServiceName : ProductId;
+    }
 
     internal string GetFeature(string name)
     {
@@ -679,7 +689,7 @@ public partial class TenantQuotaMapper(IServiceProvider provider)
         var tenantManager = provider.GetService<TenantManager>();
         var regionHelper = provider.GetService<RegionHelper>();
 
-        var priceInfo = tenantManager.GetProductPriceInfo(source.ProductId, source.Wallet);
+        var priceInfo = tenantManager.GetProductPriceInfo(source.GetPaymentId(), source.Wallet);
 
         if (priceInfo != null)
         {
