@@ -190,6 +190,18 @@ public static class DbQuotaExtension
                     //ServiceName = "ai-service", // TODO wait for #345
                     Visible = false,
                     Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -14,
+                    Name = "websearch",
+                    Description = null,
+                    Features = "websearch",
+                    Price = 0.005m,
+                    ProductId = "10010",
+                    //ServiceName = "web_search", // TODO wait for #345
+                    Visible = false,
+                    Wallet = true
                 }
                 );
         return modelBuilder;

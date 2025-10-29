@@ -45,6 +45,7 @@
       <EmbeddedResource Include="img\users.svg" />
       <EmbeddedResource Include="img\customization.svg" />
       <EmbeddedResource Include="img\statistic.svg" />
+      <EmbeddedResource Include="img\websearch_wallet.svg" />
     </ItemGroup>
     <ItemGroup>
     <ProjectReference Include="..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />

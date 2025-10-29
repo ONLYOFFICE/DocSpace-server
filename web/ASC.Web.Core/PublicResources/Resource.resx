@@ -1278,4 +1278,10 @@
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Add funds to your wallet to unlock AI features.</value>
   </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>AI web search</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Add funds to your wallet to unlock AI web search.</value>
+  </data>
 </root>
