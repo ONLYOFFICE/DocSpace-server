@@ -1150,6 +1150,19 @@ internal class FileDao(
                     await SetCustomOrder(filesDbContext, fileId, toFolderId);
                 }
 
+                if (toFolder.FolderType == FolderType.Knowledge)
+                {
+                    var vectorization = new DbFileVectorization
+                    {
+                        TenantId = tenantId,
+                        FileId = fileId,
+                        Status = VectorizationStatus.InProgress,
+                        UpdatedOn = DateTime.UtcNow
+                    };
+
+                    await context.FileVectorization.AddOrUpdateAsync(vectorization);
+                }
+
                 var oldFolder = await folderDao.GetFolderAsync(oldParentId.Value);
                 var (toFolderRoomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
                 var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(oldFolder);
