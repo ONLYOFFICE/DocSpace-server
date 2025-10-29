@@ -1080,7 +1080,12 @@ public class FileSecurity(
 
         if (file != null && room is { FolderType: FolderType.AiRoom } && parentFolders.Any(x => x.FolderType == FolderType.Knowledge))
         {
-            if (action is not (FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Delete or FilesSecurityActions.Vectorization))
+            if (action is not 
+                (FilesSecurityActions.Read or 
+                FilesSecurityActions.Download or 
+                FilesSecurityActions.Delete or 
+                FilesSecurityActions.Vectorization or 
+                FilesSecurityActions.Copy))
             {
                 return false;
             }
