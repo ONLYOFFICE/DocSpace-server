@@ -912,9 +912,9 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettings != null)
             {
-                if (gateway.IsEnabled)
+                if (gateway.Configured)
                 {
-                    chatSettings.ProviderId = 0;
+                    chatSettings.ProviderId = gateway.ProviderId;
                 }
                 else
                 {
@@ -1153,9 +1153,9 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettingsChanged)
             {
-                if (gateway.IsEnabled)
+                if (gateway.Configured)
                 {
-                    updateData.ChatSettings.ProviderId = 0;
+                    updateData.ChatSettings.ProviderId = gateway.ProviderId;
                 }
                 else
                 {

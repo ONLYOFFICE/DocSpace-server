@@ -88,7 +88,7 @@ public class AiSettingsService(
     {
         return new AiSettings
         {
-            WebSearchEnabled = aiGateway.IsEnabled || await webSearchSettingsStore.IsEnabledAsync()
+            WebSearchEnabled = aiGateway.Configured || await webSearchSettingsStore.IsEnabledAsync()
         };
     }
 }

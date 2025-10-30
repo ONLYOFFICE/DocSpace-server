@@ -48,7 +48,7 @@ public class AiGateway(
     public readonly int ProviderId = -1;
     public string Url => Settings?.Url;
     
-    public bool IsEnabled => !string.IsNullOrEmpty(Url) && !string.IsNullOrEmpty(Settings?.Secret);
+    public bool Configured => !string.IsNullOrEmpty(Url) && !string.IsNullOrEmpty(Settings?.Secret);
 
     private static AiGatewaySettings _settings;
 
@@ -57,7 +57,7 @@ public class AiGateway(
     
     public async Task<string> GetKeyAsync()
     {
-        if (!IsEnabled)
+        if (!Configured)
         {
             return null;
         }
