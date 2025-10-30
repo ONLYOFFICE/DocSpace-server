@@ -179,7 +179,7 @@ public class FileSecurity(
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
                     { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.None] },
-                    { SubjectType.Group, [FileShare.ContentCreator] },
+                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Read, FileShare.None] },
                     { SubjectType.ExternalLink, DefaultFileAccess },
                     { SubjectType.PrimaryExternalLink, DefaultFileAccess }
