@@ -599,7 +599,77 @@ public class RoomShareTests(
         editingAccess.Should().NotBeNull();
         editingAccess.Security.Edit.Should().BeTrue(); // Editing link should allow editing
     }
-    
+
+    [Fact]
+    public async Task RoomShare_MultipleExternalLinks_CheckLastAccessRights()
+    {
+        // Arrange: owner creates a virtual data room and a file inside it
+        await _filesClient.Authenticate(Initializer.Owner);
+        var owner = Initializer.Owner;
+        var user2 = await Initializer.InviteContact(EmployeeType.User);
+
+        var customRoom = await CreateCustomRoom("room_last_link_rights");
+        var file = await CreateFile("file_in_room_last_link_rights.docx", customRoom.Id);
+
+        var accessTypes = new[] { FileShare.Read, FileShare.Comment, FileShare.Editing };
+
+        foreach (var access in accessTypes)
+        {
+            // Owner: create an external link with the required access
+            await _filesClient.Authenticate(owner);
+            var linkRequest = new RoomLinkRequest(
+                access: access,
+                title: $"Link_{access}",
+                linkType: LinkType.External);
+
+            var linkResponse = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, linkRequest, TestContext.Current.CancellationToken)).Response;
+            var requestToken = linkResponse.SharedLink.RequestToken;
+
+            // User2: open the room via the external link (use the token), this should register the room for the user
+            await _filesClient.Authenticate(user2);
+            _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, requestToken);
+            var openedRoom = (await _foldersApi.GetFolderByFolderIdAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+            // Mark room as recent by Link (otherwise it will not be displayed in the list of rooms)
+            await _sharingApi.GetExternalShareDataWithHttpInfoAsync(requestToken, folderId: customRoom.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken);
+            _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+            openedRoom.Should().NotBeNull();
+            var roomFile = openedRoom.Files.Find(f => f.Title == file.Title);
+            roomFile.Should().NotBeNull();
+            roomFile.Access.Should().Be(access);
+
+            // Ensure the room appears in virtual rooms list
+            var roomsList = (await _roomsApi.GetRoomsFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+            roomsList.Should().NotBeNull();
+            roomsList.Folders.Should().Contain(f => f.Title == customRoom.Title);
+
+            // Now check file access for user2 (without token) — rights should be persisted according to the last link
+            var fileInfoAsUser2 = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+            fileInfoAsUser2.Should().NotBeNull();
+            fileInfoAsUser2.Access.Should().Be(access);
+            fileInfoAsUser2.Security.Read.Should().BeTrue();
+
+            switch (access)
+            {
+                case FileShare.Read:
+                    fileInfoAsUser2.Security.Edit.Should().BeFalse();
+                    fileInfoAsUser2.Security.Comment.Should().BeFalse();
+                    break;
+                case FileShare.Comment:
+                    fileInfoAsUser2.Security.Edit.Should().BeFalse();
+                    fileInfoAsUser2.Security.Comment.Should().BeTrue();
+                    break;
+                case FileShare.Editing:
+                    fileInfoAsUser2.Security.Edit.Should().BeTrue();
+                    fileInfoAsUser2.Security.Comment.Should().BeTrue();
+                    break;
+            }
+
+            // Prepare for next iteration: re-authenticate owner to create the next link
+            await _filesClient.Authenticate(owner);
+        }
+    }
+
     [Theory]
     [InlineData(RoomType.PublicRoom)]
     public async Task CheckEditAccess_InvalidRoomType_ReturnsFalse(RoomType roomType)
