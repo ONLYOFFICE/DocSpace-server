@@ -30,16 +30,16 @@ namespace ASC.Data.Backup.Tasks.Modules;
 public class ModuleProvider(ILogger<ModuleProvider> logger, Helpers helpers, CoreSettings coreSettings)
 {
     public IEnumerable<IModuleSpecifics> AllModules { get; } = new List<IModuleSpecifics>
-        {
-            new TenantsModuleSpecifics(coreSettings,helpers),
-            new AuditModuleSpecifics(helpers),
-            new FilesModuleSpecifics(logger,helpers),
-            new FilesModuleSpecifics2(helpers),
-            new WebStudioModuleSpecifics(helpers),
-            new CoreModuleSpecifics(helpers),
-            new IdentityModuleSpecifics(helpers)
-        }
-        .ToList();
+    {
+        new TenantsModuleSpecifics(coreSettings,helpers),
+        new AuditModuleSpecifics(helpers),
+        new FilesModuleSpecifics(logger,helpers),
+        new FilesModuleSpecifics2(helpers),
+        new WebStudioModuleSpecifics(helpers),
+        new CoreModuleSpecifics(helpers),
+        new IdentityModuleSpecifics(helpers),
+        new AiModuleSpecifics(helpers)
+    };
 
     private IModuleSpecifics RoomLogosModule { get; } = new RoomLogosModuleSpecifics(helpers);
 

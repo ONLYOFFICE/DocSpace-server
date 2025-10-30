@@ -340,8 +340,8 @@ public class TenantManager(
     public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(bool all = false, bool wallet = false)
     {
         var quotas = (await GetTenantQuotasAsync(all, wallet))
-            .Where(q => !string.IsNullOrEmpty(q.ProductId))
-            .ToDictionary(q => q.ProductId, q => q.Name);
+            .Where(q => !string.IsNullOrEmpty(q.ProductId + q.ServiceName))
+            .ToDictionary(q => q.GetPaymentId(), q => q.Name);
 
         var tenant = GetCurrentTenant(false);
 
