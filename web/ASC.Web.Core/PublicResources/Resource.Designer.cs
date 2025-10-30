@@ -3175,7 +3175,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add funds to your wallet to unlock AI features..
+        ///   Looks up a localized string similar to Enable AI features in your DocSpace to boost productivity..
         /// </summary>
         public static string TariffsFeature_aitools_wallet_price_count {
             get {

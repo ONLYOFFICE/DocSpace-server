@@ -1276,7 +1276,7 @@
     <value>AI tools</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Add funds to your wallet to unlock AI features.</value>
+    <value>Enable AI features in your DocSpace to boost productivity.</value>
   </data>
   <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
     <value>AI web search</value>
