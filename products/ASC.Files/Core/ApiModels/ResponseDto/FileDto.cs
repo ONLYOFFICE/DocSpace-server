@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ImageMagick;
+
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
@@ -199,6 +201,8 @@ public class FileDto<T> : FileEntryDto<T>
     /// The vectorization status of the file.
     /// </summary>
     public VectorizationStatus? VectorizationStatus { get; set; }
+    
+    public Size Dimensions { get; set; }
 }
 
 [Scope]
@@ -333,6 +337,24 @@ public class FileDtoHelper(
 
                     break;
             }
+        }
+
+        if (fileUtility.CanImageView(file.PureTitle))
+        {
+            try
+            {
+                await using var stream = await _daoFactory.GetFileDao<T>().GetFileStreamAsync(file);
+                using var image = new MagickImage(stream);
+                result.Dimensions = new Size
+                {
+                    Height = image.Height,
+                    Width = image.Width
+                };
+            }
+            catch (Exception)
+            {
+            }
+
         }
 
         return result;
