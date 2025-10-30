@@ -226,11 +226,18 @@ public class FileDtoHelper(
     FileChecker fileChecker,
     SecurityContext securityContext,
     UserManager userManager,
-    IUrlShortener urlShortener)
+    IUrlShortener urlShortener,
+    AiAccessibility aiAccessibility)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
 {
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null, bool? aiReady = null)
     {
+        Task<bool> aiReadyTask = null;
+        if (aiReady == null)
+        {
+            aiReadyTask = aiAccessibility.IsAiReadyAsync();
+        }
+        
         var result = await GetFileWrapperAsync(file, order, expiration, contextFolder);
 
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
@@ -355,6 +362,24 @@ public class FileDtoHelper(
             {
             }
 
+        }
+        
+        if (aiReadyTask != null)
+        {
+            aiReady = await aiReadyTask;
+        }
+        
+        if (aiReady is false)
+        {
+            if (result.Security.ContainsKey(FileSecurity.FilesSecurityActions.AscAi))
+            {
+                result.Security[FileSecurity.FilesSecurityActions.AscAi] = false;
+            }
+
+            if (result.Security.ContainsKey(FileSecurity.FilesSecurityActions.Vectorization))
+            {
+                result.Security[FileSecurity.FilesSecurityActions.Vectorization] = false;
+            }
         }
 
         return result;

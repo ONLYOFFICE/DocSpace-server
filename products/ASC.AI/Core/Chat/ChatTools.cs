@@ -75,6 +75,11 @@ public class ChatTools(
 
     private async Task<EngineConfig?> GetConfigAsync()
     {
+        if (!await webSearchSettingsStore.IsEnabledAsync())
+        {
+            return null;
+        }
+        
         if (aiGateway.Configured)
         {
             return new DocSpaceWebSearchConfig 

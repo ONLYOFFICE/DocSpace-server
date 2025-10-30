@@ -916,7 +916,7 @@ public class FileStorageService //: IFileStorageService
             {
                 if (gateway.Configured)
                 {
-                    chatSettings.ProviderId = gateway.ProviderId;
+                    chatSettings.ProviderId = AiGateway.ProviderId;
                 }
                 else
                 {
@@ -1157,7 +1157,7 @@ public class FileStorageService //: IFileStorageService
             {
                 if (gateway.Configured)
                 {
-                    updateData.ChatSettings.ProviderId = gateway.ProviderId;
+                    updateData.ChatSettings.ProviderId = AiGateway.ProviderId;
                 }
                 else
                 {

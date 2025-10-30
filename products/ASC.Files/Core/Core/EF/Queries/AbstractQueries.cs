@@ -123,6 +123,12 @@ public partial class FilesDbContext
     {
         return AbstractQueries.DeleteChatsAsync(this, folderId);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public Task<bool> AiProviderExistsAsync(int tenantId)
+    {
+        return AbstractQueries.AiProviderExistsAsync(this, tenantId);
+    }
 }
 
 static file class AbstractQueries
@@ -264,4 +270,8 @@ static file class AbstractQueries
             ctx.Chats
                 .Where(x => x.RoomId == folderId)
                 .ExecuteDelete());
+    
+    public static readonly Func<FilesDbContext, int, Task<bool>> AiProviderExistsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId) =>
+            ctx.AiProviders.Any(x => x.TenantId == tenantId));
 }
