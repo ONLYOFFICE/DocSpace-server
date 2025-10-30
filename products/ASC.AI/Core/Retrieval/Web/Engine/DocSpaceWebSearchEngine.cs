@@ -80,7 +80,7 @@ public class DocSpaceWebSearchEngine(HttpClient client, DocSpaceWebSearchConfig 
     {
         var requestBody = new ContentsRequest
         {
-            Urls = [query.Url]
+            Url = query.Url
         };
         
         var request = new HttpRequestMessage(HttpMethod.Post, $"{config.BaseUrl}/contents")
@@ -126,7 +126,7 @@ public class SearchRequest
 
 public class ContentsRequest
 {
-    public required List<string> Urls { get; init; }
+    public required string Url { get; init; }
 }
 
 public class SearchResponse
