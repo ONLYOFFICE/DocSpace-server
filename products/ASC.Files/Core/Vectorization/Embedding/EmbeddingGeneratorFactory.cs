@@ -70,7 +70,7 @@ public class EmbeddingGeneratorFactory
         var url = _settings.Url;
         var key = _settings.Key;
 
-        if (_gateway.IsEnabled)
+        if (_gateway.Configured)
         {
             url = _gateway.Url;
             key = await _gateway.GetKeyAsync();
@@ -79,7 +79,7 @@ public class EmbeddingGeneratorFactory
         ArgumentException.ThrowIfNullOrEmpty(url);
         ArgumentException.ThrowIfNullOrEmpty(key);
 
-        if (!url.Contains("api.openai.com") && !_gateway.IsEnabled)
+        if (!url.Contains("api.openai.com") && !_gateway.Configured)
         {
             return new OpenAiFloatEmbeddingGenerator(_httpClientFactory.CreateClient(),
                 new GeneratorConfiguration

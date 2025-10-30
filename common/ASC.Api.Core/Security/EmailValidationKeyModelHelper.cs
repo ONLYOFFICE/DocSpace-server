@@ -271,6 +271,13 @@ public class EmailValidationKeyModelHelper(
                     break;
                 }
 
+                var userInfoType = await userManager.GetUserTypeAsync(userInfo);
+                if (userInfoType is not EmployeeType.Guest)
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
+
                 if (uiD.HasValue)
                 {
                     var user = await userManager.GetUsersAsync(uiD.Value);
