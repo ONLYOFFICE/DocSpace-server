@@ -276,6 +276,8 @@ public class FileStorageService //: IFileStorageService
 
             if (parent.FolderType == FolderType.AiRoom)
             {
+                withSubfolders = false;
+                
                 parent = searchArea switch
                 {
                     SearchArea.Knowledge => await folderDao.GetFoldersAsync(parent.Id, FolderType.Knowledge)
