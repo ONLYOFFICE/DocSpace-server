@@ -188,7 +188,15 @@ public class File<T> : FileEntry<T>
     /// The file title.
     /// </summary>
     [JsonIgnore]
-    public override string Title => ServiceProvider.GetService<FileHelper>().GetTitle(this);
+    public override string Title
+    {
+        get
+        {
+            return string.IsNullOrEmpty(ConvertedType)
+                ? PureTitle
+                : FileUtility.ReplaceFileExtension(PureTitle, ServiceProvider.GetService<FileUtility>().GetInternalExtension(PureTitle));
+        }
+    }
 
     /// <summary>
     /// The file download URL.
