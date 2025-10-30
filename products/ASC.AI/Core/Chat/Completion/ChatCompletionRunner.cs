@@ -66,6 +66,11 @@ public class ChatCompletionRunner(
         context.UserMessage = userMessage;
         context.RawMessage = message;
         
+        if (attachments.Count > 0)
+        {
+            context.Attachments = attachments;
+        }
+        
         var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
         
         return new ChatCompletionGenerator(client, logger, socketManager, messages, chatHistory, chatNameGenerator, context);
@@ -106,6 +111,11 @@ public class ChatCompletionRunner(
         
         context.UserMessage = userMessage;
         context.RawMessage = message;
+
+        if (attachments.Count > 0)
+        {
+            context.Attachments = attachments;
+        }
         
         var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
 
