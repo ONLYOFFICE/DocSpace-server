@@ -79,7 +79,7 @@ public class FileSecurity(
         { FolderType.USER,
             new Dictionary<SubjectType, HashSet<FileShare>>
             {
-                { SubjectType.User, [FileShare.ReadWrite, FileShare.Editing, FileShare.FillForms, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict] },
+                { SubjectType.User, [FileShare.ReadWrite, FileShare.Editing, FileShare.FillForms, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None] },
                 { SubjectType.Group, [FileShare.ReadWrite, FileShare.Editing, FileShare.FillForms, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None] },
                 { SubjectType.ExternalLink, DefaultFileAccess },
                 { SubjectType.PrimaryExternalLink, DefaultFileAccess }
@@ -3017,9 +3017,19 @@ public class FileSecurity(
 
             foreach (var s in shares)
             {
-                if (s is FileShare.Restrict or FileShare.None || (s is FileShare.Read && !file.IsForm))
+                if (s is FileShare.Restrict || (s is FileShare.Read && !file.IsForm))
                 {
                     sharesToAdd.Add(s);
+                    continue;
+                }
+                
+                if (s is FileShare.None)
+                {
+                    if (file.CreateBy == authContext.CurrentAccount.ID)
+                    {
+                        sharesToAdd.Add(s);
+                    }
+
                     continue;
                 }
 
@@ -3077,7 +3087,24 @@ public class FileSecurity(
                 continue;
             }
 
-            result.Add(subjectType, shares.Where(r => parentRoomType == FolderType.FillingFormsRoom || r != FileShare.FillForms));
+            List<FileShare> sharesToAdd = [];
+
+            foreach (var s in shares.Where(r => parentRoomType == FolderType.FillingFormsRoom || r != FileShare.FillForms))
+            {
+                if (s is FileShare.None)
+                {
+                    if (folder.CreateBy == authContext.CurrentAccount.ID)
+                    {
+                        sharesToAdd.Add(s);
+                    }
+
+                    continue;
+                }
+
+                sharesToAdd.Add(s);
+            }
+
+            result.Add(subjectType, sharesToAdd);
         }
 
         return result;
