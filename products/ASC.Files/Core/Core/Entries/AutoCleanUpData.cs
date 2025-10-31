@@ -67,10 +67,11 @@ public class AutoCleanUpData
 
     public static AutoCleanUpData GetDefault()
     {
-        return new AutoCleanUpData {
-             Gap = DateToAutoCleanUp.ThirtyDays,
-             IsAutoCleanUp = true
-       };
+        return new AutoCleanUpData
+        {
+            Gap = DateToAutoCleanUp.ThirtyDays,
+            IsAutoCleanUp = true
+        };
     }
 }
 

@@ -30,6 +30,7 @@ global using System.Text.RegularExpressions;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Migration;
 global using ASC.Core.Common.EF.Model;
+global using ASC.Core.Common.EF.Model.Ai;
 global using ASC.Core.Common.Hosting;
 global using ASC.Core.Common.Hosting.Extensions;
 global using ASC.Data.Backup.EF.Model;

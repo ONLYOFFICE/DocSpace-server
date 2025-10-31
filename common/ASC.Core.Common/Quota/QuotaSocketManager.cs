@@ -36,11 +36,11 @@ public class QuotaSocketManager(
     : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
-    
+
     public async Task ChangeQuotaUsedValueAsync<T>(string featureId, T value)
     {
         var room = GetQuotaRoom();
-        
+
         await MakeRequest("change-quota-used-value", new { room, featureId, value });
     }
 

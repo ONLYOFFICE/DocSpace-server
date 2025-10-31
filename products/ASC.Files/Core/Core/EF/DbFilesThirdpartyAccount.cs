@@ -29,12 +29,16 @@ namespace ASC.Files.Core.EF;
 public class DbFilesThirdpartyAccount : BaseEntity, IDbFile, IDbSearch
 {
     public int Id { get; set; }
+    
     [MaxLength(50)]
     public string Provider { get; set; }
+    
     [MaxLength(400)]
     public string Title { get; set; }
+    
     [MaxLength(100)]
     public string UserName { get; set; }
+    
     [MaxLength(512)]
     public string Password { get; set; }
     public string Token { get; set; }
@@ -47,8 +51,14 @@ public class DbFilesThirdpartyAccount : BaseEntity, IDbFile, IDbSearch
     public string FolderId { get; set; }
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
+    
     [MaxLength(6)]
     public string Color { get; set; }
+    
+    [MaxLength(50)]
+    public string Cover { get; set; }
+    
+    
     public DateTime ModifiedOn { get; set; }
 
     public DbTenant Tenant { get; set; }
@@ -151,9 +161,15 @@ public static class DbFilesThirdpartyAccountExtension
             entity.Property(e => e.Private).HasColumnName("private");
 
             entity.Property(e => e.HasLogo).HasColumnName("has_logo");
-            
+
             entity.Property(e => e.Color)
                 .HasColumnName("color")
+                .HasColumnType("char")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.Cover)
+                .HasColumnName("cover")
                 .HasColumnType("char")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
@@ -164,7 +180,7 @@ public static class DbFilesThirdpartyAccountExtension
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
     }
-    
+
     public static void PgSqlAddDbFilesThirdpartyAccount(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFilesThirdpartyAccount>(entity =>
@@ -218,12 +234,16 @@ public static class DbFilesThirdpartyAccountExtension
             entity.Property(e => e.Color)
                 .HasColumnName("color")
                 .HasColumnType("char(6)");
-
+            
+            entity.Property(e => e.Cover)
+                .HasColumnName("cover")
+                .HasColumnType("char(6)");
+            
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")
                 .HasColumnType("timestamptz")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
-        
+
     }
 }

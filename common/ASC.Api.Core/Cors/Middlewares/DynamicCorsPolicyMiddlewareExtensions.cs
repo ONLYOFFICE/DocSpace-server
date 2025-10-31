@@ -49,7 +49,7 @@ public static class DynamicCorsPolicyMiddlewareExtensions
     }
 
 
-    public static IServiceCollection AddDynamicCors<TDynamicCorsPolicyResolver>(this IServiceCollection services, 
+    public static IServiceCollection AddDynamicCors<TDynamicCorsPolicyResolver>(this IServiceCollection services,
         Action<CorsOptions> setupAction)
         where TDynamicCorsPolicyResolver : class, IDynamicCorsPolicyResolver
     {

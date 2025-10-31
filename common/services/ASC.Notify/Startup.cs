@@ -43,7 +43,7 @@ public class Startup : BaseWorkerStartup
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
         await base.ConfigureServices(builder);
-        
+
         var services = builder.Services;
         services.AddActivePassiveHostedService<NotifySenderService>(Configuration);
         services.AddActivePassiveHostedService<NotifyCleanerService>(Configuration);
@@ -51,7 +51,7 @@ public class Startup : BaseWorkerStartup
         services.AddBaseDbContextPool<NotifyDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
-        
+
         services.AddScoped(_ => UrlEncoder.Default);
     }
 }

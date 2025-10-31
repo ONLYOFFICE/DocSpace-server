@@ -95,13 +95,13 @@ public static class WebstudioSettingsExtension
                 .HasColumnType("mediumtext")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
-            
+
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
                 .HasColumnType("datetime");
         });
     }
-    
+
     public static void PgSqlAddWebstudioSettings(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbWebstudioSettings>(entity =>
@@ -128,7 +128,7 @@ public static class WebstudioSettingsExtension
                 .IsRequired()
                 .HasColumnName("data")
                 .HasColumnType("jsonb");
-            
+
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
                 .HasColumnType("timestamptz");

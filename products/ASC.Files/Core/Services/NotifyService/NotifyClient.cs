@@ -158,7 +158,7 @@ public class NotifyClient(WorkContext notifyContext,
                     ? (tenantManager.GetCurrentTenant()).GetCulture()
                     : CultureInfo.GetCultureInfo(u.CultureName);
             }
-            
+
 
             var aceString = GetAccessString(recipientPair.Value, userCulture);
             var recipient = await recipientsProvider.GetRecipientAsync(u.Id.ToString());
@@ -176,12 +176,12 @@ public class NotifyClient(WorkContext notifyContext,
                 TagValues.Image(studioNotifyHelper, 0, "privacy.png"),
                 new AdditionalSenderTag("push.sender")
             };
-            
+
             if (!string.IsNullOrEmpty(culture))
             {
                 tags.Add(new TagValue(CommonTags.Culture, culture));
             }
-            
+
             await client.SendNoticeAsync(
                 action,
                 fileEntry.UniqID,
@@ -205,13 +205,13 @@ public class NotifyClient(WorkContext notifyContext,
 
         var folderDao = daoFactory.GetFolderDao<T>();
 
-        var (id, roomTitle) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
+        var (id, roomTitle, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
 
         if (!int.TryParse(id.ToString(), out var roomId))
         {
             return;
         }
-        
+
         var roomUrl = pathProvider.GetRoomsUrl(roomId, false);
 
         var room = await folderDao.GetFolderAsync(id);

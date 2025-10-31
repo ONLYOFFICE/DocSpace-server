@@ -42,7 +42,7 @@ public class OpensourceGiftSettings : ISettings<OpensourceGiftSettings>
     {
         return new OpensourceGiftSettings { Readed = false };
     }
-    
+
     public DateTime LastModified { get; set; }
 
     #endregion

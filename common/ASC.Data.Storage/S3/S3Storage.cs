@@ -114,7 +114,7 @@ public class S3Storage(TempStream tempStream,
                 {
                     continue;
                 }
-                
+
                 if (h.StartsWith("Content-Disposition"))
                 {
                     headersOverrides.ContentDisposition = (h[("Content-Disposition".Length + 1)..]);
@@ -247,7 +247,7 @@ public class S3Storage(TempStream tempStream,
             Key = MakePath(domain, path)
         };
 
-        if (length> 0 && (offset > 0 || offset == 0 && length != long.MaxValue))
+        if (length > 0 && (offset > 0 || offset == 0 && length != long.MaxValue))
         {
             request.ByteRange = new ByteRange(offset, length == int.MaxValue ? length : offset + length - 1);
         }
@@ -403,7 +403,7 @@ public class S3Storage(TempStream tempStream,
     public override async Task<string> UploadChunkAsync(string domain, string path, string uploadId, Stream stream, long defaultChunkSize, int chunkNumber, long chunkLength)
     {
         Stream bufferStream = null;
-        
+
         var request = new UploadPartRequest
         {
             BucketName = _bucket,
@@ -417,11 +417,11 @@ public class S3Storage(TempStream tempStream,
             request.InputStream = stream;
         }
         else
-        { 
+        {
             bufferStream = _tempStream.Create();
             await stream.CopyToAsync(bufferStream);
             bufferStream.Position = 0;
-            
+
             request.InputStream = bufferStream;
         }
 
@@ -894,7 +894,7 @@ public class S3Storage(TempStream tempStream,
     public override async IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive)
     {
         var tmp = await GetS3ObjectsAsync(domain, path);
-        var obj = tmp.Where(x=> !x.Key.EndsWith('/'))
+        var obj = tmp.Where(x => !x.Key.EndsWith('/'))
             .Where(x => Wildcard.IsMatch(pattern, Path.GetFileName(x.Key)))
             .Select(x => x.Key[(MakePath(domain, path) + "/").Length..].TrimStart('/'));
 
@@ -1137,7 +1137,7 @@ public class S3Storage(TempStream tempStream,
         props.TryGetValue("subdir", out _subDir);
 
         DataStoreValidator = dataStoreValidator;
-        
+
         return Task.FromResult<IDataStore>(this);
     }
 
@@ -1476,7 +1476,7 @@ public class S3Storage(TempStream tempStream,
         }
         await ms.WriteAsync(header, token);
 
-        stream.Position = 0; 
+        stream.Position = 0;
         await stream.CopyToAsync(ms, token);
         await stream.DisposeAsync();
 
@@ -1544,7 +1544,7 @@ public class S3Storage(TempStream tempStream,
             UploadId = uploadId,
             PartETags = eTags
         };
-         await s3.CompleteMultipartUploadAsync(completeRequest);
+        await s3.CompleteMultipartUploadAsync(completeRequest);
     }
 
     public async Task ConcatFileAsync(string pathFile, string tarKey, string destinationDomain, string destinationKey, ConcurrentQueue<int> queue, CancellationToken token)
@@ -1563,7 +1563,7 @@ public class S3Storage(TempStream tempStream,
             var objResult = await s3.GetObjectMetadataAsync(_bucket, destinationPath, token).ConfigureAwait(false);
             prevFileSize = objResult.ContentLength;
         }
-        catch{}
+        catch { }
 
         var objFile = await s3.GetObjectMetadataAsync(_bucket, pathFile, token).ConfigureAwait(false);
         var header = BuilderHeaders.CreateHeader(tarKey, objFile.ContentLength);
@@ -1574,9 +1574,9 @@ public class S3Storage(TempStream tempStream,
             var endBlock = new byte[blockSize - prevFileSize % blockSize];
             await stream.WriteAsync(endBlock, token);
         }
-        
+
         await stream.WriteAsync(header, token);
-        
+
         stream.Position = 0;
 
         var uploadRequest = new UploadPartRequest
@@ -1847,12 +1847,12 @@ public class S3Storage(TempStream tempStream,
         {
             return _response.ResponseStream.WriteAsync(buffer, cancellationToken);
         }
-        
+
         public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
             return _response.ResponseStream.CopyToAsync(destination, bufferSize, cancellationToken);
         }
-        
+
         public override void Flush()
         {
             _response.ResponseStream.Flush();

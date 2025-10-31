@@ -51,7 +51,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         CommonChunkedUploadSession chunkedUploadSession,
         CommonChunkedUploadSessionHolder sessionHolder)
     {
-        _tempStream = tempStream; 
+        _tempStream = tempStream;
         _chunkedUploadSession = chunkedUploadSession;
         _sessionHolder = sessionHolder;
 
@@ -67,7 +67,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
         var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
-        
+
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream, action);
@@ -84,7 +84,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         }
 
         var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
-        try 
+        try
         {
             var entry = TarEntry.CreateTarEntry(tarKey);
             entry.Size = buffered.Length;
@@ -126,7 +126,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
                 {
                     _chunkedUploadSession.Items["lastChunk"] = "true";
                 }
-                    
+
                 theMemStream.Position = 0;
                 var length = theMemStream.Length;
                 await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, length, _chunkNumber++);

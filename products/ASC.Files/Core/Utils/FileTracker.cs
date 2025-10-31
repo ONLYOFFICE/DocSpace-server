@@ -37,7 +37,7 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
     private static readonly TimeSpan _cacheTimeout = TimeSpan.FromSeconds(60);
     private static readonly TimeSpan _checkRightTimeout = TimeSpan.FromMinutes(1);
     private readonly Guid _instanceId = Guid.NewGuid();
-    
+
     public async Task<bool> ProlongEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, string baseUri, string docKey, bool editingAlone = false, string token = null, string fillingSessionId = null)
     {
         var checkRight = true;
@@ -53,12 +53,12 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
             {
                 tracker.EditingBy.TryAdd(tabId,
                     new TrackInfo
-                {
-                    UserId = userId,
-                    NewScheme = tabId == userId,
-                    EditingAlone = editingAlone,
-                    Token = token
-                });
+                    {
+                        UserId = userId,
+                        NewScheme = tabId == userId,
+                        EditingAlone = editingAlone,
+                        Token = token
+                    });
             }
         }
         else
@@ -188,7 +188,7 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
     public async Task ChangeRight<T>(T fileId, Guid userId, bool check)
     {
         var tracker = await GetTrackerAsync(fileId);
-        
+
         if (tracker != null)
         {
             foreach (var value in tracker.EditingBy.Values.Where(value => value.UserId == userId || userId == Guid.Empty))
@@ -228,14 +228,14 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
 
     private async Task SetTrackerAsync<T>(T fileId, FileTracker tracker)
     {
-        await cache.SetAsync(GetCacheKey(fileId), new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = tracker, InstanceId = _instanceId}, options =>
+        await cache.SetAsync(GetCacheKey(fileId), new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = tracker, InstanceId = _instanceId }, options =>
         {
             options.Duration = _cacheTimeout;
             options.DistributedCacheDuration = _cacheTimeout * 2;
         });
 
     }
-    
+
     private async Task RemoveTrackerAsync<T>(T fileId)
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default))
@@ -255,13 +255,13 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
         {
             return;
         }
-        
-        var fId =  e.Key[Tracker.Length..];
-            
-        _ = int.TryParse(fId, out var internalFileId) ? 
-            Callback(internalFileId, trackerNotify.FileTracker).ConfigureAwait(false) : 
+
+        var fId = e.Key[Tracker.Length..];
+
+        _ = int.TryParse(fId, out var internalFileId) ?
+            Callback(internalFileId, trackerNotify.FileTracker).ConfigureAwait(false) :
             Callback(fId, trackerNotify.FileTracker).ConfigureAwait(false);
-        
+
         return;
 
         async Task Callback<T>(T fileId, FileTracker fileTracker)
@@ -285,14 +285,14 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
 
                 var commonLinkUtility = scope.ServiceProvider.GetRequiredService<BaseCommonLinkUtility>();
                 commonLinkUtility.ServerUri = fileTracker.BaseUri;
-                
+
                 var tracker = scope.ServiceProvider.GetRequiredService<DocumentServiceTrackerHelper>();
                 var tenantId = fileTracker.Tenant.Id;
-                
+
                 using (logger.BeginScope(new[]
                        {
-                           new KeyValuePair<string, object>("DocumentServiceConnector", $"{fileId}"), 
-                           new KeyValuePair<string, object>("TenantId", $"{tenantId}") 
+                           new KeyValuePair<string, object>("DocumentServiceConnector", $"{fileId}"),
+                           new KeyValuePair<string, object>("TenantId", $"{tenantId}")
                        }))
                 {
                     if (await tracker.StartTrackAsync(fileId.ToString(), fileTracker.DocKey, token, tenantId, fileTracker.FillingSessionId))
@@ -323,10 +323,10 @@ public record FileTrackerNotify
 {
     [ProtoMember(1)]
     public string FileId { get; set; }
-    
+
     [ProtoMember(2)]
     public FileTracker FileTracker { get; set; }
-    
+
     [ProtoMember(3)]
     public Guid InstanceId { get; set; }
 }
@@ -336,13 +336,13 @@ public record FileTracker
 {
     [ProtoMember(1)]
     public ConcurrentDictionary<Guid, TrackInfo> EditingBy { get; set; }
-    
+
     [ProtoMember(2)]
     public Tenant Tenant { get; set; }
-    
+
     [ProtoMember(3)]
     public string BaseUri { get; set; }
-    
+
     [ProtoMember(4)]
     public string DocKey { get; set; }
 
@@ -350,7 +350,7 @@ public record FileTracker
     public string FillingSessionId { get; set; }
 
     public FileTracker() { }
-    
+
     internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, Tenant tenant, string baseUri, string docKey, string token = null, string fillingSessionId = null)
     {
         DocKey = docKey;
@@ -358,7 +358,7 @@ public record FileTracker
         BaseUri = baseUri;
         FillingSessionId = fillingSessionId;
         EditingBy = new ConcurrentDictionary<Guid, TrackInfo>();
-        EditingBy.TryAdd(tabId, new TrackInfo 
+        EditingBy.TryAdd(tabId, new TrackInfo
         {
             UserId = userId,
             NewScheme = newScheme,
@@ -372,19 +372,19 @@ public record FileTracker
     {
         [ProtoMember(1)]
         public DateTime CheckRightTime { get; set; } = DateTime.UtcNow;
-        
+
         [ProtoMember(2)]
         public DateTime TrackTime { get; set; } = DateTime.UtcNow;
-        
+
         [ProtoMember(3)]
         public required Guid UserId { get; init; }
-        
+
         [ProtoMember(4)]
-        public required bool NewScheme { get;  init; }
-        
+        public required bool NewScheme { get; init; }
+
         [ProtoMember(5)]
-        public required bool EditingAlone { get;  init; }
-        
+        public required bool EditingAlone { get; init; }
+
         [ProtoMember(6)]
         public string Token { get; init; }
     }

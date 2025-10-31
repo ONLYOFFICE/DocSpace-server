@@ -48,11 +48,11 @@ public class Startup : BaseWorkerStartup
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
         await base.ConfigureServices(builder);
-        
+
         var services = builder.Services;
         services.AddHttpClient();
 
-        
+
         if (!Enum.TryParse<ElasticLaunchType>(Configuration["elastic:mode"], true, out var elasticLaunchType))
         {
             elasticLaunchType = ElasticLaunchType.Inclusive;
@@ -86,7 +86,7 @@ public class Startup : BaseWorkerStartup
                 services.AddActivePassiveHostedService<RefreshLicenseService>(Configuration);
             }
         }
-        
+
         services.RegisterQueue<RoomIndexExportTask>();
         services.RegisterQueue<FileDeleteOperation>(10);
         services.RegisterQueue<FileMoveCopyOperation>(10);
@@ -107,7 +107,7 @@ public class Startup : BaseWorkerStartup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);
         services.AddDocumentServiceHttpClient(Configuration);
-        
+
         services.AddScoped(_ => UrlEncoder.Default);
     }
 }

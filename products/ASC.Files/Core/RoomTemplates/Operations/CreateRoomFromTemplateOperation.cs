@@ -49,9 +49,9 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
 
     public CreateRoomFromTemplateOperation()
     {
-        
+
     }
-    
+
     public CreateRoomFromTemplateOperation(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
@@ -141,7 +141,7 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
                         await folderDao.SaveFolderAsync(room);
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     logger.WarningCanNotCopyLogo(ex);
                 }
@@ -159,7 +159,7 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
                     await fileDao.CopyFileAsync(file, RoomId);
                     await PublishAsync();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     logger.WarningCanNotCopyFile(ex);
                 }

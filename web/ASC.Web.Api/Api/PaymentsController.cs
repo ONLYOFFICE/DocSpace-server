@@ -561,7 +561,7 @@ public class PaymentController(
         {
             throw new SecurityException();
         }
-        
+
         return await tariffHelper.GetCurrentQuotaAsync(inDto.Refresh);
     }
 
@@ -940,7 +940,7 @@ public class PaymentController(
 
         var allCurrencies = await tariffService.GetAllAccountingCurrenciesAsync();
 
-        return allCurrencies.Where(x=> supportedCurrencies.Contains(x.Code)).ToList();
+        return allCurrencies.Where(x => supportedCurrencies.Contains(x.Code)).ToList();
     }
 
     /// <summary>

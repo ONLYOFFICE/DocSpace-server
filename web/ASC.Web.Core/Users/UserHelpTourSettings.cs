@@ -46,7 +46,7 @@ public class UserHelpTourSettings : ISettings<UserHelpTourSettings>
             IsNewUser = false
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 }
 

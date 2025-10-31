@@ -121,10 +121,10 @@ public partial class WebPluginMapper(EmployeeDtoHelper employeeDtoHelper)
     [MapperIgnoreSource(nameof(WebPlugin.CspDomains))]
     [MapProperty(nameof(WebPluginDto.CreateBy), nameof(WebPlugin.CreateBy), Use = nameof(MapCreateBy))]
     private partial WebPluginDto ToDto(WebPlugin webPlugin);
-    
+
     [UserMapping(Default = false)]
     private static EmployeeDto MapCreateBy(Guid _) => new();
-    
+
     public async Task<WebPluginDto> ToDtoManual(WebPlugin source)
     {
         var dto = ToDto(source);

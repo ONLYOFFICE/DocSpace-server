@@ -1,22 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
     <AssemblyTitle>ASC.Web.Api</AssemblyTitle>
-    <Company>Ascensio System SIA</Company>
     <Product>ASC.Web.Api</Product>
-    <Copyright>(c) Ascensio System SIA. All rights reserved</Copyright>
     <RazorCompileOnBuild>false</RazorCompileOnBuild>
     <GenerateMvcApplicationPartsAssemblyAttributes>false</GenerateMvcApplicationPartsAssemblyAttributes>
     <DisableImplicitComponentsAnalyzers>true</DisableImplicitComponentsAnalyzers>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
   </PropertyGroup>
     <ItemGroup>
@@ -37,6 +32,7 @@
 	  <None Remove="img\statistic.svg" />
     </ItemGroup>
     <ItemGroup>
+      <EmbeddedResource Include="img\aitools_wallet.svg" />
       <EmbeddedResource Include="img\audit.svg" />
       <EmbeddedResource Include="img\free_backup.svg" />
       <EmbeddedResource Include="img\restore.svg" />
@@ -49,6 +45,7 @@
       <EmbeddedResource Include="img\users.svg" />
       <EmbeddedResource Include="img\customization.svg" />
       <EmbeddedResource Include="img\statistic.svg" />
+      <EmbeddedResource Include="img\websearch_wallet.svg" />
     </ItemGroup>
     <ItemGroup>
     <ProjectReference Include="..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />

@@ -70,7 +70,7 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, ConfigureNotifyS
 
     public async Task<IDictionary<int, NotifyMessage>> GetMessagesAsync(int count)
     {
-        await using(await distributedLockProvider.TryAcquireLockAsync("get_notify_messages"))
+        await using (await distributedLockProvider.TryAcquireLockAsync("get_notify_messages"))
         {
             using var scope = serviceScopeFactory.CreateScope();
 
@@ -102,7 +102,7 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, ConfigureNotifyS
                         return res;
                     });
 
-            await dbContext.NotifyInfo.Where(r => messages.Keys.Any(a => a == r.NotifyId)).ExecuteUpdateAsync(entry=> entry.SetProperty(p => p.State, (int)MailSendingState.Sending));
+            await dbContext.NotifyInfo.Where(r => messages.Keys.Any(a => a == r.NotifyId)).ExecuteUpdateAsync(entry => entry.SetProperty(p => p.State, (int)MailSendingState.Sending));
 
             return messages;
         }

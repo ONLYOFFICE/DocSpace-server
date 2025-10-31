@@ -43,11 +43,11 @@ public static class HttpClientTokenIntrospectionExtensions
         {
             { "token", request.Token }
         };
-     
+
         using var req = new HttpRequestMessage(HttpMethod.Post, request.Address);
         req.Content = new FormUrlEncodedContent(dict);
         using var response = await client.SendAsync(req, cancellationToken);
-        
+
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync<TokenIntrospectionResponse>(cancellationToken);

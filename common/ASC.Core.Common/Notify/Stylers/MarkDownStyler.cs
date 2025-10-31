@@ -45,7 +45,7 @@ public partial class MarkDownStyler : IPatternStyler
         }
 
         var lines = message.Body.Split([Environment.NewLine, "\n"], StringSplitOptions.None);
-        foreach(var line in lines)
+        foreach (var line in lines)
         {
             if (string.IsNullOrEmpty(line)) { body += Environment.NewLine; continue; }
             var lineToAdd = _velocityArguments.Replace(line, ArgMatchReplace);

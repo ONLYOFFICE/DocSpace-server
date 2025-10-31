@@ -32,13 +32,13 @@ public class RedisFairLockHandle : LockHandleBase
     private readonly IRedisDatabase _database;
     private PeriodicTimer _timer;
     private byte[] Message => _database.Serializer.Serialize<byte>(0);
-    
+
     internal RedisFairLockHandle(
-        IRedisDatabase database, 
-        string resource, 
+        IRedisDatabase database,
+        string resource,
         string id,
-        string channelName, 
-        string queueKey, 
+        string channelName,
+        string queueKey,
         string queueItemTimeoutKey,
         PeriodicTimer timer)
     {
@@ -54,10 +54,10 @@ public class RedisFairLockHandle : LockHandleBase
     public override async ValueTask DisposeAsync()
     {
         CheckDispose();
-        
+
         _timer?.Dispose();
         _timer = null;
-        
+
         await _database.Database.ScriptEvaluateAsync(_lockReleaseScript, new
         {
             lockKey = _resource,
@@ -75,10 +75,10 @@ public class RedisFairLockHandle : LockHandleBase
     public override void Dispose()
     {
         CheckDispose();
-        
+
         _timer?.Dispose();
         _timer = null;
-        
+
         _database.Database.ScriptEvaluate(_lockReleaseScript, new
         {
             lockKey = _resource,
@@ -89,7 +89,7 @@ public class RedisFairLockHandle : LockHandleBase
             currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             message = Message
         });
-        
+
         _disposed = true;
     }
 

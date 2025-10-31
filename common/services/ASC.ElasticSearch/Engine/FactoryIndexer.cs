@@ -411,7 +411,7 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
         {
             return;
         }
-        
+
         await QueueAsync(() => _indexer.Delete(r => r, tenantId, immediately));
     }
 

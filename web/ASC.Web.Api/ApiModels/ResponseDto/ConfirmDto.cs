@@ -54,6 +54,6 @@ public class ConfirmDto
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class ConfirmDtoMapper
-{       
+{
     public static partial ConfirmDto Map(this Validation source);
 }

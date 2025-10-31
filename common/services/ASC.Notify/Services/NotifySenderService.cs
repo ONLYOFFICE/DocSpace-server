@@ -50,7 +50,7 @@ public class NotifySenderService(
 
         await ThreadManagerWorkAsync(stoppingToken);
     }
-       
+
     private void InitializeNotifySchedulers()
     {
         notifyConfiguration.Configure();

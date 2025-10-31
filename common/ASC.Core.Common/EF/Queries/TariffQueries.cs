@@ -33,13 +33,13 @@ public partial class CoreDbContext
     {
         return Queries.TariffAsync(this, tenantId, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<Billing.Quota> QuotasAsync(int tenantId, int id)
     {
         return Queries.QuotasAsync(this, tenantId, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<int> DeleteTariffs(int tenantId)
     {
@@ -68,6 +68,6 @@ static file class Queries
                     .Select(r => new Billing.Quota(r.tariffRow.Quota, r.tariffRow.Quantity, r.quota.Wallet, r.tariffRow.DueDate, r.tariffRow.NextQuantity)));
 
     public static readonly Func<CoreDbContext, int, Task<int>> DeleteTariffs =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((CoreDbContext ctx, int tenantId) => 
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((CoreDbContext ctx, int tenantId) =>
             ctx.Tariffs.Where(r => r.TenantId == tenantId).ExecuteDelete());
 }

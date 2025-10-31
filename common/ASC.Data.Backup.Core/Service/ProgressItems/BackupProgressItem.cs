@@ -49,7 +49,7 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
 
     public BackupProgressItem()
     {
-        
+
     }
 
     public BackupProgressItem(ILogger<BackupProgressItem> logger,
@@ -202,6 +202,11 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
                 await _notifyHelper.SendAboutBackupCompletedAsync(TenantId, _userId);
             }
 
+            var missingFilesInfo = backupPortalTask.GetMissingFilesInfo();
+            if (!string.IsNullOrEmpty(missingFilesInfo))
+            {
+                Warning = string.Format(BackupResource.BackupMissingFilesWarning, missingFilesInfo);
+            }
 
             IsCompleted = true;
             await socketManager.BackupProgressAsync((int)Percentage, Dump);
@@ -226,6 +231,16 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
             catch (Exception closeCustomerSessionError)
             {
                 _logger.ErrorWithException(closeCustomerSessionError);
+            }
+
+            try
+            {
+                _notifyHelper.SetServerBaseUri(_serverBaseUri);
+                await _notifyHelper.SendAboutBackupFailedAsync(TenantId, _userId, error.Message);
+            }
+            catch (Exception notifyError)
+            {
+                _logger.ErrorWithException(notifyError);
             }
         }
         finally

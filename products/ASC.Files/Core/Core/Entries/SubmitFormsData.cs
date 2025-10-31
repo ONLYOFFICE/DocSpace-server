@@ -103,12 +103,12 @@ public class DbFormsItemDataSearch : SubmitFormsData, ISearchItem
     /// <summary>
     /// The form index name.
     /// </summary>
-    [Ignore] 
+    [Ignore]
     public string IndexName => "forms_data";
 
     public Expression<Func<ISearchItem, object[]>> GetSearchContentFields(SearchSettingsHelper searchSettings)
     {
-        return a => new object[] {  };
+        return a => new object[] { };
     }
 }
 
@@ -138,7 +138,7 @@ public class FactoryIndexerForm(
         try
         {
             var now = DateTime.UtcNow;
-            
+
             await foreach (var _ in _indexer.IndexAllAsync(GetCount, GetIds, GetData))
             {
 

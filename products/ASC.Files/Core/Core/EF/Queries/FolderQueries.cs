@@ -33,295 +33,295 @@ public partial class FilesDbContext
     {
         return FolderQueries.DbFolderQueryAsync(this, tenantId, folderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFolder> FolderAsync(int tenantId, int folderId)
     {
         return FolderQueries.FolderAsync(this, tenantId, folderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<bool> AnyTreeAsync(int parentId, int folderId)
     {
         return FolderQueries.AnyTreeAsync(this, parentId, folderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> CountFilesAsync(int tenantId, int folderId)
     {
         return FolderQueries.CountFilesAsync(this, tenantId, folderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<int> CountTreesAsync(int parentId)
     {
         return FolderQueries.CountTreesAsync(this, parentId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> FolderIdAsync(int tenantId, int folderId, int parentId)
     {
         return FolderQueries.FolderIdAsync(this, tenantId, folderId, parentId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<int> ParentIdAsync(int folderId)
     {
         return FolderQueries.ParentIdAsync(this, folderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<string> RightNodeAsync(int tenantId, string key)
     {
         return FolderQueries.RightNodeAsync(this, tenantId, key);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFolder> FolderForUpdateAsync(int tenantId, int id)
     {
         return FolderQueries.FolderForUpdateAsync(this, tenantId, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFolder> FolderWithSettingsAsync(int tenantId, int folderId)
     {
         return FolderQueries.FolderWithSettingsAsync(this, tenantId, folderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> ParentIdByIdAsync(int tenantId, int id)
     {
         return FolderQueries.ParentIdByIdAsync(this, tenantId, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFolderQuery> DbFolderQueryWithSharedAsync(int tenantId, int folderId)
     {
         return FolderQueries.DbFolderQueryWithSharedAsync(this, tenantId, folderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<int> ArrayAsync(int tenantId, int folderId)
     {
         return FolderQueries.ArrayAsync(this, tenantId, folderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<DbFilesBunchObjects> NodeAsync(int tenantId, string[] keys)
     {
         return FolderQueries.NodeAsync(this, tenantId, keys);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<DbFilesBunchObjects> NodeOnlyAsync(int tenantId, string key)
     {
         return FolderQueries.NodeOnlyAsync(this, tenantId, key);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFolderTree> SubfolderAsync(int folderId)
     {
         return FolderQueries.SubfolderAsync(this, folderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFile> DbFilesAsync(int tenantId, int folderId, int conflict)
     {
         return FolderQueries.DbFilesAsync(this, tenantId, folderId, conflict);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<OriginData> OriginsDataAsync(int tenantId, IEnumerable<int> entriesIds)
     {
         return FolderQueries.OriginsDataAsync(this, tenantId, entriesIds);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<int> SubfolderIdsAsync(int id)
     {
         return FolderQueries.SubfolderIdsAsync(this, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFolderQuery> DbFolderQueriesAsync(int tenantId, int folderId)
     {
         return FolderQueries.DbFolderQueriesAsync(this, tenantId, folderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFolderTree> TreesOrderByLevel(int toFolderId)
     {
         return FolderQueries.TreesOrderByLevel(this, toFolderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<DbFolder> DbFoldersForDeleteAsync(int tenantId, IEnumerable<int> subfolders)
     {
         return FolderQueries.DbFoldersForDeleteAsync(this, tenantId, subfolders);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
-    public IAsyncEnumerable<FolderTypeUsedSpacePair> FolderTypeUsedSpaceAsync(int tenantId, IEnumerable <FolderType> folderTypes)
+    public IAsyncEnumerable<FolderTypeUsedSpacePair> FolderTypeUsedSpaceAsync(int tenantId, IEnumerable<FolderType> folderTypes)
     {
         return FolderQueries.FolderTypeUsedSpaceAsync(this, tenantId, folderTypes);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<DbFilesBunchObjects> NodeByFolderIdsAsync(int tenantId, IEnumerable<string> folderIds)
     {
         return FolderQueries.NodeByFolderIdsAsync(this, tenantId, folderIds);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<ParentIdTitlePair> ParentIdTitlePairAsync(int folderId)
     {
         return FolderQueries.ParentIdTitlePairAsync(this, folderId);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<DbFolderQuery> ParentIdTypePairAsync(int folderId)
     {
         return FolderQueries.ParentIdTypePairAsync(this, folderId);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<DbFolderQuery> DbFolderQueriesByIdsAsync(int tenantId, IEnumerable<int> ids)
     {
         return FolderQueries.DbFolderQueriesByIdsAsync(this, tenantId, ids);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<DbFolderQuery> DbFolderQueriesByTextAsync(int tenantId, string text)
     {
         return FolderQueries.DbFolderQueriesByTextAsync(this, tenantId, text);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<DbFolderTree> FolderTreeAsync(int id, int parentId)
     {
         return FolderQueries.FolderTreeAsync(this, id, parentId);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> UpdateFoldersCountAsync(int tenantId, int id)
     {
         return FolderQueries.UpdateFoldersCountAsync(this, tenantId, id);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> UpdateFoldersCountsAsync(int tenantId, IEnumerable<int> ids)
     {
         return FolderQueries.UpdateFoldersCountsAsync(this, tenantId, ids);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
     public Task<DbFolderQuery> DbFolderQueryByTitleAndParentIdAsync(int tenantId, string title, int parentId)
     {
         return FolderQueries.DbFolderQueryByTitleAndParentIdAsync(this, tenantId, title, parentId);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> ParentIdByFileIdAsync(int tenantId, int fileId)
     {
         return FolderQueries.ParentIdByFileIdAsync(this, tenantId, fileId);
     }
-        
+
     [PreCompileQuery([null])]
     public Task<int> DeleteOrderAsync(IEnumerable<int> subfolders)
     {
         return FolderQueries.DeleteOrderAsync(this, subfolders);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteTagLinksAsync(int tenantId, IEnumerable<string> subfolders)
     {
         return FolderQueries.DeleteTagLinksAsync(this, tenantId, subfolders);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<int> DeleteTagsAsync(int tenantId)
     {
         return FolderQueries.DeleteTagsAsync(this, tenantId);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, null])]
     public Task<int> DeleteTagLinkByTagOriginAsync(int tenantId, string id, IEnumerable<string> subfolders)
     {
         return FolderQueries.DeleteTagLinkByTagOriginAsync(this, tenantId, id, subfolders);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, null])]
     public Task<int> DeleteTagOriginAsync(int tenantId, string id, IEnumerable<string> subfolders)
     {
         return FolderQueries.DeleteTagOriginAsync(this, tenantId, id, subfolders);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteBunchObjectsAsync(int tenantId, string id)
     {
         return FolderQueries.DeleteBunchObjectsAsync(this, tenantId, id);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteFilesSecurityAsync(int tenantId, IEnumerable<string> subfolders)
     {
         return FolderQueries.DeleteFilesSecurityAsync(this, tenantId, subfolders);
     }
-        
+
     [PreCompileQuery([null])]
     public Task<int> DeleteTreesBySubfoldersDictionaryAsync(IEnumerable<int> subfolders)
     {
         return FolderQueries.DeleteTreesBySubfoldersDictionaryAsync(this, subfolders);
     }
-        
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public Task<int> UpdateFoldersAsync(int tenantId, int folderId, int parentId, Guid modifiedBy)
     {
         return FolderQueries.UpdateFoldersAsync(this, tenantId, folderId, parentId, modifiedBy);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
-    public  Task<bool> DbFoldersAnyAsync(int tenantId, string title, int folderId)
+    public Task<bool> DbFoldersAnyAsync(int tenantId, string title, int folderId)
     {
         return FolderQueries.DbFoldersAnyAsync(this, tenantId, title, folderId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
     public Task<int> ReassignFoldersAsync(int tenantId, Guid oldOwnerId, Guid newOwnerId)
     {
         return FolderQueries.ReassignFoldersAsync(this, tenantId, oldOwnerId, newOwnerId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, null])]
     public Task<int> ReassignFoldersPartiallyAsync(int tenantId, Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptFolderIds)
     {
         return FolderQueries.ReassignFoldersPartiallyAsync(this, tenantId, oldOwnerId, newOwnerId, exceptFolderIds);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
     public Task<int> ReassignSpecificFoldersAsync(int tenantId, IEnumerable<int> foldersIds, Guid newOwnerId)
     {
         return FolderQueries.ReassignSpecificFoldersAsync(this, tenantId, foldersIds, newOwnerId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
     public IAsyncEnumerable<FolderReassignInfo> GetRoomsFoldersReassignInfoAsync(int tenantId, Guid ownerId)
     {
         return FolderQueries.GetRoomsFoldersReassignInfoAsync(this, tenantId, ownerId, DocSpaceHelper.RoomTypes);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<string> LeftNodeAsync(int tenantId, string key)
     {
         return FolderQueries.LeftNodeAsync(this, tenantId, key);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, long.MaxValue])]
     public Task<int> UpdateTreeFolderCounterAsync(int tenantId, int folderId, long size)
     {
         return FolderQueries.UpdateTreeFolderCounterAsync(this, tenantId, folderId, size);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbRoomSettings> RoomSettingsAsync(int tenantId, int roomId)
     {
@@ -361,19 +361,19 @@ static file class FolderQueries
                             Order = (
                                 from f in ctx.FileOrder
                                 where (
-                                    from rs in ctx.RoomSettings 
+                                    from rs in ctx.RoomSettings
                                     where rs.TenantId == f.TenantId && rs.RoomId ==
                                         (from t in ctx.Tree
-                                            where t.FolderId == r.ParentId
-                                            orderby t.Level descending
-                                            select t.ParentId
+                                         where t.FolderId == r.ParentId
+                                         orderby t.Level descending
+                                         select t.ParentId
                                         ).Skip(1).FirstOrDefault()
                                     select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
                                 select f.Order
                             ).FirstOrDefault(),
-                            Settings = (from f in ctx.RoomSettings 
-                                where f.TenantId == r.TenantId && f.RoomId == r.Id 
-                                select f).FirstOrDefault()
+                            Settings = (from f in ctx.RoomSettings
+                                        where f.TenantId == r.TenantId && f.RoomId == r.Id
+                                        select f).FirstOrDefault()
                         }
                     ).SingleOrDefault());
 
@@ -397,25 +397,25 @@ static file class FolderQueries
                                     where f.TenantId == r.TenantId
                                     select f
                                 ).FirstOrDefault(),
-                            UserShared = ctx.Security.Where(x => 
-                                    x.TenantId == r.TenantId && 
+                            UserShared = ctx.Security.Where(x =>
+                                    x.TenantId == r.TenantId &&
                                     x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder)
                                 .Select(s => s.SubjectType).ToList(),
-                            ParentShared = ctx.Security.Any(x => 
-                                x.TenantId == r.TenantId && 
+                            ParentShared = ctx.Security.Any(x =>
+                                x.TenantId == r.TenantId &&
                                 (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
-                                 x.EntryType == FileEntryType.Folder && 
+                                 x.EntryType == FileEntryType.Folder &&
                                 ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                             Settings = ctx.RoomSettings.Where(x => x.TenantId == r.TenantId && x.RoomId == r.Id).Distinct().FirstOrDefault(),
                             Order = (
                                 from f in ctx.FileOrder
                                 where (
-                                    from rs in ctx.RoomSettings 
+                                    from rs in ctx.RoomSettings
                                     where rs.TenantId == f.TenantId && rs.RoomId ==
                                         (from t in ctx.Tree
-                                            where t.FolderId == r.ParentId
-                                            orderby t.Level descending
-                                            select t.ParentId
+                                         where t.FolderId == r.ParentId
+                                         orderby t.Level descending
+                                         select t.ParentId
                                         ).Skip(1).FirstOrDefault()
                                     select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
                                 select f.Order
@@ -471,12 +471,12 @@ static file class FolderQueries
                             Order = (
                                 from f in ctx.FileOrder
                                 where (
-                                    from rs in ctx.RoomSettings 
+                                    from rs in ctx.RoomSettings
                                     where rs.TenantId == f.TenantId && rs.RoomId ==
                                         (from t in ctx.Tree
-                                            where t.FolderId == r.folder.ParentId
-                                            orderby t.Level descending
-                                            select t.ParentId
+                                         where t.FolderId == r.folder.ParentId
+                                         orderby t.Level descending
+                                         select t.ParentId
                                         ).Skip(1).FirstOrDefault()
                                     select rs.Indexing).FirstOrDefault() && f.EntryId == r.folder.Id && f.TenantId == r.folder.TenantId && f.EntryType == FileEntryType.Folder
                                 select f.Order
@@ -518,7 +518,7 @@ static file class FolderQueries
             (FilesDbContext ctx, int id, int parentId) =>
                 ctx.Tree
                     .Where(r => r.FolderId == parentId)
-                    .Select(o =>  new DbFolderTree
+                    .Select(o => new DbFolderTree
                     {
                         FolderId = id,
                         ParentId = o.ParentId,
@@ -541,7 +541,7 @@ static file class FolderQueries
                     .Select(r => r.ParentId)
                     .FirstOrDefault());
 
-    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<DbFolder>> DbFoldersForDeleteAsync = 
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<DbFolder>> DbFoldersForDeleteAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<int> subfolders) =>
                 ctx.Folders
@@ -555,7 +555,7 @@ static file class FolderQueries
                 ctx.Tree
                     .Where(r => subfolders.Contains(r.FolderId))
                     .ExecuteDelete());
-    
+
     public static readonly Func<FilesDbContext, int, IEnumerable<string>, Task<int>> DeleteTagLinksAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<string> subfolders) =>
@@ -573,7 +573,7 @@ static file class FolderQueries
                     .Where(r => !ctx.TagLink.Any(a => a.TenantId == tenantId && a.TagId == r.Id))
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, string, IEnumerable<string>, Task<int>> DeleteTagLinkByTagOriginAsync = 
+    public static readonly Func<FilesDbContext, int, string, IEnumerable<string>, Task<int>> DeleteTagLinkByTagOriginAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, string id, IEnumerable<string> subfolders) =>
                 ctx.TagLink
@@ -623,7 +623,7 @@ static file class FolderQueries
                         .SetProperty(p => p.ModifiedOn, DateTime.UtcNow)
                         .SetProperty(p => p.ModifiedBy, modifiedBy)
                     ));
-    
+
     public static readonly Func<FilesDbContext, int, string, int, Task<bool>> DbFoldersAnyAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, string title, int folderId) =>
@@ -638,7 +638,7 @@ static file class FolderQueries
                 ctx.Tree
                     .Where(r => r.ParentId == folderId));
 
-    public static readonly Func<FilesDbContext, IEnumerable<int>, Task<int>> DeleteTreesBySubfoldersDictionaryAsync = 
+    public static readonly Func<FilesDbContext, IEnumerable<int>, Task<int>> DeleteTreesBySubfoldersDictionaryAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, IEnumerable<int> subfolders) =>
                 ctx.Tree
@@ -694,7 +694,7 @@ static file class FolderQueries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int folderId) =>
                 ctx.Folders.FirstOrDefault(r => r.TenantId == tenantId && r.Id == folderId));
-    
+
     public static readonly Func<FilesDbContext, int, int, Task<DbFolder>> FolderWithSettingsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int folderId) =>
@@ -729,7 +729,7 @@ static file class FolderQueries
                     .ExecuteUpdate(q =>
                         q.SetProperty(r => r.FoldersCount, r => ctx.Tree.Count(t => t.ParentId == r.Id) - 1)
                     ));
-    
+
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> UpdateFoldersCountsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<int> ids) =>
@@ -758,7 +758,7 @@ static file class FolderQueries
                     .Where(f => f.CreateBy == oldOwnerId)
                     .Where(f => ctx.Tree.FirstOrDefault(t => t.FolderId == f.Id && exceptFolderIds.Contains(t.ParentId)) == null)
                     .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
-    
+
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, Guid, Task<int>> ReassignSpecificFoldersAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<int> foldersIds, Guid newOwnerId) =>
@@ -811,7 +811,7 @@ static file class FolderQueries
                         }
                     ));
 
-    public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<DbFolderQuery>> DbFolderQueriesByTextAsync = 
+    public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<DbFolderQuery>> DbFolderQueriesByTextAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, string text) =>
                 ctx.Folders
@@ -834,14 +834,14 @@ static file class FolderQueries
                         }
                     ));
 
-    public static readonly Func<FilesDbContext, int, string[], IAsyncEnumerable<DbFilesBunchObjects>> NodeAsync = 
+    public static readonly Func<FilesDbContext, int, string[], IAsyncEnumerable<DbFilesBunchObjects>> NodeAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, string[] keys) =>
                 ctx.BunchObjects
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => keys.Any(a => a == r.RightNode)));
 
-    public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<DbFilesBunchObjects>> NodeOnlyAsync = 
+    public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<DbFilesBunchObjects>> NodeOnlyAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, string key) =>
                 ctx.BunchObjects
@@ -872,8 +872,7 @@ static file class FolderQueries
                 ctx.TagLink
                     .Where(l => l.TenantId == tenantId)
                     .Where(l => entriesIds.Contains(Convert.ToInt32(l.EntryId)))
-                    .Join(ctx.Tag
-                            .Where(t => t.Type == TagType.Origin), l => l.TagId, t => t.Id,
+                    .Join(ctx.Tag.Where(t => t.Type == TagType.Origin && t.TenantId == tenantId), l => l.TagId, t => t.Id,
                         (l, t) => new { t.Name, t.Type, l.EntryType, l.EntryId })
                     .GroupBy(r => r.Name, r => new { r.EntryId, r.EntryType })
                     .Select(r => new OriginData
@@ -906,7 +905,7 @@ static file class FolderQueries
                     .Join(ctx.Folders, r => r.ParentId, s => s.Id, (t, f) => new { Tree = t, Folders = f })
                     .Where(r => r.Tree.FolderId == folderId)
                     .OrderByDescending(r => r.Tree.Level)
-                    .Select(r => new ParentIdTitlePair { ParentId = r.Tree.ParentId, Title = r.Folders.Title }));
+                    .Select(r => new ParentIdTitlePair { ParentId = r.Tree.ParentId, Title = r.Folders.Title, FolderType = r.Folders.FolderType }));
 
     public static readonly Func<FilesDbContext, int, Task<DbFolderQuery>> ParentIdTypePairAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -925,7 +924,7 @@ static file class FolderQueries
 
     public static readonly Func<FilesDbContext, int, IEnumerable<FolderType>, IAsyncEnumerable<FolderTypeUsedSpacePair>> FolderTypeUsedSpaceAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable <FolderType> folderTypes) =>
+            (FilesDbContext ctx, int tenantId, IEnumerable<FolderType> folderTypes) =>
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId)
                     .AsNoTracking()
@@ -933,7 +932,7 @@ static file class FolderQueries
                     .GroupBy(r => r.FolderType)
                     .Select(f => new FolderTypeUsedSpacePair { FolderType = f.Select(r => r.FolderType).FirstOrDefault(), UsedSpace = f.Sum(r => r.Counter) }));
 
-    public static readonly Func<FilesDbContext, int, int, long, Task<int>> UpdateTreeFolderCounterAsync = 
+    public static readonly Func<FilesDbContext, int, int, long, Task<int>> UpdateTreeFolderCounterAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int folderId, long size) =>
                 ctx.Folders
@@ -945,7 +944,7 @@ static file class FolderQueries
                     .ExecuteUpdate(toUpdate => toUpdate
                             .SetProperty(p => p.folder.Counter, p => p.folder.Counter + size)
                         ));
-    
+
     public static readonly Func<FilesDbContext, int, int, Task<DbRoomSettings>> RoomSettingsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int roomId) =>

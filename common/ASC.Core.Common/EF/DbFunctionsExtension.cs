@@ -32,13 +32,13 @@ public static class DbFunctionsExtension
     {
         throw new NotImplementedException();
     }
-    
+
     public static string JsonExtract(string column, [NotParameterized] string path)
     {
         //not using
         return column + path;
     }
-    
+
     public static string JsonValue(string jsonDoc, [NotParameterized] string path)
     {
         throw new NotImplementedException();

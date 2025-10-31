@@ -300,7 +300,7 @@ public class NovellLdapSearcher(IConfiguration configuration,
                     break;
                 }
 
-                _logger.ErrorSearch( searchFilter, ex);
+                _logger.ErrorSearch(searchFilter, ex);
                 continue;
             }
 

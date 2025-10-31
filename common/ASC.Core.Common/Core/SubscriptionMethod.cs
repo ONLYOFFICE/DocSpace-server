@@ -31,16 +31,16 @@ public class SubscriptionMethod
 {
     [ProtoMember(1)]
     public int Tenant { get; set; }
-    
+
     [ProtoMember(2)]
     public string Source { get; set; }
-    
+
     [ProtoMember(3)]
     public string Action { get; set; }
-    
+
     [ProtoMember(4)]
     public string Recipient { get; set; }
-    
+
     [ProtoMember(5)]
     public string[] Methods { get; set; }
 

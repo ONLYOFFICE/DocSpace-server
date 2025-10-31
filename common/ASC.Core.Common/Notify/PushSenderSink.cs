@@ -81,7 +81,7 @@ public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager
         {
             await tenantManager.SetCurrentTenantAsync(Tenant.DefaultTenant);
             tenant = tenantManager.GetCurrentTenant(false);
-        }      
+        }
 
         var user = await userManager.GetUsersAsync(new Guid(message.Recipient.ID));
         var username = user.UserName;

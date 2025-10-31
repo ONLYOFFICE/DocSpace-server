@@ -107,7 +107,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         props.TryGetValue("subdir", out _subDir);
 
         DataStoreValidator = dataStoreValidator;
-        
+
         return Task.FromResult<IDataStore>(this);
     }
 
@@ -155,14 +155,14 @@ public class GoogleCloudStorage(TempStream tempStream,
     {
         return await GetReadStreamAsync(domain, path, offset, long.MaxValue);
     }
-    
+
     public override async Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length)
     {
         var tempStream = _tempStream.Create();
 
         var storage = await GetStorageAsync();
         DownloadObjectOptions options = null;
-        
+
         if (length > 0 && (offset > 0 || offset == 0 && length != long.MaxValue))
         {
             options = new DownloadObjectOptions
@@ -170,7 +170,7 @@ public class GoogleCloudStorage(TempStream tempStream,
                 Range = new RangeHeaderValue(offset, offset + length - 1)
             };
         }
-        
+
         await storage.DownloadObjectAsync(_bucket, MakePath(domain, path), tempStream, options);
 
         if (offset > 0)
@@ -444,7 +444,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         return GetObjectsAsync(domain, path, recursive)
                .Select(x => x.Name[MakePath(domain, path + "/").Length..]);
     }
-    
+
 
     private IAsyncEnumerable<Object> GetObjectsAsync(string domain, string path, bool recursive)
     {
@@ -800,14 +800,14 @@ public class GoogleCloudStorage(TempStream tempStream,
 
     private StorageClient GetStorage()
     {
-        var credential = GoogleCredential.FromJson(_json);
+        var credential =  CredentialFactory.FromJson<GoogleCredential>(_json);
 
         return StorageClient.Create(credential);
     }
 
     private async Task<StorageClient> GetStorageAsync()
     {
-        var credential = GoogleCredential.FromJson(_json);
+        var credential = CredentialFactory.FromJson<GoogleCredential>(_json);
 
         return await StorageClient.CreateAsync(credential);
     }

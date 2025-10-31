@@ -49,7 +49,7 @@ public static class OpenTelemetryExtension
     public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         var telemetrySettings = builder.Configuration.GetSection("openTelemetry").Get<OpenTelemetrySettings>();
-        
+
         builder.Logging.AddOpenTelemetry(logging =>
         {
             logging.IncludeFormattedMessage = true;
@@ -74,7 +74,7 @@ public static class OpenTelemetryExtension
                         options.Org = telemetrySettings.InfluxDB.Org;
                     });
                 }
-                
+
                 metrics.AddMeter("MySqlConnector");
             })
             .WithTracing(tracing =>
@@ -84,9 +84,9 @@ public static class OpenTelemetryExtension
                     .AddAspNetCoreInstrumentation()
                     .AddFusionCacheInstrumentation();
             });
-        
+
         builder.AddOpenTelemetryExporters();
-        
+
         return builder;
     }
 

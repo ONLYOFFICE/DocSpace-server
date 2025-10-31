@@ -75,7 +75,7 @@ public class Client(ILogger<Client> logger, Settings settings)
                     connectionSettings.DisableDirectStreaming().PrettyJson().EnableDebugMode(r =>
                     {
                         logger.Debug(r.DebugInformation);
-                        
+
                         if (r.RequestBodyInBytes != null)
                         {
                             logger.Debug($"Request: {Encoding.UTF8.GetString(r.RequestBodyInBytes)}");
@@ -99,9 +99,9 @@ public class Client(ILogger<Client> logger, Settings settings)
                                     a.Field("document.data")
                                         .TargetField("document.attachment")
                                         .IndexedCharacters(-1))
-                                    .Remove<Document>(x => 
+                                    .Remove<Document>(x =>
                                         x.Field("document.data"))));
-                        
+
                         _client = client;
                     }
 

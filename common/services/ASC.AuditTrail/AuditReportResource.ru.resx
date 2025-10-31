@@ -100,6 +100,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Изменена цветовая тема</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Контакты</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Обновлены настройки файлов cookie</value>
   </data>
@@ -268,9 +271,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Обновлены настройки Sphinx</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Общее</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Обновлены настройки страницы приветствия</value>
   </data>
@@ -279,9 +279,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Удалена группа: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Группы</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Обновлена группа: {0}</value>
@@ -466,9 +463,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Обновлен список продуктов</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Продукты</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Переназначение</value>
   </data>
@@ -483,6 +477,9 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Сеанс начат</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Настройки</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Выключена возможность SSO</value>
@@ -609,9 +606,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Пользователи [{0}]. Отправлены инструкции по смене пароля</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Пользователи</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Пользователи [{0}]. Отправлены инструкции по активации</value>
@@ -829,9 +823,6 @@
   <data name="FileIndexChanged" xml:space="preserve">
     <value>Файл: {0}. Индекс изменен с {1} на {2}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="DeleteClient" xml:space="preserve">
     <value>Клиент {0} удален</value>
   </data>
@@ -984,5 +975,8 @@
   </data>
   <data name="RoomExternalLinkRevoked" xml:space="preserve">
     <value>Внешняя ссылка отменена: {1}</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Успешный вход через аккаунт социальной сети</value>
   </data>
 </root>

@@ -53,7 +53,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// Specifies if the folder can be shared or not.
     /// </summary>
     public bool? IsShareable { get; set; }
-    
+
     /// <summary>
     /// The new element index in the folder.
     /// </summary>
@@ -133,7 +133,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// How much folder space is used (counter).
     /// </summary>
     public long? UsedSpace { get; set; }
-    
+
     /// <summary>
     /// Specifies if the folder is password protected or not.
     /// </summary>
@@ -149,6 +149,10 @@ public class FolderDto<T> : FileEntryDto<T>
     /// The file entry type of the folder.
     /// </summary>
     public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
+    
+    public ChatSettings ChatSettings { get; set; }
+    
+    public RoomType? RootRoomType { get; set; }
 }
 
 [Scope]
@@ -174,11 +178,18 @@ public class FolderDtoHelper(
     SecurityContext securityContext,
     UserManager userManager,
     IUrlShortener urlShortener,
-    EntryStatusManager entryStatusManager)
+    EntryStatusManager entryStatusManager,
+    AiAccessibility accessibility)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
 {
-    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null)
+    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null, bool? aiReady = null)
     {
+        Task<bool> aiReadyTask = null;
+        if (folder.RootFolderType == FolderType.AiAgents && aiReady == null)
+        {
+            aiReadyTask = accessibility.IsAiReadyAsync();
+        }
+        
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
 
@@ -222,7 +233,7 @@ public class FolderDtoHelper(
             {
                 currentUserRecords ??= await _fileSecurity.GetUserRecordsAsync().ToListAsync();
 
-                result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.User) && 
+                result.InRoom = currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.User) &&
                                 !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.Group);
             }
 
@@ -240,15 +251,15 @@ public class FolderDtoHelper(
                     result.QuotaLimit = folder.SettingsQuota > -2 ? folder.SettingsQuota : quotaRoomSettings.DefaultQuota;
                 }
             }
-            
+
             result.Watermark = watermarkHelper.Get(folder.SettingsWatermark);
         }
-        
+
         if (folder.ShareRecord is { IsLink: true })
         {
             result.External = true;
-            result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) && 
-                                       folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && 
+            result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) &&
+                                       folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) &&
                                        !canRead;
 
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -267,14 +278,14 @@ public class FolderDtoHelper(
                 result.RootFolderType = FolderType.SHARE;
             }
         }
-        
+
         if (folder.Order != 0)
         {
             if (string.IsNullOrEmpty(order) && (contextFolder == null || !DocSpaceHelper.IsRoom(contextFolder.FolderType)))
             {
                 order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(folder.ParentId);
             }
-            
+
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, folder.Order) : folder.Order.ToString();
         }
 
@@ -284,7 +295,22 @@ public class FolderDtoHelper(
         }
 
         result.Lifetime = folder.SettingsLifetime.MapToDto();
-        result.AvailableShareRights =  (await _fileSecurity.GetAccesses(folder)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
+        result.AvailableShareRights = (await _fileSecurity.GetAccesses(folder)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
+        
+        if (folder.FolderType is FolderType.Knowledge or FolderType.ResultStorage)
+        {
+            result.Type = folder.FolderType;
+        }
+        
+        if (folder.SettingsChatParameters != null)
+        {
+            result.ChatSettings = new ChatSettings
+            {
+                ProviderId = folder.SettingsChatProviderId,
+                ModelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId,
+                Prompt = folder.SettingsChatParameters.Prompt
+            };
+        }
 
         if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })
         {
@@ -308,7 +334,7 @@ public class FolderDtoHelper(
 
             foreach (var action in forbiddenActions)
             {
-                result.Security[action] = false;   
+                result.Security[action] = false;
             }
 
             result.CanShare = false;
@@ -317,17 +343,17 @@ public class FolderDtoHelper(
 
             var myId = await _globalFolderHelper.GetFolderMyAsync<T>();
             result.OriginTitle = Equals(result.OriginId, myId) ? FilesUCResource.MyFiles : result.OriginTitle;
-            
+
             if (Equals(result.OriginRoomId, myId))
             {
                 result.OriginRoomTitle = FilesUCResource.MyFiles;
             }
-            else if(Equals(result.OriginRoomId,  await _globalFolderHelper.FolderArchiveAsync))
+            else if (Equals(result.OriginRoomId, await _globalFolderHelper.FolderArchiveAsync))
             {
                 result.OriginRoomTitle = result.OriginTitle;
             }
         }
-        
+
         if (folder.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID))
         {
             switch (contextFolder)
@@ -347,9 +373,34 @@ public class FolderDtoHelper(
             }
         }
         
+        if (aiReadyTask != null)
+        {
+            aiReady = await aiReadyTask;
+        }
+        
+        if (aiReady is false)
+        {
+            switch (folder.FolderType)
+            {
+                case FolderType.AiAgents:
+                    result.Security[FileSecurity.FilesSecurityActions.Create] = false;
+                    break;
+                case FolderType.Knowledge:
+                    result.Security[FileSecurity.FilesSecurityActions.Create] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.CopyTo] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.MoveTo] = false;
+                    break;
+                case FolderType.AiRoom:
+                    result.Security[FileSecurity.FilesSecurityActions.EditRoom] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.ChangeOwner] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.EditAccess] = false;
+                    break;
+            }
+        }
+
         return result;
     }
-    
+
     public async Task<FolderDto<T>> GetShortAsync<T>(Folder<T> folder)
     {
         var result = await GetFolderWrapperAsync(folder);
@@ -379,16 +430,16 @@ public class FolderDtoHelper(
                 newBadges = 0;
             }
         }
-        
+
         var result = await GetAsync<FolderDto<T>, T>(folder);
         if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates)
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;
         }
-        
+
         await entryStatusManager.SetIsFavoriteFolderAsync(folder);
-        
+
         result.IsShareable = folder.Shareable.NullIfDefault();
         result.IsFavorite = folder.IsFavorite;
         result.New = newBadges;

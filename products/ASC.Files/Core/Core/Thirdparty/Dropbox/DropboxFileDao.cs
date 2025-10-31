@@ -78,7 +78,7 @@ internal class DropboxFileDao(
 
             Metadata dropboxFile;
             var file = uploadSession.File;
-            
+
             if (file.Id != null)
             {
                 var dropboxFilePath = Dao.MakeThirdId(file.Id);

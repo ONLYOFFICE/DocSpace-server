@@ -86,5 +86,5 @@ public partial class AdditionalWhiteLabelSettingsMapper(ExternalResourceSettings
                            source.UserForumEnabled == defaultSettings.UserForumEnabled &&
                            source.VideoGuidesEnabled == defaultSettings.VideoGuidesEnabled &&
                            source.LicenseAgreementsEnabled == defaultSettings.LicenseAgreementsEnabled;
-    } 
+    }
 }

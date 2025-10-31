@@ -62,6 +62,11 @@ public record BackupProgress
     public string Error { get; set; }
 
     /// <summary>
+    /// The backup warning message.
+    /// </summary>
+    public string Warning { get; set; }
+
+    /// <summary>
     /// The backup link.
     /// </summary>
     public string Link { get; set; }
@@ -74,13 +79,10 @@ public record BackupProgress
     /// <summary>
     /// The backup progress type.
     /// </summary>
-    public BackupProgressEnum BackupProgressEnum { get; set;}
+    public BackupProgressEnum BackupProgressEnum { get; set; }
 
     /// <summary>
     /// The task ID.
     /// </summary>
     public string TaskId { get; set; }
 }
-
-
-

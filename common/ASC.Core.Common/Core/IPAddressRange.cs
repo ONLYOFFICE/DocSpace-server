@@ -55,7 +55,7 @@ public class IPAddressRange(IPAddress lower, IPAddress upper)
 
         return ipWithoutPort == restrictionIp;
     }
-    
+
     private bool IsInRange(IPAddress address)
     {
         if (address.AddressFamily != _addressFamily)
@@ -87,7 +87,7 @@ public class IPAddressRange(IPAddress lower, IPAddress upper)
 
     private static bool IsInRange(string ipAddress, string CIDRmask)
     {
-        var network =  IPNetwork.Parse(CIDRmask);
+        var network = IPNetwork.Parse(CIDRmask);
 
         var requestIP = IPAddress.Parse(ipAddress);
         var restrictionIP = network.BaseAddress;
@@ -103,11 +103,11 @@ public class IPAddressRange(IPAddress lower, IPAddress upper)
 
         return (IP_addr & CIDR_mask) == (CIDR_addr & CIDR_mask);
     }
-    
+
     private static string GetIpWithoutPort(string ip)
     {
         var portIdx = ip.IndexOf(':');
 
         return portIdx > 0 ? ip.Substring(0, portIdx) : ip;
-}
+    }
 }

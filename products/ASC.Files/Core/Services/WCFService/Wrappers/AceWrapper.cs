@@ -106,7 +106,7 @@ public class AceWrapper
     /// Determines whether the user has permission to modify the deny download setting for the file share.
     /// </summary>
     public bool CanEditDenyDownload { get; set; } = true;
-    
+
     /// <summary>
     /// The subject name.
     /// </summary>
@@ -146,7 +146,7 @@ public class AceWrapper
     /// </summary>
     [JsonPropertyName("disable_remove")]
     public bool DisableRemove { get; set; }
-    
+
     /// <summary>
     /// The request token of the access rights.
     /// </summary>
@@ -155,16 +155,16 @@ public class AceWrapper
     /// <summary>
     /// Specifies whether the subject type is a link or not.
     /// </summary>
-    [JsonIgnore] 
+    [JsonIgnore]
     public bool IsLink => (SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) || !string.IsNullOrEmpty(Link);
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class RoomInvitationMapper
-{       
+{
     public static partial AceWrapper Map(this RoomInvitation source);
     public static partial List<AceWrapper> Map(this List<RoomInvitation> source);
-    
+
 }
 
 /// <summary>

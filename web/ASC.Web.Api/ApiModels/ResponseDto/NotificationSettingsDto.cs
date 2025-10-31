@@ -44,6 +44,6 @@ public class NotificationSettingsDto
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class NotificationSettingsDtoMapper
-{       
+{
     public static partial NotificationSettingsDto Map(this NotificationSettingsRequestsDto source);
 }

@@ -486,7 +486,7 @@ public class LdapCronSettings : ISettings<LdapCronSettings>
             Cron = null
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 
     public string Cron { get; set; }
@@ -504,7 +504,7 @@ public class LdapCurrentAcccessSettings : ISettings<LdapCurrentAcccessSettings>
     {
         return new LdapCurrentAcccessSettings { CurrentAccessRights = null };
     }
-    
+
     public DateTime LastModified { get; set; }
 
     public Dictionary<LdapSettings.AccessRight, List<string>> CurrentAccessRights { get; set; } = new();
@@ -522,7 +522,7 @@ public class LdapCurrentUserPhotos : ISettings<LdapCurrentUserPhotos>
     {
         return new LdapCurrentUserPhotos { CurrentPhotos = null };
     }
-    
+
     public DateTime LastModified { get; set; }
 
     public Dictionary<Guid, string> CurrentPhotos { get; set; } = new();
@@ -540,7 +540,7 @@ public class LdapCurrentDomain : ISettings<LdapCurrentDomain>
     {
         return new LdapCurrentDomain { CurrentDomain = null };
     }
-    
+
     public DateTime LastModified { get; set; }
 
     public string CurrentDomain { get; set; }

@@ -64,7 +64,7 @@ public class AccountingClient
 
         _configuration.Currencies = _configuration.Currencies == null || _configuration.Currencies.Count == 0 ? ["USD"] : _configuration.Currencies;
 
-        if (!string.IsNullOrEmpty(_configuration.Url)) 
+        if (!string.IsNullOrEmpty(_configuration.Url))
         {
             Configured = true;
         }
@@ -76,12 +76,12 @@ public class AccountingClient
         return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/balance/{portalId}", addPolicy: addPolicy);
     }
 
-    public async Task<Session> OpenCustomerSessionAsync(string portalId, int serviceAccount, string externalRef, int quantity, int duration)
+    public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef, int quantity, int duration)
     {
         var data = new
         {
             CustomerName = portalId,
-            ServiceAccount = serviceAccount,
+            ServiceName = serviceName,
             ExternalRef = externalRef,
             Quantity = quantity,
             Duration = duration
@@ -111,12 +111,12 @@ public class AccountingClient
         return await RequestAsync<Session>(HttpMethod.Put, $"/session/extend", queryParams);
     }
 
-    public async Task CompleteCustomerSessionAsync(string portalId, int serviceAccount, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
+    public async Task CompleteCustomerSessionAsync(string portalId, string serviceName, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
         var data = new
         {
             CustomerName = portalId,
-            ServiceAccount = serviceAccount,
+            ServiceName = serviceName,
             SessionId = sessionId,
             Quantity = quantity,
             CustomerParticipantName = customerParticipantName,
@@ -179,14 +179,14 @@ public class AccountingClient
         return _configuration.Currencies;
     }
 
-    public async Task<ServiceInfo> GetServiceInfoAsync(int serviceAccount)
+    public async Task<ServiceInfo> GetServiceInfoAsync(string serviceName)
     {
-        return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/account/{serviceAccount}");
+        return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/name/{serviceName}");
     }
 
-    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, List<string> serviceAccounts)
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, List<string> serviceNames)
     {
-        var key = $"accounting-prices-{partnerId}-{string.Join(",", serviceAccounts)}";
+        var key = $"accounting-prices-{partnerId}-{string.Join(",", serviceNames)}";
         var result = _cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
 
         if (result != null)
@@ -197,14 +197,9 @@ public class AccountingClient
         var currencies = await GetAllCurrenciesAsync();
 
         result = [];
-        foreach (var serviceAccount in serviceAccounts)
+        foreach (var serviceName in serviceNames)
         {
-            if (!int.TryParse(serviceAccount, out var serviceAccountId))
-            {
-                continue;
-            }
-
-            var serviceInfo = await GetServiceInfoAsync(serviceAccountId);
+            var serviceInfo = await GetServiceInfoAsync(serviceName);
             if (serviceInfo == null)
             {
                 continue;
@@ -213,7 +208,7 @@ public class AccountingClient
             var currency = currencies.FirstOrDefault(c => c.Id == serviceInfo.CurrencyId);
             var currencyCode = currency?.Code ?? "USD";
 
-            result.Add(serviceAccount, new Dictionary<string, decimal>
+            result.Add(serviceName, new Dictionary<string, decimal>
             {
                 { currencyCode, serviceInfo.PriceValue }
             });

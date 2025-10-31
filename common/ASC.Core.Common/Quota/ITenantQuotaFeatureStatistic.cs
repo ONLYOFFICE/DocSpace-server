@@ -32,4 +32,3 @@ public interface ITenantQuotaFeatureStat<T>
 }
 
 public interface ITenantQuotaFeatureStat<T, T1> : ITenantQuotaFeatureStat<T1> where T : TenantQuotaFeature<T1>;
-

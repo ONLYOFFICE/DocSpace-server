@@ -202,5 +202,25 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/commit-chat-message", (req, res) => {
+    files.commitChatMessage(req.body);
+    res.end();
+  });
+
+  router.post("/update-chat", (req, res) => {
+    files.updateChat(req.body);
+    res.end();
+  });
+
+  router.post("/change-access-rights-file", (req, res) => {
+    files.changeAccessRightsForFile(req.body);
+    res.end();
+  });
+
+  router.post("/change-access-rights-folder", (req, res) => {
+    files.changeAccessRightsForFolder(req.body);
+    res.end();
+  });
+
   return router;
 };

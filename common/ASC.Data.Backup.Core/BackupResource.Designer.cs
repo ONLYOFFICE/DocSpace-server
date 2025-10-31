@@ -88,6 +88,15 @@ namespace ASC.Data.Backup.Core {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Some files were not included in the backup. For more details, please check {0}.
+        /// </summary>
+        internal static string BackupMissingFilesWarning {
+            get {
+                return ResourceManager.GetString("BackupMissingFilesWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The backup file is invalid. Please use the file created in the same portal..
         /// </summary>
         internal static string BackupNotFound {

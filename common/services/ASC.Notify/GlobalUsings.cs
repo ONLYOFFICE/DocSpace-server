@@ -50,6 +50,7 @@ global using ASC.Notify.Log;
 global using ASC.Notify.Messages;
 global using ASC.Notify.Services;
 global using ASC.Web.Studio.Core.Notify;
+
 global using Autofac;
 
 global using Microsoft.AspNetCore.Builder;

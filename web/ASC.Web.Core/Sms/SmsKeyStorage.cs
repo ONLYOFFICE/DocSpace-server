@@ -150,7 +150,7 @@ public class SmsKeyStorage
 
         _checkCache.Insert(cacheCheck, counter.ToString(CultureInfo.InvariantCulture), DateTime.UtcNow.Add(StoreInterval));
 
-        try 
+        try
         {
             await _semaphore.WaitAsync();
             var cacheKey = BuildCacheKey(phone);

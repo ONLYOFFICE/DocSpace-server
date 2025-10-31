@@ -95,7 +95,7 @@ public class WebhooksLogDto
 [Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public partial class WebhooksLogDtoMapper(TenantUtil tenantUtil)
-{ 
+{
     public partial WebhooksLogDto Map(DbWebhooksLog source);
 
     private DateTime MapDateToUtc(DateTime source) => tenantUtil.DateTimeToUtc(source);

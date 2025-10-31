@@ -57,7 +57,7 @@ public class SecurityControllerHelper(
         tenantManager,
         authContext)
 {
-    
+
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfoAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds)
     {
         var fileShares = await fileSharing.GetSharedInfoAsync(fileIds, folderIds);
@@ -83,12 +83,12 @@ public class SecurityControllerHelper(
             Folders = folderIds,
             Aces = fileShares,
             Message = sharingMessage
-        };         
+        };
 
         var subjects = share.Select(s => s.ShareTo).Distinct().ToList();
         var result = await _fileStorageService.SetAceObjectAsync(aceCollection, notify);
-            
-        foreach (var r in result.SelectMany(a=> a.ProcessedItems))
+
+        foreach (var r in result.SelectMany(a => a.ProcessedItems))
         {
             await foreach (var s in fileSharing.GetPureSharesAsync(r.Entry, subjects))
             {

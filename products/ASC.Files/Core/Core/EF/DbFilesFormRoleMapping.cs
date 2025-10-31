@@ -71,7 +71,7 @@ public static class DbFilesFormRoleMappingExtension
             entity.ToTable("files_form_role_mapping")
                 .HasCharSet("utf8");
 
-            entity.HasIndex(e => new { e.TenantId, e.FormId})
+            entity.HasIndex(e => new { e.TenantId, e.FormId })
                .HasDatabaseName("tenant_id_form_id");
 
             entity.HasIndex(e => new { e.TenantId, e.FormId, e.UserId })

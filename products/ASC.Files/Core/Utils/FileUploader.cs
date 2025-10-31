@@ -48,15 +48,11 @@ public class FileUploader(
     SocketManager socketManager,
     FileChecker fileChecker,
     TempStream tempStream,
-    WebhookManager webhookManager)
+    WebhookManager webhookManager,
+    VectorizationSettings vectorizationSettings)
 {
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
-        if (contentLength <= 0)
-        {
-            throw new ArgumentException(FilesCommonResource.ErrorMessage_EmptyFile);
-        }
-
         var file = await VerifyFileUploadAsync(folderId, title, contentLength, !createNewIfExist);
 
         var dao = daoFactory.GetFileDao<T>();
@@ -106,9 +102,9 @@ public class FileUploader(
 
         if (!updateIfExists && file != null)
         {
-            fileName =  await global.GetAvailableTitleAsync(fileName, folderId, fileDao.IsExistAsync, FileEntryType.File);
+            fileName = await global.GetAvailableTitleAsync(fileName, folderId, fileDao.IsExistAsync, FileEntryType.File);
         }
-        
+
         var newFile = serviceProvider.GetService<File<T>>();
         newFile.ParentId = folderId;
         newFile.Title = fileName;
@@ -118,11 +114,6 @@ public class FileUploader(
 
     private async Task<File<T>> VerifyFileUploadAsync<T>(T folderId, string fileName, long fileSize, bool updateIfExists)
     {
-        if (fileSize <= 0)
-        {
-            throw new Exception(FilesCommonResource.ErrorMessage_EmptyFile);
-        }
-
         var maxUploadSize = await GetMaxFileSizeAsync(folderId);
 
         if (fileSize > maxUploadSize)
@@ -250,8 +241,25 @@ public class FileUploader(
         file.Title = fileName;
         file.ContentLength = contentLength;
         file.CreateOn = createOn;
+        
+        var requiredVectorization = false;
 
         var dao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+        
+        var folder = await folderDao.GetFolderAsync(folderId);
+        
+        if (folder is { FolderType: FolderType.Knowledge })
+        {
+            if (!vectorizationSettings.SupportedFormats.Contains(FileUtility.GetFileExtension(fileName)))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+            }
+
+            file.VectorizationStatus = VectorizationStatus.InProgress;
+            requiredVectorization = true;
+        }
+        
         var uploadSession = await dao.CreateUploadSessionAsync(file, contentLength);
 
         uploadSession.Expired = uploadSession.Created + ChunkedUploadSessionHolder.SlidingExpiration;
@@ -262,6 +270,7 @@ public class FileUploader(
         uploadSession.CultureName = CultureInfo.CurrentUICulture.Name;
         uploadSession.Encrypted = encrypted;
         uploadSession.KeepVersion = keepVersion;
+uploadSession.RequiredVectorization = requiredVectorization;
         
         await chunkedUploadSessionHolder.StoreSessionAsync(uploadSession);
 
@@ -273,10 +282,6 @@ public class FileUploader(
         var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
         uploadSession.Expired = DateTime.UtcNow + ChunkedUploadSessionHolder.SlidingExpiration;
 
-        if (chunkLength <= 0)
-        {
-            throw new Exception(FilesCommonResource.ErrorMessage_EmptyFile);
-        }
         if (chunkLength > setupInfo.ChunkUploadSize)
         {
             throw FileSizeComment.GetFileSizeException(await setupInfo.MaxUploadSize(tenantManager, maxTotalSizeStatistic));
@@ -307,7 +312,7 @@ public class FileUploader(
             {
                 var folderDao = daoFactory.GetFolderDao<T>();
                 var currentFolder = await folderDao.GetFolderAsync(uploadSession.File.FolderIdDisplay);
-                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+                var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
 
                 var memoryStream = new MemoryStream();
                 await stream.CopyToAsync(memoryStream);
@@ -354,14 +359,14 @@ public class FileUploader(
 
         return uploadSession;
     }
-    
+
     public async Task<ChunkedUploadSession<T>> FinalizeUploadSessionAsync<T>(string uploadId)
     {
         var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
         var dao = daoFactory.GetFileDao<T>();
 
         uploadSession.File = await dao.FinalizeUploadSessionAsync(uploadSession);
-        
+
         await chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
 
         return uploadSession;
@@ -370,7 +375,7 @@ public class FileUploader(
     public async Task DeleteLinkAndMarkAsync<T>(File<T> file)
     {
         var linkDao = daoFactory.GetLinkDao<T>();
-        
+
         var t1 = linkDao.DeleteAllLinkAsync(file.Id);
         var t2 = fileMarker.MarkAsNewAsync(file).AsTask();
 
@@ -381,7 +386,7 @@ public class FileUploader(
     {
         await AbortUploadAsync(await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId));
     }
-    
+
     public Task<long> GetTransferredBytesCountAsync<T>(ChunkedUploadSession<T> uploadSession)
     {
         var dao = daoFactory.GetFileDao<T>();

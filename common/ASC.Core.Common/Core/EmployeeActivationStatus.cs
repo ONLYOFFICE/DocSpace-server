@@ -31,7 +31,7 @@ namespace ASC.Core.Users;
 /// </summary>
 [Flags]
 public enum EmployeeActivationStatus
-{ 
+{
     [SwaggerEnum("Not activated")]
     NotActivated = 0,
 

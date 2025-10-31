@@ -33,7 +33,7 @@ public class DbFilesAuditReference : BaseEntity
     public int AuditEventId { get; set; }
     public bool Corrupted { get; set; }
     public DbAuditEvent AuditEvent { get; set; }
-    
+
     public override object[] GetKeys()
     {
         return [EntryId, EntryType, AuditEventId];
@@ -59,7 +59,7 @@ public static class FilesAuditReferenceExtension
         {
             entity.ToTable("files_audit_reference");
 
-            entity.HasKey(e => new {e.EntryId, e.EntryType, e.AuditEventId})
+            entity.HasKey(e => new { e.EntryId, e.EntryType, e.AuditEventId })
                 .HasName("PRIMARY");
 
             entity.Property(e => e.EntryId)
@@ -70,7 +70,7 @@ public static class FilesAuditReferenceExtension
 
             entity.Property(e => e.AuditEventId)
                 .HasColumnName("audit_event_id");
-            
+
             entity.Property(e => e.Corrupted)
                 .HasColumnName("corrupted");
         });
@@ -93,7 +93,7 @@ public static class FilesAuditReferenceExtension
 
             entity.Property(e => e.AuditEventId)
                 .HasColumnName("audit_event_id");
-            
+
             entity.Property(e => e.Corrupted)
                 .HasColumnName("corrupted");
         });

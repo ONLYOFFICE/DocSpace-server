@@ -334,7 +334,7 @@ public enum MessageAction
 
     [SwaggerEnum("File deleted")]
     FileDeleted = 5018,
-    
+
     [SwaggerEnum("File version deleted")]
     FileVersionRemoved = 5119,
 
@@ -591,7 +591,7 @@ public enum MessageAction
     RoomWatermarkDisabled = 5113,
 
     [SwaggerEnum("Room invite resend")]
-    RoomInviteResend = 5118, 
+    RoomInviteResend = 5118,
 
     [SwaggerEnum("Room index export saved")]
     RoomIndexExportSaved = 5106,
@@ -607,6 +607,15 @@ public enum MessageAction
 
     [SwaggerEnum("Form stopped")]
     FormStopped = 5153,
+    
+    [SwaggerEnum("Agent created")]
+    AgentCreated = 5154,
+
+    [SwaggerEnum("Agent renamed")]
+    AgentRenamed = 5155,
+    
+    [SwaggerEnum("Agent deleted")]
+    AgentDeleted = 5156,
 
     #endregion
 
@@ -767,7 +776,7 @@ public enum MessageAction
 
     [SwaggerEnum("Custom quota per user disabled")]
     CustomQuotaPerUserDisabled = 6053,
-    
+
     [SwaggerEnum("DevTools access settings changed")]
     DevToolsAccessSettingsChanged = 6054,
 
@@ -779,7 +788,7 @@ public enum MessageAction
 
     [SwaggerEnum("Webhook deleted")]
     WebhookDeleted = 6057,
-    
+
     [SwaggerEnum("Created api key")]
     ApiKeyCreated = 6058,
 
@@ -851,44 +860,44 @@ public enum MessageAction
 
     [SwaggerEnum("User created and added to room")]
     UserCreatedAndAddedToRoom = 7002,
-    
+
     [SwaggerEnum("Guest created and added to room")]
     GuestCreatedAndAddedToRoom = 7003,
-    
+
     [SwaggerEnum("Contact sales mail sent")]
     ContactSalesMailSent = 7004,
 
     #endregion
-    
+
     #region Oauth
-    
+
     [SwaggerEnum("Create client")]
     CreateClient = 9901,
-    
+
     [SwaggerEnum("Update client")]
     UpdateClient = 9902,
-    
+
     [SwaggerEnum("Regenerate secret")]
     RegenerateSecret = 9903,
-    
+
     [SwaggerEnum("Delete client")]
     DeleteClient = 9904,
-    
+
     [SwaggerEnum("Change client activation")]
     ChangeClientActivation = 9905,
-    
+
     [SwaggerEnum("Change client visibility")]
     ChangeClientVisibility = 9906,
-    
+
     [SwaggerEnum("Revoke user client")]
     RevokeUserClient = 9907,
-    
+
     [SwaggerEnum("Generate authorization code token")]
     GenerateAuthorizationCodeToken = 9908,
-    
+
     [SwaggerEnum("Generate personal access token")]
     GeneratePersonalAccessToken = 9909,
-    
+
     #endregion
 
     #region Ldap

@@ -60,7 +60,7 @@ public class InvitationValidator(
 
             return result;
         }
-        
+
         var tenant = tenantManager.GetCurrentTenant();
 
         var commonLinkResult = emailValidationKeyProvider.ValidateEmailKey(ConfirmType.LinkInvite.ToStringFast() + (int)employeeType, key, emailValidationKeyProvider.ValidEmailKeyInterval);
@@ -68,7 +68,7 @@ public class InvitationValidator(
         {
             commonLinkResult = emailValidationKeyProvider.ValidateEmailKey(ConfirmType.LinkInvite.ToStringFast() + (int)employeeType + userId.Value + tenant.Alias, key, emailValidationKeyProvider.ValidEmailKeyInterval);
         }
-        
+
         if (commonLinkResult != EmailValidationKeyProvider.ValidationResult.Invalid)
         {
             result.Status = commonLinkResult;
@@ -79,7 +79,7 @@ public class InvitationValidator(
             {
                 return result;
             }
-            
+
             if (employeeType is not EmployeeType.DocSpaceAdmin)
             {
                 return result;
@@ -91,7 +91,7 @@ public class InvitationValidator(
                 result.Status = EmailValidationKeyProvider.ValidationResult.Invalid;
                 return result;
             }
-            
+
             if (tenant != null && initiator.IsOwner(tenant))
             {
                 return result;
@@ -173,7 +173,7 @@ public class InvitationValidator(
                 }
             }
         }
-        
+
         return linkId == Guid.Empty ? (EmailValidationKeyProvider.ValidationResult.Invalid, default) : (EmailValidationKeyProvider.ValidationResult.Ok, linkId);
     }
 
@@ -219,6 +219,6 @@ static file class Queries
     public static readonly Func<MessagesContext, int, string, string, Task<DbAuditEvent>> AuditEventsAsync =
         EF.CompileAsyncQuery(
             (MessagesContext ctx, int tenantId, string target, string description) =>
-                ctx.AuditEvents.FirstOrDefault(a => 
+                ctx.AuditEvents.FirstOrDefault(a =>
                     a.TenantId == tenantId && a.Action == (int)MessageAction.RoomInviteLinkUsed && a.Target == target && a.DescriptionRaw == description));
 }

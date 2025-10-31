@@ -87,7 +87,7 @@ public class ProviderIdConverter : JsonConverter<int?>
             {
                 return null;
             }
-            
+
             if (int.TryParse(providerIdString, out var result))
             {
                 return result;

@@ -52,7 +52,7 @@ public static class EnumerableExtensions
 
         var dic = elements.ToDictionary(keySelector, x => new TreeNode<TEntry>(x));
 
-        foreach (var val in dic.Select(r=>r.Value))
+        foreach (var val in dic.Select(r => r.Value))
         {
             var parentKey = parentKeySelector(val.Entry);
             if (parentKey != null && dic.TryGetValue(parentKeySelector(val.Entry), out var parent))

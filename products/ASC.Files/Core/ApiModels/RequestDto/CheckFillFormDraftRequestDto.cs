@@ -68,5 +68,5 @@ public class CheckFillFormDraftRequestDto<T>
     /// The parameters for checking the form draft filling.
     /// </summary>
     [FromBody]
-    public required CheckFillFormDraft File {  get; set; }
+    public required CheckFillFormDraft File { get; set; }
 }

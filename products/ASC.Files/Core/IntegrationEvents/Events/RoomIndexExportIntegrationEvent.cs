@@ -51,7 +51,7 @@ public record RoomIndexExportIntegrationEvent : IntegrationEvent
 
     [ProtoMember(3)]
     public bool Terminate { get; set; }
-    
+
     [ProtoMember(4)]
     public IDictionary<string, string> Headers { get; set; }
 }

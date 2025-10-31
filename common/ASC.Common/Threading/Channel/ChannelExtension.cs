@@ -26,7 +26,7 @@
 
 namespace ASC.Common.Threading;
 public static class ChannelExtension
-{   
+{
     public static IList<ChannelReader<T>> Split<T>(this ChannelReader<T> ch, int n, Func<int, int, T, int> selector = null, CancellationToken cancellationToken = default)
     {
         var outputs = new Channel<T>[n];
@@ -75,7 +75,7 @@ public static class ChannelExtension
 
         return outputs.Select(output => output.Reader).ToArray();
     }
-    
+
     public static ChannelReader<T> Merge<T>(this IEnumerable<ChannelReader<T>> inputs, CancellationToken cancellationToken = default)
     {
         var output = Channel.CreateUnbounded<T>();

@@ -30,8 +30,8 @@ namespace ASC.Web.Core.Quota;
 
 [Scope]
 public class CountUserChecker(
-    ITenantQuotaFeatureStat<CountUserFeature, int> tenantQuotaFeatureStatistic, 
-    TenantManager tenantManager, 
+    ITenantQuotaFeatureStat<CountUserFeature, int> tenantQuotaFeatureStatistic,
+    TenantManager tenantManager,
     ITariffService tariffService)
     : TenantQuotaFeatureCheckerCount<CountUserFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {

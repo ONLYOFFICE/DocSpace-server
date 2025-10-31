@@ -67,58 +67,58 @@ public class Tenant
 
     [ProtoMember(1)]
     public string AffiliateId { get; set; }
-    
+
     [ProtoMember(2)]
     public string Alias { get; set; }
-    
+
     [ProtoMember(3)]
     public bool Calls { get; set; }
-    
+
     [ProtoMember(4)]
     public string Campaign { get; set; }
-    
+
     [ProtoMember(5)]
     public DateTime CreationDateTime { get; set; }
-    
+
     [ProtoMember(6)]
     public string HostedRegion { get; set; }
-    
+
     [ProtoMember(7)]
     public int Id { get; set; }
-    
+
     [ProtoMember(8)]
     public TenantIndustry Industry { get; set; }
-    
+
     [ProtoMember(9)]
     public string Language { get; set; }
-    
+
     [ProtoMember(10)]
     public DateTime LastModified { get; set; }
-    
+
     [ProtoMember(11)]
     public string MappedDomain { get; set; }
-    
+
     [ProtoMember(12)]
     public string Name { get; set; }
-    
+
     [ProtoMember(13)]
     public Guid OwnerId { get; set; }
-    
+
     [ProtoMember(14)]
     public string PartnerId { get; set; }
-    
+
     [ProtoMember(15)]
     public string PaymentId { get; set; }
-    
+
     [ProtoMember(16)]
     public TenantStatus Status { get; set; }
-    
+
     [ProtoMember(17)]
     public DateTime StatusChangeDate { get; set; }
-    
+
     [ProtoMember(18)]
     public string TimeZone { get; set; }
-    
+
     [ProtoMember(19)]
     public List<string> TrustedDomains
     {
@@ -132,29 +132,29 @@ public class Tenant
 
             return _domains;
         }
-        
+
         set => _domains = value;
     }
 
     [ProtoMember(20)]
     public string TrustedDomainsRaw { get; set; }
-    
+
     [ProtoMember(21)]
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
-    
+
     [ProtoMember(22)]
     public int Version { get; set; }
-    
+
     [ProtoMember(23)]
     public DateTime VersionChanged { get; set; }
-    
+
     public override bool Equals(object obj)
     {
         return obj is Tenant t && t.Id == Id;
     }
 
     public CultureInfo GetCulture() => !string.IsNullOrEmpty(Language) ? CultureInfo.GetCultureInfo(Language.Trim()) : CultureInfo.CurrentCulture;
-    
+
     public override int GetHashCode()
     {
         return Id;
@@ -194,7 +194,7 @@ public class Tenant
         {
             MappedDomain = MappedDomain[8..];
         }
-        
+
         result = MappedDomain.ToLowerInvariant();
 
         return result;
@@ -210,7 +210,7 @@ public class Tenant
     {
         return Alias;
     }
-    
+
     internal string GetTrustedDomains()
     {
         TrustedDomains.RemoveAll(string.IsNullOrEmpty);
@@ -241,10 +241,10 @@ public static partial class TenantMapper
     [MapProperty(nameof(DbTenant.TrustedDomainsEnabled), nameof(Tenant.TrustedDomainsType))]
     [MapNestedProperties(nameof(DbTenant.Partner))]
     public static partial Tenant Map(this DbTenant source);
-    
+
     [MapNestedProperties(nameof(TenantUserSecurity.DbTenant))]
     public static partial Tenant Map(this TenantUserSecurity source);
-    
+
     public static partial IQueryable<Tenant> Project(this IQueryable<DbTenant> source);
     public static partial IQueryable<Tenant> Project(this IQueryable<TenantUserSecurity> source);
 }

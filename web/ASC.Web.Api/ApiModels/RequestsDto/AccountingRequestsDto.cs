@@ -70,7 +70,7 @@ public class CustomerOperationsRequestDto
     /// <summary>
     /// The maximum number of items to return for pagination. The default value is 25.
     /// </summary>
-    [FromQuery(Name = "limit")] 
+    [FromQuery(Name = "limit")]
     public int? Limit { get; set; }
 
 }

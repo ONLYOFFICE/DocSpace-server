@@ -46,7 +46,7 @@ public class MessageService(
             return _enabled.Value ? sender : null;
         }
     }
-    
+
     private HttpRequest Request => httpContextAccessor?.HttpContext?.Request;
 
     private static readonly JsonSerializerOptions _serializerOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
@@ -118,7 +118,7 @@ public class MessageService(
     {
         SendRequestMessage(action, target, description: [d1, d2], references: references, dateTime: dateTime);
     }
-    
+
     public void Send(MessageAction action, MessageTarget target, string[] description, IEnumerable<FilesAuditReference> references = null)
     {
         SendRequestMessage(action, target, description: description, references: references);
@@ -148,7 +148,7 @@ public class MessageService(
 
     #endregion
 
-    private void SendRequestMessage(MessageAction action, MessageTarget target = null, string loginName = null, DateTime? dateTime = null, 
+    private void SendRequestMessage(MessageAction action, MessageTarget target = null, string loginName = null, DateTime? dateTime = null,
         IEnumerable<FilesAuditReference> references = null, params string[] description)
     {
         if (Sender == null)
@@ -202,7 +202,7 @@ public class MessageService(
     {
         SendRequestHeadersMessage(action);
     }
-    
+
     public void SendHeadersMessage(MessageAction action, params string[] description)
     {
         SendRequestHeadersMessage(action, description: description);
@@ -230,7 +230,7 @@ public class MessageService(
         }
     }
 
-    private void SendRequestHeadersMessage(MessageAction action, MessageTarget target = null, IDictionary<string, StringValues> httpHeaders = null, 
+    private void SendRequestHeadersMessage(MessageAction action, MessageTarget target = null, IDictionary<string, StringValues> httpHeaders = null,
         IEnumerable<FilesAuditReference> references = null, params string[] description)
     {
         if (Sender == null)
@@ -287,7 +287,7 @@ public class MessageService(
 
         _ = Sender.SendAsync(message);
     }
-    
+
     public async Task<int> SendLoginMessageAsync(MessageUserData userData, MessageAction action, string initiator, params string[] description)
     {
         if (Sender == null)
@@ -354,4 +354,5 @@ public class EventDescription<T>
     public string FromParentTitle { get; set; }
     public int? FromParentType { get; set; }
     public int? FromFolderId { get; set; }
+    public bool? IsAgent { get; set; }
 }

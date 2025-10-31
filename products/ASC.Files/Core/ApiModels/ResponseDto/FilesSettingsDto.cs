@@ -80,7 +80,7 @@ public class FilesSettingsDto
     /// The list of extensions of the template files.
     /// </summary>
     public List<string> ExtsWebTemplate { get; set; }
-    
+
     /// <summary>
     /// The list of extensions of the files that must be converted.
     /// </summary>
@@ -322,6 +322,16 @@ public class FilesSettingsDto
     /// Specifies whether to open the editor in the same tab or not.
     /// </summary>
     public bool OpenEditorInSameTab { get; set; }
+    
+    /// <summary>
+    /// List of extensions available for vectorization
+    /// </summary>
+    public List<string> ExtsFilesVectorized { get; set; }
+    
+    /// <summary>
+    /// The maximum file size for vectorization
+    /// </summary>
+    public long MaxVectorizationFileSize { get; set; }
 }
 
 
@@ -331,6 +341,7 @@ public class FilesSettingsDtoConverter(
     FilesLinkUtility filesLinkUtility,
     FilesSettingsHelper filesSettingsHelper,
     SetupInfo setupInfo,
+    VectorizationSettings vectorizationSettings,
     SearchSettingsHelper searchSettingsHelper)
 {
     public async Task<FilesSettingsDto> Get()
@@ -338,11 +349,11 @@ public class FilesSettingsDtoConverter(
         return new FilesSettingsDto
         {
             ExtsImagePreviewed = fileUtility.ExtsImagePreviewed,
-            ExtsMediaPreviewed =  fileUtility.ExtsMediaPreviewed,
+            ExtsMediaPreviewed = fileUtility.ExtsMediaPreviewed,
             ExtsWebPreviewed = fileUtility.ExtsWebPreviewed,
             ExtsWebEdited = fileUtility.ExtsWebEdited,
             ExtsWebEncrypt = fileUtility.ExtsWebEncrypt,
-            ExtsWebReviewed =  fileUtility.ExtsWebReviewed,
+            ExtsWebReviewed = fileUtility.ExtsWebReviewed,
             ExtsWebCustomFilterEditing = fileUtility.ExtsWebCustomFilterEditing,
             ExtsWebRestrictedEditing = fileUtility.ExtsWebRestrictedEditing,
             ExtsWebCommented = fileUtility.ExtsWebCommented,
@@ -392,7 +403,9 @@ public class FilesSettingsDtoConverter(
             DefaultSharingAccessRights = await filesSettingsHelper.GetDefaultSharingAccessRights(),
             MaxUploadThreadCount = setupInfo.MaxUploadThreadCount,
             ChunkUploadSize = setupInfo.ChunkUploadSize,
-            OpenEditorInSameTab = await filesSettingsHelper.GetOpenEditorInSameTabAsync()
+            OpenEditorInSameTab = await filesSettingsHelper.GetOpenEditorInSameTabAsync(),
+            ExtsFilesVectorized = vectorizationSettings.SupportedFormats.ToList(),
+            MaxVectorizationFileSize = vectorizationSettings.MaxContentLength
         };
     }
 }

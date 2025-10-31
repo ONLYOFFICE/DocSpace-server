@@ -82,7 +82,7 @@ public class UploadControllerHelper(
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
         if (toFolder.FolderType == FolderType.FillingFormsRoom && toFolder.RootFolderType == FolderType.RoomTemplates && filesTitle.Any(r => FileUtility.GetFileExtension(r) != ".pdf"))
-        { 
+        {
             throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
         }
 

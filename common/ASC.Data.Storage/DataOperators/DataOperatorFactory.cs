@@ -60,4 +60,3 @@ public static class DataOperatorFactory
         return new TarReadOperator(targetFile, token, removeTarget);
     }
 }
- 

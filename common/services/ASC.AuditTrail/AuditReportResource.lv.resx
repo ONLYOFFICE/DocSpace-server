@@ -97,6 +97,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Mainīta krāsu tēma</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kontakti</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Atjaunināti sīkdatņu uzstādījumi</value>
   </data>
@@ -259,9 +262,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sphinx uzstādījumi atjaunināti</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Vispārīgi</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Sagaidīšanas lapas uzstādījumi atjaunināti</value>
   </data>
@@ -270,9 +270,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Dzēsta grupa: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Grupas</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Atjaunināta grupa: {0}</value>
@@ -430,9 +427,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Produktu saraksts atjaunināts</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Produkti</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Pārzīmēšana</value>
   </data>
@@ -447,6 +441,9 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesija uzsākta</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Iestatījumi</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO atspējots</value>
@@ -558,9 +555,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Lietotāji [{0}]. Nosūtītas paroles maiņas instrukcijas</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Lietotāji</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Lietotāji [{0}]. Nosūtītas aktivizācijas instrukcijas</value>
@@ -790,9 +784,6 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Lietotāji [{0}]. Veidlapa ir iesniegta: {1}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="RoomIndexExportSaved" xml:space="preserve">
     <value>Dokumentos saglabātā telpas rādītāja eksportēšana</value>
   </data>
@@ -936,5 +927,8 @@
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Klienta maka iespējoto pakalpojumu iestatījumi ir atjaunināti</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Ieeja ar sociālā tīkla kontu izdevās</value>
   </data>
 </root>

@@ -42,18 +42,18 @@ public abstract class ApiControllerBase(FolderDtoHelper folderDtoHelper, FileDto
 
     protected async Task<FileEntryBaseDto> GetFileEntryWrapperAsync(FileEntry r, IFolder contextFolder = null)
     {
-       return r.FileEntryType == FileEntryType.Folder
-            ? r switch
-            {
-                Folder<int> fol1 => await _folderDtoHelper.GetAsync(fol1, contextFolder: contextFolder),
-                Folder<string> fol2 => await _folderDtoHelper.GetAsync(fol2, contextFolder: contextFolder),
-                _ => null
-            }
-            : r switch
-            {
-                File<int> file1 => await _fileDtoHelper.GetAsync(file1, contextFolder: contextFolder),
-                File<string> file2 => await _fileDtoHelper.GetAsync(file2, contextFolder: contextFolder),
-                _ => null
-            };
+        return r.FileEntryType == FileEntryType.Folder
+             ? r switch
+             {
+                 Folder<int> fol1 => await _folderDtoHelper.GetAsync(fol1, contextFolder: contextFolder),
+                 Folder<string> fol2 => await _folderDtoHelper.GetAsync(fol2, contextFolder: contextFolder),
+                 _ => null
+             }
+             : r switch
+             {
+                 File<int> file1 => await _fileDtoHelper.GetAsync(file1, contextFolder: contextFolder),
+                 File<string> file2 => await _fileDtoHelper.GetAsync(file2, contextFolder: contextFolder),
+                 _ => null
+             };
     }
 }

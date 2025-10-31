@@ -73,7 +73,7 @@ public class CommonLinkUtility(
     public const string ParamName_UserUserID = "uid";
     public const string AbsoluteAccountsPath = "/accounts/";
     public const string VirtualAccountsPath = "~/accounts/";
-    
+
     public string Logout
     {
         get { return ToAbsolute("~/auth.aspx") + "?t=logout"; }
@@ -189,18 +189,18 @@ public class CommonLinkUtility(
     public string GetInvitationLink(string email, EmployeeType employeeType, Guid createdBy, string culture = null)
     {
         var tenant = _tenantManager.GetCurrentTenant();
-        
+
         var link = GetConfirmationEmailUrl(email, ConfirmType.LinkInvite, employeeType.ToStringFast() + tenant.Alias, createdBy)
                    + $"&emplType={employeeType:d}";
-        
+
         if (!string.IsNullOrEmpty(culture))
         {
             link += $"&culture={culture}";
         }
-        
+
         return link;
     }
-    
+
     public (string, string) GetConfirmationUrlAndKey(Guid userId, ConfirmType confirmType, object postfix = null)
     {
         var url = GetFullAbsolutePath($"confirm/{confirmType}?{GetTokenWithoutKey(userId, confirmType)}");
@@ -214,7 +214,7 @@ public class CommonLinkUtility(
     {
         return GetFullAbsolutePath(GetConfirmationUrlRelative(email, confirmType, postfix, userId));
     }
-    
+
     public string GetConfirmationUrl(string key, ConfirmType confirmType, Guid userId = default)
     {
         return GetFullAbsolutePath(GetConfirmationUrlRelative(key, confirmType, userId));

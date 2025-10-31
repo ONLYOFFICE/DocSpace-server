@@ -143,7 +143,7 @@ static file class Queries
             (UserDbContext ctx) =>
                 ctx.Users
                    .Join(ctx.Tenants, x => x.TenantId, y => y.Id, (users, tenants) => new { users, tenants })
-                   .Join(ctx.UserGroups, x => x.users.Id, y => y.Userid, (x, y) => new { users = x.users, tenants = x.tenants, userGroups = y})
+                   .Join(ctx.UserGroups, x => x.users.Id, y => y.Userid, (x, y) => new { users = x.users, tenants = x.tenants, userGroups = y })
                    .Where(x => x.tenants.Status == TenantStatus.Active)
                    .Where(x => x.userGroups.UserGroupId == AuthConstants.Guest.ID && !x.userGroups.Removed)
                    .Select(r => new TenantUserSettings
@@ -154,4 +154,3 @@ static file class Queries
                    }));
 
 }
-

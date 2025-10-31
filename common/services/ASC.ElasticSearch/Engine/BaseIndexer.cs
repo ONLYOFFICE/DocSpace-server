@@ -111,9 +111,9 @@ public abstract class BaseIndexer<T>(Client client,
         {
             await webStudioDbContext.AddOrUpdateAsync(q => q.WebstudioIndex, new DbWebstudioIndex
             {
-            IndexName = Wrapper.IndexName,
+                IndexName = Wrapper.IndexName,
                 LastModified = lastModified
-        });
+            });
 
             await webStudioDbContext.SaveChangesAsync();
         }
@@ -245,7 +245,7 @@ public abstract class BaseIndexer<T>(Client client,
                             {
                                 throw;
                             }
-                            
+
                             _logger.ErrorIndex(e);
                         }
                         catch (Exception e)
@@ -599,7 +599,7 @@ public abstract class BaseIndexer<T>(Client client,
         member = expr as MemberExpression;
         if (member == null && expr is UnaryExpression unary)
         {
-                member = unary.Operand as MemberExpression;
+            member = unary.Operand as MemberExpression;
         }
 
         return member == null ? "" : member.Member.Name.ToLowerCamelCase();

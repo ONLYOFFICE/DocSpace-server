@@ -54,9 +54,9 @@ public class TenantDomainValidator
 
     public TenantDomainValidator()
     {
-        
+
     }
-    
+
     public TenantDomainValidator(IConfiguration configuration, CoreBaseSettings coreBaseSettings)
     {
         MaxLength = 63;

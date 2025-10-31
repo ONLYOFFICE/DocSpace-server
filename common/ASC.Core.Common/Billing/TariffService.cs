@@ -73,7 +73,7 @@ public class TariffService(
     private static readonly TimeSpan _defaultCacheExpiration = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan _standaloneCacheExpiration = TimeSpan.FromMinutes(15);
     private TimeSpan _cacheExpiration = _defaultCacheExpiration;
-    
+
     private const int DefaultTrialPeriod = 30;
 
     //private readonly int _activeUsersMin;
@@ -81,7 +81,7 @@ public class TariffService(
 
     private int PaymentDelay => PaymentConfiguration.Delay;
     private bool TrialEnabled => PaymentConfiguration.TrialEnabled;
-    
+
     private PaymentConfiguration _paymentConfiguration;
     private PaymentConfiguration PaymentConfiguration => _paymentConfiguration ??= (configuration.GetSection("core:payment").Get<PaymentConfiguration>() ?? new PaymentConfiguration());
 
@@ -168,8 +168,8 @@ public class TariffService(
                             }
                             else
                             {
-                            await AddInitialQuotaAsync(asynctariff, tenantId);
-                        }
+                                await AddInitialQuotaAsync(asynctariff, tenantId);
+                            }
                         }
 
                         if (asynctariff.Id == tariff.Id)
@@ -455,7 +455,7 @@ public class TariffService(
                 {
                     return payments;
                 }
-                
+
                 payments = [];
                 if (billingClient.Configured)
                 {
@@ -478,7 +478,7 @@ public class TariffService(
                         LogError(error, tenantId.ToString());
                     }
                 }
-                
+
                 await hybridCache.SetAsync(key, payments, TimeSpan.FromMinutes(10));
             }
         }
@@ -524,7 +524,7 @@ public class TariffService(
         {
             keyBuilder.Append($"_{partnerId}");
         }
-        
+
         var key = keyBuilder.ToString();
         var url = cache.Get<string>(key);
         if (url == null)
@@ -599,7 +599,7 @@ public class TariffService(
 
                         foreach (var productId in productIds)
                         {
-                            if (int.TryParse(productId, out var id) && id > 10000)
+                            if (!int.TryParse(productId, out var _))
                             {
                                 accountingServices.Add(productId);
                             }
@@ -654,7 +654,7 @@ public class TariffService(
                 LogError(error);
             }
         }
-        
+
         return !string.IsNullOrEmpty(url) ? new Uri(url) : null;
     }
 
@@ -1209,10 +1209,10 @@ public class TariffService(
         return balance;
     }
 
-    public async Task<Session> OpenCustomerSessionAsync(int tenantId, int serviceAccount, string externalRef, int quantity, int duration)
+    public async Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await accountingClient.OpenCustomerSessionAsync(portalId, serviceAccount, externalRef, quantity, duration);
+        return await accountingClient.OpenCustomerSessionAsync(portalId, serviceName, externalRef, quantity, duration);
     }
 
     public async Task<bool> CloseCustomerSessionAsync(int tenantId, int sessionId)
@@ -1229,10 +1229,10 @@ public class TariffService(
         return session;
     }
 
-    public async Task<bool> CompleteCustomerSessionAsync(int tenantId, int serviceAccount, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
+    public async Task<bool> CompleteCustomerSessionAsync(int tenantId, string serviceName, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        await accountingClient.CompleteCustomerSessionAsync(portalId, serviceAccount, sessionId, quantity, customerParticipantName, metadata);
+        await accountingClient.CompleteCustomerSessionAsync(portalId, serviceName, sessionId, quantity, customerParticipantName, metadata);
         await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         return true;
     }
@@ -1269,12 +1269,12 @@ public class TariffService(
         if (coreBaseSettings.Standalone && _cacheExpiration < _standaloneCacheExpiration)
         {
             _cacheExpiration = _cacheExpiration.Add(TimeSpan.FromSeconds(30));
-}
+        }
         return _cacheExpiration;
     }
 
     private async Task InsertToCache(int tenantId, Tariff tariff)
-    { 
+    {
         await hybridCache.SetAsync(GetTariffCacheKey(tenantId), tariff, GetCacheExpiration());
     }
 

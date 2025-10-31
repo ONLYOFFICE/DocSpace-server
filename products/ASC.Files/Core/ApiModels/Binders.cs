@@ -248,7 +248,7 @@ public class InsertFileModelBinder : IModelBinder
     {
         ArgumentNullException.ThrowIfNull(bindingContext);
 
-        if (bindingContext is DefaultModelBindingContext defaultBindingContext && 
+        if (bindingContext is DefaultModelBindingContext defaultBindingContext &&
             bindingContext.ValueProvider is CompositeValueProvider { Count: 0 })
         {
             bindingContext.ValueProvider = defaultBindingContext.OriginalValueProvider;

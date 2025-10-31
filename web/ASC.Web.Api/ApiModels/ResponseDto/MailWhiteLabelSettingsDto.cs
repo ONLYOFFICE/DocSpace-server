@@ -56,5 +56,5 @@ public static partial class MailWhiteLabelSettingsDtoMapper
     private static bool MapManual(MailWhiteLabelSettings source)
     {
         return source.IsDefault();
-    } 
+    }
 }

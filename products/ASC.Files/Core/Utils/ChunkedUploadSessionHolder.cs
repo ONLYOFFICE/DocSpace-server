@@ -33,7 +33,7 @@ public class ChunkedUploadSessionHolder(
     SetupInfo setupInfo,
     IFusionCache cache)
 {
-    
+
     private CommonChunkedUploadSessionHolder _holder;
     private CommonChunkedUploadSessionHolder _currentHolder;
     public static readonly TimeSpan SlidingExpiration = TimeSpan.FromHours(12);
@@ -59,7 +59,7 @@ public class ChunkedUploadSessionHolder(
     {
         return await (await CommonSessionHolderAsync()).GetChunksAsync(s);
     }
-    
+
     public async Task<ChunkedUploadSession<T>> GetSessionAsync<T>(string sessionId)
     {
         var session = await cache.GetOrDefaultAsync<ChunkedUploadSession<T>>(sessionId);

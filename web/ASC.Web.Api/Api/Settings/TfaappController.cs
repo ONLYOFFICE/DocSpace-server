@@ -152,7 +152,7 @@ public class TfaappController(
         }
 
         if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
-        {            
+        {
             var tfaExpired = await TfaAppUserSettings.TfaExpiredAndResetAsync(settingsManager, auditEventsRepository, user.Id);
             var confirmType = tfaExpired || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, authContext.CurrentAccount.ID)
                 ? ConfirmType.TfaActivation
@@ -178,7 +178,7 @@ public class TfaappController(
     public async Task<bool> UpdateTfaSettings(TfaRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        
+
         var result = false;
 
         MessageAction action;
@@ -282,7 +282,7 @@ public class TfaappController(
         {
             throw new InvalidOperationException(Resource.ErrorAccessDenied);
         }
-        
+
         if (await UpdateTfaSettings(inDto))
         {
             return await GetTfaConfirmUrl();
@@ -421,7 +421,7 @@ public class TfaappController(
         await TfaAppUserSettings.DisableForUserAsync(settingsManager, user.Id);
         messageService.Send(MessageAction.UserDisconnectedTfaApp, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
         await userSocketManager.UpdateUserAsync(user);
-        
+
         await cookiesManager.ResetUserCookieAsync(user.Id);
         if (isMe)
         {

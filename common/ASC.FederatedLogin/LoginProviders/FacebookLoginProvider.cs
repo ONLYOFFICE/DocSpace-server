@@ -37,9 +37,9 @@ public class FacebookLoginProvider : BaseLoginProvider<FacebookLoginProvider>
     public override string Scopes => "email,public_profile";
 
     private const string FacebookProfileUrl = "https://graph.facebook.com/me?fields=email,id,birthday,link,first_name,last_name,gender";
-    
+
     private readonly RequestHelper _requestHelper;
-    
+
     public FacebookLoginProvider() { }
     public FacebookLoginProvider(
         OAuth20TokenHelper oAuth20TokenHelper,

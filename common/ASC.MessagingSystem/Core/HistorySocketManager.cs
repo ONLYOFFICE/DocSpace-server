@@ -31,7 +31,7 @@ public class HistorySocketManager(
     TenantManager tenantManager,
     ChannelWriter<SocketData> channelWriter,
     MachinePseudoKeys machinePseudoKeys,
-    IConfiguration configuration) 
+    IConfiguration configuration)
     : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
@@ -47,13 +47,13 @@ public class HistorySocketManager(
             var room = GetRoom(tenantId, reference.EntryId, reference.EntryType);
 
             await MakeRequest(
-                "update-history", 
+                "update-history",
                 new
                 {
-                    room, 
-                    id = reference.EntryId, 
+                    room,
+                    id = reference.EntryId,
                     type = reference.EntryType == 1 ? "folder" : "file"
-                }, 
+                },
                 tenantId
                 );
         }
