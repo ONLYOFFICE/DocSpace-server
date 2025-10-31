@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
+ /// <summary>
 /// The folder content information.
 /// </summary>
 public class FolderContentDto<T>
@@ -106,15 +106,15 @@ public class FolderContentDtoHelper(
             Total = folderItems.Total, 
             Count = folderItems.Entries.Count
         };
-
+        
         var expiration = TimeSpan.MaxValue;
         if (folderItems.ParentRoom is { SettingsLifetime: not null })
         {
             expiration = DateTime.UtcNow - folderItems.ParentRoom.SettingsLifetime.GetExpirationUtc();
         }
-
+        
         List<FileShareRecord<string>> currentUsersRecords = null;
-        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID) &&
+        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID) && 
             folderItems.FolderInfo is { FolderType: FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates })
         {
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
@@ -148,22 +148,27 @@ public class FolderContentDtoHelper(
                 }
             }
 
-            var foldersTask = GetFoldersDto(folders, contextFolder: folderItems.FolderInfo).ToListAsync();
-            var filesTask = GetFilesDto(files, contextFolder: folderItems.FolderInfo).ToListAsync();
-            result.Files = await filesTask;
-            result.Folders = await foldersTask;
+            var foldersTask = GetFoldersDto(folders, contextFolder: folderItems.FolderInfo).ToListAsync().AsTask();
+            var filesTask = GetFilesDto(files, contextFolder: folderItems.FolderInfo).ToListAsync().AsTask();
+
+            await Task.WhenAll(foldersTask, filesTask);
+
+            result.Files = filesTask.Result;
+            result.Folders = foldersTask.Result;
         }
-
-
+        
+        
         var currentTask = GetFolderDto(folderItems.FolderInfo, contextFolder: folderItems.FolderInfo);
         var isEnableBadges = badgesSettingsHelper.GetEnabledForCurrentUserAsync();
+
+        await Task.WhenAll(currentTask, isEnableBadges);
 
         result.PathParts = folderItems.FolderPathParts;
         result.StartIndex = startIndex;
         result.Total = folderItems.Total;
-        result.New = (await isEnableBadges) ? folderItems.New : 0;
-        result.Current = (FolderDto<T>)(await currentTask);
-        
+        result.New = (isEnableBadges.Result) ? folderItems.New : 0;
+        result.Current = (FolderDto<T>)(currentTask.Result);
+
         if (folderItems.ParentRoom is { FolderType: FolderType.AiRoom })
         {
             result.Current.RootRoomType = DocSpaceHelper.MapToRoomType(folderItems.ParentRoom.FolderType);
@@ -211,7 +216,7 @@ public class FolderContentDtoHelper(
                 yield return await GetFolderDto(r, entriesOrder, contextFolder);
             }
         }
-
+        
         async Task<FileEntryBaseDto> GetFolderDto(FileEntry folderEntry, string entriesOrder = null, IFolder contextFolder = null)
         {
             switch (folderEntry)
@@ -237,19 +242,19 @@ public class FolderContentDtoHelper(
             return null;
         }
     }
-
+    
     private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(
-        T folderId,
-        Guid userIdOrGroupId,
-        IEnumerable<FilterType> filterTypes,
-        T roomId,
-        bool searchInContent,
-        bool withSubFolders,
-        bool excludeSubject,
-        ApplyFilterOption applyFilterOption,
+        T folderId, 
+        Guid userIdOrGroupId, 
+        IEnumerable<FilterType> filterTypes, 
+        T roomId, 
+        bool searchInContent, 
+        bool withSubFolders, 
+        bool excludeSubject, 
+        ApplyFilterOption applyFilterOption, 
         string text,
-        string[] extension,
-        SearchArea searchArea,
+        string[] extension, 
+        SearchArea searchArea, 
         FormsItemDto formsItemDto,
         Location? location,
         string sortByFilter,
@@ -264,21 +269,21 @@ public class FolderContentDtoHelper(
         }
 
         var items = await fileStorageService.GetFolderItemsAsync(
-            folderId,
-            startIndex,
-            count,
-            filterTypes,
-            filterTypes?.FirstOrDefault() == FilterType.ByUser,
-            userIdOrGroupId.ToString(),
+            folderId, 
+            startIndex, 
+            count, 
+            filterTypes, 
+            filterTypes?.FirstOrDefault() == FilterType.ByUser, 
+            userIdOrGroupId.ToString(), 
             text,
-            extension,
-            searchInContent,
-            withSubFolders,
-            orderBy,
+            extension, 
+            searchInContent, 
+            withSubFolders, 
+            orderBy, 
             excludeSubject: excludeSubject,
-            roomId: roomId,
-            applyFilterOption: applyFilterOption,
-            searchArea: searchArea,
+            roomId: roomId, 
+            applyFilterOption: applyFilterOption, 
+            searchArea: searchArea, 
             formsItemDto: formsItemDto,
             location: location);
 

@@ -3171,14 +3171,13 @@ public class FileStorageService //: IFileStorageService
         await DemandPermissionToDeletePersonalDataAsync(userFromId);
 
         //check exist userTo
-        var userTo = await userManager.GetUsersAsync(userToId);
-        if (Equals(userTo, Constants.LostUser))
+        if (Equals(userToId, Constants.LostUser.Id))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UserNotFound);
         }
 
         //check user can have personal data
-        if (await userManager.IsGuestAsync(userTo))
+        if (await userManager.IsGuestAsync(userToId))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }

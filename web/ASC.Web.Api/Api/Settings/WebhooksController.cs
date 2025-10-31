@@ -336,14 +336,14 @@ public class WebhooksController(
 
     private async Task<bool> CheckAdminPermissionsAsync()
     {
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserId = authContext.CurrentAccount.ID;
 
-        if (await userManager.IsDocSpaceAdminAsync(currentUser))
+        if (await userManager.IsDocSpaceAdminAsync(currentUserId))
         {
             return true;
         }
 
-        if (await userManager.IsGuestAsync(currentUser))
+        if (await userManager.IsGuestAsync(currentUserId))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }

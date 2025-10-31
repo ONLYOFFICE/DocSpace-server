@@ -333,7 +333,7 @@ uploadSession.RequiredVectorization = requiredVectorization;
                 if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
                 {
                     var currentRoom = await folderDao.GetFolderAsync(roomId);
-                    if (currentRoom.FolderType == FolderType.FillingFormsRoom && !isForm)
+                    if (currentRoom.FolderType == FolderType.FillingFormsRoom && !isForm)//
                     {
                         throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                     }
