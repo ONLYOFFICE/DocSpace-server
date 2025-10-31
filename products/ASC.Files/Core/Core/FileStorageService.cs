@@ -4407,7 +4407,9 @@ public class FileStorageService //: IFileStorageService
         }
 
         room.Pinned = pin;
-
+        
+        await socketManager.UpdateFolderAsync(room);
+        
         return room;
     }
 
