@@ -2613,6 +2613,7 @@ public class FileSecurity(
                     }
                 case SearchArea.Active when entry.RootFolderType == FolderType.VirtualRooms:
                 case SearchArea.Any when entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.AiAgents:
+                case SearchArea.AiAgents when entry.RootFolderType == FolderType.AiAgents:
                     {
                         entry.ShareRecord = record;
                         entry.Access = record?.Share ?? FileShare.None;
