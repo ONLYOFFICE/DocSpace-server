@@ -725,8 +725,8 @@ public class RoomShareTests(
         openedRoom.Current.Access.Should().Be(FileShare.Read);
 
         var openedFile = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        openedRoom.Should().NotBeNull();
-        openedRoom.Current.Access.Should().Be(FileShare.Read);
+        openedFile.Should().NotBeNull();
+        openedFile.Access.Should().Be(FileShare.Read);
 
         // User2 visits Comment link -> should still have personal Read rights on the file
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, commentToken);
