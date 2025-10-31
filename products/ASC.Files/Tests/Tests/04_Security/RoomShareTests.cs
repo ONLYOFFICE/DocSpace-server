@@ -643,7 +643,7 @@ public class RoomShareTests(
             roomsList.Should().NotBeNull();
             roomsList.Folders.Should().Contain(f => f.Title == customRoom.Title);
 
-            // Now check file access for user2 (without token) — rights should be persisted according to the last link
+            // Now check file access for user2 (without token) ï¿½ rights should be persisted according to the last link
             var fileInfoAsUser2 = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
             fileInfoAsUser2.Should().NotBeNull();
             fileInfoAsUser2.Access.Should().Be(access);
