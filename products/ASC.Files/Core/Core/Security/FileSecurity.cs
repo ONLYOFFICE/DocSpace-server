@@ -2941,17 +2941,17 @@ public class FileSecurity(
 
     public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId, bool includeAvailableLinks = false)
     {
+        return (await GetUserOrderedSubjectsAsync(userId, includeAvailableLinks)).Select(r=> r.Subject).ToList();
+    }
+
+    private async Task<List<OrderedSubject>> GetUserOrderedSubjectsAsync(Guid userId, bool includeAvailableLinks = false)
+    {        
         if (string.Equals(httpContextAccessor?.HttpContext?.Request.Method, nameof(HttpMethod.Get), StringComparison.OrdinalIgnoreCase))
         {
             return await _subjects.GetOrAdd(new SubjectRecord(userId, includeAvailableLinks), s =>
-                new Lazy<Task<List<Guid>>>(GetUserSubjectsAsync<int>(s.UserId, s.IncludeLinks))).Value;
+                new Lazy<Task<List<OrderedSubject>>>(GetUserOrderedSubjectsAsync<int>(s.UserId, s.IncludeLinks))).Value;
         }
         
-        return await GetUserSubjectsAsync<int>(userId, includeAvailableLinks);
-    }
-
-    public async Task<List<OrderedSubject>> GetUserOrderedSubjectsAsync(Guid userId, bool includeAvailableLinks = false)
-    {
         return await GetUserOrderedSubjectsAsync<int>(userId, includeAvailableLinks);
     }
 
@@ -3153,12 +3153,8 @@ public class FileSecurity(
 
     private record SubjectRecord(Guid UserId, bool IncludeLinks);
     
-    private readonly ConcurrentDictionary<SubjectRecord, Lazy<Task<List<Guid>>>> _subjects = new();
-    private async Task<List<Guid>> GetUserSubjectsAsync<T>(Guid userId, bool includeAvailableLinks = false)
-    {
-        return (await GetUserOrderedSubjectsAsync(userId, includeAvailableLinks)).Select(r=> r.Subject).ToList();
-    }
-
+    private readonly ConcurrentDictionary<SubjectRecord, Lazy<Task<List<OrderedSubject>>>> _subjects = new();
+    
     private async Task<List<OrderedSubject>> GetUserOrderedSubjectsAsync<T>(Guid userId, bool includeAvailableLinks = false)
     {
         // priority order
