@@ -991,8 +991,8 @@ internal class FolderDao(
             var trashId = await trashIdTask;
             var tagDao = daoFactory.GetTagDao<int>();
             var toFolder = await GetFolderAsync(toFolderId);
-            var (roomId, _) = await GetParentRoomInfoFromFileEntryAsync(folder);
-            var (toFolderRoomId, _) = await GetParentRoomInfoFromFileEntryAsync(toFolder);
+            var (roomId, _, _) = await GetParentRoomInfoFromFileEntryAsync(folder);
+            var (toFolderRoomId, _, _) = await GetParentRoomInfoFromFileEntryAsync(toFolder);
             if (toFolderId == trashId)
             {
                 var tagList = new List<Tag>();
@@ -1923,14 +1923,14 @@ internal class FolderDao(
         return mapper.MapDbFolderQueryToDbFolderInternal(parentFolder);
     }
 
-    public Task<(int RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<int> entry)
+    public Task<(int RoomId, string RoomTitle, FolderType)> GetParentRoomInfoFromFileEntryAsync(FileEntry<int> entry)
     {
         var rootFolderType = entry.RootFolderType;
 
         if (rootFolderType != FolderType.VirtualRooms && rootFolderType != FolderType.RoomTemplates
             && rootFolderType != FolderType.Archive && rootFolderType != FolderType.AiAgents)
         {
-            return Task.FromResult((-1, ""));
+            return Task.FromResult((-1, "", rootFolderType));
         }
 
         var rootFolderId = Convert.ToInt32(entry.RootId);
@@ -1938,20 +1938,20 @@ internal class FolderDao(
 
         if (rootFolderId == entryId)
         {
-            return Task.FromResult((-1, ""));
+            return Task.FromResult((-1, "", rootFolderType));
         }
 
         var folderId = Convert.ToInt32(entry.ParentId);
 
         if (rootFolderId == folderId)
         {
-            return Task.FromResult((entryId, entry.Title));
+            return Task.FromResult((entryId, entry.Title, rootFolderType));
         }
 
         return ParentRoomInfoFromFileEntryFromDbAsync(folderId);
     }
 
-    private async Task<(int RoomId, string RoomTitle)> ParentRoomInfoFromFileEntryFromDbAsync(int folderId)
+    private async Task<(int RoomId, string RoomTitle, FolderType folderType)> ParentRoomInfoFromFileEntryFromDbAsync(int folderId)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -1959,10 +1959,10 @@ internal class FolderDao(
 
         if (parentFolders.Count > 1)
         {
-            return (parentFolders[1].ParentId, parentFolders[1].Title);
+            return (parentFolders[1].ParentId, parentFolders[1].Title, parentFolders[1].FolderType);
         }
 
-        return (parentFolders[0].ParentId, parentFolders[0].Title);
+        return (parentFolders[0].ParentId, parentFolders[0].Title, parentFolders[0].FolderType);
     }
 
     public async Task<int> SetCustomOrder(int folderId, int parentFolderId, int order = 0)
@@ -2293,6 +2293,7 @@ public class ParentIdTitlePair
 {
     public int ParentId { get; init; }
     public string Title { get; init; }
+    public FolderType FolderType { get; init; }
 }
 
 public class FolderTypeUsedSpacePair

@@ -897,6 +897,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<string>("ServiceName")
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar")
+                        .HasColumnName("service_name")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<bool>("Visible")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
@@ -1034,6 +1041,29 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "backup",
                             Price = 10m,
                             ProductId = "10006",
+                            ServiceName = "backup",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -13,
+                            Features = "aitools",
+                            Name = "aitools",
+                            Price = 0.0002m,
+                            ProductId = "10009",
+                            ServiceName = "ai-service",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -14,
+                            Features = "websearch",
+                            Name = "websearch",
+                            Price = 0.005m,
+                            ProductId = "10010",
+                            ServiceName = "web_search",
                             Visible = false,
                             Wallet = true
                         });

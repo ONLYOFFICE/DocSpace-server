@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ImageMagick;
+
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
@@ -199,6 +201,8 @@ public class FileDto<T> : FileEntryDto<T>
     /// The vectorization status of the file.
     /// </summary>
     public VectorizationStatus? VectorizationStatus { get; set; }
+    
+    public Size Dimensions { get; set; }
 }
 
 [Scope]
@@ -222,11 +226,18 @@ public class FileDtoHelper(
     FileChecker fileChecker,
     SecurityContext securityContext,
     UserManager userManager,
-    IUrlShortener urlShortener)
+    IUrlShortener urlShortener,
+    AiAccessibility aiAccessibility)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener) 
 {
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null, bool? aiReady = null)
     {
+        Task<bool> aiReadyTask = null;
+        if (aiReady == null)
+        {
+            aiReadyTask = aiAccessibility.IsAiReadyAsync();
+        }
+        
         var result = await GetFileWrapperAsync(file, order, expiration, contextFolder);
         
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
@@ -335,6 +346,43 @@ public class FileDtoHelper(
             }
         }
         
+        if (fileUtility.CanImageView(file.PureTitle))
+        {
+            try
+            {
+                await using var stream = await _daoFactory.GetFileDao<T>().GetFileStreamAsync(file);
+                using var image = new MagickImage();
+                image.Ping(stream);
+                result.Dimensions = new Size
+                {
+                    Height = image.Height,
+                    Width = image.Width
+                };
+            }
+            catch (Exception)
+            {
+            }
+
+        }
+        
+        if (aiReadyTask != null)
+        {
+            aiReady = await aiReadyTask;
+        }
+        
+        if (aiReady is false)
+        {
+            if (result.Security.ContainsKey(FileSecurity.FilesSecurityActions.AscAi))
+            {
+                result.Security[FileSecurity.FilesSecurityActions.AscAi] = false;
+            }
+
+            if (result.Security.ContainsKey(FileSecurity.FilesSecurityActions.Vectorization))
+            {
+                result.Security[FileSecurity.FilesSecurityActions.Vectorization] = false;
+            }
+        }
+
         return result;
     }
 

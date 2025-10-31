@@ -312,7 +312,7 @@ uploadSession.RequiredVectorization = requiredVectorization;
             {
                 var folderDao = daoFactory.GetFolderDao<T>();
                 var currentFolder = await folderDao.GetFolderAsync(uploadSession.File.FolderIdDisplay);
-                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+                var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
 
                 var memoryStream = new MemoryStream();
                 await stream.CopyToAsync(memoryStream);

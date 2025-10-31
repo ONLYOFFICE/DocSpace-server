@@ -31,6 +31,7 @@ public class AiSettingsService(
     UserManager userManager,
     AuthContext authContext,
     WebSearchSettingsStore webSearchSettingsStore,
+    AiAccessibility accessibility,
     AiGateway aiGateway)
 {
     public async Task<WebSearchSettings> SetWebSearchSettingsAsync(
@@ -38,7 +39,7 @@ public class AiSettingsService(
         EngineType type,
         string? key)
     {
-        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || aiGateway.Configured)
         {
             throw new SecurityException();
         }
@@ -76,7 +77,7 @@ public class AiSettingsService(
 
     public async Task<WebSearchSettings> GetWebSearchSettingsAsync()
     {
-        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || aiGateway.Configured)
         {
             throw new SecurityException();
         }
@@ -88,7 +89,8 @@ public class AiSettingsService(
     {
         return new AiSettings
         {
-            WebSearchEnabled = aiGateway.IsEnabled || await webSearchSettingsStore.IsEnabledAsync()
+            WebSearchEnabled = await webSearchSettingsStore.IsEnabledAsync(),
+            AiReady = await accessibility.IsAiReadyAsync()
         };
     }
 }

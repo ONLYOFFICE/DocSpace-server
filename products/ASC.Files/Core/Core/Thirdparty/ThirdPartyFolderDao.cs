@@ -660,12 +660,12 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return dao.GetRootFolderAsync();
     }
 
-    public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
+    public Task<(string RoomId, string RoomTitle, FolderType)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
     {
 
         return Task.FromResult(entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents)
-            ? (string.Empty, string.Empty)
-            : (_providerInfo.FolderId, _providerInfo.CustomerTitle));
+            ? (string.Empty, string.Empty, FolderType.DEFAULT)
+            : (_providerInfo.FolderId, _providerInfo.CustomerTitle, FolderType.PublicRoom));
     }
 
     public Task<FilesStatisticsResultDto> GetFilesUsedSpace()

@@ -29,7 +29,9 @@ namespace ASC.AI.Core.Retrieval.Web;
 [Scope]
 public class WebSearchSettingsStore(
     SettingsManager settingsManager,
-    InstanceCrypto instanceCrypto)
+    InstanceCrypto instanceCrypto,
+    TenantManager tenantManager,
+    AiGateway aiGateway)
 {
     public async Task SetSettingsAsync(WebSearchSettings webSearchSettings)
     {
@@ -71,7 +73,15 @@ public class WebSearchSettingsStore(
 
     public async Task<bool> IsEnabledAsync()
     {
-        var webSearchSettingsRaw = await settingsManager.LoadAsync<WebSearchSettingsRaw>();
+        var tenantId = tenantManager.GetCurrentTenantId();
+        
+        if (aiGateway.Configured)
+        {
+            var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
+            return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.WebSearch);
+        }
+        
+        var webSearchSettingsRaw = await settingsManager.LoadAsync<WebSearchSettingsRaw>(tenantId);
         
         return webSearchSettingsRaw.Enabled && webSearchSettingsRaw.Type != EngineType.None;
     }

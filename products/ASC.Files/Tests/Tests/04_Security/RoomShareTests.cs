@@ -599,7 +599,175 @@ public class RoomShareTests(
         editingAccess.Should().NotBeNull();
         editingAccess.Security.Edit.Should().BeTrue(); // Editing link should allow editing
     }
-    
+
+    [Fact]
+    public async Task RoomShare_MultipleExternalLinks_CheckLastAccessRights()
+    {
+        // Arrange: owner creates a virtual data room and a file inside it
+        await _filesClient.Authenticate(Initializer.Owner);
+        var owner = Initializer.Owner;
+        var user2 = await Initializer.InviteContact(EmployeeType.User);
+
+        var customRoom = await CreateCustomRoom("room_last_link_rights");
+        var file = await CreateFile("file_in_room_last_link_rights.docx", customRoom.Id);
+
+        var accessTypes = new[] { FileShare.Read, FileShare.Comment, FileShare.Editing };
+
+        foreach (var access in accessTypes)
+        {
+            // Owner: create an external link with the required access
+            await _filesClient.Authenticate(owner);
+            var linkRequest = new RoomLinkRequest(
+                access: access,
+                title: $"Link_{access}",
+                linkType: LinkType.External);
+
+            var linkResponse = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, linkRequest, TestContext.Current.CancellationToken)).Response;
+            var requestToken = linkResponse.SharedLink.RequestToken;
+
+            // User2: open the room via the external link (use the token), this should register the room for the user
+            await _filesClient.Authenticate(user2);
+            _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, requestToken);
+            var openedRoom = (await _foldersApi.GetFolderByFolderIdAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+            // Mark room as recent by Link (otherwise it will not be displayed in the list of rooms)
+            await _sharingApi.GetExternalShareDataWithHttpInfoAsync(requestToken, folderId: customRoom.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken);
+            _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+            openedRoom.Should().NotBeNull();
+            var roomFile = openedRoom.Files.Find(f => f.Title == file.Title);
+            roomFile.Should().NotBeNull();
+            roomFile.Access.Should().Be(access);
+
+            // Ensure the room appears in virtual rooms list
+            var roomsList = (await _roomsApi.GetRoomsFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+            roomsList.Should().NotBeNull();
+            roomsList.Folders.Should().Contain(f => f.Title == customRoom.Title);
+
+            // Now check file access for user2 (without token) � rights should be persisted according to the last link
+            var fileInfoAsUser2 = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+            fileInfoAsUser2.Should().NotBeNull();
+            fileInfoAsUser2.Access.Should().Be(access);
+            fileInfoAsUser2.Security.Read.Should().BeTrue();
+
+            switch (access)
+            {
+                case FileShare.Read:
+                    fileInfoAsUser2.Security.Edit.Should().BeFalse();
+                    fileInfoAsUser2.Security.Comment.Should().BeFalse();
+                    break;
+                case FileShare.Comment:
+                    fileInfoAsUser2.Security.Edit.Should().BeFalse();
+                    fileInfoAsUser2.Security.Comment.Should().BeTrue();
+                    break;
+                case FileShare.Editing:
+                    fileInfoAsUser2.Security.Edit.Should().BeTrue();
+                    fileInfoAsUser2.Security.Comment.Should().BeTrue();
+                    break;
+            }
+
+            // Prepare for next iteration: re-authenticate owner to create the next link
+            await _filesClient.Authenticate(owner);
+        }
+    }
+
+    [Fact]
+    public async Task RoomShare_PersonalRights_PreservedAfterVisitingExternalLinks()
+    {
+        // Arrange: owner creates a room and a file inside it, invites user2 and grants personal Read rights
+        await _filesClient.Authenticate(Initializer.Owner);
+        var owner = Initializer.Owner;
+        var user2 = await Initializer.InviteContact(EmployeeType.User);
+
+        var room = await CreateCustomRoom("room_personal_rights");
+        var file = await CreateFile("file_in_room_personal_rights.docx", room.Id);
+
+        var setRoomSecurityResult = (await _roomsApi.SetRoomSecurityAsync(room.Id, new RoomInvitationRequest
+        {
+            Invitations = [ new RoomInvitation { Id = user2.Id, Access = FileShare.Read } ]
+        }, TestContext.Current.CancellationToken)).Response;
+
+        setRoomSecurityResult.Should().NotBeNull();
+
+        // Owner creates two external links: Comment and Editing
+        var commentLinkResponse = (await _roomsApi.SetRoomLinkAsync(room.Id, new RoomLinkRequest(access: FileShare.Comment, title: "CommentLink", linkType: LinkType.External), TestContext.Current.CancellationToken)).Response;
+        var commentToken = commentLinkResponse.SharedLink.RequestToken;
+
+        var editLinkResponse = (await _roomsApi.SetRoomLinkAsync(room.Id, new RoomLinkRequest(access: FileShare.Editing, title: "EditLink", linkType: LinkType.External), TestContext.Current.CancellationToken)).Response;
+        var editToken = editLinkResponse.SharedLink.RequestToken;
+
+        // Log out and check access to links for Anonymous
+        await _filesClient.Authenticate(null);
+
+        // Anonymous visits Comment link
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, commentToken);
+
+        var openedRoomByAnonymousViaCommentLink = (await _foldersApi.GetFolderByFolderIdAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        openedRoomByAnonymousViaCommentLink.Should().NotBeNull();
+        openedRoomByAnonymousViaCommentLink.Current.Access.Should().Be(FileShare.Comment);
+
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        // Anonymous visits Edit link
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, editToken);
+
+        var openedRoomByAnonymousViaEditLink = (await _foldersApi.GetFolderByFolderIdAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        openedRoomByAnonymousViaEditLink.Should().NotBeNull();
+        openedRoomByAnonymousViaEditLink.Current.Access.Should().Be(FileShare.Editing);
+
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        // Authenticate user2 and open room
+        await _filesClient.Authenticate(user2);
+
+        // Check personal Read rights
+        var openedRoom = (await _foldersApi.GetFolderByFolderIdAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        openedRoom.Should().NotBeNull();
+        openedRoom.Current.Access.Should().Be(FileShare.Read);
+
+        var openedFile = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        openedFile.Should().NotBeNull();
+        openedFile.Access.Should().Be(FileShare.Read);
+
+        // User2 visits Comment link -> should still have personal Read rights on the file
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, commentToken);
+
+        var openedRoomViaCommentLink = (await _foldersApi.GetFolderByFolderIdAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        openedRoomViaCommentLink.Should().NotBeNull();
+        openedRoomViaCommentLink.Current.Access.Should().Be(FileShare.Read);
+
+        // Mark room as recent by Link
+        await _sharingApi.GetExternalShareDataWithHttpInfoAsync(commentToken, folderId: room.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken);
+
+        var openedFileViaCommentLink = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        openedFileViaCommentLink.Should().NotBeNull();
+        openedFileViaCommentLink.Access.Should().Be(FileShare.Read);
+        openedFileViaCommentLink.Security.Read.Should().BeTrue();
+        openedFileViaCommentLink.Security.Comment.Should().BeFalse();
+        openedFileViaCommentLink.Security.Edit.Should().BeFalse();
+
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+
+        // User2 visits Edit link -> personal Read rights must still be preserved
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, editToken);
+
+        var openedRoomViaEditLink = (await _foldersApi.GetFolderByFolderIdAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        openedRoomViaEditLink.Should().NotBeNull();
+        openedRoomViaEditLink.Current.Access.Should().Be(FileShare.Read);
+
+        // Mark room as recent by Link
+        await _sharingApi.GetExternalShareDataWithHttpInfoAsync(editToken, folderId: room.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken);
+
+        var openedFileViaEditLink = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        openedFileViaEditLink.Should().NotBeNull();
+        openedFileViaEditLink.Access.Should().Be(FileShare.Read);
+        openedFileViaEditLink.Security.Read.Should().BeTrue();
+        openedFileViaEditLink.Security.Comment.Should().BeFalse();
+        openedFileViaEditLink.Security.Edit.Should().BeFalse();
+
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+    }
+
     [Theory]
     [InlineData(RoomType.PublicRoom)]
     public async Task CheckEditAccess_InvalidRoomType_ReturnsFalse(RoomType roomType)

@@ -166,11 +166,34 @@ public class EventTypeConverter(
             {
                 var notificationInfo = JsonSerializer.Deserialize<EventDescription<JsonElement>>(rawNotificationInfo);
 
-                var newContext = dest.Action == (int)MessageAction.RoomRenamed
-                    ? $"{AuditReportResource.RoomsModule}: {notificationInfo.RoomOldTitle}" :
-                    !string.IsNullOrEmpty(notificationInfo.RoomTitle)
-                        ? $"{AuditReportResource.RoomsModule}: {notificationInfo.RoomTitle}"
-                        : notificationInfo.RootFolderTitle;
+                string newContext;
+                
+                switch (dest.Action)
+                {
+                    case (int)MessageAction.AgentRenamed:
+                        newContext = $"{AuditReportResource.AgentsModule}: {notificationInfo.RoomOldTitle}";
+                        break;
+                    case (int)MessageAction.RoomRenamed:
+                        newContext = $"{AuditReportResource.RoomsModule}: {notificationInfo.RoomOldTitle}";
+                        break;
+                    default:
+                        {
+                            if (notificationInfo.IsAgent.HasValue && notificationInfo.IsAgent.Value)
+                            {
+                                newContext = $"{AuditReportResource.AgentsModule}: {notificationInfo.RoomTitle}";
+                            }
+                            else if (!string.IsNullOrEmpty(notificationInfo.RoomTitle))
+                            {
+                                newContext = $"{AuditReportResource.RoomsModule}: {notificationInfo.RoomTitle}";
+                            }
+                            else
+                            {
+                                newContext = notificationInfo.RootFolderTitle;
+                            }
+
+                            break;
+                        }
+                }
 
                 if (newContext != null)
                 {

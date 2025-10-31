@@ -41,26 +41,23 @@ internal class CrossDao //Additional SharpBox
         //Get File from first dao
         var fromFile = await fromFileDao.GetFileAsync(fromConverter(fromFileId));
 
-        return await PerformCrossDaoFileCopyAsync(fromFile, fromFileDao, fromConverter, toFolderId, toFileDao, toConverter, deleteSourceFile);
-    }
-    
-    public async Task<File<TTo>> PerformCrossDaoFileCopyAsync<TFrom, TTo>(
-        File<TFrom> fromFile, IFileDao<TFrom> fromFileDao, Func<TFrom, TFrom> fromConverter,
-        TTo toFolderId, IFileDao<TTo> toFileDao, Func<TTo, TTo> toConverter,
-        bool deleteSourceFile)
-    {
         if (fromFile.ContentLength > setupInfo.AvailableFileSize)
         {
-            throw new Exception(string.Format(deleteSourceFile ? FilesCommonResource.ErrorMessage_FileSizeMove : FilesCommonResource.ErrorMessage_FileSizeCopy,
-                                              FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
+            throw new Exception(string.Format(
+                deleteSourceFile 
+                    ? FilesCommonResource.ErrorMessage_FileSizeMove 
+                    : FilesCommonResource.ErrorMessage_FileSizeCopy, 
+                FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
         }
 
         var securityDao = serviceProvider.GetService<ISecurityDao<TFrom>>();
         var securityDaoTo = serviceProvider.GetService<ISecurityDao<TTo>>();
         var tagDao = serviceProvider.GetService<ITagDao<TFrom>>();
+        var toFolderDao = serviceProvider.GetService<IFolderDao<TTo>>();
 
         var fromFileCopy = (File<TFrom>)fromFile.Clone();
 
+        var toFolderTask = toFolderDao.GetFolderAsync(toFolderId);
         var fromFileShareRecords = securityDao.GetPureShareRecordsAsync(fromFileCopy);
         var fromFileNewTags = tagDao.GetNewTagsAsync(Guid.Empty, fromFileCopy);
         var fromFileLockTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
@@ -74,7 +71,12 @@ internal class CrossDao //Additional SharpBox
         toFile.Encrypted = fromFile.Encrypted;
         toFile.ParentId = toConverter(toFolderId);
         toFile.ThumbnailStatus = Thumbnail.Waiting;
-        toFile.VectorizationStatus = fromFile.VectorizationStatus;
+        
+        var toFolder = await toFolderTask;
+        if (toFolder.FolderType == FolderType.Knowledge)
+        {
+            toFile.VectorizationStatus = VectorizationStatus.InProgress;
+        }
 
         fromFile.Id = fromConverter(fromFile.Id);
 
@@ -131,7 +133,7 @@ internal class CrossDao //Additional SharpBox
         }
 
         //Delete source file if needed
-        await fromFileDao.DeleteFileAsync(fromConverter(fromFile.Id));
+        await fromFileDao.DeleteFileAsync(fromConverter(fromFileId));
 
 
         return toFile;

@@ -33,7 +33,8 @@ internal class DocumentsActionMapper : IProductActionMapper
         new FilesActionMapper(),
         new FoldersActionMapper(),
         new RoomsActionMapper(),
-        new SettingsActionMapper()
+        new SettingsActionMapper(),
+        new AgentsActionMapper()
     ];
 
     public ProductType Product => ProductType.Documents;
@@ -144,7 +145,7 @@ internal class RoomsActionMapper : ILocationActionMapper
             {
                 EntryType.Room, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Create, [MessageAction.RoomCreated] },
+                    { ActionType.Create, [MessageAction.RoomCreated, MessageAction.AgentCreated] },
                     { ActionType.Copy, [MessageAction.RoomCopied] },
                     {
                         ActionType.Update, [
@@ -181,6 +182,37 @@ internal class RoomsActionMapper : ILocationActionMapper
                     },
                     { ActionType.Delete, [MessageAction.RoomDeleted] },
                     { ActionType.Export, [MessageAction.RoomIndexExportSaved] }
+                }
+            },
+            {
+                EntryType.Tag, new Dictionary<ActionType, MessageAction>
+                {
+                    { ActionType.Create, MessageAction.TagCreated },
+                    { ActionType.Delete, MessageAction.TagsDeleted }
+                }
+            }
+        };
+    }
+}
+
+internal class AgentsActionMapper : ILocationActionMapper
+{
+    public LocationType Location { get; }
+    public IDictionary<MessageAction, MessageMaps> Actions { get; }
+
+    public AgentsActionMapper()
+    {
+        Location = LocationType.Agents;
+        Actions = new MessageMapsDictionary(ProductType.Documents, Location)
+        {
+            {
+                EntryType.Room, new Dictionary<ActionType, MessageAction[]>
+                {
+                    { ActionType.Create, [MessageAction.AgentCreated] },
+                    {
+                        ActionType.Update, [MessageAction.AgentRenamed]
+                    },
+                    { ActionType.Delete, [MessageAction.AgentDeleted] }
                 }
             },
             {

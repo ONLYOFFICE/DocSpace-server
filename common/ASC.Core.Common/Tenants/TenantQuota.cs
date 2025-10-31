@@ -75,6 +75,11 @@ public class TenantQuota
     public string ProductId { get; set; }
 
     /// <summary>
+    /// The service name.
+    /// </summary>
+    public string ServiceName { get; set; }
+
+    /// <summary>
     /// Specifies if the tenant quota is visible or not.
     /// </summary>
     public bool Visible { get; set; }
@@ -397,6 +402,28 @@ public class TenantQuota
         set => _backup.Value = value;
     }
 
+    private readonly WalletFeatureFlag _aiTools;
+
+    /// <summary>
+    /// Specifies if the AI tools anabled as a wallet service or not.
+    /// </summary>
+    public bool AITools
+    {
+        get => _aiTools.Value;
+        set => _aiTools.Value = value;
+    }
+
+    private readonly WalletFeatureFlag _webSearch;
+
+    /// <summary>
+    /// Specifies if the AI Web Search anabled as a wallet service or not.
+    /// </summary>
+    public bool WebSearch
+    {
+        get => _webSearch.Value;
+        set => _webSearch.Value = value;
+    }
+
     public TenantQuota()
     {
         _featuresList = [];
@@ -427,6 +454,8 @@ public class TenantQuota
         _yearFeature = new TenantQuotaFeatureFlag(this, "year") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _countFreeBackup = new CountFreeBackupFeature(this) { Order = 6, EmployeeType = EmployeeType.DocSpaceAdmin };
         _backup = new WalletFeatureFlag(this, "backup") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiTools = new WalletFeatureFlag(this, "aitools") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _webSearch = new WalletFeatureFlag(this, "websearch") { EmployeeType = EmployeeType.DocSpaceAdmin };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -455,7 +484,9 @@ public class TenantQuota
             _statisticFeature,
             _yearFeature,
             _countFreeBackup,
-            _backup
+            _backup,
+            _aiTools,
+            _webSearch
         };
     }
 
@@ -470,6 +501,7 @@ public class TenantQuota
         Name = quota.Name;
         Price = quota.Price;
         ProductId = quota.ProductId;
+        ServiceName = quota.ServiceName;
         Visible = quota.Visible;
         MaxFileSize = quota.MaxFileSize;
         Features = quota.Features;
@@ -614,6 +646,10 @@ public class TenantQuota
     {
         return TenantQuotaFeatures.OfType<T>().FirstOrDefault();
     }
+    public string GetPaymentId()
+    {
+        return Wallet && !string.IsNullOrEmpty(ServiceName) ? ServiceName : ProductId;
+    }
 
     internal string GetFeature(string name)
     {
@@ -653,7 +689,7 @@ public partial class TenantQuotaMapper(IServiceProvider provider)
         var tenantManager = provider.GetService<TenantManager>();
         var regionHelper = provider.GetService<RegionHelper>();
 
-        var priceInfo = tenantManager.GetProductPriceInfo(source.ProductId, source.Wallet);
+        var priceInfo = tenantManager.GetProductPriceInfo(source.GetPaymentId(), source.Wallet);
 
         if (priceInfo != null)
         {

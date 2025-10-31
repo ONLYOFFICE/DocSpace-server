@@ -43,11 +43,13 @@ public class AiGateway(
     TenantManager tenantManager, 
     ITariffService tariffService, 
     UserManager userManager,
-    AuthContext authContext)
+    AuthContext authContext,
+    SettingsManager settingsManager)
 {
+    public const int ProviderId = -1;
     public string Url => Settings?.Url;
     
-    public bool IsEnabled => !string.IsNullOrEmpty(Url) && !string.IsNullOrEmpty(Settings?.Secret);
+    public bool Configured => !string.IsNullOrEmpty(Url) && !string.IsNullOrEmpty(Settings?.Secret);
 
     private static AiGatewaySettings _settings;
 
@@ -56,12 +58,18 @@ public class AiGateway(
     
     public async Task<string> GetKeyAsync()
     {
-        if (!IsEnabled)
+        if (!Configured)
         {
             return null;
         }
         
         var tenantId = tenantManager.GetCurrentTenantId();
+        
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
+        if (settings.EnabledServices == null || !settings.EnabledServices.Contains(TenantWalletService.AITools))
+        {
+            throw new SecurityException("Service is not enabled");
+        }
         
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
         if (customerInfo == null)

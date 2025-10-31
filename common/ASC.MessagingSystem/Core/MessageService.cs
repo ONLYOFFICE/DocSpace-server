@@ -354,4 +354,5 @@ public class EventDescription<T>
     public string FromParentTitle { get; set; }
     public int? FromParentType { get; set; }
     public int? FromFolderId { get; set; }
+    public bool? IsAgent { get; set; }
 }

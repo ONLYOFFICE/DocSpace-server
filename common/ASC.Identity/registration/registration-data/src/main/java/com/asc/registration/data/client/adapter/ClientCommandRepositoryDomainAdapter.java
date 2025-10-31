@@ -31,6 +31,7 @@ import com.asc.common.core.domain.event.DomainEventPublisher;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
 import com.asc.common.core.domain.value.UserId;
+import com.asc.common.utilities.crypto.RandomStringGenerator;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.event.ClientEvent;
 import com.asc.registration.data.client.mapper.ClientDataAccessMapper;
@@ -38,7 +39,6 @@ import com.asc.registration.data.client.repository.JpaClientRepository;
 import com.asc.registration.service.ports.output.repository.ClientCommandRepository;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -54,6 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Profile("!saas")
 @RequiredArgsConstructor
 public class ClientCommandRepositoryDomainAdapter implements ClientCommandRepository {
+  private static final int CLIENT_SECRET_LENGTH = 36;
   private static final String UTC = "UTC";
 
   private final JpaClientRepository jpaClientRepository;
@@ -118,7 +119,7 @@ public class ClientCommandRepositoryDomainAdapter implements ClientCommandReposi
       ClientEvent event, TenantId tenantId, ClientId clientId) {
     log.debug("Regenerating and persisting a new secret");
 
-    var secret = UUID.randomUUID().toString();
+    var secret = RandomStringGenerator.generate(CLIENT_SECRET_LENGTH);
 
     log.debug("Newly generated secret: {}", secret);
 

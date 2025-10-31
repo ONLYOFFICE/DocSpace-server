@@ -538,7 +538,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             return folder;
         }
 
-        var (rId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(folder);
+        var (rId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(folder);
         if (int.TryParse(rId.ToString(), out var roomId) && roomId != -1)
         {
             var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));

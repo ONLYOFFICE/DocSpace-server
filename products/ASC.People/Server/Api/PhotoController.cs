@@ -128,9 +128,8 @@ public class PhotoController(
         }
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
-
-        var tenant = tenantManager.GetCurrentTenant();
-        if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != securityContext.CurrentAccount.ID)
+        
+        if (user.Id != securityContext.CurrentAccount.ID)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }

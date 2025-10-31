@@ -905,7 +905,7 @@ static file class FolderQueries
                     .Join(ctx.Folders, r => r.ParentId, s => s.Id, (t, f) => new { Tree = t, Folders = f })
                     .Where(r => r.Tree.FolderId == folderId)
                     .OrderByDescending(r => r.Tree.Level)
-                    .Select(r => new ParentIdTitlePair { ParentId = r.Tree.ParentId, Title = r.Folders.Title }));
+                    .Select(r => new ParentIdTitlePair { ParentId = r.Tree.ParentId, Title = r.Folders.Title, FolderType = r.Folders.FolderType }));
 
     public static readonly Func<FilesDbContext, int, Task<DbFolderQuery>> ParentIdTypePairAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

@@ -94,6 +94,6 @@ namespace ASC.AI.Models.RequestDto
         /// </summary>
         public IEnumerable<FileShareParams>? Share { get; set; }
 
-        public ChatSettings? ChatSettings { get; set; }
+        public required ChatSettings ChatSettings { get; set; }
     }
 }

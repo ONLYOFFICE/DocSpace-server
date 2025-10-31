@@ -132,7 +132,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI features.
+        ///   Looks up a localized string similar to AI tools.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_ai_service {
             get {
@@ -3165,6 +3165,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI tools.
+        /// </summary>
+        public static string TariffsFeature_aitools_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aitools_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable AI features in your DocSpace to boost productivity..
+        /// </summary>
+        public static string TariffsFeature_aitools_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aitools_wallet_price_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tracking logins &amp; actions.
         /// </summary>
         public static string TariffsFeature_audit {
@@ -3440,6 +3458,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_usersQuotaExceeds_exception {
             get {
                 return ResourceManager.GetString("TariffsFeature_usersQuotaExceeds_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI web search.
+        /// </summary>
+        public static string TariffsFeature_websearch_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_websearch_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add funds to your wallet to unlock AI web search..
+        /// </summary>
+        public static string TariffsFeature_websearch_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_websearch_wallet_price_count", resourceCulture);
             }
         }
         

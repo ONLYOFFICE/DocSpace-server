@@ -182,24 +182,13 @@ public class McpDao(
             
             foreach (var systemServer in systemMcpConfig.Servers.Values)
             {
-                if (!states.TryGetValue(systemServer.Id, out var state) || !state.Enabled)
+                var state = states.GetValueOrDefault(systemServer.Id);
+                if (state is { Enabled: false })
                 {
                     continue;
                 }
-
-                var server = new McpServer
-                {
-                    Id = systemServer.Id,
-                    Name = systemServer.Name,
-                    Description = systemServer.Description,
-                    Endpoint = systemServer.Endpoint,
-                    Headers = systemServer.Headers,
-                    ServerType = systemServer.Type,
-                    ConnectionType = systemServer.ConnectionType,
-                    Enabled = true
-                };
                     
-                systemServers.Add(server);
+                systemServers.Add(systemServer.ToMcpServer(tenantId, state));
             }
             
             if (count > 0)
@@ -241,22 +230,10 @@ public class McpDao(
                     filteredSystemServers.Select(x => x.Id)
                 ).ToDictionaryAsync(x => x.ServerId);
 
-                foreach (var systemServer in filteredSystemServers)
-                {
-                    var server = new McpServer
-                    {
-                        Id = systemServer.Id,
-                        Name = systemServer.Name,
-                        Description = systemServer.Description,
-                        Endpoint = systemServer.Endpoint,
-                        Headers = systemServer.Headers,
-                        ServerType = systemServer.Type,
-                        ConnectionType = systemServer.ConnectionType,
-                        Enabled = states.TryGetValue(systemServer.Id, out var state) && state.Enabled
-                    };
-                    
-                    servers.Add(server);
-                }
+                var systemServers = filteredSystemServers.Select(x => 
+                    x.ToMcpServer(tenantId, states.GetValueOrDefault(x.Id))).ToList();
+                
+                servers.AddRange(systemServers);
             }
         }
         

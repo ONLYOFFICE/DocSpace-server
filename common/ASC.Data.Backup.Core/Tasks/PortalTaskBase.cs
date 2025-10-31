@@ -124,7 +124,8 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                     "whitelabel",
                     "customnavigation",
                     "room_logos",
-                    "webplugins"
+                    "webplugins",
+                    "mcp_icons"
                 };
 
         if (!allowedStorageModules.Contains(storageModuleName))

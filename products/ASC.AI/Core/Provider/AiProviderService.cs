@@ -106,11 +106,11 @@ public class AiProviderService(
             throw new SecurityException("Access denied");       
         }
         
-        if (gateway.IsEnabled)
+        if (gateway.Configured)
         {
             yield return new AiProvider
             {
-                Id = 0,
+                Id = AiGateway.ProviderId,
                 Title = "DocSpace AI",
                 Url = string.Empty,
                 Key = string.Empty,
@@ -128,7 +128,7 @@ public class AiProviderService(
 
     public async Task<int> GetProvidersTotalCountAsync()
     {
-        if (gateway.IsEnabled)
+        if (gateway.Configured)
         {
             return 1;
         }
@@ -152,9 +152,9 @@ public class AiProviderService(
 
     public async Task<IEnumerable<ModelData>> GetModelsAsync(int? providerId, Scope? scope)
     {
-        if (gateway.IsEnabled)
+        if (gateway.Configured)
         {
-            var provider = await GetProviderAsync(0);
+            var provider = await GetProviderAsync(AiGateway.ProviderId);
             return await GetProviderModelsAsync(provider, scope);
         }
         
@@ -188,11 +188,11 @@ public class AiProviderService(
     
     public async Task<AiProvider> GetProviderAsync(int providerId)
     {
-        if (gateway.IsEnabled)
+        if (gateway.Configured)
         {
             return new AiProvider
             {
-                Id = 0,
+                Id = AiGateway.ProviderId,
                 Title = "DocSpace AI",
                 Url = gateway.Url,
                 Key = await gateway.GetKeyAsync(),
@@ -218,7 +218,7 @@ public class AiProviderService(
     
     private async Task ThrowIfNotAccessAsync()
     {
-        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || gateway.Configured)
         {
             throw new SecurityException("Access denied");       
         }

@@ -24,24 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Database.Models;
+namespace ASC.Core.Common.EF.Model.Ai;
 
-public class DbAiProvider : BaseEntity
+public class DbChat : BaseEntity
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public int TenantId { get; set; }
-    public ProviderType Type { get; set; }
+    public int RoomId { get; set; }
+    public Guid UserId { get; set; }
+    
     [MaxLength(255)]
     public required string Title { get; set; }
-    public required string Url { get; set; }
-    public required string Key { get; set; }
-
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }
-    
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+
     public DbTenant Tenant { get; set; }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    public List<DbChatMessage> Messages { get; set; }
     
     public override object[] GetKeys()
     {
@@ -49,54 +47,52 @@ public class DbAiProvider : BaseEntity
     }
 }
 
-public static class ModelsProviderExtension
+public static class DbChatSessionExtensions
 {
-    public static ModelBuilderWrapper AddDbAiProviders(this ModelBuilderWrapper modelBuilder)
+    public static ModelBuilderWrapper AddDbChats(this ModelBuilderWrapper modelBuilder)
     {
-        modelBuilder.Entity<DbAiProvider>().Navigation(e => e.Tenant).AutoInclude(false);
-        modelBuilder.Add(AddMySqlModelsProviders, ASC.Core.Common.EF.Provider.MySql);
+        modelBuilder.Entity<DbChat>().Navigation(x => x.Messages).AutoInclude(false);
+        modelBuilder.Entity<DbChat>().Navigation(e => e.Tenant).AutoInclude(false);
+        
+        modelBuilder.Add(MySqlAddDbChatSession, Provider.MySql);
         
         return modelBuilder;
     }
 
-    public static void AddMySqlModelsProviders(this ModelBuilder modelBuilder)
+    private static void MySqlAddDbChatSession(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbAiProvider>(entity =>
+        modelBuilder.Entity<DbChat>(entity =>
         {
-            entity.ToTable("ai_providers")
+            entity.ToTable("ai_chats")
                 .HasCharSet("utf8");
-
+            
             entity.HasKey(e => e.Id)
                 .HasName("PRIMARY");
             
             entity.Property(e => e.Id)
                 .HasColumnName("id")
-                .ValueGeneratedOnAdd();
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
             
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id");
             
-            entity.Property(e => e.Type)
-                .HasColumnName("type");
+            entity.Property(e => e.RoomId)
+                .HasColumnName("room_id");
             
             entity.Property(e => e.Title)
                 .HasColumnName("title")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.UserId)
+                .HasColumnName("user_id")
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Url)
-                .HasColumnName("url")
-                .HasColumnType("text")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-            
-            entity.Property(e => e.Key)
-                .HasColumnName("key")
-                .HasColumnType("text")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-            
             entity.Property(e => e.CreatedOn)
                 .HasColumnName("created_on")
                 .HasColumnType("datetime");
@@ -104,9 +100,12 @@ public static class ModelsProviderExtension
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")
                 .HasColumnType("datetime");
-
+            
             entity.HasIndex(e => new { e.TenantId, e.Id })
                 .HasDatabaseName("IX_tenant_id_id");
+            
+            entity.HasIndex(e => new { e.TenantId, e.RoomId, e.UserId, e.ModifiedOn })
+                .HasDatabaseName("IX_tenant_id_room_id_user_id_modified_on");
         });
     }
 }

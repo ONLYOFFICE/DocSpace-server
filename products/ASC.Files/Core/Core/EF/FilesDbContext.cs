@@ -56,6 +56,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbFileVectorization> FileVectorization { get; set; }
     public DbSet<DbUserChatSettings> UserChatSettings { get; set; }
     public DbSet<DbMcpServerSettings> McpServerSettings { get; set; }
+    public DbSet<DbAiProvider> AiProviders { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -87,6 +88,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbFileVectorization()
             .AddDbUserChatSettings()
             .AddDbMcpServerSettings()
+            .AddDbAiProviders()
             .AddDbFunctions();
     }
 }

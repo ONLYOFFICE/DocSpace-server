@@ -178,11 +178,18 @@ public class FolderDtoHelper(
     SecurityContext securityContext,
     UserManager userManager,
     IUrlShortener urlShortener,
-    EntryStatusManager entryStatusManager)
+    EntryStatusManager entryStatusManager,
+    AiAccessibility accessibility)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
 {
-    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null)
+    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null, bool? aiReady = null)
     {
+        Task<bool> aiReadyTask = null;
+        if (folder.RootFolderType == FolderType.AiAgents && aiReady == null)
+        {
+            aiReadyTask = accessibility.IsAiReadyAsync();
+        }
+        
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
 
@@ -300,8 +307,8 @@ public class FolderDtoHelper(
             result.ChatSettings = new ChatSettings
             {
                 ProviderId = folder.SettingsChatProviderId,
-                ModelId = string.IsNullOrEmpty(folder.SettingsChatParameters.ModelId) ? null : folder.SettingsChatParameters.ModelId,
-                Prompt = folder.SettingsChatParameters.Prompt,
+                ModelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId,
+                Prompt = folder.SettingsChatParameters.Prompt
             };
         }
 
@@ -362,6 +369,31 @@ public class FolderDtoHelper(
                         result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
                     }
 
+                    break;
+            }
+        }
+        
+        if (aiReadyTask != null)
+        {
+            aiReady = await aiReadyTask;
+        }
+        
+        if (aiReady is false)
+        {
+            switch (folder.FolderType)
+            {
+                case FolderType.AiAgents:
+                    result.Security[FileSecurity.FilesSecurityActions.Create] = false;
+                    break;
+                case FolderType.Knowledge:
+                    result.Security[FileSecurity.FilesSecurityActions.Create] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.CopyTo] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.MoveTo] = false;
+                    break;
+                case FolderType.AiRoom:
+                    result.Security[FileSecurity.FilesSecurityActions.EditRoom] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.ChangeOwner] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.EditAccess] = false;
                     break;
             }
         }

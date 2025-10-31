@@ -793,8 +793,12 @@ public class UserController(
         var currentUser = await _userManager.GetUsersAsync(currentUserId);
         var targetUserType = await _userManager.GetUserTypeAsync(targetUser);
 
-        if (targetUserType is not EmployeeType.Guest ||
-            await _userManager.GetUserTypeAsync(currentUser) is EmployeeType.Guest ||
+        if (targetUserType is not EmployeeType.Guest)
+        {
+            throw new ArgumentException("User is not a guest");
+        }
+
+        if (await _userManager.GetUserTypeAsync(currentUser) is EmployeeType.Guest ||
             !await _userManager.CanUserViewAnotherUserAsync(currentUserId, targetUser.Id))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
@@ -836,7 +840,7 @@ public class UserController(
 
         if (targetUserType is not EmployeeType.Guest)
         {
-            throw new SecurityException(Resource.ErrorAccessDenied);
+            throw new ArgumentException("User is not a guest");
         }
 
         var currentUserId = authContext.CurrentAccount.ID;

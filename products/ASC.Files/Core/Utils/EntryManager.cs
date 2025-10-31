@@ -500,7 +500,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             CalculateTotal();
         }
-        else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates && !parent.ProviderEntry)
+        else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents && !parent.ProviderEntry)
         {
             entries = await fileSecurity.GetVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject,
                 provider, subjectFilter, quotaFilter, storageFilter);
@@ -1437,7 +1437,7 @@ public class EntryManager(IDaoFactory daoFactory,
             {
                 var folderDao = daoFactory.GetFolderDao<T>();
 
-                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
+                var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
 
                 var rootFolder = int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1 ?
                     await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T))).NotFoundIfNull() :
@@ -1609,7 +1609,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         var folderDao = daoFactory.GetFolderDao<T>();
         var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
-        var (folderId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+        var (folderId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
 
         if (int.TryParse(folderId.ToString(), out var roomId))
         {

@@ -182,7 +182,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             if (fileEntry != null)
             {
-                (fromRoomId, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(fileEntry);
+                (fromRoomId, _, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(fileEntry);
             }
 
             if (int.TryParse(fromRoomId?.ToString(), out var frId) &&
@@ -362,7 +362,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             if (parentRoomId == null)
             {
-                var (rId, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(folder);
+                var (rId, _, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(folder);
                 cache.Insert(cacheKey, rId.ToString(), TimeSpan.FromMinutes(5));
                 parentRoomId = rId.ToString();
             }
@@ -892,6 +892,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var cachedFolderDao = scope.ServiceProvider.GetService<ICacheFolderDao<T>>();
         var fileSecurity = scope.ServiceProvider.GetService<FileSecurity>();
         var vectorizationTaskPublisher = scope.ServiceProvider.GetService<VectorizationTaskPublisher>();
+        var vectorizationSettings = scope.ServiceProvider.GetService<VectorizationSettings>();
 
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();
@@ -936,9 +937,9 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             {
                 Err = FilesCommonResource.ErrorMessage_NotSupportedFormat;
             }
-            else if (toFolder.FolderType is FolderType.Knowledge && !copy)
+            else if (toFolder.FolderType is FolderType.Knowledge && !vectorizationSettings.IsSupportedContentExtraction(file.Title))
             {
-                Err = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
+                Err =FilesCommonResource.ErrorMessage_NotSupportedFormat;
             }
             else
             {
@@ -1050,6 +1051,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 });
 
                                 newFile = await fileDao.GetFileAsync(newFileId);
+
+                                if (toFolder.FolderType == FolderType.Knowledge && 
+                                    !newFile.ProviderEntry && 
+                                    newFile is File<int> fileInt)
+                                {
+                                    await vectorizationTaskPublisher.PublishAsync(fileInt);
+                                }
 
                                 await filesMessageService.SendMoveMessageAsync(newFile, parentFolder, toFolder, toParentFolders, false, _headers, [file.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
                                 await webhookManager.PublishAsync(parentFolder.FolderType == FolderType.TRASH ? WebhookTrigger.FileRestored : WebhookTrigger.FileMoved, newFile);

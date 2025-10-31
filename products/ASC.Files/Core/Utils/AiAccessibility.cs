@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,13 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Provider.Data;
+namespace ASC.Files.Core.Utils;
 
-public enum ProviderType
+[Scope]
+public class AiAccessibility(
+    TenantManager tenantManager,
+    AiGateway aiGateway,
+    SettingsManager settingsManager,
+    IDbContextFactory<FilesDbContext> dbContextFactory)
 {
-    DocSpaceAi = 0,
-    OpenAi = 1,
-    TogetherAi = 2,
-    OpenAiCompatible = 3,
-    Anthropic = 4,
+    public async Task<bool> IsAiReadyAsync()
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        
+        if (aiGateway.Configured)
+        {
+            var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
+            return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools);
+        }
+
+        await using var db = await dbContextFactory.CreateDbContextAsync();
+        return await db.AiProviderExistsAsync(tenantId);
+    }
 }

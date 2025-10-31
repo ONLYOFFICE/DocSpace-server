@@ -205,7 +205,7 @@ public class NotifyClient(WorkContext notifyContext,
 
         var folderDao = daoFactory.GetFolderDao<T>();
 
-        var (id, roomTitle) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
+        var (id, roomTitle, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
 
         if (!int.TryParse(id.ToString(), out var roomId))
         {

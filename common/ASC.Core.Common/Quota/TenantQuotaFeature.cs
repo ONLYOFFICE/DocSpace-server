@@ -144,7 +144,7 @@ public class TenantQuotaFeatureSize(TenantQuota tenantQuota, string name, bool p
     }
 }
 
-public class TenantQuotaFeatureFlag(TenantQuota tenantQuota, string name, bool paid = false) : TenantQuotaFeature<bool>(tenantQuota, name, paid)
+public class TenantQuotaFeatureFlag(TenantQuota tenantQuota, string name, bool paid = false) : TenantQuotaFeature<bool>(tenantQuota, name, false, paid)
 {
     protected override bool TryParse(string s, out bool result)
     {

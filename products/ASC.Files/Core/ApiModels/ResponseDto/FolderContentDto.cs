@@ -85,7 +85,8 @@ public class FolderContentDtoHelper(
     BadgesSettingsHelper badgesSettingsHelper,
     FileSecurityCommon fileSecurityCommon,
     AuthContext authContext,
-    BreadCrumbsManager breadCrumbsManager)
+    BreadCrumbsManager breadCrumbsManager,
+    AiAccessibility accessibility)
 {
     public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null)
     {
@@ -98,7 +99,13 @@ public class FolderContentDtoHelper(
 
     public async Task<FolderContentDto<T>> GetAsync<T>(T parentId, DataWrapper<T> folderItems, int startIndex)
     {
-        var result = new FolderContentDto<T> { PathParts = folderItems.FolderPathParts, StartIndex = startIndex, Total = folderItems.Total, Count = folderItems.Entries.Count };
+        var result = new FolderContentDto<T>
+        {
+            PathParts = folderItems.FolderPathParts, 
+            StartIndex = startIndex, 
+            Total = folderItems.Total, 
+            Count = folderItems.Entries.Count
+        };
         
         var expiration = TimeSpan.MaxValue;
         if (folderItems.ParentRoom is { SettingsLifetime: not null })
@@ -113,6 +120,8 @@ public class FolderContentDtoHelper(
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
         }
         
+        var aiReady = await accessibility.IsAiReadyAsync();
+
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {
             var order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(parentId);
@@ -194,7 +203,7 @@ public class FolderContentDtoHelper(
         {
             return fileEntry switch
             {
-                File<int> fol1 => await fileWrapperHelper.GetAsync(fol1, entriesOrder, expiration, contextFolder),
+                File<int> fol1 => await fileWrapperHelper.GetAsync(fol1, entriesOrder, expiration, contextFolder, aiReady),
                 File<string> fol2 => await fileWrapperHelper.GetAsync(fol2, entriesOrder, expiration, contextFolder),
                 _ => null
             };
@@ -219,7 +228,7 @@ public class FolderContentDtoHelper(
                     {
                         currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
                     }
-                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder);
+                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, aiReady);
                 case Folder<string> fol2:
                     if (currentUsersRecords == null &&
                         DocSpaceHelper.IsRoom(fol2.FolderType) &&
