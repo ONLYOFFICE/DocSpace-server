@@ -2221,7 +2221,7 @@ public class FileSecurity(
         }
 
         FileShareRecord<T> ace;
-        var oderedSubjects = new List<OrderedSubject>();
+        var orderedSubjects = new List<OrderedSubject>();
         if (shares == null)
         {
             var includeAvailableLinks = entry switch
@@ -2231,14 +2231,14 @@ public class FileSecurity(
                 _ => false
             };
 
-            oderedSubjects = await GetUserOrderedSubjectsAsync(userId, includeAvailableLinks);
-            shares = await GetSharesAsync(entry, oderedSubjects.Select(s => s.Subject));
+            orderedSubjects = await GetUserOrderedSubjectsAsync(userId, includeAvailableLinks);
+            shares = await GetSharesAsync(entry, orderedSubjects.Select(s => s.Subject));
         }
 
         if (entry.FileEntryType == FileEntryType.File)
         {
             ace = shares
-                .OrderBy(r => r, new OrderedSubjectComparer<T>(oderedSubjects))
+                .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                 .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                 .FirstOrDefault(r => Equals(r.EntryId, entry.Id) && r.EntryType == FileEntryType.File);
 
@@ -2246,7 +2246,7 @@ public class FileSecurity(
             {
                 // share on parent folders
                 ace = shares.Where(r => Equals(r.EntryId, entry.ParentId) && r.EntryType == FileEntryType.Folder)
-                    .OrderBy(r => r, new OrderedSubjectComparer<T>(oderedSubjects))
+                    .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                     .ThenBy(r => r.Level)
                     .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                     .FirstOrDefault();
@@ -2255,7 +2255,7 @@ public class FileSecurity(
         else
         {
             ace = shares.Where(r => Equals(r.EntryId, entry.Id) && r.EntryType == FileEntryType.Folder)
-                .OrderBy(r => r, new OrderedSubjectComparer<T>(oderedSubjects))
+                .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                 .ThenBy(r => r.Level)
                 .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                 .FirstOrDefault();
@@ -3130,38 +3130,7 @@ public class FileSecurity(
 
     private async Task<List<Guid>> GetUserSubjectsAsync<T>(Guid userId, bool includeAvailableLinks = false)
     {
-        // priority order
-        // User, Group, admin, everyone
-
-        var result = new List<Guid> { userId };
-
-        result.AddRange((await userManager.GetUserGroupsAsync(userId)).Select(g => g.ID));
-
-        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(userId))
-        {
-            result.Add(Constants.GroupAdmin.ID);
-        }
-
-        result.Add(Constants.GroupEveryone.ID);
-
-        var linkId = await externalShare.GetLinkIdAsync();
-        if (linkId != Guid.Empty)
-        {
-            result.Add(linkId);
-        }
-
-        if (includeAvailableLinks)
-        {
-            await foreach (var tag in daoFactory.GetTagDao<T>().GetTagsAsync(userId, default, TagType.RecentByLink))
-            {
-                if (Guid.TryParse(tag.Name, out var tagId) && linkId != tagId)
-                {
-                    result.Add(tagId);
-                }
-            }
-        }
-
-        return result;
+        return (await GetUserOrderedSubjectsAsync(userId, includeAvailableLinks)).Select(r=> r.Subject).ToList();
     }
 
     private async Task<List<OrderedSubject>> GetUserOrderedSubjectsAsync<T>(Guid userId, bool includeAvailableLinks = false)
@@ -3169,7 +3138,7 @@ public class FileSecurity(
         // priority order
         // User, Group, admin, everyone
 
-        var result = new List<OrderedSubject>() { new(userId, SubjectOrderType.User) };
+        var result = new List<OrderedSubject> { new(userId, SubjectOrderType.User) };
 
         var groups = await userManager.GetUserGroupsAsync(userId);
 
