@@ -3250,29 +3250,7 @@ public class FileSecurity(
         var tenantId = tenantManager.GetCurrentTenantId();
         return $"{tenantId}-{parentId}";
     }
-
-    private sealed class SubjectComparer<T>(List<Guid> subjects) : IComparer<FileShareRecord<T>>
-    {
-        public int Compare(FileShareRecord<T> x, FileShareRecord<T> y)
-        {
-            if (x.Subject == y.Subject)
-            {
-                return 0;
-            }
-
-            var index1 = subjects.IndexOf(x.Subject);
-            var index2 = subjects.IndexOf(y.Subject);
-            if (index1 == 0 || index2 == 0 // UserId
-                            || Constants.SystemGroups.Any(g => g.ID == x.Subject) || Constants.SystemGroups.Any(g => g.ID == y.Subject)) // System Groups
-            {
-                return index1.CompareTo(index2);
-            }
-
-            // Groups are equal.
-            return 0;
-        }
-    }
-
+    
     private sealed class OrderedSubjectComparer<T>(List<OrderedSubject> orderedSubjects) : IComparer<FileShareRecord<T>>
     {
         public int Compare(FileShareRecord<T> x, FileShareRecord<T> y)
