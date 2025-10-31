@@ -22,7 +22,6 @@
          <PackageVersion Include="Package.Id" Version="x.y.z" />
          Projects can temporarily use VersionOverride metadata on PackageReference
          until the versions are moved here. -->
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.5.1" />
     <!-- Centralized from ASC.Api.Core -->
     <PackageVersion Include="AspNetCore.HealthChecks.Kafka" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.MySql" Version="9.0.0" />
@@ -61,9 +60,9 @@
     <PackageVersion Include="ARSoft.Tools.NetStandard.DXSdata" Version="1.0.0" />
     <PackageVersion Include="Autofac.Configuration" Version="7.0.0" />
     <PackageVersion Include="AWS.Logger.NLog" Version="3.3.4" />
-    <PackageVersion Include="Bogus" Version="35.6.4" />
+    <PackageVersion Include="Bogus" Version="35.6.5" />
     <PackageVersion Include="Confluent.Kafka" Version="2.12.0" />
-    <PackageVersion Include="DistributedLock.Redis" Version="1.0.3" />
+    <PackageVersion Include="DistributedLock.Redis" Version="1.1.1" />
     <PackageVersion Include="DistributedLock.ZooKeeper" Version="1.0.0" />
     <PackageVersion Include="JWT" Version="11.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="9.0.10" />
@@ -91,10 +90,11 @@
     <PackageVersion Include="Amazon.Extensions.S3.Encryption" Version="2.2.1" />
     <PackageVersion Include="Anthropic.SDK" Version="5.8.0" />
     <PackageVersion Include="Apache.NMS.AMQP" Version="2.4.0" />
-    <PackageVersion Include="Aspire.Hosting.MySql" Version="9.5.1" />
-    <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.5.1" />
-    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="9.5.1" />
-    <PackageVersion Include="Aspire.Hosting.Redis" Version="9.5.1" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.5.2" />
+    <PackageVersion Include="Aspire.Hosting.MySql" Version="9.5.2" />
+    <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
+    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="9.5.2" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="9.5.2" />
     <PackageVersion Include="AspNetCore.HealthChecks.UI" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
     <PackageVersion Include="AWSSDK.CloudFront" Version="3.7.404.55" />
@@ -125,7 +125,7 @@
     <PackageVersion Include="Ical.Net" Version="4.3.1" />
     <PackageVersion Include="Joonasw.AspNetCore.SecurityHeaders" Version="6.0.0" />
     <PackageVersion Include="log4net" Version="3.0.3" />
-    <PackageVersion Include="Magick.NET-Q8-AnyCPU" Version="14.9.0" />
+    <PackageVersion Include="Magick.NET-Q8-AnyCPU" Version="14.9.1" />
     <PackageVersion Include="MailKit" Version="4.14.1" />
     <PackageVersion Include="Microsoft.AspNet.WebApi.Core" Version="5.3.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.8" />
@@ -175,15 +175,15 @@
     <PackageVersion Include="SkiaSharp.Svg" Version="1.60.0" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
     <PackageVersion Include="System.ServiceModel.Primitives" Version="8.1.2" />
-    <PackageVersion Include="Telegram.Bot" Version="22.7.2" />
-    <PackageVersion Include="Testcontainers" Version="4.6.0" />
-    <PackageVersion Include="Testcontainers.MySql" Version="4.6.0" />
-    <PackageVersion Include="Testcontainers.OpenSearch" Version="4.6.0" />
-    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.6.0" />
-    <PackageVersion Include="Testcontainers.RabbitMq" Version="4.6.0" />
-    <PackageVersion Include="Testcontainers.Redis" Version="4.6.0" />
+    <PackageVersion Include="Telegram.Bot" Version="22.7.4" />
+    <PackageVersion Include="Testcontainers" Version="4.8.1" />
+    <PackageVersion Include="Testcontainers.MySql" Version="4.8.1" />
+    <PackageVersion Include="Testcontainers.OpenSearch" Version="4.8.1" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.8.1" />
+    <PackageVersion Include="Testcontainers.RabbitMq" Version="4.8.1" />
+    <PackageVersion Include="Testcontainers.Redis" Version="4.8.1" />
     <PackageVersion Include="TweetinviAPI" Version="5.0.4" />
-    <PackageVersion Include="Twilio" Version="7.13.4" />
+    <PackageVersion Include="Twilio" Version="7.13.5" />
     <PackageVersion Include="UAParser" Version="3.1.47" />
     <PackageVersion Include="WebDav.Client" Version="2.9.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
