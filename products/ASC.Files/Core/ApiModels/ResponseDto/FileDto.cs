@@ -351,7 +351,8 @@ public class FileDtoHelper(
             try
             {
                 await using var stream = await _daoFactory.GetFileDao<T>().GetFileStreamAsync(file);
-                using var image = new MagickImage(stream);
+                using var image = new MagickImage();
+                image.Ping(stream);
                 result.Dimensions = new Size
                 {
                     Height = image.Height,
