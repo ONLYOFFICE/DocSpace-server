@@ -182,7 +182,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         {
             DbAdapter = _providerInfo.Provider == Provider.MySql ? DbAdapter.MySql : DbAdapter.Postgres,
             TablesToIgnore = tablesToIgnore.ToArray(),
-            WithReseed = true
+            //WithReseed = true
         });
     }
 
