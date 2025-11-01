@@ -42,4 +42,7 @@ public abstract class ExportTaskData
     
     [ProtoMember(4)]
     public required string BaseUri { get; set; }
+
+    [ProtoMember(5)]
+    public required Guid ChatId { get; set; }
 }

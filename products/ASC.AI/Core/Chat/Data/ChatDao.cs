@@ -277,6 +277,14 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         return await dbContext.GetMessagesTotalCountAsync(chatId);
     }
 
+    public async Task<Guid?> GetChatIdByMessageAsync(int messageId, Guid userId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var message = await dbContext.GetMessageAsync(messageId, userId);
+
+        return message?.ChatId;
+    }
+
     public async Task<UserChatSettings> SetUserChatSettingsAsync(
         int tenantId, 
         int roomId, 

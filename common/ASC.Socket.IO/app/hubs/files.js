@@ -561,6 +561,10 @@ module.exports = (io) => {
     filesIO.to(userRoom).emit("s:update-chat", { chatId, chatTitle });
   }
 
+  function exportChat({ room, resultFile }) {
+    filesIO.to(room).emit("s:export-chat", { resultFile });
+  }
+
   function changeAccessRightsForFile({ id, room, data, userId } = {}) {
     logger.info(`change access rights for file ${id} in room ${room} to user ${userId}`);
     filesIO.to(`${room}-${userId}`).emit("s:change-access-rights-file", { id, data });
@@ -609,6 +613,7 @@ module.exports = (io) => {
     selfRestrictionForFolder,
     commitChatMessage,
     updateChat,
+    exportChat,
     changeAccessRightsForFile,
     changeAccessRightsForFolder
   };

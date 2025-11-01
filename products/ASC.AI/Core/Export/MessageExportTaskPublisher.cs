@@ -35,7 +35,7 @@ public class MessageExportTaskPublisher(
     AuthContext authContext,
     IEventBus eventBus)
 {
-    public async Task PublishAsync(string title, int messageId, string folderId, bool isFolderThirdParty)
+    public async Task PublishAsync(string title, Guid chatId, int messageId, string folderId, bool isFolderThirdParty)
     {
         if (messageId <= 0)
         {
@@ -51,6 +51,7 @@ public class MessageExportTaskPublisher(
             IsFolderThirdParty = isFolderThirdParty,
             Title = title,
             MessageId = messageId,
+            ChatId = chatId,
             BaseUri = commonLinkUtility.ServerRootPath
         };
         
