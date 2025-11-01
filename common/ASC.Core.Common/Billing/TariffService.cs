@@ -492,7 +492,7 @@ public class TariffService(
 
         if (billingClient.Configured)
         {
-            var allQuotas = (await quotaService.GetTenantQuotasAsync()).Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible).ToList();
+            var allQuotas = (await quotaService.GetTenantQuotasAsync()).Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible && !q.Wallet).ToList();
             newQuotas = quantity.Select(item => allQuotas.Find(q => q.Name == item.Key)).ToList();
 
             TenantQuota updatedQuota = null;

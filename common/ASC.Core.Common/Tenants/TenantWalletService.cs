@@ -42,5 +42,5 @@ public enum TenantWalletService
     AITools = -13,
 
     [SwaggerEnum("WebSearch")]
-    WebSearch = -14,
+    WebSearch = -15,
 }

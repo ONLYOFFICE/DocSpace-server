@@ -27,6 +27,17 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
+/// The wallet service information.
+/// </summary>
+public class WalletServiceDto : QuotaDto
+{
+    /// <summary>
+    /// The list of inner services.
+    /// </summary>
+    public List<QuotaDto> InnerServices { get; set; }
+}
+
+/// <summary>
 /// The quota information.
 /// </summary>
 public class QuotaDto
@@ -177,4 +188,10 @@ public class FeatureUsedDto
     /// The used space title.
     /// </summary>
     public string Title { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class WalletServiceDtoMapper
+{
+    public static partial WalletServiceDto MapToWalletServiceDto(this QuotaDto source);
 }

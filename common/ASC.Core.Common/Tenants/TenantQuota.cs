@@ -80,6 +80,11 @@ public class TenantQuota
     public string ServiceName { get; set; }
 
     /// <summary>
+    /// The service group.
+    /// </summary>
+    public string ServiceGroup { get; set; }
+
+    /// <summary>
     /// Specifies if the tenant quota is visible or not.
     /// </summary>
     public bool Visible { get; set; }
@@ -413,6 +418,17 @@ public class TenantQuota
         set => _aiTools.Value = value;
     }
 
+    private readonly WalletFeatureFlag _aiToken;
+
+    /// <summary>
+    /// Specifies if the AI tools anabled as a wallet service or not.
+    /// </summary>
+    public bool AIToken
+    {
+        get => _aiToken.Value;
+        set => _aiToken.Value = value;
+    }
+
     private readonly WalletFeatureFlag _webSearch;
 
     /// <summary>
@@ -455,6 +471,7 @@ public class TenantQuota
         _countFreeBackup = new CountFreeBackupFeature(this) { Order = 6, EmployeeType = EmployeeType.DocSpaceAdmin };
         _backup = new WalletFeatureFlag(this, "backup") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _aiTools = new WalletFeatureFlag(this, "aitools") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiToken = new WalletFeatureFlag(this, "aitoken") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _webSearch = new WalletFeatureFlag(this, "websearch") { EmployeeType = EmployeeType.DocSpaceAdmin };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
@@ -486,6 +503,7 @@ public class TenantQuota
             _countFreeBackup,
             _backup,
             _aiTools,
+            _aiToken,
             _webSearch
         };
     }
@@ -502,6 +520,7 @@ public class TenantQuota
         Price = quota.Price;
         ProductId = quota.ProductId;
         ServiceName = quota.ServiceName;
+        ServiceGroup = quota.ServiceGroup;
         Visible = quota.Visible;
         MaxFileSize = quota.MaxFileSize;
         Features = quota.Features;

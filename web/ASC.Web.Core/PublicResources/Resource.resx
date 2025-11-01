@@ -1282,6 +1282,12 @@
     <value>AI web search</value>
   </data>
   <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>Add funds to your wallet to unlock AI web search.</value>
+    <value>Enable AI-powered web search to get information from the internet.</value>
+  </data>
+  <data name="TariffsFeature_aitoken_wallet" xml:space="preserve">
+    <value>AI token</value>
+  </data>
+  <data name="TariffsFeature_aitoken_wallet_price_count" xml:space="preserve">
+    <value>A unit of text measurement that large language models (LLMs) can handle</value>
   </data>
 </root>

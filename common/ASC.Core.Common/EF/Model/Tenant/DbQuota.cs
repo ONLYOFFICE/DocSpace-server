@@ -43,6 +43,10 @@ public class DbQuota : BaseEntity
 
     [MaxLength(128)]
     public string ServiceName { get; set; }
+
+    [MaxLength(128)]
+    public string ServiceGroup { get; set; }
+
     public bool Visible { get; set; }
     public bool Wallet { get; set; }
     public override object[] GetKeys()
@@ -184,7 +188,7 @@ public static class DbQuotaExtension
                     Price = 10,
                     ProductId = "10006",
                     ServiceName = "backup",
-                    Visible = false,
+                    Visible = true,
                     Wallet = true
                 },
                 new DbQuota
@@ -193,21 +197,36 @@ public static class DbQuotaExtension
                     Name = "aitools",
                     Description = null,
                     Features = "aitools",
-                    Price = 0.0002m,
-                    ProductId = "10009",
-                    ServiceName = "ai-service",
-                    Visible = false,
+                    Price = 0,
+                    ProductId = null,
+                    ServiceName = null,
+                    ServiceGroup = null,
+                    Visible = true,
                     Wallet = true
                 },
                 new DbQuota
                 {
                     TenantId = -14,
+                    Name = "aitoken",
+                    Description = null,
+                    Features = "aitoken",
+                    Price = 0.0002m,
+                    ProductId = "10009",
+                    ServiceName = "ai-service",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -15,
                     Name = "websearch",
                     Description = null,
                     Features = "websearch",
                     Price = 0.005m,
                     ProductId = "10010",
                     ServiceName = "web_search",
+                    ServiceGroup = "aitools",
                     Visible = false,
                     Wallet = true
                 }
@@ -237,6 +256,12 @@ public static class DbQuotaExtension
 
             entity.Property(e => e.ServiceName)
                 .HasColumnName("service_name")
+                .HasColumnType("varchar")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+
+            entity.Property(e => e.ServiceGroup)
+                .HasColumnName("service_group")
                 .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
@@ -291,6 +316,10 @@ public static class DbQuotaExtension
 
             entity.Property(e => e.ServiceName)
                 .HasColumnName("service_name")
+                .HasColumnType("varchar(128)");
+
+            entity.Property(e => e.ServiceGroup)
+                .HasColumnName("service_group")
                 .HasColumnType("varchar(128)");
 
             entity.Property(e => e.Description)
