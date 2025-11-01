@@ -1284,4 +1284,7 @@
   <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
     <value>Add funds to your wallet to unlock AI web search.</value>
   </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Failed to set quota per ai agent. The entered value is greater than the total DocSpace storage.</value>
+  </data>
 </root>

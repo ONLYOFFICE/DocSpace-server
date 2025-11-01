@@ -849,6 +849,12 @@ public enum MessageAction
     [SwaggerEnum("Customer wallet services settings updated")]
     CustomerWalletServicesSettingsUpdated = 6067,
 
+    [SwaggerEnum("Quota per AI agent changed")]
+    QuotaPerAiAgentChanged = 6068,
+
+    [SwaggerEnum("Quota per AI agent disabled")]
+    QuotaPerAiAgentDisabled = 6069,
+
     #endregion
 
     #region others
