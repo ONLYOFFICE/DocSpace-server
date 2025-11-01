@@ -33,15 +33,34 @@ namespace ASC.Data.Storage.DiscStorage;
 
 public class StorageHandler(string storagePath, string module, string domain, bool checkAuth = true)
 {
-    public async Task InvokeAsync(HttpContext context, TenantManager tenantManager, AuthContext authContext, StorageFactory storageFactory, EmailValidationKeyProvider emailValidationKeyProvider, UserManager userManager)
+    public async Task InvokeAsync(
+        HttpContext context, 
+        TenantManager tenantManager, 
+        AuthContext authContext, 
+        StorageFactory storageFactory, 
+        EmailValidationKeyProvider emailValidationKeyProvider, 
+        UserManager userManager,
+        CoreSettings coreSettings)
     {
-        var storage = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), module);
+        var currentTenant = tenantManager.GetCurrentTenant(false);
+        if (currentTenant == null)
+        {
+            throw new ItemNotFoundException("tenant");
+        }
+
+        var storage = await storageFactory.GetStorageAsync(currentTenant.Id, module);
         var path = CrossPlatform.PathCombine(storagePath, GetRouteValue("pathInfo", context).Replace('/', Path.DirectorySeparatorChar));
         string header = context.Request.Query[Constants.QueryHeader];
         string auth = context.Request.Query[Constants.QueryAuth];
         var storageExpire = storage.GetExpire(domain);
+        var fromPublicRoom = false;
+        if (!authContext.IsAuthenticated)
+        {
+            var anonymousSessionKey = context.Request.Cookies["anonymous_session_key"];
+            fromPublicRoom = Signature.Read<Guid>(anonymousSessionKey, await coreSettings.GetDocDbKeyAsync()) != Guid.Empty;
+        }
 
-        if (checkAuth && !authContext.IsAuthenticated && !SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) 
+        if (checkAuth && !authContext.IsAuthenticated && !SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) && !fromPublicRoom
             || module == "backup" && (!authContext.IsAuthenticated || !(await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;

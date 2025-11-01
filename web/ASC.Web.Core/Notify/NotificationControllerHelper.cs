@@ -29,9 +29,15 @@ namespace ASC.Web.Core.Notify;
 public class NotificationControllerHelper(
     StudioNotifyHelper studioNotifyHelper,
     AuthContext authContext,
-    BadgesSettingsHelper badgesSettingsHelper)
+    BadgesSettingsHelper badgesSettingsHelper,
+    NotificationChannelsHelper notificationChannelsHelper)
 {
     private readonly Guid _userId = authContext.CurrentAccount.ID;
+
+    public IEnumerable<NotificationChannelStatus> GetNotificationChannels()
+    {
+        return notificationChannelsHelper.GetNotificationChannels().Select(c => new NotificationChannelStatus() { Name = c.Name, IsEnabled = c.IsEnabled });
+    }
 
     public async Task<bool> GetNotificationStatusAsync(NotificationType notificationType)
     {

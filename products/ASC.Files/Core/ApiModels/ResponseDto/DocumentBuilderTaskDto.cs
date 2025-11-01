@@ -29,49 +29,49 @@ using ASC.Files.Core.Services.DocumentBuilderService;
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The document builder task parameters.
+/// The Document Builder task parameters.
 /// </summary>
 public class DocumentBuilderTaskDto
 {
     /// <summary>
-    /// The document builder ID.
+    /// The Document Builder task ID.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
-    /// The error message occured while the document building process.
+    /// The error message occurred during the document building process.
     /// </summary>
-    public string Error { get; set; }
+    public required string Error { get; set; }
 
     /// <summary>
-    /// The percentage of the progress of the document building process.
+    /// The progress percentage of the document building process.
     /// </summary>
-    public int Percentage { get; set; }
+    public required int Percentage { get; set; }
 
     /// <summary>
     /// Specifies whether the document building process is completed or not.
     /// </summary>
-    public bool IsCompleted { get; set; }
+    public required bool IsCompleted { get; set; }
 
     /// <summary>
     /// The status of the document building process.
     /// </summary>
-    public DistributedTaskStatus Status { get; set; }
+    public required DistributedTaskStatus Status { get; set; }
 
     /// <summary>
     /// The result file ID.
     /// </summary>
-    public object ResultFileId { get; set; }
+    public required object ResultFileId { get; set; }
 
     /// <summary>
     /// The result file name.
     /// </summary>
-    public string ResultFileName { get; set; }
+    public required string ResultFileName { get; set; }
 
     /// <summary>
     /// The result file URL.
     /// </summary>
-    public string ResultFileUrl { get; set; }
+    public required string ResultFileUrl { get; set; }
 
     public static DocumentBuilderTaskDto Get<TId, TData>(DocumentBuilderTask<TId, TData> task)
     {

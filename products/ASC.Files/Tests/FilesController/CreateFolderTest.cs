@@ -32,9 +32,9 @@ namespace ASC.Files.Tests.FilesController;
 [Collection("Test Collection")]
 public class CreateFolderTest(
     FilesApiFactory filesFactory, 
-    WebApplicationFactory<WebApiProgram> apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    WepApiFactory apiFactory, 
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
     public static TheoryData<string> FolderNames =>
@@ -104,8 +104,8 @@ public class CreateFolderTest(
         var folderRequest = new CreateFolder("Test Folder");
         
         // Act & Assert
-        await Assert.ThrowsAsync<Docspace.Client.ApiException>(
-            async () => await _filesFoldersApi.CreateFolderAsync(
+        await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.CreateFolderAsync(
                 Random.Shared.Next(10000, 20000), 
                 folderRequest, 
                 cancellationToken: TestContext.Current.CancellationToken));
@@ -115,7 +115,7 @@ public class CreateFolderTest(
     [MemberData(nameof(SystemFolderTypesData))]
     public async Task CreateFolder_InSystemFolder_Owner_ReturnsOk(FolderType folderType)
     {
-        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(async () => await CreateFolder("Test System Folder", folderType, Initializer.Owner));
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await CreateFolder("Test System Folder", folderType, Initializer.Owner));
 
         exception.ErrorCode.Should().Be(403);
     }
@@ -130,8 +130,8 @@ public class CreateFolderTest(
         var folderRequest = new CreateFolder(longFolderName);
         
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
-            async () => await _filesFoldersApi.CreateFolderAsync(
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.CreateFolderAsync(
                 await GetFolderIdAsync(FolderType.USER, Initializer.Owner), 
                 folderRequest, 
                 cancellationToken: TestContext.Current.CancellationToken));

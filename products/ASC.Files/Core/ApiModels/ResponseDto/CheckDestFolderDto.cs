@@ -27,23 +27,23 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The destination folder checking information.
+/// The result of checking whether files can be moved or copied to the specified folder.
 /// </summary>
 public class CheckDestFolderDto
 {
     /// <summary>
-    /// The result of the operation.
+    /// The result of the validation operation.
     /// </summary>
     public CheckDestFolderResult Result { get; set; }
 
     /// <summary>
-    /// The list of files of the destination folder.
+    /// The list of files in the destination folder.
     /// </summary>
-    public List<FileEntryDto> Files { get; set; }
+    public List<FileEntryBaseDto> Files { get; set; }
 }
 
 /// <summary>
-/// The destination folder checking result.
+/// The result of the validation operation.
 /// </summary>
 public enum CheckDestFolderResult
 {

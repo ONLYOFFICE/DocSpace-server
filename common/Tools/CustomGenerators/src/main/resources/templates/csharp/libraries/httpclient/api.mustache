@@ -1,24 +1,15 @@
 {{>partial_header}}
 
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Mime;
 using {{packageName}}.Client;
 {{#hasImport}}using {{packageName}}.{{modelPackage}};
 {{/hasImport}}
-
-namespace {{packageName}}.{{apiPackage}}
+{{#operations}}
+namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
 {
-    {{#operations}}
-
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    {{>visibility}} interface {{interfacePrefix}}{{classname}}Sync : IApiAccessor
+    {{>visibility}} interface {{interfacePrefix}}{{x-classname}}Sync : IApiAccessor
     {
         #region Synchronous Operations
         {{#operation}}
@@ -61,7 +52,7 @@ namespace {{packageName}}.{{apiPackage}}
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    {{>visibility}} interface {{interfacePrefix}}{{classname}}Async : IApiAccessor
+    {{>visibility}} interface {{interfacePrefix}}{{x-classname}}Async : IApiAccessor
     {
         #region Asynchronous Operations
         {{#operation}}
@@ -81,7 +72,7 @@ namespace {{packageName}}.{{apiPackage}}
         {{#isDeprecated}}
         [Obsolete]
         {{/isDeprecated}}
-        {{#returnType}}System.Threading.Tasks.Task<{{{.}}}>{{/returnType}}{{^returnType}}System.Threading.Tasks.Task{{/returnType}} {{operationId}}Async({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}System.Threading.CancellationToken cancellationToken = default);
+        {{#returnType}}Task<{{{.}}}>{{/returnType}}{{^returnType}}Task{{/returnType}} {{operationId}}Async({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default);
 
         /// <summary>
         /// {{summary}}
@@ -99,7 +90,7 @@ namespace {{packageName}}.{{apiPackage}}
         {{#isDeprecated}}
         [Obsolete]
         {{/isDeprecated}}
-        System.Threading.Tasks.Task<ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}>> {{operationId}}WithHttpInfoAsync({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}System.Threading.CancellationToken cancellationToken = default);
+        Task<ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}>> {{operationId}}WithHttpInfoAsync({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default);
         {{/operation}}
         #endregion Asynchronous Operations
     }
@@ -108,7 +99,7 @@ namespace {{packageName}}.{{apiPackage}}
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    {{>visibility}} interface {{interfacePrefix}}{{classname}} : {{interfacePrefix}}{{classname}}Sync{{#supportsAsync}}, {{interfacePrefix}}{{classname}}Async{{/supportsAsync}}
+    {{>visibility}} interface {{interfacePrefix}}{{x-classname}} : {{interfacePrefix}}{{x-classname}}Sync{{#supportsAsync}}, {{interfacePrefix}}{{x-classname}}Async{{/supportsAsync}}
     {
 
     }
@@ -116,68 +107,68 @@ namespace {{packageName}}.{{apiPackage}}
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    {{>visibility}} class {{classname}} : IDisposable, {{interfacePrefix}}{{classname}}
+    {{>visibility}} class {{x-classname}} : IDisposable, {{interfacePrefix}}{{x-classname}}
     {
         private ExceptionFactory _exceptionFactory = (_, _) => null;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="{{classname}}"/> class.
+        /// Initializes a new instance of the <see cref="{{x-classname}}"/> class.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <returns></returns>
-        public {{classname}}() : this((string)null)
+        public {{x-classname}}() : this((string)null)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="{{classname}}"/> class.
+        /// Initializes a new instance of the <see cref="{{x-classname}}"/> class.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <param name="basePath">The target service's base path in URL format.</param>
         /// <exception cref="ArgumentException"></exception>
         /// <returns></returns>
-        public {{classname}}(string basePath)
+        public {{x-classname}}(string basePath)
         {
-            this.Configuration = {{packageName}}.Client.Configuration.MergeConfigurations(
+            Configuration = {{packageName}}.Client.Configuration.MergeConfigurations(
                 GlobalConfiguration.Instance,
                 new Configuration { BasePath = basePath }
             );
-            this.ApiClient = new ApiClient(this.Configuration.BasePath);
-            this.Client =  this.ApiClient;
+            ApiClient = new ApiClient(Configuration.BasePath);
+            Client =  ApiClient;
             {{#supportsAsync}}
-            this.AsynchronousClient = this.ApiClient;
+            AsynchronousClient = ApiClient;
             {{/supportsAsync}}
-            this.ExceptionFactory = {{packageName}}.Client.Configuration.DefaultExceptionFactory;
+            ExceptionFactory = {{packageName}}.Client.Configuration.DefaultExceptionFactory;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="{{classname}}"/> class using a Configuration object.
+        /// Initializes a new instance of the <see cref="{{x-classname}}"/> class using a Configuration object.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <param name="configuration">An instance of Configuration.</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <returns></returns>
-        public {{classname}}(Configuration configuration)
+        public {{x-classname}}(Configuration configuration)
         {
             ArgumentNullException.ThrowIfNull(configuration);
 
-            this.Configuration = {{packageName}}.Client.Configuration.MergeConfigurations(
+            Configuration = {{packageName}}.Client.Configuration.MergeConfigurations(
                 GlobalConfiguration.Instance,
                 configuration
             );
-            this.ApiClient = new ApiClient(this.Configuration.BasePath);
-            this.Client = this.ApiClient;
+            ApiClient = new ApiClient(Configuration.BasePath);
+            Client = ApiClient;
             {{#supportsAsync}}
-            this.AsynchronousClient = this.ApiClient;
+            AsynchronousClient = ApiClient;
             {{/supportsAsync}}
             ExceptionFactory = {{packageName}}.Client.Configuration.DefaultExceptionFactory;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="{{classname}}"/> class.
+        /// Initializes a new instance of the <see cref="{{x-classname}}"/> class.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="handler">An optional instance of HttpClientHandler that is used by HttpClient.</param>
@@ -187,12 +178,12 @@ namespace {{packageName}}.{{apiPackage}}
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public {{classname}}(HttpClient client, HttpClientHandler handler = null) : this(client, (string)null, handler)
+        public {{x-classname}}(HttpClient client, HttpClientHandler handler = null) : this(client, (string)null, handler)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="{{classname}}"/> class.
+        /// Initializes a new instance of the <see cref="{{x-classname}}"/> class.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="basePath">The target service's base path in URL format.</param>
@@ -204,24 +195,24 @@ namespace {{packageName}}.{{apiPackage}}
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public {{classname}}(HttpClient client, string basePath, HttpClientHandler handler = null)
+        public {{x-classname}}(HttpClient client, string basePath, HttpClientHandler handler = null)
         {
             ArgumentNullException.ThrowIfNull(client);
 
-            this.Configuration = {{packageName}}.Client.Configuration.MergeConfigurations(
+            Configuration = {{packageName}}.Client.Configuration.MergeConfigurations(
                 GlobalConfiguration.Instance,
                 new Configuration { BasePath = basePath }
             );
-            this.ApiClient = new ApiClient(client, this.Configuration.BasePath, handler);
-            this.Client =  this.ApiClient;
+            ApiClient = new ApiClient(client, Configuration.BasePath, handler);
+            Client =  ApiClient;
             {{#supportsAsync}}
-            this.AsynchronousClient = this.ApiClient;
+            AsynchronousClient = ApiClient;
             {{/supportsAsync}}
-            this.ExceptionFactory = {{packageName}}.Client.Configuration.DefaultExceptionFactory;
+            ExceptionFactory = {{packageName}}.Client.Configuration.DefaultExceptionFactory;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="{{classname}}"/> class using a Configuration object.
+        /// Initializes a new instance of the <see cref="{{x-classname}}"/> class using a Configuration object.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="configuration">An instance of Configuration.</param>
@@ -232,32 +223,32 @@ namespace {{packageName}}.{{apiPackage}}
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public {{classname}}(HttpClient client, Configuration configuration, HttpClientHandler handler = null)
+        public {{x-classname}}(HttpClient client, Configuration configuration, HttpClientHandler handler = null)
         {
             ArgumentNullException.ThrowIfNull(configuration);
             ArgumentNullException.ThrowIfNull(client);
 
-            this.Configuration = {{packageName}}.Client.Configuration.MergeConfigurations(
+            Configuration = {{packageName}}.Client.Configuration.MergeConfigurations(
                 GlobalConfiguration.Instance,
                 configuration
             );
-            this.ApiClient = new ApiClient(client, this.Configuration.BasePath, handler);
-            this.Client = this.ApiClient;
+            ApiClient = new ApiClient(client, Configuration.BasePath, handler);
+            Client = ApiClient;
             {{#supportsAsync}}
-            this.AsynchronousClient = this.ApiClient;
+            AsynchronousClient = ApiClient;
             {{/supportsAsync}}
             ExceptionFactory = {{packageName}}.Client.Configuration.DefaultExceptionFactory;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="{{classname}}"/> class
+        /// Initializes a new instance of the <see cref="{{x-classname}}"/> class
         /// using a Configuration object and client instance.
         /// </summary>
         /// <param name="client">The client interface for synchronous API access.</param>{{#supportsAsync}}
         /// <param name="asyncClient">The client interface for asynchronous API access.</param>{{/supportsAsync}}
         /// <param name="configuration">The configuration object.</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public {{classname}}(ISynchronousClient client, {{#supportsAsync}}IAsynchronousClient asyncClient, {{/supportsAsync}}IReadableConfiguration configuration)
+        public {{x-classname}}(ISynchronousClient client, {{#supportsAsync}}IAsynchronousClient asyncClient, {{/supportsAsync}}IReadableConfiguration configuration)
         {
             ArgumentNullException.ThrowIfNull(client);
             {{#supportsAsync}}
@@ -265,12 +256,12 @@ namespace {{packageName}}.{{apiPackage}}
             {{/supportsAsync}}
             ArgumentNullException.ThrowIfNull(configuration);
 
-            this.Client = client;
+            Client = client;
             {{#supportsAsync}}
-            this.AsynchronousClient = asyncClient;
+            AsynchronousClient = asyncClient;
             {{/supportsAsync}}
-            this.Configuration = configuration;
-            this.ExceptionFactory = {{packageName}}.Client.Configuration.DefaultExceptionFactory;
+            Configuration = configuration;
+            ExceptionFactory = {{packageName}}.Client.Configuration.DefaultExceptionFactory;
         }
 
         /// <summary>
@@ -278,7 +269,7 @@ namespace {{packageName}}.{{apiPackage}}
         /// </summary>
         public void Dispose()
         {
-            this.ApiClient.Dispose();
+            ApiClient.Dispose();
         }
 
         /// <summary>
@@ -304,7 +295,7 @@ namespace {{packageName}}.{{apiPackage}}
         /// <value>The base path</value>
         public string GetBasePath()
         {
-            return this.Configuration.BasePath;
+            return Configuration.BasePath;
         }
 
         /// <summary>
@@ -329,10 +320,31 @@ namespace {{packageName}}.{{apiPackage}}
             set => _exceptionFactory = value; 
         }
 
+        {{#x-supportsFields}}
+        private string? _fields;
+
+        /// <summary>
+        /// Specifies which fields should be included in the API response.
+        /// </summary>
+        /// <param name="fields">A comma-separated list of field paths to include in the response</param>
+        /// <returns></returns>
+
+        public {{x-classname}} WithFields(string fields)
+        {
+            _fields = fields;
+            return this;
+        }
+        {{/x-supportsFields}}
+
         {{#operation}}
         /// <summary>
-        /// {{summary}} {{notes}}
+        /// {{summary}}
         /// </summary>
+        {{#notes}}
+        /// <remarks>
+        /// {{.}}
+        /// </remarks>
+        {{/notes}}
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
         {{#allParams}}/// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}/// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
@@ -347,8 +359,13 @@ namespace {{packageName}}.{{apiPackage}}
         }
 
         /// <summary>
-        /// {{summary}} {{notes}}
+        /// {{summary}}
         /// </summary>
+        {{#notes}}
+        /// <remarks>
+        /// {{.}}
+        /// </remarks>
+        {{/notes}}
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
         {{#allParams}}/// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}/// <seealso href="{{vendorExtensions.x-seealsoUrl}}">REST API Reference for {{operationId}} Operation</seealso>
@@ -363,7 +380,7 @@ namespace {{packageName}}.{{apiPackage}}
             {{^vendorExtensions.x-csharp-value-type}}
             // verify the required parameter '{{paramName}}' is set
             if ({{paramName}} == null)
-                throw new ApiException(400, "Missing required parameter '{{paramName}}' when calling {{classname}}->{{operationId}}");
+                throw new ApiException(400, "Missing required parameter '{{paramName}}' when calling {{x-classname}}->{{operationId}}");
 
             {{/vendorExtensions.x-csharp-value-type}}
             {{/required}}
@@ -437,6 +454,12 @@ namespace {{packageName}}.{{apiPackage}}
             }
             {{/required}}
             {{/headerParams}}
+            {{#vendorExtensions.x-hasFieldsParam}}
+            if (_fields != null)
+            {
+                localVarRequestOptions.HeaderParameters.Add("fields", _fields); // header parameter
+            }
+            {{/vendorExtensions.x-hasFieldsParam}}
             {{#formParams}}
             {{#required}}
             {{#isFile}}
@@ -467,49 +490,49 @@ namespace {{packageName}}.{{apiPackage}}
             {{#isApiKey}}
             {{#isKeyInCookie}}
             // cookie parameter support
-            if (!string.IsNullOrEmpty(this.Configuration.GetApiKeyWithPrefix("{{keyParamName}}")))
+            if (!string.IsNullOrEmpty(Configuration.GetApiKeyWithPrefix("{{keyParamName}}")))
             {
-                localVarRequestOptions.Cookies.Add(new Cookie("{{keyParamName}}", this.Configuration.GetApiKeyWithPrefix("{{keyParamName}}")));
+                localVarRequestOptions.Cookies.Add(new Cookie("{{keyParamName}}", Configuration.GetApiKeyWithPrefix("{{keyParamName}}")));
             }
             {{/isKeyInCookie}}
             {{#isKeyInHeader}}
-            if (!string.IsNullOrEmpty(this.Configuration.GetApiKeyWithPrefix("{{keyParamName}}")))
+            if (!string.IsNullOrEmpty(Configuration.GetApiKeyWithPrefix("{{keyParamName}}")))
             {
-                localVarRequestOptions.HeaderParameters.Add("{{keyParamName}}", this.Configuration.GetApiKeyWithPrefix("{{keyParamName}}"));
+                localVarRequestOptions.HeaderParameters.Add("{{keyParamName}}", Configuration.GetApiKeyWithPrefix("{{keyParamName}}"));
             }
             {{/isKeyInHeader}}
             {{#isKeyInQuery}}
-            if (!string.IsNullOrEmpty(this.Configuration.GetApiKeyWithPrefix("{{keyParamName}}")))
+            if (!string.IsNullOrEmpty(Configuration.GetApiKeyWithPrefix("{{keyParamName}}")))
             {
-                localVarRequestOptions.QueryParameters.Add(ClientUtils.ParameterToMultiMap("", "{{keyParamName}}", this.Configuration.GetApiKeyWithPrefix("{{keyParamName}}")));
+                localVarRequestOptions.QueryParameters.Add(ClientUtils.ParameterToMultiMap("", "{{keyParamName}}", Configuration.GetApiKeyWithPrefix("{{keyParamName}}")));
             }
             {{/isKeyInQuery}}
             {{/isApiKey}}
             {{#isBasicBasic}}
             // http basic authentication required
-            if (!string.IsNullOrEmpty(this.Configuration.Username) || !string.IsNullOrEmpty(this.Configuration.Password) && !localVarRequestOptions.HeaderParameters.ContainsKey("Authorization"))
+            if (!string.IsNullOrEmpty(Configuration.Username) || !string.IsNullOrEmpty(Configuration.Password) && !localVarRequestOptions.HeaderParameters.ContainsKey("Authorization"))
             {
-                localVarRequestOptions.HeaderParameters.Add("Authorization", "Basic " + ClientUtils.Base64Encode(this.Configuration.Username + ":" + this.Configuration.Password));
+                localVarRequestOptions.HeaderParameters.Add("Authorization", "Basic " + ClientUtils.Base64Encode(Configuration.Username + ":" + Configuration.Password));
             }
             {{/isBasicBasic}}
             {{#isBasicBearer}}
             // bearer authentication required
-            if (!string.IsNullOrEmpty(this.Configuration.AccessToken) && !localVarRequestOptions.HeaderParameters.ContainsKey("Authorization"))
+            if (!string.IsNullOrEmpty(Configuration.AccessToken) && !localVarRequestOptions.HeaderParameters.ContainsKey("Authorization"))
             {
-                localVarRequestOptions.HeaderParameters.Add("Authorization", "Bearer " + this.Configuration.AccessToken);
+                localVarRequestOptions.HeaderParameters.Add("Authorization", "Bearer " + Configuration.AccessToken);
             }
             {{/isBasicBearer}}
             {{#isOAuth}}
             // oauth required
-            if (!string.IsNullOrEmpty(this.Configuration.AccessToken) && !localVarRequestOptions.HeaderParameters.ContainsKey("Authorization"))
+            if (!string.IsNullOrEmpty(Configuration.AccessToken) && !localVarRequestOptions.HeaderParameters.ContainsKey("Authorization"))
             {
-                localVarRequestOptions.HeaderParameters.Add("Authorization", "Bearer " + this.Configuration.AccessToken);
+                localVarRequestOptions.HeaderParameters.Add("Authorization", "Bearer " + Configuration.AccessToken);
             }
             {{/isOAuth}}
             {{#isHttpSignature}}
-            if (this.Configuration.HttpSigningConfiguration != null)
+            if (Configuration.HttpSigningConfiguration != null)
             {
-                var HttpSigningHeaders = this.Configuration.HttpSigningConfiguration.GetHttpSignedHeader(this.Configuration.BasePath, "{{{httpMethod}}}", "{{{path}}}", localVarRequestOptions);
+                var HttpSigningHeaders = Configuration.HttpSigningConfiguration.GetHttpSignedHeader(Configuration.BasePath, "{{{httpMethod}}}", "{{{path}}}", localVarRequestOptions);
                 foreach (var headerItem in HttpSigningHeaders)
                 {
                     if (localVarRequestOptions.HeaderParameters.ContainsKey(headerItem.Key))
@@ -526,12 +549,15 @@ namespace {{packageName}}.{{apiPackage}}
             {{/authMethods}}
 
             // make the HTTP request
-            var localVarResponse = this.Client.{{#lambda.titlecase}}{{#lambda.lowercase}}{{httpMethod}}{{/lambda.lowercase}}{{/lambda.titlecase}}<{{{returnType}}}{{^returnType}}Object{{/returnType}}>("{{{path}}}", localVarRequestOptions, this.Configuration);
+            var localVarResponse = Client.{{#lambda.titlecase}}{{#lambda.lowercase}}{{httpMethod}}{{/lambda.lowercase}}{{/lambda.titlecase}}<{{{returnType}}}{{^returnType}}Object{{/returnType}}>("{{{path}}}", localVarRequestOptions, Configuration);
 
-            if (this.ExceptionFactory != null)
+            if (ExceptionFactory != null)
             {
-                var exception = this.ExceptionFactory("{{operationId}}", localVarResponse);
-                if (exception != null) throw exception;
+                var exception = ExceptionFactory("{{operationId}}", localVarResponse);
+                if (exception != null)
+                {
+                    throw exception;
+                }
             }
 
             return localVarResponse;
@@ -539,8 +565,13 @@ namespace {{packageName}}.{{apiPackage}}
 
         {{#supportsAsync}}
         /// <summary>
-        /// {{summary}} {{notes}}
+        /// {{summary}}
         /// </summary>
+        {{#notes}}
+        /// <remarks>
+        /// {{.}}
+        /// </remarks>
+        {{/notes}}
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
         {{#allParams}}
         /// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
@@ -551,15 +582,20 @@ namespace {{packageName}}.{{apiPackage}}
         {{#isDeprecated}}
         [Obsolete]
         {{/isDeprecated}}
-        {{#returnType}}public async System.Threading.Tasks.Task<{{{.}}}>{{/returnType}}{{^returnType}}public async System.Threading.Tasks.Task{{/returnType}} {{operationId}}Async({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}System.Threading.CancellationToken cancellationToken = default)
+        {{#returnType}}public async Task<{{{.}}}>{{/returnType}}{{^returnType}}public async Task{{/returnType}} {{operationId}}Async({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default)
         {
-            {{#returnType}}ApiResponse<{{{returnType}}}> localVarResponse = await {{operationId}}WithHttpInfoAsync({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}cancellationToken).ConfigureAwait(false);
+            {{#returnType}}var localVarResponse = await {{operationId}}WithHttpInfoAsync({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;{{/returnType}}{{^returnType}}await {{operationId}}WithHttpInfoAsync({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}cancellationToken).ConfigureAwait(false);{{/returnType}}
         }
 
         /// <summary>
-        /// {{summary}} {{notes}}
+        /// {{summary}}
         /// </summary>
+        {{#notes}}
+        /// <remarks>
+        /// {{.}}
+        /// </remarks>
+        {{/notes}}
         /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
         {{#allParams}}
         /// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
@@ -570,25 +606,24 @@ namespace {{packageName}}.{{apiPackage}}
         {{#isDeprecated}}
         [Obsolete]
         {{/isDeprecated}}
-        public async System.Threading.Tasks.Task<ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}>> {{operationId}}WithHttpInfoAsync({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}System.Threading.CancellationToken cancellationToken = default)
+        public async Task<ApiResponse<{{{returnType}}}{{^returnType}}Object{{/returnType}}>> {{operationId}}WithHttpInfoAsync({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default)
         {
             {{#allParams}}
             {{#required}}
             {{^vendorExtensions.x-csharp-value-type}}
             // verify the required parameter '{{paramName}}' is set
             if ({{paramName}} == null)
-                throw new ApiException(400, "Missing required parameter '{{paramName}}' when calling {{classname}}->{{operationId}}");
+                throw new ApiException(400, "Missing required parameter '{{paramName}}' when calling {{x-classname}}->{{operationId}}");
 
             {{/vendorExtensions.x-csharp-value-type}}
             {{/required}}
             {{/allParams}}
-
-            RequestOptions localVarRequestOptions = new RequestOptions();
+            var localVarRequestOptions = new RequestOptions();
 
             string[] contentTypes = [{{#consumes}} "{{{mediaType}}}"{{^-last}}, {{/-last}}{{/consumes}}];
 
             // to determine the Accept header
-            string[] accepts = [{{#produces}}" {{{mediaType}}}"{{^-last}},{{/-last}}{{/produces}}];
+            string[] accepts = [{{#produces}} "{{{mediaType}}}"{{^-last}},{{/-last}}{{/produces}}];
 
 
             var localVarContentType = ClientUtils.SelectHeaderContentType(contentTypes);
@@ -636,6 +671,12 @@ namespace {{packageName}}.{{apiPackage}}
             // Set client side default value of Header Param "{{baseName}}".
             localVarRequestOptions.HeaderParameters.Add("{{baseName}}", ClientUtils.ParameterToString({{#_enum}}"{{{.}}}"{{/_enum}})); // Constant header parameter
             {{/isHeaderParam}}
+            {{#vendorExtensions.x-hasFieldsParam}}
+            if (_fields != null)
+            {
+                localVarRequestOptions.HeaderParameters.Add("fields", _fields); // header parameter
+            }
+            {{/vendorExtensions.x-hasFieldsParam}}
             {{/constantParams}}
             {{#headerParams}}
             {{#required}}
@@ -678,51 +719,51 @@ namespace {{packageName}}.{{apiPackage}}
             {{#isApiKey}}
             {{#isKeyInCookie}}
             // cookie parameter support
-            if (!string.IsNullOrEmpty(this.Configuration.GetApiKeyWithPrefix("{{keyParamName}}")))
+            if (!string.IsNullOrEmpty(Configuration.GetApiKeyWithPrefix("{{keyParamName}}")))
             {
-                localVarRequestOptions.Cookies.Add(new Cookie("{{keyParamName}}", this.Configuration.GetApiKeyWithPrefix("{{keyParamName}}")));
+                localVarRequestOptions.Cookies.Add(new Cookie("{{keyParamName}}", Configuration.GetApiKeyWithPrefix("{{keyParamName}}")));
             }
             {{/isKeyInCookie}}
             {{#isKeyInHeader}}
-            if (!string.IsNullOrEmpty(this.Configuration.GetApiKeyWithPrefix("{{keyParamName}}")))
+            if (!string.IsNullOrEmpty(Configuration.GetApiKeyWithPrefix("{{keyParamName}}")))
             {
-                localVarRequestOptions.HeaderParameters.Add("{{keyParamName}}", this.Configuration.GetApiKeyWithPrefix("{{keyParamName}}"));
+                localVarRequestOptions.HeaderParameters.Add("{{keyParamName}}", Configuration.GetApiKeyWithPrefix("{{keyParamName}}"));
             }
             {{/isKeyInHeader}}
             {{#isKeyInQuery}}
-            if (!string.IsNullOrEmpty(this.Configuration.GetApiKeyWithPrefix("{{keyParamName}}")))
+            if (!string.IsNullOrEmpty(Configuration.GetApiKeyWithPrefix("{{keyParamName}}")))
             {
-                localVarRequestOptions.QueryParameters.Add(ClientUtils.ParameterToMultiMap("", "{{keyParamName}}", this.Configuration.GetApiKeyWithPrefix("{{keyParamName}}")));
+                localVarRequestOptions.QueryParameters.Add(ClientUtils.ParameterToMultiMap("", "{{keyParamName}}", Configuration.GetApiKeyWithPrefix("{{keyParamName}}")));
             }
             {{/isKeyInQuery}}
             {{/isApiKey}}
             {{#isBasic}}
             {{#isBasicBasic}}
             // http basic authentication required
-            if (!string.IsNullOrEmpty(this.Configuration.Username) || !string.IsNullOrEmpty(this.Configuration.Password) && !localVarRequestOptions.HeaderParameters.ContainsKey("Authorization"))
+            if (!string.IsNullOrEmpty(Configuration.Username) || !string.IsNullOrEmpty(Configuration.Password) && !localVarRequestOptions.HeaderParameters.ContainsKey("Authorization"))
             {
-                localVarRequestOptions.HeaderParameters.Add("Authorization", "Basic " + ClientUtils.Base64Encode(this.Configuration.Username + ":" + this.Configuration.Password));
+                localVarRequestOptions.HeaderParameters.Add("Authorization", "Basic " + ClientUtils.Base64Encode(Configuration.Username + ":" + Configuration.Password));
             }
             {{/isBasicBasic}}
             {{#isBasicBearer}}
             // bearer authentication required
-            if (!string.IsNullOrEmpty(this.Configuration.AccessToken) && !localVarRequestOptions.HeaderParameters.ContainsKey("Authorization"))
+            if (!string.IsNullOrEmpty(Configuration.AccessToken) && !localVarRequestOptions.HeaderParameters.ContainsKey("Authorization"))
             {
-                localVarRequestOptions.HeaderParameters.Add("Authorization", "Bearer " + this.Configuration.AccessToken);
+                localVarRequestOptions.HeaderParameters.Add("Authorization", "Bearer " + Configuration.AccessToken);
             }
             {{/isBasicBearer}}
             {{/isBasic}}
             {{#isOAuth}}
             // oauth required
-            if (!string.IsNullOrEmpty(this.Configuration.AccessToken) && !localVarRequestOptions.HeaderParameters.ContainsKey("Authorization"))
+            if (!string.IsNullOrEmpty(Configuration.AccessToken) && !localVarRequestOptions.HeaderParameters.ContainsKey("Authorization"))
             {
-                localVarRequestOptions.HeaderParameters.Add("Authorization", "Bearer " + this.Configuration.AccessToken);
+                localVarRequestOptions.HeaderParameters.Add("Authorization", "Bearer " + Configuration.AccessToken);
             }
             {{/isOAuth}}
             {{#isHttpSignature}}
-            if (this.Configuration.HttpSigningConfiguration != null)
+            if (Configuration.HttpSigningConfiguration != null)
             {
-                var HttpSigningHeaders = this.Configuration.HttpSigningConfiguration.GetHttpSignedHeader(this.Configuration.BasePath, "{{{httpMethod}}}", "{{{path}}}", localVarRequestOptions);
+                var HttpSigningHeaders = Configuration.HttpSigningConfiguration.GetHttpSignedHeader(Configuration.BasePath, "{{{httpMethod}}}", "{{{path}}}", localVarRequestOptions);
                 foreach (var headerItem in HttpSigningHeaders)
                 {
                     if (localVarRequestOptions.HeaderParameters.ContainsKey(headerItem.Key))
@@ -740,12 +781,15 @@ namespace {{packageName}}.{{apiPackage}}
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.{{#lambda.titlecase}}{{#lambda.lowercase}}{{httpMethod}}{{/lambda.lowercase}}{{/lambda.titlecase}}Async<{{{returnType}}}{{^returnType}}Object{{/returnType}}>("{{{path}}}", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await AsynchronousClient.{{#lambda.titlecase}}{{#lambda.lowercase}}{{httpMethod}}{{/lambda.lowercase}}{{/lambda.titlecase}}Async<{{{returnType}}}{{^returnType}}Object{{/returnType}}>("{{{path}}}", localVarRequestOptions, Configuration, cancellationToken).ConfigureAwait(false);
 
-            if (this.ExceptionFactory != null)
+            if (ExceptionFactory != null)
             {
-                var exception = this.ExceptionFactory("{{operationId}}", localVarResponse);
-                if (exception != null) throw exception;
+                var exception = ExceptionFactory("{{operationId}}", localVarResponse);
+                if (exception != null) 
+                {
+                    throw exception;
+                }
             }
 
             return localVarResponse;

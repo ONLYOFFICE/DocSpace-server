@@ -126,20 +126,15 @@ global using ASC.Security.Cryptography;
 global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Studio.Utility;
 global using Autofac;
-global using AutoMapper;
-global using AutoMapper.QueryableExtensions;
 global using Google.Apis.Auth.OAuth2;
 global using MailKit.Security;
+
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Infrastructure;
-global using Microsoft.EntityFrameworkCore.Metadata;
-global using Microsoft.EntityFrameworkCore.Migrations;
-global using Microsoft.EntityFrameworkCore.Migrations.Operations;
 global using Microsoft.EntityFrameworkCore.Query;
 global using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
-global using Microsoft.EntityFrameworkCore.Update;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
@@ -151,9 +146,13 @@ global using NetEscapades.EnumGenerators;
 global using NVelocity;
 global using NVelocity.App.Events;
 global using Polly;
-global using Pomelo.EntityFrameworkCore.MySql.Infrastructure.Internal;
-global using Pomelo.EntityFrameworkCore.MySql.Migrations;
+global using Polly.Registry;
+global using Polly.Retry;
+
 global using ProtoBuf;
+
+global using Riok.Mapperly.Abstractions;
+
 global using Telegram.Bot;
 global using Textile;
 global using Textile.Blocks;

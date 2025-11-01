@@ -29,17 +29,17 @@ namespace ASC.AuditTrail.Mappers;
 internal class LoginActionsMapper : IProductActionMapper
 {
     public ProductType Product => ProductType.Login;
-    public List<IModuleActionMapper> Mappers { get; } = [new LoginNoneModuleActionMapper()];
+    public List<ILocationActionMapper> Mappers { get; } = [new LoginNoneModuleActionMapper()];
 }
 
-internal class LoginNoneModuleActionMapper : IModuleActionMapper
+internal class LoginNoneModuleActionMapper : ILocationActionMapper
 {
-    public ModuleType Module { get; }
+    public LocationType Location { get; }
     public IDictionary<MessageAction, MessageMaps> Actions { get; }
 
     public LoginNoneModuleActionMapper()
     {
-        Module = ModuleType.None;
+        Location = LocationType.None;
 
         Actions = new MessageMapsDictionary
         {
@@ -50,7 +50,8 @@ internal class LoginNoneModuleActionMapper : IModuleActionMapper
             MessageAction.LoginFailDisabledProfile, MessageAction.LoginFail,MessageAction.LoginFailViaSms,MessageAction.LoginFailViaApi,
             MessageAction.LoginFailViaApiSms,MessageAction.LoginFailViaApiTfa,MessageAction.LoginFailViaApiSocialAccount,
             MessageAction.LoginFailViaTfaApp,MessageAction.LoginFailIpSecurity,MessageAction.LoginFailViaSSO,MessageAction.LoginFailBruteForce,
-            MessageAction.LoginFailRecaptcha,MessageAction.Logout,MessageAction.SessionStarted,MessageAction.SessionCompleted,MessageAction.AuthLinkActivated
+            MessageAction.LoginFailRecaptcha,MessageAction.Logout,MessageAction.SessionStarted,MessageAction.SessionCompleted,
+            MessageAction.AuthLinkActivated,MessageAction.LoginSuccessViaOAuth,MessageAction.LoginSuccessViaPassword
         };
 
         Actions.Add(MessageAction.LoginSuccessViaSocialAccount, new MessageMaps("LoginSuccessSocialAccount"));

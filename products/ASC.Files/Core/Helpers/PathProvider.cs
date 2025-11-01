@@ -70,17 +70,20 @@ public class PathProvider(WebImageSupplier webImageSupplier,
         switch (folder.RootFolderType)
         {
             case FolderType.USER:
-                result = string.Format($"personal/filter?folder={urlPathEncode}");
+                result = string.Format($"rooms/personal/filter?folder={urlPathEncode}");
                 break;
             case FolderType.Recent:
-                result =  string.Format($"personal/filter?folder=recent");
+                result =  string.Format($"recent/filter?folder={urlPathEncode}");
                 break;
             case FolderType.Archive:
-                result = string.Format($"archived/filter?folder={urlPathEncode}");
+                result = string.Format($"rooms/archived/filter?folder={urlPathEncode}");
+                break;
+            case FolderType.SHARE:
+                result = string.Format($"shared-with-me/filter?folder={urlPathEncode}");
                 break;
             case FolderType.VirtualRooms:
             case FolderType.RoomTemplates:
-                result = string.Format($"shared/{urlPathEncode}/filter?folder={urlPathEncode}");
+                result = string.Format($"rooms/shared/{urlPathEncode}/filter?folder={urlPathEncode}");
                 break;
         }
 
@@ -89,7 +92,7 @@ public class PathProvider(WebImageSupplier webImageSupplier,
             result += $"&key={key}";
         }
         
-        return commonLinkUtility.GetFullAbsolutePath(string.Format($"{filesLinkUtility.FilesBaseAbsolutePath}rooms/{result}"));
+        return commonLinkUtility.GetFullAbsolutePath(string.Format($"{filesLinkUtility.FilesBaseAbsolutePath}{result}"));
     }
 
     public async Task<string> GetFolderUrlByIdAsync<T>(T folderId, string key = null)

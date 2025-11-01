@@ -37,12 +37,10 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        ExternalShare externalShare,
-        AuthContext authContext,
         ConfigurationConverter<int> configurationConverter,
         SecurityContext securityContext,
         IHttpContextAccessor httpContextAccessor)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, httpContextAccessor);
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, configurationConverter, securityContext, httpContextAccessor);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -52,12 +50,10 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        ExternalShare externalShare,
-        AuthContext authContext,
         ConfigurationConverter<string> configurationConverter,
         SecurityContext securityContext,
         IHttpContextAccessor httpContextAccessor)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, httpContextAccessor);
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, configurationConverter, securityContext, httpContextAccessor);
 
 public abstract class EditorController<T>(
     FileStorageService fileStorageService,
@@ -67,8 +63,6 @@ public abstract class EditorController<T>(
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        ExternalShare externalShare,
-        AuthContext authContext,
         ConfigurationConverter<T> configurationConverter,
         SecurityContext securityContext,
         IHttpContextAccessor httpContextAccessor)
@@ -159,7 +153,6 @@ public abstract class EditorController<T>(
         var rootFolder = await documentServiceHelper.GetRootFolderAsync(file);
         if (file.IsForm && rootFolder.RootFolderType != FolderType.RoomTemplates)
         {
-
             formOpenSetup = rootFolder.FolderType switch
             {
                 FolderType.FillingFormsRoom => await documentServiceHelper.GetFormOpenSetupForFillingRoomAsync(file, rootFolder, inDto.EditorType, inDto.Edit, entryManager),
@@ -173,6 +166,7 @@ public abstract class EditorController<T>(
                     CanFill = inDto.Fill,
                 }
             };
+            
             formOpenSetup.RootFolder = rootFolder;
         }
 
@@ -200,6 +194,10 @@ public abstract class EditorController<T>(
                 };
             }
         }
+        if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
+        {
+            file.FormInfo = new FormInfo<T> { FillingSessionId = formOpenSetup.FillingSessionId };
+        }
 
         var result = await configurationConverter.Convert(configuration, file);
 
@@ -209,25 +207,9 @@ public abstract class EditorController<T>(
             result.EditorConfig.Embedded.ShareUrl = "";
             result.EditorConfig.Customization.Goback = await configuration.EditorConfig?.Customization.GetGoBack(inDto.EditorType, file);
         }
-
-        if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
-            && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
-        {
-            var linkId = await externalShare.GetLinkIdAsync();
-
-            if (linkId != Guid.Empty && file.RootFolderType == FolderType.USER && file.CreateBy != authContext.CurrentAccount.ID)
-            {
-                await entryManager.MarkFileAsRecentByLink(file, linkId);
-            }
-            else
-            {
-                await entryManager.MarkAsRecent(file);
-            }
-        }
         
         if (formOpenSetup != null)
         {
-
             if (formOpenSetup.RootFolder.FolderType is FolderType.VirtualDataRoom)
             {
                 result.StartFilling = file.Security[FileSecurity.FilesSecurityActions.StartFilling];
@@ -240,6 +222,10 @@ public abstract class EditorController<T>(
                 {
                     result.EditorConfig.User.Roles = [formOpenSetup.RoleName];
                     result.FillingStatus = true;
+                }
+                if (!formOpenSetup.HasRole)
+                {
+                    result.EditorConfig.Customization.SubmitForm.Visible = false;
                 }
             }
             else
@@ -257,13 +243,6 @@ public abstract class EditorController<T>(
         if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
         {
             result.FillingSessionId = formOpenSetup.FillingSessionId;
-            if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
-            {
-                result.EditorConfig.User = new UserConfig
-                {
-                    Id = formOpenSetup.FillingSessionId
-                };
-            }
         }
 
         if (rootFolder.RootFolderType == FolderType.RoomTemplates)
@@ -295,9 +274,14 @@ public abstract class EditorController<T>(
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionWrapper>))]
     [HttpGet("{fileId}/sharedusers")]
-    public async Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
+    public Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
+    {        
+        if (!securityContext.IsAuthenticated)
     {
-        return await fileStorageService.SharedUsersAsync(inDto.FileId);
+            return Task.FromResult<List<MentionWrapper>>(null);
+    }
+
+        return fileStorageService.SharedUsersAsync(inDto.FileId);
     }
 
     /// <summary>
@@ -456,6 +440,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     public async Task<DocServiceUrlDto> GetDocServiceUrl(DocServiceUrlRequestDto inDto)
     {
         var url = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl);
+        var preloadUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServicePreloadUrl);
 
         var dsVersion = "";
 
@@ -468,6 +453,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         {
             Version = dsVersion,
             DocServiceUrlApi = url,
+            DocServicePreloadUrl = preloadUrl,
             DocServiceUrl = filesLinkUtility.GetDocServiceUrl(),
             DocServiceUrlInternal =filesLinkUtility.GetDocServiceUrlInternal(),
             DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),

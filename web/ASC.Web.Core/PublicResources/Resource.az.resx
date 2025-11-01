@@ -305,7 +305,7 @@
     <value>Brendləşdirmə və fərdiləşdirmə</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>İstifadəçi giriş və hərəkətlərinin izlənməsi</value>
+    <value>Giriş və hərəkətləri izləmək</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Maksimum fayl ölçüsü</value>
@@ -320,7 +320,7 @@
     <value>Admin sayı</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Avtomatik ehtiyat nüsxə və bərpa</value>
+    <value>Məlumatların bərpası</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Limitsiz sayda aktiv otaqlar</value>
@@ -347,7 +347,7 @@
     <value>Otaqdakı istifadəçilər:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Limitsiz sayda istifadəçilər</value>
+    <value>Limitsiz sayda istifadəçi və qonaq</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>İstifadəçilərin sayı {0}-dan çox olmamalıdır</value>
@@ -1080,5 +1080,86 @@
   </data>
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>Webhook URL-i mövcud deyil. HEAD sorğusu 200 http statusuna cavab vermir.</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Kredit</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Valyuta</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Tarix</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Məbləğ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Disk sahəsi</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Balansın artırılması</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Ölçü vahidi</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Müştəri əməliyyatları hesabatı ({0}-{1})</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Qrup tapılmadı</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Əlavə disk yaddaşı</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Yaddaşı tam sizə lazım olan məbləğə uyğunlaşdırın.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>İstifadə olunan yaddaş sahəsi:</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Avtomatik yenilənmə</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Pulsuz ehtiyat nüsxələrinin sayı bir ay ərzində {0}-dən çox olmamalıdır</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>DocSpace-iniz üçün ehtiyat nüsxələrini aktivləşdirin. Xərclər avtomatik olaraq hesablanacaq.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Yedəkləmə</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Yedəkləmə</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Yedəkləmə</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Əlaqə</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Əməliyyat tarixçəsi</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Avtomatik doldurma</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>Ayda {0} pulsuz yedəkləmə</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Ödəniş tələb olunur</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Növ</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Təfərrüatlar</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debet</value>
   </data>
 </root>

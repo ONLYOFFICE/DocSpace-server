@@ -130,9 +130,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Atjaunināti pārrakstīšanas uzstādījumi</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Dokumenti</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Iestatījumi</value>
   </data>
@@ -379,9 +376,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Pārvietot</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Citi</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Mainīts īpašnieks: {0}</value>
   </data>
@@ -399,9 +393,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Paroles drošuma uzstādījumi atjaunināti</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Personas</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platforma</value>
@@ -456,9 +447,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesija uzsākta</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Iestatījumi</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO atspējots</value>
@@ -939,5 +927,14 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP sinhronizācija pabeigta</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Novietojums</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Reklāmas baneru redzamības iestatījumi ir mainīti</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Klienta maka iespējoto pakalpojumu iestatījumi ir atjaunināti</value>
   </data>
 </root>

@@ -60,9 +60,9 @@ public class LoginEventsCache(IFusionCacheProvider cacheProvider)
 
 [Scope]
 public class DbLoginEventsManager(
+    BaseEventMapper mapper,
     IDbContextFactory<MessagesContext> dbContextFactory,
-    LoginEventsCache cache,
-    IMapper mapper)
+    LoginEventsCache cache)
 {
     private static readonly List<int> _loginActions =
     [
@@ -75,7 +75,10 @@ public class DbLoginEventsManager(
         (int)MessageAction.LoginSuccessViaSSO,
         (int)MessageAction.LoginSuccessViaApiSocialAccount,
         (int)MessageAction.LoginSuccesViaTfaApp,
-        (int)MessageAction.LoginSuccessViaApiTfa
+        (int)MessageAction.LoginSuccessViaApiTfa,
+        (int)MessageAction.LoginSuccessViaPassword,
+
+        (int)MessageAction.AuthLinkActivated
     ];
 
     public async Task<DbLoginEvent> GetByIdAsync(int tenantId, int id)
@@ -110,7 +113,7 @@ public class DbLoginEventsManager(
 
         var loginInfo = await loginEventContext.LoginEventsAsync(tenantId, userId, _loginActions, date).ToListAsync();
 
-        return mapper.Map<List<DbLoginEvent>, List<BaseEvent>>(loginInfo);
+        return mapper.Map(loginInfo);
     }
 
     public async Task LogOutEventAsync(int tenantId, int loginEventId)

@@ -28,10 +28,10 @@ namespace ASC.Web.Files.Utils;
 
 [Scope]
 public class ChunkedUploadSessionHolder(
+    IServiceProvider serviceProvider,
     GlobalStore globalStore,
     SetupInfo setupInfo,
-    IFusionCache cache,
-    FileHelper fileHelper)
+    IFusionCache cache)
 {
     
     private CommonChunkedUploadSessionHolder _holder;
@@ -63,7 +63,7 @@ public class ChunkedUploadSessionHolder(
     public async Task<ChunkedUploadSession<T>> GetSessionAsync<T>(string sessionId)
     {
         var session = await cache.GetOrDefaultAsync<ChunkedUploadSession<T>>(sessionId);
-        session.File.FileHelper = fileHelper;
+        session.File.ServiceProvider = serviceProvider;
         session.TransformItems();
         return session;
     }

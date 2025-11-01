@@ -68,5 +68,5 @@ public class UpdateGroupRequestDto
     /// The request for updating a group.
     /// </summary>
     [FromBody]
-    public UpdateGroupRequest Update {  get; set; }
+    public required UpdateGroupRequest Update {  get; set; }
 }

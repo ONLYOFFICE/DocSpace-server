@@ -34,28 +34,28 @@ public class ConfigurationDto<T>
     /// <summary>
     /// The document configuration.
     /// </summary>
-    public DocumentConfigDto Document { get; set; }
+    public required DocumentConfigDto Document { get; set; }
 
     /// <summary>
     /// The document type.
     /// </summary>
-    public string DocumentType { get; set; }
+    public required string DocumentType { get; set; }
 
     /// <summary>
     /// The editor configuration.
     /// </summary>
-    public EditorConfigurationDto EditorConfig { get; set; }
+    public required EditorConfigurationDto EditorConfig { get; set; }
 
     /// <summary>
     /// The editor type.
     /// </summary>
-    public EditorType EditorType { get; set; }
+    public required EditorType EditorType { get; set; }
 
     /// <summary>
     /// The editor URL.
     /// </summary>
     [Url]
-    public string EditorUrl { get; set; }
+    public required string EditorUrl { get; set; }
 
     /// <summary>
     /// The token of the file configuration.
@@ -70,7 +70,7 @@ public class ConfigurationDto<T>
     /// <summary>
     /// The file parameters.
     /// </summary>
-    public FileDto<T> File { get; set; }
+    public required FileDto<T> File { get; set; }
 
     /// <summary>
     /// The error message.
@@ -152,12 +152,12 @@ public class EditorConfigurationDto
     /// <summary>
     /// The language of the editor configuration.
     /// </summary>
-    public string Lang { get; set; }
+    public required string Lang { get; set; }
 
     /// <summary>
     /// The mode of the editor configuration.
     /// </summary>
-    public string Mode { get; set; }
+    public required string Mode { get; set; }
 
     /// <summary>
     /// Specifies if the mode is write of the editor configuration.
@@ -182,7 +182,7 @@ public class EditorConfigurationDto
     /// <summary>
     /// The user configuration of the editor.
     /// </summary>
-    public UserConfig User { get; set; }
+    public required UserConfig User { get; set; }
 }
 
 /// <summary>
@@ -316,7 +316,7 @@ public class AnonymousConfigDto
     /// <summary>
     /// Specifies if the anonymous is a request.
     /// </summary>
-    public bool Request { get; set; }
+    public required bool Request { get; set; }
 }
 
 /// <summary>
@@ -476,6 +476,7 @@ public class ConfigurationConverter<T>(
             return null;
         }
 
+        var fileDto = await fileDtoHelper.GetAsync(file);
         var result = new ConfigurationDto<T>
         {
             Document = await documentConfigConverter.Convert(source.Document, file),
@@ -483,7 +484,8 @@ public class ConfigurationConverter<T>(
             EditorConfig = await editorConfigurationConverter.Convert(source, file),
             EditorType = source.EditorType,
             EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl),
-            ErrorMessage = source.Error
+            ErrorMessage = source.Error,
+            File = fileDto
         };
         
         result.EditorUrl = FilesLinkUtility.AddQueryString(result.EditorUrl, new Dictionary<string, string> {
@@ -491,7 +493,6 @@ public class ConfigurationConverter<T>(
         });
 
         result.Token = documentServiceHelper.GetSignature(result);
-        result.File = await fileDtoHelper.GetAsync(file);
         result.Type = source.Type;
 
         if (source.EditorType == EditorType.Embedded)
@@ -532,6 +533,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
             Mode = source.Mode,
             ModeWrite = source.ModeWrite,
             Plugins = source.Plugins,
+            Recent = await source.GetRecent(fileType, file.Id).ToListAsync(),
             Templates = await source.GetTemplates(fileType, configuration.Document.Title),
             User = await source.GetUserAsync()
         };
@@ -559,12 +561,12 @@ public class CustomizationConfigConverter<T>(
 
         var result = new CustomizationConfigDto
         {
-            About = source.About,
+            About = await source.IsAboutPageVisible(),
             Customer = coreBaseSettings.Standalone ? await customerConfigConverter.Convert(source.Customer) : null,
             Feedback = await source.GetFeedback(),
             Forcesave = source.GetForceSave(file),
             Goback = await source.GetGoBack(configuration.EditorType, file),
-            Logo = await configConverter.Convert(configuration),
+            Logo = await configConverter.Convert(configuration, file),
             MentionShare = await source.GetMentionShare(file),
             Review = source.GetReview(configuration.EditorConfig.ModeWrite),
             SubmitForm = await source.GetSubmitForm(file),
@@ -579,7 +581,7 @@ public class CustomizationConfigConverter<T>(
 [Scope(GenericArguments = [typeof(string)])]
 public class LogoConfigConverter<T>
 {
-    public async Task<LogoConfigDto> Convert(Configuration<T> configuration)
+    public async Task<LogoConfigDto> Convert(Configuration<T> configuration, File<T> file)
     {
         var source = configuration.EditorConfig?.Customization?.Logo;
         
@@ -588,12 +590,14 @@ public class LogoConfigConverter<T>
             return null;
         }
 
+        var fileType = FileUtility.GetFileTypeByFileName(file.Title);
+
         var result = new LogoConfigDto
         {
-            Image = await source.GetImage(configuration.EditorType),
-            ImageDark = await source.GetImageDark(),
-            ImageLight = await source.GetImageLight(),
-            ImageEmbedded = await source.GetImageEmbedded(configuration.EditorType),
+            Image = await source.GetImage(fileType, configuration.EditorType),
+            ImageDark = await source.GetImageDark(fileType),
+            ImageLight = await source.GetImageLight(fileType),
+            ImageEmbedded = await source.GetImageEmbedded(fileType, configuration.EditorType),
             Url = source.Url,
             Visible = source.GetVisible(configuration.EditorType)
         };

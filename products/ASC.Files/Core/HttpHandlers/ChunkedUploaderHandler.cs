@@ -177,8 +177,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                         var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, section.Body, context.Request.ContentLength.Value - headersLength - boundaryLength * 2 - 6, request.ChunkNumber);
                         await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
-                        await WriteSuccess(context,
-                            await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
+                        await WriteSuccess(context, await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
                         return;
                     }
                 case ChunkedRequestType.Finalize:
@@ -226,6 +225,10 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         {
             throw;
         }
+        catch (FusionCacheSerializationException)
+        {
+            throw;
+        }
         catch (FileNotFoundException error)
         {
             logger.ErrorChunkedUploaderHandlerService(error);
@@ -238,7 +241,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         catch (Exception error)
         {
             logger.ErrorChunkedUploaderHandlerService(error);
-            await WriteError(context, error.Message);
+            await WriteError(context, error.InnerException?.Message ?? error.Message);
         }
     }
 

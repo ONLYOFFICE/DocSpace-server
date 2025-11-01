@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Data.Backup.EF.Context;
 using ASC.Data.Storage;
 
 namespace ASC.Files;
@@ -42,6 +41,7 @@ public class Startup : BaseStartup
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
         var services = builder.Services;
+        
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         services.AddMemoryCache();
@@ -56,7 +56,7 @@ public class Startup : BaseStartup
         
         services.RegisterQueue<AsyncTaskData<int>>();
         services.RegisterQueue<AsyncTaskData<string>>();
-        
+        services.RegisterFreeBackupQuotaFeature();
         services.AddStartupTask<CheckPdfStartupTask>()
            .TryAddSingleton(services);
     }

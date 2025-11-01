@@ -27,12 +27,19 @@
 namespace ASC.Core.Billing;
 
 /// <summary>
-/// The product quantity type.
+/// The type of action performed on a product's quantity.
 /// </summary>
 public enum ProductQuantityType
 {
+    [SwaggerEnum("Set")]
     Set = 0,
+
+    [SwaggerEnum("Add")]
     Add = 1,
+
+    [SwaggerEnum("Sub")]
     Sub = 2,
+
+    [SwaggerEnum("Renew")]
     Renew = 3
 }

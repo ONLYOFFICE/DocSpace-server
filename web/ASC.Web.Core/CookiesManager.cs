@@ -250,7 +250,7 @@ public class CookiesManager(
         await dbLoginEventsManager.LogOutAllActiveConnectionsForTenantAsync(tenant.Id);
     }
 
-    public async Task<string> AuthenticateMeAndSetCookiesAsync(Guid userId, MessageAction action = MessageAction.LoginSuccess, bool session = false)
+    public async Task<string> AuthenticateMeAndSetCookiesAsync(Guid userId, MessageAction action = MessageAction.LoginSuccess, bool session = false, string initiator = null, params string[] description)
     {
         var isSuccess = true;
         var cookies = string.Empty;
@@ -276,17 +276,17 @@ public class CookiesManager(
 
         async Task<int> FuncLoginEvent()
         {
-            return await ipSecurity.VerifyAsync() ? await GetLoginEventIdAsync(action) : 0;
+            return await ipSecurity.VerifyAsync() ? await GetLoginEventIdAsync(action, initiator, description) : 0;
         }
     }
 
-    private async Task<int> GetLoginEventIdAsync(MessageAction action)
+    private async Task<int> GetLoginEventIdAsync(MessageAction action, string initiator, params string[] description)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = securityContext.CurrentAccount.ID;
         var data = new MessageUserData(tenantId, userId);
 
-        return await messageService.SendLoginMessageAsync(data, action);
+        return await messageService.SendLoginMessageAsync(data, action, initiator, description);
     }
 
     public string GetAscCookiesName()
@@ -297,6 +297,11 @@ public class CookiesManager(
     public string GetConfirmCookiesName()
     {
         return GetCookiesName(CookiesType.ConfirmKey);
+    }
+    
+    public static string GetAnonymousSessionKeyCookiesName()
+    {
+        return GetCookiesName(CookiesType.AnonymousSessionKey);
     }
     
     private string GetFullCookiesName(CookiesType type, string itemId = null)
@@ -311,7 +316,7 @@ public class CookiesManager(
         return name;
     }
 
-    private string GetCookiesName(CookiesType type)
+    private static string GetCookiesName(CookiesType type)
     {
         var result = type switch
         {

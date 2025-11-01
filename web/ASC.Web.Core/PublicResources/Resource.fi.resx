@@ -284,7 +284,7 @@
     <value>Uutta</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Käyttäjien kirjautumisten &amp; toiminnan seuranta</value>
+    <value>Kirjautumisten ja toimien seuranta</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Maksimi tiedostokoko</value>
@@ -299,7 +299,7 @@
     <value>Järjestelmänvalvojien määrä</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Automaattinen varmuuskopiointi &amp; palautus</value>
+    <value>Tietojen palautus</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Rajoittamaton aktiivisten huoneiden määrä</value>
@@ -326,7 +326,7 @@
     <value>Käyttäjiä huoneessa:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Rajattu käyttäjien määrä</value>
+    <value>Rajoittamaton määrä käyttäjiä ja vieraita</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Käyttäjien määrä ei saisi ylittää {0}</value>
@@ -1088,16 +1088,10 @@
     <value>Valuutta</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Päivämäärä ja aika</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Kuvaus</value>
+    <value>Päivämäärä</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Määrä</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Palvelun nimi</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Levytila</value>
@@ -1111,9 +1105,6 @@
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Asiakastoimintojen raportti ({0}-{1})</value>
   </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Nosto</value>
-  </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>Ryhmää ei löydy</value>
   </data>
@@ -1125,5 +1116,50 @@
   </data>
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Käytetty muistin tila:</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Varmuuskopio</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Ota varmuuskopiot käyttöön DocSpacessasi. Kustannukset laskutetaan automaattisesti.</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Ilmaisten varmuuskopioiden määrä ei saisi ylittää {0} kuukaudessa</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Maksu vaaditaan</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Varmuuskopio</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Varmuuskopio</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Automaattinen uusiminen</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} ilmaista varmuuskopiota kuukaudessa</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Automaattinen täyttö</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Tapahtumahistoria</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Yhteystiedot</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debet</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Yksityiskohdat</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tyyppi</value>
   </data>
 </root>

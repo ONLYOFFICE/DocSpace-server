@@ -59,17 +59,17 @@ public class TariffDto
     /// <summary>
     /// The tariff due date.
     /// </summary>
-    public DateTime DueDate { get; set; }
+    public ApiDateTime DueDate { get; set; }
 
     /// <summary>
     /// The tariff delay due date.
     /// </summary>
-    public DateTime DelayDueDate { get; set; }
+    public ApiDateTime DelayDueDate { get; set; }
 
     /// <summary>
     /// The tariff license date.
     /// </summary>
-    public DateTime LicenseDate { get; set; }
+    public ApiDateTime LicenseDate { get; set; }
 
     /// <summary>
     /// The customer ID.

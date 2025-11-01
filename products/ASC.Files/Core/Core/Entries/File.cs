@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Mapping;
+using System.Text.Json.Serialization;
+
 namespace ASC.Files.Core;
 
 /// <summary>
@@ -64,7 +67,7 @@ public enum FileStatus
 }
 
 /// <summary>
-/// The file parameters.
+/// Represents a file with associated metadata and operations.
 /// </summary>
 [Transient(GenericArguments = [typeof(int)])]
 [Transient(GenericArguments = [typeof(string)])]
@@ -72,17 +75,16 @@ public enum FileStatus
 public class File<T> : FileEntry<T>
 {
     private FileStatus _status;
-
-    public File()
+    
+    [JsonConstructor]
+    protected File()
     {
         Version = 1;
         VersionGroup = 1;
         FileEntryType = FileEntryType.File;
     }
-
-    public File(
-        FileHelper fileHelper,
-        Global global, SecurityContext securityContext) : base(fileHelper, global, securityContext)
+    
+    public File(IServiceProvider provider) : base(provider)
     {
         Version = 1;
         VersionGroup = 1;
@@ -107,6 +109,7 @@ public class File<T> : FileEntry<T>
     /// <summary>
     /// The file comment.
     /// </summary>
+    [JsonIgnore]
     public string Comment { get; set; }
 
     /// <summary>
@@ -166,7 +169,7 @@ public class File<T> : FileEntry<T>
     /// </summary>
     public async Task<FileStatus> GetFileStatus()
     {
-        _status = await FileHelper.GetFileStatus(this, _status);
+        _status = await ServiceProvider.GetService<FileHelper>().GetFileStatus(this, _status);
         return _status;
     }
 
@@ -184,13 +187,13 @@ public class File<T> : FileEntry<T>
     /// The file title.
     /// </summary>
     [JsonIgnore]
-    public override string Title => FileHelper.GetTitle(this);
+    public override string Title => ServiceProvider.GetService<FileHelper>().GetTitle(this);
 
     /// <summary>
     /// The file download URL.
     /// </summary>
     [JsonIgnore]
-    public string DownloadUrl => FileHelper.GetDownloadUrl(this);
+    public string DownloadUrl => ServiceProvider.GetService<FileHelper>().GetDownloadUrl(this);
 
     /// <summary>
     /// Specifies whether the file is locked or not.
@@ -321,7 +324,7 @@ public class File<T> : FileEntry<T>
     /// The file force save type.
     /// </summary>
     public ForcesaveType Forcesave { get; set; }
-
+    
     /// <summary>
     /// The file converted type.
     /// </summary>
@@ -379,7 +382,49 @@ public record FormInfo<T>
     public EntryProperties<T> Properties { get; init; }
     
     /// <summary>
+    /// The file filling session ID.
+    /// </summary>
+    public string FillingSessionId { get; set; }
+
+    /// <summary>
     /// The empty form information.
     /// </summary>
     public static FormInfo<T> Empty => new();
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class FileMapper(IServiceProvider serviceProvider, TenantDateTimeConverter tenantDateTimeConverter, SecurityTreeRecordMapper treeRecordMapper)
+{
+    private partial File<int> Map(DbFileQuery source);
+    
+    [MapProperty(nameof(DbFile.Title), nameof(File<int>.PureTitle))]
+    private partial void ApplyChanges(DbFile source, File<int> target);
+
+    [UserMapping(Default = true)]
+    public File<int> MapDbFileQueryToDbFileInternal(DbFileQuery dbFileQuery)
+    {
+        if (dbFileQuery == null)
+        {
+            return null;
+        }
+
+        var result = Map(dbFileQuery);
+        ApplyChanges(dbFileQuery.File, result);
+        result.CreateOn = tenantDateTimeConverter.Convert(dbFileQuery.File.CreateOn);
+        result.ModifiedOn = tenantDateTimeConverter.Convert(dbFileQuery.File.ModifiedOn);
+        result.LastOpened = tenantDateTimeConverter.Convert(dbFileQuery.LastOpened);
+        result.ShareRecord = treeRecordMapper.MapToInternal(dbFileQuery.SharedRecord);
+        
+        if (dbFileQuery.UserShared != null)
+        {
+            result.Shared = dbFileQuery.UserShared.Any(r => r is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
+            result.SharedForUser = dbFileQuery.UserShared.Any(r => r is SubjectType.Group or SubjectType.User);
+        }
+
+        return result;
+    }
+    
+    [ObjectFactory]
+    private File<int> CreateFile() => serviceProvider.GetService<File<int>>();
 }

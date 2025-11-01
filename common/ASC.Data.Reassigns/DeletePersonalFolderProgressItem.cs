@@ -86,7 +86,7 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
                 userTo = tenantManager.GetCurrentTenant().OwnerId;
             }
 
-            await fileStorageService.MoveSharedFilesAsync(_userId, userTo);
+            await fileStorageService.MoveSharedEntriesAsync(_userId, userTo);
 
             Percentage = 50;
             await PublishChanges();

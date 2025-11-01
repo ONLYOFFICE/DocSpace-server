@@ -237,9 +237,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Janë përditësuar cilësimet e përsëritjes</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Dokumentet</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Cilësimet</value>
   </data>
@@ -508,7 +505,7 @@
     <value>Identifikimi i suksesshëm përmes API dhe kodit SMS</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Identifikohuni me sukses në llogarinë social</value>
+    <value>Identifikimi përmes llogarisë sociale ishte i suksesshëm: {0}</value>
   </data>
   <data name="LoginSuccessViaApiTfa" xml:space="preserve">
     <value>Identifikimi i susesshëm përmes API dhe aplikacionit të vërtetimit</value>
@@ -540,9 +537,6 @@
   <data name="OAuthModule" xml:space="preserve">
     <value>OAuth</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Të tjerët</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Pronari u ndryshua: {0}</value>
   </data>
@@ -560,9 +554,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Cilësimet e fuqisë së fjalëkalimit u përditësuan</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Njerëz</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platforma</value>
@@ -746,9 +737,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesioni filloi</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Cilësimet</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO u çaktivizua</value>
@@ -983,5 +971,77 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook u perditësua: {0}</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Cilësimet e dukshmërisë së banerëve promovues janë ndryshuar</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Operacioni i kryer nga klienti</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Raporti i operacioneve të klientit u shkarkua</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Abonimi i klientit është përditësua: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Portofoli i klientit u rimbush: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e rimbushjes së portofolit të klientit u përditësuan</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Vendndodhja</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Shërbimet e aktivizuara për portofolin e klientit</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Identifikimi i suksesshëm përmes OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Identifikim i suksesshëm përmes emrit të përdoruesit dhe fjalëkalimit</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Skedarët [{0}]. Lidhja e jashtme u krijua: {1}. Roli: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Skedarët [{0}]. Lidhja e jashtme u fshi: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Skedarët [{0}]. Lidhja e jashtme u përditësua: {1}. Roli: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Skedari u shënua si i preferuar: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Skedari u hoq nga të preferuarat: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Skedari u hoq nga "Të ndara me mua": {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Skedarët [{0}]. Aksesi u përditësua për {1}. Roli: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Dosja u shkarkua: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Dosjet [{0}]. Lidhja e jashtme u krijua: {1}. Roli: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Dosjet [{0}]. Lidhja e jashtme u fshi: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Dosjet [{0}]. Lidhja e jashtme u përditësua: {1}. Roli: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Dosja u hoq nga "Të ndara me mua": {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Dosjet [{0}]. Aksesi u përditësua për {1}. Roli: {2}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Lidhja e jashtme u revokua: {1}</value>
   </data>
 </root>

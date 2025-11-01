@@ -26,7 +26,16 @@
 
 using System.Text.Json;
 
+using ASC.Common.Threading.DistributedLock.Abstractions;
+using ASC.Core.Common;
 using ASC.Core.Configuration;
+using ASC.Core.Tenants;
+using ASC.Data.Backup.Core.Quota;
+using ASC.Web.Core.PublicResources;
+
+using Polly;
+using Polly.Registry;
+using Polly.Retry;
 
 namespace ASC.Data.Backup.Services;
 
@@ -34,15 +43,16 @@ namespace ASC.Data.Backup.Services;
 public sealed class BackupSchedulerService(
     ILogger<BackupSchedulerService> logger,
     IServiceScopeFactory scopeFactory,
-    IConfiguration configuration,
-    CoreBaseSettings coreBaseSettings,
+    BackupConfigurationService backupConfigurationService,
     IEventBus eventBus)
      : ActivePassiveBackgroundService<BackupSchedulerService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
     private readonly IEventBus _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
 
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } = configuration.GetSection("backup").Get<BackupSettings>().Scheduler.Period;
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = backupConfigurationService.Settings.Scheduler.Period;
+
+    public static string ResiliencePipelineName => "BackupSchedulerServiceResiliencePipeline";
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
@@ -50,8 +60,13 @@ public sealed class BackupSchedulerService(
 
         var tariffService = serviceScope.ServiceProvider.GetRequiredService<ITariffService>();
         var backupRepository = serviceScope.ServiceProvider.GetRequiredService<BackupRepository>();
+        var backupService = serviceScope.ServiceProvider.GetRequiredService<BackupService>();
         var backupSchedule = serviceScope.ServiceProvider.GetRequiredService<Schedule>();
         var tenantManager = serviceScope.ServiceProvider.GetRequiredService<TenantManager>();
+        var notifyHelper = serviceScope.ServiceProvider.GetRequiredService<NotifyHelper>();
+        var distributedLockProvider = serviceScope.ServiceProvider.GetRequiredService<IDistributedLockProvider>();
+        var freeBackupsChecker = serviceScope.ServiceProvider.GetRequiredService<CountFreeBackupChecker>();
+        var resiliencePipelineProvider = serviceScope.ServiceProvider.GetRequiredService<ResiliencePipelineProvider<string>>();
 
         logger.DebugStartedToSchedule();
 
@@ -62,6 +77,8 @@ public sealed class BackupSchedulerService(
 
         logger.DebugBackupsSchedule(backupsToSchedule.Count);
 
+        IDistributedLockHandle lockHandle = null;
+
         foreach (var schedule in backupsToSchedule)
         {
             if (stoppingToken.IsCancellationRequested)
@@ -71,45 +88,107 @@ public sealed class BackupSchedulerService(
 
             try
             {
-                tenantManager.SetCurrentTenant(new ASC.Core.Tenants.Tenant(schedule.TenantId, String.Empty));
+                tenantManager.SetCurrentTenant(new Tenant(schedule.TenantId, String.Empty));
 
-                if (coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(schedule.TenantId)).AutoBackupRestore)
+                var tariff = await tariffService.GetTariffAsync(schedule.TenantId);
+
+                if (tariff.State < TariffState.Delay)
                 {
-                    var tariff = await tariffService.GetTariffAsync(schedule.TenantId);
+                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetFreeBackupsCountCheckKey(schedule.TenantId), cancellationToken: stoppingToken);
 
-                    if (tariff.State < TariffState.Delay)
+                    var pipeline = resiliencePipelineProvider.GetPipeline<Session>(ResiliencePipelineName);
+
+                    var billingSession = await pipeline.ExecuteAsync(async (_) =>
                     {
-                        schedule.LastBackupTime = DateTime.UtcNow;
+                        try
+                        {
+                            await freeBackupsChecker.CheckAppend();
+                            return new Session();
+                        }
+                        catch (TenantQuotaException)
+                        {
+                            var backupServiceEnabled = await backupService.IsBackupServiceEnabledAsync(schedule.TenantId);
+                            if (!backupServiceEnabled)
+                            {
+                                throw;
+                            }
 
-                        await backupRepository.SaveBackupScheduleAsync(schedule);
+                            var customerSession = await backupService.OpenCustomerSessionForBackupAsync(schedule.TenantId);
+                            if (customerSession == null)
+                            {
+                                throw new BillingException(Resource.ErrorNotAllowedOption);
+                            }
 
-                        logger.DebugStartScheduledBackup(schedule.TenantId, schedule.StorageType, schedule.StorageBasePath);
-                        var param = JsonSerializer.Deserialize<Dictionary<string, string>>(schedule.StorageParams);
-                        await _eventBus.PublishAsync(new BackupRequestIntegrationEvent(
-                                                 tenantId: schedule.Dump ? int.Parse(param["tenantId"]) : schedule.TenantId,
-                                                 storageBasePath: schedule.StorageBasePath,
-                                                 storageParams: param,
-                                                 storageType: schedule.StorageType,
-                                                 createBy: Constants.CoreSystem.ID,
-                                                 isScheduled: true,
-                                                 dump: schedule.Dump,
-                                                 backupsStored: schedule.BackupsStored
-                                          ));
-                    }
-                    else
-                    {
-                        logger.DebugNotPaid(schedule.TenantId);
-                    }
+                            return customerSession;
+                        }
+                    }, stoppingToken);
+
+                    schedule.LastBackupTime = DateTime.UtcNow;
+
+                    await backupRepository.SaveBackupScheduleAsync(schedule);
+
+                    logger.DebugStartScheduledBackup(schedule.TenantId, schedule.StorageType, schedule.StorageBasePath);
+                    var param = JsonSerializer.Deserialize<Dictionary<string, string>>(schedule.StorageParams);
+                    await _eventBus.PublishAsync(new BackupRequestIntegrationEvent(
+                                                tenantId: schedule.Dump ? int.Parse(param["tenantId"]) : schedule.TenantId,
+                                                storageBasePath: schedule.StorageBasePath,
+                                                storageParams: param,
+                                                storageType: schedule.StorageType,
+                                                createBy: Constants.CoreSystem.ID,
+                                                isScheduled: true,
+                                                dump: schedule.Dump,
+                                                backupsStored: schedule.BackupsStored,
+                                                billingSessionId: billingSession?.SessionId ?? 0,
+                                                billingSessionExpire: billingSession?.Expire ?? default
+                                        ));
                 }
                 else
                 {
-                    logger.DebugHaveNotAccess(schedule.TenantId);
+                    logger.DebugNotPaid(schedule.TenantId);
                 }
+            }
+            catch (Exception ex) when (ex is TenantQuotaException
+                || ex is AccountingPaymentRequiredException
+                || ex is AccountingCustomerNotFoundException
+                || ex is BillingException)
+            {
+                logger.DebugHaveNotAccess(schedule.TenantId, ex.Message);
+
+                await backupRepository.DeleteBackupScheduleAsync(schedule.TenantId);
+
+                await notifyHelper.SendAboutScheduledBackupFailedAsync(schedule.TenantId, ex.Message);
             }
             catch (Exception error)
             {
                 logger.ErrorBackups(error);
             }
+            finally
+            {
+                if (lockHandle != null)
+                {
+                    await lockHandle.ReleaseAsync();
+                    lockHandle = null;
+                }
+            }
         }
+    }
+}
+
+public static class BackupSchedulerServiceExtension
+{
+    public static void AddBackupSchedulerServiceResiliencePipeline(this IServiceCollection services)
+    {
+        services.AddResiliencePipeline<string, Session>(BackupSchedulerService.ResiliencePipelineName, pipelineBuilder =>
+        {
+            pipelineBuilder.AddRetry(new RetryStrategyOptions<Session>()
+            {
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Exponential,
+                ShouldHandle = new PredicateBuilder<Session>()
+                    .Handle<Exception>()
+                    .HandleResult(result => result == null)
+            });
+        });
     }
 }

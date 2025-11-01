@@ -51,7 +51,7 @@ public enum WatermarkAdditions
 /// <summary>
 /// The watermark settings information.
 /// </summary>
-public class WatermarkSettings : IMapFrom<DbRoomWatermark>, IMapFrom<WatermarkRequestDto>
+public class WatermarkSettings
 {
     /// <summary>
     /// The watermark text.
@@ -87,6 +87,14 @@ public class WatermarkSettings : IMapFrom<DbRoomWatermark>, IMapFrom<WatermarkRe
     /// The watermark image scale.
     /// </summary>
     public int ImageScale { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class WatermarkSettingsMapper
+{       
+    public static partial WatermarkSettings Map(this WatermarkRequestDto source);
+    public static partial DbRoomWatermark Map(this WatermarkSettings source);
+    public static partial WatermarkSettings Map(this DbRoomWatermark source);
 }
 
 [Scope]

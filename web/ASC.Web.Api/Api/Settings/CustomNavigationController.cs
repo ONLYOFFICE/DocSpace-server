@@ -27,6 +27,7 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("customnavigation")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class CustomNavigationController(
     MessageService messageService,
     PermissionContext permissionContext,
@@ -142,6 +143,7 @@ public class CustomNavigationController(
     /// <short>Delete a custom navigation item</short>
     /// <path>api/2.0/settings/customnavigation/delete/{id}</path>
     [Tags("Settings / Custom Navigation")]
+    [SwaggerResponse(200, "Ok")]
     [HttpDelete("delete/{id:guid}")]
     public async Task DeleteCustomNavigationItem(IdRequestDto<Guid> inDto)
     {

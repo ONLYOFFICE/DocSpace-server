@@ -73,14 +73,19 @@ public class MessageService(
         SendRequestMessage(action, loginName: loginName);
     }
 
-    public void SendLoginMessage(MessageAction action, string loginName, string d1)
+    public void SendLoginMessage(MessageAction action, string loginName, params string[] d)
     {
-        SendRequestMessage(action, loginName: loginName, description: d1);
+        SendRequestMessage(action, loginName: loginName, description: d);
     }
 
     #endregion
 
     #region HttpRequest & Target
+
+    public async Task SendAsync(MessageAction action, MessageTarget target)
+    {
+        await SendRequestMessageAsync(action, target);
+    }
 
     public void Send(MessageAction action, MessageTarget target)
     {
@@ -165,6 +170,30 @@ public class MessageService(
         }
 
         _ = Sender.SendAsync(message);
+    }
+
+    private async Task SendRequestMessageAsync(MessageAction action, MessageTarget target = null, string loginName = null, DateTime? dateTime = null,
+        IEnumerable<FilesAuditReference> references = null, params string[] description)
+    {
+        if (Sender == null)
+        {
+            return;
+        }
+
+        if (Request == null)
+        {
+            logger.DebugEmptyHttpRequest(action);
+
+            return;
+        }
+
+        var message = messageFactory.Create(Request, loginName, dateTime, action, target, references, description);
+        if (!messagePolicy.Check(message))
+        {
+            return;
+        }
+
+        await Sender.SendAsync(message);
     }
 
     #region HttpHeaders
@@ -259,14 +288,14 @@ public class MessageService(
         _ = Sender.SendAsync(message);
     }
     
-    public async Task<int> SendLoginMessageAsync(MessageUserData userData, MessageAction action)
+    public async Task<int> SendLoginMessageAsync(MessageUserData userData, MessageAction action, string initiator, params string[] description)
     {
         if (Sender == null)
         {
             return 0;
         }
 
-        var message = messageFactory.Create(Request, userData, action);
+        var message = messageFactory.Create(Request, userData, action, initiator, description);
         if (!messagePolicy.Check(message))
         {
             return 0;

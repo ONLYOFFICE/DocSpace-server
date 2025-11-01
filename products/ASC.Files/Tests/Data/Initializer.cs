@@ -26,11 +26,9 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
-using Docspace.Client;
-
 using MemberRequestDto = ASCPeople::ASC.People.ApiModels.RequestDto.MemberRequestDto;
 using PasswordHasher = ASC.Security.Cryptography.PasswordHasher;
-using WizardRequestsDto = Docspace.Model.WizardRequestsDto;
+using WizardRequestsDto = DocSpace.API.SDK.Model.WizardRequestsDto;
 
 namespace ASC.Files.Tests.Data;
 
@@ -39,19 +37,20 @@ public static class Initializer
     public static readonly User Owner = new("test@example.com", "11111111");
     
     private static bool _initialized;
-    private static HttpClient _apiClient = null!;
-    private static AuthenticationApi _authenticationApi = null!;
-    private static SettingsCommonSettingsApi  _commonSettingsApi = null!;
-    private static PortalUsersApi  _portalUsersApi = null!;
-    private static PeopleProfilesApi  _peopleProfilesApi = null!;
-    private static HttpClient _peopleClient = null!;
+
     private static PasswordHasher _passwordHasher = null!;
-    
+    private static readonly Lock _locker = new();
+    private static WepApiFactory _apiFactory = null!;
+    private static PeopleFactory _peopleFactory = null!;
+    private static FilesServiceFactory _filesServiceFactory = null!;
+    private static readonly string _basePath = Path.GetFullPath(Path.Combine("..", "..", "..", "..", "..", "..", ".."));
     private static readonly List<KeyValuePair<string, string?>> _settings =
     [
-        new("log:dir", Path.Combine("..", "..", "..", "..", "Logs", "Test")),
-        new("$STORAGE_ROOT", Path.Combine("..", "..", "..", "..", "Data", "Test")),
-        new("web:hub:internal", "")
+        new("log:dir", Path.Combine(_basePath, "Logs", "Test")),
+        new("$STORAGE_ROOT", Path.Combine(_basePath, "Data", "Test")),
+        new("web:hub:internal", ""),
+        new("core:base-domain", "localhost"),
+        new("license:file:path", Path.Combine(_basePath, "Data", "license", "license.lic"))
     ];
 
     private static readonly Faker<MemberRequestDto> _fakerMember = new Faker<MemberRequestDto>()
@@ -59,86 +58,77 @@ public static class Initializer
         .RuleFor(x => x.LastName, f => f.Person.LastName)
         .RuleFor(x => x.Email, f => f.Person.Email)
         .RuleFor(x => x.Password, f => f.Internet.Password(8, 10));
-    
-    public static List<KeyValuePair<string, string?>> GetSettings(CustomProviderInfo providerInfo, string redisConnectionString, string rabbitMqConnectionString, string openSearchConnectionString)
+
+    public static List<KeyValuePair<string, string?>>? GlobalSettings { get; private set; }
+
+    public static void InitSettings(CustomProviderInfo providerInfo, string redisConnectionString, string rabbitMqConnectionString, string openSearchConnectionString)
     {
-        var result = new List<KeyValuePair<string, string?>>(_settings)
+        lock (_locker)
         {
-            new("ConnectionStrings:default:connectionString", providerInfo.ConnectionString()),
-            new("ConnectionStrings:default:providerName", providerInfo.ProviderFullName),
-            new("testAssembly", $"ASC.Migrations.{providerInfo.Provider}.SaaS")
-        };
-        
-        var redisSplit = redisConnectionString.Split(':');
-        var redisHost = redisSplit[0];
-        var redisPort = redisSplit[1];
-        
-        result.Add(new KeyValuePair<string, string?>("Redis:Hosts:0:Host", redisHost));
-        result.Add(new KeyValuePair<string, string?>("Redis:Hosts:0:Port", redisPort));
-        
-        var rabbitMqSettings = new Uri(rabbitMqConnectionString);
-        var rabbitMqUserInfo = rabbitMqSettings.UserInfo.Split(':');
-        result.Add(new KeyValuePair<string, string?>("RabbitMQ:Hostname", rabbitMqSettings.Host));
-        result.Add(new KeyValuePair<string, string?>("RabbitMQ:Port", rabbitMqSettings.Port.ToString()));
-        result.Add(new KeyValuePair<string, string?>("RabbitMQ:UserName", rabbitMqUserInfo[0]));
-        result.Add(new KeyValuePair<string, string?>("RabbitMQ:Password", rabbitMqUserInfo[1]));
-        
-        var openSearchSplit = openSearchConnectionString.Split(':');
-        var openSearchHost = openSearchSplit[0];
-        var openSearchPort = openSearchSplit[1];
-        
-        result.Add(new KeyValuePair<string, string?>("elastic:Scheme", "http"));
-        result.Add(new KeyValuePair<string, string?>("elastic:Host", openSearchHost));
-        result.Add(new KeyValuePair<string, string?>("elastic:Port", openSearchPort));
-        
-        return result;
+            if (GlobalSettings is { Count: > 0 })
+            {
+                return;
+            }
+
+            GlobalSettings =
+            [
+                .._settings,
+                new KeyValuePair<string, string?>("ConnectionStrings:default:connectionString", providerInfo.ConnectionString()),
+                new KeyValuePair<string, string?>("ConnectionStrings:default:providerName", providerInfo.ProviderFullName),
+                new KeyValuePair<string, string?>("testAssembly", $"ASC.Migrations.{providerInfo.Provider}.SaaS")
+            ];
+
+            var redisSplit = redisConnectionString.Split(':');
+            var redisHost = redisSplit[0];
+            var redisPort = redisSplit[1];
+
+            GlobalSettings.Add(new KeyValuePair<string, string?>("Redis:Hosts:0:Host", redisHost));
+            GlobalSettings.Add(new KeyValuePair<string, string?>("Redis:Hosts:0:Port", redisPort));
+
+            var rabbitMqSettings = new Uri(rabbitMqConnectionString);
+            var rabbitMqUserInfo = rabbitMqSettings.UserInfo.Split(':');
+            GlobalSettings.Add(new KeyValuePair<string, string?>("RabbitMQ:Hostname", rabbitMqSettings.Host));
+            GlobalSettings.Add(new KeyValuePair<string, string?>("RabbitMQ:Port", rabbitMqSettings.Port.ToString()));
+            GlobalSettings.Add(new KeyValuePair<string, string?>("RabbitMQ:UserName", rabbitMqUserInfo[0]));
+            GlobalSettings.Add(new KeyValuePair<string, string?>("RabbitMQ:Password", rabbitMqUserInfo[1]));
+
+            var openSearchSplit = openSearchConnectionString.Split(':');
+            var openSearchHost = openSearchSplit[0];
+            var openSearchPort = openSearchSplit[1];
+
+            GlobalSettings.Add(new KeyValuePair<string, string?>("elastic:Scheme", "http"));
+            GlobalSettings.Add(new KeyValuePair<string, string?>("elastic:Host", openSearchHost));
+            GlobalSettings.Add(new KeyValuePair<string, string?>("elastic:Port", openSearchPort));
+        }
     }
     
     public static async Task InitializeAsync(
         FilesApiFactory filesFactory,
-        WebApplicationFactory<WebApiProgram> apiFactory,
-        WebApplicationFactory<PeopleProgram> peopleFactory,
-        WebApplicationFactory<FilesServiceProgram> filesServiceFactory)
+        WepApiFactory apiFactory,
+        PeopleFactory peopleFactory,
+        FilesServiceFactory filesServiceFactory)
     {
         _passwordHasher = filesFactory.Services.GetRequiredService<PasswordHasher>();
         
         if (!_initialized)
-        {
-            var apiClientStartTask = Task.Run(() =>
-            {
-                _apiClient = apiFactory.WithWebHostBuilder(Build).CreateClient();
-                _authenticationApi = new AuthenticationApi(_apiClient, new Configuration { BasePath = _apiClient.BaseAddress!.ToString().TrimEnd('/') });
-                _commonSettingsApi = new SettingsCommonSettingsApi(_apiClient, new Configuration { BasePath = _apiClient.BaseAddress!.ToString().TrimEnd('/') });
-                _portalUsersApi = new PortalUsersApi(_apiClient, new Configuration { BasePath = _apiClient.BaseAddress!.ToString().TrimEnd('/') });
-            });
-
-            var peopleClientStartTask = Task.Run(() =>
-            {
-                _peopleClient = peopleFactory.WithWebHostBuilder(Build).CreateClient();
-                _peopleProfilesApi = new PeopleProfilesApi(_peopleClient, new Configuration { BasePath = _peopleClient.BaseAddress!.ToString().TrimEnd('/') });
-            });
-
-            var filesServiceStartTask = Task.Run(() =>
-            {
-                _ = filesServiceFactory.WithWebHostBuilder(Build).CreateClient();
-            });
-            
-            await Task.WhenAll(apiClientStartTask, peopleClientStartTask, filesServiceStartTask);
-
-            var settings  = (await _commonSettingsApi.GetPortalSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        {        
+            _apiFactory = apiFactory;
+            _peopleFactory = peopleFactory;
+            _filesServiceFactory = filesServiceFactory;
+            var settings  = (await apiFactory.CommonSettingsApi.GetPortalSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
             
             if (!string.IsNullOrEmpty(settings.WizardToken))
             {
-                _apiClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", settings.WizardToken);
+                apiFactory.HttpClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", settings.WizardToken);
 
-                await _commonSettingsApi.CompleteWizardAsync(new WizardRequestsDto(Owner.Email, _passwordHasher.GetClientPassword(Owner.Password)), TestContext.Current.CancellationToken);
+                await apiFactory.CommonSettingsApi.CompleteWizardAsync(new WizardRequestsDto(Owner.Email, _passwordHasher.GetClientPassword(Owner.Password)), TestContext.Current.CancellationToken);
                 
-                _apiClient.DefaultRequestHeaders.Remove("confirm");
+                apiFactory.HttpClient.DefaultRequestHeaders.Remove("confirm");
             }
         }
         
         await filesFactory.HttpClient.Authenticate(Owner);
-        _ = await filesFactory.FilesFoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
+        _ = await filesFactory.FoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         if (!_initialized)
         {
@@ -146,23 +136,14 @@ public static class Initializer
         }
 
         _initialized = true;
-        return;
-
-        void Build(IWebHostBuilder builder)
-        {
-            foreach (var setting in GetSettings(filesFactory.ProviderInfo, filesFactory.RedisConnectionString, filesFactory.RabbitMqConnectionString, filesFactory.OpenSearchConnectionString))
-            {
-                builder.UseSetting(setting.Key, setting.Value);
-            }
-        }
     }
     
     internal static async Task<User> InviteContact(EmployeeType employeeType)
     {
-        await _apiClient.Authenticate(Owner);
+        await _apiFactory.HttpClient.Authenticate(Owner);
 
-        var shortLink = (await _portalUsersApi.GetInvitationLinkAsync(employeeType, TestContext.Current.CancellationToken)).Response;
-        var fullLink = await _apiClient.GetAsync(shortLink);
+        var shortLink = (await _apiFactory.PortalUsersApi.GetInvitationLinkAsync(employeeType, TestContext.Current.CancellationToken)).Response;
+        var fullLink = await _apiFactory.HttpClient.GetAsync(shortLink);
         var confirmHeader = fullLink.RequestMessage?.RequestUri?.Query.Substring(1);
         if (confirmHeader == null)
         {
@@ -170,8 +151,8 @@ public static class Initializer
 
         }
         
-        await _peopleClient.Authenticate(Owner);
-        _peopleClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", confirmHeader);
+        await _peopleFactory.HttpClient.Authenticate(Owner);
+        _peopleFactory.HttpClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", confirmHeader);
         
         var parsedQuery = HttpUtility.ParseQueryString(confirmHeader);
         if(!Enum.TryParse(parsedQuery["emplType"], out EmployeeType parsedEmployeeType))
@@ -181,7 +162,7 @@ public static class Initializer
         
         var fakeMember = _fakerMember.Generate();
         
-        var createMemberResponse = await _peopleProfilesApi.AddMemberWithHttpInfoAsync(new Docspace.Model.MemberRequestDto
+        var createMemberResponse = await _peopleFactory.ProfilesApi.AddMemberWithHttpInfoAsync(new DocSpace.API.SDK.Model.MemberRequestDto
         {
             FromInviteLink = true,
             CultureName = "en-US",
@@ -196,7 +177,7 @@ public static class Initializer
             Key = parsedQuery["key"],
         }, TestContext.Current.CancellationToken);
         
-        _peopleClient.DefaultRequestHeaders.Remove("confirm");
+        _peopleFactory.HttpClient.DefaultRequestHeaders.Remove("confirm");
         
         if (createMemberResponse.StatusCode != HttpStatusCode.OK)
         {
@@ -209,18 +190,26 @@ public static class Initializer
         };
     }
 
-    public static async Task Authenticate(this HttpClient client, User user)
-    {        
-        var authMe = await _authenticationApi.AuthenticateMeAsync(new Docspace.Model.AuthRequestsDto
+    public static async ValueTask Authenticate(this HttpClient client, User? user)
+    {
+        if (user == null)
+        {
+            client.DefaultRequestHeaders.Authorization = null;
+            return;
+        }
+
+        user.PasswordHash ??= _passwordHasher.GetClientPassword(user.Password);
+        
+        var authMe = await _apiFactory.AuthenticationApi.AuthenticateMeAsync(new AuthRequestsDto
         {
             UserName = user.Email,
-            PasswordHash = _passwordHasher.GetClientPassword(user.Password)
+            PasswordHash =  user.PasswordHash
         }, TestContext.Current.CancellationToken);
         
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authMe.Response.Token);
     }
-    
-    internal static string Password(
+
+    private static string Password(
         this Internet internet,
         int minLength,
         int maxLength,

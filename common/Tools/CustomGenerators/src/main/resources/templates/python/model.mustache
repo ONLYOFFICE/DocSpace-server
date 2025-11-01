@@ -6,7 +6,7 @@
 {{>model_enum}}
 {{/isEnum}}
 {{^isEnum}}
-{{#oneOf}}{{#-first}}{{>model_oneof}}{{/-first}}{{/oneOf}}{{^oneOf}}{{#anyOf}}{{#-first}}{{>model_anyof}}{{/-first}}{{/anyOf}}{{^anyOf}}{{>model_generic}}{{/anyOf}}{{/oneOf}}
+{{#oneOf}}{{#-first}}{{>model_oneof}}{{/-first}}{{/oneOf}}{{^oneOf}}{{#anyOf}}{{#-first}}{{>model_anyof}}{{/-first}}{{/anyOf}}{{#vendorExtensions.x-uses-allOf}}{{>model_allof}}{{/vendorExtensions.x-uses-allOf}}{{^vendorExtensions.x-uses-allOf}}{{^anyOf}}{{>model_generic}}{{/anyOf}}{{/vendorExtensions.x-uses-allOf}}{{/oneOf}}
 {{/isEnum}}
 {{/model}}
 {{/models}}

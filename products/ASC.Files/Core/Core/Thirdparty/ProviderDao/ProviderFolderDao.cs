@@ -654,7 +654,10 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     }
     public Task<Folder<string>> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
     {
-        throw new NotImplementedException();
+        var selector = _selectorFactory.GetSelector(entry.Id);
+        var folderDao = selector.GetFolderDao(entry.Id);
+
+        return folderDao.GetFirstParentTypeFromFileEntryAsync(entry);
     }
     public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
     {
@@ -739,5 +742,16 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         var folderDao = selector.GetFolderDao(room.Id);
 
         return folderDao.DeleteLifetimeSettings(room);
+    }
+
+    public IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, OrderBy orderBy, int offset, int count)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<int> GetFoldersByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, bool excludeSubject, Location? location, int trashId)
+    {
+        throw new NotImplementedException();
     }
 }

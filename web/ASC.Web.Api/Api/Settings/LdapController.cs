@@ -37,8 +37,7 @@ public class LdapController(
     LdapSaveSyncOperation ldapSaveSyncOperation,
     AuthContext authContext,
     PermissionContext permissionContext,
-    CoreBaseSettings coreBaseSettings,
-    IMapper mapper)
+    CoreBaseSettings coreBaseSettings)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
@@ -63,7 +62,7 @@ public class LdapController(
         if (settings == null)
         {
             settings = new LdapSettings().GetDefault();
-            return mapper.Map<LdapSettings, LdapSettingsDto>(settings);
+            return settings.MapToSettingsDto();
         }
 
         settings.Password = null;
@@ -71,7 +70,7 @@ public class LdapController(
 
         if (settings.IsDefault)
         {
-            return mapper.Map<LdapSettings, LdapSettingsDto>(settings);
+            return settings.MapToSettingsDto();
         }
 
         var defaultSettings = settings.GetDefault();
@@ -81,7 +80,7 @@ public class LdapController(
             settings.IsDefault = true;
         }
 
-        return mapper.Map<LdapSettings, LdapSettingsDto>(settings);
+        return settings.MapToSettingsDto();
     }
 
     /// <summary>
@@ -106,7 +105,7 @@ public class LdapController(
             return null;
         }
 
-        return mapper.Map<LdapCronSettings, LdapCronSettingsDto>(settings);
+        return settings.MapToDto();
     }
 
     /// <summary>
@@ -174,7 +173,7 @@ public class LdapController(
         
         var result = await ldapSaveSyncOperation.SyncLdapAsync(ldapSettings, tenant, userId);
 
-        return mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
+        return result.MapToDto();
     }
 
     /// <summary>
@@ -198,7 +197,7 @@ public class LdapController(
         
         var result = await ldapSaveSyncOperation.TestLdapSyncAsync(ldapSettings, tenant);
 
-        return mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
+        return result.MapToDto();
     }
 
     /// <summary>
@@ -214,7 +213,7 @@ public class LdapController(
     [HttpPost("")]
     public async Task<LdapStatusDto> SaveLdapSettings(LdapRequestsDto inDto)
     {
-        var ldapSettings = mapper.Map<LdapRequestsDto, LdapSettings>(inDto);
+        var ldapSettings = inDto.MapToSettings();
 
         await CheckLdapPermissionsAsync();
 
@@ -229,7 +228,7 @@ public class LdapController(
         
         var result = await ldapSaveSyncOperation.SaveLdapSettingsAsync(ldapSettings, tenant, userId);
 
-        return mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
+        return result.MapToDto();
     }
 
     /// <summary>
@@ -253,7 +252,7 @@ public class LdapController(
         
         var result = await ldapSaveSyncOperation.TestLdapSaveAsync(inDto, tenant, userId);
 
-        return mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
+        return result.MapToDto();
     }
 
     /// <summary>
@@ -275,7 +274,7 @@ public class LdapController(
         
         var result = await ldapSaveSyncOperation.ToLdapOperationStatus(tenant.Id);
 
-        return mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
+        return result.MapToDto();
     }
 
     /// <summary>
@@ -295,7 +294,7 @@ public class LdapController(
 
         var settings = new LdapSettings().GetDefault();
 
-        return mapper.Map<LdapSettings, LdapSettingsDto>(settings);
+        return settings.MapToSettingsDto();
     }
 
     private async Task CheckLdapPermissionsAsync()

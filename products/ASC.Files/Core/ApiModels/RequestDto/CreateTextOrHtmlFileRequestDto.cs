@@ -63,5 +63,5 @@ public class CreateTextOrHtmlFileRequestDto<T>
     /// The parameters for creating an HTML or text file.
     /// </summary>
     [FromBody]
-    public CreateTextOrHtmlFile File { get; set; }
+    public required CreateTextOrHtmlFile File { get; set; }
 }

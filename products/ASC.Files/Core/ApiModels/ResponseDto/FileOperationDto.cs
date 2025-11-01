@@ -34,36 +34,36 @@ public class FileOperationDto
     /// <summary>
     /// The file operation ID.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// The file operation type.
     /// </summary>
     [JsonPropertyName("Operation")]
-    public FileOperationType OperationType { get; init; }
+    public required FileOperationType OperationType { get; init; }
 
     /// <summary>
     /// The file operation progress in percentage.
     /// </summary>
     [SwaggerSchemaCustom(Example = 100)]
-    public int Progress { get; set; }
+    public required int Progress { get; set; }
 
     /// <summary>
     /// The file operation error message.
     /// </summary>
     [SwaggerSchemaCustom(Example = "")]
-    public string Error { get; set; }
+    public required string Error { get; set; }
 
     /// <summary>
     /// The file operation processing status.
     /// </summary>
     [SwaggerSchemaCustom(Example = "1")]
-    public string Processed { get; set; }
+    public required string Processed { get; set; }
 
     /// <summary>
     /// Specifies if the file operation is finished or not.
     /// </summary>
-    public bool Finished { get; set; }
+    public required bool Finished { get; set; }
 
     /// <summary>
     /// The file operation URL.
@@ -74,12 +74,12 @@ public class FileOperationDto
     /// <summary>
     /// The list of files of the file operation.
     /// </summary>
-    public List<FileEntryDto> Files { get; set; }
+    public List<FileEntryBaseDto> Files { get; set; }
 
     /// <summary>
     /// The list of folders of the file operation.
     /// </summary>
-    public List<FileEntryDto> Folders { get; set; }
+    public List<FileEntryBaseDto> Folders { get; set; }
 }
 
 [Scope]
@@ -180,7 +180,7 @@ public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
 
         return result;
 
-        async IAsyncEnumerable<FileEntryDto> GetFoldersAsync<T>(IEnumerable<T> folders)
+        async IAsyncEnumerable<FileEntryBaseDto> GetFoldersAsync<T>(IEnumerable<T> folders)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
 
@@ -190,7 +190,7 @@ public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
             }
         }
 
-        async IAsyncEnumerable<FileEntryDto> GetFilesAsync<T>(IEnumerable<T> files)
+        async IAsyncEnumerable<FileEntryBaseDto> GetFilesAsync<T>(IEnumerable<T> files)
         {
             var fileDao = daoFactory.GetFileDao<T>();
 

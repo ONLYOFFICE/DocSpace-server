@@ -47,14 +47,27 @@ public class ProviderManager(ConsumerFactory consumerFactory)
         ProviderConstants.Facebook,
         ProviderConstants.Twitter,
         ProviderConstants.Microsoft,
-        ProviderConstants.AppleId
+        ProviderConstants.AppleId,
+        ProviderConstants.Weixin,
     ];
 
     public static readonly List<string> InviteExceptProviders =
     [
         ProviderConstants.Twitter,
-        ProviderConstants.AppleId
+        ProviderConstants.AppleId,
+        ProviderConstants.Weixin,
     ];
+
+    public static List<string> GetSortedAuthProviders(string geoInfoKey)
+    {
+        if (geoInfoKey == "CN")
+        {
+            var result = new List<string>() { ProviderConstants.Weixin };
+            result.AddRange(AuthProviders.Where(x => x != ProviderConstants.Weixin));
+            return result;
+        }
+        return AuthProviders;
+    }
 
     public ILoginProvider GetLoginProvider(string providerType)
     {

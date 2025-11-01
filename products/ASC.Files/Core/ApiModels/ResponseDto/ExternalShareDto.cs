@@ -31,27 +31,32 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// <summary>
 /// The external sharing information and validation data.
 /// </summary>
-public class ExternalShareDto : IMapFrom<ValidationInfo>
+public class ExternalShareDto
 {
     /// <summary>
     /// The external data status.
     /// </summary>
-    public Status Status { get; set; }
+    public required Status Status { get; set; }
 
     /// <summary>
     /// The external data ID.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// The external data title.
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
+    /// <summary>
+    /// The type of the external data.
+    /// </summary>
+    public FileEntryType? Type { get; set; }
+    
     /// <summary>
     /// The tenant ID.
     /// </summary>
-    public int TenantId { get; set; }
+    public required int TenantId { get; set; }
 
     /// <summary>
     /// The unique identifier of the shared entity.
@@ -59,22 +64,44 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     public string EntityId { get; set; }
    
     /// <summary>
-    /// The title of the shared entry.
+    /// The title of the shared entity.
     /// </summary>
-    public string EntryTitle { get; set; }
+    public string EntityTitle { get; set; }
 
+    /// <summary>
+    /// The entry type of the external data.
+    /// </summary>
+    public FileEntryType? EntityType { get; set; }
+    
+    /// <summary>
+    /// Indicates whether the entity represents a room.
+    /// </summary>
+    public bool? IsRoom { get; set; }
+    
     /// <summary>
     /// Specifies whether to share the external data or not.
     /// </summary>
-    public bool Shared { get; set; }
+    public required bool Shared { get; set; }
 
     /// <summary>
     /// The link ID of the external data.
     /// </summary>
-    public Guid LinkId { get; set; }
+    public required Guid LinkId { get; set; }
     
     /// <summary>
     /// Specifies whether the user is authenticated or not.
     /// </summary>
-    public bool IsAuthenticated { get; set; }
+    public required bool IsAuthenticated { get; set; }
+    
+    /// <summary>
+    /// The room ID of the external data.
+    /// </summary>
+    public bool IsRoomMember { get; set; }
+}
+
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class ExternalShareDtoMapper
+{
+    public static partial ExternalShareDto Map(this ValidationInfo source);
 }

@@ -127,9 +127,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>更新配置文件覆盖</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>文档</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>设置</value>
   </data>
@@ -388,9 +385,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>移动</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>其他人</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>所有者已更改：{0}</value>
   </data>
@@ -408,9 +402,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>密码强度设置已更新</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>成员</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>平台</value>
@@ -465,9 +456,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>会话已开始</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>设置</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO已禁用</value>
@@ -734,7 +722,7 @@
     <value>打开以进行更改的文件：{0}</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>通过社交账号登录成功</value>
+    <value>通过社交帐户登录成功：{0}</value>
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>门户已被重命名</value>
@@ -939,5 +927,62 @@
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>客户钱包充值设置已更新</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>促销横幅的可见性设置已变更</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>客户钱包已启用服务的设置已更新</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>位置</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>通过 OAuth 2.0 成功登录</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>通过登录名和密码成功登录</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>文件[{0}]。外部链接已创建：{1}。角色：{2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>文件[{0}]。外部链接已删除：{1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>文件[{0}]。外部链接已更新：{1}。角色：{2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>文件已标记为收藏：{0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>文件已从“共享”中移除：{0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>文件已从“共享”中移除：{0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>文件[{0}]。{1}的访问权限已更新。角色：{2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>文件夹已下载：{0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>文件夹[{0}]。外部链接已创建：{1}。角色：{2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>文件夹[{0}]。外部链接已删除：{1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>文件夹[{0}]。外部链接已更新：{1}。角色：{2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>文件夹已从“共享”中移除：{0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>文件夹[{0}]。外部链接已更新：{1}。角色：{2}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>外部链接已撤销：{1}</value>
   </data>
 </root>

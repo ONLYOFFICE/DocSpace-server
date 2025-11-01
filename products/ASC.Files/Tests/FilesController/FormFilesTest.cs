@@ -29,9 +29,9 @@ namespace ASC.Files.Tests.FilesController;
 [Collection("Test Collection")]
 public class FormFilesTest(
     FilesApiFactory filesFactory,
-    WebApplicationFactory<WebApiProgram> apiFactory,
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram)
+    WepApiFactory apiFactory,
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram)
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
     [Fact]
@@ -41,10 +41,10 @@ public class FormFilesTest(
         await _filesClient.Authenticate(Initializer.Owner);
 
         // Create a regular PDF file (not a form)
-        var regularPdfFile = await CreateFile("regular.pdf", FolderType.USER, Initializer.Owner);
+        var regularPdfFile = await CreateFileInMy("regular.pdf", Initializer.Owner);
 
         // Act
-        var isFormResult = (await _filesFilesApi.IsFormPDFAsync(regularPdfFile.Id, TestContext.Current.CancellationToken)).Response;
+        var isFormResult = (await _filesApi.IsFormPDFAsync(regularPdfFile.Id, TestContext.Current.CancellationToken)).Response;
 
         // Assert
         // Created PDF files are not forms
@@ -59,17 +59,17 @@ public class FormFilesTest(
 
         // Note: Creating a proper form file for testing might require specific setup
         // For this test, we'll use a regular file but handle the expected response appropriately
-        var file = await CreateFile("test_form.pdf", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("test_form.pdf", Initializer.Owner);
 
         // Act & Assert
         try
         {
-            var roles = (await _filesFilesApi.GetAllFormRolesAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+            var roles = (await _filesApi.GetAllFormRolesAsync(file.Id, TestContext.Current.CancellationToken)).Response;
 
             // If the file is properly recognized as a form, we can check its roles
             roles.Should().NotBeNull();
         }
-        catch (Docspace.Client.ApiException ex)
+        catch (ApiException ex)
         {
             // For a non-form file or if form functionality is not fully set up in test environment
             // API might return an error - this is expected
@@ -85,18 +85,18 @@ public class FormFilesTest(
 
         // Note: Creating a proper form draft for testing might require specific setup
         // For this test, we'll use a regular file but handle the expected response appropriately
-        var file = await CreateFile("form_draft.pdf", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("form_draft.pdf", Initializer.Owner);
 
         // Act & Assert
         try
         {
             var checkParams = new CheckFillFormDraft();
-            var result = (await _filesFilesApi.CheckFillFormDraftAsync(file.Id, checkParams, TestContext.Current.CancellationToken)).Response;
+            var result = (await _filesApi.CheckFillFormDraftAsync(file.Id, checkParams, TestContext.Current.CancellationToken)).Response;
 
             // If the file is properly recognized as a form draft, we'll get a session ID
             result.Should().NotBeNull();
         }
-        catch (Docspace.Client.ApiException ex)
+        catch (ApiException ex)
         {
             // For a non-form file or if form functionality is not fully set up in test environment
             // API might return an error - this is expected
@@ -112,20 +112,20 @@ public class FormFilesTest(
 
         // Create a test form file
         // Note: Creating a proper form file for testing might require specific setup
-        var file = await CreateFile("manage_form.pdf", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("manage_form.pdf", Initializer.Owner);
 
         // Act & Assert
         try
         {
             // Attempt to manage form filling (e.g., start a filling process)
             var manageParams = new ManageFormFillingDtoInteger(file.Id, FormFillingManageAction.Resume);
-            await _filesFilesApi.ManageFormFillingAsync(file.Id.ToString(), manageParams, TestContext.Current.CancellationToken);
+            await _filesApi.ManageFormFillingAsync(file.Id.ToString(), manageParams, TestContext.Current.CancellationToken);
 
             // If successful, get the file to check its status
             var updatedFile = await GetFile(file.Id);
             updatedFile.Should().NotBeNull();
         }
-        catch (Docspace.Client.ApiException ex)
+        catch (ApiException ex)
         {
             // For a non-form file or if form functionality is not fully set up in test environment
             // API might return an error - this is expected

@@ -262,6 +262,10 @@ public class FileMarker(
                             if (userEntriesData.TryGetValue(id, out var value))
                             {
                                 value.Entries.Add(rootFolder);
+                                if (rootFolder == folderShare)
+                                {
+                                    value.RootId = rootFolder.Id.ToString();
+                                }
                             }
                             else
                             {
@@ -1038,6 +1042,8 @@ public class FileMarker(
             return;
         }
 
+        totalTags = totalTags.Distinct().ToList();
+
         var shareFolder = await globalFolder.GetFolderShareAsync<T>(daoFactory);
         var parentFolderTag = Equals(shareFolder, parent.Id)
                                     ? await tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(shareFolder)).FirstOrDefaultAsync()
@@ -1192,31 +1198,13 @@ public class FileMarker(
         }
     }
     
-    public async Task<MarkResult> MarkAsRecentByLink<T>(FileEntry<T> entry, Guid linkId)
+    public async Task MarkAsRecentByLink<T>(FileEntry<T> entry, Guid linkId)
     {
-        if (entry is File<T>)
-        {
-            if (entry.RootFolderType is not FolderType.USER)
-            {
-                return MarkResult.NotMarked;
-            }
-
-            if (await globalFolder.GetFolderMyAsync(daoFactory) == 0)
-            {
-                return MarkResult.NotMarked;
-            }
-        }
-
-        if (entry is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType))
-        {
-            return MarkResult.NotMarked;
-        }
-        
         var tagDao = daoFactory.GetTagDao<T>();
         var userId = authContext.CurrentAccount.ID;
         var linkIdString = linkId.ToString();
 
-        var tags = await tagDao.GetTagsAsync(userId, TagType.RecentByLink, [entry])
+        var tags = await tagDao.GetTagsAsync(userId, [TagType.RecentByLink, TagType.Recent], [entry])
             .ToDictionaryAsync(k => k.Name);
 
         if (tags.Count > 0)
@@ -1225,16 +1213,9 @@ public class FileMarker(
 
             await tagDao.RemoveTagsAsync(toRemove);
         }
-
-        if (tags.ContainsKey(linkIdString))
-        {
-            return MarkResult.MarkExists;
-        }
-
-        var tag = Tag.RecentByLink(authContext.CurrentAccount.ID, linkId, entry);
-        await tagDao.SaveTagsAsync(tag);
-
-        return MarkResult.Marked;
+        
+        var tag = Tag.RecentByLink(userId, linkId, entry);
+        await tagDao.SaveTagsAsync(tag, userId);
     }
 
     private async Task InsertToCache(object folderId, int count)
@@ -1327,11 +1308,4 @@ public class AsyncTaskData<T> : DistributedTask
             _logger.ErrorExecMarkFileAsNew(e);
         }
     }
-}
-
-public enum MarkResult
-{
-    Marked,
-    NotMarked,
-    MarkExists
 }

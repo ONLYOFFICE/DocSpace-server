@@ -264,7 +264,8 @@ public class EditorConfiguration<T>(
     EntryManager entryManager,
     DocumentServiceTrackerHelper documentServiceTrackerHelper, 
     ExternalShare externalShare,
-    UserPhotoManager userPhotoManager)
+    UserPhotoManager userPhotoManager,
+    GlobalFolderHelper globalFolderHelper)
 {
     public PluginsConfig Plugins { get; } = pluginsConfig;
     public CustomizationConfig<T> Customization { get; } = customizationConfig;
@@ -285,7 +286,6 @@ public class EditorConfiguration<T>(
         if (_user != null)
         {
             return _user;
-
         }
 
         if (!UserInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
@@ -302,13 +302,18 @@ public class EditorConfiguration<T>(
     }
 
     public async Task<string> GetCallbackUrl(File<T> file)
-    {
+    {        
         if (!ModeWrite)
         {
             return null;
         }
-
+        
         var callbackUrl = documentServiceTrackerHelper.GetCallbackUrl(file.Id.ToString());
+
+        if (!string.IsNullOrEmpty(file.FormInfo?.FillingSessionId))
+        {
+            callbackUrl = externalShare.GetUrlWithFillingSessionId(callbackUrl, file.FormInfo.FillingSessionId);
+        }
 
         if (file.ShareRecord is not { IsLink: true } || string.IsNullOrEmpty(file.ShareRecord.Options?.Password))
         {
@@ -356,6 +361,10 @@ public class EditorConfiguration<T>(
                 title = FilesJSResource.TitleNewFilePresentation;
                 break;
 
+            case FileType.Pdf:
+                title = FilesJSResource.TitleNewFilePdfFormText;
+                break;
+
             default:
                 return null;
         }
@@ -396,21 +405,37 @@ public class EditorConfiguration<T>(
         };
 
         var folderDao = daoFactory.GetFolderDao<int>();
-        var files = (await entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, null, false))
+        var recentId = await globalFolderHelper.FolderRecentAsync;
+        var recent = await folderDao.GetFolderAsync(recentId);
+
+        var (entries, _) = await entryManager.GetEntriesAsync(recent, null, 0, 10, [filter], false, Guid.Empty, String.Empty, null, false, false, new OrderBy(SortedByType.LastOpened, false));
+        
+        var files = entries 
             .Cast<File<int>>()
             .Where(file => file != null && !Equals(fileId, file.Id))
             .ToList();
 
         var parentIds = files.Select(r => r.ParentId).Distinct().ToList();
         var parentFolders = await folderDao.GetFoldersAsync(parentIds).ToListAsync();
+
+           
         
         foreach (var file in files)
-        {
+        { 
+            var externalMediaAccess = file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink };
+            var requestToken = "";
+            if (externalMediaAccess)
+            {
+                requestToken = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
+            }
+            
+            var webUrl = externalShare.GetUrlWithShare(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), requestToken);
+            
             yield return new RecentConfig
             {
                 Folder = parentFolders.FirstOrDefault(r => file.ParentId == r.Id)?.Title,
                 Title = file.Title,
-                Url = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
+                Url = baseCommonLinkUtility.GetFullAbsolutePath(webUrl)
             };
         }
     }
@@ -577,11 +602,6 @@ public class PermissionsConfig
     /// Defines if the document can be printed or not.
     /// </summary>
     public bool Print { get; set; } = true;
-
-    /// <summary>
-    /// Specifies whether to display the "Rename..." button when using the "onRequestRename" event.
-    /// </summary>
-    public bool Rename { get; set; }
 
     /// <summary>
     /// Defines if the document can be reviewed or not.
@@ -845,6 +865,7 @@ public class CustomerConfig(
 [Transient(GenericArguments = [typeof(string)])]
 public class CustomizationConfig<T>(
     CoreBaseSettings coreBaseSettings,
+    TenantManager tenantManager,
     SettingsManager settingsManager,
     FileUtility fileUtility,
     FilesSettingsHelper filesSettingsHelper,
@@ -863,7 +884,22 @@ public class CustomizationConfig<T>(
     [JsonIgnore]
     public string GobackUrl;
 
-    public bool About => !coreBaseSettings.Standalone && !coreBaseSettings.CustomMode;
+    public async Task<bool> IsAboutPageVisible()
+    {
+        if (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode)
+        {
+            return true;
+        }
+
+        var quota = await tenantManager.GetCurrentTenantQuotaAsync();
+        if (!quota.Branding)
+        {
+            return true;
+        }
+
+        var companyWhiteLabelSettings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>();
+        return !companyWhiteLabelSettings.HideAbout;
+    }
 
     public CustomerConfig Customer { get; set; } = customerConfig;
 
@@ -896,11 +932,6 @@ public class CustomizationConfig<T>(
 
     public async Task<GobackConfig> GetGoBack(EditorType editorType, File<T> file)
     {
-        if (editorType == EditorType.Embedded)
-        {
-            return null;
-        }
-        
         if (GobackUrl != null)
         {
             return new GobackConfig
@@ -910,7 +941,7 @@ public class CustomizationConfig<T>(
         }
         
         Folder<T> parent;
-        var folderDao = daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetCacheFolderDao<T>();
         var (shareRight, key) = await CheckLinkAsync(file);
         
         if (!authContext.IsAuthenticated)
@@ -929,28 +960,48 @@ public class CustomizationConfig<T>(
         {
 
             parent = await folderDao.GetFolderAsync(file.ParentId);
-            if (file.RootFolderType == FolderType.USER && 
-                !Equals(file.RootId, await globalFolderHelper.FolderMyAsync) && 
-                !await fileSecurity.CanReadAsync(parent))
+            
+            if (file.RootFolderType == FolderType.USER && !Equals(file.RootId, await globalFolderHelper.FolderMyAsync))
             {
-                if (await fileSecurity.CanReadAsync(file))
+                if (!await fileSecurity.CanReadAsync(file))
                 {
-                    return new GobackConfig
-                    {
-                        Url = await pathProvider.GetFolderUrlByIdAsync(await globalFolderHelper.FolderRecentAsync, key)
-                    };
+                    return null;
                 }
 
-                return null;
+                string url;
+
+                if (parent.FolderType != FolderType.USER && await fileSecurity.CanReadAsync(parent))
+                {
+                    parent.RootFolderType = FolderType.SHARE;
+                    url = pathProvider.GetFolderUrl(parent, key);
+                    parent.RootFolderType = FolderType.USER;
+                }
+                else
+                {
+                    url = pathProvider.GetFolderUrl(await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>()), key);
+                }
+                
+                return new GobackConfig
+                {
+                    Url = url
+                };
             }
 
+            var canReadParent = await fileSecurity.CanReadAsync(parent);
+            
             if (file.Encrypted && 
                 file.RootFolderType == FolderType.Privacy && 
-                !await fileSecurity.CanReadAsync(parent))
+                !canReadParent)
             {
                 parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderPrivacyAsync<T>());
             }
 
+            if (file.RootFolderType == FolderType.VirtualRooms && 
+                !canReadParent)
+            {
+                parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>());
+            }
+            
             return new GobackConfig
             {
                 Url =  pathProvider.GetFolderUrl(parent, key)
@@ -1130,28 +1181,37 @@ public class LogoConfig(
     TenantLogoHelper tenantLogoHelper)
 {
 
-    public async Task<string> GetImage(EditorType editorType)
+    public async Task<string> GetImage(FileType fileType, EditorType editorType)
     {
-        return editorType == EditorType.Embedded
-                ? commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed))
-                : commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor));
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, editorType == EditorType.Embedded);
+
+        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(logoType));
     }
 
-    public async Task<string> GetImageLight()
+    public async Task<string> GetImageLight(FileType fileType)
     {
-        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed));
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, embed: true);
+
+        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(logoType));
     }
 
-    public async Task<string> GetImageDark()
+    public async Task<string> GetImageDark(FileType fileType)
     {
-        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor));
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, embed: false);
+
+        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(logoType));
     }
 
-    public async Task<string> GetImageEmbedded(EditorType editorType)
+    public async Task<string> GetImageEmbedded(FileType fileType, EditorType editorType)
     {
-        return editorType != EditorType.Embedded
-                ? null
-                : commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed));
+        if (editorType != EditorType.Embedded)
+        {
+            return null;
+        }
+
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, true);
+
+        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(logoType));
     }
 
     public string Url

@@ -27,84 +27,48 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// Client session opening parameters
-/// </summary>
-public class OpenCustomerSessionRequestDto
-{
-    /// <summary>
-    /// Service account
-    /// </summary>
-    public int ServiceAccount { get; set; }
-
-    /// <summary>
-    /// External reference
-    /// </summary>
-    public string ExternalRef { get; set; }
-
-    /// <summary>
-    /// Quantity
-    /// </summary>
-    public int Quantity { get; set; }
-}
-
-/// <summary>
-/// Parameters for performing a customer operation
-/// </summary>
-public class PerformCustomerOperationRequestDto
-{
-    /// <summary>
-    /// Service account
-    /// </summary>
-    public int ServiceAccount { get; set; }
-
-    /// <summary>
-    /// Session ID
-    /// </summary>
-    public int SessionId { get; set; }
-
-    /// <summary>
-    /// Quantity
-    /// </summary>
-    public int Quantity { get; set; }
-}
-
-/// <summary>
-/// Parameters of the request for receiving the report on client operations
+/// The request parameters for receiving a report on client operations.
 /// </summary>
 public class CustomerOperationsRequestDto
 {
     /// <summary>
-    /// Start date
+    /// The report start date.
     /// </summary>
     [FromQuery(Name = "startDate")]
     public DateTime StartDate { get; set; }
 
     /// <summary>
-    /// End date
+    /// The report end date.
     /// </summary>
     [FromQuery(Name = "endDate")]
     public DateTime EndDate { get; set; }
 
     /// <summary>
-    /// Include credit operations (true by default)
+    /// The participant name.
+    /// </summary>
+    [FromQuery(Name = "participantName")]
+    public string ParticipantName { get; set; }
+
+    /// <summary>
+    /// Specifies whether to include credit operations in the report. The default value is true.
     /// </summary>
     [FromQuery(Name = "credit")]
     public bool? Credit { get; set; }
 
     /// <summary>
-    /// Include withdrawal operations (true by default)
+    /// Specifies whether to include debit operations in the report. The default value is true.
     /// </summary>
-    [FromQuery(Name = "withdrawal")]
-    public bool? Withdrawal { get; set; }
+    [FromQuery(Name = "debit")]
+    public bool? Debit { get; set; }
 
     /// <summary>
-    /// Offset (0 by default)
+    /// The number of items to skip for pagination. The default value is 0.
     /// </summary>
     [FromQuery(Name = "offset")]
     public int? Offset { get; set; }
 
     /// <summary>
-    /// Limit (25 by default)
+    /// The maximum number of items to return for pagination. The default value is 25.
     /// </summary>
     [FromQuery(Name = "limit")] 
     public int? Limit { get; set; }
@@ -112,27 +76,32 @@ public class CustomerOperationsRequestDto
 }
 
 /// <summary>
-/// Parameters of the request for generating the report on client operations
+/// The request parameters for generating a report on client operations.
 /// </summary>
 public class CustomerOperationsReportRequestDto
 {
     /// <summary>
-    /// Start date
+    /// The report start date.
     /// </summary>
     public DateTime? StartDate { get; set; }
 
     /// <summary>
-    /// End date
+    /// The report end date.
     /// </summary>
     public DateTime? EndDate { get; set; }
 
     /// <summary>
-    /// Include credit operations
+    /// The participant name.
+    /// </summary>
+    public string ParticipantName { get; set; }
+
+    /// <summary>
+    /// Specifies whether to include credit operations in the report.
     /// </summary>
     public bool? Credit { get; set; }
 
     /// <summary>
-    /// Include withdrawal operations
+    /// Specifies whether to include debit operations in the report.
     /// </summary>
-    public bool? Withdrawal { get; set; }
+    public bool? Debit { get; set; }
 }

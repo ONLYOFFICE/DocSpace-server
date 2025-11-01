@@ -32,7 +32,7 @@ namespace ASC.Web.Studio.Core;
 public class EmailActivationSettings : ISettings<EmailActivationSettings>
 {
     /// <summary>
-    /// Specifies whether the email activation settings is shown or hidden.
+    /// Specifies whether the email activation settings are shown or hidden.
     /// </summary>
     public bool Show { get; set; }
 

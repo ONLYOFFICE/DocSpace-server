@@ -42,6 +42,7 @@ public static class Actions
     public static readonly INotifyAction JoinUsers = new NotifyAction("join", "join users");
     public static readonly INotifyAction SendWhatsNew = new NotifyAction("send_whats_new", "send whats new");
     public static readonly INotifyAction BackupCreated = new NotifyAction("backup_created", "backup created");
+    public static readonly INotifyAction ScheduledBackupFailed = new NotifyAction("scheduled_backup_failed", "scheduled backup failed");
     public static readonly INotifyAction RestoreStarted = new NotifyAction("restore_started", "restore_started");
     public static readonly INotifyAction RestoreCompletedV115 = new NotifyAction("restore_completed_v115");
     public static readonly INotifyAction PortalDeactivate = new NotifyAction("portal_deactivate", "portal deactivate");
@@ -59,6 +60,7 @@ public static class Actions
     public static readonly INotifyAction ActivateEmail = new NotifyAction("activate_email", "activate_email");
     public static readonly INotifyAction EmailChangeV115 = new NotifyAction("change_email_v115", "change_email_v115");
     public static readonly INotifyAction PasswordChangeV115 = new NotifyAction("change_password_v115", "change_password_v115");
+    public static readonly INotifyAction PasswordChanged = new NotifyAction("password_changed", "password_changed");
     public static readonly INotifyAction PasswordSet = new NotifyAction("set_password", "set_password");
     public static readonly INotifyAction PhoneChange = new NotifyAction("change_phone", "change_phone");
     public static readonly INotifyAction TfaChange = new NotifyAction("change_tfa", "change_tfa");

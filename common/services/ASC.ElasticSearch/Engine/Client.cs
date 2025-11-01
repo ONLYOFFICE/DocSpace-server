@@ -55,6 +55,7 @@ public class Client(ILogger<Client> logger, Settings settings)
 
                 var uri = new Uri($"{settings.Scheme}://{settings.Host}:{settings.Port}");
                 var connectionSettings = new ConnectionSettings(new SingleNodeConnectionPool(uri))
+                    .TransferEncodingChunked()
                     .RequestTimeout(TimeSpan.FromMinutes(5))
                     .MaximumRetries(10)
                     .ThrowExceptions();
@@ -92,7 +93,14 @@ public class Client(ILogger<Client> logger, Settings settings)
                     var client = new OpenSearchClient(connectionSettings);
                     if (Ping(client))
                     {
-                        client.Ingest.PutPipeline("attachments", p => p.Processors(pp => pp.Attachment<Attachment>(a => a.Field("document.data").TargetField("document.attachment"))));
+                        client.Ingest.PutPipeline("attachments", p =>
+                            p.Processors(pp =>
+                                pp.Attachment<Attachment>(a =>
+                                    a.Field("document.data")
+                                        .TargetField("document.attachment")
+                                        .IndexedCharacters(-1))
+                                    .Remove<Document>(x => 
+                                        x.Field("document.data"))));
                         
                         _client = client;
                     }

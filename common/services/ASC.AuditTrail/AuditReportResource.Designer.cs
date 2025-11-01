@@ -340,6 +340,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Customer wallet enabled services settings updated.
+        /// </summary>
+        public static string CustomerWalletServicesSettingsUpdated {
+            get {
+                return ResourceManager.GetString("CustomerWalletServicesSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Customer wallet topped up: {0}.
         /// </summary>
         public static string CustomerWalletToppedUp {
@@ -520,15 +529,6 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Documents.
-        /// </summary>
-        public static string DocumentsProduct {
-            get {
-                return ResourceManager.GetString("DocumentsProduct", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Settings.
         /// </summary>
         public static string DocumentsSettingsModule {
@@ -691,6 +691,33 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Files [{0}]. External link created: {1}. Role: {2}.
+        /// </summary>
+        public static string FileExternalLinkCreated {
+            get {
+                return ResourceManager.GetString("FileExternalLinkCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Files [{0}]. External link deleted: {1}.
+        /// </summary>
+        public static string FileExternalLinkDeleted {
+            get {
+                return ResourceManager.GetString("FileExternalLinkDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Files [{0}]. External link updated: {1}. Role: {2}.
+        /// </summary>
+        public static string FileExternalLinkUpdated {
+            get {
+                return ResourceManager.GetString("FileExternalLinkUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Folders [{0}]. File Imported: {1}. Provider: {2}.
         /// </summary>
         public static string FileImported {
@@ -714,6 +741,15 @@ namespace ASC.AuditTrail {
         public static string FileLocked {
             get {
                 return ResourceManager.GetString("FileLocked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File Marked As Favorite: {0}.
+        /// </summary>
+        public static string FileMarkedAsFavorite {
+            get {
+                return ResourceManager.GetString("FileMarkedAsFavorite", resourceCulture);
             }
         }
         
@@ -750,6 +786,24 @@ namespace ASC.AuditTrail {
         public static string FileOpenedForChange {
             get {
                 return ResourceManager.GetString("FileOpenedForChange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File Removed From Favorite: {0}.
+        /// </summary>
+        public static string FileRemovedFromFavorite {
+            get {
+                return ResourceManager.GetString("FileRemovedFromFavorite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File removed from &quot;Shared with me&quot;: {0}.
+        /// </summary>
+        public static string FileRemovedFromList {
+            get {
+                return ResourceManager.GetString("FileRemovedFromList", resourceCulture);
             }
         }
         
@@ -844,6 +898,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Files [{0}]. Access Updated for {1}. Role: {2}.
+        /// </summary>
+        public static string FileUpdatedAccessFor {
+            get {
+                return ResourceManager.GetString("FileUpdatedAccessFor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Files [{0}]. Revision {1}. Comment Updated.
         /// </summary>
         public static string FileUpdatedRevisionComment {
@@ -916,6 +979,42 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Folder Downloaded: {0}.
+        /// </summary>
+        public static string FolderDownloaded {
+            get {
+                return ResourceManager.GetString("FolderDownloaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folders [{0}]. External link created: {1}. Role: {2}.
+        /// </summary>
+        public static string FolderExternalLinkCreated {
+            get {
+                return ResourceManager.GetString("FolderExternalLinkCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folders [{0}]. External link deleted: {1}.
+        /// </summary>
+        public static string FolderExternalLinkDeleted {
+            get {
+                return ResourceManager.GetString("FolderExternalLinkDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folders [{0}]. External link updated: {1}. Role: {2}.
+        /// </summary>
+        public static string FolderExternalLinkUpdated {
+            get {
+                return ResourceManager.GetString("FolderExternalLinkUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Folder: {0}. Index changed from {1} to {2}.
         /// </summary>
         public static string FolderIndexChanged {
@@ -961,6 +1060,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Folder removed from &quot;Shared with me&quot;: {0}.
+        /// </summary>
+        public static string FolderRemovedFromList {
+            get {
+                return ResourceManager.GetString("FolderRemovedFromList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Folder Renamed: {0}.
         /// </summary>
         public static string FolderRenamed {
@@ -984,6 +1092,15 @@ namespace ASC.AuditTrail {
         public static string FolderUpdatedAccess {
             get {
                 return ResourceManager.GetString("FolderUpdatedAccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folders [{0}]. Access Updated for {1}. Role: {2}.
+        /// </summary>
+        public static string FolderUpdatedAccessFor {
+            get {
+                return ResourceManager.GetString("FolderUpdatedAccessFor", resourceCulture);
             }
         }
         
@@ -1249,6 +1366,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Location.
+        /// </summary>
+        public static string LocationCol {
+            get {
+                return ResourceManager.GetString("LocationCol", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Login Fail.
         /// </summary>
         public static string LoginFail {
@@ -1429,7 +1555,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Login Via Social Account Success.
+        ///   Looks up a localized string similar to Login Via Social Account Success: {0}.
         /// </summary>
         public static string LoginSuccessViaApiSocialAccount {
             get {
@@ -1443,6 +1569,24 @@ namespace ASC.AuditTrail {
         public static string LoginSuccessViaApiTfa {
             get {
                 return ResourceManager.GetString("LoginSuccessViaApiTfa", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successful Login via OAuth 2.0.
+        /// </summary>
+        public static string LoginSuccessViaOAuth {
+            get {
+                return ResourceManager.GetString("LoginSuccessViaOAuth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Login success via login and password.
+        /// </summary>
+        public static string LoginSuccessViaPassword {
+            get {
+                return ResourceManager.GetString("LoginSuccessViaPassword", resourceCulture);
             }
         }
         
@@ -1528,15 +1672,6 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Others.
-        /// </summary>
-        public static string OthersProduct {
-            get {
-                return ResourceManager.GetString("OthersProduct", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Owner Changed: {0}.
         /// </summary>
         public static string OwnerChanged {
@@ -1587,15 +1722,6 @@ namespace ASC.AuditTrail {
         public static string PasswordStrengthSettingsUpdated {
             get {
                 return ResourceManager.GetString("PasswordStrengthSettingsUpdated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to People.
-        /// </summary>
-        public static string PeopleProduct {
-            get {
-                return ResourceManager.GetString("PeopleProduct", resourceCulture);
             }
         }
         
@@ -1906,6 +2032,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to External link revoked: {1}.
+        /// </summary>
+        public static string RoomExternalLinkRevoked {
+            get {
+                return ResourceManager.GetString("RoomExternalLinkRevoked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to External link updated: {0}. Role: {1}.
         /// </summary>
         public static string RoomExternalLinkUpdated {
@@ -2145,15 +2280,6 @@ namespace ASC.AuditTrail {
         public static string SessionStarted {
             get {
                 return ResourceManager.GetString("SessionStarted", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Settings.
-        /// </summary>
-        public static string SettingsProduct {
-            get {
-                return ResourceManager.GetString("SettingsProduct", resourceCulture);
             }
         }
         

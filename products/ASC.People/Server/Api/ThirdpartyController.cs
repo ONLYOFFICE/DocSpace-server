@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Log;
+using ASC.Web.Studio.UserControls.Management;
+
 using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.People.Api;
@@ -33,14 +36,15 @@ namespace ASC.People.Api;
 ///</summary>
 [DefaultRoute("thirdparty")]
 public class ThirdpartyController(
+    ILogger<ThirdpartyController> logger,
     AccountLinker accountLinker,
-    CookiesManager cookiesManager,
     CoreBaseSettings coreBaseSettings,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IHttpClientFactory httpClientFactory,
     MobileDetector mobileDetector,
     ProviderManager providerManager,
     UserHelpTourHelper userHelpTourHelper,
+    EmployeeDtoHelper employeeDtoHelper,
     UserManagerWrapper userManagerWrapper,
     UserPhotoManager userPhotoManager,
     AuthContext authContext,
@@ -53,7 +57,8 @@ public class ThirdpartyController(
     LoginProfileTransport loginProfileTransport,
     EmailValidationKeyModelHelper emailValidationKeyModelHelper,
     UserSocketManager socketManager,
-    UserWebhookManager webhookManager)
+    UserWebhookManager webhookManager,
+    GeolocationHelper geolocationHelper)
     : ApiControllerBase
     {
 
@@ -81,7 +86,9 @@ public class ThirdpartyController(
 
         inDto.FromOnly = string.IsNullOrWhiteSpace(inDto.FromOnly) ? string.Empty : inDto.FromOnly.ToLower();
 
-        foreach (var provider in ProviderManager.AuthProviders.Where(provider => string.IsNullOrEmpty(inDto.FromOnly) || inDto.FromOnly == provider || (provider == "google" && inDto.FromOnly == "openid")))
+        var geoInfoKey = (await geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key;
+
+        foreach (var provider in ProviderManager.GetSortedAuthProviders(geoInfoKey).Where(provider => string.IsNullOrEmpty(inDto.FromOnly) || inDto.FromOnly == provider || (provider == "google" && inDto.FromOnly == "openid")))
         {
             if (inDto.InviteView && ProviderManager.InviteExceptProviders.Contains(provider))
             {
@@ -157,7 +164,7 @@ public class ThirdpartyController(
     [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
     [AllowAnonymous]
     [HttpPost("signup")]
-    public async Task SignupThirdPartyAccount(SignupAccountRequestDto inDto)
+    public async Task<EmployeeDto> SignupThirdPartyAccount(SignupAccountRequestDto inDto)
     {
         var passwordHash = inDto.PasswordHash;
         var mustChangePassword = false;
@@ -176,14 +183,14 @@ public class ThirdpartyController(
                 throw new Exception(thirdPartyProfile.AuthorizationError);
             }
 
-            return;
+            return null;
         }
 
         if (string.IsNullOrEmpty(thirdPartyProfile.EMail))
         {
             throw new Exception(Resource.ErrorNotCorrectEmail);
         }
-        
+
         var model = emailValidationKeyModelHelper.GetModel();
         var linkData = await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, null, inDto.EmployeeType ?? EmployeeType.RoomAdmin, model?.UiD);
 
@@ -202,20 +209,16 @@ public class ThirdpartyController(
             {
                 await accountLinker.AddLinkAsync(user.Id, thirdPartyProfile);
             }
-
-            await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
         }
         else
         {
-            Guid userId;
-
             try
             {
                 await securityContext.AuthenticateMeWithoutCookieAsync(Constants.CoreSystem);
 
                 var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
 
-                (var newUser, quotaLimit) = await CreateNewUser(
+                (user, quotaLimit) = await CreateNewUser(
                     GetFirstName(inDto, thirdPartyProfile),
                     GetLastName(inDto, thirdPartyProfile),
                     GetEmailAddress(inDto, thirdPartyProfile),
@@ -227,40 +230,47 @@ public class ThirdpartyController(
                     model?.UiD);
 
                 var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
-                messageService.Send(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), description: newUser.DisplayUserName(false, displayUserSettingsHelper));
-                userId = newUser.Id;
+                messageService.Send(MessageInitiator.System, messageAction, MessageTarget.Create(user.Id), description: user.DisplayUserName(false, displayUserSettingsHelper));
+
                 if (!string.IsNullOrEmpty(thirdPartyProfile.Avatar))
                 {
-                    await SaveContactImage(userId, thirdPartyProfile.Avatar);
+                    await SaveContactImage(user.Id, thirdPartyProfile.Avatar);
                 }
 
-                await accountLinker.AddLinkAsync(userId, thirdPartyProfile);
+                await accountLinker.AddLinkAsync(user.Id, thirdPartyProfile);
 
-                await webhookManager.PublishAsync(WebhookTrigger.UserCreated, newUser);
+                await webhookManager.PublishAsync(WebhookTrigger.UserCreated, user);
+
+                await studioNotifyService.UserHasJoinAsync();
+
+                if (mustChangePassword)
+                {
+                    await studioNotifyService.UserPasswordChangeAsync(user, true);
+                }
+
+                await userHelpTourHelper.SetIsNewUser(true);
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorWithException(ex);
             }
             finally
             {
                 securityContext.Logout();
             }
+        }
 
-            user = await userManager.GetUsersAsync(userId);
-
-            await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
-
-            await studioNotifyService.UserHasJoinAsync();
-
-            if (mustChangePassword)
-            {
-                await studioNotifyService.UserPasswordChangeAsync(user, true);
-            }
-
-            await userHelpTourHelper.SetIsNewUser(true);
+        if (user.Id == ASC.Core.Users.Constants.LostUser.Id)
+        {
+            return null;
         }
 
         if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
         {
             await invitationService.AddUserToRoomByInviteAsync(linkData, user, quotaLimit);
         }
+
+        return await employeeDtoHelper.GetAsync(user);
     }
 
     /// <summary>
@@ -406,13 +416,10 @@ public class ThirdpartyController(
 
     private static string GetMeaningfulProviderName(string providerName)
     {
-        return providerName switch
-        {
-            "google" or "openid" => "Google",
-            "facebook" => "Facebook",
-            "twitter" => "Twitter",
-            "linkedin" => "LinkedIn",
-            _ => "Unknown Provider"
-        };
+        var result = string.IsNullOrEmpty(providerName)
+            ? null
+            : ConsumerExtension.GetResourceString(providerName == "openid" ? "Google" : providerName);
+
+        return result ?? "Unknown Provider";
     }
 }

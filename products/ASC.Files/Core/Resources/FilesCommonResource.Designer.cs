@@ -448,15 +448,6 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The file is opened for editing by {0}. Currently, the co-editing feature is not supported for this file format..
-        /// </summary>
-        public static string ErrorMessage_EditingCoauth {
-            get {
-                return ResourceManager.GetString("ErrorMessage_EditingCoauth", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The file is open for editing in a mobile application by {0}.
         /// </summary>
         public static string ErrorMessage_EditingMobile {
@@ -502,7 +493,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Moving several files to the Form Filling room is not supported. Move one {0} PDF form at a time..
+        ///   Looks up a localized string similar to Moving several files to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time..
         /// </summary>
         public static string ErrorMessage_FilesMoveFormFillingError {
             get {
@@ -529,7 +520,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Moving folders to the Form Filling room is not supported. Move one {0} PDF form at a time..
+        ///   Looks up a localized string similar to Moving folders to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time..
         /// </summary>
         public static string ErrorMessage_FolderMoveFormFillingError {
             get {
@@ -619,7 +610,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The file cannot be moved to this room. Please try to move the {0} PDF form..
+        ///   Looks up a localized string similar to The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form..
         /// </summary>
         public static string ErrorMessage_MoveToFormRoom {
             get {
@@ -952,7 +943,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The file cannot be uploaded to this room. Please try to upload the {0} PDF form..
+        ///   Looks up a localized string similar to The file cannot be uploaded to this room. Please try to upload the ONLYOFFICE PDF form..
         /// </summary>
         public static string ErrorMessage_UploadToFormRoom {
             get {
@@ -1011,6 +1002,15 @@ namespace ASC.Files.Core.Resources {
         public static string FillOutExternalLinkTitle {
             get {
                 return ResourceManager.GetString("FillOutExternalLinkTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Documents of user {0} {1}.
+        /// </summary>
+        public static string FolderNameForReassignedData {
+            get {
+                return ResourceManager.GetString("FolderNameForReassignedData", resourceCulture);
             }
         }
         

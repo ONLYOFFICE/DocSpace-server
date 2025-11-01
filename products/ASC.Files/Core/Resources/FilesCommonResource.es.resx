@@ -166,9 +166,6 @@
   <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Se ha producido un error en el servicio de documentos</value>
   </data>
-  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
-    <value>El archivo es abierto para editar por usuario {0}. En este momento la edición colaborativa no es soportada para este formato.</value>
-  </data>
   <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>{0}abrió el archivo para la edición en la aplicación móvil</value>
   </data>
@@ -183,6 +180,9 @@
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Archivo más de {0} no será movido</value>
+  </data>
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
+    <value>La nueva versión no puede ser la misma que la actual</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>No se puede copiar la carpeta a su subcarpeta</value>
@@ -219,6 +219,12 @@
   </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Es imposible conectarse a proveedor {0} con los datos de acceso proporcionados.</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
+    <value>No tiene permisos suficientes para copiar el archivo</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
+    <value>No tiene permisos suficientes para copiar la carpeta</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Usted no tiene permisos suficientes para crear</value>
@@ -280,6 +286,36 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>No hay permiso para ver los elementos en la papelera de reciclaje</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Proveedor no válido</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>No es posible utilizar esta carpeta para almacenar la sala</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>El enlace de invitación no es válido o su validez ha expirado</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>El rol no está disponible para este tipo de usuario</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Este proveedor ya está conectado a la sala</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>No tiene permisos para copiar algo a esta carpeta</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>No tiene permisos suficientes para copiar la carpeta</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>No tiene permisos suficientes para desarchivar la sala</value>
+  </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>No puede editar salas archivadas</value>
+  </data>
+  <data name="ErrorrMessage_PinRoom" xml:space="preserve">
+    <value>No puede anclar una sala</value>
+  </data>
   <data name="Everyone" xml:space="preserve">
     <value>Todos</value>
   </data>
@@ -329,6 +365,12 @@
   <data name="UnlockComment" xml:space="preserve">
     <value>El archivo es desbloqueado</value>
   </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Editor</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>No tiene permisos para editar la sala</value>
+  </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>Administrador de DocSpace</value>
   </data>
@@ -356,65 +398,20 @@
   <data name="AceStatusEnum_Collaborator" xml:space="preserve">
     <value>Colaborador</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Editor</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Este proveedor ya está conectado a la sala</value>
-  </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Proveedor no válido</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>No es posible utilizar esta carpeta para almacenar la sala</value>
-  </data>
-  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
-    <value>La nueva versión no puede ser la misma que la actual</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>El enlace de invitación no es válido o su validez ha expirado</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>El rol no está disponible para este tipo de usuario</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>No tiene permisos para editar la sala</value>
-  </data>
   <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
     <value>No tiene permisos suficientes para archivar la sala</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>No tiene permisos para copiar algo a esta carpeta</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
-    <value>No tiene permisos suficientes para copiar la carpeta</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
-    <value>No tiene permisos suficientes para copiar el archivo</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>No tiene permisos suficientes para copiar la carpeta</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>No tiene permisos suficientes para desarchivar la sala</value>
-  </data>
-  <data name="ErrorrMessage_PinRoom" xml:space="preserve">
-    <value>No puede anclar una sala</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>No puede editar salas archivadas</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Enlace compartido</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Enlace de invitación</value>
   </data>
   <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
     <value>El número máximo de enlaces no puede superar {0}</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Ha intentado introducir su contraseña demasiadas veces. Vuelva a intentarlo más tarde</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Enlace de invitación</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Enlace compartido</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Autor</value>
@@ -430,9 +427,6 @@
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Exportar autor</value>
-  </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Carpeta</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Índice</value>
@@ -458,29 +452,35 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tipo</value>
   </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Carpeta</value>
+  </data>
   <data name="Date" xml:space="preserve">
     <value>Fecha</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Usuario</value>
   </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>No se admite mover varios archivos a la sala para rellenar formularios. Mueva un formulario PDF de {0} a la vez.</value>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Enlace al formulario</value>
   </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>No se admite mover carpetas a la sala para rellenar formularios. Mueva un formulario PDF de {0} a la vez.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>El archivo no se puede mover a esta sala. Intente mover el formulario PDF de {0}.</value>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Abrir archivo</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>El archivo no se puede cargar en esta sala. Intente cargar el formulario PDF de {0}.</value>
+    <value>El archivo no se puede cargar en esta sala. Intente cargar el formulario PDF de ONLYOFFICE.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Enlace para rellenar</value>
   </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Enlace al formulario</value>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>No se admite mover varios archivos a la sala para rellenar formularios. Mueva un formulario PDF de ONLYOFFICE a la vez.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>No se admite mover carpetas a la sala para rellenar formularios. Mueva un formulario PDF de ONLYOFFICE a la vez.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>El archivo no se puede mover a esta sala. Intente mover el formulario PDF de ONLYOFFICE.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Número de formulario</value>
@@ -488,20 +488,17 @@
   <data name="ExternalUser" xml:space="preserve">
     <value>Usuario externo</value>
   </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Creador de contenido</value>
-  </data>
   <data name="AceStatusEnum_RoomManager" xml:space="preserve">
     <value>Gestor de sala</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Creador de contenido</value>
   </data>
   <data name="RoleEnum_RoomManager" xml:space="preserve">
     <value>Gestor de sala</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Abrir archivo</value>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Creador de contenido</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Creador de contenido</value>
   </data>
   <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
     <value>No se puede eliminar la versión actual del archivo</value>
@@ -512,10 +509,13 @@
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Empezar a rellenar</value>
   </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Administrador de sala</value>
+  </data>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Invitado</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrador de sala</value>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Documentos del usuario {0} {1}</value>
   </data>
 </root>

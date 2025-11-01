@@ -803,7 +803,7 @@
     <value>Personalización de marca</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Seguimiento de las conexiones y acciones de los usuarios</value>
+    <value>Seguimiento de inicios de sesión y acciones</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Tamaño máximo del archivo</value>
@@ -818,7 +818,7 @@
     <value>El número de administradores</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Copias de seguridad y recuperación automáticas</value>
+    <value>Recuperación de datos</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Número ilimitado de salas activas</value>
@@ -845,7 +845,7 @@
     <value>Usuarios en la sala:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Número ilimitado de usuarios</value>
+    <value>Número ilimitado de usuarios e invitados</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>l número de usuarios no debe superar {0}</value>
@@ -1088,22 +1088,16 @@
     <value>Moneda</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Fecha y hora</value>
+    <value>Fecha</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Cantidad</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Nombre del servicio</value>
   </data>
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Unidad de medida</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Informe sobre las operaciones del cliente ({0}-{1})</value>
-  </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Retirada</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>El grupo no se ha podido encontrar</value>
@@ -1116,5 +1110,98 @@
   </data>
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Espacio de almacenamiento utilizado:</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Espacio en disco</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Recarga de saldo</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contacto</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Débito</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detalles</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Copia de seguridad</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Copia de seguridad</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Historial de transacciones</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Renovación automática</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Recarga automática</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Pago requerido</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Copia de seguridad</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Active las copias de seguridad para su DocSpace. Los costes se facturarán automáticamente.</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} copias de seguridad gratuitas al mes</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>El número de copias de seguridad gratuitas no debe superar {0} en un mes</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID del cliente</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Secreto del cliente</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Habilite la aplicación para iniciar sesión en el portal utilizando una cuenta de WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Habilite la aplicación para iniciar sesión en el portal utilizando una cuenta de WeChat.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Fecha</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Correo electrónico</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Apellido</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Cuota del servicio de documentos ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>El número de plugins supera el límite</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Se ha producido un error inesperado. Por favor, inténtelo de nuevo.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Ha conectado correctamente Telegram para recibir notificaciones de su DocSpace.</value>
   </data>
 </root>

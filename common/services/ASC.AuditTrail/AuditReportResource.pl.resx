@@ -124,9 +124,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Nadpisywane ustawienia zostały zaktualizowane</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Dokumenty</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Ustawienia</value>
   </data>
@@ -373,9 +370,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Rusz</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Inne</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Właściciel został zmieniony: {0}</value>
   </data>
@@ -393,9 +387,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Ustawienia siły haseł zostały zaktualizowane</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Ludzie</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platforma</value>
@@ -450,9 +441,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Uruchomienie sesji</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Ustawienia</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Wyłączona możliwość SSO</value>
@@ -912,5 +900,41 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook został zaktualizowany: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Link autoryzacyjny został aktywowany</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Operacja klienta została wykonana</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Raport operacji klienta został pobrany</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Subskrypcja klienta została zaktualizowana: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Portfel klienta został zasilony: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Ustawienia zasilania portfela klienta zostały zaktualizowane</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Uwierzytelnianie LDAP wyłączone</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Włączono uwierzytelnianie LDAP</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Synchronizacja LDAP zakończona</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Lokalizacja</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Zmieniono ustawienia widoczności banerów promocyjnych</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Zaktualizowano ustawienia usług obsługujących portfel klienta</value>
   </data>
 </root>

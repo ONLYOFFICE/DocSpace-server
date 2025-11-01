@@ -48,9 +48,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         SecurityContext securityContext,
         SettingsManager settingsManager,
         IQuotaService quotaService,
-        TenantManager tenantManager)
-    {
-
+        TenantManager tenantManager,
+        CoreSettings coreSettings)
+{
     public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
     {
         var lastVersion = true;
@@ -60,8 +60,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var file = await fileDao.GetFileAsync(fileId);
         if (file != null && 0 < version && version < file.Version)
         {
-                file = await fileDao.GetFileAsync(fileId, version);
-                lastVersion = false;
+            file = await fileDao.GetFileAsync(fileId, version);
+            lastVersion = false;
         }
 
         if (file == null)
@@ -70,12 +70,12 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         return (file, lastVersion);
-            }
+    }
 
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit,
         bool tryCoauth, bool fillFormsPossible, EditorType editorType, bool isSubmitOnly = false)
     {
-        var docParams = await GetParamsAsync(file, lastVersion, true, editPossible, editPossible, tryEdit, tryCoauth, fillFormsPossible);
+        var docParams = await GetParamsAsync(file, lastVersion, editPossible, editPossible, tryEdit, tryCoauth, fillFormsPossible);
         docParams.Configuration.EditorType = editorType;
 
         if (isSubmitOnly)
@@ -91,7 +91,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     {
         var (file, lastVersion) = await GetCurFileInfoAsync(fileId, version);
 
-        return await GetParamsAsync(file, lastVersion, true, true, editPossible, tryEdit, tryCoAuthoring, fillFormsPossible);
+        return await GetParamsAsync(file, lastVersion, true, editPossible, tryEdit, tryCoAuthoring, fillFormsPossible);
     }
 
     public async Task<bool> CheckCustomQuota<T>(Folder<T> rootFolder)
@@ -140,10 +140,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return true;
     }
 
-    private async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool rightToRename,
+    private async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion,
         bool rightToEdit, bool editPossible, bool tryEdit, bool tryCoAuthoring, bool fillFormsPossible)
     {
-
         if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
@@ -171,7 +170,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         rightModifyFilter = rightModifyFilter && await fileSecurity.CanEditAsync(file) && !await customFilterManager.CustomFilterEnabledForMeAsync(file);
-        rightToRename = rightToRename && rightToEdit && await fileSecurity.CanRenameAsync(file);
 
         rightToReview = rightToReview && await fileSecurity.CanReviewAsync(file);
         if (reviewPossible && !rightToReview)
@@ -214,7 +212,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 strError = FilesCommonResource.ErrorMessage_LockedFile;
             }
 
-            rightToRename = false;
             rightToEdit = editPossible = false;
             rightToReview = reviewPossible = false;
             rightToFillForms = fillFormsPossible = false;
@@ -266,18 +263,14 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (await fileTracker.IsEditingAsync(file.Id))
         {
-            bool canCoAuthoring;
             if ((editPossible || reviewPossible || fillFormsPossible || commentPossible)
                 && tryCoAuthoring
-                && (!(canCoAuthoring = fileUtility.CanCoAuthoring(file.Title)) || await fileTracker.IsEditingAloneAsync(file.Id)))
+                && (await fileTracker.IsEditingAloneAsync(file.Id)))
             {
                 if (tryEdit)
                 {
                     var editingBy = (await fileTracker.GetEditingByAsync(file.Id)).FirstOrDefault();
-                    strError = string.Format(!canCoAuthoring 
-                                                 ? FilesCommonResource.ErrorMessage_EditingCoauth
-                                                 : FilesCommonResource.ErrorMessage_EditingMobile,
-                                             await global.GetUserNameAsync(editingBy, true));
+                    strError = string.Format(FilesCommonResource.ErrorMessage_EditingMobile, await global.GetUserNameAsync(editingBy, true));
                 }
                 
                 rightToEdit = editPossible = reviewPossible = fillFormsPossible = commentPossible = false;
@@ -307,7 +300,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         configuration.Document.Permissions = new PermissionsConfig
         {
             Edit = rightToEdit && lastVersion,
-            Rename = rightToRename && lastVersion && !file.ProviderEntry,
             Review = rightToReview && lastVersion,
             FillForms = rightToFillForms && lastVersion,
             Comment = rightToComment && lastVersion,
@@ -438,7 +430,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public async Task<string> GetDocKeyAsync<T>(T fileId, int fileVersion, DateTime modified, string extraKey = null)
     {
-        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}_{await global.GetDocDbKeyAsync()}";
+        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}_{await coreSettings.GetDocDbKeyAsync()}";
 
         if (!string.IsNullOrEmpty(extraKey))
         {
@@ -461,7 +453,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public bool IsDocSubmitKey(string docKey, string key)
     {
-        var submitKey = Encoding.UTF8.GetString(Convert.FromBase64String(FixBase64String(key)));
+        var submitKey = Encoding.UTF8.GetString(Convert.FromBase64String(key.Base64FromUrlSafe()));
 
         var keySplit = submitKey.Split(Convert.ToChar("_"), 3);
 
@@ -470,21 +462,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             return true;
         }
         return false;
-    }
-    
-    static string FixBase64String(string input)
-    {
-        // Convert from URL-safe Base64 to standard Base64
-        var fixedInput = input.Replace('-', '+').Replace('_', '/');
-    
-        // Add padding if necessary
-        switch (fixedInput.Length % 4)
-        {
-            case 2: fixedInput += "=="; break;
-            case 3: fixedInput += "="; break;
-        }
-    
-        return fixedInput;
     }
 
     public async Task CheckUsersForDropAsync<T>(File<T> file)
@@ -665,9 +642,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             if (myRoles.Count == 0)
             {
+                result.CanFill = false;
+                result.CanStartFilling = false;
                 return result;
             }
-
+            result.HasRole = true;
             var role = myRoles.FirstOrDefault(role => !role.Submitted && currentStep == role.Sequence);
             if (role != null)
             {
@@ -695,11 +674,17 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
         else
         {
-            result.CanEdit = true;
-            result.CanFill = false;
-            result.EditorType = editorType;
+            var canEdit = await fileSecurity.CanEditAsync(file);
+            var canFill = await fileSecurity.CanFillFormsAsync(file);
+
+            result.CanEdit = canEdit;
+            result.CanFill = canFill;
+            result.CanEditRoom = await fileSecurity.CanEditRoomAsync(room);
+            result.EditorType = !canEdit && canFill && editorType != EditorType.Mobile
+                        ? EditorType.Embedded
+                        : editorType;
         }
-        return result;
+            return result;
     }
 
     public async Task<FormOpenSetup<T>> GetFormOpenSetupForUserFolderAsync<T>(File<T> file, EditorType editorType, bool edit, bool fill)
@@ -712,7 +697,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             result = new FormOpenSetup<T>
             {
-                CanEdit = edit,
+                CanEdit = !fill,
                 CanFill = fill || canFill,
                 CanStartFilling = true,
                 EditorType = editorType

@@ -166,9 +166,6 @@
   <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Fehler in Dokumnetendienstleistungen aufgetreten</value>
   </data>
-  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
-    <value>Die Datei ird zur Bearbeitung von{0}geöffnet. Derzeit wird die Zusammenbearbeitung für dieses Dateiformat nicht unterstützt.</value>
-  </data>
   <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>{0} öffnetet die Datei zum Bearbeiten mit der mobilen Anwendung</value>
   </data>
@@ -183,6 +180,9 @@
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Datei größer als {0} wird nicht verschoben</value>
+  </data>
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
+    <value>Die neue Version kann nicht mit der aktuellen identisch sein</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Unmöglich das Verzeichnis in sein Unterverzeichnis zu kopieren</value>
@@ -219,6 +219,12 @@
   </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Authentifizierung bei Provider {0} mit den gegebenen Zugangsdaten nicht möglich.</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
+    <value>Sie haben keine ausreichende Berechtigungen, um die Datei zu kopieren</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
+    <value>Sie haben keine ausreichende  Berechtigungen, um den Ordner zu kopieren</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Sie haben keine Berechtigung zum Erstellen</value>
@@ -280,6 +286,36 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Unmöglich Elemente im Papierkorb durchzusehen</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Ungültiger Anbieter</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Es ist nicht möglich, diesen Ordner zum Speichern des Raums zu verwenden</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Der Einladungslink ist ungültig oder seine Gültigkeit ist abgelaufen</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Die Rolle ist für diesen Benutzertyp nicht verfügbar</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Dieser Anbieter ist bereits mit dem Raum verbunden</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Sie haben keine Berechtigung zum Kopieren in diesen Ordner</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Sie haben keine Berechtigung zum Verschieben in diesen Ordner</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Sie haben keine ausreichende Berechtigung, um die Archivierung des Raums aufzuheben</value>
+  </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Sie können archivierte Räume nicht bearbeiten</value>
+  </data>
+  <data name="ErrorrMessage_PinRoom" xml:space="preserve">
+    <value>Sie können einen Raum nicht anheften</value>
+  </data>
   <data name="Everyone" xml:space="preserve">
     <value>Jeder</value>
   </data>
@@ -329,6 +365,12 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="UnlockComment" xml:space="preserve">
     <value>Die Datei ist nicht gesperrt</value>
   </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Redakteur</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Sie haben keine Berechtigung, den Raum zu bearbeiten</value>
+  </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>DocSpace-Administrator</value>
   </data>
@@ -356,65 +398,20 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="AceStatusEnum_Collaborator" xml:space="preserve">
     <value>Collaborator</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Redakteur</value>
-  </data>
-  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
-    <value>Die neue Version kann nicht mit der aktuellen identisch sein</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
-    <value>Sie haben keine ausreichende Berechtigungen, um die Datei zu kopieren</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
-    <value>Sie haben keine ausreichende  Berechtigungen, um den Ordner zu kopieren</value>
-  </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Ungültiger Anbieter</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Es ist nicht möglich, diesen Ordner zum Speichern des Raums zu verwenden</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Der Einladungslink ist ungültig oder seine Gültigkeit ist abgelaufen</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Dieser Anbieter ist bereits mit dem Raum verbunden</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Die Rolle ist für diesen Benutzertyp nicht verfügbar</value>
-  </data>
   <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
     <value>Sie haben keine ausreichende Berechtigung zum Archivieren des Raums</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Sie haben keine Berechtigung zum Kopieren in diesen Ordner</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Sie haben keine Berechtigung, den Raum zu bearbeiten</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Sie haben keine Berechtigung zum Verschieben in diesen Ordner</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Sie haben keine ausreichende Berechtigung, um die Archivierung des Raums aufzuheben</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Sie können archivierte Räume nicht bearbeiten</value>
-  </data>
-  <data name="ErrorrMessage_PinRoom" xml:space="preserve">
-    <value>Sie können einen Raum nicht anheften</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Gemeinsamer Link</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Einladungs-Link</value>
   </data>
   <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
     <value>Die maximale Anzahl von Links darf {0} nicht überschreiten</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Sie haben zu oft versucht, Ihr Passwort einzugeben. Bitte versuchen Sie es später noch einmal</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Einladungs-Link</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Gemeinsamer Link</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Autor</value>
@@ -430,9 +427,6 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Export-Autor</value>
-  </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Ordner</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Index</value>
@@ -458,29 +452,35 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Typ</value>
   </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Ordner</value>
+  </data>
   <data name="Date" xml:space="preserve">
     <value>Datum</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Benutzer</value>
   </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Das Verschieben mehrerer Dateien in den Raum zum Ausfüllen von Formularen wird nicht unterstützt. Verschieben Sie immer nur ein {0} PDF-Formular auf einmal.</value>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Link zum Formular</value>
   </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Das Verschieben von Ordnern in den Raum zum Ausfüllen von Formularen wird nicht unterstützt. Verschieben Sie immer nur ein {0} PDF-Formular auf einmal.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Die Datei kann nicht in diesen Raum verschoben werden. Bitte versuchen Sie, das {0} PDF-Formular zu verschieben.</value>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Datei öffnen</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Die Datei kann nicht in diesen Raum hochgeladen werden. Bitte versuchen Sie, das {0} PDF-Formular hochzuladen.</value>
+    <value>Die Datei kann nicht in diesen Raum hochgeladen werden. Bitte versuchen Sie, das ONLYOFFICE PDF-Formular hochzuladen.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Link zum Ausfüllen</value>
   </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Link zum Formular</value>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Das Verschieben mehrerer Dateien in den Raum zum Ausfüllen von Formularen wird nicht unterstützt. Verschieben Sie immer nur ein ONLYOFFICE PDF-Formular auf einmal.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Das Verschieben von Ordnern in den Raum zum Ausfüllen von Formularen wird nicht unterstützt. Verschieben Sie immer nur ein ONLYOFFICE PDF-Formular auf einmal.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Die Datei kann nicht in diesen Raum verschoben werden. Bitte versuchen Sie, das ONLYOFFICE PDF-Formular zu verschieben.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Formularnummer</value>
@@ -488,20 +488,17 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="ExternalUser" xml:space="preserve">
     <value>Externer Benutzer</value>
   </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Inhaltsersteller</value>
-  </data>
   <data name="AceStatusEnum_RoomManager" xml:space="preserve">
     <value>Raum-Manager</value>
   </data>
   <data name="RoleEnum_RoomManager" xml:space="preserve">
     <value>Raum-Manager</value>
   </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
     <value>Inhaltsersteller</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Datei öffnen</value>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Inhaltsersteller</value>
   </data>
   <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
     <value>Die aktuelle Dateiversion kann nicht gelöscht werden</value>
@@ -512,10 +509,13 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Ausfüllen beginnen</value>
   </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Raumadministrator</value>
+  </data>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Gast</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Raumadministrator</value>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Dokumente des Benutzers {0} {1}</value>
   </data>
 </root>

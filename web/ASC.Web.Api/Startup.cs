@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Data.Backup.Core.Quota;
+
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ASC.Web.Api;
@@ -40,9 +42,9 @@ public class Startup : BaseStartup
 
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        var services = builder.Services;
         await base.ConfigureServices(builder);
 
+        var services = builder.Services;
         if (!_configuration.GetValue<bool>("disableLdapNotifyService"))
         {
             services.AddHostedService<LdapNotifyService>();
@@ -51,6 +53,7 @@ public class Startup : BaseStartup
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddBaseDbContextPool<BackupsContext>();
         services.RegisterQuotaFeature();
+        services.RegisterFreeBackupQuotaFeature();
         services.RegisterQueue<LdapOperationJob>();
         services.RegisterQueue<SmtpJob>();
         services.RegisterQueue<UsersQuotaSyncJob>();

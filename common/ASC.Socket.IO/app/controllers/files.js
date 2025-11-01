@@ -157,6 +157,11 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/update-telegram", (req, res) => {
+    files.updateTelegram(req.body);
+    res.end();
+  });
+
   router.post("/delete-guest", (req, res) => {
     files.deleteGuest(req.body);
     res.end();
@@ -184,6 +189,16 @@ module.exports = (files) => {
 
   router.post("/encryption-progress", (req, res) => {
     files.encryptionProgress(req.body);
+    res.end();
+  });
+
+  router.post("/self-restriction-file", (req, res) => {
+    files.selfRestrictionForFile(req.body);
+    res.end();
+  });
+
+  router.post("/self-restriction-folder", (req, res) => {
+    files.selfRestrictionForFolder(req.body);
     res.end();
   });
 

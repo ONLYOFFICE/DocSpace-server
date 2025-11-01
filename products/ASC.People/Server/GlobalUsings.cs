@@ -75,6 +75,7 @@ global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.VirtualRooms;
+global using ASC.Geolocation;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
 global using ASC.People;
@@ -103,12 +104,12 @@ global using ASC.Web.Studio.Utility;
 global using ASC.Webhooks.Core;
 global using Autofac;
 
-global using AutoMapper;
-
 global using Microsoft.AspNetCore.Http.Extensions;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.Hosting.WindowsServices;
+
+global using Riok.Mapperly.Abstractions;
 
 global using Swashbuckle.AspNetCore.Annotations;
 

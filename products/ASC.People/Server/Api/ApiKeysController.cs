@@ -36,8 +36,8 @@ public class ApiKeysController(
     UserManager userManager,
     MessageService messageService,
     SettingsManager settingsManager,
-    IHttpContextAccessor httpContextAccessor,
-    IMapper mapper) : ControllerBase
+    ApiKeyMapper mapper,
+    IHttpContextAccessor httpContextAccessor) : ControllerBase
 {
     /// <summary>
     ///  Creates a user API key with the parameters specified in the request.
@@ -78,7 +78,7 @@ public class ApiKeysController(
             apiKey.Permissions,
             expiresAt);
         
-        var apiKeyResponseDto = mapper.Map<ApiKeyResponseDto>(result.keyData);
+        var apiKeyResponseDto = await mapper.MapManual(result.keyData);
 
         messageService.Send(MessageAction.ApiKeyCreated, MessageTarget.Create(apiKeyResponseDto.Id), apiKeyResponseDto.Key);
 
@@ -116,7 +116,7 @@ public class ApiKeysController(
     ///  Returns a list of all API keys for the current user.
     /// </summary>  
     /// <short>
-    ///  Get user API keys
+    ///  Get current user's API keys
     /// </short>
     /// <path>api/2.0/keys</path>
     /// <collection>list</collection>
@@ -142,16 +142,16 @@ public class ApiKeysController(
 
         await foreach (var apiKey in result)
         {
-            yield return mapper.Map<ApiKeyResponseDto>(apiKey);
+            yield return await mapper.MapManual(apiKey);
         }
     }
 
-    
+
     /// <summary>
-    ///  Returns current user API key info.
+    /// Returns information about the current user's API key.
     /// </summary>  
     /// <short>
-    ///  Get user API key info
+    ///  Get current user's API key
     /// </short>
     /// <path>api/2.0/keys/@self</path>
     [Tags("Api keys")]
@@ -162,13 +162,12 @@ public class ApiKeysController(
         var token = httpContextAccessor?.HttpContext?.Request.Headers.Authorization.ToString()["Bearer ".Length..];
 
         var apiKey = await apiKeyManager.GetApiKeyAsync(token);
-        
-        return mapper.Map<ApiKeyResponseDto>(apiKey);
+        return await mapper.MapManual(apiKey);
     }
     
     
     /// <summary>
-    ///  Updates an existing API key changing its name, permissions and status.
+    ///  Updates an existing API key changing its name, permissions, and status.
     /// </summary>  
     /// <short>
     ///  Update an API key
@@ -212,7 +211,7 @@ public class ApiKeysController(
     }
 
     /// <summary>
-    ///  Delete a user API key by its ID.
+    ///  Deletes a user API key by its ID.
     /// </summary>  
     /// <short>
     ///  Delete a user API key

@@ -136,9 +136,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Ajustes de sobrescritura actualizados</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Documentos</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Ajustes</value>
   </data>
@@ -371,7 +368,7 @@
     <value>Conexión exitosa</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Conexión vía cuenta social exitosa</value>
+    <value>Inicio de sesión exitoso a través de la cuenta social: {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Acceso exitoso vía la aplicación de red social</value>
@@ -409,9 +406,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Mover</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Otros</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Propietario cambiado: {0}</value>
   </data>
@@ -429,9 +423,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Ajustes de seguridad de contraseña actualizados</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Personas</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Plataforma</value>
@@ -492,9 +483,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesión comenzada</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Ajustes</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO desactivada</value>
@@ -939,5 +927,62 @@
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>Ajustes actualizados para recargar el monedero del cliente</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Ubicación</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Se ha actualizado la configuración de los servicios habilitados para el monedero del cliente</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Se ha modificado la configuración de visibilidad de los banners promocionales</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Inicio de sesión correcto mediante OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Inicio de sesión correcto mediante nombre de usuario y contraseña</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Archivos [{0}]. Enlace externo creado: {1}. Rol: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Archivos [{0}]. Enlace externo eliminado: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Archivos [{0}]. Enlace externo actualizado: {1}. Rol: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Archivo marcado como favorito: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Archivo eliminado de Favoritos: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Archivo eliminado de «Compartido conmigo»: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Archivos [{0}]. Acceso actualizado para {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Carpeta descargada: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Carpetas [{0}]. Enlace externo creado: {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Carpetas [{0}]. Enlace externo eliminado: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Carpetas [{0}]. Enlace externo actualizado: {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Carpeta eliminada de «Compartido conmigo»: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Carpetas [{0}]. Acceso actualizado para {1}. Rol: {2}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Enlace externo revocado: {1}</value>
   </data>
 </root>

@@ -288,7 +288,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 return;
             }
             
-            var t1 = TryMarkAsRecentByLink(file);
+            var t1 = TryMarkAsRecent(file);
             var t2 = fileMarker.RemoveMarkAsNewAsync(file).AsTask();
             
             await Task.WhenAll(t1, t2);
@@ -485,16 +485,12 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)));
     }
 
-    private async Task TryMarkAsRecentByLink<T>(File<T> file)
+    private async Task TryMarkAsRecent<T>(File<T> file)
     {
-        if (authContext.IsAuthenticated && file.RootFolderType == FolderType.USER && !file.ProviderEntry && file.CreateBy != authContext.CurrentAccount.ID
+        if (authContext.IsAuthenticated && !file.ProviderEntry 
             && (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title) || !fileUtility.CanWebView(file.Title)))
         {
-            var linkId = await externalShare.GetLinkIdAsync();
-            if (linkId != Guid.Empty)
-            {
-                await entryManager.MarkFileAsRecentByLink(file, linkId);
-            }
+            await entryManager.MarkAsRecent(file);
         }
     }
 
@@ -589,8 +585,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             await fileDao.InvalidateCacheAsync(id);
 
             var (linkRight, file) = await CheckLinkAsync(id, version, fileDao);
-
-            if (linkRight == FileShare.Restrict && !securityContext.IsAuthenticated)
+            
+            if (linkRight.Access == FileShare.Restrict && !securityContext.IsAuthenticated)
             {
                 var auth = context.Request.Query[FilesLinkUtility.AuthKey];
                 var validateResult = emailValidationKeyProvider.ValidateEmailKey(id.ToString() + version, auth.FirstOrDefault() ?? "", global.StreamUrlExpire);
@@ -675,8 +671,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
                 return;
             }
-
-            if (linkRight == FileShare.Restrict && securityContext.IsAuthenticated && !await fileSecurity.CanDownloadAsync(file))
+            
+            if (linkRight.Access == FileShare.Restrict && securityContext.IsAuthenticated && !await fileSecurity.CanDownloadAsync(file))
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                 return;
@@ -716,20 +712,20 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         }
     }
 
-    private async Task<(FileShare, File<T>)> CheckLinkAsync<T>(T id, int version, IFileDao<T> fileDao)
+    private async Task<(ValidationInfo, File<T>)> CheckLinkAsync<T>(T id, int version, IFileDao<T> fileDao)
     {
-        var linkRight = FileShare.Restrict;
+        var validationInfo = new ValidationInfo { Access = FileShare.Restrict };
 
         var key = externalShare.GetKey();
         if (string.IsNullOrEmpty(key))
         {
-            return (linkRight, null);
+            return (validationInfo, null);
         }
 
         var result = await externalLinkHelper.ValidateAsync(key);
         if (result.Access == FileShare.Restrict)
         {
-            return (linkRight, null);
+            return (result, null);
         }
 
         var file = version > 0
@@ -738,10 +734,10 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
         if (file != null && await fileSecurity.CanDownloadAsync(file))
         {
-            linkRight = result.Access;
+            return (result, file);
         }
 
-        return (linkRight, file);
+        return (validationInfo, file);
     }
 
     private async Task EmptyFile(HttpContext context)
@@ -912,7 +908,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             }
             
             var (linkRight, file) = await CheckLinkAsync(id, version, fileDao);
-            if (linkRight == FileShare.Restrict && !securityContext.IsAuthenticated)
+            
+            if (linkRight.Access == FileShare.Restrict && !securityContext.IsAuthenticated)
             {
                 var auth = context.Request.Query[FilesLinkUtility.AuthKey].FirstOrDefault();
                 var validateResult = emailValidationKeyProvider.ValidateEmailKey(id.ToString() + version, auth ?? "", global.StreamUrlExpire);
@@ -943,8 +940,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
                 return;
             }
-
-            if (linkRight == FileShare.Restrict && securityContext.IsAuthenticated && !await fileSecurity.CanReadAsync(file))
+            
+            if (linkRight.Access == FileShare.Restrict && securityContext.IsAuthenticated && !await fileSecurity.CanReadAsync(file))
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                 return;
@@ -1055,7 +1052,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var view = bool.TryParse(context.Request.Query[FilesLinkUtility.View].FirstOrDefault(), out var v) && v;
             if (view)
             {
-                var t1 = TryMarkAsRecentByLink(file);
+                var t1 = TryMarkAsRecent(file);
                 var t2 = fileMarker.RemoveMarkAsNewAsync(file).AsTask();
                 
                 await Task.WhenAll(t1, t2);
@@ -1539,12 +1536,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             throw new HttpException((int)HttpStatusCode.BadRequest, e.Message);
         }
 
-        var lastfileDataAction = fileData.Actions?.LastOrDefault();
-        var fillingSessionId = lastfileDataAction != null
-            ? (lastfileDataAction.UserId.StartsWith(FileConstant.AnonFillingSession)
-                ? lastfileDataAction.UserId
-                : $"{fileId}_{lastfileDataAction.UserId}")
-            : string.Empty;
+        var fillingSessionId = context.Request.Query[FilesLinkUtility.FillingSessionId].FirstOrDefault() ?? string.Empty;
 
         var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
         if (!string.IsNullOrEmpty(signatureSecret))

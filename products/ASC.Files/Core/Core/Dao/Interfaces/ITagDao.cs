@@ -28,15 +28,15 @@ namespace ASC.Files.Core;
 
 public interface ITagDao<T>
 {
-    IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, TagType tagType, IEnumerable<FileEntry<T>> fileEntries);
+    IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, IEnumerable<TagType> tagType, IEnumerable<FileEntry<T>> fileEntries);
     IAsyncEnumerable<Tag> GetTagsAsync(T entryId, FileEntryType entryType, TagType? tagType, Guid? owner = null, string name = null);
-    IAsyncEnumerable<Tag> GetTagsAsync(TagType tagType, IEnumerable<FileEntry<T>> fileEntries);
-    IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, TagType tagType);
+    IAsyncEnumerable<Tag> GetTagsAsync(IEnumerable<TagType> tagType, IEnumerable<FileEntry<T>> fileEntries);
+    IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, T entryId, params IEnumerable<TagType> tagType);
     IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<T> parentFolder, bool deepSearch);
     IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, IEnumerable<FileEntry<T>> fileEntries);
     IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, FileEntry<T> fileEntry);
     Task<IEnumerable<Tag>> SaveTagsAsync(IEnumerable<Tag> tag, Guid createdBy = default);
-    Task<IEnumerable<Tag>> SaveTagsAsync(Tag tag);
+    Task<IEnumerable<Tag>> SaveTagsAsync(Tag tag, Guid createdBy = default);
     IAsyncEnumerable<TagInfo> GetTagsInfoAsync(string searchText, TagType tagType, bool byName, int from = 0, int count = 0);
     IAsyncEnumerable<TagInfo> GetTagsInfoAsync(IEnumerable<string> names, TagType type);
     Task<TagInfo> SaveTagInfoAsync(TagInfo tagInfo);

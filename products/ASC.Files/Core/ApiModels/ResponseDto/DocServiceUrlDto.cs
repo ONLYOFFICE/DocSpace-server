@@ -46,6 +46,12 @@ public class DocServiceUrlDto
     /// </summary>
     public required string DocServiceUrl { get; set; }
 
+
+    /// <summary>
+    /// The URL used to preload the document service scripts.
+    /// </summary>
+    public required string DocServicePreloadUrl { get; set; }
+
     /// <summary>
     /// The internal document service URL.
     /// </summary>
@@ -59,12 +65,12 @@ public class DocServiceUrlDto
     /// <summary>
     /// The document service signature header.
     /// </summary>
-    public string DocServiceSignatureHeader { get; set; }
+    public required string DocServiceSignatureHeader { get; set; }
 
     /// <summary>
     /// Specifies if the document service SSL verification is enabled.
     /// </summary>
-    public bool DocServiceSslVerification { get; set; }
+    public required bool DocServiceSslVerification { get; set; }
 
     /// <summary>
     /// Specifies if the document service is default.

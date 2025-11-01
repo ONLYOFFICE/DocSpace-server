@@ -61,6 +61,15 @@
   <data name="AceShareLink" xml:space="preserve">
     <value>Ulkoinen portaali</value>
   </data>
+  <data name="AceStatusEnum_Comment" xml:space="preserve">
+    <value>Kommentti</value>
+  </data>
+  <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
+    <value>Mukautettu suodatin</value>
+  </data>
+  <data name="AceStatusEnum_FillForms" xml:space="preserve">
+    <value>Lomakkeen täyttö</value>
+  </data>
   <data name="AceStatusEnum_Read" xml:space="preserve">
     <value>Vain luku</value>
   </data>
@@ -82,6 +91,9 @@
   <data name="Author_Me" xml:space="preserve">
     <value>Minä</value>
   </data>
+  <data name="CommentAutosave" xml:space="preserve">
+    <value>Automaattisesti tallennettu</value>
+  </data>
   <data name="CommentChangeOwner" xml:space="preserve">
     <value>Omistaja vaihtunut</value>
   </data>
@@ -97,14 +109,32 @@
   <data name="CommentCreateByDocuSign" xml:space="preserve">
     <value>Luoja: DocuSign</value>
   </data>
+  <data name="CommentCreateFillFormDraft" xml:space="preserve">
+    <value>Luotu täyttämään lomake</value>
+  </data>
   <data name="CommentEdit" xml:space="preserve">
     <value>Muokattu</value>
+  </data>
+  <data name="CommentEditEncrypt" xml:space="preserve">
+    <value>Muokattu salauksella</value>
+  </data>
+  <data name="CommentEncrypted" xml:space="preserve">
+    <value>Salattu</value>
+  </data>
+  <data name="CommentForcesave" xml:space="preserve">
+    <value>Tallennettu</value>
+  </data>
+  <data name="CommentOverwrite" xml:space="preserve">
+    <value>Päällekirjoitettu</value>
   </data>
   <data name="CommentRevert" xml:space="preserve">
     <value>Palautettu tarkistuksesta: {0}</value>
   </data>
   <data name="CommentRevertChanges" xml:space="preserve">
     <value>Palautettu asiakirjan muutoksesta: {0}</value>
+  </data>
+  <data name="CommentSubmitFillForm" xml:space="preserve">
+    <value>Lähetetty lomake</value>
   </data>
   <data name="CommentUpload" xml:space="preserve">
     <value>Ladattu</value>
@@ -136,9 +166,6 @@
   <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Virhe asiakirjapalvelussa. Ihan outo</value>
   </data>
-  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
-    <value>Tiedosto on avattu muokkausta varten, muokkaaja: {0}. Tällä hetkellä yhteistä muokkausta ei ole tuettu tälle tiedostomuodolle.</value>
-  </data>
   <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>{0} muokkasi tiedostoa mobiilisovelluksella</value>
   </data>
@@ -153,6 +180,9 @@
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Tiedosto joka on suurempi kuin {0} ei voida siirtää</value>
+  </data>
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
+    <value>Uusi versio ei voi olla sama kuin nykyinen</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Kansiota ei voi kopioida sen alikansioon. Vähän niin kuin yrittäisi syödä oman päänsä</value>
@@ -190,6 +220,12 @@
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Tunnistautuminen palveluntarjoajaan {0} ei onnistu annetuilla tunnuksilla.</value>
   </data>
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
+    <value>Sinulla ei ole tarpeeksi oikeuksia tiedoston kopioimiseen</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
+    <value>Sinulla ei ole tarpeeksi oikeuksia kansion kopioimiseen</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Sinulla ei ole riittävästi oikeuksia luoda</value>
   </data>
@@ -210,6 +246,12 @@
   </data>
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Olet jo muokkaamassa tätä asiakirjaa toisella välilehdellä. Nyt menee hankalaksi</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
+    <value>Sinulla ei ole tarpeeksi oikeuksia tiedostoon siirtoa varten</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
+    <value>Sinulla ei ole tarpeeksi oikeuksia kansion siirtoa varten</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Oikeutesi eivät riitä tiedoston tarkastelemiseen</value>
@@ -238,8 +280,41 @@
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Et voi päivittää tiedostoa, joka on avoinna muokkausta varten. Tietokone ei siihen pysty</value>
   </data>
+  <data name="ErrorMessage_UserNotFound" xml:space="preserve">
+    <value>Käyttäjää ei löytynyt</value>
+  </data>
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Et voi esikatsella osia Roskakorissa. Ne ovat jo liian pilaantuneita</value>
+  </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Virheellinen palveluntarjoaja</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Tätä kansiota ei ole mahdollista käyttää huoneen tallentamiseen</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Kutsulinkki on virheellinen tai sen voimassaolo on päättynyt</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Rooli ei ole mahdollinen tälle käyttäjätyypille</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Tämä palveluntarjoaja on jo yhdistetty huoneeseen</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Sinulla ei ole tarpeeksi oikeuksia tämän kansion kopioimiseen</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Sinulla ei ole tarpeeksi oikeuksia tämän kansion siirtämiseen</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Sinulla ei ole tarpeeksi oikeuksia huoneen palauttamiseen</value>
+  </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Et voi muokata arkistoituja huoneita</value>
+  </data>
+  <data name="ErrorrMessage_PinRoom" xml:space="preserve">
+    <value>Et voi kiinnittää huonetta</value>
   </data>
   <data name="Everyone" xml:space="preserve">
     <value>Kaikki</value>
@@ -247,11 +322,33 @@
   <data name="Guest" xml:space="preserve">
     <value>Vierailija</value>
   </data>
+  <data name="IndexTitle" xml:space="preserve">
+    <value>Etsi asiakirjojen sisällöstä</value>
+  </data>
+  <data name="MessageFileCreated" xml:space="preserve">
+    <value>Tiedosto luotu kansiossa "{0}"</value>
+  </data>
+  <data name="MessageFileCreatedForm" xml:space="preserve">
+    <value>Täytettävä PDF-asiakirja on valmis. Se on tallennettu {0}:aan</value>
+  </data>
+  <data name="MessageFillFormDraftCreated" xml:space="preserve">
+    <value>PDF-kopio on luotu {0} kansioon. Ole hyvä ja täytä lomake ja lataa tulos PDF:nä tai DOCX-tiedostona.</value>
+  </data>
+  <data name="MessageFillFormDraftDiscard" xml:space="preserve">
+    <value>Tiedosto ei ole enää luonnos lomakkeen täyttämiseksi.</value>
+  </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>Tee kaikkea käyttäjänä|Yhdistä Dropbox, Box ja muita palveluita 'Yhteiset asiakirjat' -osiossa|Aseta käyttöoikeuksia asiakirjoille ja kansioille 'Yhteiset asiakirjat' osiossa</value>
   </data>
   <data name="ProductDescription" xml:space="preserve">
     <value>Luo, muokkaa ja jaa asiakirjoja. Muokkaa niitä yhteistyössä reaaliajassa. Tukee 100% MS Office formaatteja.</value>
+  </data>
+  <data name="ProductDescriptionEx" xml:space="preserve">
+    <value>Muokkaa, jaa ja tee yhteistyötä office-asiakirjoilla reaaliajassa. Luo ja hallitse yhteisiä asiakirjoja, joihin koko tiimillä on pääsy.
+Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
+  </data>
+  <data name="ProductDescriptionShort" xml:space="preserve">
+    <value>Näytä ja lataa jaetut asiakirjat. Lataa tiedostot jaettuihin kansioihin. Taattu yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   </data>
   <data name="ProductName" xml:space="preserve">
     <value>Asiakirjat</value>
@@ -267,6 +364,12 @@
   </data>
   <data name="UnlockComment" xml:space="preserve">
     <value>Tiedoston lukitus on poistettu</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Muokkaaja</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Sinulla ei ole tarpeeksi oikeuksia tämän huoneen muokkaamiseen</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>DocSpace ylläpitäjä</value>
@@ -292,129 +395,23 @@
   <data name="RoleEnum_Collaborator" xml:space="preserve">
     <value>Yhteistyökumppani</value>
   </data>
-  <data name="CommentSubmitFillForm" xml:space="preserve">
-    <value>Lähetetty lomake</value>
-  </data>
-  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
-    <value>Uusi versio ei voi olla sama kuin nykyinen</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
-    <value>Sinulla ei ole tarpeeksi oikeuksia tiedoston kopioimiseen</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
-    <value>Sinulla ei ole tarpeeksi oikeuksia kansion kopioimiseen</value>
-  </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Virheellinen palveluntarjoaja</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Tätä kansiota ei ole mahdollista käyttää huoneen tallentamiseen</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Kutsulinkki on virheellinen tai sen voimassaolo on päättynyt</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Tämä palveluntarjoaja on jo yhdistetty huoneeseen</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Rooli ei ole mahdollinen tälle käyttäjätyypille</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>Sinulla ei ole tarpeeksi oikeuksia huoneen arkistoimiseen</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Sinulla ei ole tarpeeksi oikeuksia tämän kansion kopioimiseen</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Sinulla ei ole tarpeeksi oikeuksia tämän huoneen muokkaamiseen</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Sinulla ei ole tarpeeksi oikeuksia tämän kansion siirtämiseen</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Sinulla ei ole tarpeeksi oikeuksia huoneen palauttamiseen</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Et voi muokata arkistoituja huoneita</value>
-  </data>
-  <data name="ErrorrMessage_PinRoom" xml:space="preserve">
-    <value>Et voi kiinnittää huonetta</value>
-  </data>
   <data name="AceStatusEnum_Collaborator" xml:space="preserve">
     <value>Yhteistyökumppani</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Muokkaaja</value>
-  </data>
-  <data name="AceStatusEnum_Comment" xml:space="preserve">
-    <value>Kommentti</value>
-  </data>
-  <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
-    <value>Mukautettu suodatin</value>
-  </data>
-  <data name="AceStatusEnum_FillForms" xml:space="preserve">
-    <value>Lomakkeen täyttö</value>
-  </data>
-  <data name="CommentAutosave" xml:space="preserve">
-    <value>Automaattisesti tallennettu</value>
-  </data>
-  <data name="CommentCreateFillFormDraft" xml:space="preserve">
-    <value>Luotu täyttämään lomake</value>
-  </data>
-  <data name="CommentEditEncrypt" xml:space="preserve">
-    <value>Muokattu salauksella</value>
-  </data>
-  <data name="CommentEncrypted" xml:space="preserve">
-    <value>Salattu</value>
-  </data>
-  <data name="CommentForcesave" xml:space="preserve">
-    <value>Tallennettu</value>
-  </data>
-  <data name="CommentOverwrite" xml:space="preserve">
-    <value>Päällekirjoitettu</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
-    <value>Sinulla ei ole tarpeeksi oikeuksia tiedostoon siirtoa varten</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
-    <value>Sinulla ei ole tarpeeksi oikeuksia kansion siirtoa varten</value>
-  </data>
-  <data name="ErrorMessage_UserNotFound" xml:space="preserve">
-    <value>Käyttäjää ei löytynyt</value>
-  </data>
-  <data name="IndexTitle" xml:space="preserve">
-    <value>Etsi asiakirjojen sisällöstä</value>
-  </data>
-  <data name="MessageFileCreated" xml:space="preserve">
-    <value>Tiedosto luotu kansiossa "{0}"</value>
-  </data>
-  <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Täytettävä PDF-asiakirja on valmis. Se on tallennettu {0}:aan</value>
-  </data>
-  <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>PDF-kopio on luotu {0} kansioon. Ole hyvä ja täytä lomake ja lataa tulos PDF:nä tai DOCX-tiedostona.</value>
-  </data>
-  <data name="MessageFillFormDraftDiscard" xml:space="preserve">
-    <value>Tiedosto ei ole enää luonnos lomakkeen täyttämiseksi.</value>
-  </data>
-  <data name="ProductDescriptionShort" xml:space="preserve">
-    <value>Näytä ja lataa jaetut asiakirjat. Lataa tiedostot jaettuihin kansioihin. Taattu yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
-  </data>
-  <data name="ProductDescriptionEx" xml:space="preserve">
-    <value>Muokkaa, jaa ja tee yhteistyötä office-asiakirjoilla reaaliajassa. Luo ja hallitse yhteisiä asiakirjoja, joihin koko tiimillä on pääsy.
-Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Jaettu linkki</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Kutsulinkki</value>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>Sinulla ei ole tarpeeksi oikeuksia huoneen arkistoimiseen</value>
   </data>
   <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
     <value>Linkkien maksimimäärää ei voi ylittää {0}</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Olet yrittänyt syöttää salasanasi liian monta kertaa. Ole hyvä ja yritä myöhemmin uudelleen</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Kutsulinkki</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Jaettu linkki</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Tekijä</value>
@@ -430,9 +427,6 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Viennin tekijä</value>
-  </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Kansio</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Indeksi</value>
@@ -458,50 +452,53 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tyyppi</value>
   </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Kansio</value>
+  </data>
   <data name="Date" xml:space="preserve">
     <value>Päivämäärä</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Käyttäjä</value>
   </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Useiden tiedostojen siirtämistä Lomakkeen täyttöhuoneeseen ei tueta. Siirrä yksi {0} PDF-lomake kerrallaan.</value>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Linkki lomakkeeseen</value>
   </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Kansioiden siirtämistä Lomakkeen täyttöhuoneeseen ei tueta. Siirrä yksi {0} PDF-lomake kerrallaan.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Tiedostoa ei voi siirtää tähän huoneeseen. Kokeile siirtää {0} PDF-lomake.</value>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Avaa tiedosto</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Tiedostoa ei voi ladata tähän huoneeseen. Kokeile ladata {0} PDF-lomake.</value>
+    <value>Tiedostoa ei voi ladata tähän huoneeseen. Kokeile ladata ONLYOFFICE PDF-lomake.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Linkki täyttämiseen</value>
   </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Linkki lomakkeeseen</value>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Useiden tiedostojen siirtämistä Lomakkeen täyttöhuoneeseen ei tueta. Siirrä yksi ONLYOFFICE PDF-lomake kerrallaan.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Kansioiden siirtämistä Lomakkeen täyttöhuoneeseen ei tueta. Siirrä yksi ONLYOFFICE PDF-lomake kerrallaan.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Tiedostoa ei voi siirtää tähän huoneeseen. Kokeile siirtää ONLYOFFICE PDF-lomake.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Lomakkeen numero</value>
   </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Sisällöntuottaja</value>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Ulkoinen käyttäjä</value>
   </data>
   <data name="AceStatusEnum_RoomManager" xml:space="preserve">
     <value>Huoneen johtaja</value>
   </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Ulkoinen käyttäjä</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Sisällöntuottaja</value>
-  </data>
   <data name="RoleEnum_RoomManager" xml:space="preserve">
     <value>Huoneen johtaja</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Avaa tiedosto</value>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Sisällöntuottaja</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Sisällöntuottaja</value>
   </data>
   <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
     <value>Nykyistä tiedoston versiota ei voi poistaa</value>
@@ -512,10 +509,10 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Aloita täyttäminen</value>
   </data>
-  <data name="RoleEnum_Guest" xml:space="preserve">
-    <value>Vieras</value>
-  </data>
   <data name="RoleEnum_RoomAdmin" xml:space="preserve">
     <value>Huoneen pääkäyttäjä</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Vieras</value>
   </data>
 </root>

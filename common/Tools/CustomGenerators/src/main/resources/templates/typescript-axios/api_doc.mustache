@@ -1,8 +1,7 @@
-# {{classname}}{{#description}}
+# {{#operations}}{{x-classname}}{{/operations}}{{#description}}
+{{.}}{{/description}}
 
-{{description}}{{/description}}
-
-All URIs are relative to *{{basePath}}*
+All URIs are relative to *https://your-docspace.onlyoffice.com*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
@@ -44,7 +43,7 @@ import {
     {{classname}},
     Configuration{{#allParams}}{{#isModel}},
     {{{dataType}}}{{/isModel}}{{/allParams}}
-} from '{{#npmName}}{{.}}{{/npmName}}{{^npmName}}./api{{/npmName}}';
+} from '{{#packageName}}{{.}}{{/packageName}}{{^packageName}}./api{{/packageName}}';
 
 const configuration = new Configuration();
 const apiInstance = new {{classname}}(configuration);

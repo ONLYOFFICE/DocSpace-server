@@ -35,5 +35,5 @@ public class DeleteColorThemeRequestDto
     /// The ID of the portal theme to delete.
     /// </summary>
     [FromQuery(Name = "id")]
-    public int Id { get; set; }
+    public required int Id { get; set; }
 }

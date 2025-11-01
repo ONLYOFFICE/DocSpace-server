@@ -4,10 +4,14 @@
   "generator-cli": {
     "version": "7.13.0"
   },
-  "generatorName": "my-python-custom",
-  "inputSpec": "./tools/api-docs.json",
-  "outputDir": " python-test",
+  "generatorName": "my-python",
+  "inputSpec": "./json/api-docs.json",
+  "outputDir": "python-sdk",
   "additionalProperties": {
-	"packageName": "docspace-api-python"
+    "packageName": "docspace_api_sdk",
+    "packageVersion": "3.5.0-preview.1",
+    "licenseName": "Apache-2.0",
+    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-python",
+    "excludeTests": true
   }
 }

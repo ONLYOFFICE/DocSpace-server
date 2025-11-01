@@ -150,4 +150,10 @@ public class UserSocketManager(ITariffService tariffService,
             await MakeRequest("delete-guest", new { tenantId, room = admin.Id, guestId = userId });
         }
     }
+
+    public async Task UpdateTelegram(int tenantId, Guid userId, string username)
+    {
+        _ = await _tenantManager.SetCurrentTenantAsync(tenantId);
+        await MakeRequest("update-telegram", new { tenantId, userId, username });
+    }
 }

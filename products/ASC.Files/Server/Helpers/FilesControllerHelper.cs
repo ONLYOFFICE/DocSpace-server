@@ -208,13 +208,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
         return await _fileDtoHelper.GetAsync(result);
     }
-
-    public async Task<FileDto<T>> SetCustomFilterTagAsync<T>(T fileId, bool enabled)
-    {
-        var result = await _fileStorageService.SetCustomFilterTagAsync(fileId, enabled);
-
-        return await _fileDtoHelper.GetAsync(result);
-    }
+    
 
     public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null)
     {

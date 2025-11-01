@@ -57,5 +57,5 @@ public class DeleteFolder<T>
     /// The parameters for deleting a folder.
     /// </summary>
     [FromBody]
-    public DeleteFolder Delete { get; set; }
+    public required DeleteFolder Delete { get; set; }
 }

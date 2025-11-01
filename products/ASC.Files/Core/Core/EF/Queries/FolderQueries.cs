@@ -397,23 +397,15 @@ static file class FolderQueries
                                     where f.TenantId == r.TenantId
                                     select f
                                 ).FirstOrDefault(),
-                            Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom || r.FolderType == FolderType.FillingFormsRoom) 
-                                ? ctx.Security.Any(s => 
-                                    s.TenantId == r.TenantId && 
-                                    s.EntryId == r.Id.ToString() && 
-                                    s.EntryType == FileEntryType.Folder && 
-                                    s.SubjectType == SubjectType.PrimaryExternalLink)
-                                : r.FolderType == FolderType.DEFAULT && ctx.Security.Any(x => 
+                            UserShared = ctx.Security.Where(x => 
                                     x.TenantId == r.TenantId && 
-                                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) && 
-                                    x.EntryType == FileEntryType.Folder && 
-                                    x.EntryId == ctx.Tree
-                                        .Where(t => t.FolderId == r.ParentId)
-                                        .OrderByDescending(t => t.Level)
-                                        .Select(t => t.ParentId)
-                                        .Skip(1)
-                                        .FirstOrDefault()
-                                        .ToString()),
+                                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder)
+                                .Select(s => s.SubjectType).ToList(),
+                            ParentShared = ctx.Security.Any(x => 
+                                x.TenantId == r.TenantId && 
+                                (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
+                                 x.EntryType == FileEntryType.Folder && 
+                                ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
                             Settings = ctx.RoomSettings.Where(x => x.TenantId == r.TenantId && x.RoomId == r.Id).Distinct().FirstOrDefault(),
                             Order = (
                                 from f in ctx.FileOrder

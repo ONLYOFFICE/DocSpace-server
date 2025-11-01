@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Encodings.Web;
+
 using ASC.Files.Core.Core;
 using ASC.Files.Core.EF;
 
@@ -40,14 +42,16 @@ public class Startup : BaseWorkerStartup
 
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        var services = builder.Services;
         await base.ConfigureServices(builder);
         
+        var services = builder.Services;
         services.AddActivePassiveHostedService<NotifySenderService>(Configuration);
         services.AddActivePassiveHostedService<NotifyCleanerService>(Configuration);
 
         services.AddBaseDbContextPool<NotifyDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
+        
+        services.AddScoped(_ => UrlEncoder.Default);
     }
 }

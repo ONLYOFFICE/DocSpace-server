@@ -37,8 +37,7 @@ internal abstract class BaseTagDao<T>(
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
-    IDistributedLockProvider distributedLockProvider,
-    IMapper mapper)
+    IDistributedLockProvider distributedLockProvider)
     : AbstractDao(dbContextManager,
         userManager,
         tenantManager,
@@ -50,7 +49,8 @@ internal abstract class BaseTagDao<T>(
         serviceProvider,
         distributedLockProvider), ITagDao<T>
 {
-    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, TagType tagType, IEnumerable<FileEntry<T>> fileEntries)
+    private const int MaxRecentTagsCount = 1000;
+    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, IEnumerable<TagType> tagType, IEnumerable<FileEntry<T>> fileEntries)
     {
         var mapping = daoFactory.GetMapping<T>();
         var filesId = new HashSet<string>();
@@ -89,7 +89,7 @@ internal abstract class BaseTagDao<T>(
         }
     }
 
-    public IAsyncEnumerable<Tag> GetTagsAsync(TagType tagType, IEnumerable<FileEntry<T>> fileEntries)
+    public IAsyncEnumerable<Tag> GetTagsAsync(IEnumerable<TagType> tagType, IEnumerable<FileEntry<T>> fileEntries)
     {
         return GetTagsAsync(Guid.Empty, tagType, fileEntries);
     }
@@ -110,11 +110,11 @@ internal abstract class BaseTagDao<T>(
         }
     }
 
-    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, TagType tagType)
+    public async IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, T entryId, params IEnumerable<TagType> tagType)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var fromDb = await filesDbContext.TagsByOwnerAsync(tenantId, tagType, owner).ToListAsync();
+        var fromDb = await filesDbContext.TagsByOwnerAsync(tenantId, owner, Equals(entryId, default(T)) ? null : entryId.ToString(), tagType).ToListAsync();
         
         foreach (var e in fromDb)
         {
@@ -148,7 +148,7 @@ internal abstract class BaseTagDao<T>(
 
         await foreach (var tag in q.AsAsyncEnumerable())
         {
-            yield return mapper.Map<DbFilesTag, TagInfo>(tag);
+            yield return tag.MapToTagInfo();
         }
     }
 
@@ -168,13 +168,13 @@ internal abstract class BaseTagDao<T>(
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var tagDb = mapper.Map<TagInfo, DbFilesTag>(tagInfo);
+        var tagDb = tagInfo.MapToDbFilesTag();
         tagDb.TenantId = tenantId;
 
         var tag = await filesDbContext.Tag.AddAsync(tagDb);
         await filesDbContext.SaveChangesAsync();
 
-        return mapper.Map<DbFilesTag, TagInfo>(tag.Entity);
+        return tag.Entity.MapToTagInfo();
     }
 
     public async Task<IEnumerable<Tag>> SaveTagsAsync(IEnumerable<Tag> tags, Guid createdBy = default)
@@ -260,7 +260,7 @@ internal abstract class BaseTagDao<T>(
         return result;
     }
 
-    public async Task<IEnumerable<Tag>> SaveTagsAsync(Tag tag)
+    public async Task<IEnumerable<Tag>> SaveTagsAsync(Tag tag, Guid createdBy = default)
     {
         var result = new List<Tag>();
 
@@ -287,12 +287,24 @@ internal abstract class BaseTagDao<T>(
                 await using var tx = await internalFilesDbContext.Database.BeginTransactionAsync();
 
                 await DeleteTagsBeforeSave(internalFilesDbContext, tenantId);
-
+                
                 var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
                 var cacheTagId = new Dictionary<string, int>();
 
                 result.Add(await SaveTagAsync(internalFilesDbContext, tenantId, tag, cacheTagId, createOn));
 
+                if (tag.Type is TagType.Recent or TagType.RecentByLink && createdBy != Guid.Empty)
+                {
+                    await internalFilesDbContext.Tag.Where(r => r.TenantId == tenantId)
+                        .Join(internalFilesDbContext.TagLink, r => r.Id, l => l.TagId, (t, l) => new TagLinkData { Tag = t, Link = l })
+                        .Where(r => r.Link.TenantId == r.Tag.TenantId)
+                        .Where(r => (r.Tag.Type == TagType.Recent || r.Tag.Type == TagType.RecentByLink) && r.Link.CreateBy == createdBy)
+                        .Select(r => r.Link)
+                        .OrderByDescending(r => r.CreateOn)
+                        .Skip(MaxRecentTagsCount - 1)
+                        .ExecuteDeleteAsync();
+                }
+                
                 await tx.CommitAsync();
             });
         }
@@ -591,9 +603,14 @@ internal abstract class BaseTagDao<T>(
 
     protected async ValueTask<Tag> ToTagAsync(FilesDbContext filesDbContext, int tenantId, TagLinkData r)
     {
-        var result = mapper.Map<DbFilesTag, Tag>(r.Tag);
-        mapper.Map(r.Link, result);
+        var result =  r.Tag.Map();
+        TagMapper.ApplyUpdate(r.Link, result);
 
+        if (result == null)
+        {
+            return null;
+        }
+        
         result.EntryId = await MappingIdAsync(filesDbContext, tenantId, r.Link.EntryId);
 
         return result;
@@ -601,14 +618,17 @@ internal abstract class BaseTagDao<T>(
 
     private async ValueTask<TagInfo> ToTagAsyncInfo(FilesDbContext filesDbContext, int tenantId, TagLinkData r)
     {
-        var result = mapper.Map<DbFilesTag, TagInfo>(r.Tag);
-        mapper.Map(r.Tag, result);
+        var result =  r.Tag.MapToTagInfo();
+        TagInfoMapper.ApplyUpdate(r.Link, result);
 
-        if(r.Link != null)
+        if (r.Link == null)
         {
-            result.EntryId = await MappingIdAsync(filesDbContext, tenantId, r.Link.EntryId);
-            result.EntryType = r.Link.EntryType;
+            return result;
         }
+
+        result.EntryId = await MappingIdAsync(filesDbContext, tenantId, r.Link.EntryId);
+        result.EntryType = r.Link.EntryType;
+
         return result;
     }
     private string GetCacheKey(Tag tag, int tenantId)
@@ -682,7 +702,6 @@ internal class TagDao(
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
-    IMapper mapper,
     IDistributedLockProvider distributedLockProvider)
     : BaseTagDao<int>(
         daoFactory,
@@ -695,8 +714,7 @@ internal class TagDao(
           settingsManager,
           authContext,
           serviceProvider,
-          distributedLockProvider,
-          mapper)
+          distributedLockProvider)
     {
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<int> parentFolder, bool deepSearch)
     {
@@ -815,7 +833,6 @@ internal class ThirdPartyTagDao(
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider,
-        IMapper mapper,
         IThirdPartyTagDao thirdPartyTagDao,
         IDistributedLockProvider distributedLockProvider)
     : BaseTagDao<string>(
@@ -829,8 +846,7 @@ internal class ThirdPartyTagDao(
           settingsManager,
           authContext,
           serviceProvider,
-          distributedLockProvider,
-          mapper)
+          distributedLockProvider)
     {
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {

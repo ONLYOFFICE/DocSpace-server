@@ -117,12 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Date" xml:space="preserve">
-    <value>Датум</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Корисник</value>
-  </data>
   <data name="AceShareLink" xml:space="preserve">
     <value>Спољашњи портал</value>
   </data>
@@ -204,18 +198,6 @@
   <data name="CommentUpload" xml:space="preserve">
     <value>Отпремљено</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Сарадник</value>
-  </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Уређивач</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Дељени линк</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Позивни линк</value>
-  </data>
   <data name="DocuSignStatusDeclined" xml:space="preserve">
     <value>Одбијено</value>
   </data>
@@ -243,9 +225,6 @@
   <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Дошло је до грешке у Сервису за документе</value>
   </data>
-  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
-    <value>Датотека је отворена за уређивање {0}. Тренутно, функција заједничког уређивања није подржана за овај формат датотеке.</value>
-  </data>
   <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>Датотека је отворена за уређивање у мобилној апликацији од стране {0}</value>
   </data>
@@ -270,17 +249,8 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Потребан фолдер није пронађен</value>
   </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Нетачан наслов</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Није могуће користити овај фолдер за чување собе</value>
-  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Нетачан наслов</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Позивни линк је неважећи или је истекла његова валидност</value>
   </data>
   <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Датотека је тренутно закључана од стране другог корисника</value>
@@ -291,17 +261,8 @@
   <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Превише преузимања.</value>
   </data>
-  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
-    <value>Максимални број линкова можда неће прекорачити {0}</value>
-  </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Жао нам је, овај формат није подржан</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Овај провајдер је већ повезан на собу</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Улога није доступна за овај тип корисника</value>
   </data>
   <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Аутор чувања је непознат</value>
@@ -315,9 +276,6 @@
   <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Немате довољно дозвола да извршите операцију</value>
   </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>Немате довољно дозвола да архивирате собу</value>
-  </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Немогуће је ауторизовати се на {0} провајдеру са датим приступним подацима.</value>
   </data>
@@ -326,9 +284,6 @@
   </data>
   <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Немате довољно дозвола да копирате фолдер</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Немате дозволу да копирате овај фолдер</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Немате довољно дозвола да креирате</value>
@@ -351,17 +306,11 @@
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Овај документ ви уређујете у другој картици</value>
   </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Немате дозволу да уредите собу</value>
-  </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Немате довољно дозвола да померите датотеку</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Немате довољно дозвола да померите фолдер</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Немате дозволу да померите овај фолдер</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Немате довољно дозвола да видите датотеку</value>
@@ -375,26 +324,17 @@
   <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Немате довољно дозвола да преименујете фолдер</value>
   </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Немате довољно дозволе да разархивирате собу</value>
-  </data>
   <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Немогуће ажурирати датотеку зато што је отворена за уређивање</value>
   </data>
   <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Немате довољно дозвола да видите садржај фолдера</value>
   </data>
-  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>Превише пута сте покушали да унесете вашу лозинку. Молимо покушајте поново касније</value>
-  </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Садржај фолдера треће стране није доступан. Покушајте да поново повежете налог.</value>
   </data>
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Грешка у почетку уређивања датотеке</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Не можете уредити архивиране собе</value>
   </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Не можете ажурирати датотеку која је отворена за уређивање</value>
@@ -404,6 +344,33 @@
   </data>
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Није вам дозвољено да претходно прегледате елементе у Отпаду</value>
+  </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Нетачан наслов</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Није могуће користити овај фолдер за чување собе</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Позивни линк је неважећи или је истекла његова валидност</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Улога није доступна за овај тип корисника</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Овај провајдер је већ повезан на собу</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Немате дозволу да копирате овај фолдер</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Немате дозволу да померите овај фолдер</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Немате довољно дозволе да разархивирате собу</value>
+  </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Не можете уредити архивиране собе</value>
   </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Не можете прикачити собу</value>
@@ -448,11 +415,20 @@
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Креирајте и уређујте сопствене документе као и дељене документе са одговарајуц́им правима приступа |Омогуц́ите приступ за читање/уређивање другим корисницима документима и фолдерима |Повежите Dropbox, Box и друге налоге у одељку 'Документи'</value>
   </data>
-  <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>Сарадник</value>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Име</value>
   </data>
-  <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Коментатор</value>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Презиме</value>
+  </data>
+  <data name="UnlockComment" xml:space="preserve">
+    <value>Датотека је откључана</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Уређивач</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Немате дозволу да уредите собу</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>DocSpace Администратор</value>
@@ -460,17 +436,41 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Уређивач</value>
   </data>
-  <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>Попуњивач обрасца</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>Корисник</value>
   </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>Посматрач</value>
   </data>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>Коментатор</value>
+  </data>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>Попуњивач обрасца</value>
+  </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>Прегледач</value>
   </data>
-  <data name="RoleEnum_User" xml:space="preserve">
-    <value>Корисник</value>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>Сарадник</value>
+  </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Сарадник</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>Немате довољно дозвола да архивирате собу</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Максимални број линкова можда неће прекорачити {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Превише пута сте покушали да унесете вашу лозинку. Молимо покушајте поново касније</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Позивни линк</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Дељени линк</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Аутор</value>
@@ -489,9 +489,6 @@
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Index</value>
-  </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Фолдер</value>
   </data>
   <data name="RoomIndex_Modified" xml:space="preserve">
     <value>Модификовано</value>
@@ -514,53 +511,53 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Тип</value>
   </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>Име</value>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Фолдер</value>
   </data>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>Презиме</value>
+  <data name="Date" xml:space="preserve">
+    <value>Датум</value>
   </data>
-  <data name="UnlockComment" xml:space="preserve">
-    <value>Датотека је откључана</value>
-  </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Померање неколико датотека у просторију за Попуњавање Формулара није подржано. Померајте један по један {0} PDF.</value>
-  </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Померање фолдера у просторију за Попуњавање Формулара није подржано. Померајте један по један {0} PDF.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Датотека не може бити померена у ову просторију. Молимо покушајте да померите {0} PDF формулар.</value>
-  </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Датотека не може бити померена у ову просторију. Молимо покушајте да померите {0} PDF формулар.</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Линк за попуњавање</value>
+  <data name="User" xml:space="preserve">
+    <value>Корисник</value>
   </data>
   <data name="LinkToForm" xml:space="preserve">
     <value>Линк ка формулару</value>
   </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Отвори фајл</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Датотека не може бити померена у ову просторију. Молимо покушајте да померите ONLYOFFICE PDF формулар.</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Линк за попуњавање</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Померање неколико датотека у просторију за Попуњавање Формулара није подржано. Померајте један по један ONLYOFFICE PDF.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Померање фолдера у просторију за Попуњавање Формулара није подржано. Померајте један по један ONLYOFFICE PDF.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Датотека не може бити померена у ову просторију. Молимо покушајте да померите ONLYOFFICE PDF формулар.</value>
+  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Број формулара</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Спољни корисник</value>
+  </data>
   <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Менаџер собе</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
     <value>Менаџер собе</value>
   </data>
   <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
     <value>Креатор садржаја</value>
   </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Спољни корисник</value>
-  </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Менаџер собе</value>
-  </data>
   <data name="RoleEnum_ContentCreator" xml:space="preserve">
     <value>Креатор садржаја</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Отвори фајл</value>
   </data>
   <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
     <value>Није могуће обрисати тренутну верзију фајла</value>
@@ -571,10 +568,13 @@
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Започни попуњавање</value>
   </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Администратор собе</value>
+  </data>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Гост</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Администратор собе</value>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Документи корисника {0} {1}</value>
   </data>
 </root>

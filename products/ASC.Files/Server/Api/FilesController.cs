@@ -165,12 +165,12 @@ public abstract class FilesController<T>(
     /// <short>Copy a file</short>
     /// <path>api/2.0/files/file/{fileId}/copyas</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Copied file entry information", typeof(FileEntryDto))]
+    [SwaggerResponse(200, "Copied file entry information", typeof(FileEntryBaseDto))]
     [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "File not found")]
     [HttpPost("file/{fileId}/copyas")]
-    public async Task<FileEntryDto> CopyFileAs(CopyAsRequestDto<T> inDto)
+    public async Task<FileEntryBaseDto> CopyFileAs(CopyAsRequestDto<T> inDto)
     {
         if (inDto.File.DestFolderId.ValueKind == JsonValueKind.Number)
         {
@@ -350,7 +350,9 @@ public abstract class FilesController<T>(
     [HttpPut("file/{fileId}/customfilter")]
     public async Task<FileDto<T>> SetCustomFilterTag(FileCustomFilterRequestDto<T> inDto)
     {
-        return await filesControllerHelper.SetCustomFilterTagAsync(inDto.FileId, inDto.Parameters.Enabled);
+        var result = await fileStorageService.SetCustomFilterTagAsync(inDto.FileId, inDto.Parameters.Enabled);
+
+        return await _fileDtoHelper.GetAsync(result);
     }
 
     /// <summary>
@@ -445,9 +447,18 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
     [SwaggerResponse(404, "Not Found")]
     [HttpPost("file/{id}/link")]
-    public async Task<FileShareDto> CreatePrimaryExternalLink(FileLinkRequestDto<T> inDto)
+    public async Task<FileShareDto> CreateFilePrimaryExternalLink(FileLinkRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File, inDto.File.Access, expirationDate: inDto.File.ExpirationDate, requiredAuth: inDto.File.Internal, allowUnlimitedDate: true);
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(
+            inDto.Id, 
+            FileEntryType.File, 
+            inDto.File.Access, 
+            expirationDate: inDto.File.ExpirationDate, 
+            requiredAuth: inDto.File.Internal, 
+            allowUnlimitedDate: true,
+            denyDownload: inDto.File.DenyDownload, 
+            password: inDto.File.Password);
+        
         return await fileShareDtoHelper.Get(linkAce);
     }
 
@@ -464,47 +475,9 @@ public abstract class FilesController<T>(
     [HttpGet("file/{id}/link")]
     public async Task<FileShareDto> GetFilePrimaryExternalLink(FilePrimaryIdRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File);
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File, allowUnlimitedDate: true);
 
         return await fileShareDtoHelper.Get(linkAce);
-    }
-
-    /// <summary>
-    /// Sets order of the file with ID specified in the request.
-    /// </summary>
-    /// <short>
-    /// Set file order
-    /// </short>
-    /// <path>api/2.0/files/{fileId}/order</path>
-    [Tags("Files / Files")]
-    [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "Not Found")]
-    [HttpPut("{fileId}/order")]
-    public async Task<FileDto<T>> SetFileOrder(OrderFileRequestDto<T> inDto)
-    {
-        var file = await fileStorageService.SetFileOrder(inDto.FileId, inDto.Order.Order);
-
-        return await _fileDtoHelper.GetAsync(file);
-    }
-
-    /// <summary>
-    /// Sets order of the files.
-    /// </summary>
-    /// <short>
-    /// Set order of files
-    /// </short>
-    /// <path>api/2.0/files/order</path>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    [Tags("Files / Files")]
-    [SwaggerResponse(200, "Updated file entries information", typeof(IAsyncEnumerable<FileDto<int>>))]
-    [HttpPut("order")]
-    public IAsyncEnumerable<FileEntryDto<T>> SetFilesOrder(OrdersRequestDto<T> inDto)
-    {
-        return fileStorageService.SetOrderAsync(inDto.Items).SelectAwait<FileEntry<T>, FileEntryDto<T>>(
-            async e => e.FileEntryType == FileEntryType.Folder ? 
-                await _folderDtoHelper.GetAsync(e as Folder<T>) : 
-                await _fileDtoHelper.GetAsync(e as File<T>));
     }
 
     /// <summary>
@@ -539,14 +512,61 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
     [HttpPut("file/{id}/links")]
-    public async Task<FileShareDto> SetExternalLink(FileLinkRequestDto<T> inDto)
+    public async Task<FileShareDto> SetFileExternalLink(FileLinkRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.SetExternalLinkAsync(inDto.Id, FileEntryType.File, inDto.File.LinkId, null, inDto.File.Access, requiredAuth: inDto.File.Internal, 
-            primary: inDto.File.Primary, expirationDate: inDto.File.ExpirationDate);
+        var linkAce = await fileStorageService.SetExternalLinkAsync(
+            inDto.Id, 
+            FileEntryType.File, 
+            inDto.File.LinkId, 
+            inDto.File.Title, 
+            inDto.File.Access,
+            inDto.File.ExpirationDate,
+            inDto.File.Password,
+            inDto.File.DenyDownload,
+            inDto.File.Internal,
+            inDto.File.Primary);
 
         return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
     }
+    
+    /// <summary>
+    /// Sets the order of the file with the ID specified in the request.
+    /// </summary>
+    /// <short>
+    /// Set file order
+    /// </short>
+    /// <path>api/2.0/files/{fileId}/order</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(404, "Not Found")]
+    [HttpPut("{fileId}/order")]
+    public async Task<FileDto<T>> SetFileOrder(OrderFileRequestDto<T> inDto)
+    {
+        var file = await fileStorageService.SetFileOrder(inDto.FileId, inDto.Order.Order);
 
+        return await _fileDtoHelper.GetAsync(file);
+    }
+
+    /// <summary>
+    /// Sets the order of the files specified in the request.
+    /// </summary>
+    /// <short>
+    /// Set order of files
+    /// </short>
+    /// <path>api/2.0/files/order</path>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Updated file entries information", typeof(IAsyncEnumerable<FileEntryDto<int>>))]
+    [HttpPut("order")]
+    public IAsyncEnumerable<FileEntryDto<T>> SetFilesOrder(OrdersRequestDto<T> inDto)
+    {
+        return fileStorageService.SetOrderAsync(inDto.Items).SelectAwait<FileEntry<T>, FileEntryDto<T>>(
+            async e => e.FileEntryType == FileEntryType.Folder ? 
+                await _folderDtoHelper.GetAsync(e as Folder<T>) : 
+                await _fileDtoHelper.GetAsync(e as File<T>));
+    }
+    
     /// <summary>
     /// Saves a file with the identifier specified in the request as a PDF document.
     /// </summary>
@@ -567,7 +587,7 @@ public abstract class FilesController<T>(
     /// <short>Save form role mapping</short>
     /// <path>api/2.0/files/file/{fileId}/formrolemapping</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Updated information about form role mappings", typeof(FormRole))]
+    [SwaggerResponse(200, "Updated information about form role mappings")]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPost("file/{fileId}/formrolemapping")]
     public async Task SaveFormRoleMapping(SaveFormRoleMappingDto<T> inDto)
@@ -582,7 +602,7 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/formroles</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Successfully retrieved all roles for the form", typeof(IEnumerable<FormRole>))]
+    [SwaggerResponse(200, "Successfully retrieved all roles for the form", typeof(IEnumerable<FormRoleDto>))]
     [SwaggerResponse(403, "You do not have enough permissions to view the form roles")]
     [HttpGet("file/{fileId}/formroles")]
     public IAsyncEnumerable<FormRoleDto> GetAllFormRoles(FileIdRequestDto<T> inDto)

@@ -42,18 +42,18 @@ namespace ASC.Web.Api.Controllers;
 [ControllerName("security")]
 public class SecurityController(
     PermissionContext permissionContext,
-    TenantManager tenantManager,
-    MessageService messageService,
-    LoginEventsRepository loginEventsRepository,
-    AuditEventsRepository auditEventsRepository,
-    CsvFileHelper csvFileHelper,
-    CsvFileUploader csvFileUploader,
-    SettingsManager settingsManager,
-    AuditActionMapper auditActionMapper,
-    CoreBaseSettings coreBaseSettings,
-    CspSettingsHelper cspSettingsHelper, 
-    ApiDateTimeHelper apiDateTimeHelper,
-    IdentityClient identityClient)
+        TenantManager tenantManager,
+        MessageService messageService,
+        LoginEventsRepository loginEventsRepository,
+        AuditEventsRepository auditEventsRepository,
+        CsvFileHelper csvFileHelper,
+        CsvFileUploader csvFileUploader,
+        SettingsManager settingsManager,
+        AuditActionMapper auditActionMapper,
+        CoreBaseSettings coreBaseSettings,
+        CspSettingsHelper cspSettingsHelper, 
+        ApiDateTimeHelper apiDateTimeHelper,
+        IdentityClient identityClient)
     : ControllerBase
 {
     /// <summary>
@@ -74,7 +74,8 @@ public class SecurityController(
 
         DemandBaseAuditPermission();
 
-        return (await loginEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20)).Select(x => new LoginEventDto(x, apiDateTimeHelper));
+        return (await loginEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20, limitedActionText: true))
+            .Select(x => new LoginEventDto(x, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -100,7 +101,7 @@ public class SecurityController(
         var to = DateTime.UtcNow;
         var from = to.Subtract(TimeSpan.FromDays(settings.AuditTrailLifeTime));
 
-        return (await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20, from: from, to: to))
+        return (await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20, from: from, to: to, limitedActionText: true))
             .Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
@@ -157,7 +158,7 @@ public class SecurityController(
 
         await DemandAuditPermissionAsync();
 
-        return (await auditEventsRepository.GetByFilterAsync(inDto.UserId, inDto.ProductType, inDto.ModuleType, inDto.ActionType, inDto.Action, inDto.EntryType, inDto.Target, inDto.From, inDto.To, inDto.StartIndex, inDto.Count)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
+        return (await auditEventsRepository.GetByFilterAsync(inDto.UserId, inDto.LocationType, inDto.ActionType, inDto.Action, inDto.EntryType, inDto.Target, inDto.From, inDto.To, inDto.StartIndex, inDto.Count)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -179,7 +180,7 @@ public class SecurityController(
             Actions = MessageActionExtensions.GetNames(),
             ActionTypes = ActionTypeExtensions.GetNames(),
             ProductTypes = ProductTypeExtensions.GetNames(),
-            ModuleTypes = ModuleTypeExtensions.GetNames(),
+            ModuleTypes = LocationTypeExtensions.GetNames(),
             EntryTypes = EntryTypeExtensions.GetNames()
         };
     }
@@ -204,10 +205,10 @@ public class SecurityController(
             {
                 ProductType = r.Product.ToStringFast(),
                 Modules = r.Mappers
-                .Where(m => !inDto.ModuleType.HasValue || m.Module == inDto.ModuleType.Value)
+                .Where(m => !inDto.LocationType.HasValue || m.Location == inDto.LocationType.Value)
                 .Select(x => new
                 {
-                    ModuleType = x.Module.ToStringFast(),
+                    ModuleType = x.Location.ToStringFast(),
                     Actions = x.Actions.Select(a => new
                     {
                         MessageAction = a.Key.ToString(),
@@ -275,7 +276,7 @@ public class SecurityController(
         var to = DateTime.UtcNow;
         var from = to.Subtract(TimeSpan.FromDays(settings.AuditTrailLifeTime));
 
-        var reportName = string.Format(AuditReportResource.AuditTrailReportName + ".csv", from.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture), to.ToString("MM.dd.yyyy"));
+        var reportName = string.Format(AuditReportResource.AuditTrailReportName + ".csv", from.ToShortDateString(), to.ToShortDateString());
 
         var events = await auditEventsRepository.GetByFilterAsync(from: from, to: to);
 

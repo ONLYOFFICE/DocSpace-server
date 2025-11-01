@@ -24,15 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core.Tenants;
 
 /// <summary>
 /// The tenant parameters.
 /// </summary>
 [ProtoContract]
-public class Tenant : IMapFrom<DbTenant>
+public class Tenant
 {
     public const int DefaultTenant = -1;
 
@@ -213,18 +211,6 @@ public class Tenant : IMapFrom<DbTenant>
         return Alias;
     }
     
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<DbTenant, Tenant>()
-            .ForMember(r => r.TrustedDomainsType, opt => opt.MapFrom(src => src.TrustedDomainsEnabled))
-            .ForMember(r => r.AffiliateId, opt => opt.MapFrom(src => src.Partner.AffiliateId))
-            .ForMember(r => r.PartnerId, opt => opt.MapFrom(src => src.Partner.PartnerId))
-            .ForMember(r => r.Campaign, opt => opt.MapFrom(src => src.Partner.Campaign));
-
-        profile.CreateMap<TenantUserSecurity, Tenant>()
-            .IncludeMembers(src => src.DbTenant);
-    }
-
     internal string GetTrustedDomains()
     {
         TrustedDomains.RemoveAll(string.IsNullOrEmpty);
@@ -247,4 +233,18 @@ public class Tenant : IMapFrom<DbTenant>
             TrustedDomains.AddRange(trustedDomains.Split(['|'], StringSplitOptions.RemoveEmptyEntries));
         }
     }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class TenantMapper
+{
+    [MapProperty(nameof(DbTenant.TrustedDomainsEnabled), nameof(Tenant.TrustedDomainsType))]
+    [MapNestedProperties(nameof(DbTenant.Partner))]
+    public static partial Tenant Map(this DbTenant source);
+    
+    [MapNestedProperties(nameof(TenantUserSecurity.DbTenant))]
+    public static partial Tenant Map(this TenantUserSecurity source);
+    
+    public static partial IQueryable<Tenant> Project(this IQueryable<DbTenant> source);
+    public static partial IQueryable<Tenant> Project(this IQueryable<TenantUserSecurity> source);
 }

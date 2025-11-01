@@ -52,5 +52,5 @@ public class FileCustomFilterRequestDto<T>
     /// The parameters for setting the Custom Filter editing mode.
     /// </summary>
     [FromBody]
-    public CustomFilterParameters Parameters { get; set; }
+    public required CustomFilterParameters Parameters { get; set; }
 }

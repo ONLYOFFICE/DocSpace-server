@@ -53,12 +53,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// Specifies if the folder can be shared or not.
     /// </summary>
     public bool? IsShareable { get; set; }
-
-    /// <summary>
-    /// Specifies if the folder is favorite or not.
-    /// </summary>
-    public bool? IsFavorite { get; set; }
-
+    
     /// <summary>
     /// The new element index in the folder.
     /// </summary>
@@ -138,12 +133,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// How much folder space is used (counter).
     /// </summary>
     public long? UsedSpace { get; set; }
-
-    /// <summary>
-    /// Specifies if the folder can be accessed via an external link or not.
-    /// </summary>
-    public bool? External { get; set; }
-
+    
     /// <summary>
     /// Specifies if the folder is password protected or not.
     /// </summary>
@@ -152,6 +142,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// Specifies if an external link to the folder is expired or not.
     /// </summary>
+    [Obsolete("Use IsLinkExpired instead")]
     public bool? Expired { get; set; }
 
     /// <summary>
@@ -178,14 +169,14 @@ public class FolderDtoHelper(
     BreadCrumbsManager breadCrumbsManager,
     TenantManager tenantManager,
     WatermarkDtoHelper watermarkHelper,
-    IMapper mapper,
     ExternalShare externalShare,
     FileSecurityCommon fileSecurityCommon,
     SecurityContext securityContext,
-    UserManager userManager)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory)
-    {
-
+    UserManager userManager,
+    IUrlShortener urlShortener,
+    EntryStatusManager entryStatusManager)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
+{
     public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null)
     {
         var result = await GetFolderWrapperAsync(folder);
@@ -196,7 +187,7 @@ public class FolderDtoHelper(
             if (folder.Tags == null)
             {
                 var tagDao = _daoFactory.GetTagDao<T>();
-                result.Tags = await tagDao.GetTagsAsync(TagType.Custom, [folder]).Select(t => t.Name).ToListAsync();
+                result.Tags = await tagDao.GetTagsAsync([TagType.Custom], [folder]).Select(t => t.Name).ToListAsync();
             }
             else
             {
@@ -251,19 +242,32 @@ public class FolderDtoHelper(
             }
             
             result.Watermark = watermarkHelper.Get(folder.SettingsWatermark);
+        }
+        
+        if (folder.ShareRecord is { IsLink: true })
+        {
+            result.External = true;
+            result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) && 
+                                       folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && 
+                                       !canRead;
 
-            if (folder.ShareRecord is { IsLink: true })
+#pragma warning disable CS0618 // Type or member is obsolete
+            result.Expired = folder.ShareRecord.Options?.IsExpired;
+            result.IsLinkExpired = folder.ShareRecord.Options?.IsExpired;
+            result.RequestToken = await _externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
+            var expirationDate = folder.ShareRecord?.Options?.ExpirationDate;
+            if (expirationDate != null && expirationDate != DateTime.MinValue)
             {
-                result.External = true;
-                result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) && 
-                                           folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && 
-                                           !canRead;
-
-                result.Expired = folder.ShareRecord.Options?.IsExpired;
-                result.RequestToken = await externalShare.CreateShareKeyAsync(folder.ShareRecord.Subject);
+                result.ExpirationDate = _apiDateTimeHelper.Get(expirationDate);
+            }
+            var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.ParentId);
+            if (!await _fileSecurity.CanReadAsync(parent))
+            {
+                result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                result.RootFolderType = FolderType.SHARE;
             }
         }
-
+        
         if (folder.Order != 0)
         {
             if (string.IsNullOrEmpty(order) && (contextFolder == null || !DocSpaceHelper.IsRoom(contextFolder.FolderType)))
@@ -279,7 +283,69 @@ public class FolderDtoHelper(
             result.Type = folder.FolderType;
         }
 
-        result.Lifetime = mapper.Map<RoomDataLifetime, RoomDataLifetimeDto>(folder.SettingsLifetime);
+        result.Lifetime = folder.SettingsLifetime.MapToDto();
+        result.AvailableShareRights =  (await _fileSecurity.GetAccesses(folder)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
+
+        if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })
+        {
+            var forbiddenActions = new List<FileSecurity.FilesSecurityActions>
+            {
+                FileSecurity.FilesSecurityActions.FillForms,
+                FileSecurity.FilesSecurityActions.Edit,
+                FileSecurity.FilesSecurityActions.SubmitToFormGallery,
+                FileSecurity.FilesSecurityActions.CreateRoomFrom,
+                FileSecurity.FilesSecurityActions.Duplicate,
+                FileSecurity.FilesSecurityActions.Delete,
+                FileSecurity.FilesSecurityActions.Lock,
+                FileSecurity.FilesSecurityActions.CustomFilter,
+                FileSecurity.FilesSecurityActions.Embed,
+                FileSecurity.FilesSecurityActions.StartFilling,
+                FileSecurity.FilesSecurityActions.StopFilling,
+                FileSecurity.FilesSecurityActions.CopySharedLink,
+                FileSecurity.FilesSecurityActions.CopyLink,
+                FileSecurity.FilesSecurityActions.FillingStatus
+            };
+
+            foreach (var action in forbiddenActions)
+            {
+                result.Security[action] = false;   
+            }
+
+            result.CanShare = false;
+
+            result.Order = "";
+
+            var myId = await _globalFolderHelper.GetFolderMyAsync<T>();
+            result.OriginTitle = Equals(result.OriginId, myId) ? FilesUCResource.MyFiles : result.OriginTitle;
+            
+            if (Equals(result.OriginRoomId, myId))
+            {
+                result.OriginRoomTitle = FilesUCResource.MyFiles;
+            }
+            else if(Equals(result.OriginRoomId,  await _globalFolderHelper.FolderArchiveAsync))
+            {
+                result.OriginRoomTitle = result.OriginTitle;
+            }
+        }
+        
+        if (folder.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID))
+        {
+            switch (contextFolder)
+            {
+                case { FolderType: FolderType.Recent }:
+                case { FolderType: FolderType.SHARE }:
+                case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, authContext.CurrentAccount.ID):
+                    result.RootFolderType = FolderType.SHARE;
+                    result.RootFolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                    var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.ParentId);
+                    if (!await _fileSecurity.CanReadAsync(parent))
+                    {
+                        result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
+                    }
+
+                    break;
+            }
+        }
         
         return result;
     }
@@ -313,16 +379,18 @@ public class FolderDtoHelper(
                 newBadges = 0;
             }
         }
-
+        
         var result = await GetAsync<FolderDto<T>, T>(folder);
         if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates)
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;
         }
-
+        
+        await entryStatusManager.SetIsFavoriteFolderAsync(folder);
+        
         result.IsShareable = folder.Shareable.NullIfDefault();
-        result.IsFavorite = folder.IsFavorite.NullIfDefault();
+        result.IsFavorite = folder.IsFavorite;
         result.New = newBadges;
         result.Pinned = folder.Pinned;
         result.Private = folder.SettingsPrivate;

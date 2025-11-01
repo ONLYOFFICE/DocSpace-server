@@ -61,6 +61,15 @@ namespace ASC.Data.Backup.Core {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Automatic backup.
+        /// </summary>
+        internal static string AutoBackup {
+            get {
+                return ResourceManager.GetString("AutoBackup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Something went wrong while creating the backup. Please try creating it again or contact support..
         /// </summary>
         internal static string BackupException {
@@ -84,6 +93,60 @@ namespace ASC.Data.Backup.Core {
         internal static string BackupNotFound {
             get {
                 return ResourceManager.GetString("BackupNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Custom cloud.
+        /// </summary>
+        internal static string BackupStorageTypeCustomCloud {
+            get {
+                return ResourceManager.GetString("BackupStorageTypeCustomCloud", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Temporary storage.
+        /// </summary>
+        internal static string BackupStorageTypeDataStore {
+            get {
+                return ResourceManager.GetString("BackupStorageTypeDataStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Backup room.
+        /// </summary>
+        internal static string BackupStorageTypeDocuments {
+            get {
+                return ResourceManager.GetString("BackupStorageTypeDocuments", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Local file.
+        /// </summary>
+        internal static string BackupStorageTypeLocal {
+            get {
+                return ResourceManager.GetString("BackupStorageTypeLocal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Third-party storage.
+        /// </summary>
+        internal static string BackupStorageTypeThirdPartyConsumer {
+            get {
+                return ResourceManager.GetString("BackupStorageTypeThirdPartyConsumer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Third-party resource.
+        /// </summary>
+        internal static string BackupStorageTypeThridpartyDocuments {
+            get {
+                return ResourceManager.GetString("BackupStorageTypeThridpartyDocuments", resourceCulture);
             }
         }
         

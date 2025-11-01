@@ -26,13 +26,16 @@
 
 namespace ASC.Core.Common.EF;
 
-public class User : BaseEntity, IMapFrom<UserInfo>
+public class User : BaseEntity
 {
     public int TenantId { get; set; }
+    
     [MaxLength(255)]
     public string UserName { get; set; }
+    
     [MaxLength(64)]
     public string FirstName { get; set; }
+    
     [MaxLength(64)]
     public string LastName { get; set; }
     public Guid Id { get; set; }
@@ -40,27 +43,37 @@ public class User : BaseEntity, IMapFrom<UserInfo>
     public DateTime? BirthDate { get; set; }
     public EmployeeStatus Status { get; set; }
     public EmployeeActivationStatus ActivationStatus { get; set; }
+    
     [MaxLength(255)]
     public string Email { get; set; }
     public DateTime? WorkFromDate { get; set; }
     public DateTime? TerminatedDate { get; set; }
+    
     [MaxLength(64)]
     public string Title { get; set; }
+    
     [MaxLength(20)]
     public string CultureName { get; set; }
+    
     [MaxLength(1024)]
     public string Contacts { get; set; }
+    
     [MaxLength(255)]
     public string MobilePhone { get; set; }
     public MobilePhoneActivationStatus MobilePhoneActivation { get; set; }
+    
     [MaxLength(255)]
     public string Location { get; set; }
+    
     [MaxLength(512)]
     public string Notes { get; set; }
+    
     [MaxLength(512)]
     public string Sid { get; set; }
+    
     [MaxLength(512)]
     public string SsoNameId { get; set; }
+    
     [MaxLength(512)]
     public string SsoSessionId { get; set; }
     public bool Removed { get; set; }

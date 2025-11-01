@@ -29,9 +29,9 @@ namespace ASC.Files.Tests.FilesController;
 [Collection("Test Collection")]
 public class FileOperationsTest(
     FilesApiFactory filesFactory, 
-    WebApplicationFactory<WebApiProgram> apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    WepApiFactory apiFactory, 
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
 
@@ -44,10 +44,10 @@ public class FileOperationsTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var file = await CreateFile("file_for_download.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_for_download.docx", Initializer.Owner);
         
         // Act
-        var downloadUrl = (await _filesFilesApi.GetPresignedUriAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var downloadUrl = (await _filesApi.GetPresignedUriAsync(file.Id, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         downloadUrl.Should().NotBeNull();

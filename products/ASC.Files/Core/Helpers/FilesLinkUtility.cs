@@ -80,6 +80,7 @@ public class FilesLinkUtility
     public const string IsFile = "is_file";
     public const string View = "view";
     public const string ShardKey = "shardkey";
+    public const string FillingSessionId = "fillingSessionId";
 
     public string FileHandlerPath
     {
@@ -168,6 +169,24 @@ public class FilesLinkUtility
                 if (!string.IsNullOrEmpty(url))
                 {
                     url += "web-apps/apps/api/documents/api.js";
+                }
+            }
+            return url;
+        }
+    }
+
+    private const string PreloadUrlKey = "preload";
+    public string DocServicePreloadUrl
+    {
+        get
+        {
+            var url = GetUrlSetting(PreloadUrlKey);
+            if (string.IsNullOrEmpty(url))
+            {
+                url = GetDocServiceUrl();
+                if (!string.IsNullOrEmpty(url))
+                {
+                    url += "web-apps/apps/api/documents/preload.html";
                 }
             }
             return url;

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.FederatedLogin.LoginProviders;
 
 /// <summary>
@@ -31,18 +33,43 @@ namespace ASC.FederatedLogin.LoginProviders;
 /// </summary>
 public enum LoginProvider
 {
+    [SwaggerEnum("Facebook")]
     Facebook,
+
+    [SwaggerEnum("Google")]
     Google,
+
+    [SwaggerEnum("Dropbox")]
     Dropbox,
+
+    [SwaggerEnum("Docusign")]
     Docusign,
+
+    [SwaggerEnum("Box")]
     Box,
+
+    [SwaggerEnum("OneDrive")]
     OneDrive,
+
+    [SwaggerEnum("GosUslugi")]
     GosUslugi,
+
+    [SwaggerEnum("LinkedIn")]
     LinkedIn,
+
+    [SwaggerEnum("MailRu")]
     MailRu,
+
+    [SwaggerEnum("VK")]
     VK,
+
+    [SwaggerEnum("Wordpress")]
     Wordpress,
+
+    [SwaggerEnum("Yahoo")]
     Yahoo,
+
+    [SwaggerEnum("Yandex")]
     Yandex
 }
 
@@ -66,12 +93,12 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
     public abstract string ClientSecret { get; }
     public virtual string Scopes => string.Empty;
 
-    protected readonly OAuth20TokenHelper _oAuth20TokenHelper;
+    protected readonly IOAuth20TokenHelper _oAuth20TokenHelper;
 
     protected BaseLoginProvider() { }
 
     protected BaseLoginProvider(
-        OAuth20TokenHelper oAuth20TokenHelper,
+        IOAuth20TokenHelper oAuth20TokenHelper,
         TenantManager tenantManager,
         CoreBaseSettings coreBaseSettings,
         CoreSettings coreSettings,

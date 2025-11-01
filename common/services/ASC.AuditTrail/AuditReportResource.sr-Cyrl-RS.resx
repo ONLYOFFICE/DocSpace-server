@@ -195,9 +195,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Подешавања преписивања ажурирана</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Документи</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Подешавања</value>
   </data>
@@ -463,7 +460,7 @@
     <value>Пријава путем API и друштвених медија успешна</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Пријава путем друштвеног налога упешна</value>
+    <value>Успешна пријава путем друштвеног налога: {0}</value>
   </data>
   <data name="LoginSuccessViaSSO" xml:space="preserve">
     <value>Успешна пријава путем SSO</value>
@@ -483,9 +480,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Помери</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Други</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Власник промењен: {0}</value>
   </data>
@@ -503,9 +497,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Подешавања јачине лозинке ажурирана</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Људи</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Платформа</value>
@@ -569,9 +560,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Сесија започета</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Подешавања</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO онемогућен</value>
@@ -998,5 +986,62 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP синхронизација завршена</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Локација</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Подашавања услуга омогућених за кориснички новчаник су ажурирана</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Поставке видљивости промотивних банера су променене</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Успешна пријава путем OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Успешна пријава путем корисничког имена и лозинке</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Датотеке [{0}]. Креирана је екстерна веза: {1}. Улога: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Датотеке [{0}]. Екстерна веза обрисана: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Датотеке [{0}]. Екстерна веза ажурирана: {1}. Улога: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Датотека означена као омиљена: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Датотека уклоњена из омиљених: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Датотека уклоњена из „Дељено са мном“: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Фајлови [{0}]. Приступ ажуриран за {1}. Улога: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Фасцикла преузета: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Фасцикле [{0}]. Креирана је екстерна веза: {1}. Улога: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Фасцикле [{0}]. Екстерна веза обрисана: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Фасцикле [{0}]. Екстерна веза ажурирана: {1}. Улога: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Фасцикла уклоњена из „Дељено са мном“: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Фасцикле [{0}]. Приступ ажуриран за {1}. Улога: {2}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Екстерна веза опозвана: {1}</value>
   </data>
 </root>

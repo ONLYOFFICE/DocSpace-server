@@ -45,14 +45,12 @@ public partial class SettingsController(
     SetupInfo setupInfo,
     ExternalResourceSettings externalResourceSettings,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
-    GeolocationHelper geolocationHelper,
     ConsumerFactory consumerFactory,
     TimeZoneConverter timeZoneConverter,
     CustomNamingPeople customNamingPeople,
     IFusionCache fusionCache,
     ProviderManager providerManager,
     FirstTimeTenantSettings firstTimeTenantSettings,
-    TelegramHelper telegramHelper,
     PasswordHasher passwordHasher,
     DnsSettings dnsSettings,
     CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
@@ -60,7 +58,6 @@ public partial class SettingsController(
     TenantDomainValidator tenantDomainValidator,
     TenantLogoManager tenantLogoManager,
     ExternalShare externalShare,
-    IMapper mapper,
     UserFormatter userFormatter,
     IDistributedLockProvider distributedLockProvider,
     UsersQuotaSyncOperation usersQuotaSyncOperation,
@@ -88,8 +85,10 @@ public partial class SettingsController(
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
         var tenantCookieSettings = await settingsManager.LoadAsync<TenantCookieSettings>();
         var additionalWhiteLabelSettings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
+        var companyWhiteLabelSettings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>();
 
         var tenant = tenantManager.GetCurrentTenant();
+        var quota = await tenantManager.GetCurrentTenantQuotaAsync();
 
         var settings = new SettingsDto
         {
@@ -105,7 +104,7 @@ public partial class SettingsController(
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
-            DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !(await tenantManager.GetCurrentTenantQuotaAsync()).Branding,
+            DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !quota.Branding || !companyWhiteLabelSettings.HideAbout,
             DeepLink = new DeepLinkDto
             {
                 AndroidPackageName = configuration["deeplink:androidpackagename"] ?? "",
@@ -174,7 +173,7 @@ public partial class SettingsController(
             }
 
             var formGallerySettings = configuration.GetSection("files:oform").Get<OFormSettings>();
-            settings.FormGallery = mapper.Map<FormGalleryDto>(formGallerySettings);
+            settings.FormGallery = formGallerySettings.Map();
 
             settings.InvitationLimit = await userInvitationLimitHelper.GetLimit();
             settings.MaxImageUploadSize = setupInfo.MaxImageUploadSize;
@@ -199,9 +198,7 @@ public partial class SettingsController(
 
             settings.ThirdpartyEnable = setupInfo.ThirdPartyAuthEnabled && providerManager.IsNotEmpty;
 
-            var country = (await geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key;
-
-            settings.RecaptchaType = country == "CN" ? RecaptchaType.hCaptcha : RecaptchaType.Default;
+            settings.RecaptchaType = !string.IsNullOrEmpty(setupInfo.HcaptchaPublicKey) ? RecaptchaType.hCaptcha : RecaptchaType.Default;
 
             settings.RecaptchaPublicKey = settings.RecaptchaType is RecaptchaType.hCaptcha ? setupInfo.HcaptchaPublicKey : setupInfo.RecaptchaPublicKey;
         }
@@ -432,9 +429,11 @@ public partial class SettingsController(
     /// Get the deep link settings
     /// </short>
     /// <path>api/2.0/settings/deeplink</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Ok", typeof(TenantDeepLinkSettings))]
     [HttpGet("deeplink")]
+    [AllowAnonymous]
     public async Task<TenantDeepLinkSettings> GetDeepLinkSettings()
     {
         var result = await settingsManager.LoadAsync<TenantDeepLinkSettings>(HttpContext.GetIfModifiedSince());
@@ -1075,58 +1074,6 @@ public partial class SettingsController(
     }
 
     /// <summary>
-    /// Returns a link that will connect TelegramBot to your account.
-    /// </summary>
-    /// <short>Get the Telegram link</short>
-    /// <path>api/2.0/settings/telegramlink</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Settings / Telegram")]
-    [SwaggerResponse(200, "Telegram link", typeof(object))]
-    [HttpGet("telegramlink")]
-    public async Task<string> GetTelegramLink()
-    {
-        var tenant = tenantManager.GetCurrentTenant();
-        var currentLink = telegramHelper.CurrentRegistrationLink(authContext.CurrentAccount.ID, tenant.Id);
-
-        if (string.IsNullOrEmpty(currentLink))
-        {
-            var url = await telegramHelper.RegisterUserAsync(authContext.CurrentAccount.ID, tenant.Id);
-            return url;
-        }
-
-        return currentLink;
-    }
-
-    /// <summary>
-    /// Checks if the user has connected to TelegramBot.
-    /// </summary>
-    /// <short>Check the Telegram connection</short>
-    /// <path>api/2.0/settings/telegramisconnected</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Settings / Telegram")]
-    [SwaggerResponse(200, "Operation result: 0 - not connected, 1 - connected, 2 - awaiting confirmation", typeof(TelegramHelper.RegStatus))]
-    [HttpGet("telegramisconnected")]
-    public async Task<TelegramHelper.RegStatus> GetTelegramIsConnected()
-    {
-        var tenant = tenantManager.GetCurrentTenant();
-        return await telegramHelper.UserIsConnectedAsync(authContext.CurrentAccount.ID, tenant.Id);
-    }
-
-    /// <summary>
-    /// Unlinks TelegramBot from your account.
-    /// </summary>
-    /// <short>Unlink Telegram</short>
-    /// <path>api/2.0/settings/telegramdisconnect</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Settings / Telegram")]
-    [HttpDelete("telegramdisconnect")]
-    public async Task TelegramDisconnect()
-    {
-        var tenant = tenantManager.GetCurrentTenant();
-        await telegramHelper.DisconnectAsync(authContext.CurrentAccount.ID, tenant.Id);
-    }
-
-    /// <summary>
     /// Returns the Developer Tools access settings for the portal.
     /// </summary>
     /// <short>
@@ -1165,10 +1112,10 @@ public partial class SettingsController(
     }
 
     /// <summary>
-    /// Returns the promotional banners visibility settings settings for the portal.
+    /// Returns the visibility settings of the promotional banners in the portal.
     /// </summary>
     /// <short>
-    /// Get the promotional banners visibility settings
+    /// Get the banners visibility
     /// </short>
     /// <path>api/2.0/settings/banner</path>
     [Tags("Settings / Banners visibility")]
@@ -1180,10 +1127,10 @@ public partial class SettingsController(
     }
 
     /// <summary>
-    /// Sets the promotional banners visibility settings settings for the portal.
+    /// Sets the visibility settings of the promotional banners in the portal.
     /// </summary>
     /// <short>
-    /// Set the promotional banners visibility settings
+    /// Set the banners visibility
     /// </short>
     /// <path>api/2.0/settings/banner</path>
     [Tags("Security / Banners visibility")]
@@ -1234,7 +1181,7 @@ public partial class SettingsController(
 
         return HttpContext.TryGetFromCache(settings.LastModified)
             ? null
-            : mapper.Map<TenantUserInvitationSettings, TenantUserInvitationSettingsDto>(settings);
+            : settings.Map();
     }
 
 
@@ -1258,6 +1205,6 @@ public partial class SettingsController(
 
         _ = await settingsManager.SaveAsync(settings);
 
-        return mapper.Map<TenantUserInvitationSettings, TenantUserInvitationSettingsDto>(settings);
+        return settings.Map();
     }
 }

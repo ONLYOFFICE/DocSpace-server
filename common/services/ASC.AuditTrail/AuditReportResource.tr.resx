@@ -124,9 +124,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Üstüne Yazma Ayarları Güncellendi</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Dökümanlar</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Ayarlar</value>
   </data>
@@ -373,9 +370,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Taşı</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Diğerleri</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Sahip Değiştirildi: {0}</value>
   </data>
@@ -393,9 +387,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Şifre Gücü Ayarları Güncellendi</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>İnsanlar</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platform</value>
@@ -450,9 +441,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Seans Başlatıldı</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Ayarlar</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO Devre Dışı Bırakıldı</value>
@@ -939,5 +927,14 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP senkronizasyonu tamamlandı</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Konum</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Promosyon afişlerinin görünürlük ayarları değiştirildi</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Müşteri cüzdanı etkinleştirilmiş hizmet ayarları güncellendi</value>
   </data>
 </root>

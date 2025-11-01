@@ -263,7 +263,7 @@ public class OperationController(
     /// <summary>
     /// Checks if files can be moved or copied to the specified folder.
     /// </summary>
-    /// <short>Check for moving or copying to a folder</short>
+    /// <short>Check for moving or copying files to a folder</short>
     /// <path>api/2.0/files/fileops/checkdestfolder</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Result", typeof(CheckDestFolderDto))]
@@ -296,7 +296,7 @@ public class OperationController(
             Files = await filesTask
         };
 
-        async IAsyncEnumerable<FileEntryDto> GetFilesDto(IEnumerable<FileEntry> fileEntries)
+        async IAsyncEnumerable<FileEntryBaseDto> GetFilesDto(IEnumerable<FileEntry> fileEntries)
         {
             foreach (var entry in fileEntries)
             {
@@ -308,14 +308,14 @@ public class OperationController(
     /// <summary>
     /// Checks if files or folders can be moved or copied to the specified folder, moves or copies them, and returns their information.
     /// </summary>
-    /// <short>Check and move or copy to a folder</short>
+    /// <short>Move or copy files to a folder</short>
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<FileEntryDto>))]
+    [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpGet("move")]
-    public async IAsyncEnumerable<FileEntryDto> CheckMoveOrCopyBatchItems([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
+    public async IAsyncEnumerable<FileEntryBaseDto> CheckMoveOrCopyBatchItems([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {
         List<object> checkedFiles;
         List<object> checkedFolders;

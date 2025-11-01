@@ -268,6 +268,13 @@ public interface IFolderDao<T>
 
 
     /// <summary>
+    /// Set created by
+    /// </summary>
+    /// <param name="newOwnerId"></param>
+    /// <param name="folderIds"></param>
+    Task ReassignFoldersAsync(Guid newOwnerId, IEnumerable<T> folderIds);
+
+    /// <summary>
     /// Search the list of folders containing text in title
     /// Only in TMFolderDao
     /// </summary>
@@ -425,6 +432,16 @@ public interface IFolderDao<T>
     Task<WatermarkSettings> GetWatermarkSettings(Folder<T> room);
     Task<Folder<T>> DeleteWatermarkSettings(Folder<T> room);
     Task<Folder<T>> DeleteLifetimeSettings(Folder<T> room);
+    
+    IAsyncEnumerable<Folder<T>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, bool excludeSubject, Location? location, int trashId, OrderBy orderBy, int offset, int count);
+    Task<int> GetFoldersByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, bool excludeSubject, Location? location, int trashId);
+
+    Task<int> GetSharedFoldersCountAsync(T parentId);
+
+    IAsyncEnumerable<Folder<T>> GetSharedFoldersAsync(T parentId, int offset = 0, int count = -1);
+
     #endregion
 }
 

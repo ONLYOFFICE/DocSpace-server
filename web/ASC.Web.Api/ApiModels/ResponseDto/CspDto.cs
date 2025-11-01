@@ -34,10 +34,10 @@ public class CspDto
     /// <summary>
     /// The list of CSP domains.
     /// </summary>
-    public IEnumerable<string> Domains { get; set; }
+    public required IEnumerable<string> Domains { get; set; }
 
     /// <summary>
     /// The CSP header.
     /// </summary>
-    public string Header { get; set; }
+    public required string Header { get; set; }
 }

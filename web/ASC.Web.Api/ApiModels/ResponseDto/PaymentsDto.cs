@@ -32,31 +32,31 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class ReportDto
 {
     /// <summary>
-    /// Collection of operations.
+    /// A collection of operations.
     /// </summary>
     public List<OperationDto> Collection { get; set; }
     /// <summary>
-    /// Offset of the report data.
+    /// The report data offset.
     /// </summary>
     public int Offset { get; set; }
     /// <summary>
-    /// Limit of the report data.
+    /// The report data limit.
     /// </summary>
     public int Limit { get; set; }
     /// <summary>
-    /// Total quantity of operations in the report.
+    /// The total quantity of operations in the report.
     /// </summary>
     public int TotalQuantity { get; set; }
     /// <summary>
-    /// Total number of pages in the report.
+    /// The total number of pages in the report.
     /// </summary>
     public int TotalPage { get; set; }
     /// <summary>
-    /// Current page number of the report.
+    /// The current page number of the report.
     /// </summary>
     public int CurrentPage { get; set; }
 
-    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper)
+    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)
     {
         Offset = report.Offset;
         Limit = report.Limit;
@@ -70,7 +70,7 @@ public class ReportDto
         {
             foreach (var operation in report.Collection)
             {
-                Collection.Add(new OperationDto(operation, apiDateTimeHelper));
+                Collection.Add(new OperationDto(operation, apiDateTimeHelper, participantDisplayNames));
             }
         }
     }
@@ -82,23 +82,27 @@ public class ReportDto
 public class OperationDto
 {
     /// <summary>
-    /// Date of the operation.
+    /// The date when the operation took place.
     /// </summary>
     public ApiDateTime Date { get; set; }
     /// <summary>
-    /// Service related to the operation.
+    /// The service related to the operation.
     /// </summary>
     public string Service { get; set; }
     /// <summary>
-    /// Brief description of the operation.
+    /// The brief operation description.
     /// </summary>
     public string Description { get; set; }
     /// <summary>
-    /// Unit of the service.
+    /// The detailed information about the operation.
+    /// </summary>
+    public string Details { get; set; }
+    /// <summary>
+    /// The service unit.
     /// </summary>
     public string ServiceUnit { get; set; }
     /// <summary>
-    /// Quantity of the service used.
+    /// The quantity of the service used.
     /// </summary>
     public int Quantity { get; set; }
     /// <summary>
@@ -106,27 +110,42 @@ public class OperationDto
     /// </summary>
     public string Currency { get; set; }
     /// <summary>
-    /// Credit amount of the operation.
+    /// The credit amount of the operation.
     /// </summary>
     public decimal Credit { get; set; }
     /// <summary>
-    /// Withdrawal amount of the operation.
+    /// The debit amount of the operation.
     /// </summary>
-    public decimal Withdrawal { get; set; }
+    public decimal Debit { get; set; }
+    /// <summary>
+    /// The participant original name.
+    /// </summary>
+    public string ParticipantName { get; set; }
+    /// <summary>
+    /// The participant display name.
+    /// </summary>
+    public string ParticipantDisplayName { get; set; }
 
-    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper)
+    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)
     {
+        var (description, unitOfMeasurement) = GetServiceDescAndUOM(operation.Service);
+
         Date = apiDateTimeHelper.Get(operation.Date);
         Service = operation.Service;
-        Description = GetServiceDesc(operation.Service);
-        ServiceUnit = operation.ServiceUnit;
+        Description = description;
+        Details = operation.Metadata != null && operation.Metadata.TryGetValue(BillingClient.MetadataDetails, out var details) ? details : string.Empty;
+        ServiceUnit = unitOfMeasurement;
         Quantity = operation.Quantity;
         Currency = operation.Currency;
         Credit = operation.Credit;
-        Withdrawal = operation.Withdrawal;
+        Debit = operation.Debit;
+        ParticipantName = operation.ParticipantName;
+        ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
+            ? value
+            : operation.ParticipantName;
     }
 
-    public static string GetServiceDesc(string serviceName)
+    private static (string, string) GetServiceDescAndUOM(string serviceName)
     {
         // for testing purposes
         if (serviceName != null && serviceName.StartsWith("disk-storage"))
@@ -134,7 +153,13 @@ public class OperationDto
             serviceName = "disk-storage";
         }
 
-        return Resource.ResourceManager.GetString("AccountingCustomerOperationServiceDesc_" + (serviceName ?? "top-up"));
+        if (string.IsNullOrEmpty(serviceName))
+        {
+            serviceName = "top-up";
+        }
+
+        return (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}"),
+            Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"));
     }
 }
 
@@ -154,7 +179,7 @@ public class CustomerInfoDto(CustomerInfo customerInfo, EmployeeDto employeeDto)
     public PaymentMethodStatus PaymentMethodStatus { get; private set; } = customerInfo.PaymentMethodStatus;
 
     /// <summary>
-    /// The email address of the customer.
+    /// The customer email address.
     /// </summary>
     public string Email { get; private set; } = customerInfo.Email;
 

@@ -129,9 +129,9 @@ public class ReassignController(
     }
 
     /// <summary>
-    /// Checks if the reassignment of rooms and shared files is necessary or not.
+    /// Checks whether the reassignment of rooms and shared files is required.
     /// </summary>
-    /// <short>Check the data reassignment need</short>
+    /// <short>Check data for reassignment need</short>
     /// <path>api/2.0/people/reassign/necessary</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Boolean value: true if neccessary reassign", typeof(bool))]
@@ -154,7 +154,7 @@ public class ReassignController(
 
         if (inDto.Type is EmployeeType.Guest && !result)
         {
-            result = (await fileStorageService.GetSharedFilesAsync(inDto.UserId)).Any();
+            result = (await fileStorageService.GetSharedEntriesCountAsync(inDto.UserId)) > 0;
         }
 
         return result;

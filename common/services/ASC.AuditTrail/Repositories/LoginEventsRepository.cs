@@ -30,8 +30,8 @@ namespace ASC.AuditTrail.Repositories;
 public class LoginEventsRepository(
     TenantManager tenantManager,
     IDbContextFactory<MessagesContext> dbContextFactory,
-    IMapper mapper,
-    GeolocationHelper geolocationHelper)
+    GeolocationHelper geolocationHelper,
+    LoginEventMapper eventMapper)
 {
     public async Task<List<LoginEvent>> GetByFilterAsync(
         Guid? login = null,
@@ -39,7 +39,8 @@ public class LoginEventsRepository(
         DateTime? fromDate = null,
         DateTime? to = null,
         int startIndex = 0,
-        int limit = 0)
+        int limit = 0,
+        bool limitedActionText = false)
     {
         var tenant = tenantManager.GetCurrentTenantId();
         await using var messagesContext = await dbContextFactory.CreateDbContextAsync();
@@ -93,7 +94,8 @@ public class LoginEventsRepository(
             }
         }
 
-        var events = mapper.Map<List<LoginEventQuery>, List<LoginEvent>>(await query.ToListAsync());
+        var eventQueryList = await query.ToListAsync();
+        var events = limitedActionText ? eventMapper.ToLimitedLoginEvents(eventQueryList) : eventMapper.ToLoginEvents(eventQueryList);
 
         foreach (var e in events)
         {
@@ -118,6 +120,10 @@ public class LoginEventsRepository(
             (int)MessageAction.LoginSuccessViaApiSocialAccount,
             (int)MessageAction.LoginSuccesViaTfaApp,
             (int)MessageAction.LoginSuccessViaApiTfa,
+            (int)MessageAction.LoginSuccessViaOAuth,
+            (int)MessageAction.LoginSuccessViaPassword,
+
+            (int)MessageAction.AuthLinkActivated,
 
             (int)MessageAction.Logout
         };

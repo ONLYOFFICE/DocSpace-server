@@ -31,8 +31,7 @@ public class NotificationController(
     IFusionCache fusionCache,
     WebItemManager webItemManager,
     NotificationControllerHelper notificationControllerHelper,
-    RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
-    IMapper mapper)
+    RoomsNotificationSettingsHelper roomsNotificationSettingsHelper)
 : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
@@ -62,7 +61,7 @@ public class NotificationController(
     {
         await notificationControllerHelper.SetNotificationStatusAsync(inDto.Type, inDto.IsEnabled);
 
-        return mapper.Map<NotificationSettingsDto>(inDto);
+        return inDto.Map();
     }
 
     /// <summary>
@@ -76,7 +75,7 @@ public class NotificationController(
     public async Task<RoomsNotificationSettingsDto> GetRoomsNotificationSettings()
     {
         var  settings = await roomsNotificationSettingsHelper.GetSettingsForCurrentUserAsync();
-        return mapper.Map<RoomsNotificationSettingsDto>(settings);
+        return settings.Map();
     }
 
     /// <summary>
@@ -90,6 +89,23 @@ public class NotificationController(
     public async Task<RoomsNotificationSettingsDto> SetRoomsNotificationStatus(RoomsNotificationsSettingsRequestDto inDto)
     {
         var settings = await roomsNotificationSettingsHelper.SetForCurrentUserAsync(inDto.RoomsId, inDto.Mute);
-        return mapper.Map<RoomsNotificationSettingsDto>(settings);
+        return settings.Map();
+    }
+
+    /// <summary>
+    /// Returns a list of notification channels.
+    /// </summary>
+    /// <short>Get notification channels</short>
+    /// <path>api/2.0/settings/notification/channels</path>
+    [Tags("Settings / Notifications")]
+    [SwaggerResponse(200, "Notification settings", typeof(NotificationChannelStatusDto))]
+    [HttpGet("channels")]
+    public NotificationChannelStatusDto GetNotificationChannels()
+    {
+        var channels = notificationControllerHelper.GetNotificationChannels();
+        return new NotificationChannelStatusDto
+        {
+            Channels = [.. channels.Select(c => new NotificationChannelDto { Name = c.Name, IsEnabled = c.IsEnabled })]
+        };
     }
 }

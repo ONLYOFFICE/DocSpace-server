@@ -24,14 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Billing;
-
-using Polly;
-
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
 public class DocumentServiceLicense(ICache cache,
+    ResiliencePipelineProvider<string> resiliencePipelineProvider,
     CoreBaseSettings coreBaseSettings,
     FilesLinkUtility filesLinkUtility,
     IHttpClientFactory clientFactory)
@@ -79,17 +76,23 @@ public class DocumentServiceLicense(ICache cache,
 
     public async Task<LicenseValidationResult> ValidateLicense(License license)
     {
-        var retryPolicy = Policy
-            .HandleResult<LicenseValidationResult>(result => result == null)
-            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+        var pipeline = resiliencePipelineProvider.GetPipeline<LicenseValidationResult>(LicenseResiliencePipelineName);
 
-        var response = await retryPolicy.ExecuteAsync(async () =>
+        var errorMsg = string.Empty;
+
+        var response = await pipeline.ExecuteAsync(async (_) =>
         {
             var commandResponse = await GetDocumentServiceLicenseAsync(false);
 
             if (commandResponse == null)
             {
                 return new LicenseValidationResult(true, null);
+            }
+
+            if (commandResponse.Error == ErrorTypes.ParseError)
+            {
+                errorMsg = commandResponse.ErrorString;
+                return null; // Possible DocumentService behavior without a license when the response contains "end_date":null
             }
 
             if (commandResponse.Error != ErrorTypes.NoError)
@@ -114,12 +117,12 @@ public class DocumentServiceLicense(ICache cache,
             return null;
         });
 
-        return response ?? new LicenseValidationResult(false, "Failure after several attempts");
+        return response ?? new LicenseValidationResult(false, $"Failure after several attempts. {errorMsg}");
     }
 
-    public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync()
+    public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync(bool useCache = true)
     {
-        var commandResponse = await GetDocumentServiceLicenseAsync(true);
+        var commandResponse = await GetDocumentServiceLicenseAsync(useCache);
         return commandResponse == null ? 
             (null, null) : 
             (commandResponse.Quota?.Users?.ToDictionary(r=> r.UserId, r=> r.Expire), commandResponse.License);

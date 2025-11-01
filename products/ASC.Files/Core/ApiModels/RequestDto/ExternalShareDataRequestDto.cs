@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The external shared data request parameters.
+/// The request parameters for getting external shared data.
 /// </summary>
 public class ExternalShareDataRequestDto
 {
@@ -42,4 +42,10 @@ public class ExternalShareDataRequestDto
     /// </summary>
     [FromQuery(Name = "fileId")]
     public string FileId { get; set; } = null;
+
+    /// <summary>
+    /// The unique folder identifier.
+    /// </summary>
+    [FromQuery(Name = "folderId")]
+    public string FolderId { get; set; } = null;
 }

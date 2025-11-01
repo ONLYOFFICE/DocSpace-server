@@ -37,19 +37,24 @@ public class GroupSummaryDto
     /// The group ID.
     /// </summary>
     [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
     /// The group name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Group Name")]
-    public string Name { get; init; }
+    public required string Name { get; init; }
 
     /// <summary>
     /// The group manager.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Jake.Zazhitski")]
     public string Manager { get; set; }
+
+    /// <summary>
+    /// Indicates whether the group is a system group.
+    /// </summary>
+    public bool? IsSystem { get; set; }
 }
 
 [Scope]
@@ -61,7 +66,8 @@ public class GroupSummaryDtoHelper(UserManager userManager)
         {
             Id = group.ID, 
             Name = group.Name, 
-            Manager = (await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID))).UserName
+            Manager = (await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID))).UserName,
+            IsSystem = await userManager.IsSystemGroup(group.ID) ? true : null
         };
     }
 }

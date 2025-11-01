@@ -135,4 +135,25 @@
   <data name="BackupInvalid" xml:space="preserve">
     <value>백업 파일이 유효하지 않습니다.</value>
   </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>자동 백업</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>임시 저장소</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>백업 방</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>로컬 파일</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>타사 저장소</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>타사 리소스</value>
+  </data>
 </root>

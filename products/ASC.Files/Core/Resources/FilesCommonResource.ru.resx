@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AceShareLink" xml:space="preserve">
     <value>Вне портала</value>
@@ -166,9 +225,6 @@
   <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Произошла ошибка сервиса документов</value>
   </data>
-  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
-    <value>Файл открыт на редактирование пользователем {0}. В настоящее время возможность совместного редактирования не поддерживается для этого формата.</value>
-  </data>
   <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>Файл открыт на редактирование в мобильном приложении пользователем: {0}</value>
   </data>
@@ -183,6 +239,9 @@
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Файл более {0} не будет перемещен</value>
+  </data>
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
+    <value>Новая версия не может совпадать с текущей</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Нельзя скопировать папку в свою дочернюю папку</value>
@@ -219,6 +278,12 @@
   </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Не удается авторизоваться у провайдера {0} с указанными учетными данными.</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
+    <value>У Вас недостаточно прав для копирования файла</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
+    <value>У Вас недостаточно прав для копирования папки</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>У Вас недостаточно прав для создания</value>
@@ -280,6 +345,36 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Запрещено просматривать элементы корзины</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Недопустимый провайдер</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Невозможно использовать эту папку для хранения комнаты</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Пригласительная ссылка недействительна или срок ее действия истек</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Роль недоступна для этого типа пользователя</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Этот провайдер уже подключен к комнате</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>У вас недостаточно прав для копирования в эту папку</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>У вас недостаточно прав для перемещения в эту папку</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>У вас недостаточно прав для разархивирования комнаты</value>
+  </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Вы не можете редактировать заархивированные комнаты</value>
+  </data>
+  <data name="ErrorrMessage_PinRoom" xml:space="preserve">
+    <value>Вы не можете закрепить комнату</value>
+  </data>
   <data name="Everyone" xml:space="preserve">
     <value>Все</value>
   </data>
@@ -329,6 +424,12 @@
   <data name="UnlockComment" xml:space="preserve">
     <value>Файл разблокирован</value>
   </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Редактор</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>У вас недостаточно прав для редактирования комнаты</value>
+  </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>Администратор DocSpace</value>
   </data>
@@ -356,65 +457,20 @@
   <data name="AceStatusEnum_Collaborator" xml:space="preserve">
     <value>Соавтор</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Редактор</value>
-  </data>
-  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
-    <value>Новая версия не может совпадать с текущей</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
-    <value>У Вас недостаточно прав для копирования файла</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
-    <value>У Вас недостаточно прав для копирования папки</value>
-  </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Недопустимый провайдер</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Невозможно использовать эту папку для хранения комнаты</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Пригласительная ссылка недействительна или срок ее действия истек</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Этот провайдер уже подключен к комнате</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Роль недоступна для этого типа пользователя</value>
-  </data>
   <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
     <value>У вас недостаточно прав для архивирования комнаты</value>
   </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>У вас недостаточно прав для копирования в эту папку</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>У вас недостаточно прав для редактирования комнаты</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>У вас недостаточно прав для перемещения в эту папку</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>У вас недостаточно прав для разархивирования комнаты</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Вы не можете редактировать заархивированные комнаты</value>
-  </data>
-  <data name="ErrorrMessage_PinRoom" xml:space="preserve">
-    <value>Вы не можете закрепить комнату</value>
-  </data>
   <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
     <value>Максимальное количество ссылок не должно превышать {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Вы сделали слишком много попыток ввода пароля. Пожалуйста, повторите попытку позже</value>
   </data>
   <data name="DefaultInvitationLinkTitle" xml:space="preserve">
     <value>Пригласительная ссылка</value>
   </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
     <value>Ссылка для доступа</value>
-  </data>
-  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>Вы сделали слишком много попыток ввода пароля. Пожалуйста, повторите попытку позже</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Автор</value>
@@ -430,9 +486,6 @@
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Автор экспорта</value>
-  </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Папка</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Индекс</value>
@@ -458,29 +511,35 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Тип</value>
   </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Папка</value>
+  </data>
   <data name="Date" xml:space="preserve">
     <value>Дата</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Пользователь</value>
   </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Перемещение нескольких файлов в комнату «Заполнение форм» не поддерживается. Перемещайте по одной PDF-форме {0}.</value>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Ссылка на форму</value>
   </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Перемещение папок в комнату «Заполнение форм» не поддерживается. Перемещайте по одной PDF-форме {0}.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Файл не может быть перемещен в эту комнату. Попробуйте переместить PDF-форму {0}.</value>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Открыть файл</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Файл не может быть загружен в эту комнату. Попробуйте загрузить PDF-форму {0}.</value>
+    <value>Файл не может быть загружен в эту комнату. Попробуйте загрузить PDF-форму ONLYOFFICE.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Ссылка для заполнения</value>
   </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Ссылка на форму</value>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Перемещение нескольких файлов в комнату «Заполнение форм» не поддерживается. Перемещайте по одной PDF-форме ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Перемещение папок в комнату «Заполнение форм» не поддерживается. Перемещайте по одной PDF-форме ONLYOFFICE.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Файл не может быть перемещен в эту комнату. Попробуйте переместить PDF-форму ONLYOFFICE.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Номер формы</value>
@@ -488,20 +547,17 @@
   <data name="ExternalUser" xml:space="preserve">
     <value>Внешний пользователь</value>
   </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Создатель контента</value>
-  </data>
   <data name="AceStatusEnum_RoomManager" xml:space="preserve">
     <value>Менеджер комнат</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Создатель контента</value>
   </data>
   <data name="RoleEnum_RoomManager" xml:space="preserve">
     <value>Менеджер комнат</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Открыть файл</value>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Создатель контента</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Создатель контента</value>
   </data>
   <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
     <value>Невозможно удалить текущую версию файла</value>
@@ -512,10 +568,13 @@
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Начать заполнение</value>
   </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Администратор комнаты</value>
+  </data>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Гость</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Администратор комнаты</value>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Документы пользователя {0} {1}</value>
   </data>
 </root>

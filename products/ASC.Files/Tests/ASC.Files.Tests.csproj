@@ -11,26 +11,27 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Bogus" Version="35.6.2" />
+        <PackageReference Include="Bogus" Version="35.6.3" />
         <PackageReference Include="coverlet.collector" Version="6.0.4">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Docspace" Version="3.2.0.2" />
+        <PackageReference Include="DocSpace.API.SDK" Version="3.5.0-preview.1" />
         <PackageReference Include="FluentAssertions" Version="7.0.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.3" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.8" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
         <PackageReference Include="Respawn" Version="6.2.1" />
-        <PackageReference Include="Testcontainers" Version="4.3.0" />
-        <PackageReference Include="Testcontainers.MySql" Version="4.3.0" />
-        <PackageReference Include="Testcontainers.PostgreSql" Version="4.3.0" />
-        <PackageReference Include="Testcontainers.RabbitMq" Version="4.3.0" />
-        <PackageReference Include="Testcontainers.Redis" Version="4.3.0" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2">
+        <PackageReference Include="Testcontainers" Version="4.6.0" />
+        <PackageReference Include="Testcontainers.MySql" Version="4.6.0" />
+        <PackageReference Include="Testcontainers.OpenSearch" Version="4.6.0" />
+        <PackageReference Include="Testcontainers.PostgreSql" Version="4.6.0" />
+        <PackageReference Include="Testcontainers.RabbitMq" Version="4.6.0" />
+        <PackageReference Include="Testcontainers.Redis" Version="4.6.0" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="xunit.v3" Version="2.0.0" />
+        <PackageReference Include="xunit.v3" Version="3.0.1" />
     </ItemGroup>
 
     <ItemGroup>

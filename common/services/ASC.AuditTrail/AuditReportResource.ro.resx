@@ -195,9 +195,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Setări de suprascriere actualizate</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Documente</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Setări</value>
   </data>
@@ -427,7 +424,7 @@
     <value>Conectarea a reușit</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Conectarea prin cont de rețea socială a reușit</value>
+    <value>Conectarea prin cont de rețea socială a reușit: {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Conectarea prin aplicația de socializare a reușit</value>
@@ -465,9 +462,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Mutare</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Alte</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Schimbare proprietar: {0}</value>
   </data>
@@ -485,9 +479,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Setări Nivel de complexitate parolă au fost actualizate</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Persoane</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platforma</value>
@@ -578,9 +569,6 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesiunea a început</value>
-  </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>Setări</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Conectarea unică dezactivată</value>
@@ -998,5 +986,62 @@
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>Setările de alimentare a portofelului de client au fost actualizate</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Setările serviciilor care au fost activate cu portofelul clientului au fost actualizate</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Locaţie</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Autentificarea reușită prin OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Autentificarea reușită cu nume de utilizator și parolă</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Fișiere [{0}]. Link-ul extern a fost creat: {1}. Rol: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Fișiere [{0}]. Link-ul extern a fost șters: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Fișiere [{0}]. Link-ul extern a fost actualizat: {1}. Rol: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Fișierul a fost marcat ca favorit: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Fişierul a fost eliminat din Favorite: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Fişieul a fost eliminat din secțiunea Partajate cu mine: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Fișiere [{0}]. Permisiuni de acces actualizate pentru {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Folderul a fost încărcat {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Foldere [{0}]. Link-ul extern a fost creat: {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Foldere [{0}]. Link-ul extern a fost șters: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Foldere [{0}]. Link-ul extern a fost actualizat: {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Folderul a fost eliminat din secțiunea Partajate cu mine: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Foldere [{0}]. Permisiuni de acces au fost actualizate pentru {1}. Rol: {2}</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Setările de vizibilitate ale anunțurilor banner au fost modificate</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Link-ul extern a fost revocat: {1}</value>
   </data>
 </root>

@@ -1,7 +1,7 @@
-# {{packageName}}.{{apiPackage}}.{{classname}}{{#description}}
+# {{packageName}}.{{apiPackage}}.{{#operations}}{{x-classname}}{{/operations}}{{#description}}
 {{.}}{{/description}}
 
-All URIs are relative to *{{{basePath}}}*
+All URIs are relative to *https://your-docspace.onlyoffice.com*
 
 | Method | HTTP request | Description |
 |--------|--------------|-------------|
@@ -57,7 +57,7 @@ namespace Example
         public static void Main()
         {
             Configuration config = new Configuration();
-            config.BasePath = "{{{basePath}}}";
+            config.BasePath = "https://your-docspace.onlyoffice.com";
             {{#hasAuthMethods}}
             {{#authMethods}}
             {{#isBasicBasic}}
@@ -86,10 +86,10 @@ namespace Example
             // create instances of HttpClient, HttpClientHandler to be reused later with different Api classes
             HttpClient httpClient = new HttpClient();
             HttpClientHandler httpClientHandler = new HttpClientHandler();
-            var apiInstance = new {{classname}}(httpClient, config, httpClientHandler);
+            var apiInstance = new {{x-classname}}(httpClient, config, httpClientHandler);
             {{/useHttpClient}}
             {{^useHttpClient}}
-            var apiInstance = new {{classname}}(config);
+            var apiInstance = new {{x-classname}}(config);
             {{/useHttpClient}}
             {{#allParams}}
             {{#isPrimitiveType}}
@@ -110,7 +110,7 @@ namespace Example
             }
             catch (ApiException  e)
             {
-                Debug.Print("Exception when calling {{classname}}.{{operationId}}: " + e.Message);
+                Debug.Print("Exception when calling {{x-classname}}.{{operationId}}: " + e.Message);
                 Debug.Print("Status Code: " + e.ErrorCode);
                 Debug.Print(e.StackTrace);
             }
@@ -135,7 +135,7 @@ try
 }
 catch (ApiException e)
 {
-    Debug.Print("Exception when calling {{classname}}.{{operationId}}WithHttpInfo: " + e.Message);
+    Debug.Print("Exception when calling {{x-classname}}.{{operationId}}WithHttpInfo: " + e.Message);
     Debug.Print("Status Code: " + e.ErrorCode);
     Debug.Print(e.StackTrace);
 }

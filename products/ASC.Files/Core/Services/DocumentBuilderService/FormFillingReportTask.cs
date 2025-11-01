@@ -58,6 +58,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
     {
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
         var clientFactory = serviceProvider.GetService<IHttpClientFactory>();
+        var tenantUtil = serviceProvider.GetService<TenantUtil>();
 
         var fileDao = daoFactory.GetFileDao<int>();
         var origProperties = await daoFactory.GetFileDao<int>().GetProperties(_data.OriginalFormId);
@@ -69,12 +70,11 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         using var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
-        
-        resultFile.Version++;
-        resultFile.VersionGroup++;
+
+        resultFile.CreateOn = tenantUtil.DateTimeNow();
         resultFile.ContentLength = stream.Length;
 
-        resultFile = await fileDao.SaveFileAsync(resultFile, stream, false);
+        resultFile = await fileDao.ReplaceFileVersionAsync(resultFile, stream);
 
         if (resultFile.Id != origProperties.FormFilling.ResultsFileID)
         {
@@ -115,7 +115,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
             if(formsData.Any())
             {
                 keys.Add(FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture));
-                keys.AddRange(formsData.Skip(1).Select(field => field.Key));
+                keys.AddRange(formsData.Skip(1).Where(d => d.Type != "picture" && d.Type != "signature").Select(field => field.Key));
                 keys.Add(FilesCommonResource.ResourceManager.GetString("Date", tenantCulture));
                 keys.Add(FilesCommonResource.ResourceManager.GetString("LinkToForm", tenantCulture));
 
@@ -124,7 +124,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
                     var t = new List<object>();
                     foreach (var field in formFillingRes.FormsData)
                     {
-                        if (field.Type == "picture")
+                        if (field.Type == "picture" || field.Type == "signature")
                         {
                             continue;
                         }
@@ -142,13 +142,16 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
                         url = ""
                     });
                     var formsDataFile = await fileDao.GetFileAsync(formFillingRes.Id);
-                    var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
-                    t.Add(new
+                    if (formsDataFile != null)
                     {
-                        format = "@",
-                        value = FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture),
-                        url = resultUrl
-                    });
+                        var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
+                        t.Add(new
+                        {
+                            format = "@",
+                            value = FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture),
+                            url = resultUrl
+                        });
+                    }
                     values.Add(t);
                 }
             }

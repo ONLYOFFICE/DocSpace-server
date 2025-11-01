@@ -194,7 +194,7 @@ public class LoginProfileTransport(InstanceCrypto instanceCrypto, TenantManager 
 {
     public async Task<string> ToString(LoginProfile profile)
     {
-        var tenantId =  tenantManager.GetCurrentTenantId();
+        var tenantId =  tenantManager.GetCurrentTenant(false)?.Id;
         var input =  await instanceCrypto.EncryptAsync(Encoding.UTF8.GetBytes(profile.ToString() + tenantId));
         return WebEncoders.Base64UrlEncode(input);
     }
