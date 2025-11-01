@@ -107,7 +107,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 return false;
             }
         }
-        if (DocSpaceHelper.IsRoom(rootFolder.FolderType))
+        if (DocSpaceHelper.IsRoom(rootFolder.FolderType) && !rootFolder.ProviderEntry)
         {
             var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
             if (quotaRoomSettings.EnableQuota)
