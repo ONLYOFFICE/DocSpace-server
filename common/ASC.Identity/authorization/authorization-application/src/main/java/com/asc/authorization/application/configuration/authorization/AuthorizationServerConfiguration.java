@@ -148,7 +148,7 @@ public class AuthorizationServerConfiguration {
                             .tokenIntrospectionEndpointAuthenticationMethods(
                                 methods -> {
                                   methods.clear();
-                                  methods.addAll(List.of(CLIENT_SECRET_BASIC, CLIENT_SECRET_POST));
+                                  methods.add(CLIENT_SECRET_POST);
                                 })
                             .tokenRevocationEndpointAuthenticationMethods(
                                 methods -> {
@@ -178,8 +178,7 @@ public class AuthorizationServerConfiguration {
                                         .tokenIntrospectionEndpointAuthenticationMethods(
                                             methods -> {
                                               methods.clear();
-                                              methods.addAll(
-                                                  List.of(CLIENT_SECRET_BASIC, CLIENT_SECRET_POST));
+                                              methods.add(CLIENT_SECRET_POST);
                                             })
                                         .tokenRevocationEndpointAuthenticationMethods(
                                             methods -> {
