@@ -976,14 +976,51 @@ public class FileSharing(
         {
             yield break;
         }
+        
+        var cachedFolderDao = daoFactory.GetCacheFolderDao<T>();
+        var parents = await cachedFolderDao.GetFirstParentTypeFromFileEntryAsync(entry);
+        AceWrapper owner;
+        
+        if (parents is null)
+        {
+            owner = new AceWrapper
+            {
+                Id = entry.CreateBy,
+                SubjectName = await global.GetUserNameAsync(entry.CreateBy),
+                SubjectGroup = false,
+                Access = FileShare.ReadWrite,
+                Owner = true,
+                CanEditAccess = false
+            };
+        }
+        else
+        {
+            owner = new AceWrapper
+            {
+                Id = parents.CreateBy,
+                SubjectName = await global.GetUserNameAsync(parents.CreateBy),
+                SubjectGroup = false,
+                Access = FileShare.ReadWrite,
+                Owner = true,
+                CanEditAccess = false
+            };
+        }
 
+        if (await ValidateUserActivationAndSearch(owner.Id, filterType, status, text))
+        {
+            yield return owner;
+        }
+    }
+
+    private async Task<bool> ValidateUserActivationAndSearch(Guid userId, ShareFilterType filterType, EmployeeActivationStatus? status, string text)
+    {
         if (status.HasValue && filterType == ShareFilterType.User)
         {
-            var user = await userManager.GetUsersAsync(entry.CreateBy);
+            var user = await userManager.GetUsersAsync(userId);
 
             if (user.ActivationStatus != status.Value)
             {
-                yield break;
+                return false;
             }
         }
 
@@ -991,57 +1028,17 @@ public class FileSharing(
         {
             text = text.ToLower().Trim();
 
-            var user = await userManager.GetUsersAsync(entry.CreateBy);
+            var user = await userManager.GetUsersAsync(userId);
 
             if (!(user.FirstName.Contains(text, StringComparison.CurrentCultureIgnoreCase) ||
                   user.LastName.Contains(text, StringComparison.CurrentCultureIgnoreCase) ||
                   user.Email.Contains(text, StringComparison.CurrentCultureIgnoreCase)))
             {
-                yield break;
+                return false;
             }
         }
 
-        var owner = new AceWrapper
-        {
-            Id = entry.CreateBy,
-            SubjectName = await global.GetUserNameAsync(entry.CreateBy),
-            SubjectGroup = false,
-            Access = FileShare.ReadWrite,
-            Owner = true,
-            CanEditAccess = false
-        };
-
-        yield return owner;
-
-        var i = 0;
-        var cachedFolderDao = daoFactory.GetCacheFolderDao<T>();
-        var parents = cachedFolderDao.GetParentFoldersAsync(entry.ParentId)
-            .Where(r => r.FolderType is not FolderType.VirtualRooms and not FolderType.AiAgents)
-            .Select(r => r.CreateBy)
-            .Where(r => !r.Equals(entry.CreateBy))
-            .Distinct();
-        
-        await foreach (var parent in parents)
-        {
-            var parentOwner = false;
-
-            if (i == 0)
-            {
-                owner.Owner = false;
-                parentOwner = true;
-            }
-
-            yield return new AceWrapper
-            {
-                Id = parent,
-                SubjectName = await global.GetUserNameAsync(parent),
-                SubjectGroup = false,
-                Access = FileShare.ReadWrite,
-                Owner = parentOwner,
-                CanEditAccess = false
-            };
-            i++;
-        }
+        return true;
     }
 
     private async Task<AceWrapper> ToAceAsync<T>(FileEntry<T> entry, FileShareRecord<T> record, bool canEditAccess, bool canEditInternal, bool canEditExpiration)

@@ -1121,14 +1121,22 @@ internal abstract class SecurityBaseDao<T>(
 
         return result;
     }
-
+    
     private async Task<IQueryable<DbFilesSecurity>> GetPureSharesQuery(int tenantId, FileEntry<T> entry, ShareFilterType filterType, FilesDbContext filesDbContext)
     {
         var entryId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
-
+        
         var q = filesDbContext.Security.AsNoTracking()
-            .Where(s => s.TenantId == tenantId && s.EntryId == entryId && s.EntryType == entry.FileEntryType);
-
+            .Where(s => s.TenantId == tenantId && 
+                        (s.EntryId == entryId && 
+                        s.EntryType == entry.FileEntryType
+                        || s.EntryType == FileEntryType.Folder && 
+                        filesDbContext.Tree.Any(r => r.FolderId.ToString() == entryId && 
+                                                     filesDbContext.Folders.Any(f => f.TenantId == tenantId && 
+                                                                                     s.EntryId == f.ParentId.ToString() && 
+                                                                                     f.Id == r.ParentId && 
+                                                                                     f.FolderType != FolderType.AiAgents && f.FolderType != FolderType.VirtualRooms && f.FolderType != FolderType.USER))));
+        
         switch (filterType)
         {
             case ShareFilterType.UserOrGroup:
