@@ -102,14 +102,9 @@ public class BaseTest(
         return (await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
     }
     
-    protected async Task<int> GetFolderIdAsync(FolderType folderType, User user)
+    protected async Task<int> GetShareFolderIdAsync(User user)
     {
-        await _filesClient.Authenticate(user);
-        
-        var rootFolder = (await _foldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType.HasValue && r.Current.RootFolderType.Value == folderType)!.Current.Id;
-        
-        return folderId;
+        return await GetFolderIdAsync(FolderType.SHARE, user);
     }
     
     protected async Task<int> GetUserFolderIdAsync(User user)
@@ -128,7 +123,7 @@ public class BaseTest(
     
     protected async Task<FileDtoInteger> CreateFileInMy(string fileName, User user)
     {
-        var folderId = await GetFolderIdAsync(FolderType.USER, user);
+        var folderId = await GetUserFolderIdAsync( user);
         
         return await CreateFile(fileName, folderId);
     }
@@ -147,7 +142,7 @@ public class BaseTest(
     
     protected async Task<FolderDtoInteger> CreateFolderInMy(string folderName, User user)
     {
-        var folderId = await GetFolderIdAsync(FolderType.USER, user);
+        var folderId = await GetUserFolderIdAsync( user);
         
         return await CreateFolder(folderName, folderId);
     }
@@ -252,5 +247,15 @@ public class BaseTest(
         var openEditResult = (await _filesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
         return openEditResult.File;
+    }
+    
+    private async Task<int> GetFolderIdAsync(FolderType folderType, User user)
+    {
+        await _filesClient.Authenticate(user);
+        
+        var rootFolder = (await _foldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType.HasValue && r.Current.RootFolderType.Value == folderType)!.Current.Id;
+        
+        return folderId;
     }
 }

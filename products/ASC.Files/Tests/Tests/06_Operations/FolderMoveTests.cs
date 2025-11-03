@@ -48,7 +48,7 @@ public class FolderMoveTests(
         await CreateFile("test_file.docx", sourceFolder.Id);
         
         // Create a target folder
-        var targetFolderId = await GetFolderIdAsync(FolderType.USER, Initializer.Owner);
+        var targetFolderId = await GetUserFolderIdAsync( Initializer.Owner);
         
         // Act
         var copyParams = new BatchRequestDto

@@ -135,7 +135,7 @@ public class FolderCreateTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _foldersApi.CreateFolderAsync(
-                await GetFolderIdAsync(FolderType.USER, Initializer.Owner), 
+                await GetUserFolderIdAsync( Initializer.Owner), 
                 folderRequest, 
                 cancellationToken: TestContext.Current.CancellationToken));
         
@@ -149,7 +149,7 @@ public class FolderCreateTests(
         
         // Arrange
         var folderName = "Duplicate Folder";
-        var parentFolderId = await GetFolderIdAsync(FolderType.USER, Initializer.Owner);
+        var parentFolderId = await GetUserFolderIdAsync( Initializer.Owner);
         
         // Create first folder
         var firstFolder = await CreateFolder(folderName, parentFolderId);
