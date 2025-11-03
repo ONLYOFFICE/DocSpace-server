@@ -1129,8 +1129,11 @@ internal abstract class SecurityBaseDao<T>(
         var q = filesDbContext.Security.AsNoTracking()
             .Where(s => s.TenantId == tenantId && 
                         (s.EntryId == entryId && 
-                        s.EntryType == entry.FileEntryType
-                        || s.EntryType == FileEntryType.Folder && 
+                        s.EntryType == entry.FileEntryType || 
+                        (filterType == ShareFilterType.User ||
+                        filterType == ShareFilterType.Group ||
+                        filterType == ShareFilterType.UserOrGroup) && 
+                        s.EntryType == FileEntryType.Folder && 
                         filesDbContext.Tree.Any(r => r.FolderId.ToString() == entryId && 
                                                      filesDbContext.Folders.Any(f => f.TenantId == tenantId && 
                                                                                      s.EntryId == f.ParentId.ToString() && 
