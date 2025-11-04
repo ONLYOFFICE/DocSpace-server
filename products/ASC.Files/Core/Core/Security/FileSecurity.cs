@@ -2678,8 +2678,8 @@ public class FileSecurity(
         var fileDao = daoFactory.GetFileDao<T>();
         var securityDao = daoFactory.GetSecurityDao<T>();
 
-        var fileIds = new Dictionary<T, FileShare>();
-        var folderIds = new Dictionary<T, FileShare>();
+        var fileIds = new Dictionary<T, (FileShare, Guid)>();
+        var folderIds = new Dictionary<T, (FileShare, Guid)>();
 
         var recordGroup = records.GroupBy(r => new { r.EntryId, r.EntryType }, (_, group) => new
         {
@@ -2694,14 +2694,14 @@ public class FileSecurity(
             {
                 if (!folderIds.ContainsKey(r.EntryId))
                 {
-                    folderIds.Add(r.EntryId, r.Share);
+                    folderIds.Add(r.EntryId, (r.Share, r.Owner));
                 }
             }
             else
             {
                 if (!fileIds.ContainsKey(r.EntryId))
                 {
-                    fileIds.Add(r.EntryId, r.Share);
+                    fileIds.Add(r.EntryId, (r.Share, r.Owner));
                 }
             }
         }
@@ -2715,9 +2715,10 @@ public class FileSecurity(
 
             await foreach (var x in files)
             {
-                if (fileIds.TryGetValue(x.Id, out _))
+                if (fileIds.TryGetValue(x.Id, out var tuple))
                 {
-                    x.Access = fileIds[x.Id];
+                    x.Access = tuple.Item1;
+                    x.SharedBy = tuple.Item2;
                     x.FolderIdDisplay = share;
                 }
 
@@ -2738,9 +2739,10 @@ public class FileSecurity(
 
             await foreach (var folder in folders)
             {
-                if (folderIds.TryGetValue(folder.Id, out _))
+                if (folderIds.TryGetValue(folder.Id, out var access))
                 {
-                    folder.Access = folderIds[folder.Id];
+                    folder.Access = access.Item1;
+                    folder.SharedBy = access.Item2;
                     folder.FolderIdDisplay = share;
                 }
 

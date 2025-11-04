@@ -54,6 +54,11 @@ public abstract class FileEntry : ICloneable
     public Guid CreateBy { get; set; }
 
     /// <summary>
+    /// Identifies the user who has shared the file entry.
+    /// </summary>
+    public Guid? SharedBy { get; set; }
+
+    /// <summary>
     /// The name of the user who created the file entry.
     /// </summary>
     [JsonIgnore]

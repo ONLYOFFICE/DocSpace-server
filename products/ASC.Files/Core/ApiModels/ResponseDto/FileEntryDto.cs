@@ -56,6 +56,11 @@ public abstract class FileEntryBaseDto
     public FileShare Access { get; set; }
 
     /// <summary>
+    /// The unique identifier of the user who shared the file entry.
+    /// </summary>
+    public Guid? SharedBy { get; set; }
+
+    /// <summary>
     /// Specifies if the file entry is shared via link or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
@@ -153,6 +158,7 @@ public abstract class FileEntryBaseDto
     {
         Title = entry.Title;
         Access = entry.Access;
+        SharedBy = entry.SharedBy;
         Shared = entry.Shared;
         SharedForUser = entry.SharedForUser;
         ParentShared = entry.ParentShared;
@@ -352,6 +358,7 @@ public class FileEntryDtoHelper(
             Title = entry.Title,
             Access = entry.Access,
             Shared = entry.Shared,
+            SharedBy = entry.SharedBy,
             SharedForUser = entry.SharedForUser,
             ParentShared = entry.ParentShared,
             ShortWebUrl = shortWebUrl,
