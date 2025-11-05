@@ -235,7 +235,7 @@ public class FileDtoHelper(
         Task<bool> aiReadyTask = null;
         if (aiReady == null)
         {
-            aiReadyTask = aiAccessibility.IsAiReadyAsync();
+            aiReadyTask = aiAccessibility.IsAiEnabledAsync();
         }
         
         var result = await GetFileWrapperAsync(file, order, expiration, contextFolder);
@@ -375,11 +375,6 @@ public class FileDtoHelper(
             if (result.Security.ContainsKey(FileSecurity.FilesSecurityActions.AscAi))
             {
                 result.Security[FileSecurity.FilesSecurityActions.AscAi] = false;
-            }
-
-            if (result.Security.ContainsKey(FileSecurity.FilesSecurityActions.Vectorization))
-            {
-                result.Security[FileSecurity.FilesSecurityActions.Vectorization] = false;
             }
         }
 

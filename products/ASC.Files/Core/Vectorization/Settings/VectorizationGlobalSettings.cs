@@ -24,21 +24,44 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.Files.Core.Vectorization.Settings;
 
-public class AiSettingsDto
+[Singleton]
+public class VectorizationGlobalSettings
 {
-    public bool WebSearchEnabled { get; init; }
-    public bool VectorizationEnabled { get; init; }
-    public bool AiReady { get; init; }
-    public required string KnowledgeSearchToolName { get; init; }
-    public required string WebSearchToolName { get; init; }
-    public required string WebCrawlingToolName { get; init; }
-}
+    public float ChunkOverlap { get; init; }
+    public int ChunksBatchSize { get; init; }
+    public long MaxContentLength { get; init; }
+    public HashSet<string> SupportedFormats { get; init; }
+    
+    public VectorizationGlobalSettings(IConfiguration configuration)
+    {
+        var settings = configuration.GetSection("ai:vectorization").Get<Settings>() ?? Settings.Default;
+        ChunkOverlap = settings.ChunkOverlap;
+        ChunksBatchSize = settings.ChunksBatchSize;
+        MaxContentLength = settings.MaxContentLengthBytes;
+        SupportedFormats = settings.SupportedFormats;
+    }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class AiSettingsDtoMapper
-{
-    public static partial AiSettingsDto MapToDto(this AiSettings source);
+    public bool IsSupportedContentExtraction(string fileTitle)
+    {
+        var ext = FileUtility.GetFileExtension(fileTitle);
+        return SupportedFormats.Contains(ext);
+    }
+    
+    private class Settings
+    {
+        public float ChunkOverlap { get; init; }
+        public int ChunksBatchSize { get; init; }
+        public long MaxContentLengthBytes { get; init; }
+        public HashSet<string> SupportedFormats { get; init; }
+        
+        internal static Settings Default => new()
+        {
+            ChunkOverlap = 0.2f,
+            ChunksBatchSize = 10,
+            MaxContentLengthBytes = 10485760,
+            SupportedFormats = [".txt", ".docx", ".xlsx", ".csv", ".pdf"]
+        };
+    }
 }

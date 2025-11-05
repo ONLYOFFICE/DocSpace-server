@@ -54,8 +54,9 @@ public class FileSecurity(
     BadgesSettingsHelper badgesSettingsHelper,
     ExternalShare externalShare,
     AuthManager authManager,
-    VectorizationSettings vectorizationSettings,
-    VectorizationHelper vectorizationHelper)
+    VectorizationGlobalSettings vectorizationGlobalSettings,
+    VectorizationHelper vectorizationHelper,
+    AiAccessibility aiAccessibility)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -1065,7 +1066,7 @@ public class FileSecurity(
         }
 
         if (action is FilesSecurityActions.AscAi &&
-            (file == null || !vectorizationSettings.IsSupportedContentExtraction(file.Title)))
+            (file == null || !vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title)))
         {
             return false;
         }
@@ -1093,6 +1094,11 @@ public class FileSecurity(
                 FilesSecurityActions.Delete or 
                 FilesSecurityActions.Vectorization or 
                 FilesSecurityActions.Copy))
+            {
+                return false;
+            }
+
+            if (action is FilesSecurityActions.Vectorization && !await aiAccessibility.IsVectorizationEnabledAsync())
             {
                 return false;
             }
@@ -1160,10 +1166,19 @@ public class FileSecurity(
                 return false;
             }
 
-            if (folder.FolderType == FolderType.Knowledge && 
-                action is not (FilesSecurityActions.Read or FilesSecurityActions.MoveTo or FilesSecurityActions.CopyTo or FilesSecurityActions.Create))
+            if (folder.FolderType == FolderType.Knowledge)
             {
-                return false;
+                if (action is not (FilesSecurityActions.Read or FilesSecurityActions.MoveTo
+                    or FilesSecurityActions.CopyTo or FilesSecurityActions.Create))
+                {
+                    return false;
+                }
+                
+                if (action is FilesSecurityActions.CopyTo or FilesSecurityActions.MoveTo or FilesSecurityActions.Create &&
+                    !await aiAccessibility.IsVectorizationEnabledAsync())
+                {
+                    return false;
+                }
             }
 
             if (folder.FolderType == FolderType.ResultStorage 

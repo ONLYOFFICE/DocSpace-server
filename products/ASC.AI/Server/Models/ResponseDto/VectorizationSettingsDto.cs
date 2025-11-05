@@ -26,19 +26,14 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class AiSettingsDto
+public class VectorizationSettingsDto
 {
-    public bool WebSearchEnabled { get; init; }
-    public bool VectorizationEnabled { get; init; }
-    public bool AiReady { get; init; }
-    public required string KnowledgeSearchToolName { get; init; }
-    public required string WebSearchToolName { get; init; }
-    public required string WebCrawlingToolName { get; init; }
+    public EmbeddingProviderType Type { get; init; }
 }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, 
     PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class AiSettingsDtoMapper
+public static partial class VectorizationSettingsDtoMapper
 {
-    public static partial AiSettingsDto MapToDto(this AiSettings source);
+    public static partial VectorizationSettingsDto MapToDto(this VectorizationSettings source);
 }

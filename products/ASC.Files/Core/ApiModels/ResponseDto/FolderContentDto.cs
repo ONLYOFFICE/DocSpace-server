@@ -120,7 +120,7 @@ public class FolderContentDtoHelper(
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
         }
         
-        var aiReady = await accessibility.IsAiReadyAsync();
+        var aiReady = await accessibility.IsAiEnabledAsync();
 
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {

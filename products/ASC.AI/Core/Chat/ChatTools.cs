@@ -32,14 +32,15 @@ public class ChatTools(
     WebSearchTool webSearchTool,
     WebCrawlingTool webCrawlingTool,
     KnowledgeSearchTool knowledgeSearchTool,
-    WebSearchSettingsStore webSearchSettingsStore,
-    AiGateway aiGateway)
+    AiSettingsStore aiSettingsStore,
+    AiGateway aiGateway,
+    AiAccessibility aiAccessibility)
 {
-    public async Task<ToolHolder> GetAsync(int roomId, UserChatSettings chatSettings, bool knowledgeEnabled)
+    public async Task<ToolHolder> GetAsync(int roomId, UserChatSettings chatSettings, bool knowledgeHasFiles)
     {
         var holder = await mcpService.GetToolsAsync(roomId);
 
-        if (knowledgeEnabled)
+        if (knowledgeHasFiles && await aiAccessibility.IsVectorizationEnabledAsync())
         {
             var knowledgeFunc = knowledgeSearchTool.Init(roomId);
             var knowledgeWrapper = ToWrapper(roomId, knowledgeFunc);
@@ -51,7 +52,7 @@ public class ChatTools(
             return holder;
         }
 
-        var config = await GetConfigAsync();
+        var config = await GetWebConfigAsync();
         if (config == null)
         {
             return holder;
@@ -73,9 +74,9 @@ public class ChatTools(
         return holder;
     }
 
-    private async Task<EngineConfig?> GetConfigAsync()
+    private async Task<EngineConfig?> GetWebConfigAsync()
     {
-        if (!await webSearchSettingsStore.IsEnabledAsync())
+        if (!await aiSettingsStore.IsWebSearchEnabledAsync())
         {
             return null;
         }
@@ -89,7 +90,7 @@ public class ChatTools(
             };
         }
         
-        var settings = await webSearchSettingsStore.GetSettingsAsync();
+        var settings = await aiSettingsStore.GetWebSearchSettingsAsync();
         return settings is not { Enabled: true, Type: not EngineType.None, Config: not null } ? null : settings.Config;
     }
 

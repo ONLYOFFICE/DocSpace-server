@@ -29,6 +29,7 @@ namespace ASC.AI.Core.Settings;
 public class AiSettings
 {
     public bool WebSearchEnabled { get; init; }
+    public bool VectorizationEnabled { get; init; }
     public bool AiReady { get; init; }
     public string KnowledgeSearchToolName => KnowledgeSearchTool.Name;
     public string WebSearchToolName => WebSearchTool.Name;

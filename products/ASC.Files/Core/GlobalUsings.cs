@@ -137,6 +137,7 @@ global using ASC.Files.Core.Thirdparty;
 global using ASC.Files.Core.Vectorization;
 global using ASC.Files.Core.Vectorization.Events;
 global using ASC.Files.Core.Vectorization.Embedding;
+global using ASC.Files.Core.Vectorization.Settings;
 global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Core.Utils;
 global using ASC.Files.Thirdparty;
