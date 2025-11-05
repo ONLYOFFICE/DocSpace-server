@@ -90,7 +90,7 @@ public class VectorizationTask : DistributedTaskProgress
 
             var splitterSettings = new SplitterSettings
             {
-                MaxTokensPerChunk = (int)(EmbeddingGeneratorFactory.Model.ContextLength * 0.75),
+                MaxTokensPerChunk = (int)(vectorizationSettings.ChunkSize * 0.75),
                 ChunkOverlap = vectorizationSettings.ChunkOverlap
             };
 
@@ -98,7 +98,8 @@ public class VectorizationTask : DistributedTaskProgress
                 Chunk.IndexName,
                 new VectorCollectionOptions
                 {
-                    Dimension = EmbeddingGeneratorFactory.Model.Dimension, ModelId = EmbeddingGeneratorFactory.Model.Id
+                    Dimension = vectorizationSettings.Model.Dimension, 
+                    ModelId = vectorizationSettings.Model.Id
                 });
 
             file = await fileDao.GetFileAsync(_fileId);

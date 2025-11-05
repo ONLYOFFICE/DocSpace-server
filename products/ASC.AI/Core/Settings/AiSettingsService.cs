@@ -32,7 +32,8 @@ public class AiSettingsService(
     AuthContext authContext,
     AiSettingsStore aiSettingsStore,
     AiAccessibility accessibility,
-    AiGateway aiGateway)
+    AiGateway aiGateway,
+    VectorizationGlobalSettings vectorizationGlobalSettings)
 {
     public async Task<WebSearchSettings> SetWebSearchSettingsAsync(bool enabled, EngineType type, string? key)
     {
@@ -116,7 +117,8 @@ public class AiSettingsService(
         {
             WebSearchEnabled = await webSearchTask,
             VectorizationEnabled = await vectorizationTask,
-            AiReady = await aiReadyTask
+            AiReady = await aiReadyTask,
+            EmbeddingModel = vectorizationGlobalSettings.Model.Id,
         };
     }
     

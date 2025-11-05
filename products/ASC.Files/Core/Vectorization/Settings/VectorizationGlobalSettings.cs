@@ -29,18 +29,26 @@ namespace ASC.Files.Core.Vectorization.Settings;
 [Singleton]
 public class VectorizationGlobalSettings
 {
+    public int ChunkSize { get; init; }
     public float ChunkOverlap { get; init; }
     public int ChunksBatchSize { get; init; }
     public long MaxContentLength { get; init; }
     public HashSet<string> SupportedFormats { get; init; }
+    public EmbeddingModel Model { get; init; }
     
     public VectorizationGlobalSettings(IConfiguration configuration)
     {
-        var settings = configuration.GetSection("ai:vectorization").Get<Settings>() ?? Settings.Default;
+        var settings = configuration.GetSection("ai:vectorization").Get<Settings>();
+        ChunkSize = settings.ChunkSize;
         ChunkOverlap = settings.ChunkOverlap;
         ChunksBatchSize = settings.ChunksBatchSize;
         MaxContentLength = settings.MaxContentLengthBytes;
         SupportedFormats = settings.SupportedFormats;
+        Model = new EmbeddingModel
+        {
+            Id = settings.ModelId,
+            Dimension = settings.Dimension
+        };
     }
 
     public bool IsSupportedContentExtraction(string fileTitle)
@@ -51,17 +59,12 @@ public class VectorizationGlobalSettings
     
     private class Settings
     {
+        public int ChunkSize { get; init; }
         public float ChunkOverlap { get; init; }
         public int ChunksBatchSize { get; init; }
         public long MaxContentLengthBytes { get; init; }
         public HashSet<string> SupportedFormats { get; init; }
-        
-        internal static Settings Default => new()
-        {
-            ChunkOverlap = 0.2f,
-            ChunksBatchSize = 10,
-            MaxContentLengthBytes = 10485760,
-            SupportedFormats = [".txt", ".docx", ".xlsx", ".csv", ".pdf"]
-        };
+        public string ModelId { get; init; }
+        public int Dimension { get; init; }
     }
 }
