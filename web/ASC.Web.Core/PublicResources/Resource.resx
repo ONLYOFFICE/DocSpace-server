@@ -1287,4 +1287,7 @@
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
     <value>Failed to set quota per ai agent. The entered value is greater than the total DocSpace storage.</value>
   </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>AI agent space quota exceeded</value>
+  </data>
 </root>

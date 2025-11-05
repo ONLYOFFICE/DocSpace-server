@@ -91,6 +91,7 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.PrivacyRoomDisable,
                     MessageAction.QuotaPerRoomChanged, MessageAction.QuotaPerRoomDisabled, MessageAction.QuotaPerUserChanged, MessageAction.QuotaPerUserDisabled, MessageAction.QuotaPerPortalChanged, MessageAction.QuotaPerPortalDisabled, MessageAction.QuotaPerAiAgentChanged, MessageAction.QuotaPerAiAgentDisabled,
                     MessageAction.CustomQuotaPerRoomDefault, MessageAction.CustomQuotaPerRoomChanged, MessageAction.CustomQuotaPerRoomDisabled, MessageAction.CustomQuotaPerUserDefault, MessageAction.CustomQuotaPerUserChanged, MessageAction.CustomQuotaPerUserDisabled,
+                    MessageAction.CustomQuotaPerAiAgentDefault, MessageAction.CustomQuotaPerAiAgentChanged, MessageAction.CustomQuotaPerAiAgentDisabled,
                     MessageAction.DevToolsAccessSettingsChanged,
                     MessageAction.WebhookUpdated,
                     MessageAction.ApiKeyUpdated,

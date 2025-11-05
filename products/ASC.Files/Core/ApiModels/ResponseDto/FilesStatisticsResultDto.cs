@@ -50,6 +50,11 @@ public class FilesStatisticsResultDto
     /// The used space of files in the \"Rooms\" section.
     /// </summary>
     public FilesStatisticsFolder RoomsUsedSpace { get; set; }
+
+    /// <summary>
+    /// The used space of files in the \"AI agents\" section.
+    /// </summary>
+    public FilesStatisticsFolder AiAgentsUsedSpace { get; set; }
 }
 
 /// <summary>

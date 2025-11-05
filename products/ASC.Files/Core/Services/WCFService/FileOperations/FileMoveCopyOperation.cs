@@ -384,10 +384,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 toFolderRoom != null &&
                 !string.Equals(parentRoomId, toFolderRoom.Id.ToString()))
             {
-                var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-                if (quotaRoomSettings.EnableQuota)
+                TenantEntityQuotaSettings quotaSettings = toFolderRoom.FolderType is FolderType.AiRoom
+                   ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                   : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                if (quotaSettings.EnableQuota)
                 {
-                    roomQuotaLimit = toFolderRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : toFolderRoom.SettingsQuota;
+                    roomQuotaLimit = toFolderRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : toFolderRoom.SettingsQuota;
                     if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                     {
                         if (roomQuotaLimit - toFolderRoom.Counter < folder.Counter)
@@ -465,7 +467,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
             else if (!canUseRoomQuota)
             {
-                Err = FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit).Message;
+                Err = FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit, toFolderRoom.FolderType is FolderType.AiRoom).Message;
             }
             else if (!canUseUserQuota)
             {

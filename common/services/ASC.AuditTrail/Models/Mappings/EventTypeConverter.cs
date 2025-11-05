@@ -134,6 +134,8 @@ public class EventTypeConverter(
             }
             else if (dest.Action is (int)MessageAction.CustomQuotaPerRoomDefault or
                          (int)MessageAction.CustomQuotaPerRoomChanged or
+                         (int)MessageAction.CustomQuotaPerAiAgentDefault or
+                         (int)MessageAction.CustomQuotaPerAiAgentChanged or
                          (int)MessageAction.CustomQuotaPerUserDefault or
                          (int)MessageAction.CustomQuotaPerUserChanged
                      && long.TryParse(dest.Description.FirstOrDefault(), out var customSize))

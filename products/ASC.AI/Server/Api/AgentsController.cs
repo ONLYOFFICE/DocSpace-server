@@ -26,11 +26,15 @@
 
 using ASC.Api.Core.Core;
 using ASC.Api.Utils;
+using ASC.Core.Common.Settings;
+using ASC.Core.Tenants;
 using ASC.Files.Core;
 using ASC.Files.Core.ApiModels.RequestDto;
 using ASC.Files.Core.ApiModels.ResponseDto;
 using ASC.Files.Core.VirtualRooms;
+using ASC.MessagingSystem.Core;
 using ASC.Web.Files.Classes;
+using ASC.Web.Files.Helpers;
 using ASC.Web.Files.Services.WCFService;
 using ASC.Web.Files.Services.WCFService.FileOperations;
 
@@ -48,7 +52,9 @@ namespace ASC.AI.Api
         FileDeleteOperationsManager fileDeleteOperationsManager,
         FileOperationDtoHelper fileOperationDtoHelper,
         GlobalFolderHelper globalFolderHelper,
-        FolderContentDtoHelper folderContentDtoHelper)
+        FolderContentDtoHelper folderContentDtoHelper,
+        FilesMessageService filesMessageService,
+        SettingsManager settingsManager)
         : ControllerBase
     {
         /// <summary>
@@ -167,6 +173,67 @@ namespace ASC.AI.Api
             await fileDeleteOperationsManager.Publish([inDto.Id], [], false, !inDto.DeleteRoom.DeleteAfter, true);
 
             return await fileOperationDtoHelper.GetAsync((await fileDeleteOperationsManager.GetOperationResults()).FirstOrDefault());
+        }
+
+
+        /// <summary>
+        /// Changes the quota limit for the AI agents with the IDs specified in the request.
+        /// </summary>
+        /// <short>
+        /// Change the AI agent quota limit
+        /// </short>
+        /// <path>api/2.0/ai/agents/agentquota</path>
+        /// <collection>list</collection>
+        [SwaggerResponse(200, "List of AI agents with detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
+        [HttpPut("agents/agentquota")]
+        public async IAsyncEnumerable<FolderDto<int>> UpdateAgentsQuota(UpdateRoomsQuotaRequestDto<int> inDto)
+        {
+            var (agentIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
+
+            var agentNames = new List<string>();
+
+            foreach (var agentId in agentIntIds)
+            {
+                var agent = await fileStorageService.FolderQuotaChangeAsync(agentId, inDto.Quota);
+                agentNames.Add(agent.Title);
+                yield return await folderDtoHelper.GetAsync(agent);
+            }
+
+            if (inDto.Quota >= 0)
+            {
+                filesMessageService.Send(MessageAction.QuotaPerAiAgentChanged, inDto.Quota.ToString(), agentNames.ToArray());
+            }
+            else
+            {
+                filesMessageService.Send(MessageAction.QuotaPerAiAgentDisabled, string.Join(", ", agentNames.ToArray()));
+            }
+        }
+
+        /// <summary>
+        /// Resets the quota limit for the AI agents with the IDs specified in the request.
+        /// </summary>
+        /// <short>
+        /// Reset the AI agents quota limit
+        /// </short>
+        /// <path>api/2.0/ai/agents/resetquota</path>
+        /// <collection>list</collection>
+        [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
+        [HttpPut("agents/resetquota")]
+        public async IAsyncEnumerable<FolderDto<int>> ResetAIAgentsQuota(UpdateRoomsRoomIdsRequestDto<int> inDto)
+        {
+            var (agentIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
+            var agentTitles = new List<string>();
+            var quotaAiAgentSettings = await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>();
+
+            foreach (var agentId in agentIntIds)
+            {
+                var agent = await fileStorageService.FolderQuotaChangeAsync(agentId, -2);
+                agentTitles.Add(agent.Title);
+
+                yield return await folderDtoHelper.GetAsync(agent);
+            }
+
+            filesMessageService.Send(MessageAction.CustomQuotaPerRoomDefault, quotaAiAgentSettings.DefaultQuota.ToString(), agentTitles.ToArray());
         }
     }
 }
