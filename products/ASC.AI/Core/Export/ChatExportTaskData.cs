@@ -30,7 +30,4 @@ namespace ASC.AI.Core.Export;
 
 [ProtoContract]
 public class ChatExportTaskData : ExportTaskData
-{
-    [ProtoMember(1)]
-    public Guid ChatId { get; set; }
-}
+{ }

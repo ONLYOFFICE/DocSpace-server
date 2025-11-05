@@ -27,6 +27,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 
+using ASC.AI.Core.Chat;
 using ASC.Common.Threading;
 using ASC.Web.Files.Classes;
 using ASC.Web.Files.Services.DocumentService;
@@ -56,131 +57,147 @@ public abstract partial class ExportTask<T>(IServiceScopeFactory serviceScopeFac
 
     protected override async Task DoJob()
     {
+        ExportFolder? exportFolder = null;
         try
         {
             await using var scope = serviceScopeFactory.CreateAsyncScope();
             Logger = scope.ServiceProvider.GetRequiredService<ILogger<ExportTask<T>>>();
 
-            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-            _ = await tenantManager.SetCurrentTenantAsync(TenantId);
-
-            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-            await securityContext.AuthenticateMeWithoutCookieAsync(UserId);
-            
-            var commonLinkUtility = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>();
-            
-            if (!string.IsNullOrEmpty(Data.BaseUri))
+            try
             {
-                commonLinkUtility.ServerUri = Data.BaseUri;
-            }
+                var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+                _ = await tenantManager.SetCurrentTenantAsync(TenantId);
 
-            var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
-            var folder = ExportFolder.Create(daoFactory, Data);
+                var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+                await securityContext.AuthenticateMeWithoutCookieAsync(UserId);
 
-            await folder.GetFolder();
-            await folder.CheckSecurity(scope.ServiceProvider.GetRequiredService<FileSecurity>());
+                var commonLinkUtility = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>();
 
-            var messages = GetMessages(scope.ServiceProvider);
-
-            var builder = new StringBuilder();
-            
-            var counter = 1;
-            var urlToIndex = new Dictionary<string, int>();
-            var sources = new List<(int, string)>();
-
-            await foreach (var message in messages)
-            {
-                if (message.Role == Role.User)
+                if (!string.IsNullOrEmpty(Data.BaseUri))
                 {
-                    builder.Append("# ");
+                    commonLinkUtility.ServerUri = Data.BaseUri;
+                }
+
+                var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
+                exportFolder = ExportFolder.Create(daoFactory, Data);
+
+                await exportFolder.GetFolder();
+                await exportFolder.CheckSecurity(scope.ServiceProvider.GetRequiredService<FileSecurity>());
+
+                var messages = GetMessages(scope.ServiceProvider);
+
+                var builder = new StringBuilder();
+
+                var counter = 1;
+                var urlToIndex = new Dictionary<string, int>();
+                var sources = new List<(int, string)>();
+
+                await foreach (var message in messages)
+                {
+                    if (message.Role == Role.User)
+                    {
+                        builder.Append("# ");
+
+                        foreach (var content in message.Contents)
+                        {
+                            if (content is TextMessageContent textContent)
+                            {
+                                builder.Append(textContent.Text);
+                            }
+                        }
+
+                        builder.AppendLine();
+
+                        continue;
+                    }
 
                     foreach (var content in message.Contents)
                     {
-                        if (content is TextMessageContent textContent)
+                        if (content is not TextMessageContent textContent ||
+                            string.IsNullOrEmpty(textContent.Text))
                         {
-                            builder.Append(textContent.Text);
+                            continue;
                         }
+
+                        var processedText = CutThink(textContent.Text);
+
+                        var sourceProcessedText = MdLinksRegex().Replace(processedText, evaluator: match =>
+                        {
+                            try
+                            {
+                                var title = match.Groups[1].Value;
+                                var url = match.Groups[2].Value;
+
+                                var isRelativeUrl = Uri.IsWellFormedUriString(url, UriKind.Relative);
+                                if (isRelativeUrl)
+                                {
+                                    url = commonLinkUtility.GetFullAbsolutePath(url);
+                                }
+
+                                if (urlToIndex.TryAdd(url, counter))
+                                {
+                                    sources.Add((counter, url));
+                                    counter++;
+                                }
+
+                                return isRelativeUrl ? $"[{title}]({url})" : match.Value;
+                            }
+                            catch
+                            {
+                                return match.Value;
+                            }
+                        });
+
+                        builder.AppendLine(sourceProcessedText);
                     }
-                    
+
                     builder.AppendLine();
-                    
-                    continue;
                 }
 
-                foreach (var content in message.Contents)
+                if (sources.Count > 0)
                 {
-                    if (content is not TextMessageContent textContent || 
-                        string.IsNullOrEmpty(textContent.Text))
+                    foreach (var (index, url) in sources)
                     {
-                        continue;
+                        builder.AppendLine($"{index}. {url}");
                     }
-                    
-                    var processedText = CutThink(textContent.Text);
-
-                    var sourceProcessedText = MdLinksRegex().Replace(processedText, evaluator: match => 
-                    { 
-                        try
-                        {
-                            var title = match.Groups[1].Value;
-                            var url = match.Groups[2].Value;
-
-                            var isRelativeUrl = Uri.IsWellFormedUriString(url, UriKind.Relative);
-                            if (isRelativeUrl)
-                            {
-                                url = commonLinkUtility.GetFullAbsolutePath(url);
-                            }
-
-                            if (urlToIndex.TryAdd(url, counter))
-                            {
-                                sources.Add((counter, url));
-                                counter++;
-                            }
-
-                            return isRelativeUrl ? $"[{title}]({url})" : match.Value;
-                        }
-                        catch
-                        {
-                            return match.Value;
-                        }
-                    });
-
-                    builder.AppendLine(sourceProcessedText);
                 }
 
-                builder.AppendLine();
-            }
-
-            if (sources.Count > 0)
-            {
-                foreach (var (index, url) in sources)
+                if (builder.Length == 0)
                 {
-                    builder.AppendLine($"{index}. {url}");
+                    throw new Exception("Messages not found");
+                }
+
+                var pathProvider = scope.ServiceProvider.GetRequiredService<PathProvider>();
+
+                var markdown = builder.ToString();
+                var bytes = Encoding.UTF8.GetBytes(markdown);
+                await using var ms = new MemoryStream(bytes);
+                var fileUri = await pathProvider.GetTempUrlAsync(ms, ".md");
+
+                var docService = scope.ServiceProvider.GetRequiredService<DocumentServiceConnector>();
+
+                var (_, outFileUri, outFileType) = await docService.GetConvertedUriAsync(fileUri, "md", "docx", Guid.NewGuid().ToString("n"), null, CultureInfo.CurrentUICulture.Name, null, null, null, false, false);
+
+                var fileConverter = scope.ServiceProvider.GetRequiredService<FileConverter>();
+
+                await exportFolder.SaveFile(fileConverter, outFileUri, outFileType, Data.Title, false);
+
+                if (Status <= DistributedTaskStatus.Running)
+                {
+                    Status = DistributedTaskStatus.Completed;
                 }
             }
-
-            if (builder.Length == 0)
+            catch
             {
-                throw new Exception("Messages not found");
+                throw;
             }
-
-            var pathProvider = scope.ServiceProvider.GetRequiredService<PathProvider>();
-
-            var markdown = builder.ToString();
-            var bytes = Encoding.UTF8.GetBytes(markdown);
-            await using var ms = new MemoryStream(bytes);
-            var fileUri = await pathProvider.GetTempUrlAsync(ms, ".md");
-
-            var docService = scope.ServiceProvider.GetRequiredService<DocumentServiceConnector>();
-
-            var (_, outFileUri, outFileType) = await docService.GetConvertedUriAsync(fileUri, "md", "docx", Guid.NewGuid().ToString("n"), null, CultureInfo.CurrentUICulture.Name, null, null, null, false, false);
-
-            var fileConverter = scope.ServiceProvider.GetRequiredService<FileConverter>();
-
-            await folder.SaveFile(fileConverter, outFileUri, outFileType, Data.Title, false);
-
-            if (Status <= DistributedTaskStatus.Running)
+            finally
             {
-                Status = DistributedTaskStatus.Completed;
+                var socket = scope.ServiceProvider.GetRequiredService<ChatSocketClient>();
+                if (exportFolder != null)
+                {
+                    await exportFolder.NotifySocket(socket, Data.ChatId);
+                }
             }
         }
         catch (Exception e)
@@ -226,11 +243,13 @@ public abstract partial class ExportTask<T>(IServiceScopeFactory serviceScopeFac
         public abstract Task GetFolder();
         public abstract Task CheckSecurity(FileSecurity fileSecurity);
         public abstract Task SaveFile(FileConverter fileConverter, string fileUri, string fileType, string title, bool updateIfExists);
+        public abstract Task NotifySocket(ChatSocketClient chatSocketClient, Guid chatId);
     }
 
     private class ExportFolder<TFolder>(IFolderDao<TFolder> folderDao, TFolder folderId) : ExportFolder
     {
         public Folder<TFolder>? Folder { get; private set; }
+        public File<TFolder>? Result { get; private set; }
 
         public override async Task GetFolder()
         {
@@ -260,7 +279,12 @@ public abstract partial class ExportTask<T>(IServiceScopeFactory serviceScopeFac
 
         public override async Task SaveFile(FileConverter fileConverter, string fileUri, string fileType, string title, bool updateIfExists)
         {
-            _ = await fileConverter.SaveConvertedFileAsync(Folder, fileUri, fileType, title, updateIfExists);
+            Result = await fileConverter.SaveConvertedFileAsync(Folder, fileUri, fileType, title, updateIfExists);
+        }
+
+        public override async Task NotifySocket(ChatSocketClient chatSocketClient, Guid chatId)
+        {
+            await chatSocketClient.ExportCompleted(chatId, Result);
         }
     }
 
