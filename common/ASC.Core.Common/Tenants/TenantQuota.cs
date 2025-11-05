@@ -418,26 +418,103 @@ public class TenantQuota
         set => _aiTools.Value = value;
     }
 
-    private readonly WalletFeatureFlag _aiToken;
+    private readonly WalletFeatureFlag _aiToolsWebSearch;
 
     /// <summary>
-    /// Specifies if the AI tools anabled as a wallet service or not.
+    /// Specifies whether the web search is enabled as a subservice of AI tools.
     /// </summary>
-    public bool AIToken
+    public bool AIToolsWebSearch
     {
-        get => _aiToken.Value;
-        set => _aiToken.Value = value;
+        get => _aiToolsWebSearch.Value;
+        set => _aiToolsWebSearch.Value = value;
     }
 
-    private readonly WalletFeatureFlag _webSearch;
+    private readonly WalletFeatureFlag _aiToolsWebFetch;
 
     /// <summary>
-    /// Specifies if the AI Web Search anabled as a wallet service or not.
+    /// Specifies whether the web fetch is enabled as a subservice of AI tools
     /// </summary>
-    public bool WebSearch
+    public bool AIToolsWebFetch
     {
-        get => _webSearch.Value;
-        set => _webSearch.Value = value;
+        get => _aiToolsWebFetch.Value;
+        set => _aiToolsWebFetch.Value = value;
+    }
+
+    private readonly WalletFeatureFlag _aiToolsEmbedding;
+
+    /// <summary>
+    /// Specifies whether the embedding is enabled as a subservice of AI tools
+    /// </summary>
+    public bool AIToolsEmbedding
+    {
+        get => _aiToolsEmbedding.Value;
+        set => _aiToolsEmbedding.Value = value;
+    }
+
+    private readonly WalletFeatureFlag _aiToolsDeepseek31Input;
+
+    /// <summary>
+    /// Specifies whether the Deepseek 3.1 input tokens is enabled as a subservice of AI tools
+    /// </summary>
+    public bool AIToolsDeepseek31Input
+    {
+        get => _aiToolsDeepseek31Input.Value;
+        set => _aiToolsDeepseek31Input.Value = value;
+    }
+
+    private readonly WalletFeatureFlag _aiToolsDeepseek31Output;
+
+    /// <summary>
+    /// Specifies whether the Deepseek 3.1 output tokens is enabled as a subservice of AI tools
+    /// </summary>
+    public bool AIToolsDeepseek31Output
+    {
+        get => _aiToolsDeepseek31Output.Value;
+        set => _aiToolsDeepseek31Output.Value = value;
+    }
+
+    private readonly WalletFeatureFlag _aiToolsClaude45Input;
+
+    /// <summary>
+    /// Specifies whether the Claude 4.5 input tokens is enabled as a subservice of AI tools
+    /// </summary>
+    public bool AIToolsClaude45Input
+    {
+        get => _aiToolsClaude45Input.Value;
+        set => _aiToolsClaude45Input.Value = value;
+    }
+
+    private readonly WalletFeatureFlag _aiToolsClaude45Output;
+
+    /// <summary>
+    /// Specifies whether the Claude 4.5 output tokens is enabled as a subservice of AI tools
+    /// </summary>
+    public bool AIToolsClaude45Output
+    {
+        get => _aiToolsClaude45Output.Value;
+        set => _aiToolsClaude45Output.Value = value;
+    }
+
+    private readonly WalletFeatureFlag _aiToolsGPT5Input;
+
+    /// <summary>
+    /// Specifies whether the GPT 5 input tokens is enabled as a subservice of AI tools
+    /// </summary>
+    public bool AIToolsGPT5Input
+    {
+        get => _aiToolsGPT5Input.Value;
+        set => _aiToolsGPT5Input.Value = value;
+    }
+
+    private readonly WalletFeatureFlag _aiToolsGPT5Output;
+
+    /// <summary>
+    /// Specifies whether the GPT 5 output tokens is enabled as a subservice of AI tools
+    /// </summary>
+    public bool AIToolsGPT5Output
+    {
+        get => _aiToolsGPT5Output.Value;
+        set => _aiToolsGPT5Output.Value = value;
     }
 
     public TenantQuota()
@@ -471,8 +548,15 @@ public class TenantQuota
         _countFreeBackup = new CountFreeBackupFeature(this) { Order = 6, EmployeeType = EmployeeType.DocSpaceAdmin };
         _backup = new WalletFeatureFlag(this, "backup") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _aiTools = new WalletFeatureFlag(this, "aitools") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiToken = new WalletFeatureFlag(this, "aitoken") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _webSearch = new WalletFeatureFlag(this, "websearch") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiToolsWebSearch = new WalletFeatureFlag(this, "websearch") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiToolsWebFetch = new WalletFeatureFlag(this, "webfetch") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiToolsEmbedding = new WalletFeatureFlag(this, "embedding") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiToolsDeepseek31Input = new WalletFeatureFlag(this, "deepseek31input") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiToolsDeepseek31Output = new WalletFeatureFlag(this, "deepseek31output") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiToolsClaude45Input = new WalletFeatureFlag(this, "claude45input") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiToolsClaude45Output = new WalletFeatureFlag(this, "claude45output") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiToolsGPT5Input = new WalletFeatureFlag(this, "gpt5input") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiToolsGPT5Output = new WalletFeatureFlag(this, "gpt5output") { EmployeeType = EmployeeType.DocSpaceAdmin };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -503,8 +587,15 @@ public class TenantQuota
             _countFreeBackup,
             _backup,
             _aiTools,
-            _aiToken,
-            _webSearch
+            _aiToolsWebSearch,
+            _aiToolsWebFetch,
+            _aiToolsEmbedding,
+            _aiToolsDeepseek31Input,
+            _aiToolsDeepseek31Output,
+            _aiToolsClaude45Input,
+            _aiToolsClaude45Output,
+            _aiToolsGPT5Input,
+            _aiToolsGPT5Output
         };
     }
 

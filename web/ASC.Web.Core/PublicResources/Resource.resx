@@ -1284,10 +1284,52 @@
   <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
     <value>Enable AI-powered web search to get information from the internet.</value>
   </data>
-  <data name="TariffsFeature_aitoken_wallet" xml:space="preserve">
-    <value>AI token</value>
+  <data name="TariffsFeature_claude45input_wallet" xml:space="preserve">
+    <value>AI Claude 4.5 input token</value>
   </data>
-  <data name="TariffsFeature_aitoken_wallet_price_count" xml:space="preserve">
-    <value>A unit of text measurement that large language models (LLMs) can handle</value>
+  <data name="TariffsFeature_claude45input_wallet_price_count" xml:space="preserve">
+    <value>A unit of input text measurement for Claude 4.5</value>
+  </data>
+  <data name="TariffsFeature_claude45output_wallet" xml:space="preserve">
+    <value>AI Claude 4.5 output token</value>
+  </data>
+  <data name="TariffsFeature_claude45output_wallet_price_count" xml:space="preserve">
+    <value>A unit of output text measurement for Claude 4.5</value>
+  </data>
+  <data name="TariffsFeature_deepseek31input_wallet" xml:space="preserve">
+    <value>AI Deepseek 3.1 input token</value>
+  </data>
+  <data name="TariffsFeature_deepseek31input_wallet_price_count" xml:space="preserve">
+    <value>A unit of input text measurement for Deepseek 3.1</value>
+  </data>
+  <data name="TariffsFeature_deepseek31output_wallet" xml:space="preserve">
+    <value>AI Deepseek 3.1 output token</value>
+  </data>
+  <data name="TariffsFeature_deepseek31output_wallet_price_count" xml:space="preserve">
+    <value>A unit of output text measurement for Deepseek 3.1</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet" xml:space="preserve">
+    <value>AI embedding</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet_price_count" xml:space="preserve">
+    <value>A unit of embedding measurement that large language models (LLMs) can handle</value>
+  </data>
+  <data name="TariffsFeature_gpt5input_wallet" xml:space="preserve">
+    <value>AI GPT 5 input token</value>
+  </data>
+  <data name="TariffsFeature_gpt5input_wallet_price_count" xml:space="preserve">
+    <value>A unit of input text measurement for GPT 5</value>
+  </data>
+  <data name="TariffsFeature_gpt5output_wallet" xml:space="preserve">
+    <value>AI GPT 5 output token</value>
+  </data>
+  <data name="TariffsFeature_gpt5output_wallet_price_count" xml:space="preserve">
+    <value>A unit of output text measurement for GPT 5</value>
+  </data>
+  <data name="TariffsFeature_webfetch_wallet" xml:space="preserve">
+    <value>AI web fetch</value>
+  </data>
+  <data name="TariffsFeature_webfetch_wallet_price_count" xml:space="preserve">
+    <value>A unit of text page measurement that large language models (LLMs) can handle</value>
   </data>
 </root>

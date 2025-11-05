@@ -3166,24 +3166,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI token.
-        /// </summary>
-        public static string TariffsFeature_aitoken_wallet {
-            get {
-                return ResourceManager.GetString("TariffsFeature_aitoken_wallet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to A unit of text measurement that large language models (LLMs) can handle.
-        /// </summary>
-        public static string TariffsFeature_aitoken_wallet_price_count {
-            get {
-                return ResourceManager.GetString("TariffsFeature_aitoken_wallet_price_count", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to AI tools.
         /// </summary>
         public static string TariffsFeature_aitools_wallet {
@@ -3229,11 +3211,101 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI Claude 4.5 input token.
+        /// </summary>
+        public static string TariffsFeature_claude45input_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_claude45input_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A unit of input text measurement for Claude 4.5.
+        /// </summary>
+        public static string TariffsFeature_claude45input_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_claude45input_wallet_price_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI Claude 4.5 output token.
+        /// </summary>
+        public static string TariffsFeature_claude45output_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_claude45output_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A unit of output text measurement for Claude 4.5.
+        /// </summary>
+        public static string TariffsFeature_claude45output_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_claude45output_wallet_price_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Branding &amp; customization.
         /// </summary>
         public static string TariffsFeature_customization {
             get {
                 return ResourceManager.GetString("TariffsFeature_customization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI Deepseek 3.1 input token.
+        /// </summary>
+        public static string TariffsFeature_deepseek31input_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_deepseek31input_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A unit of input text measurement for Deepseek 3.1.
+        /// </summary>
+        public static string TariffsFeature_deepseek31input_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_deepseek31input_wallet_price_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI Deepseek 3.1 output token.
+        /// </summary>
+        public static string TariffsFeature_deepseek31output_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_deepseek31output_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A unit of output text measurement for Deepseek 3.1.
+        /// </summary>
+        public static string TariffsFeature_deepseek31output_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_deepseek31output_wallet_price_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI embedding.
+        /// </summary>
+        public static string TariffsFeature_embedding_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_embedding_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A unit of embedding measurement that large language models (LLMs) can handle.
+        /// </summary>
+        public static string TariffsFeature_embedding_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_embedding_wallet_price_count", resourceCulture);
             }
         }
         
@@ -3270,6 +3342,42 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_free_backup_exception {
             get {
                 return ResourceManager.GetString("TariffsFeature_free_backup_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI GPT 5 input token.
+        /// </summary>
+        public static string TariffsFeature_gpt5input_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_gpt5input_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A unit of input text measurement for GPT 5.
+        /// </summary>
+        public static string TariffsFeature_gpt5input_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_gpt5input_wallet_price_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI GPT 5 output token.
+        /// </summary>
+        public static string TariffsFeature_gpt5output_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_gpt5output_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A unit of output text measurement for GPT 5.
+        /// </summary>
+        public static string TariffsFeature_gpt5output_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_gpt5output_wallet_price_count", resourceCulture);
             }
         }
         
@@ -3477,6 +3585,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_usersQuotaExceeds_exception {
             get {
                 return ResourceManager.GetString("TariffsFeature_usersQuotaExceeds_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI web fetch.
+        /// </summary>
+        public static string TariffsFeature_webfetch_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_webfetch_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A unit of text page measurement that large language models (LLMs) can handle.
+        /// </summary>
+        public static string TariffsFeature_webfetch_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_webfetch_wallet_price_count", resourceCulture);
             }
         }
         
