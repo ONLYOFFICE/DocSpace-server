@@ -108,7 +108,7 @@ public class AiSettingsService(
     {
         var webSearchTask = aiSettingsStore.IsWebSearchEnabledAsync();
         var vectorizationTask = aiSettingsStore.IsVectorizationEnabledAsync();
-        var aiReadyTask = accessibility.IsAiReadyAsync();
+        var aiReadyTask = accessibility.IsAiEnabledAsync();
         
         await Task.WhenAll(webSearchTask, vectorizationTask, aiReadyTask);
         

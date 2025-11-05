@@ -86,7 +86,7 @@ public class ChatExecutionContextBuilder(
                 Provider = provider.Type,
                 Endpoint= provider.Url,
                 Key = provider.Key,
-                ModelId = room.SettingsChatParameters.ModelId,
+                ModelId = room.SettingsChatParameters.ModelId
             },
             Instruction = room.SettingsChatParameters.Prompt,
             ContextFolderId = resultStorage.Id,
