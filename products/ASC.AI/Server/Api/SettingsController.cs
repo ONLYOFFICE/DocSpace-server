@@ -50,6 +50,21 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
         return settings.MapToDto();
     }
     
+    [HttpPut("config/vectorization")]
+    public async Task<VectorizationSettingsDto> SetVectorizationSettingsAsync(SetEmbeddingConfigRequestDto inDto)
+    {
+        var settings = await aiSettingsService.SetVectorizationSettingsAsync(inDto.Body.Type, inDto.Body.Key);
+
+        return settings.MapToDto();
+    }
+    
+    [HttpGet("config/vectorization")]
+    public async Task<VectorizationSettingsDto> GetVectorizationSettingsAsync()
+    {
+        var settings = await aiSettingsService.GetVectorizationSettingsAsync();
+        return settings.MapToDto();
+    }
+    
     [HttpGet("config")]
     public async Task<AiSettingsDto> GetAiSettingsAsync()
     {

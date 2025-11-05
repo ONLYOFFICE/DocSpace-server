@@ -39,7 +39,7 @@ public abstract class EngineConfig
     public abstract bool CrawlingSupported();
 }
 
-public class WebSearchSettingsRaw : ISettings<WebSearchSettingsRaw>
+public class EncryptedWebSearchSettings : ISettings<EncryptedWebSearchSettings>
 {
     [JsonIgnore]
     public Guid ID => new("{B2FC4410-5538-46E0-959A-AF1BEEAC9E20}");
@@ -47,9 +47,9 @@ public class WebSearchSettingsRaw : ISettings<WebSearchSettingsRaw>
     public EngineType Type { get; set; }
     public string? Config { get; set; }
     
-    public WebSearchSettingsRaw GetDefault()
+    public EncryptedWebSearchSettings GetDefault()
     {
-        return new WebSearchSettingsRaw
+        return new EncryptedWebSearchSettings
         {
             Enabled = false,
             Type = EngineType.None,

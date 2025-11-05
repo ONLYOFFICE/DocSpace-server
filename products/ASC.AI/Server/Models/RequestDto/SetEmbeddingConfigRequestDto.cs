@@ -24,21 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.AI.Models.RequestDto;
 
-public class AiSettingsDto
+public class SetEmbeddingConfigRequestDto
 {
-    public bool WebSearchEnabled { get; init; }
-    public bool VectorizationEnabled { get; init; }
-    public bool AiReady { get; init; }
-    public required string KnowledgeSearchToolName { get; init; }
-    public required string WebSearchToolName { get; init; }
-    public required string WebCrawlingToolName { get; init; }
+    [FromBody]
+    public required SetEmbeddingConfigRequestBody Body { get; init; }
 }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class AiSettingsDtoMapper
+public class SetEmbeddingConfigRequestBody
 {
-    public static partial AiSettingsDto MapToDto(this AiSettings source);
+    public EmbeddingProviderType Type { get; init; }
+    public string? Key { get; init; }
 }

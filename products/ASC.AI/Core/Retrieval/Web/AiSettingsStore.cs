@@ -27,15 +27,15 @@
 namespace ASC.AI.Core.Retrieval.Web;
 
 [Scope]
-public class WebSearchSettingsStore(
+public class AiSettingsStore(
     SettingsManager settingsManager,
     InstanceCrypto instanceCrypto,
     TenantManager tenantManager,
     AiGateway aiGateway)
 {
-    public async Task SetSettingsAsync(WebSearchSettings webSearchSettings)
+    public async Task SetWebSearchSettingsAsync(WebSearchSettings webSearchSettings)
     {
-        var webSearchSettingsRaw = new WebSearchSettingsRaw
+        var encryptedSettings = new EncryptedWebSearchSettings
         {
             Enabled = webSearchSettings.Enabled, 
             Type = webSearchSettings.Type
@@ -44,15 +44,15 @@ public class WebSearchSettingsStore(
         if (webSearchSettings.Config != null)
         {
             var jsonConfig = JsonSerializer.Serialize(webSearchSettings.Config);
-            webSearchSettingsRaw.Config = await instanceCrypto.EncryptAsync(jsonConfig);
+            encryptedSettings.Config = await instanceCrypto.EncryptAsync(jsonConfig);
         }
         
-        await settingsManager.SaveAsync(webSearchSettingsRaw);
+        await settingsManager.SaveAsync(encryptedSettings);
     }
 
-    public async Task<WebSearchSettings> GetSettingsAsync()
+    public async Task<WebSearchSettings> GetWebSearchSettingsAsync()
     {
-        var webSearchSettingsRaw = await settingsManager.LoadAsync<WebSearchSettingsRaw>();
+        var webSearchSettingsRaw = await settingsManager.LoadAsync<EncryptedWebSearchSettings>();
 
         var webSearchSettings = new WebSearchSettings
         {
@@ -71,7 +71,7 @@ public class WebSearchSettingsStore(
         return webSearchSettings;
     }
 
-    public async Task<bool> IsEnabledAsync()
+    public async Task<bool> IsWebSearchEnabledAsync()
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         
@@ -81,8 +81,49 @@ public class WebSearchSettingsStore(
             return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.WebSearch);
         }
         
-        var webSearchSettingsRaw = await settingsManager.LoadAsync<WebSearchSettingsRaw>(tenantId);
+        var webSearchSettingsRaw = await settingsManager.LoadAsync<EncryptedWebSearchSettings>(tenantId);
         
         return webSearchSettingsRaw.Enabled && webSearchSettingsRaw.Type != EngineType.None;
+    }
+    
+    public async Task SetVectorizationSettingsAsync(VectorizationSettings vectorizationSettings)
+    {
+        var settings = new EncryptedVectorizationSettings
+        {
+            ProviderType = vectorizationSettings.Type
+        };
+
+        if (vectorizationSettings.Type != EmbeddingProviderType.None)
+        {
+            settings.Key = await instanceCrypto.EncryptAsync(vectorizationSettings.Key);
+        }
+        
+        await settingsManager.SaveAsync(settings);
+    }
+    
+    public async Task<VectorizationSettings> GetVectorizationSettingsAsync()
+    {
+        var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>();
+        if (settings.ProviderType == EmbeddingProviderType.None)
+        {
+            return new VectorizationSettings {
+                
+                Type = settings.ProviderType, 
+                Key = null 
+            };
+        }
+
+        var key = await instanceCrypto.DecryptAsync(settings.Key);
+        return new VectorizationSettings
+        {
+            Type = settings.ProviderType,
+            Key = key
+        };
+    }
+    
+    public async Task<bool> IsVectorizationEnabledAsync()
+    {
+        var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>();
+        return settings.ProviderType != EmbeddingProviderType.None;
     }
 }

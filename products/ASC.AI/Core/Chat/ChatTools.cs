@@ -32,7 +32,7 @@ public class ChatTools(
     WebSearchTool webSearchTool,
     WebCrawlingTool webCrawlingTool,
     KnowledgeSearchTool knowledgeSearchTool,
-    WebSearchSettingsStore webSearchSettingsStore,
+    AiSettingsStore aiSettingsStore,
     AiGateway aiGateway)
 {
     public async Task<ToolHolder> GetAsync(int roomId, UserChatSettings chatSettings, bool knowledgeEnabled)
@@ -75,7 +75,7 @@ public class ChatTools(
 
     private async Task<EngineConfig?> GetConfigAsync()
     {
-        if (!await webSearchSettingsStore.IsEnabledAsync())
+        if (!await aiSettingsStore.IsWebSearchEnabledAsync())
         {
             return null;
         }
@@ -89,7 +89,7 @@ public class ChatTools(
             };
         }
         
-        var settings = await webSearchSettingsStore.GetSettingsAsync();
+        var settings = await aiSettingsStore.GetWebSearchSettingsAsync();
         return settings is not { Enabled: true, Type: not EngineType.None, Config: not null } ? null : settings.Config;
     }
 

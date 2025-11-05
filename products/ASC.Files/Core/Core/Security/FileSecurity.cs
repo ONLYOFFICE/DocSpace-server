@@ -54,7 +54,7 @@ public class FileSecurity(
     BadgesSettingsHelper badgesSettingsHelper,
     ExternalShare externalShare,
     AuthManager authManager,
-    VectorizationSettings vectorizationSettings,
+    VectorizationGlobalSettings vectorizationGlobalSettings,
     VectorizationHelper vectorizationHelper)
     : IFileSecurity
 {
@@ -1065,7 +1065,7 @@ public class FileSecurity(
         }
 
         if (action is FilesSecurityActions.AscAi &&
-            (file == null || !vectorizationSettings.IsSupportedContentExtraction(file.Title)))
+            (file == null || !vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title)))
         {
             return false;
         }

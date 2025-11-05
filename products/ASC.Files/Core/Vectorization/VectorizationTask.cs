@@ -86,7 +86,7 @@ public class VectorizationTask : DistributedTaskProgress
             var vectorStore = scope.ServiceProvider.GetRequiredService<VectorStore>();
             var generatorFactory = scope.ServiceProvider.GetRequiredService<EmbeddingGeneratorFactory>();
             var fileProcessor = scope.ServiceProvider.GetRequiredService<FileTextProcessor>();
-            var vectorizationSettings = scope.ServiceProvider.GetRequiredService<VectorizationSettings>();
+            var vectorizationSettings = scope.ServiceProvider.GetRequiredService<VectorizationGlobalSettings>();
 
             var splitterSettings = new SplitterSettings
             {

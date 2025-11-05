@@ -38,6 +38,7 @@ global using ASC.AI.Core.MCP;
 global using ASC.AI.Core.MCP.Data;
 global using ASC.AI.Core.Settings;
 global using ASC.AI.Core.Retrieval.Web;
+global using ASC.AI.Core.Retrieval.Knowledge;
 global using ASC.Core;
 
 global using ASC.Common;
@@ -46,6 +47,7 @@ global using ASC.Core.Common.EF.Model.Ai;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Vectorization;
+global using ASC.Files.Core.Vectorization.Settings;
 
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
