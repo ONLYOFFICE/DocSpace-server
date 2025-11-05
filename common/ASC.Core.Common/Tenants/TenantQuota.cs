@@ -799,11 +799,12 @@ public partial class TenantQuotaMapper(IServiceProvider provider)
         var tenantManager = provider.GetService<TenantManager>();
         var regionHelper = provider.GetService<RegionHelper>();
 
-        var priceInfo = tenantManager.GetProductPriceInfo(source.GetPaymentId(), source.Wallet);
+        var productPaymentId = source.GetPaymentId();
+        var priceInfo = tenantManager.GetProductPriceInfo(productPaymentId, source.Wallet);
 
         if (priceInfo != null)
         {
-            var currentRegion = regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { source.ProductId, priceInfo } }).Result;
+            var currentRegion = regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { productPaymentId, priceInfo } }).Result;
 
             if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolve))
             {
