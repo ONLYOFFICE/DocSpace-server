@@ -2321,14 +2321,14 @@ public class FileSecurity(
         return daoFactory.GetSecurityDao<T>().GetPureSharesCountAsync(entry, filterType, status, text);
     }
 
-    public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
+    public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, Guid sharedBy, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var securityDao = daoFactory.GetSecurityDao<string>();
         var orderedSubjects = await GetUserOrderedSubjectsAsync(authContext.CurrentAccount.ID, true);
         List<FileShareRecord<int>> recordsInternal = [];
         List<FileShareRecord<string>> recordsThirdParty = [];
 
-        await foreach (var r in securityDao.GetSharesAsync(orderedSubjects.Select(s => s.Subject)))
+        await foreach (var r in securityDao.GetSharesAsync(orderedSubjects.Select(s => s.Subject), sharedBy))
         {
             if (int.TryParse(r.EntryId, out _))
             {

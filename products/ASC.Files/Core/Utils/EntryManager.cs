@@ -332,6 +332,7 @@ public class EntryManager(IDaoFactory daoFactory,
         IEnumerable<FilterType> filterTypes,
         bool subjectGroup,
         Guid subjectId,
+        Guid sharedBy,
         string searchText,
         string[] extension,
         bool searchInContent,
@@ -395,7 +396,7 @@ public class EntryManager(IDaoFactory daoFactory,
         if (parent.FolderType == FolderType.SHARE)
         {
             //share
-            var shared = await fileSecurity.GetSharesForMeAsync(filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+            var shared = await fileSecurity.GetSharesForMeAsync(filterType, subjectGroup, subjectId, sharedBy, searchText, extension, searchInContent, withSubfolders).ToListAsync();
 
             entries.AddRange(shared);
 

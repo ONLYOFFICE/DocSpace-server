@@ -64,10 +64,10 @@ public partial class FilesDbContext
         return SecurityQueries.IsSharedAsync(this, tenantId, folderId, subjectTypes);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
-    public IAsyncEnumerable<DbFilesSecurity> SharesAsync(int tenantId, IEnumerable<Guid> subjects)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
+    public IAsyncEnumerable<DbFilesSecurity> SharesAsync(int tenantId, IEnumerable<Guid> subjects, Guid ownerId)
     {
-        return SecurityQueries.SharesAsync(this, tenantId, subjects);
+        return SecurityQueries.SharesAsync(this, tenantId, subjects, ownerId);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, null])]
@@ -165,11 +165,11 @@ static file class SecurityQueries
                     .Join(ctx.Tree.Where(x => x.FolderId == folderId), s => s.EntryId, t => t.ParentId.ToString(), (s, t) => s)
                     .Any());
 
-    public static readonly Func<FilesDbContext, int, IEnumerable<Guid>, IAsyncEnumerable<DbFilesSecurity>> SharesAsync =
+    public static readonly Func<FilesDbContext, int, IEnumerable<Guid>, Guid, IAsyncEnumerable<DbFilesSecurity>> SharesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<Guid> subjects) =>
+            (FilesDbContext ctx, int tenantId, IEnumerable<Guid> subjects, Guid ownerId) =>
                 ctx.Security
-                    .Where(r => r.TenantId == tenantId && subjects.Contains(r.Subject)));
+                    .Where(r => r.TenantId == tenantId && subjects.Contains(r.Subject) && (ownerId == Guid.Empty || ownerId == r.Owner)));
 
     public static readonly
         Func<FilesDbContext, int, IEnumerable<string>, IEnumerable<string>, IAsyncEnumerable<DbFilesSecurity>> PureShareRecordsDbAsync =

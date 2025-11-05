@@ -880,6 +880,7 @@ public class VirtualRoomsCommonController(
             filter,
             false,
             inDto.SubjectId,
+            Guid.Empty,
             filterValue,
             [],
             true,

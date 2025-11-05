@@ -88,11 +88,11 @@ public class FolderContentDtoHelper(
     BreadCrumbsManager breadCrumbsManager,
     AiAccessibility accessibility)
 {
-    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null)
+    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null)
     {
         var types = filterType.HasValue ? new[] { filterType.Value } : null;
 
-        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, text, extension, searchArea ?? SearchArea.Active, formsItemDto, location, sortByFilter, sortOrder, startIndex, limit);
+        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, sharedBy ?? Guid.Empty,types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, text, extension, searchArea ?? SearchArea.Active, formsItemDto, location, sortByFilter, sortOrder, startIndex, limit);
 
         return folderContentWrapper.NotFoundIfNull();
     }
@@ -246,6 +246,7 @@ public class FolderContentDtoHelper(
     private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(
         T folderId, 
         Guid userIdOrGroupId, 
+        Guid sharedBy, 
         IEnumerable<FilterType> filterTypes, 
         T roomId, 
         bool searchInContent, 
@@ -274,7 +275,8 @@ public class FolderContentDtoHelper(
             count, 
             filterTypes, 
             filterTypes?.FirstOrDefault() == FilterType.ByUser, 
-            userIdOrGroupId.ToString(), 
+            userIdOrGroupId.ToString(),
+            sharedBy,
             text,
             extension, 
             searchInContent, 

@@ -219,7 +219,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
 
         while (true)
         {
-            var (entries, _) = await entryManager.GetEntriesAsync(room, room, from, count, [filterType], false, Guid.Empty, null, null, false, true, new OrderBy(SortedByType.CustomOrder, true));
+            var (entries, _) = await entryManager.GetEntriesAsync(room, room, from, count, [filterType], false, Guid.Empty, Guid.Empty, null, null, false, true, new OrderBy(SortedByType.CustomOrder, true));
             var typedEntries = entries.OfType<FileEntry<T>>().ToList();
 
             if (filterType == FilterType.FoldersOnly)

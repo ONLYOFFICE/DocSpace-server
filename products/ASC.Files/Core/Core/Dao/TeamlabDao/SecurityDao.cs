@@ -170,11 +170,11 @@ internal abstract class SecurityBaseDao<T>(
         }
     }
 
-    public async IAsyncEnumerable<FileShareRecord<T>> GetSharesAsync(IEnumerable<Guid> subjects)
+    public async IAsyncEnumerable<FileShareRecord<T>> GetSharesAsync(IEnumerable<Guid> subjects, Guid? ownerId = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q = filesDbContext.SharesAsync(tenantId, subjects);
+        var q = filesDbContext.SharesAsync(tenantId, subjects, ownerId ?? Guid.Empty);
 
         await foreach (var e in q)
         {

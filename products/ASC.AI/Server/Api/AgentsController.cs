@@ -85,6 +85,7 @@ namespace ASC.AI.Api
                 filter,
                 false,
                 inDto.SubjectId,
+                Guid.Empty,
                 filterValue,
                 [],
                 true,

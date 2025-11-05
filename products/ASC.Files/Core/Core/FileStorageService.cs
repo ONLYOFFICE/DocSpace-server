@@ -199,7 +199,7 @@ public class FileStorageService //: IFileStorageService
                 parentRoom = !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
             }
 
-            (entries, _) = await entryManager.GetEntriesAsync(parent, parentRoom, 0, -1, [FilterType.FoldersOnly], false, Guid.Empty, string.Empty, [], false, false, new OrderBy(SortedByType.AZ, true));
+            (entries, _) = await entryManager.GetEntriesAsync(parent, parentRoom, 0, -1, [FilterType.FoldersOnly], false, Guid.Empty, Guid.Empty, string.Empty, [], false, false, new OrderBy(SortedByType.AZ, true));
         }
         catch (Exception e)
         {
@@ -216,6 +216,7 @@ public class FileStorageService //: IFileStorageService
         IEnumerable<FilterType> filterTypes,
         bool subjectGroup,
         string subject,
+        Guid sharedBy,
         string searchText,
         string[] extension,
         bool searchInContent,
@@ -353,6 +354,7 @@ public class FileStorageService //: IFileStorageService
                 filterTypes,
                 subjectGroup,
                 subjectId,
+                sharedBy,
                 searchText,
                 extension,
                 searchInContent,
@@ -3246,6 +3248,7 @@ public class FileStorageService //: IFileStorageService
                     new List<FilterType> { FilterType.FoldersOnly },
                     false,
                     user.ToString(),
+                    Guid.Empty,
                     "",
                     [],
                     false,
@@ -3277,6 +3280,7 @@ public class FileStorageService //: IFileStorageService
                 [FilterType.FoldersOnly],
                 false,
                 user.ToString(),
+                Guid.Empty,
                 "",
                 [],
                 false,
