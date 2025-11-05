@@ -376,7 +376,7 @@ public static class DbQuotaExtension
             entity.Property(e => e.Price)
                 .HasColumnName("price")
                 .HasDefaultValueSql("'0.00'")
-                .HasColumnType("decimal(10,4)");
+                .HasColumnType("decimal(15,9)");
 
             entity.Property(e => e.Visible)
                 .HasColumnName("visible")
@@ -428,7 +428,7 @@ public static class DbQuotaExtension
             entity.Property(e => e.Price)
                 .HasColumnName("price")
                 .HasDefaultValue(0.00m)
-                .HasColumnType("decimal(10,4)");
+                .HasColumnType("decimal(15,9)");
 
             entity.Property(e => e.Visible)
                 .HasColumnName("visible")
