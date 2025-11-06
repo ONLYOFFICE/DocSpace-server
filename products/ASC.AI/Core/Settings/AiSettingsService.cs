@@ -30,21 +30,16 @@ namespace ASC.AI.Core.Settings;
 public class AiSettingsService(
     UserManager userManager,
     AuthContext authContext,
-    WebSearchSettingsStore webSearchSettingsStore,
+    AiSettingsStore aiSettingsStore,
     AiAccessibility accessibility,
-    AiGateway aiGateway)
+    AiGateway aiGateway,
+    VectorizationGlobalSettings vectorizationGlobalSettings)
 {
-    public async Task<WebSearchSettings> SetWebSearchSettingsAsync(
-        bool enabled, 
-        EngineType type,
-        string? key)
+    public async Task<WebSearchSettings> SetWebSearchSettingsAsync(bool enabled, EngineType type, string? key)
     {
-        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || aiGateway.Configured)
-        {
-            throw new SecurityException();
-        }
+        await ThrowIfNotAccess();
     
-        var settings = await webSearchSettingsStore.GetSettingsAsync();
+        var settings = await aiSettingsStore.GetWebSearchSettingsAsync();
         settings.Enabled = enabled;
         
         var typeChanged = settings.Type != type;
@@ -70,27 +65,68 @@ public class AiSettingsService(
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
     
-        await webSearchSettingsStore.SetSettingsAsync(settings);
+        await aiSettingsStore.SetWebSearchSettingsAsync(settings);
     
         return settings;
     }
 
     public async Task<WebSearchSettings> GetWebSearchSettingsAsync()
     {
-        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || aiGateway.Configured)
-        {
-            throw new SecurityException();
-        }
+        await ThrowIfNotAccess();
         
-        return await webSearchSettingsStore.GetSettingsAsync();
+        return await aiSettingsStore.GetWebSearchSettingsAsync();
+    }
+    
+    public async Task<VectorizationSettings> SetVectorizationSettingsAsync(EmbeddingProviderType type, string? key)
+    {
+        await ThrowIfNotAccess();
+
+        var settings = await aiSettingsStore.GetVectorizationSettingsAsync();
+        if (type == EmbeddingProviderType.None)
+        {
+            settings.Type = type;
+            settings.Key = null;
+        }
+        else
+        {
+            settings.Type = type;
+            settings.Key = key;
+        }
+
+        await aiSettingsStore.SetVectorizationSettingsAsync(settings);
+
+        return settings;
+    }
+    
+    public async Task<VectorizationSettings> GetVectorizationSettingsAsync()
+    {
+        await ThrowIfNotAccess();
+        
+        return await aiSettingsStore.GetVectorizationSettingsAsync();
     }
 
     public async Task<AiSettings> GetAiSettingsAsync()
     {
+        var webSearchTask = aiSettingsStore.IsWebSearchEnabledAsync();
+        var vectorizationTask = aiSettingsStore.IsVectorizationEnabledAsync();
+        var aiReadyTask = accessibility.IsAiEnabledAsync();
+        
+        await Task.WhenAll(webSearchTask, vectorizationTask, aiReadyTask);
+        
         return new AiSettings
         {
-            WebSearchEnabled = await webSearchSettingsStore.IsEnabledAsync(),
-            AiReady = await accessibility.IsAiReadyAsync()
+            WebSearchEnabled = await webSearchTask,
+            VectorizationEnabled = await vectorizationTask,
+            AiReady = await aiReadyTask,
+            EmbeddingModel = vectorizationGlobalSettings.Model.Id,
         };
+    }
+    
+    private async Task ThrowIfNotAccess()
+    {
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || aiGateway.Configured)
+        {
+            throw new SecurityException();
+        }
     }
 }

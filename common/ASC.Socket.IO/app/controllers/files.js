@@ -212,6 +212,11 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/chat-export", (req, res) => {
+    files.exportChat(req.body);
+    res.end();
+  });
+
   router.post("/change-access-rights-file", (req, res) => {
     files.changeAccessRightsForFile(req.body);
     res.end();

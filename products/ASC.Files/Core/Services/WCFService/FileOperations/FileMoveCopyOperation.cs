@@ -894,7 +894,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var cachedFolderDao = scope.ServiceProvider.GetService<ICacheFolderDao<T>>();
         var fileSecurity = scope.ServiceProvider.GetService<FileSecurity>();
         var vectorizationTaskPublisher = scope.ServiceProvider.GetService<VectorizationTaskPublisher>();
-        var vectorizationSettings = scope.ServiceProvider.GetService<VectorizationSettings>();
+        var vectorizationSettings = scope.ServiceProvider.GetService<VectorizationGlobalSettings>();
 
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();

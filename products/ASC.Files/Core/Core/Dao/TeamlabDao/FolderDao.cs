@@ -271,10 +271,11 @@ internal class FolderDao(
 
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var currentUserId = _authContext.CurrentAccount.ID;
-
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        
         var q = await GetFoldersQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, withSubfolders, excludeSubject, roomId, filesDbContext);
 
-        q = q.Where(r => !filesDbContext.Security.Any(x => x.TenantId == r.TenantId && x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder && x.Share == FileShare.Restrict && x.Subject == currentUserId));
+        q = q.Where(r => !filesDbContext.Security.Any(x => x.TenantId == tenantId && x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder && x.Share == FileShare.Restrict && x.Subject == currentUserId));
 
         if (containingMyFiles)
         {
@@ -1830,7 +1831,8 @@ internal class FolderDao(
     }
 
     private IQueryable<DbFolderQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<DbFolder> dbFiles)
-    {
+    {        
+        var tenantId = _tenantManager.GetCurrentTenantId();
         return dbFiles
             .Select(r => new DbFolderQuery
             {
@@ -1842,15 +1844,15 @@ internal class FolderDao(
                                orderby t.Level descending
                                select t.ParentId
                               ).FirstOrDefault()
-                        where f.TenantId == r.TenantId
+                        where f.TenantId == tenantId
                         select f
                     ).FirstOrDefault(),
                 UserShared = filesDbContext.Security.Where(x =>
-                        x.TenantId == r.TenantId &&
+                        x.TenantId == tenantId &&
                         x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder)
                     .Select(s => s.SubjectType).ToList(),
                 ParentShared = filesDbContext.Security.Any(x =>
-                    x.TenantId == r.TenantId &&
+                    x.TenantId == tenantId &&
                     (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                     x.EntryType == FileEntryType.Folder &&
                     filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
@@ -1858,21 +1860,22 @@ internal class FolderDao(
                     from f in filesDbContext.FileOrder
                     where (
                         from rs in filesDbContext.RoomSettings
-                        where rs.TenantId == f.TenantId && rs.RoomId ==
+                        where rs.TenantId == tenantId && rs.RoomId ==
                             (from t in filesDbContext.Tree
                              where t.FolderId == r.ParentId
                              orderby t.Level descending
                              select t.ParentId
                             ).Skip(1).FirstOrDefault()
-                        select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
+                        select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == tenantId && f.EntryType == FileEntryType.Folder
                     select f.Order
                 ).FirstOrDefault(),
-                Settings = filesDbContext.RoomSettings.Where(x => x.TenantId == r.TenantId && x.RoomId == r.Id).Distinct().FirstOrDefault()
+                Settings = filesDbContext.RoomSettings.Where(x => x.TenantId == tenantId && x.RoomId == r.Id).Distinct().FirstOrDefault()
             });
     }
 
-    private static IQueryable<DbFolderQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<FolderByTagQuery> dbFoldersByTag)
-    {
+    private IQueryable<DbFolderQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<FolderByTagQuery> dbFoldersByTag)
+    {        
+        var tenantId = _tenantManager.GetCurrentTenantId();
         return dbFoldersByTag
             .Select(r => new DbFolderQuery
             {
@@ -1884,7 +1887,7 @@ internal class FolderDao(
                                orderby t.Level descending
                                select t.ParentId
                               ).FirstOrDefault()
-                        where f.TenantId == r.Entry.TenantId
+                        where f.TenantId == tenantId
                         select f
                     ).FirstOrDefault(),
                 SharedRecord = r.Security,
@@ -2129,7 +2132,7 @@ internal class FolderDao(
             SortedByType.DateAndTime => orderBy.IsAsc ? q.OrderBy(r => r.ModifiedOn) : q.OrderByDescending(r => r.ModifiedOn),
             SortedByType.DateAndTimeCreation => orderBy.IsAsc ? q.OrderBy(r => r.CreateOn) : q.OrderByDescending(r => r.CreateOn),
             SortedByType.CustomOrder => q.Join(filesDbContext.FileOrder, a => a.Id, b => b.EntryId, (folder, order) => new { folder, order })
-                                    .Where(r => r.order.EntryType == FileEntryType.Folder && r.order.TenantId == r.folder.TenantId)
+                                    .Where(r => r.order.EntryType == FileEntryType.Folder && r.order.TenantId == tenantId)
                                     .OrderBy(r => r.order.Order)
                                     .Select(r => r.folder),
             _ => q.OrderBy(r => r.Title)
@@ -2220,7 +2223,7 @@ internal class FolderDao(
                     filesDbContext.Files.Any(f =>
                         f.ParentId == r.Id &&
                         pdfCategories.Contains(f.Category) &&
-                        f.TenantId == r.TenantId &&
+                        f.TenantId == tenantId &&
                         filesDbContext.FilesFormRoleMapping.Any(m =>
                             m.TenantId == tenantId &&
                             m.FormId == f.Id &&
@@ -2231,7 +2234,7 @@ internal class FolderDao(
                         filesDbContext.Files.Any(f =>
                             f.ParentId == t.FolderId &&
                             pdfCategories.Contains(f.Category) &&
-                            f.TenantId == r.TenantId &&
+                            f.TenantId == tenantId &&
                             filesDbContext.FilesFormRoleMapping.Any(m =>
                                 m.TenantId == tenantId &&
                                 m.FormId == f.Id &&
@@ -2260,10 +2263,10 @@ internal class FolderDao(
                 .Join(filesDbContext.Security, r => r.folder.Id.ToString(), security => security.EntryId, (r, security) => new { r.folder, security })
                 .Where(r => r.security.TenantId == tenantId
                     && r.security.EntryType == FileEntryType.Folder
-                    && (r.security.SubjectType == SubjectType.ExternalLink
-                        || r.security.SubjectType == SubjectType.PrimaryExternalLink
-                        || r.security.SubjectType == SubjectType.User
-                        || r.security.SubjectType == SubjectType.Group))
+                    && (r.security.SubjectType == SubjectType.ExternalLink || 
+                        r.security.SubjectType == SubjectType.PrimaryExternalLink || 
+                        r.security.SubjectType == SubjectType.User || 
+                        r.security.SubjectType == SubjectType.Group))
                 .Select(r => r.folder);
 
         return q;

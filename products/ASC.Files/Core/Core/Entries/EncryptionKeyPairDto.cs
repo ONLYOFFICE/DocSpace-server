@@ -61,8 +61,8 @@ public class EncryptionKeyPairDtoHelper(
         ArgumentException.ThrowIfNullOrEmpty(publicKey);
         ArgumentException.ThrowIfNullOrEmpty(privateKeyEnc);
 
-        var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-        if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(user))
+        var userId = authContext.CurrentAccount.ID;
+        if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(userId))
         {
             throw new SecurityException();
         }
@@ -71,11 +71,11 @@ public class EncryptionKeyPairDtoHelper(
         {
             PrivateKeyEnc = privateKeyEnc,
             PublicKey = publicKey,
-            UserId = user.Id
+            UserId = userId
         };
 
         var keyPairString = JsonSerializer.Serialize(keyPair);
-        await encryptionLoginProvider.SetKeysAsync(user.Id, keyPairString);
+        await encryptionLoginProvider.SetKeysAsync(userId, keyPairString);
     }
 
     public async Task<EncryptionKeyPairDto> GetKeyPairAsync()

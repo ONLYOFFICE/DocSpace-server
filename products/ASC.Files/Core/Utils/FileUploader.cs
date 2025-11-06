@@ -49,7 +49,7 @@ public class FileUploader(
     FileChecker fileChecker,
     TempStream tempStream,
     WebhookManager webhookManager,
-    VectorizationSettings vectorizationSettings)
+    VectorizationGlobalSettings vectorizationGlobalSettings)
 {
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
@@ -251,7 +251,7 @@ public class FileUploader(
         
         if (folder is { FolderType: FolderType.Knowledge })
         {
-            if (!vectorizationSettings.SupportedFormats.Contains(FileUtility.GetFileExtension(fileName)))
+            if (!vectorizationGlobalSettings.SupportedFormats.Contains(FileUtility.GetFileExtension(fileName)))
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
             }
@@ -333,7 +333,7 @@ uploadSession.RequiredVectorization = requiredVectorization;
                 if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
                 {
                     var currentRoom = await folderDao.GetFolderAsync(roomId);
-                    if (currentRoom.FolderType == FolderType.FillingFormsRoom && !isForm)
+                    if (currentRoom.FolderType == FolderType.FillingFormsRoom && !isForm)//
                     {
                         throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                     }

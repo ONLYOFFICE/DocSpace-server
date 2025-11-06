@@ -36,8 +36,7 @@ public class UserPhotosValidator(SecurityContext securityContext, UserManager us
         }
 
         var userId = securityContext.CurrentAccount.ID;
-        var currentUser = await userManager.GetUsersAsync(userId);
-        var userType = await userManager.GetUserTypeAsync(currentUser);
+        var userType = await userManager.GetUserTypeAsync(userId);
 
         if (userType == EmployeeType.Guest && !path.Contains(userId.ToString()))
         {

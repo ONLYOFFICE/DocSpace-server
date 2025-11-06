@@ -24,15 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Settings;
+namespace ASC.AI.Models.RequestDto;
 
-public class AiSettings
+public class SetEmbeddingConfigRequestDto
 {
-    public bool WebSearchEnabled { get; init; }
-    public bool VectorizationEnabled { get; init; }
-    public bool AiReady { get; init; }
-    public required string EmbeddingModel { get; init; }
-    public string KnowledgeSearchToolName => KnowledgeSearchTool.Name;
-    public string WebSearchToolName => WebSearchTool.Name;
-    public string WebCrawlingToolName => WebCrawlingTool.Name;
+    [FromBody]
+    public required SetEmbeddingConfigRequestBody Body { get; init; }
+}
+
+public class SetEmbeddingConfigRequestBody
+{
+    public EmbeddingProviderType Type { get; init; }
+    public string? Key { get; init; }
 }

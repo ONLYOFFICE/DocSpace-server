@@ -67,6 +67,7 @@ global using ASC.Files.Core.Text;
 global using ASC.Files.Core.Utils;
 global using ASC.Files.Core.Vectorization.Data;
 global using ASC.Files.Core.Vectorization.Embedding;
+global using ASC.Files.Core.Vectorization.Settings;
 
 global using ASC.FederatedLogin;
 global using ASC.FederatedLogin.Helpers;

@@ -38,7 +38,10 @@ public class MessageExporter(
 {
     public async Task ExportMessageAsync<T>(T folderId, string title, int messageId)
     {
-        await messageExport.PublishAsync(title, messageId, folderId!.ToString()!, folderId is string);
+        var chatId = await chatDao.GetChatIdByMessageAsync(messageId, authContext.CurrentAccount.ID)
+            ?? throw new ItemNotFoundException("Chat not found");
+
+        await messageExport.PublishAsync(title, chatId, messageId, folderId!.ToString()!, folderId is string);
     }
 
     public async Task ExportMessagesAsync<T>(T folderId, string title, Guid chatId)

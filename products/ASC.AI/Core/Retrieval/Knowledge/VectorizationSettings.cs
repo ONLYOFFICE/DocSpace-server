@@ -24,15 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Settings;
+namespace ASC.AI.Core.Retrieval.Knowledge;
 
-public class AiSettings
+public class VectorizationSettings
 {
-    public bool WebSearchEnabled { get; init; }
-    public bool VectorizationEnabled { get; init; }
-    public bool AiReady { get; init; }
-    public required string EmbeddingModel { get; init; }
-    public string KnowledgeSearchToolName => KnowledgeSearchTool.Name;
-    public string WebSearchToolName => WebSearchTool.Name;
-    public string WebCrawlingToolName => WebCrawlingTool.Name;
+    public EmbeddingProviderType Type { get; set; }
+    public string? Key { get; set; }
 }

@@ -187,7 +187,7 @@ public class FolderDtoHelper(
         Task<bool> aiReadyTask = null;
         if (folder.RootFolderType == FolderType.AiAgents && aiReady == null)
         {
-            aiReadyTask = accessibility.IsAiReadyAsync();
+            aiReadyTask = accessibility.IsAiEnabledAsync();
         }
         
         var result = await GetFolderWrapperAsync(folder);
@@ -388,11 +388,6 @@ public class FolderDtoHelper(
             {
                 case FolderType.AiAgents:
                     result.Security[FileSecurity.FilesSecurityActions.Create] = false;
-                    break;
-                case FolderType.Knowledge:
-                    result.Security[FileSecurity.FilesSecurityActions.Create] = false;
-                    result.Security[FileSecurity.FilesSecurityActions.CopyTo] = false;
-                    result.Security[FileSecurity.FilesSecurityActions.MoveTo] = false;
                     break;
                 case FolderType.AiRoom:
                     result.Security[FileSecurity.FilesSecurityActions.EditRoom] = false;

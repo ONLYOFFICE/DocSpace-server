@@ -402,28 +402,6 @@ public class TenantQuota
         set => _backup.Value = value;
     }
 
-    private readonly WalletFeatureFlag _aiTools;
-
-    /// <summary>
-    /// Specifies if the AI tools anabled as a wallet service or not.
-    /// </summary>
-    public bool AITools
-    {
-        get => _aiTools.Value;
-        set => _aiTools.Value = value;
-    }
-
-    private readonly WalletFeatureFlag _webSearch;
-
-    /// <summary>
-    /// Specifies if the AI Web Search anabled as a wallet service or not.
-    /// </summary>
-    public bool WebSearch
-    {
-        get => _webSearch.Value;
-        set => _webSearch.Value = value;
-    }
-
     public TenantQuota()
     {
         _featuresList = [];
@@ -454,8 +432,6 @@ public class TenantQuota
         _yearFeature = new TenantQuotaFeatureFlag(this, "year") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _countFreeBackup = new CountFreeBackupFeature(this) { Order = 6, EmployeeType = EmployeeType.DocSpaceAdmin };
         _backup = new WalletFeatureFlag(this, "backup") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiTools = new WalletFeatureFlag(this, "aitools") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _webSearch = new WalletFeatureFlag(this, "websearch") { EmployeeType = EmployeeType.DocSpaceAdmin };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -484,9 +460,7 @@ public class TenantQuota
             _statisticFeature,
             _yearFeature,
             _countFreeBackup,
-            _backup,
-            _aiTools,
-            _webSearch
+            _backup
         };
     }
 
@@ -689,11 +663,12 @@ public partial class TenantQuotaMapper(IServiceProvider provider)
         var tenantManager = provider.GetService<TenantManager>();
         var regionHelper = provider.GetService<RegionHelper>();
 
-        var priceInfo = tenantManager.GetProductPriceInfo(source.GetPaymentId(), source.Wallet);
+        var productPaymentId = source.GetPaymentId();
+        var priceInfo = tenantManager.GetProductPriceInfo(productPaymentId, source.Wallet);
 
         if (priceInfo != null)
         {
-            var currentRegion = regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { source.ProductId, priceInfo } }).Result;
+            var currentRegion = regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { productPaymentId, priceInfo } }).Result;
 
             if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolve))
             {

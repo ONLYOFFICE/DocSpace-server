@@ -136,7 +136,7 @@ public class FileSharingAceHelper(
                     continue;
                 }
 
-                var fileAccesses = await fileSecurity.GetAccesses(file);
+                var fileAccesses = await fileSecurity.GetAccesses(file, w.SubjectType);
                 if (fileAccesses == null || !fileAccesses.TryGetValue(w.SubjectType, out var access) || !access.Contains(w.Access))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
@@ -1015,7 +1015,13 @@ public class FileSharing(
 
         var i = 0;
         var cachedFolderDao = daoFactory.GetCacheFolderDao<T>();
-        await foreach (var parent in cachedFolderDao.GetParentFoldersAsync(entry.ParentId).Where(r => r.FolderType != FolderType.VirtualRooms).Select(r => r.CreateBy).Where(r => !r.Equals(entry.CreateBy)).Distinct())
+        var parents = cachedFolderDao.GetParentFoldersAsync(entry.ParentId)
+            .Where(r => r.FolderType is not FolderType.VirtualRooms and not FolderType.AiAgents)
+            .Select(r => r.CreateBy)
+            .Where(r => !r.Equals(entry.CreateBy))
+            .Distinct();
+        
+        await foreach (var parent in parents)
         {
             var parentOwner = false;
 

@@ -141,8 +141,7 @@ public class ReassignController(
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
 
         var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-        var user = await userManager.GetUsersAsync(inDto.UserId);
-        var userType = await userManager.GetUserTypeAsync(user);
+        var userType = await userManager.GetUserTypeAsync(inDto.UserId);
         var tenant = tenantManager.GetCurrentTenant();
 
         if (!currentUser.IsOwner(tenant) && userType is EmployeeType.DocSpaceAdmin)

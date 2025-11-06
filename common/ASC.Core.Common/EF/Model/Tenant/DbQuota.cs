@@ -186,30 +186,6 @@ public static class DbQuotaExtension
                     ServiceName = "backup",
                     Visible = false,
                     Wallet = true
-                },
-                new DbQuota
-                {
-                    TenantId = -13,
-                    Name = "aitools",
-                    Description = null,
-                    Features = "aitools",
-                    Price = 0.0002m,
-                    ProductId = "10009",
-                    ServiceName = "ai-service",
-                    Visible = false,
-                    Wallet = true
-                },
-                new DbQuota
-                {
-                    TenantId = -14,
-                    Name = "websearch",
-                    Description = null,
-                    Features = "websearch",
-                    Price = 0.005m,
-                    ProductId = "10010",
-                    ServiceName = "web_search",
-                    Visible = false,
-                    Wallet = true
                 }
                 );
         return modelBuilder;

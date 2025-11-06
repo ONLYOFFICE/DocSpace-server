@@ -107,7 +107,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 return false;
             }
         }
-        if (DocSpaceHelper.IsRoom(rootFolder.FolderType))
+        if (DocSpaceHelper.IsRoom(rootFolder.FolderType) && !rootFolder.ProviderEntry)
         {
             TenantEntityQuotaSettings quotaSettings = rootFolder.FolderType is FolderType.AiRoom
                    ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()

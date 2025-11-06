@@ -32,13 +32,6 @@ public class FileHelper(FileTrackerHelper fileTracker,
                         FileUtility fileUtility,
                         FileConverter fileConverter)
 {
-    internal string GetTitle<T>(File<T> file)
-    {
-        return string.IsNullOrEmpty(file.ConvertedType)
-                    ? file.PureTitle
-                    : FileUtility.ReplaceFileExtension(file.PureTitle, fileUtility.GetInternalExtension(file.PureTitle));
-    }
-
     internal async Task<FileStatus> GetFileStatus<T>(File<T> file, FileStatus currentStatus)
     {
         var editingTask = fileUtility.CanWebEdit(file.Title)

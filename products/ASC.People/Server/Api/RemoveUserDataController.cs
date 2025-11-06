@@ -126,7 +126,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
                 throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var isGuest = await userManager.IsGuestAsync(user);
+        var isGuest = await userManager.IsGuestAsync(user.Id);
 
         var progressItem = await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, true, true, isGuest);
 

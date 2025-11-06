@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using SecurityContext = ASC.Core.SecurityContext;
+
 namespace ASC.AI.Core.Chat;
 
 [Scope]
@@ -32,7 +34,8 @@ public class ChatSocketClient(
     TenantManager tenantManager, 
     ChannelWriter<SocketData> channelWriter, 
     MachinePseudoKeys machinePseudoKeys, 
-    IConfiguration configuration) 
+    IConfiguration configuration,
+    SecurityContext securityContext)
     : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
@@ -41,6 +44,13 @@ public class ChatSocketClient(
     {
         var room = GetRoom(chatId);
         await MakeRequest("commit-chat-message", new { room, messageId });
+    }
+
+    public async Task ExportCompleted<T>(Guid chatId, File<T>? resultFile)
+    {
+        var currentUser = securityContext.CurrentAccount.ID;
+        var room = $"{GetRoom(chatId)}-{currentUser}";
+        await MakeRequest("chat-export", new { room, resultFile });
     }
 
     private string GetRoom(Guid chatId)

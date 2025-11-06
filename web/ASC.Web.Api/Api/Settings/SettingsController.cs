@@ -719,11 +719,11 @@ public partial class SettingsController(
     [HttpPut("welcome/close")]
     public async Task CloseWelcomePopup()
     {
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-
         var collaboratorPopupSettings = await settingsManager.LoadForCurrentUserAsync<CollaboratorSettings>();
 
-        if (!(await userManager.IsGuestAsync(currentUser) && collaboratorPopupSettings.FirstVisit && !await userManager.IsOutsiderAsync(currentUser)))
+        if (!(await userManager.IsGuestAsync(authContext.CurrentAccount.ID) && 
+              collaboratorPopupSettings.FirstVisit && 
+              !await userManager.IsOutsiderAsync(authContext.CurrentAccount.ID)))
         {
             throw new NotSupportedException("Not available.");
         }

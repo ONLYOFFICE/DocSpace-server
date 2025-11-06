@@ -486,7 +486,7 @@ public class UserController(
 
         foreach (var user in users)
         {
-            if (await _userManager.CanUserViewAnotherUserAsync(currentUser, user))
+            if (await _userManager.CanUserViewAnotherUserAsync(currentUser.Id, user.Id))
             {
                 result.Add(await employeeDtoHelper.GetAsync(user));
             }
@@ -799,7 +799,7 @@ public class UserController(
         }
 
         if (await _userManager.GetUserTypeAsync(currentUser) is EmployeeType.Guest ||
-            !await _userManager.CanUserViewAnotherUserAsync(currentUser, targetUser))
+            !await _userManager.CanUserViewAnotherUserAsync(currentUserId, targetUser.Id))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
@@ -836,24 +836,24 @@ public class UserController(
             throw new ItemNotFoundException("User not found");
         }
 
-        var targetUserType = await _userManager.GetUserTypeAsync(targetUser);
+        var targetUserType = await _userManager.GetUserTypeAsync(targetUser.Id);
 
         if (targetUserType is not EmployeeType.Guest)
         {
             throw new ArgumentException("User is not a guest");
         }
 
-        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-        var currentUserType = await _userManager.GetUserTypeAsync(currentUser);
+        var currentUserId = authContext.CurrentAccount.ID;
+        var currentUserType = await _userManager.GetUserTypeAsync(currentUserId);
 
         if (currentUserType is EmployeeType.Guest or EmployeeType.User)
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        if (!await _userManager.CanUserViewAnotherUserAsync(currentUser, targetUser))
+        if (!await _userManager.CanUserViewAnotherUserAsync(currentUserId, targetUser.Id))
         {
-            await _userManager.AddUserRelationAsync(currentUser.Id, targetUser.Id);
+            await _userManager.AddUserRelationAsync(currentUserId, targetUser.Id);
         }
 
         return await employeeFullDtoHelper.GetFullAsync(targetUser);
@@ -961,9 +961,7 @@ public class UserController(
             return await employeeFullDtoHelper.GetSimple(user, false);
         }
 
-        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-
-        if (!await _userManager.CanUserViewAnotherUserAsync(currentUser, user))
+        if (!await _userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, user.Id))
         {
             throw new SecurityException(Resource.ResourceManager.GetString("ErrorAccessDenied", cultureInfo));
         }
@@ -1015,9 +1013,8 @@ public class UserController(
             return await employeeFullDtoHelper.GetSimple(user, false);
         }
 
-        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        if (!await _userManager.CanUserViewAnotherUserAsync(currentUser, user))
+        if (!await _userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, user.Id))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
@@ -1381,7 +1378,7 @@ public class UserController(
 
         foreach (var user in users)
         {
-            if (await _userManager.CanUserViewAnotherUserAsync(currentUser, user))
+            if (await _userManager.CanUserViewAnotherUserAsync(currentUser.Id, user.Id))
             {
                 yield return await employeeFullDtoHelper.GetFullAsync(user);
             }
