@@ -3011,7 +3011,7 @@ public class FileSecurity(
     }
 
 
-    public async Task<IDictionary<SubjectType, IEnumerable<FileShare>>> GetAccesses<T>(File<T> file)
+    public async Task<IDictionary<SubjectType, IEnumerable<FileShare>>> GetAccesses<T>(File<T> file, SubjectType? subjectTypeForCheck = null)
     {
         var result = new Dictionary<SubjectType, IEnumerable<FileShare>>();
 
@@ -3055,7 +3055,7 @@ public class FileSecurity(
                 
                 if (s is FileShare.None)
                 {
-                    if (file.CreateBy == authContext.CurrentAccount.ID)
+                    if (file.CreateBy == authContext.CurrentAccount.ID || subjectTypeForCheck is null or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink)
                     {
                         sharesToAdd.Add(s);
                     }

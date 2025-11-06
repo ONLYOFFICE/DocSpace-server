@@ -2328,6 +2328,7 @@ internal class FileDao(
 
     private IQueryable<DbFileQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles, bool attachVectorizationStatus = false)
     {
+        var tenantId = _tenantManager.GetCurrentTenantId();
         return dbFiles
             .Select(r => new DbFileQuery
             {
@@ -2346,24 +2347,25 @@ internal class FileDao(
                     from f in filesDbContext.FileOrder
                     where (
                         from rs in filesDbContext.RoomSettings
-                        where rs.TenantId == f.TenantId && rs.RoomId ==
+                        where rs.TenantId == tenantId && rs.RoomId ==
                             (from t in filesDbContext.Tree
                              where t.FolderId == r.ParentId
                              orderby t.Level descending
                              select t.ParentId
                             ).Skip(1).FirstOrDefault()
-                        select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
+                        select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == tenantId && f.EntryType == FileEntryType.File
                     select f.Order
                 ).FirstOrDefault(),
                 VectorizationStatus = attachVectorizationStatus 
                     ? filesDbContext.FileVectorization
-                        .FirstOrDefault(x => x.TenantId == r.TenantId && x.FileId == r.Id).Status
+                        .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id).Status
                     : null
             });
     }
 
-    private static IQueryable<DbFileQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<FileByTagQuery> dbFilesByTag)
-    {
+    private IQueryable<DbFileQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<FileByTagQuery> dbFilesByTag)
+    {        
+        var tenantId = _tenantManager.GetCurrentTenantId();
         return dbFilesByTag
             .Select(r => new DbFileQuery
             {
@@ -2375,7 +2377,7 @@ internal class FileDao(
                                orderby t.Level descending
                                select t.ParentId
                               ).FirstOrDefault()
-                        where f.TenantId == r.Entry.TenantId
+                        where f.TenantId == tenantId
                         select f
                     ).FirstOrDefault(),
                 SharedRecord = r.Security,
@@ -2385,8 +2387,9 @@ internal class FileDao(
             });
     }
 
-    private static IQueryable<DbFileQuery> FromQueryWithShared(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles, bool attachVectorizationStatus = false)
+    private IQueryable<DbFileQuery> FromQueryWithShared(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles, bool attachVectorizationStatus = false)
     {
+        var tenantId = _tenantManager.GetCurrentTenantId();
         return dbFiles
             .Select(r => new DbFileQuery
             {
@@ -2398,15 +2401,15 @@ internal class FileDao(
                                orderby t.Level descending
                                select t.ParentId
                               ).FirstOrDefault()
-                        where f.TenantId == r.TenantId
+                        where f.TenantId == tenantId
                         select f
                     ).FirstOrDefault(),
                 UserShared = filesDbContext.Security.Where(x =>
-                    x.TenantId == r.TenantId &&
+                    x.TenantId == tenantId &&
                     x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File)
                     .Select(s => s.SubjectType).ToList(),
                 ParentShared = filesDbContext.Security.Any(x =>
-                    x.TenantId == r.TenantId &&
+                    x.TenantId == tenantId &&
                     (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                     x.EntryType == FileEntryType.Folder &&
                     filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
@@ -2414,18 +2417,18 @@ internal class FileDao(
                     from f in filesDbContext.FileOrder
                     where (
                         from rs in filesDbContext.RoomSettings
-                        where rs.TenantId == f.TenantId && rs.RoomId ==
+                        where rs.TenantId == tenantId && rs.RoomId ==
                             (from t in filesDbContext.Tree
                              where t.FolderId == r.ParentId
                              orderby t.Level descending
                              select t.ParentId
                             ).Skip(1).FirstOrDefault()
-                        select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
+                        select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == tenantId && f.EntryType == FileEntryType.File
                     select f.Order
                 ).FirstOrDefault(),
                 VectorizationStatus = attachVectorizationStatus 
                     ? filesDbContext.FileVectorization
-                        .FirstOrDefault(x => x.TenantId == r.TenantId && x.FileId == r.Id).Status
+                        .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id).Status
                     : null
             });
     }
@@ -2517,7 +2520,7 @@ internal class FileDao(
         var currentUserId = _authContext.CurrentAccount.ID;
         var q = GetFileQuery(filesDbContext, r => r.ParentId == parentId && r.CurrentVersion);
 
-        q = q.Where(r => !filesDbContext.Security.Any(x => x.TenantId == r.TenantId && x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File && x.Share == FileShare.Restrict && x.Subject == currentUserId));
+        q = q.Where(r => !filesDbContext.Security.Any(x => x.TenantId == tenantId && x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File && x.Share == FileShare.Restrict && x.Subject == currentUserId));
 
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
@@ -2601,7 +2604,7 @@ internal class FileDao(
                     ? q.OrderBy(r => DbFunctionsExtension.SubstringIndex(r.Title, '.', -1))
                     : q.OrderByDescending(r => DbFunctionsExtension.SubstringIndex(r.Title, '.', -1)),
                 SortedByType.CustomOrder => q.Join(filesDbContext.FileOrder, a => a.Id, b => b.EntryId, (file, order) => new { file, order })
-                    .Where(r => r.order.EntryType == FileEntryType.File && r.order.TenantId == r.file.TenantId)
+                    .Where(r => r.order.EntryType == FileEntryType.File && r.order.TenantId == tenantId)
                     .OrderBy(r => r.order.Order)
                     .Select(r => r.file),
                 _ => q.OrderBy(r => r.Title)
