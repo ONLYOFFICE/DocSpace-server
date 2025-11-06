@@ -75,7 +75,7 @@ public class InvitationService(
 
         var isAuth = authContext.IsAuthenticated;
 
-        (validation.RoomId, validation.Title) = data.LinkType switch
+        (validation.RoomId, validation.Title, validation.IsAgent) = data.LinkType switch
         {
             InvitationLinkType.Individual when !string.IsNullOrEmpty(roomId) => await GetRoomDataAsync(roomId, async entry =>
             {
@@ -171,7 +171,7 @@ public class InvitationService(
                     return true;
                 }
             }),
-            _ => (null, null)
+            _ => (null, null, false)
         };
 
         if (isAuth || data.Result is EmailValidationKeyProvider.ValidationResult.UserExisted)
@@ -307,32 +307,32 @@ public class InvitationService(
         }
     }
 
-    private async Task<(string, string)> GetRoomDataAsync(string roomId, Func<FileEntry, Task<bool>> accessResolver = null)
+    private async Task<(string, string, bool)> GetRoomDataAsync(string roomId, Func<FileEntry, Task<bool>> accessResolver = null)
     {
         if (int.TryParse(roomId, out var intId))
         {
             var internalRoom = await daoFactory.GetFolderDao<int>().GetFolderAsync(intId);
             if (!await CheckRoomAsync(internalRoom))
             {
-                return (null, null);
+                return (null, null, false);
             }
 
-            return (internalRoom.Id.ToString(), internalRoom.Title);
+            return (internalRoom.Id.ToString(), internalRoom.Title, internalRoom.FolderType is FolderType.AiRoom);
         }
 
         var provider = await daoFactory.ProviderDao.GetProviderInfoByEntryIdAsync(roomId);
         if (provider == null || string.IsNullOrEmpty(provider.FolderId))
         {
-            return (null, null);
+            return (null, null, false);
         }
 
         var thirdPartyRoom = await daoFactory.GetFolderDao<string>().GetFolderAsync(provider.FolderId);
         if (!await CheckRoomAsync(thirdPartyRoom))
         {
-            return (null, null);
+            return (null, null, false);
         }
 
-        return (thirdPartyRoom.Id, thirdPartyRoom.Title);
+        return (thirdPartyRoom.Id, thirdPartyRoom.Title, false);
 
         async Task<bool> CheckRoomAsync<T>(Folder<T> room)
         {
@@ -357,6 +357,7 @@ public class Validation
     public string RoomId { get; set; }
     public string Title { get; set; }
     public string Email { get; set; }
+    public bool IsAgent { get; set; }
 }
 
 public class InvitationLinkData
