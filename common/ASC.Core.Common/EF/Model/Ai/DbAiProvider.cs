@@ -40,17 +40,21 @@ public class DbAiProvider : BaseEntity
     public int Id { get; set; }
     public int TenantId { get; set; }
     public ProviderType Type { get; set; }
+    
     [MaxLength(255)]
+    [Required]
     public required string Title { get; set; }
+    
+    [Required]
     public required string Url { get; set; }
+    
+    [Required]
     public required string Key { get; set; }
 
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }
     
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     public DbTenant Tenant { get; set; }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     
     public override object[] GetKeys()
     {

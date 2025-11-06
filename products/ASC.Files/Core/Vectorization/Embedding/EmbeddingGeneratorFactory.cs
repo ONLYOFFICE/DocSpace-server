@@ -29,77 +29,53 @@
 namespace ASC.Files.Core.Vectorization.Embedding;
 
 [Scope]
-public class EmbeddingGeneratorFactory
+public class EmbeddingGeneratorFactory(
+    IHttpClientFactory httpClientFactory,
+    AiGateway gateway,
+    SettingsManager settingsManager,
+    InstanceCrypto instanceCrypto,
+    VectorizationGlobalSettings vectorizationGlobalSettings)
 {
-    public EmbeddingModel Model => _model ?? throw new ArgumentNullException(nameof(_model));
-    
-    private static EmbeddingSettings? _settings;
-    private static EmbeddingModel? _model;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly AiGateway _gateway;
-    
-    public EmbeddingGeneratorFactory(IConfiguration configuration, IHttpClientFactory httpClientFactory, AiGateway gateway)
-    {
-        _httpClientFactory = httpClientFactory;
-        _gateway = gateway;
-
-        if (_settings != null)
-        {
-            return;
-        }
-
-        _settings = configuration.GetSection("ai:embedding").Get<EmbeddingSettings>();
-        if (_settings != null)
-        {
-            _model = new EmbeddingModel
-            {
-                Id = _settings.ModelId,
-                Dimension = _settings.Dimension,
-                ContextLength = _settings.ContextLength
-            };
-        }
-    }
-    
     public async Task<IEmbeddingGenerator<string, Embedding<float>>> CreateAsync()
     {
-        if (_settings == null)
+        string url;
+        string key;
+        string modelId;
+
+        if (gateway.Configured)
         {
-            throw new ArgumentNullException(nameof(_settings));
+            url = gateway.Url;
+            key = await gateway.GetKeyAsync();
+            modelId = vectorizationGlobalSettings.Model.Id;
         }
-
-        var url = _settings.Url;
-        var key = _settings.Key;
-
-        if (_gateway.Configured)
+        else
         {
-            url = _gateway.Url;
-            key = await _gateway.GetKeyAsync();
+            var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>();
+
+            (url, modelId) = settings.ProviderType switch
+            {
+                EmbeddingProviderType.OpenAi => ("https://api.openai.com/v1", vectorizationGlobalSettings.Model.Id),
+                EmbeddingProviderType.OpenRouter => ("https://openrouter.ai/api/v1", $"openai/{vectorizationGlobalSettings.Model.Id}"),
+                EmbeddingProviderType.None => throw new InvalidOperationException("Vectorization settings are not configured"),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            key = await instanceCrypto.DecryptAsync(settings.Key);
         }
 
         ArgumentException.ThrowIfNullOrEmpty(url);
         ArgumentException.ThrowIfNullOrEmpty(key);
 
-        if (!url.Contains("api.openai.com") && !_gateway.Configured)
-        {
-            return new OpenAiFloatEmbeddingGenerator(_httpClientFactory.CreateClient(),
-                new GeneratorConfiguration
-                {
-                    Endpoint = _settings.Url, 
-                    ApiKey = _settings.Key, 
-                    ModelId = _settings.ModelId
-                });
-        }
-
         var credential = new ApiKeyCredential(key);
         var options = new OpenAIClientOptions
         {
             Endpoint = new Uri(url),
-            Transport = new HttpClientPipelineTransport(_httpClientFactory.CreateClient())
+            Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
         };
         
-        var base64Client = new OpenAIClient(credential, options);
+        var client = new OpenAIClient(credential, options);
 
-        return base64Client.GetEmbeddingClient(_settings.ModelId).AsIEmbeddingGenerator();
+        return client.GetEmbeddingClient(modelId).AsIEmbeddingGenerator();
     }
 }
 
@@ -107,5 +83,4 @@ public class EmbeddingModel
 {
     public required string Id { get; init; }
     public int Dimension { get; init; }
-    public int ContextLength { get; init; }
 }

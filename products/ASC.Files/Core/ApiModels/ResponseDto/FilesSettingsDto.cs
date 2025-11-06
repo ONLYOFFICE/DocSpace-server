@@ -341,7 +341,7 @@ public class FilesSettingsDtoConverter(
     FilesLinkUtility filesLinkUtility,
     FilesSettingsHelper filesSettingsHelper,
     SetupInfo setupInfo,
-    VectorizationSettings vectorizationSettings,
+    VectorizationGlobalSettings vectorizationGlobalSettings,
     SearchSettingsHelper searchSettingsHelper)
 {
     public async Task<FilesSettingsDto> Get()
@@ -404,8 +404,8 @@ public class FilesSettingsDtoConverter(
             MaxUploadThreadCount = setupInfo.MaxUploadThreadCount,
             ChunkUploadSize = setupInfo.ChunkUploadSize,
             OpenEditorInSameTab = await filesSettingsHelper.GetOpenEditorInSameTabAsync(),
-            ExtsFilesVectorized = vectorizationSettings.SupportedFormats.ToList(),
-            MaxVectorizationFileSize = vectorizationSettings.MaxContentLength
+            ExtsFilesVectorized = vectorizationGlobalSettings.SupportedFormats.ToList(),
+            MaxVectorizationFileSize = vectorizationGlobalSettings.MaxContentLength
         };
     }
 }

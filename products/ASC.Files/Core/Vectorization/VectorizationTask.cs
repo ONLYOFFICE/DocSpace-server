@@ -86,11 +86,11 @@ public class VectorizationTask : DistributedTaskProgress
             var vectorStore = scope.ServiceProvider.GetRequiredService<VectorStore>();
             var generatorFactory = scope.ServiceProvider.GetRequiredService<EmbeddingGeneratorFactory>();
             var fileProcessor = scope.ServiceProvider.GetRequiredService<FileTextProcessor>();
-            var vectorizationSettings = scope.ServiceProvider.GetRequiredService<VectorizationSettings>();
+            var vectorizationSettings = scope.ServiceProvider.GetRequiredService<VectorizationGlobalSettings>();
 
             var splitterSettings = new SplitterSettings
             {
-                MaxTokensPerChunk = (int)(generatorFactory.Model.ContextLength * 0.75),
+                MaxTokensPerChunk = (int)(vectorizationSettings.ChunkSize * 0.75),
                 ChunkOverlap = vectorizationSettings.ChunkOverlap
             };
 
@@ -98,7 +98,8 @@ public class VectorizationTask : DistributedTaskProgress
                 Chunk.IndexName,
                 new VectorCollectionOptions
                 {
-                    Dimension = generatorFactory.Model.Dimension, ModelId = generatorFactory.Model.Id
+                    Dimension = vectorizationSettings.Model.Dimension, 
+                    ModelId = vectorizationSettings.Model.Id
                 });
 
             file = await fileDao.GetFileAsync(_fileId);

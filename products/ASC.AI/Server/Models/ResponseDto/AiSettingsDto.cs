@@ -29,7 +29,9 @@ namespace ASC.AI.Models.ResponseDto;
 public class AiSettingsDto
 {
     public bool WebSearchEnabled { get; init; }
+    public bool VectorizationEnabled { get; init; }
     public bool AiReady { get; init; }
+    public required string EmbeddingModel { get; init; }
     public required string KnowledgeSearchToolName { get; init; }
     public required string WebSearchToolName { get; init; }
     public required string WebCrawlingToolName { get; init; }

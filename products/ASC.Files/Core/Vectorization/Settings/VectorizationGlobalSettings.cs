@@ -24,15 +24,47 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Settings;
+namespace ASC.Files.Core.Vectorization.Settings;
 
-public class AiSettings
+[Singleton]
+public class VectorizationGlobalSettings
 {
-    public bool WebSearchEnabled { get; init; }
-    public bool VectorizationEnabled { get; init; }
-    public bool AiReady { get; init; }
-    public required string EmbeddingModel { get; init; }
-    public string KnowledgeSearchToolName => KnowledgeSearchTool.Name;
-    public string WebSearchToolName => WebSearchTool.Name;
-    public string WebCrawlingToolName => WebCrawlingTool.Name;
+    public int ChunkSize { get; init; }
+    public float ChunkOverlap { get; init; }
+    public int ChunksBatchSize { get; init; }
+    public long MaxContentLength { get; init; }
+    public HashSet<string> SupportedFormats { get; init; }
+    public EmbeddingModel Model { get; init; }
+    
+    public VectorizationGlobalSettings(IConfiguration configuration)
+    {
+        var settings = configuration.GetSection("ai:vectorization").Get<Settings>();
+        ChunkSize = settings.ChunkSize;
+        ChunkOverlap = settings.ChunkOverlap;
+        ChunksBatchSize = settings.ChunksBatchSize;
+        MaxContentLength = settings.MaxContentLengthBytes;
+        SupportedFormats = settings.SupportedFormats;
+        Model = new EmbeddingModel
+        {
+            Id = settings.ModelId,
+            Dimension = settings.Dimension
+        };
+    }
+
+    public bool IsSupportedContentExtraction(string fileTitle)
+    {
+        var ext = FileUtility.GetFileExtension(fileTitle);
+        return SupportedFormats.Contains(ext);
+    }
+    
+    private class Settings
+    {
+        public int ChunkSize { get; init; }
+        public float ChunkOverlap { get; init; }
+        public int ChunksBatchSize { get; init; }
+        public long MaxContentLengthBytes { get; init; }
+        public HashSet<string> SupportedFormats { get; init; }
+        public string ModelId { get; init; }
+        public int Dimension { get; init; }
+    }
 }

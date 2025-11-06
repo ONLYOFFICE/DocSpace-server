@@ -24,44 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Vectorization;
+namespace ASC.Files.Core.Vectorization.Settings;
 
-[Singleton]
-public class VectorizationSettings
+public enum EmbeddingProviderType
 {
-    public float ChunkOverlap { get; init; }
-    public int ChunksBatchSize { get; init; }
-    public long MaxContentLength { get; init; }
-    public HashSet<string> SupportedFormats { get; init; }
-    
-    public VectorizationSettings(IConfiguration configuration)
-    {
-        var settings = configuration.GetSection("ai:vectorization").Get<Settings>() ?? Settings.Default;
-        ChunkOverlap = settings.ChunkOverlap;
-        ChunksBatchSize = settings.ChunksBatchSize;
-        MaxContentLength = settings.MaxContentLengthBytes;
-        SupportedFormats = settings.SupportedFormats;
-    }
+    None,
+    OpenAi,
+    OpenRouter
+}
 
-    public bool IsSupportedContentExtraction(string fileTitle)
-    {
-        var ext = FileUtility.GetFileExtension(fileTitle);
-        return SupportedFormats.Contains(ext);
-    }
+public class EncryptedVectorizationSettings : ISettings<EncryptedVectorizationSettings>
+{
+    public Guid ID => new("{B8A3D0B7-63B0-408C-8CB8-D0213AB3EF83}");
+    public DateTime LastModified { get; set; }
+    public EmbeddingProviderType ProviderType { get; init; }
+    public string Key { get; set; }
     
-    private class Settings
+    public EncryptedVectorizationSettings GetDefault()
     {
-        public float ChunkOverlap { get; init; }
-        public int ChunksBatchSize { get; init; }
-        public long MaxContentLengthBytes { get; init; }
-        public HashSet<string> SupportedFormats { get; init; }
-        
-        internal static Settings Default => new()
+        return new EncryptedVectorizationSettings
         {
-            ChunkOverlap = 0.2f,
-            ChunksBatchSize = 10,
-            MaxContentLengthBytes = 10485760,
-            SupportedFormats = [".txt", ".docx", ".xlsx", ".csv", ".pdf"]
+            ProviderType = EmbeddingProviderType.None,
+            Key = null
         };
     }
 }

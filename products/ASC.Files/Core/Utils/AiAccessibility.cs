@@ -33,7 +33,7 @@ public class AiAccessibility(
     SettingsManager settingsManager,
     IDbContextFactory<FilesDbContext> dbContextFactory)
 {
-    public async Task<bool> IsAiReadyAsync()
+    public async Task<bool> IsAiEnabledAsync()
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         
@@ -45,5 +45,18 @@ public class AiAccessibility(
 
         await using var db = await dbContextFactory.CreateDbContextAsync();
         return await db.AiProviderExistsAsync(tenantId);
+    }
+    
+    public async Task<bool> IsVectorizationEnabledAsync()
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        
+        if (aiGateway.Configured)
+        {
+            return true; // TODO: added TenantWalletService check
+        }
+
+        var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>(tenantId);
+        return settings.ProviderType != EmbeddingProviderType.None;
     }
 }
