@@ -2342,7 +2342,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
     private async Task SetOriginsAsync<T>(Folder<T> parent, List<FileEntry> entries)
     {
-        if (parent.FolderType != FolderType.TRASH || entries.Count == 0)
+        if (parent.FolderType != FolderType.TRASH  || entries.Count == 0)
         {
             return;
         }

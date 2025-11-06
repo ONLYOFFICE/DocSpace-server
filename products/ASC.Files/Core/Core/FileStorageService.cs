@@ -266,6 +266,7 @@ public class FileStorageService //: IFileStorageService
                 parentRoom = !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms && !parent.ProviderEntry ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
 
                 parent.ParentRoomType = parentRoom.FolderType;
+                parent.ParentRoomCreatedBy = parentRoom.CreateBy;
             }
 
             if (parent.RootFolderType == FolderType.RoomTemplates)
@@ -273,6 +274,7 @@ public class FileStorageService //: IFileStorageService
                 parentRoom = !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.RoomTemplates && !parent.ProviderEntry ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
 
                 parent.ParentRoomType = parentRoom.FolderType;
+                parent.ParentRoomCreatedBy = parentRoom.CreateBy;
             }
 
             if (parent.FolderType == FolderType.AiRoom)
@@ -421,6 +423,7 @@ public class FileStorageService //: IFileStorageService
             entries = entries.Select(r =>
             {
                 r.ParentRoomType = parentRoom.FolderType;
+                r.ParentRoomCreatedBy = parentRoom.CreateBy;
                 return r;
             });
         }
@@ -5391,6 +5394,7 @@ public class FileStorageService //: IFileStorageService
             if (room != null)
             {
                 entry.ParentRoomType = room.FolderType;
+                entry.ParentRoomCreatedBy = room.CreateBy;
             }
         }
     }

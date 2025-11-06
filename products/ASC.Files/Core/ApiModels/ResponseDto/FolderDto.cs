@@ -271,11 +271,20 @@ public class FolderDtoHelper(
             {
                 result.ExpirationDate = _apiDateTimeHelper.Get(expirationDate);
             }
-            var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.ParentId);
+
+            var cachedFolder = _daoFactory.GetCacheFolderDao<T>();
+            var parents = await cachedFolder.GetParentFoldersAsync(result.ParentId).ToListAsync();
+            var parent = parents.FirstOrDefault();
             if (!await _fileSecurity.CanReadAsync(parent))
             {
                 result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
                 result.RootFolderType = FolderType.SHARE;
+            }
+            
+            var room = parents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
+            if (room != null)
+            {
+                result.OwnedBy = await employeeWrapperHelper.GetAsync(room.CreateBy);
             }
         }
 

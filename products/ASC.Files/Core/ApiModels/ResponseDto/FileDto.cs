@@ -583,12 +583,19 @@ public class FileDtoHelper(
                 {
                     result.ExpirationDate = _apiDateTimeHelper.Get(expirationDate);
                 }
-
-                var parent = await folderDao.GetFolderAsync(result.FolderId);
+                
+                var parents = await folderDao.GetParentFoldersAsync(result.FolderId).ToListAsync();
+                var parent = parents.FirstOrDefault();
                 if (!await _fileSecurity.CanReadAsync(parent))
                 {
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
                     result.RootFolderType = FolderType.SHARE;
+                }
+            
+                var room = parents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
+                if (room != null)
+                {
+                    result.OwnedBy = await employeeWrapperHelper.GetAsync(room.CreateBy);
                 }
             }
             

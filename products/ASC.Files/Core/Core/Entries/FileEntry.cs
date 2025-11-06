@@ -160,6 +160,11 @@ public abstract class FileEntry : ICloneable
     public FolderType? ParentRoomType { get; set; }
 
     /// <summary>
+    /// Indicates the unique identifier of the user who created the parent room, if applicable.
+    /// </summary>
+    public Guid? ParentRoomCreatedBy { get; set; }
+
+    /// <summary>
     /// The ID of the user who created the root folder of the file entry.
     /// </summary>
     public Guid RootCreateBy { get; set; }
