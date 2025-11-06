@@ -242,13 +242,17 @@ public class FolderDtoHelper(
                      (result.RootFolderType is FolderType.Archive or FolderType.TRASH && result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete) ||
                      await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID)))
             {
-                var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+
                 result.UsedSpace = folder.Counter;
 
-                if (quotaRoomSettings.EnableQuota && result.RootFolderType != FolderType.Archive && result.RootFolderType != FolderType.TRASH)
+                TenantEntityQuotaSettings quotaSettings = folder.FolderType is FolderType.AiRoom
+                ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+
+                if (quotaSettings.EnableQuota && result.RootFolderType != FolderType.Archive && result.RootFolderType != FolderType.TRASH)
                 {
                     result.IsCustomQuota = folder.SettingsQuota > -2;
-                    result.QuotaLimit = folder.SettingsQuota > -2 ? folder.SettingsQuota : quotaRoomSettings.DefaultQuota;
+                    result.QuotaLimit = folder.SettingsQuota > -2 ? folder.SettingsQuota : quotaSettings.DefaultQuota;
                 }
             }
 

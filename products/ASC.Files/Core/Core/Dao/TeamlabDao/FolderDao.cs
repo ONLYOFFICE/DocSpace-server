@@ -366,6 +366,13 @@ internal class FolderDao(
                         UsedSpace = rootFolder.UsedSpace
                     };
                     break;
+                case FolderType.AiAgents:
+                    result.AiAgentsUsedSpace = new FilesStatisticsFolder
+                    {
+                        Title = FilesUCResource.AiAgents,
+                        UsedSpace = rootFolder.UsedSpace
+                    };
+                    break;
             }
         }
         return result;

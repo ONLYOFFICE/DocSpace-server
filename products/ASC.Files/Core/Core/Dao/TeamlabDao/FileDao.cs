@@ -428,15 +428,18 @@ internal class FileDao(
             if (roomId != -1)
             {
                 var currentRoom = await folderDao.GetFolderAsync(roomId);
-                var quotaRoomSettings = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-                if (quotaRoomSettings.EnableQuota)
+
+                TenantEntityQuotaSettings quotaSettings = currentRoom.FolderType is FolderType.AiRoom
+                   ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                   : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                if (quotaSettings.EnableQuota)
                 {
-                    var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : currentRoom.SettingsQuota;
+                    var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : currentRoom.SettingsQuota;
                     if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                     {
                         if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
                         {
-                            throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
+                            throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit, currentRoom.FolderType is FolderType.AiRoom);
                         }
                     }
                 }
@@ -1061,15 +1064,17 @@ internal class FileDao(
         if (toRoomId != -1 && fromRoomId != toRoomId)
         {
             var toRoom = DocSpaceHelper.IsRoom(toFolder.FolderType) ? toFolder : await folderDao.GetFolderAsync(toRoomId);
-            var quotaRoomSettings = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-            if (quotaRoomSettings.EnableQuota)
+            TenantEntityQuotaSettings quotaSettings = toRoom.FolderType is FolderType.AiRoom
+                   ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                   : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            if (quotaSettings.EnableQuota)
             {
-                var roomQuotaLimit = toRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : toRoom.SettingsQuota;
+                var roomQuotaLimit = toRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : toRoom.SettingsQuota;
                 if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                 {
                     if (roomQuotaLimit - toRoom.Counter < fileContentLength)
                     {
-                        throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
+                        throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit, toRoom.FolderType is FolderType.AiRoom);
                     }
                 }
             }

@@ -109,10 +109,12 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
         if (DocSpaceHelper.IsRoom(rootFolder.FolderType) && !rootFolder.ProviderEntry)
         {
-            var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-            if (quotaRoomSettings.EnableQuota)
+            TenantEntityQuotaSettings quotaSettings = rootFolder.FolderType is FolderType.AiRoom
+                   ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                   : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            if (quotaSettings.EnableQuota)
             {
-                var roomQuotaLimit = rootFolder.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : rootFolder.SettingsQuota;
+                var roomQuotaLimit = rootFolder.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : rootFolder.SettingsQuota;
                 if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota && roomQuotaLimit <= rootFolder.Counter)
                 {
                     return false;

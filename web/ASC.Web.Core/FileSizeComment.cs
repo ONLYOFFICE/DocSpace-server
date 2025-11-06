@@ -43,6 +43,10 @@ public class FileSizeComment(SetupInfo setupInfo)
     {
         return $"{Resource.RoomFreeSpaceException} ({FilesSizeToString(size)}).";
     }
+    private static string GetAiAgentFreeSpaceExceptionString(long size)
+    {
+        return $"{Resource.AiAgentFreeSpaceException} ({FilesSizeToString(size)}).";
+    }
 
     private static string GetUserFreeSpaceExceptionString(long size)
     {
@@ -54,9 +58,9 @@ public class FileSizeComment(SetupInfo setupInfo)
         return new TenantQuotaException(GetFileSizeExceptionString(size));
     }
 
-    public static Exception GetRoomFreeSpaceException(long size)
+    public static Exception GetRoomFreeSpaceException(long size, bool isAiAgetn = false)
     {
-        return new TenantQuotaException(GetRoomFreeSpaceExceptionString(size));
+        return new TenantQuotaException(isAiAgetn ? GetAiAgentFreeSpaceExceptionString(size) : GetRoomFreeSpaceExceptionString(size));
     }
 
     public static Exception GetUserFreeSpaceException(long size)

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,51 +24,24 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.ResponseDto;
+namespace ASC.Core.Tenants;
 
 /// <summary>
-/// The file statistics result parameters.
+/// The ai agent quota settings.
 /// </summary>
-public class FilesStatisticsResultDto
+[Serializable]
+public class TenantAiAgentQuotaSettings : TenantEntityQuotaSettings, ISettings<TenantAiAgentQuotaSettings>
 {
-    /// <summary>
-    /// The used space of files in the \"My Documents\" section.
-    /// </summary>
-    public FilesStatisticsFolder MyDocumentsUsedSpace { get; set; }
 
-    /// <summary>
-    /// The used space of files in the \"Trash\" section.
-    /// </summary>
-    public FilesStatisticsFolder TrashUsedSpace { get; set; }
+    [JsonIgnore]
+    public Guid ID
+    {
+        get { return new Guid("{6D0B226C-EF0F-4765-836E-0A08B55DC06C}"); }
+    }
+    public TenantAiAgentQuotaSettings GetDefault()
+    {
+        return new TenantAiAgentQuotaSettings();
+    }
 
-    /// <summary>
-    /// The used space of files in the \"Archive\" section.
-    /// </summary>
-    public FilesStatisticsFolder ArchiveUsedSpace { get; set; }
-
-    /// <summary>
-    /// The used space of files in the \"Rooms\" section.
-    /// </summary>
-    public FilesStatisticsFolder RoomsUsedSpace { get; set; }
-
-    /// <summary>
-    /// The used space of files in the \"AI agents\" section.
-    /// </summary>
-    public FilesStatisticsFolder AiAgentsUsedSpace { get; set; }
-}
-
-/// <summary>
-/// The file statictics folder parameters.
-/// </summary>
-public class FilesStatisticsFolder
-{
-    /// <summary>
-    /// The folder title.
-    /// </summary>
-    public string Title { get; set; }
-
-    /// <summary>
-    /// The used space in the folder.
-    /// </summary>
-    public long UsedSpace { get; set; }
+    public DateTime LastModified { get; set; }
 }
