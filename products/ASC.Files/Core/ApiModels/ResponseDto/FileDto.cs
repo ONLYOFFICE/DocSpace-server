@@ -417,7 +417,6 @@ public class FileDtoHelper(
         result.Locked = file.Locked.NullIfDefault();
         result.LockedBy = file.LockedBy;
         result.Access = file.Access;
-        result.SharedBy = file.SharedBy;
         result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
         result.CustomFilterEnabled = file.CustomFilterEnabled.NullIfDefault();
         result.CustomFilterEnabledBy = file.CustomFilterEnabledBy;

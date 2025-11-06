@@ -56,9 +56,9 @@ public abstract class FileEntryBaseDto
     public FileShare Access { get; set; }
 
     /// <summary>
-    /// The unique identifier of the user who shared the file entry.
+    /// Provides information about the employee who shared the file or folder.
     /// </summary>
-    public Guid? SharedBy { get; set; }
+    public EmployeeDto SharedBy { get; set; }
 
     /// <summary>
     /// Specifies if the file entry is shared via link or not.
@@ -158,7 +158,6 @@ public abstract class FileEntryBaseDto
     {
         Title = entry.Title;
         Access = entry.Access;
-        SharedBy = entry.SharedBy;
         Shared = entry.Shared;
         SharedForUser = entry.SharedForUser;
         ParentShared = entry.ParentShared;
@@ -358,7 +357,7 @@ public class FileEntryDtoHelper(
             Title = entry.Title,
             Access = entry.Access,
             Shared = entry.Shared,
-            SharedBy = entry.SharedBy,
+            SharedBy = entry.SharedBy.HasValue ? await employeeWrapperHelper.GetAsync(entry.SharedBy.Value) : null,
             SharedForUser = entry.SharedForUser,
             ParentShared = entry.ParentShared,
             ShortWebUrl = shortWebUrl,
