@@ -184,7 +184,7 @@ namespace ASC.AI.Api
         /// </short>
         /// <path>api/2.0/ai/agents/agentquota</path>
         /// <collection>list</collection>
-        [SwaggerResponse(200, "List of AI agents with detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
+        [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
         [HttpPut("agents/agentquota")]
         public async IAsyncEnumerable<FolderDto<int>> UpdateAgentsQuota(UpdateRoomsQuotaRequestDto<int> inDto)
         {
@@ -201,11 +201,11 @@ namespace ASC.AI.Api
 
             if (inDto.Quota >= 0)
             {
-                filesMessageService.Send(MessageAction.QuotaPerAiAgentChanged, inDto.Quota.ToString(), agentNames.ToArray());
+                filesMessageService.Send(MessageAction.CustomQuotaPerAiAgentChanged, inDto.Quota.ToString(), agentNames.ToArray());
             }
             else
             {
-                filesMessageService.Send(MessageAction.QuotaPerAiAgentDisabled, string.Join(", ", agentNames.ToArray()));
+                filesMessageService.Send(MessageAction.CustomQuotaPerAiAgentDisabled, string.Join(", ", agentNames.ToArray()));
             }
         }
 
@@ -219,7 +219,7 @@ namespace ASC.AI.Api
         /// <collection>list</collection>
         [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
         [HttpPut("agents/resetquota")]
-        public async IAsyncEnumerable<FolderDto<int>> ResetAIAgentsQuota(UpdateRoomsRoomIdsRequestDto<int> inDto)
+        public async IAsyncEnumerable<FolderDto<int>> ResetAgentsQuota(UpdateRoomsRoomIdsRequestDto<int> inDto)
         {
             var (agentIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
             var agentTitles = new List<string>();
@@ -233,7 +233,7 @@ namespace ASC.AI.Api
                 yield return await folderDtoHelper.GetAsync(agent);
             }
 
-            filesMessageService.Send(MessageAction.CustomQuotaPerRoomDefault, quotaAiAgentSettings.DefaultQuota.ToString(), agentTitles.ToArray());
+            filesMessageService.Send(MessageAction.CustomQuotaPerAiAgentDefault, quotaAiAgentSettings.DefaultQuota.ToString(), agentTitles.ToArray());
         }
     }
 }

@@ -420,6 +420,33 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI agents [{0}]. Set custom storage quota for AI agents : {1}.
+        /// </summary>
+        public static string CustomQuotaPerAiAgentChanged {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerAiAgentChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI agents  [{0}]. Set default storage quota for AI agents : {1}.
+        /// </summary>
+        public static string CustomQuotaPerAiAgentDefault {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerAiAgentDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI agents  [{0}]. Disabled storage quota for AI agents.
+        /// </summary>
+        public static string CustomQuotaPerAiAgentDisabled {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerAiAgentDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Rooms [{0}]. Set custom storage quota for rooms: {1}.
         /// </summary>
         public static string CustomQuotaPerRoomChanged {
@@ -1883,6 +1910,24 @@ namespace ASC.AuditTrail {
         public static string ProductsListUpdated {
             get {
                 return ResourceManager.GetString("ProductsListUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Set default storage quota for AI agents: {0}.
+        /// </summary>
+        public static string QuotaPerAiAgentChanged {
+            get {
+                return ResourceManager.GetString("QuotaPerAiAgentChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disabled default storage quota for AI agents.
+        /// </summary>
+        public static string QuotaPerAiAgentDisabled {
+            get {
+                return ResourceManager.GetString("QuotaPerAiAgentDisabled", resourceCulture);
             }
         }
         
