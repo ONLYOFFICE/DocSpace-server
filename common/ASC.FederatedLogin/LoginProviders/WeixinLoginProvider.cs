@@ -101,6 +101,11 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
         var jProfile = JObject.Parse(openidProfile)
                        ?? throw new Exception("Failed to correctly process the response");
 
+        if (jProfile.Value<int>("errcode") != 0)
+        {
+            throw new Exception($"Failed to parse profile: {jProfile.Value<int>("errcode")} - {jProfile.Value<int>("errmsg")}");
+        }
+
         // No names, no email
         var profile = new LoginProfile
         {
@@ -111,6 +116,8 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
             Provider = ProviderConstants.Weixin
         };
 
-        return profile;
+        return string.IsNullOrWhiteSpace(profile.Id)
+            ? throw new Exception($"Failed to parse profile: no id found")
+            : profile;
     }
 }
