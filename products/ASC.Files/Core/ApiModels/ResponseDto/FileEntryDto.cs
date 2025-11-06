@@ -351,13 +351,15 @@ public class FileEntryDtoHelper(
             }
         }
 
+        var sharedBy = entry.SharedBy ?? entry.ShareRecord?.Owner;
+        
         return new T
         {
             Id = entry.Id,
             Title = entry.Title,
             Access = entry.Access,
             Shared = entry.Shared,
-            SharedBy = entry.SharedBy.HasValue ? await employeeWrapperHelper.GetAsync(entry.SharedBy.Value) : null,
+            SharedBy = sharedBy.HasValue ? await employeeWrapperHelper.GetAsync(sharedBy.Value) : null,
             SharedForUser = entry.SharedForUser,
             ParentShared = entry.ParentShared,
             ShortWebUrl = shortWebUrl,
