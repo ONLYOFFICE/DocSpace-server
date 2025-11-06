@@ -91,7 +91,7 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
 
     private LoginProfile RequestProfile(string accessToken)
     {
-        var openidProfile = _requestHelper.PerformRequest(ProfileUrl, headers: new Dictionary<string, string> { { "Authorization", "Bearer " + accessToken } });
+        var openidProfile = _requestHelper.PerformRequest($"{ProfileUrl}?access_token={accessToken}");
         var loginProfile = ProfileFromWeixin(openidProfile);
         return loginProfile;
     }
