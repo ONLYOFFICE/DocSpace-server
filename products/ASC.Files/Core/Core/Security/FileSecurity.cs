@@ -55,7 +55,8 @@ public class FileSecurity(
     ExternalShare externalShare,
     AuthManager authManager,
     VectorizationGlobalSettings vectorizationGlobalSettings,
-    VectorizationHelper vectorizationHelper)
+    VectorizationHelper vectorizationHelper,
+    AiAccessibility aiAccessibility)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -1097,6 +1098,11 @@ public class FileSecurity(
                 return false;
             }
 
+            if (action is FilesSecurityActions.Vectorization && !await aiAccessibility.IsVectorizationEnabledAsync())
+            {
+                return false;
+            }
+
             if (action is FilesSecurityActions.Delete && 
                 file is { VectorizationStatus: VectorizationStatus.InProgress } && 
                 await vectorizationHelper.InProcessAsync(file.Id))
@@ -1160,10 +1166,19 @@ public class FileSecurity(
                 return false;
             }
 
-            if (folder.FolderType == FolderType.Knowledge && 
-                action is not (FilesSecurityActions.Read or FilesSecurityActions.MoveTo or FilesSecurityActions.CopyTo or FilesSecurityActions.Create))
+            if (folder.FolderType == FolderType.Knowledge)
             {
-                return false;
+                if (action is not (FilesSecurityActions.Read or FilesSecurityActions.MoveTo
+                    or FilesSecurityActions.CopyTo or FilesSecurityActions.Create))
+                {
+                    return false;
+                }
+                
+                if (action is FilesSecurityActions.CopyTo or FilesSecurityActions.MoveTo or FilesSecurityActions.Create &&
+                    !await aiAccessibility.IsVectorizationEnabledAsync())
+                {
+                    return false;
+                }
             }
 
             if (folder.FolderType == FolderType.ResultStorage 
