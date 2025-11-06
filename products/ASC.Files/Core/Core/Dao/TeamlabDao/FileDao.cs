@@ -47,7 +47,6 @@ internal class FileDao(
         GlobalStore globalStore,
         GlobalFolder globalFolder,
         Global global,
-        IDaoFactory daoFactory,
         ChunkedUploadSessionHolder chunkedUploadSessionHolder,
         SelectorFactory selectorFactory,
         CrossDao crossDao,
@@ -59,7 +58,7 @@ internal class FileDao(
         StorageFactory storageFactory,
         TenantQuotaController tenantQuotaController,
         IDistributedLockProvider distributedLockProvider,
-        FileStorageService fileStorageService,
+        //FileStorageService fileStorageService,
         SocketManager socketManager,
         SecurityContext securityContext,
         TempStream tempStream,
@@ -405,8 +404,7 @@ internal class FileDao(
         }
 
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var folderDao = daoFactory.GetFolderDao<int>();
-        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = _serviceProvider.GetService<IFolderDao<int>>();
         var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
 
         var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
@@ -608,7 +606,7 @@ internal class FileDao(
                         var currentRoom = await folderDao.GetFolderAsync(roomId);
                         if (currentRoom.FolderType == FolderType.FillingFormsRoom && currentRoom.RootFolderType != FolderType.RoomTemplates)
                         {
-                            var fileProp = await fileDao.GetProperties(file.Id);
+                            var fileProp = await GetProperties(file.Id);
                             var extension = FileUtility.GetFileExtension(file.Title);
 
                             if (file.IsForm || (extension is ".csv" or ".xlsx" && fileProp != null && Equals(fileProp.FormFilling.ResultsFolderId, file.ParentId)))
@@ -639,13 +637,13 @@ internal class FileDao(
                                     
                                     properties.FormFilling.StartFilling = true;
                                     properties.FormFilling.OriginalFormId = file.Id;
-                                    await fileDao.SaveProperties(file.Id, properties);
-                                    
-                                    var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
-                                    if (file.IsForm)
-                                    {
-                                        await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
-                                    }
+                                    await SaveProperties(file.Id, properties);
+                                        //TODO                                    
+                                    // var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                                    // if (file.IsForm)
+                                    // {
+                                    //     await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
+                                    // }
                                 }
                             }
                             else
@@ -916,7 +914,7 @@ internal class FileDao(
 
     private async Task SaveFileStreamAsync(File<int> file, Stream stream, Folder<int> currentFolder = null)
     {
-        var folderDao = daoFactory.GetFolderDao<int>();
+        var folderDao = _serviceProvider.GetService<IFolderDao<int>>();
 
         await (await globalStore.GetStoreAsync()).SaveAsync(string.Empty, GetUniqFilePath(file), file.GetFileQuotaOwner(), stream, file.Title);
 
@@ -1037,8 +1035,8 @@ internal class FileDao(
             return 0;
         }
 
-        var tagDao = daoFactory.GetTagDao<int>();
-        var folderDao = daoFactory.GetFolderDao<int>();
+        var folderDao = _serviceProvider.GetService<IFolderDao<int>>();
+        var tagDao = _serviceProvider.GetService<ITagDao<int>>();
         var toFolder = await folderDao.GetFolderAsync(toFolderId);
         var file = await GetFileAsync(fileId);
         var fromFolder = await folderDao.GetFolderAsync(file.ParentId);
@@ -1051,7 +1049,7 @@ internal class FileDao(
         var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom);
         var fromRoomTag = await fromRoomTags.FirstOrDefaultAsync();
 
-        var trashId = await globalFolder.GetFolderTrashAsync(daoFactory);
+        var trashId = await globalFolder.GetFolderTrashAsync(folderDao);
 
         var toUser = await _userManager.GetUsersAsync(toFolder.RootCreateBy);
         var fromUser = await _userManager.GetUsersAsync(fromFolder.RootCreateBy);
@@ -2946,7 +2944,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         GlobalStore globalStore,
         GlobalFolder globalFolder,
         Global global,
-        IDaoFactory daoFactory,
         ChunkedUploadSessionHolder chunkedUploadSessionHolder,
         SelectorFactory selectorFactory,
         CrossDao crossDao,
@@ -2958,7 +2955,7 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         StorageFactory storageFactory,
         TenantQuotaController tenantQuotaController,
         IDistributedLockProvider distributedLockProvider,
-        FileStorageService fileStorageService,
+        //FileStorageService fileStorageService,
         SocketManager socketManager,
         SecurityContext securityContext,
         TempStream tempStream,
@@ -2987,7 +2984,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         globalStore,
         globalFolder,
         global,
-        daoFactory,
         chunkedUploadSessionHolder,
         selectorFactory,
         crossDao,
@@ -2999,7 +2995,7 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         storageFactory,
         tenantQuotaController,
         distributedLockProvider,
-        fileStorageService,
+       // fileStorageService,
         socketManager,
         securityContext,
         tempStream,

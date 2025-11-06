@@ -29,9 +29,7 @@ namespace ASC.Files.Core.Thirdparty;
 [Scope]
 internal class CrossDao //Additional SharpBox
 (IServiceProvider serviceProvider,
-        SetupInfo setupInfo,
-        FileConverter fileConverter,
-        SocketManager socketManager)
+        SetupInfo setupInfo)
 {
     public async Task<File<TTo>> PerformCrossDaoFileCopyAsync<TFrom, TTo>(
         TFrom fromFileId, IFileDao<TFrom> fromFileDao, Func<TFrom, TFrom> fromConverter,
@@ -80,10 +78,7 @@ internal class CrossDao //Additional SharpBox
 
         fromFile.Id = fromConverter(fromFile.Id);
 
-        var mustConvert = !string.IsNullOrEmpty(fromFile.ConvertedType);
-        await using (var fromFileStream = mustConvert
-                         ? await fileConverter.ExecAsync(fromFile)
-                         : await fromFileDao.GetFileStreamAsync(fromFile))
+        await using (var fromFileStream =  await fromFileDao.GetFileStreamAsync(fromFile))
         {
             toFile.ContentLength = fromFileStream.CanSeek ? fromFileStream.Length : fromFile.ContentLength;
             toFile = await toFileDao.SaveFileAsync(toFile, fromFileStream);
@@ -157,7 +152,7 @@ internal class CrossDao //Additional SharpBox
 
         if (toFolder == null)
         {
-            await socketManager.CreateFolderAsync(await toFolderDao.GetFolderAsync(toConverter(toFolderId)));
+            //await socketManager.CreateFolderAsync(await toFolderDao.GetFolderAsync(toConverter(toFolderId)));
         }
 
         var foldersToCopy = await fromFolderDao.GetFoldersAsync(fromConverter(fromFolderId)).ToListAsync();
@@ -235,7 +230,7 @@ internal class CrossDao //Additional SharpBox
             {
                 var id = fromConverter(fromFolderId);
                 var folder = await fromFolderDao.GetFolderAsync(id);
-                await socketManager.DeleteFolder(folder, action: async () => await fromFolderDao.DeleteFolderAsync(id));
+                //await socketManager.DeleteFolder(folder, action: async () => await fromFolderDao.DeleteFolderAsync(id));
             }
         }
 

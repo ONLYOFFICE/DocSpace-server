@@ -33,8 +33,8 @@ public class BaseIndexerFile(Client client,
         TenantManager tenantManager,
         BaseIndexerHelper baseIndexerHelper,
         Settings settings,
-        IServiceProvider serviceProvider,
-        IDaoFactory daoFactory)
+        IServiceProvider serviceProvider)
+        //IDaoFactory daoFactory)
     : BaseIndexer<DbFile>(client, log, dbContextManager, tenantManager, baseIndexerHelper, settings, serviceProvider)
 {
     protected override async Task<bool> BeforeIndexAsync(DbFile data)
@@ -44,7 +44,7 @@ public class BaseIndexerFile(Client client,
             return false;
         }
 
-        if (daoFactory.GetFileDao<int>() is FileDao fileDao)
+        if (serviceProvider.GetService<IFileDao<int>>() is FileDao fileDao)
         {
             await fileDao.InitDocumentAsync(data, data.TenantId);
         }

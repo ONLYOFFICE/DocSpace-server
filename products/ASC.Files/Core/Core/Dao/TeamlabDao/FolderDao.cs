@@ -38,7 +38,7 @@ internal class FolderDao(
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider,
-        IDaoFactory daoFactory,
+        ITagDao<int> tagDao,
         SelectorFactory selectorFactory,
         CrossDao crossDao,
         FolderMapper mapper,
@@ -960,7 +960,7 @@ internal class FolderDao(
         var currentAccount = _authContext.CurrentAccount.ID;
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
-        var trashIdTask = globalFolder.GetFolderTrashAsync(daoFactory);
+        var trashIdTask = globalFolder.GetFolderTrashAsync(this);
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
@@ -990,7 +990,6 @@ internal class FolderDao(
             }
 
             var trashId = await trashIdTask;
-            var tagDao = daoFactory.GetTagDao<int>();
             var toFolder = await GetFolderAsync(toFolderId);
             var (roomId, _, _) = await GetParentRoomInfoFromFileEntryAsync(folder);
             var (toFolderRoomId, _, _) = await GetParentRoomInfoFromFileEntryAsync(toFolder);
@@ -1070,9 +1069,9 @@ internal class FolderDao(
     public async Task<string> MoveFolderAsync(int folderId, string toFolderId, CancellationToken? cancellationToken)
     {
         var toSelector = selectorFactory.GetSelector(toFolderId);
-
+//TODO
         var moved = await crossDao.PerformCrossDaoFolderCopyAsync(
-            folderId, this, daoFactory.GetFileDao<int>(), r => r,
+            folderId, this, null, r => r,
             toFolderId, toSelector.GetFolderDao(toFolderId), toSelector.GetFileDao(toFolderId), toSelector.ConvertId,
             true, cancellationToken)
             ;
@@ -1126,7 +1125,6 @@ internal class FolderDao(
         copy.SettingsDenyDownload = folder.SettingsDenyDownload;
         copy.SettingsHasLogo = folder.SettingsHasLogo;
         copy = await GetFolderAsync(await SaveFolderAsync(copy));
-        var tagDao = daoFactory.GetTagDao<int>();
         var tags = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, TagType.Custom).ToListAsync();
         foreach (var t in tags)
         {
@@ -1141,9 +1139,9 @@ internal class FolderDao(
     public async Task<Folder<string>> CopyFolderAsync(int folderId, string toFolderId, CancellationToken? cancellationToken)
     {
         var toSelector = selectorFactory.GetSelector(toFolderId);
-
+//TODO
         var moved = await crossDao.PerformCrossDaoFolderCopyAsync(
-            folderId, this, daoFactory.GetFileDao<int>(), r => r,
+            folderId, this, null, r => r,
             toFolderId, toSelector.GetFolderDao(toFolderId), toSelector.GetFileDao(toFolderId), toSelector.ConvertId,
             false, cancellationToken)
             ;
@@ -2330,7 +2328,7 @@ internal class CacheFolderDao(
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
-    IDaoFactory daoFactory,
+    ITagDao<int> tagDao,
     SelectorFactory selectorFactory,
     CrossDao crossDao,
     FolderMapper mapper,
@@ -2349,7 +2347,7 @@ internal class CacheFolderDao(
         settingsManager,
         authContext,
         serviceProvider,
-        daoFactory,
+        tagDao,
         selectorFactory,
         crossDao,
         mapper,

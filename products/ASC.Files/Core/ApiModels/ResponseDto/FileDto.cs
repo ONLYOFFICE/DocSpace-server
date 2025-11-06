@@ -240,7 +240,7 @@ public class FileDtoHelper(
         
         var result = await GetFileWrapperAsync(file, order, expiration, contextFolder);
         
-        result.ViewAccessibility = await fileUtility.GetAccessibility(file);
+        result.ViewAccessibility = await fileUtility.GetAccessibility(file, _daoFactory.GetCacheFolderDao<T>());
         result.AvailableShareRights =  (await _fileSecurity.GetAccesses(file)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
         result.VectorizationStatus = file.VectorizationStatus;
         

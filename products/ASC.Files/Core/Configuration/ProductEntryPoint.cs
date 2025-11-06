@@ -289,7 +289,7 @@ public class ProductEntryPoint : Product
                 result.TryAdd(record.EntryId, false);
             }
         }
-        var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
+        var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(folderDao);
 
         var myRooms = await folderDao.GetRoomsAsync(null, null, null, userId, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, new List<int> { virtualRoomsFolderId }).ToListAsync();
 
@@ -301,7 +301,7 @@ public class ProductEntryPoint : Product
 
         if (isDocSpaceAdmin)
         {
-            var archiveFolderId = await _globalFolder.GetFolderArchiveAsync(_daoFactory);
+            var archiveFolderId = await _globalFolder.GetFolderArchiveAsync(folderDao);
 
             var rooms = await folderDao.GetRoomsAsync(new List<int> { archiveFolderId }, null, null, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
 

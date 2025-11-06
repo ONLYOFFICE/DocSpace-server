@@ -58,7 +58,7 @@ public class CountRoomCheckerStatistic(IServiceProvider serviceProvider) : ITena
         var globalFolder = serviceProvider.GetService<GlobalFolder>();
         var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
 
-        var parentId = await globalFolder.GetFolderVirtualRoomsAsync(daoFactory, false);
+        var parentId = await globalFolder.GetFolderVirtualRoomsAsync(folderDao, false);
         if (parentId == 0)
         {
             return 0;

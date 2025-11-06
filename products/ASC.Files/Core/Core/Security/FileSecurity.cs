@@ -44,6 +44,7 @@ public class FileSecurityCommon(UserManager userManager, WebItemSecurity webItem
 public class FileSecurity(
     IHttpContextAccessor httpContextAccessor,
     IDaoFactory daoFactory,
+    IFolderDao<int> folderDaoInternal,
     UserManager userManager,
     TenantManager tenantManager,
     AuthContext authContext,
@@ -1351,7 +1352,7 @@ public class FileSecurity(
                     return false;
                 }
 
-                var myTrashId = await globalFolder.GetFolderTrashAsync(daoFactory);
+                var myTrashId = await globalFolder.GetFolderTrashAsync(folderDaoInternal);
                 if (!Equals(myTrashId, 0))
                 {
                     return Equals(e.RootId, myTrashId) && (folder == null || action != FilesSecurityActions.Delete || !Equals(e.Id, myTrashId));
@@ -2472,11 +2473,11 @@ public class FileSecurity(
 
         var rootFoldersIds = searchArea switch
         {
-            SearchArea.Active => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
-            SearchArea.Archive => [await globalFolder.GetFolderArchiveAsync(daoFactory)],
-            SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
-            SearchArea.AiAgents => [await globalFolder.GetFolderAiAgentsAsync(daoFactory)],
-            _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
+            SearchArea.Active => [await globalFolder.GetFolderVirtualRoomsAsync(folderDao)],
+            SearchArea.Archive => [await globalFolder.GetFolderArchiveAsync(folderDao)],
+            SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(folderDao)],
+            SearchArea.AiAgents => [await globalFolder.GetFolderAiAgentsAsync(folderDao)],
+            _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(folderDao), await globalFolder.GetFolderArchiveAsync(folderDao) }
         };
 
         var roomsEntries = storageFilter == StorageFilter.ThirdParty ?
@@ -2574,11 +2575,11 @@ public class FileSecurity(
 
         var rootFoldersIds = searchArea switch
         {
-            SearchArea.Active => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
-            SearchArea.Archive => [await globalFolder.GetFolderArchiveAsync(daoFactory)],
-            SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
-            SearchArea.AiAgents => [await globalFolder.GetFolderAiAgentsAsync(daoFactory)],
-            _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
+            SearchArea.Active => [await globalFolder.GetFolderVirtualRoomsAsync(folderDao)],
+            SearchArea.Archive => [await globalFolder.GetFolderArchiveAsync(folderDao)],
+            SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(folderDao)],
+            SearchArea.AiAgents => [await globalFolder.GetFolderAiAgentsAsync(folderDao)],
+            _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(folderDao), await globalFolder.GetFolderArchiveAsync(folderDao) }
         };
 
         var rooms = storageFilter == StorageFilter.ThirdParty
@@ -2726,7 +2727,7 @@ public class FileSecurity(
         if (filterType != FilterType.FoldersOnly)
         {
             var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
-            var share = await globalFolder.GetFolderShareAsync<T>(daoFactory);
+            var share = await globalFolder.GetFolderShareAsync<T>(folderDaoInternal);
 
             await foreach (var x in files)
             {
@@ -2749,7 +2750,7 @@ public class FileSecurity(
                 folders = FilterReadAsync(folders);
             }
 
-            var share = await globalFolder.GetFolderShareAsync<T>(daoFactory);
+            var share = await globalFolder.GetFolderShareAsync<T>(folderDaoInternal);
 
             await foreach (var folder in folders)
             {
@@ -2888,7 +2889,7 @@ public class FileSecurity(
         if (filterType != FilterType.FoldersOnly)
         {
             var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
-            var privateFolder = await globalFolder.GetFolderPrivacyAsync<T>(daoFactory);
+            var privateFolder = await globalFolder.GetFolderPrivacyAsync<T>(folderDaoInternal);
 
             await foreach (var x in files)
             {
@@ -2911,7 +2912,7 @@ public class FileSecurity(
                 folders = FilterReadAsync(folders);
             }
 
-            var privacyFolder = await globalFolder.GetFolderPrivacyAsync<T>(daoFactory);
+            var privacyFolder = await globalFolder.GetFolderPrivacyAsync<T>(folderDaoInternal);
 
             await foreach (var folder in folders)
             {

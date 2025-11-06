@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.Security;
 
 [Scope]
-public class FileValidator(FileSecurity fileSecurity, IDaoFactory daoFactory) : IDataStoreValidator
+public class FileValidator(FileSecurity fileSecurity, IFileDao<int> fileDao, ISecurityDao<string> securityDao) : IDataStoreValidator
 {
     public async Task<bool> Validate(string path)
     {
@@ -35,7 +35,7 @@ public class FileValidator(FileSecurity fileSecurity, IDaoFactory daoFactory) : 
 
         if (FileDao.TryGetFileId(path, out var fileId))
         {
-            var file = await daoFactory.GetFileDao<int>().GetFileAsync(fileId);
+            var file = await fileDao.GetFileAsync(fileId);
             if (file == null)
             {
                 return false;
@@ -50,7 +50,7 @@ public class FileValidator(FileSecurity fileSecurity, IDaoFactory daoFactory) : 
             return true;
         }
 
-        var record = await daoFactory.GetSecurityDao<string>().GetSharesAsync([id]).FirstOrDefaultAsync();
+        var record = await securityDao.GetSharesAsync([id]).FirstOrDefaultAsync();
         if (record is { IsLink: true, Options: not null })
         {
             return !record.Options.DenyDownload;

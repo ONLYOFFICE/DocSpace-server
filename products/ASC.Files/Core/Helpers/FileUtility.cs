@@ -167,8 +167,7 @@ public enum Accessibility
 [Scope]
 public class FileUtility(
         FileUtilityConfiguration fileUtilityConfiguration,
-        FilesLinkUtility filesLinkUtility,
-        DaoFactory daoFactory)
+        FilesLinkUtility filesLinkUtility)
 {
     #region method
 
@@ -281,7 +280,7 @@ public class FileUtility(
         return FileType.Unknown;
     }
 
-    public async Task<IDictionary<Accessibility, bool>> GetAccessibility<T>(File<T> file)
+    public async Task<IDictionary<Accessibility, bool>> GetAccessibility<T>(File<T> file, IFolderDao<T>  folderDao)
     {
         var fileName = file.Title;
 
@@ -299,7 +298,7 @@ public class FileUtility(
                 Accessibility.WebCustomFilterEditing => CanWebCustomFilterEditing(fileName),
                 Accessibility.WebRestrictedEditing => CanWebRestrictedEditing(fileName),
                 Accessibility.WebComment => CanWebComment(fileName),
-                Accessibility.CanConvert => await CanConvert(file),
+                Accessibility.CanConvert => await CanConvert(file, folderDao),
                 Accessibility.MustConvert => MustConvert(fileName),
                 _ => false
             };
@@ -364,9 +363,8 @@ public class FileUtility(
         return ExtsWebCommented.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase)) && CanWebEdit(fileName);
     }
 
-    public async Task<bool> CanConvert<T>(File<T> file)
+    public async Task<bool> CanConvert<T>(File<T> file, IFolderDao<T> folderDao)
     {
-        var folderDao = daoFactory.GetCacheFolderDao<T>();
         if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
         {
             return false;

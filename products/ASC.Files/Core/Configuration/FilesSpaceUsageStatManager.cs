@@ -35,7 +35,7 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
         CommonLinkUtility commonLinkUtility,
         GlobalFolderHelper globalFolderHelper,
         PathProvider pathProvider,
-        IDaoFactory daoFactory,
+        IFolderDao<int> daoFactory,
         GlobalFolder globalFolder)
     : SpaceUsageStatManager, IUserSpaceUsage
 {

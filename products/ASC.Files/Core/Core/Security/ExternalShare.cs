@@ -28,7 +28,7 @@ namespace ASC.Files.Core.Security;
 
 [Scope]
 public class ExternalShare(
-    IDaoFactory daoFactory,
+    ISecurityDao<string> securityDao,
     CookiesManager cookiesManager,
     IHttpContextAccessor httpContextAccessor,
     BaseCommonLinkUtility commonLinkUtility,
@@ -81,7 +81,7 @@ public class ExternalShare(
 
     public async Task<Status> ValidateAsync(Guid linkId, bool isAuthenticated)
     {
-        var record = await daoFactory.GetSecurityDao<string>().GetSharesAsync([linkId]).FirstOrDefaultAsync();
+        var record = await securityDao.GetSharesAsync([linkId]).FirstOrDefaultAsync();
 
         return record == null ? Status.Invalid : await ValidateRecordAsync(record, null, isAuthenticated);
     }

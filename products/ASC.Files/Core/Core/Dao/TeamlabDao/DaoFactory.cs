@@ -27,49 +27,169 @@
 namespace ASC.Files.Core.Data;
 
 [Scope(typeof(IDaoFactory))]
-public class DaoFactory(IServiceProvider serviceProvider, IProviderDao providerDao) : IDaoFactory
+public class DaoFactory(IDaoFactory<string> daoFactoryThirdparty, IDaoFactory<int> daoFactoryInternal, IProviderDao providerDao) : IDaoFactory
 {
     public IProviderDao ProviderDao { get; } = providerDao;
 
     public IFileDao<T> GetFileDao<T>()
     {
-        return serviceProvider.GetService<IFileDao<T>>();
+        if (typeof(T) == typeof(int))
+        {
+            return (IFileDao<T>)daoFactoryInternal.FileDao;
+        }
+        if (typeof(T) == typeof(string))
+        {
+            return (IFileDao<T>)daoFactoryThirdparty.FileDao;
+        }
+        return null;
     }
 
     public IFileDao<T> GetCacheFileDao<T>()
-    {
-        return serviceProvider.GetService<ICacheFileDao<T>>() ??
-               serviceProvider.GetService<IFileDao<T>>();
+    {        
+        if (typeof(T) == typeof(int))
+        {
+            return (IFileDao<T>)daoFactoryInternal.CacheFileDao ?? GetFileDao<T>();
+        }
+        if (typeof(T) == typeof(string))
+        {
+            return (IFileDao<T>)daoFactoryThirdparty.CacheFileDao ?? GetFileDao<T>();
+        }
+        return null;
     }
 
     public IFolderDao<T> GetFolderDao<T>()
     {
-        return serviceProvider.GetService<IFolderDao<T>>();
+        if (typeof(T) == typeof(int))
+        {
+            return (IFolderDao<T>)daoFactoryInternal.FolderDao;
+        }
+        if (typeof(T) == typeof(string))
+        {
+            return (IFolderDao<T>)daoFactoryThirdparty.FolderDao;
+        }
+        return null;
     }
 
     public IFolderDao<T> GetCacheFolderDao<T>()
     {
-        return serviceProvider.GetService<ICacheFolderDao<T>>() ??
-               serviceProvider.GetService<IFolderDao<T>>();
+        if (typeof(T) == typeof(int))
+        {
+            return (IFolderDao<T>)daoFactoryInternal.CacheFolderDao ?? GetFolderDao<T>();
+        }
+        if (typeof(T) == typeof(string))
+        {
+            return (IFolderDao<T>)daoFactoryThirdparty.CacheFolderDao ?? GetFolderDao<T>();
+        }
+        return null;
     }
 
     public ITagDao<T> GetTagDao<T>()
     {
-        return serviceProvider.GetService<ITagDao<T>>();
+        if (typeof(T) == typeof(int))
+        {
+            return (ITagDao<T>)daoFactoryInternal.TagDao;
+        }
+        if (typeof(T) == typeof(string))
+        {
+            return (ITagDao<T>)daoFactoryThirdparty.TagDao;
+        }
+        
+        return null;
     }
 
     public ISecurityDao<T> GetSecurityDao<T>()
     {
-        return serviceProvider.GetService<ISecurityDao<T>>();
+        if (typeof(T) == typeof(int))
+        {
+            return (ISecurityDao<T>)daoFactoryInternal.SecurityDao;
+        }
+        if (typeof(T) == typeof(string))
+        {
+            return (ISecurityDao<T>)daoFactoryThirdparty.SecurityDao;
+        }
+        return null;
     }
 
     public ILinkDao<T> GetLinkDao<T>()
     {
-        return serviceProvider.GetService<ILinkDao<T>>();
+        if (typeof(T) == typeof(int))
+        {
+            return (ILinkDao<T>)daoFactoryInternal.LinkDao;
+        }
+        if (typeof(T) == typeof(string))
+        {
+            return (ILinkDao<T>)daoFactoryThirdparty.LinkDao;
+        }
+        return null;
     }
 
     public IMappingId<T> GetMapping<T>()
     {
-        return serviceProvider.GetService<IMappingId<T>>();
+        if (typeof(T) == typeof(int))
+        {
+            return (IMappingId<T>)daoFactoryInternal.Mapping;
+        }
+        if (typeof(T) == typeof(string))
+        {
+            return (IMappingId<T>)daoFactoryThirdparty.Mapping;
+        }
+        return null;
     }
+}
+
+[Scope(typeof(IDaoFactory<int>), GenericArguments = [typeof(int)])]
+[Scope(typeof(IDaoFactory<string>), GenericArguments = [typeof(string)])]
+public class DaoFactory<T> : IDaoFactory<T>
+{
+    public DaoFactory(
+        IFileDao<T> fileDao,
+        IProviderDao providerDao,
+        IFolderDao<T> folderDao,
+        ICacheFolderDao<T> cacheFolderDao,
+        ICacheFileDao<T> cacheFileDao,
+        ITagDao<T> tagDao,
+        ISecurityDao<T> securityDao,
+        ILinkDao<T> linkDao,
+        IMappingId<T> mapping)
+    {
+        ProviderDao = providerDao;
+        FolderDao = folderDao;
+        CacheFolderDao = cacheFolderDao;
+        FileDao = fileDao;
+        CacheFileDao = cacheFileDao;
+        TagDao = tagDao;
+        SecurityDao = securityDao;
+        LinkDao = linkDao;
+        Mapping = mapping;
+    }
+    
+    public DaoFactory(
+        IFileDao<T> fileDao,
+        IProviderDao providerDao,
+        IFolderDao<T> folderDao,
+        ITagDao<T> tagDao,
+        ISecurityDao<T> securityDao,
+        ILinkDao<T> linkDao,
+        IMappingId<T> mapping)
+    {
+        ProviderDao = providerDao;
+        FolderDao = folderDao;
+        CacheFolderDao = folderDao;
+        FileDao = fileDao;
+        CacheFileDao = fileDao;
+        TagDao = tagDao;
+        SecurityDao = securityDao;
+        LinkDao = linkDao;
+        Mapping = mapping;
+    }
+
+    public IProviderDao ProviderDao { get; }
+    public IFolderDao<T> FolderDao { get; }
+    public IFolderDao<T> CacheFolderDao { get; }
+    public IFileDao<T> FileDao { get; }
+    public IFileDao<T> CacheFileDao { get; }
+    public ITagDao<T> TagDao { get; }
+    public ISecurityDao<T> SecurityDao { get; }
+    public ILinkDao<T> LinkDao { get; }
+    public IMappingId<T> Mapping { get; }
 }

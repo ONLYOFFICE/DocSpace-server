@@ -49,6 +49,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
     protected override async Task<File<int>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData)
     {
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
+        var folderDaoInternal = serviceProvider.GetService<IFolderDao<int>>();
         var clientFactory = serviceProvider.GetService<IHttpClientFactory>();
         var socketManager = serviceProvider.GetService<SocketManager>();
         var globalFolder = serviceProvider.GetService<GlobalFolder>();
@@ -56,7 +57,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         var file = serviceProvider.GetService<File<int>>();
 
         file.CreateBy = _userId;
-        file.ParentId = await globalFolder.GetFolderMyAsync(daoFactory);
+        file.ParentId = await globalFolder.GetFolderMyAsync(folderDaoInternal);
         file.Title = inputData.OutputFileName;
 
         using var request = new HttpRequestMessage();

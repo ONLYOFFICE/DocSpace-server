@@ -85,7 +85,8 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
         var scopeClass = serviceScope.ServiceProvider.GetService<FileMarkAsReadOperationScope>();
         var filesMessageService = serviceScope.ServiceProvider.GetRequiredService<FilesMessageService>();
         var fileSecurity = serviceScope.ServiceProvider.GetRequiredService<FileSecurity>();
-        var (fileMarker, globalFolder, daoFactory, settingsManager) = scopeClass;
+        var folderDao = serviceScope.ServiceProvider.GetRequiredService<IFolderDao<int>>();
+        var (fileMarker, globalFolder, _, settingsManager) = scopeClass;
         var entries = Enumerable.Empty<FileEntry<T>>();
         if (Folders.Count > 0)
         {
@@ -119,16 +120,16 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
 
         var rootIds = new List<int>
             {
-                await globalFolder.GetFolderMyAsync(daoFactory),
-                await globalFolder.GetFolderCommonAsync(daoFactory),
-                await globalFolder.GetFolderShareAsync(daoFactory),
-                await globalFolder.GetFolderProjectsAsync(daoFactory),
-                await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)
+                await globalFolder.GetFolderMyAsync(folderDao),
+                await globalFolder.GetFolderCommonAsync(folderDao),
+                await globalFolder.GetFolderShareAsync(folderDao),
+                await globalFolder.GetFolderProjectsAsync(folderDao),
+                await globalFolder.GetFolderVirtualRoomsAsync(folderDao)
             };
 
         if (await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
         {
-            rootIds.Add(await globalFolder.GetFolderPrivacyAsync(daoFactory));
+            rootIds.Add(await globalFolder.GetFolderPrivacyAsync(folderDao));
         }
 
         var newrootfolder = new List<string>();

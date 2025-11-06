@@ -39,3 +39,16 @@ public interface IDaoFactory
     ILinkDao<T> GetLinkDao<T>();
     IMappingId<T> GetMapping<T>();
 }
+
+public interface IDaoFactory<T>
+{
+    IProviderDao ProviderDao { get; }
+    IFolderDao<T> FolderDao { get; }
+    IFolderDao<T> CacheFolderDao { get; }
+    IFileDao<T> FileDao { get; }
+    IFileDao<T> CacheFileDao { get; }
+    ITagDao<T> TagDao { get; }
+    ISecurityDao<T> SecurityDao { get; }
+    ILinkDao<T> LinkDao { get; }
+    IMappingId<T> Mapping { get; }
+}
