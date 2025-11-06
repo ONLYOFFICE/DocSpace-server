@@ -227,10 +227,19 @@ public class AiProviderService(
     private async Task ThrowIfNotValidAsync(string url, string key, ProviderType type)
     {
         var modelClient = modelClientFactory.Create(type);
-        var models = await modelClient.GetModelsAsync(url, key, null);
-        if (models.Count == 0)
+
+        try
         {
-            throw new ArgumentException("Invalid provider");
+            _ = await modelClient.GetModelsAsync(url, key, null);
+        }
+        catch (HttpRequestException httpException)
+        {
+            if (httpException.StatusCode is HttpStatusCode.Unauthorized)
+            {
+                throw new ArgumentException(ErrorMessages.InvalidProviderKey);
+            }
+
+            throw new ArgumentException(ErrorMessages.InvalidProviderUrl);
         }
     }
 }
