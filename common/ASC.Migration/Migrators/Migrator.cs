@@ -518,9 +518,9 @@ public abstract class Migrator(
                         {
                             await SecurityContext.AuthenticateMeAsync(user.Info.Id);
                         }
+
                         var room = await FileStorageService.CreateRoomAsync($"{matchingFilesIds[key].Title}", RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
 
-                        orderedFolders = storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
                         matchingRoomIds.Add(security.EntryId, room);
                         localMatchingRoomIds.Add(security.EntryId, room);
                         Log(string.Format(MigrationResource.CreateShareRoom, room.Title));
@@ -539,7 +539,7 @@ public abstract class Migrator(
                             var collection = new AceCollection<int>
                             {
                                 Files = [],
-                                Folders = new List<int> { matchingRoomIds[security.EntryId].Id },
+                                Folders = new List<int> { room.Id },
                                 Aces = aceList,
                                 Message = null
                             };
@@ -547,13 +547,33 @@ public abstract class Migrator(
                             await FileStorageService.SetAceObjectAsync(collection, false);
                         }
 
+                        var lookup = storage.Folders.ToLookup(f => f.ParentId);
+                        var descendantFolders = new List<MigrationFolder>();
+                        var queue = new Queue<int>();
+                        queue.Enqueue(security.EntryId);
+
+                        while (queue.Count > 0)
+                        {
+                            var current = queue.Dequeue();
+
+                            foreach (var child in lookup[current])
+                            {
+                                descendantFolders.Add(child);
+                                queue.Enqueue(child.Id);
+                            }
+                        }
+
+                        orderedFolders = descendantFolders.OrderBy(f => f.Level);
+
                         foreach (var folder in orderedFolders)
                         {
                             newFolder = await FileStorageService.CreateFolderAsync(matchingRoomIds[folder.ParentId].Id, folder.Title);
                             matchingRoomIds.Add(folder.Id, newFolder);
+                            localMatchingRoomIds.Add(folder.Id, newFolder);
                             innerFolders.Add(folder.Id);
                             Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
                         }
+
                         foreach (var file in storage.Files.Where(f => localMatchingRoomIds.ContainsKey(f.Folder)))
                         {
                             try
@@ -561,7 +581,7 @@ public abstract class Migrator(
                                 await using var fs = new FileStream(file.Path, FileMode.Open);
 
                                 var newFile = ServiceProvider.GetService<File<int>>();
-                                newFile.ParentId = localMatchingRoomIds[security.EntryId].Id;
+                                newFile.ParentId = localMatchingRoomIds[file.Folder].Id;
                                 newFile.Comment = FilesCommonResource.CommentCreate;
                                 newFile.Title = Path.GetFileName(file.Title);
                                 newFile.ContentLength = fs.Length;
@@ -587,6 +607,7 @@ public abstract class Migrator(
                             }
                         }
                     }
+
                     if (_usersForImport.ContainsKey(security.Subject) && _currentUser.ID == _usersForImport[security.Subject].Info.Id)
                     {
                         continue;
