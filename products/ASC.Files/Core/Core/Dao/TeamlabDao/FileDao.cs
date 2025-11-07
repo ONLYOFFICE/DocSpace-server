@@ -69,7 +69,8 @@ internal class FileDao(
         FilesMessageService filesMessageService,
         QuotaSocketManager quotaSocketManager,
         CustomQuota customQuota, 
-        VectorStore vectorStore)
+        VectorStore vectorStore,
+        IEventBus eventBus)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -464,11 +465,13 @@ internal class FileDao(
                     }
                 }
             }
-
+            
             var isNew = false;
             DbFile toInsert = null;
             var cloneStreamForSave = new MemoryStream();
             var streamChange = false;
+            var needVectorization = false;
+            
             await using (var filesDbContext = await _dbContextFactory.CreateDbContextAsync())
             {
                 var parentFolders = await filesDbContext.DbFolderTreesAsync(file.ParentId).ToListAsync();
@@ -510,6 +513,12 @@ internal class FileDao(
                         if (!isNew)
                         {
                             await filesDbContext.DisableCurrentVersionAsync(tenantId, file.Id);
+                        }
+
+                        if (isNew && currentFolder is { FolderType: FolderType.Knowledge })
+                        {
+                            needVectorization = true;
+                            file.VectorizationStatus = VectorizationStatus.InProgress;
                         }
 
                         var fileType = FileUtility.GetFileTypeByFileName(file.Title);
@@ -705,6 +714,14 @@ internal class FileDao(
             }
 
             _ = factoryIndexer.IndexAsync(await InitDocumentAsync(toInsert));
+
+            if (needVectorization)
+            {
+                await eventBus.PublishAsync(new VectorizationIntegrationEvent(file.CreateBy, tenantId)
+                {
+                    FileId = file.Id
+                });
+            }
 
             return await GetFileAsync(file.Id);
         }
@@ -1060,6 +1077,7 @@ internal class FileDao(
         var fromUser = await _userManager.GetUsersAsync(fromFolder.RootCreateBy);
 
         var needDeleteVectors = fromFolder.FolderType is FolderType.Knowledge;
+        var needVectorization = toFolder.FolderType is FolderType.Knowledge;
 
         if (toRoomId != -1 && fromRoomId != toRoomId)
         {
@@ -1155,7 +1173,7 @@ internal class FileDao(
                     await SetCustomOrder(filesDbContext, fileId, toFolderId);
                 }
 
-                if (toFolder.FolderType == FolderType.Knowledge)
+                if (needVectorization)
                 {
                     var vectorization = new DbFileVectorization
                     {
@@ -1279,6 +1297,14 @@ internal class FileDao(
             {
                 await DeleteVectorsAsync(tenantId, fileId);
             }
+
+            if (needVectorization)
+            {
+                await eventBus.PublishAsync(new VectorizationIntegrationEvent(file.CreateBy, tenantId)
+                {
+                    FileId = fileId
+                });
+            }
         });
 
         return fileId;
@@ -1325,7 +1351,6 @@ internal class FileDao(
         copy.Encrypted = file.Encrypted;
         copy.Category = file.Category;
         copy.ThumbnailStatus = file.ThumbnailStatus == Thumbnail.Created ? Thumbnail.Creating : Thumbnail.Waiting;
-        copy.VectorizationStatus = file.VectorizationStatus;
 
         await using (var stream = await GetFileStreamAsync(file))
         {
@@ -2973,7 +2998,8 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         FilesMessageService filesMessageService,
         QuotaSocketManager quotaSocketManager,
         CustomQuota customQuota,
-        VectorStore vectorStore)
+        VectorStore vectorStore,
+        IEventBus eventBus)
     : FileDao(
         logger,
         factoryIndexer,
@@ -3014,7 +3040,8 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         filesMessageService,
         quotaSocketManager,
         customQuota, 
-        vectorStore), ICacheFileDao<int>
+        vectorStore,
+        eventBus), ICacheFileDao<int>
 {
 
     private readonly ConcurrentDictionary<int, IEnumerable<FormRole>> _cache = new();

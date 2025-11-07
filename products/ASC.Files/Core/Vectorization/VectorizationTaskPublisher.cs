@@ -67,25 +67,4 @@ public class VectorizationTaskPublisher(
             await socketManager.UpdateFileAsync(file);
         }
     }
-    
-    public async Task PublishAsync(File<int> file)
-    {
-        if (file == null)
-        {
-            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-
-        if (!await fileSecurity.CanVectorizationAsync(file))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-        
-        var tenantId = tenantManager.GetCurrentTenantId();
-        var userId = authContext.CurrentAccount.ID;
-        
-        await eventBus.PublishAsync(new VectorizationIntegrationEvent(userId, tenantId)
-        {
-            FileId = file.Id
-        });
-    }
 }

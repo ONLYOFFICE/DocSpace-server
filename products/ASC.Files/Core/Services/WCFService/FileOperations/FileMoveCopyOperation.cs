@@ -893,7 +893,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
         var cachedFolderDao = scope.ServiceProvider.GetService<ICacheFolderDao<T>>();
         var fileSecurity = scope.ServiceProvider.GetService<FileSecurity>();
-        var vectorizationTaskPublisher = scope.ServiceProvider.GetService<VectorizationTaskPublisher>();
         var vectorizationSettings = scope.ServiceProvider.GetService<VectorizationGlobalSettings>();
 
         var toFolderId = toFolder.Id;
@@ -978,22 +977,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 newFile = await FileDao.CopyFileAsync(file.Id, toFolderId); //Stream copy will occur inside dao
                                 newFile.Title = title;
 
-                                if (!newFile.ProviderEntry && newFile is File<int> internalFile)
-                                {
-                                    var needVectorization = toFolder.FolderType is FolderType.Knowledge;
-                                    if (needVectorization)
-                                    {
-                                        newFile.VectorizationStatus = VectorizationStatus.InProgress;
-                                    }
-                                    
-                                    await fileDao.SaveFileAsync(newFile, null);
-
-                                    if (needVectorization)
-                                    {
-                                        await vectorizationTaskPublisher.PublishAsync(internalFile);
-                                    }
-                                }
-
                                 await filesMessageService.SendCopyMessageAsync(newFile, parentFolder, toFolder, toParentFolders, false, _headers, [newFile.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
                                 await webhookManager.PublishAsync(WebhookTrigger.FileCopied, newFile);
 
@@ -1053,13 +1036,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 });
 
                                 newFile = await fileDao.GetFileAsync(newFileId);
-
-                                if (toFolder.FolderType == FolderType.Knowledge && 
-                                    !newFile.ProviderEntry && 
-                                    newFile is File<int> fileInt)
-                                {
-                                    await vectorizationTaskPublisher.PublishAsync(fileInt);
-                                }
 
                                 await filesMessageService.SendMoveMessageAsync(newFile, parentFolder, toFolder, toParentFolders, false, _headers, [file.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
                                 await webhookManager.PublishAsync(parentFolder.FolderType == FolderType.TRASH ? WebhookTrigger.FileRestored : WebhookTrigger.FileMoved, newFile);
