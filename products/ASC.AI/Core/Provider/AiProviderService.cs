@@ -34,7 +34,6 @@ public class AiProviderService(
     ProviderSettings providerSettings,
     UserManager userManager,
     ModelClientFactory modelClientFactory,
-    ILogger<AiProviderService> logger,
     AiGateway gateway)
 {
     public async Task<AiProvider> AddProviderAsync(string? title, string? url, string key, ProviderType type)
@@ -150,40 +149,16 @@ public class AiProviderService(
         await providerDao.DeleteProviders(tenantManager.GetCurrentTenantId(), ids);
     }
 
-    public async Task<IEnumerable<ModelData>> GetModelsAsync(int? providerId, Scope? scope)
+    public async Task<IEnumerable<ModelData>> GetModelsAsync(int providerId, Scope? scope)
     {
         if (gateway.Configured)
         {
-            var provider = await GetProviderAsync(AiGateway.ProviderId);
-            return await GetProviderModelsAsync(provider, scope);
+            var internalProvider = await GetProviderAsync(AiGateway.ProviderId);
+            return await GetProviderModelsAsync(internalProvider, scope);
         }
         
-        if (providerId.HasValue)
-        {
-            var provider = await GetProviderAsync(providerId.Value);
-            return await GetProviderModelsAsync(provider, scope);
-        }
-        
-        var providers = await GetProvidersAsync(0, 10).ToListAsync();
-
-        var tasks = providers.Select(p => 
-            Task.Run(async () => 
-            { 
-                try
-                {
-                    return await GetProviderModelsAsync(p, scope);
-                }
-                catch (Exception ex)
-                {
-                    logger.ErrorWithException(ex);
-                }
-
-                return []; 
-            }));
-
-        var result = await Task.WhenAll(tasks);
-        
-        return result.SelectMany(x => x);
+        var provider = await GetProviderAsync(providerId);
+        return await GetProviderModelsAsync(provider, scope);
     }
     
     public async Task<AiProvider> GetProviderAsync(int providerId)
@@ -207,7 +182,7 @@ public class AiProviderService(
     private async Task<IEnumerable<ModelData>> GetProviderModelsAsync(AiProvider p, Scope? scope)
     {
         var client = modelClientFactory.Create(p.Type);
-        var models = await client.GetModelsAsync(p.Url, p.Key, scope);
+        var models = await GetModelsInternalAsync(client, p.Url, p.Key, scope);
 
         return models.Select(m => new ModelData
         {
@@ -228,9 +203,14 @@ public class AiProviderService(
     {
         var modelClient = modelClientFactory.Create(type);
 
+        _ = await GetModelsInternalAsync(modelClient, url, key, null);
+    }
+
+    private static async Task<List<ModelInfo>> GetModelsInternalAsync(IModelClient modelClient, string url, string key, Scope? scope)
+    {
         try
         {
-            _ = await modelClient.GetModelsAsync(url, key, null);
+            return await modelClient.GetModelsAsync(url, key, scope);
         }
         catch (HttpRequestException httpException)
         {

@@ -430,8 +430,8 @@ internal class FileDao(
                 var currentRoom = await folderDao.GetFolderAsync(roomId);
 
                 TenantEntityQuotaSettings quotaSettings = currentRoom.FolderType is FolderType.AiRoom
-                   ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
-                   : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                   ? await _settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                   : await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
                 if (quotaSettings.EnableQuota)
                 {
                     var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : currentRoom.SettingsQuota;
@@ -1065,8 +1065,8 @@ internal class FileDao(
         {
             var toRoom = DocSpaceHelper.IsRoom(toFolder.FolderType) ? toFolder : await folderDao.GetFolderAsync(toRoomId);
             TenantEntityQuotaSettings quotaSettings = toRoom.FolderType is FolderType.AiRoom
-                   ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
-                   : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                   ? await _settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                   : await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
             if (quotaSettings.EnableQuota)
             {
                 var roomQuotaLimit = toRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : toRoom.SettingsQuota;

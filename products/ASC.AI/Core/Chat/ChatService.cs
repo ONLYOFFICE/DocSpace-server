@@ -84,7 +84,7 @@ public class ChatService(
         await chatDao.DeleteChatsAsync(tenantManager.GetCurrentTenantId(), [chat.Id]);
     }
 
-    public Task<IEnumerable<ModelData>> GetModelsAsync(int? providerId)
+    public Task<IEnumerable<ModelData>> GetModelsAsync(int providerId)
     {
         return aiProviderService.GetModelsAsync(providerId, Scope.Chat);
     }
