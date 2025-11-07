@@ -33,7 +33,8 @@ public class AiSettingsService(
     AiSettingsStore aiSettingsStore,
     AiAccessibility accessibility,
     AiGateway aiGateway,
-    VectorizationGlobalSettings vectorizationGlobalSettings)
+    VectorizationGlobalSettings vectorizationGlobalSettings,
+    SystemMcpConfig systemMcpConfig)
 {
     public async Task<WebSearchSettings> SetWebSearchSettingsAsync(bool enabled, EngineType type, string? key)
     {
@@ -111,6 +112,9 @@ public class AiSettingsService(
         var vectorizationTask = aiSettingsStore.IsVectorizationEnabledAsync();
         var aiReadyTask = accessibility.IsAiEnabledAsync();
         
+        var docSpaceMcpServer = systemMcpConfig.Servers.Values.FirstOrDefault(
+            x => x.Type == ServerType.DocSpace);
+        
         await Task.WhenAll(webSearchTask, vectorizationTask, aiReadyTask);
         
         return new AiSettings
@@ -119,6 +123,7 @@ public class AiSettingsService(
             VectorizationEnabled = await vectorizationTask,
             AiReady = await aiReadyTask,
             EmbeddingModel = vectorizationGlobalSettings.Model.Id,
+            DocSpaceMcpServerId = docSpaceMcpServer?.Id
         };
     }
     

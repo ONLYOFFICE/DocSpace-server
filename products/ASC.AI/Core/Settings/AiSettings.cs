@@ -32,6 +32,7 @@ public class AiSettings
     public bool VectorizationEnabled { get; init; }
     public bool AiReady { get; init; }
     public required string EmbeddingModel { get; init; }
+    public Guid? DocSpaceMcpServerId { get; init; }
     public string KnowledgeSearchToolName => KnowledgeSearchTool.Name;
     public string WebSearchToolName => WebSearchTool.Name;
     public string WebCrawlingToolName => WebCrawlingTool.Name;
