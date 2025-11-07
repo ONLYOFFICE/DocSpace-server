@@ -61,6 +61,12 @@ public static class McpServerExtensions
             HasIcon = dbMcpUnit.Server.HasIcon,
             ModifiedOn = dbMcpUnit.Server.ModifiedOn
         };
+        
+        if (server.HasIcon)
+        {
+            server.Icon = await iconStore.GetAsync(
+                dbMcpUnit.Server.TenantId, dbMcpUnit.Server.Id, dbMcpUnit.Server.ModifiedOn);
+        }
 
         if (dbMcpUnit.Server.Headers == null)
         {
@@ -69,12 +75,6 @@ public static class McpServerExtensions
 
         var headersJson = await crypto.DecryptAsync(dbMcpUnit.Server.Headers);
         server.Headers = JsonSerializer.Deserialize<Dictionary<string, string>>(headersJson);
-        
-        if (server.HasIcon)
-        {
-            server.Icon = await iconStore.GetAsync(
-                dbMcpUnit.Server.TenantId, dbMcpUnit.Server.Id, dbMcpUnit.Server.ModifiedOn);
-        }
 
         return server;
     }
