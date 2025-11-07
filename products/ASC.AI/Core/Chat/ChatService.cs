@@ -94,7 +94,7 @@ public class ChatService(
         var chat = await chatDao.GetChatAsync(tenantManager.GetCurrentTenantId(), chatId);
         if (chat == null || chat.UserId != authContext.CurrentAccount.ID)
         {
-            throw new ItemNotFoundException("Chat not found");
+            throw new ItemNotFoundException(ErrorMessages.ChatNotFound);
         }
         
         return chat;
@@ -139,7 +139,7 @@ public class ChatService(
 
         if (!await fileSecurity.CanUseChatAsync(room))
         {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
+            throw new SecurityException(ErrorMessages.ChatAccessDenied);
         }
     }
 }

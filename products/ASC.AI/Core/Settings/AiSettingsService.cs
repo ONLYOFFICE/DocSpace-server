@@ -131,7 +131,7 @@ public class AiSettingsService(
     {
         if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || aiGateway.Configured)
         {
-            throw new SecurityException();
+            throw new SecurityException(ErrorMessages.AiSettingsAccessDenied);
         }
     }
 }

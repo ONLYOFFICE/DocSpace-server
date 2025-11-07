@@ -57,4 +57,13 @@
     <data name="ServerNameExists" xml:space="preserve">
         <value>MCP server name is already exists</value>
     </data>
+    <data name="ChatNotFound" xml:space="preserve">
+        <value>Chat not found</value>
+    </data>
+    <data name="ChatAccessDenied" xml:space="preserve">
+        <value>You don't have permission to use chat</value>
+    </data>
+    <data name="AiSettingsAccessDenied" xml:space="preserve">
+        <value>You don't have permission to manage AI settings</value>
+    </data>
 </root>

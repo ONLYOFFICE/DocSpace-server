@@ -60,6 +60,33 @@ namespace ASC.AI.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You don&apos;t have permission to manage AI settings.
+        /// </summary>
+        internal static string AiSettingsAccessDenied {
+            get {
+                return ResourceManager.GetString("AiSettingsAccessDenied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You don&apos;t have permission to use chat.
+        /// </summary>
+        internal static string ChatAccessDenied {
+            get {
+                return ResourceManager.GetString("ChatAccessDenied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Chat not found.
+        /// </summary>
+        internal static string ChatNotFound {
+            get {
+                return ResourceManager.GetString("ChatNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Incorrect provider type.
         /// </summary>
         internal static string IncorrectProvider {
