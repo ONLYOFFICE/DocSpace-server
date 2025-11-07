@@ -33,4 +33,28 @@
     <data name="ManageProviders" xml:space="preserve">
         <value>You don't have permission to manage providers</value>
     </data>
+    <data name="ServerNotFound" xml:space="preserve">
+        <value>MCP server not found</value>
+    </data>
+    <data name="ServerFailedConnect" xml:space="preserve">
+        <value>Failed to connect to MCP server</value>
+    </data>
+    <data name="ServersRoomLimit" xml:space="preserve">
+        <value>Maximum number of servers per room is {0}</value>
+    </data>
+    <data name="InvalidAuthCode" xml:space="preserve">
+        <value>Invalid authorization code</value>
+    </data>
+    <data name="ManageServers" xml:space="preserve">
+        <value>You don't have permission to manage MCP servers</value>
+    </data>
+    <data name="InvalidServerName" xml:space="preserve">
+        <value>Invalid MCP server name. Only letters, numbers, underscores, and hyphens are allowed</value>
+    </data>
+    <data name="ReservedServerName" xml:space="preserve">
+        <value>MCP server name is not allowed</value>
+    </data>
+    <data name="ServerNameExists" xml:space="preserve">
+        <value>MCP server name is already exists</value>
+    </data>
 </root>

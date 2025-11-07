@@ -69,6 +69,15 @@ namespace ASC.AI.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid authorization code.
+        /// </summary>
+        internal static string InvalidAuthCode {
+            get {
+                return ResourceManager.GetString("InvalidAuthCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The specified API key is invalid or does not have access rights. Verify that the key is correct and try again.
         /// </summary>
         internal static string InvalidProviderKey {
@@ -87,6 +96,15 @@ namespace ASC.AI.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid MCP server name. Only letters, numbers, underscores, and hyphens are allowed.
+        /// </summary>
+        internal static string InvalidServerName {
+            get {
+                return ResourceManager.GetString("InvalidServerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have permission to manage providers.
         /// </summary>
         internal static string ManageProviders {
@@ -96,11 +114,65 @@ namespace ASC.AI.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You don&apos;t have permission to manage MCP servers.
+        /// </summary>
+        internal static string ManageServers {
+            get {
+                return ResourceManager.GetString("ManageServers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Provider not found.
         /// </summary>
         internal static string ProviderNotFound {
             get {
                 return ResourceManager.GetString("ProviderNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MCP server name is not allowed.
+        /// </summary>
+        internal static string ReservedServerName {
+            get {
+                return ResourceManager.GetString("ReservedServerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to connect to MCP server.
+        /// </summary>
+        internal static string ServerFailedConnect {
+            get {
+                return ResourceManager.GetString("ServerFailedConnect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MCP server name is already exists.
+        /// </summary>
+        internal static string ServerNameExists {
+            get {
+                return ResourceManager.GetString("ServerNameExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MCP server not found.
+        /// </summary>
+        internal static string ServerNotFound {
+            get {
+                return ResourceManager.GetString("ServerNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Maximum number of servers per room is {0}.
+        /// </summary>
+        internal static string ServersRoomLimit {
+            get {
+                return ResourceManager.GetString("ServersRoomLimit", resourceCulture);
             }
         }
     }

@@ -97,7 +97,7 @@ public partial class McpService(
         var server = await mcpDao.GetServerAsync(tenantId, serverId);
         if (server == null)
         {
-            throw new ItemNotFoundException("MCP Server not found");
+            throw new ItemNotFoundException(ErrorMessages.ServerNotFound);
         }
 
         var needConnect = false;
@@ -164,7 +164,7 @@ public partial class McpService(
             var server = await mcpDao.GetServerAsync(tenantId, serverId);
             if (server == null)
             {
-                throw new ItemNotFoundException("MCP Server not found");
+                throw new ItemNotFoundException(ErrorMessages.ServerNotFound);
             }
         
             await mcpDao.SetServerStateAsync(tenantId, serverId, enabled);
@@ -190,7 +190,7 @@ public partial class McpService(
         
         var tenantId = tenantManager.GetCurrentTenantId();
         
-        return await mcpDao.GetServerAsync(tenantId, id) ?? throw new ItemNotFoundException("MCP Server not found");
+        return await mcpDao.GetServerAsync(tenantId, id) ?? throw new ItemNotFoundException(ErrorMessages.ServerNotFound);
     }
 
     public async Task<(List<McpServer> servers, int totalCount)> GetActiveServersAsync(int offset, int count)
@@ -228,7 +228,7 @@ public partial class McpService(
                 var currentServersCount = await mcpDao.GetServersConnectionsCountAsync(tenantId, roomId);
                 if (currentServersCount + serversToAdd.Count > MaxMcpServersByRoom)
                 {
-                    throw new ArgumentOutOfRangeException($"Maximum number of servers per room is {MaxMcpServersByRoom}");
+                    throw new ArgumentOutOfRangeException(string.Format(ErrorMessages.ServersRoomLimit, MaxMcpServersByRoom));
                 }
             
                 await mcpDao.AddServersConnectionsAsync(tenantId, roomId, serversToAdd);
@@ -290,13 +290,13 @@ public partial class McpService(
         var connection = await mcpDao.GetMcpConnectionAsync(tenantId, roomId, userId, serverId);
         if (connection == null)
         {
-            throw new ItemNotFoundException("Mcp server not found");
+            throw new ItemNotFoundException(ErrorMessages.ServerNotFound);
         }
         
         var token = oauthTokenHelper.GetAccessToken(connection.OauthProvider, code);
         if (token == null)
         {
-            throw new ArgumentException("Invalid code");
+            throw new ArgumentException(ErrorMessages.InvalidAuthCode);
         }
 
         if (connection.Settings == null)
@@ -320,7 +320,7 @@ public partial class McpService(
         }
         catch (Exception e)
         {
-            throw new InvalidOperationException("Failed to connect to server", e);
+            throw new InvalidOperationException(ErrorMessages.ServerFailedConnect, e);
         }
 
         await mcpDao.SaveSettingsAsync(tenantId, roomId, authContext.CurrentAccount.ID, serverId, connection.Settings);
@@ -338,7 +338,7 @@ public partial class McpService(
         var connection = await mcpDao.GetMcpConnectionAsync(tenantId, roomId, userId, serverId);
         if (connection == null)
         {
-            throw new ItemNotFoundException("Mcp server not found");
+            throw new ItemNotFoundException(ErrorMessages.ServerNotFound);
         }
 
         if (connection.Settings?.OauthCredentials == null)
@@ -363,7 +363,7 @@ public partial class McpService(
         var connection = await mcpDao.GetMcpConnectionAsync(tenantId, roomId, userId, serverId);
         if (connection == null)
         {
-            throw new ItemNotFoundException("Mcp server not found");
+            throw new ItemNotFoundException(ErrorMessages.ServerNotFound);
         }
 
         return await GetToolsAsync(connection);
@@ -379,7 +379,7 @@ public partial class McpService(
         var connection = await mcpDao.GetMcpConnectionAsync(tenantId, roomId, userId, serverId);
         if (connection == null)
         {
-            throw new ItemNotFoundException("Mcp server not found");
+            throw new ItemNotFoundException(ErrorMessages.ServerNotFound);
         }
 
         var settings = connection.Settings;
@@ -517,7 +517,7 @@ public partial class McpService(
     {
         if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
         {
-            throw new SecurityException("Access denied");
+            throw new SecurityException(ErrorMessages.ManageServers);
         }
     }
     
@@ -541,7 +541,7 @@ public partial class McpService(
         catch (Exception e)
         {
             logger.ErrorWithException(e);
-            throw new InvalidOperationException("Unable to connect to the mcp server");
+            throw new InvalidOperationException(ErrorMessages.ServerFailedConnect);
         }
     }
     
@@ -613,18 +613,18 @@ public partial class McpService(
     {
         if (!_serverNameRegex.IsMatch(name))
         {
-            throw new ArgumentException("Invalid MCP server name. Only letters, numbers, underscores, and hyphens are allowed.");
+            throw new ArgumentException(ErrorMessages.InvalidServerName);
         }
 
         if (systemMcpConfig.ReservedServerNames.Contains(name))
         {
-            throw new ArgumentException("MCP server name is not allowed.");
+            throw new ArgumentException(ErrorMessages.ReservedServerName);
         }
 
         var server = await mcpDao.GetServerByNameAsync(tenantId, name);
         if (server != null && server.Id != serverId)
         {
-            throw new ArgumentException("MCP server name is already exists.");
+            throw new ArgumentException(ErrorMessages.ServerNameExists);
         }
     }
 }
