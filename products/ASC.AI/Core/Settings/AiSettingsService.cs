@@ -123,7 +123,7 @@ public class AiSettingsService(
             VectorizationEnabled = await vectorizationTask,
             AiReady = await aiReadyTask,
             EmbeddingModel = vectorizationGlobalSettings.Model.Id,
-            DocSpaceMcpServerId = docSpaceMcpServer?.Id
+            PortalMcpServerId = docSpaceMcpServer?.Id
         };
     }
     
