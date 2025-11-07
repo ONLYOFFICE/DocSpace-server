@@ -39,7 +39,7 @@ public class AnthropicModelClient(HttpClient httpClient) : IModelClient
         
         try
         {
-            var response = await client.Models.ListModelsAsync();
+            var response = await client.Models.ListModelsAsync(beforeId: "claude-3-5-haiku-20241022", limit: 100);
             return response.Models.Select(x => new ModelInfo { Id = x.Id }).ToList();
         }
         catch (AuthenticationException e)
