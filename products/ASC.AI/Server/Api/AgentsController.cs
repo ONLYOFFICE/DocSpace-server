@@ -113,9 +113,25 @@ namespace ASC.AI.Api
                 lifetime.StartDate = DateTime.UtcNow;
             }
 
-            var room = await fileStorageService.CreateAiAgentAsync(inDto.Title, inDto.Private,
-                inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover,
-                inDto.Tags, inDto.Logo, inDto.ChatSettings);
+            var room = await fileStorageService.CreateAiAgentAsync(
+                inDto.Title, 
+                inDto.Private,
+                inDto.Indexing, 
+                inDto.Share, 
+                inDto.Quota, 
+                lifetime, 
+                inDto.DenyDownload, 
+                inDto.Watermark, 
+                inDto.Color, 
+                inDto.Cover,
+                inDto.Tags, 
+                inDto.Logo, 
+                inDto.ChatSettings);
+
+            if (!inDto.AttachDefaultTools)
+            {
+                return await folderDtoHelper.GetAsync(room);
+            }
 
             try
             {
