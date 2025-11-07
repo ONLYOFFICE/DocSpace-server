@@ -167,7 +167,6 @@ internal class WebDavDaoBase(
         
         ProcessFolderAsRoom(folder);
         SetDateTime(webDavFolder, folder);
-        folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return folder;
     }
@@ -190,7 +189,6 @@ internal class WebDavDaoBase(
         file.Title = MakeFileTitle(webDavFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
-        file.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
         SetDateTime(webDavFile, file);
 
         return file;

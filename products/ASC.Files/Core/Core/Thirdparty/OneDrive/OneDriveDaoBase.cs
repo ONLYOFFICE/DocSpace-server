@@ -150,7 +150,6 @@ internal class OneDriveDaoBase(
         folder.SettingsCover = ProviderInfo.Cover;
         
         ProcessFolderAsRoom(folder);
-        folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return folder;
     }
@@ -213,7 +212,6 @@ internal class OneDriveDaoBase(
         file.Title = MakeFileTitle(onedriveFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
-        file.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return file;
     }

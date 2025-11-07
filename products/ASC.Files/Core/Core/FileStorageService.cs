@@ -636,7 +636,6 @@ public class FileStorageService //: IFileStorageService
                 });
 
                 folder.FolderType = folderType;
-                folder.Shared = folderType == FolderType.PublicRoom;
                 folder.RootFolderType = FolderType.VirtualRooms;
                 folder.FolderIdDisplay = IdConverter.Convert<string>(await globalFolderHelper.FolderVirtualRoomsAsync);
 

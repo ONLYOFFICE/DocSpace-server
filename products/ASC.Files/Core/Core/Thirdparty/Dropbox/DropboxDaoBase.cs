@@ -177,8 +177,6 @@ internal class DropboxDaoBase(
             folder.ModifiedOn = _tenantUtil.DateTimeFromUtc(folder.ModifiedOn);
         }
 
-        folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
-
         return folder;
     }
 
@@ -235,7 +233,6 @@ internal class DropboxDaoBase(
         file.Title = MakeFileTitle(dropboxFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
-        file.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return file;
     }

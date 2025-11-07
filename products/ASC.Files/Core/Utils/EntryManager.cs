@@ -683,7 +683,8 @@ public class EntryManager(IDaoFactory daoFactory,
 
             data = data.ToList();
         }
-
+        
+        
         await fileMarker.SetTagsNewAsync(parent, data);
 
         //sorting after marking
@@ -734,7 +735,19 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
             }
         }
+        
+        if (parent.ProviderEntry)
+        {
+            var securityDao = daoFactory.GetSecurityDao<string>();
+            var thirdPartyData = thirdPartyFiles.Select(FileEntry<string> (r) => r).Concat(thirdPartyFolders).ToList();
+            var records = await securityDao.GetPureShareRecordsAsync(thirdPartyData).Where(r=> r.IsLink).ToListAsync();
 
+            foreach (var d in thirdPartyData)
+            {
+                d.Shared = records.Any(r => r.EntryId == d.Id && r.EntryType == d.FileEntryType);
+            }
+        }
+        
         var t1 = entryStatusManager.SetFileStatusAsync(internalFiles);
         var t2 = entryStatusManager.SetIsFavoriteFoldersAsync(internalFolders);
         var t3 = entryStatusManager.SetFileStatusAsync(thirdPartyFiles);
