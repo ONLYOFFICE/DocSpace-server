@@ -60,6 +60,15 @@ namespace ASC.AI.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Incorrect provider type.
+        /// </summary>
+        internal static string IncorrectProvider {
+            get {
+                return ResourceManager.GetString("IncorrectProvider", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The specified API key is invalid or does not have access rights. Verify that the key is correct and try again.
         /// </summary>
         internal static string InvalidProviderKey {
@@ -74,6 +83,24 @@ namespace ASC.AI.Core.Resources {
         internal static string InvalidProviderUrl {
             get {
                 return ResourceManager.GetString("InvalidProviderUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You don&apos;t have permission to manage providers.
+        /// </summary>
+        internal static string ManageProviders {
+            get {
+                return ResourceManager.GetString("ManageProviders", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provider not found.
+        /// </summary>
+        internal static string ProviderNotFound {
+            get {
+                return ResourceManager.GetString("ProviderNotFound", resourceCulture);
             }
         }
     }

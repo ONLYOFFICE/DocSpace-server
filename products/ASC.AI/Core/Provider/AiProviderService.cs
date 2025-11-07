@@ -43,7 +43,7 @@ public class AiProviderService(
         var settings = providerSettings.Get(type);
         if (settings == null)
         {
-            throw new ArgumentException("Incorrect provider type");
+            throw new ArgumentException(ErrorMessages.IncorrectProvider);
         }
         
         ArgumentException.ThrowIfNullOrEmpty(title, nameof(title));
@@ -102,7 +102,7 @@ public class AiProviderService(
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         if (userType is not (EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin))
         {
-            throw new SecurityException("Access denied");       
+            throw new SecurityException(ErrorMessages.ManageProviders);
         }
         
         if (gateway.Configured)
@@ -176,7 +176,7 @@ public class AiProviderService(
         }
 
         var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId);
-        return provider ?? throw new ItemNotFoundException("Provider not found");
+        return provider ?? throw new ItemNotFoundException(ErrorMessages.ProviderNotFound);
     }
     
     private async Task<IEnumerable<ModelData>> GetProviderModelsAsync(AiProvider p, Scope? scope)
@@ -195,7 +195,7 @@ public class AiProviderService(
     {
         if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || gateway.Configured)
         {
-            throw new SecurityException("Access denied");       
+            throw new SecurityException(ErrorMessages.ManageProviders);       
         }
     }
 

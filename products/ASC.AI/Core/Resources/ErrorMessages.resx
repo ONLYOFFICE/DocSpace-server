@@ -24,4 +24,13 @@
     <data name="InvalidProviderKey" xml:space="preserve">
         <value>The specified API key is invalid or does not have access rights. Verify that the key is correct and try again</value>
     </data>
+    <data name="ProviderNotFound" xml:space="preserve">
+        <value>Provider not found</value>
+    </data>
+    <data name="IncorrectProvider" xml:space="preserve">
+        <value>Incorrect provider type</value>
+    </data>
+    <data name="ManageProviders" xml:space="preserve">
+        <value>You don't have permission to manage providers</value>
+    </data>
 </root>
