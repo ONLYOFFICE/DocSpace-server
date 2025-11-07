@@ -24,22 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Core;
-using ASC.Api.Utils;
-using ASC.Core.Common.Settings;
-using ASC.Core.Tenants;
-using ASC.Files.Core;
-using ASC.Files.Core.ApiModels.RequestDto;
-using ASC.Files.Core.ApiModels.ResponseDto;
-using ASC.Files.Core.VirtualRooms;
-using ASC.MessagingSystem.Core;
-using ASC.Web.Files.Classes;
-using ASC.Web.Files.Helpers;
-using ASC.Web.Files.Services.WCFService;
-using ASC.Web.Files.Services.WCFService.FileOperations;
-
-using Swashbuckle.AspNetCore.Annotations;
-
 namespace ASC.AI.Api
 {
     [Scope]
@@ -54,7 +38,10 @@ namespace ASC.AI.Api
         GlobalFolderHelper globalFolderHelper,
         FolderContentDtoHelper folderContentDtoHelper,
         FilesMessageService filesMessageService,
-        SettingsManager settingsManager)
+        SettingsManager settingsManager,
+        SystemMcpConfig systemMcpConfig,
+        McpService mcpService,
+        ILogger<AgentsController> logger)
         : ControllerBase
     {
         /// <summary>
@@ -129,6 +116,21 @@ namespace ASC.AI.Api
             var room = await fileStorageService.CreateAiAgentAsync(inDto.Title, inDto.Private,
                 inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover,
                 inDto.Tags, inDto.Logo, inDto.ChatSettings);
+
+            try
+            {
+                var server = systemMcpConfig.Servers.Values.FirstOrDefault(
+                    x => x.Type == ServerType.DocSpace);
+
+                if (server != null)
+                {
+                    await mcpService.AddServersToRoomAsync(room, [server.Id]);
+                }
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
 
             return await folderDtoHelper.GetAsync(room);
         }

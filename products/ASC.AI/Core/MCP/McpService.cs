@@ -216,32 +216,42 @@ public partial class McpService(
 
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var notify = false;
-
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId)))
-        {
-            var servers = await mcpDao.GetServersAsync(tenantId, ids);
-            if (servers.Count > 0)
-            {
-                var serversToAdd = servers.Where(x => x.Enabled).Select(x => x.Id).ToList();
-        
-                var currentServersCount = await mcpDao.GetServersConnectionsCountAsync(tenantId, roomId);
-                if (currentServersCount + serversToAdd.Count > MaxMcpServersByRoom)
-                {
-                    throw new ArgumentOutOfRangeException(string.Format(ErrorMessages.ServersRoomLimit, MaxMcpServersByRoom));
-                }
-            
-                await mcpDao.AddServersConnectionsAsync(tenantId, roomId, serversToAdd);
-                notify = true;
-            }
-        }
-
+        var notify = await AddServersToRoomAsync(room, ids);
         if (notify)
         {
             await socketManager.UpdateFolderAsync(room);
         }
         
         return await GetServerStatusesAsync(roomId, tenantId);
+    }
+
+    public async Task<bool> AddServersToRoomAsync(Folder<int> room, HashSet<Guid> ids)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var notify = false;
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId)))
+        {
+            var servers = await mcpDao.GetServersAsync(tenantId, ids);
+            if (servers.Count <= 0)
+            {
+                return notify;
+            }
+
+            var serversToAdd = servers.Where(x => x.Enabled).Select(x => x.Id).ToList();
+        
+            var currentServersCount = await mcpDao.GetServersConnectionsCountAsync(tenantId, room.Id);
+            if (currentServersCount + serversToAdd.Count > MaxMcpServersByRoom)
+            {
+                throw new ArgumentOutOfRangeException(string.Format(ErrorMessages.ServersRoomLimit, MaxMcpServersByRoom));
+            }
+            
+            await mcpDao.AddServersConnectionsAsync(tenantId, room.Id, serversToAdd);
+            notify = true;
+        }
+
+        return notify;
     }
 
     public async Task DeleteServersFromRoomAsync(int roomId, List<Guid> ids)
