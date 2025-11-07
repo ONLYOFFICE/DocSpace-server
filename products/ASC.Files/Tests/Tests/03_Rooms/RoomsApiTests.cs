@@ -487,4 +487,53 @@ public class RoomsApiTests(
         await apiFactory.CommonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, 
             cancellationToken: TestContext.Current.CancellationToken);
     }
+    
+    
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "78012")]
+    public async Task ShareRoom_AsContentCreator_ShouldReturnUsersWithoutGroups()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        await _peopleClient.Authenticate(Initializer.Owner);
+        
+        var room = await CreatePublicRoom("Test Room For Content Creator");
+        var docspaceAdmin = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        var invitationDocspaceAdmin = new RoomInvitation
+        {
+            Id = docspaceAdmin.Id,
+            Access = FileShare.ContentCreator
+        };
+        
+        await _groupApi.AddGroupAsync(new GroupRequestDto([docspaceAdmin.Id], docspaceAdmin.Id, "TestGroup"), TestContext.Current.CancellationToken);
+        
+        var user = await Initializer.InviteContact(EmployeeType.User);
+        var invitation = new RoomInvitation
+        {
+            Id = user.Id,
+            Access = FileShare.ContentCreator
+        };
+
+        var roomInvitation = new RoomInvitationRequest
+        {
+            Invitations = [invitation, invitationDocspaceAdmin],
+            Notify = false,
+            Message = "",
+            Culture = "en-US"
+        };
+
+        await _roomsApi.SetRoomSecurityAsync(room.Id, roomInvitation, cancellationToken: TestContext.Current.CancellationToken);
+        
+        await _filesClient.Authenticate(docspaceAdmin);
+        var shares = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        shares.Should().NotBeNull();
+        shares.Should().Contain(r => !string.IsNullOrEmpty(r.SharedToUser.Department));
+        
+        await _filesClient.Authenticate(user);
+        shares = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        shares.Should().NotBeNull();
+        shares.Should().NotContain(r => !string.IsNullOrEmpty(r.SharedToUser.Department));
+    }
 }
