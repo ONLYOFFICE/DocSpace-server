@@ -337,16 +337,33 @@ public abstract class Migrator(
         var orderedFolders = storage.Folders.OrderBy(f => f.Level);
         foreach (var folder in orderedFolders)
         {
+            var parentEntry = matchingFilesIds[$"{FolderKey}-{folder.ParentId}"];
             if (!storage.ShouldImportSharedFolders ||
-                !storage.Securities.Any(s => s.EntryId == folder.Id && s.EntryType == 1) && matchingFilesIds[$"{FolderKey}-{folder.ParentId}"].Id != 0)
+                !storage.Securities.Any(s => s.EntryId == folder.Id && s.EntryType == 1) && parentEntry.Id != 0)
             {
-                if (storage.Type == FolderType.BUNCH && !folder.Private)
+                if (storage.Type == FolderType.BUNCH && !folder.Private && parentEntry.Id == -1)
                 {
-                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
+                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, RoomType.CustomRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
+
+                    var aceCollection = new AceCollection<int>
+                    {
+                        Files = [],
+                        Folders = [newFolder.Id],
+                        Aces = [
+                            new AceWrapper
+                            {
+                                Access = Files.Core.Security.FileShare.Read,
+                                Id = Constants.GroupEveryone.ID
+                            }
+                        ],
+                        Message = null
+                    };
+
+                    await FileStorageService.SetAceObjectAsync(aceCollection, false);
                 }
                 else
                 {
-                    newFolder = await FileStorageService.CreateFolderAsync(matchingFilesIds[$"{FolderKey}-{folder.ParentId}"].Id, folder.Title);
+                    newFolder = await FileStorageService.CreateFolderAsync(parentEntry.Id, folder.Title);
                 }
 
                 Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
