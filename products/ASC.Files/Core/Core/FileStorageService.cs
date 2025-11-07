@@ -641,7 +641,6 @@ public class FileStorageService //: IFileStorageService
                 });
 
                 folder.FolderType = folderType;
-                folder.Shared = folderType == FolderType.PublicRoom;
                 folder.RootFolderType = FolderType.VirtualRooms;
                 folder.FolderIdDisplay = IdConverter.Convert<string>(await globalFolderHelper.FolderVirtualRoomsAsync);
 
@@ -1277,16 +1276,18 @@ public class FileStorageService //: IFileStorageService
             {
                 if (updateData.Quota >= 0)
                 {
-                    filesMessageService.Send(MessageAction.CustomQuotaPerRoomChanged, updateData.Quota.ToString(), [folder.Title]);
+                    filesMessageService.Send(folder.FolderType is FolderType.AiRoom ? MessageAction.CustomQuotaPerAiAgentChanged : MessageAction.CustomQuotaPerRoomChanged, updateData.Quota.ToString(), [folder.Title]);
                 }
                 else if (updateData.Quota == -1)
                 {
-                    filesMessageService.Send(MessageAction.CustomQuotaPerRoomDisabled, folder.Title);
+                    filesMessageService.Send(folder.FolderType is FolderType.AiRoom ? MessageAction.CustomQuotaPerAiAgentDisabled : MessageAction.CustomQuotaPerRoomDisabled, folder.Title);
                 }
                 else
                 {
-                    var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-                    filesMessageService.Send(MessageAction.CustomQuotaPerRoomDefault, quotaRoomSettings.DefaultQuota.ToString(), [folder.Title]);
+                    TenantEntityQuotaSettings quotaSettings = folder.FolderType is FolderType.AiRoom
+                        ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                        : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                    filesMessageService.Send(folder.FolderType is FolderType.AiRoom ? MessageAction.CustomQuotaPerAiAgentDefault : MessageAction.CustomQuotaPerRoomDefault, quotaSettings.DefaultQuota.ToString(), [folder.Title]);
                 }
             }
         }

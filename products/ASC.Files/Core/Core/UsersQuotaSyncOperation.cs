@@ -142,6 +142,10 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
             roomQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
             await settingsManager.SaveAsync(roomQuotaSettings);
 
+            var aiAgentQuotaSettings = await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>();
+            aiAgentQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
+            await settingsManager.SaveAsync(aiAgentQuotaSettings);
+
         }
         catch (Exception ex)
         {

@@ -31,6 +31,7 @@ public class McpServerShortDto
     public Guid Id { get; init; }
     public string? Name { get; init; }
     public ServerType ServerType { get; init; }
+    public bool Enabled { get; init; }
     public Icon? Icon { get; init; }
 }
 

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Core.Export;
+
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.AI.Core.Chat;
@@ -50,7 +52,7 @@ public class ChatSocketClient(
     {
         var currentUser = securityContext.CurrentAccount.ID;
         var room = $"{GetRoom(chatId)}-{currentUser}";
-        await MakeRequest("chat-export", new { room, resultFile });
+        await MakeRequest("chat-export", new { room, resultFile = resultFile?.MapToDto() });
     }
 
     private string GetRoom(Guid chatId)

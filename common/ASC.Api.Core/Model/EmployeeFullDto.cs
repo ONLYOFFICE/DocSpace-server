@@ -430,6 +430,11 @@ public class EmployeeFullDtoHelper(
 
     private async Task FillGroupsAsync(EmployeeFullDto result, UserInfo userInfo)
     {
+        if (await _userManager.IsUserAsync(_authContext.CurrentAccount.ID) && _authContext.CurrentAccount.ID != userInfo.Id)
+        {
+            return;
+        }
+        
         var groupsFromDb = (await _userManager.GetUserGroupsAsync(userInfo.Id));
         List<GroupSummaryDto> groups = [];
 

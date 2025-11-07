@@ -396,6 +396,62 @@ public partial class SettingsController(
     }
 
     /// <summary>
+    /// Saves the AI Agent quota settings specified in the request to the current portal.
+    /// </summary>
+    /// <short>
+    /// Save the AI Agent quota settings
+    /// </short>
+    /// <path>api/2.0/settings/aiagentquotasettings</path>
+    [Tags("Settings / Quota")]
+    [SwaggerResponse(200, "Tenant AI Agent quota settings", typeof(TenantAiAgentQuotaSettings))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [HttpPost("aiagentquotasettings")]
+    public async Task<TenantAiAgentQuotaSettings> SaveAiAgentQuotaSettings(QuotaSettingsRequestsDto inDto)
+    {
+        await DemandStatisticPermissionAsync();
+
+        if (!inDto.DefaultQuota.TryGetInt64(out var quota))
+        {
+            throw new Exception(Resource.AiAgentQuotaGreaterPortalError);
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
+        var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
+
+        if (maxTotalSize < quota)
+        {
+            throw new Exception(Resource.AiAgentQuotaGreaterPortalError);
+        }
+
+        if (coreBaseSettings.Standalone)
+        {
+            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+            if (tenantQuotaSetting.EnableQuota && tenantQuotaSetting.Quota < quota)
+            {
+                throw new Exception(Resource.AiAgentQuotaGreaterPortalError);
+            }
+        }
+
+        var quotaSettings = await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>();
+        quotaSettings.EnableQuota = inDto.EnableQuota;
+        quotaSettings.DefaultQuota = quota > 0 ? quota : 0;
+
+        await settingsManager.SaveAsync(quotaSettings);
+
+        if (inDto.EnableQuota)
+        {
+            messageService.Send(MessageAction.QuotaPerAiAgentChanged, quota.ToString());
+        }
+        else
+        {
+            messageService.Send(MessageAction.QuotaPerAiAgentDisabled);
+        }
+
+        return quotaSettings;
+    }
+
+    /// <summary>
     /// Saves the deep link configuration settings for the portal.
     /// </summary>
     /// <short>

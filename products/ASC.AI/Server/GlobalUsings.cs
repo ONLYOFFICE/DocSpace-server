@@ -25,7 +25,9 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 global using ASC.Api.Core;
+global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Convention;
+global using ASC.Api.Utils;
 
 global using ASC.AI.Core.Chat;
 global using ASC.AI.Core.Chat.Data;
@@ -42,15 +44,26 @@ global using ASC.AI.Core.Retrieval.Knowledge;
 global using ASC.Core;
 
 global using ASC.Common;
+global using ASC.Common.Log;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model.Ai;
+global using ASC.Core.Common.Settings;
+global using ASC.Core.Tenants;
+global using ASC.Files.Core;
+global using ASC.Files.Core.ApiModels.RequestDto;
+global using ASC.Files.Core.ApiModels.ResponseDto;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Core.Vectorization;
 global using ASC.Files.Core.Vectorization.Settings;
-
+global using ASC.MessagingSystem.Core;
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
+global using ASC.Web.Files.Classes;
+global using ASC.Web.Files.Helpers;
+global using ASC.Web.Files.Services.WCFService;
+global using ASC.Web.Files.Services.WCFService.FileOperations;
 
 global using Microsoft.AspNetCore.Mvc;
 
@@ -59,5 +72,7 @@ global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Threading.Channels;
+
+global using Swashbuckle.AspNetCore.Annotations;
 
 global using Riok.Mapperly.Abstractions;

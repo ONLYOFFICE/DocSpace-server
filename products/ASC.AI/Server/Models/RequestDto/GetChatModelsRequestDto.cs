@@ -29,5 +29,5 @@ namespace ASC.AI.Models.RequestDto;
 public class GetChatModelsRequestDto
 {
     [FromQuery(Name = "provider")]
-    public int? ProviderId { get; set; }
+    public int ProviderId { get; set; }
 }

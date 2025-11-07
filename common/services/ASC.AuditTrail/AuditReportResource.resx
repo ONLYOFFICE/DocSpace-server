@@ -1050,4 +1050,19 @@
   <data name="AgentDeleted" xml:space="preserve">
     <value>Agent deleted</value>
   </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Set default storage quota for AI agents: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Disabled default storage quota for AI agents</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI agents [{0}]. Set custom storage quota for AI agents : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI agents  [{0}]. Set default storage quota for AI agents : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI agents  [{0}]. Disabled storage quota for AI agents</value>
+  </data>
 </root>
