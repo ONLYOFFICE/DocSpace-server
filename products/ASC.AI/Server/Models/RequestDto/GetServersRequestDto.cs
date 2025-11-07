@@ -24,20 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.AI.Models.RequestDto;
 
-public class McpServerShortDto
+public class GetServersRequestDto
 {
+    [FromRoute(Name = "id")]
     public Guid Id { get; init; }
-    public string? Name { get; init; }
-    public ServerType ServerType { get; init; }
-    public bool Enabled { get; init; }
-    public Icon? Icon { get; init; }
-}
-
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class McpServerShortDtoMapper
-{
-    public static partial McpServerShortDto MapToShortDto(this McpServer source);
 }

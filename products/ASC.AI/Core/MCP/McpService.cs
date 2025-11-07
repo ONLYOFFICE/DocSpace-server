@@ -183,6 +183,15 @@ public partial class McpService(
         
         return await mcpDao.GetServersAsync(tenantId, offset, count);
     }
+    
+    public async Task<McpServer> GetServerAsync(Guid id)
+    {
+        await ThrowIfNotAccessAsync();
+        
+        var tenantId = tenantManager.GetCurrentTenantId();
+        
+        return await mcpDao.GetServerAsync(tenantId, id) ?? throw new ItemNotFoundException("MCP Server not found");
+    }
 
     public async Task<(List<McpServer> servers, int totalCount)> GetActiveServersAsync(int offset, int count)
     {
