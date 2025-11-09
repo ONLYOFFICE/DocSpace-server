@@ -1065,4 +1065,13 @@
   <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
     <value>AI agents  [{0}]. Disabled storage quota for AI agents</value>
   </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>AI provider created: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>AI provider deleted: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>AI provider updated: {0}</value>
+  </data>
 </root>

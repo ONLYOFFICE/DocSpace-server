@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.MessagingSystem.EF.Model;
+
 using ProviderDto = ASC.AI.Models.ResponseDto.ProviderDto;
 
 namespace ASC.AI.Api;
@@ -33,14 +35,17 @@ namespace ASC.AI.Api;
 [ApiController]
 [ControllerName("ai")]
 public class ProviderController(
-    AiProviderService providerService, 
+    AiProviderService providerService,
     ApiContext apiContext,
+    MessageService messageService,
     ProviderMapper providerMapper) : ControllerBase
 {
     [HttpPost("providers")]
     public async Task<ProviderDto> AddProviderAsync(CreateProviderRequestDto inDto)
     {
         var provider = await providerService.AddProviderAsync(inDto.Title, inDto.Url, inDto.Key, inDto.Type);
+
+        messageService.Send(MessageAction.AIProviderCreated, MessageTarget.Create(provider.Id), provider.Title);
 
         return providerMapper.MapToDto(provider);
     }
@@ -66,13 +71,31 @@ public class ProviderController(
     {
         var provider = await providerService.UpdateProviderAsync(inDto.Id, inDto.Body.Title, inDto.Body.Url, inDto.Body.Key);
 
+        messageService.Send(MessageAction.AIProviderUpdated, MessageTarget.Create(provider.Id), provider.Title);
+
         return providerMapper.MapToDto(provider);
     }
 
     [HttpDelete("providers")]
     public async Task<NoContentResult> DeleteProvidersAsync(RemoveProviderRequestDto inDto)
     {
+        var providers = new List<AiProvider>();
+
+        foreach (var id in inDto.Ids)
+        {
+            var provider = await providerService.GetProviderAsync(id);
+            if (provider != null)
+            {
+                providers.Add(provider);
+            }
+        }
+
         await providerService.DeleteProvidersAsync(inDto.Ids);
+
+        foreach (var provider in providers)
+        {
+            messageService.Send(MessageAction.AIProviderDeleted, MessageTarget.Create(provider.Id), provider.Title);
+        }
 
         return NoContent();
     }
