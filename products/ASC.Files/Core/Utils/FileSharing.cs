@@ -332,14 +332,7 @@ public class FileSharingAceHelper(
 
                     if (tags.Count > 0)
                     {
-                        if (file != null)
-                        {
-                            await socketManager.DeleteFileAsync(file, users: tags.Select(t => t.Owner));
-                        }
-                        else if (folder != null)
-                        {
-                            await socketManager.DeleteFolder(folder, tags.Select(t => t.Owner));
-                        }
+                        await socketManager.RemoveFromSharedAsync(entry, tags.Select(t => t.Owner));
                     }
                 }
 
