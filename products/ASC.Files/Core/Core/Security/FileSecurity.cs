@@ -3057,7 +3057,7 @@ public class FileSecurity(
                 
                 if (s is FileShare.None)
                 {
-                    if (file.CreateBy == authContext.CurrentAccount.ID || subjectTypeForCheck is null or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink)
+                    if (file.CreateBy == authContext.CurrentAccount.ID || subjectTypeForCheck is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink)
                     {
                         sharesToAdd.Add(s);
                     }
