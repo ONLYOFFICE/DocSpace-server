@@ -168,6 +168,33 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI provider created: {0}.
+        /// </summary>
+        public static string AIProviderCreated {
+            get {
+                return ResourceManager.GetString("AIProviderCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI provider deleted: {0}.
+        /// </summary>
+        public static string AIProviderDeleted {
+            get {
+                return ResourceManager.GetString("AIProviderDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI provider updated: {0}.
+        /// </summary>
+        public static string AIProviderUpdated {
+            get {
+                return ResourceManager.GetString("AIProviderUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User Api Key Created: {0}.
         /// </summary>
         public static string ApiKeyCreated {

@@ -864,6 +864,15 @@ public enum MessageAction
     [SwaggerEnum("Custom quota per AI agent disabled")]
     CustomQuotaPerAiAgentDisabled = 6072,
 
+    [SwaggerEnum("AI provider created")]
+    AIProviderCreated = 6073,
+
+    [SwaggerEnum("AI provider updated")]
+    AIProviderUpdated = 6074,
+
+    [SwaggerEnum("AI provider deleted")]
+    AIProviderDeleted = 6075,
+
     #endregion
 
     #region others
