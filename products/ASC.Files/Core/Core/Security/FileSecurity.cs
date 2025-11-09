@@ -2271,14 +2271,19 @@ public class FileSecurity(
                 .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                 .FirstOrDefault(r => Equals(r.EntryId, entry.Id) && r.EntryType == FileEntryType.File);
 
-            if (ace == null)
+            if (ace == null || entry.RootFolderType == FolderType.VirtualRooms)
             {
                 // share on parent folders
-                ace = shares.Where(r => Equals(r.EntryId, entry.ParentId) && r.EntryType == FileEntryType.Folder)
+                var parentAce = shares.Where(r => Equals(r.EntryId, entry.ParentId) && r.EntryType == FileEntryType.Folder)
                     .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                     .ThenBy(r => r.Level)
                     .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                     .FirstOrDefault();
+
+                if (parentAce != null)
+                {
+                    ace = parentAce;
+                }
             }
         }
         else
