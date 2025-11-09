@@ -79,8 +79,8 @@ public class FileSharingAceHelper(
         var file = entry as File<T>;
         var room = folder != null && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
 
-        var roomUrl = room != null 
-            ? room.FolderType == FolderType.AiRoom 
+        var roomUrl = room != null
+            ? room.FolderType == FolderType.AiRoom
                 ? pathProvider.GetAgentUrl(room.Id.ToString())
                 : pathProvider.GetRoomsUrl(room.Id.ToString(), false)
             : null;
@@ -104,6 +104,7 @@ public class FileSharingAceHelper(
             {
                 continue;
             }
+
             var currentUserType = await userManager.GetUserTypeAsync(currentUser);
             var existedShare = shares.Get(w.Id);
             var eventType = existedShare != null ? w.Access == FileShare.None ? EventType.Remove : EventType.Update : EventType.Create;
@@ -231,7 +232,7 @@ public class FileSharingAceHelper(
             if (room != null && !w.IsLink && (existedShare == null || (!existedShare.IsLink && existedShare.SubjectType != SubjectType.Group)))
             {
                 if (room.RootId is int root && root != await globalFolderHelper.FolderRoomTemplatesAsync && (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) ||
-                    !userAccesses.Contains(w.Access)))
+                                                                                                             !userAccesses.Contains(w.Access)))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
@@ -437,6 +438,14 @@ public class FileSharingAceHelper(
                     usersWithoutRight.Add(id);
                 }
             });
+
+
+            if (usersWithoutRight.Count > 0 && share == FileShare.None && w.SubjectType is SubjectType.User or SubjectType.Group)
+            {
+                var tagDao = daoFactory.GetTagDao<T>();
+                var tags = await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync();
+                usersWithoutRight = usersWithoutRight.Except(tags.Select(r => r.Owner)).ToList();
+            }
         }
 
         if (entryType == FileEntryType.File)
@@ -501,6 +510,7 @@ public class FileSharingAceHelper(
             {
                 defaultShare = FileShare.None;
             }
+
             await fileSecurity.ShareAsync(entry.Id, entryType, currentId, defaultShare);
             await socketManager.SelfRestrictionAsync(entry, currentId, defaultShare);
         }
@@ -976,11 +986,11 @@ public class FileSharing(
         {
             yield break;
         }
-        
+
         var cachedFolderDao = daoFactory.GetCacheFolderDao<T>();
         var parents = await cachedFolderDao.GetFirstParentTypeFromFileEntryAsync(entry);
         AceWrapper owner;
-        
+
         if (parents is null)
         {
             owner = new AceWrapper
@@ -1121,6 +1131,7 @@ public class FileSharing(
 }
 
 public record AceProcessingResult<T>(bool Changed, string Warning, List<ProcessedItem<T>> ProcessedItems);
+
 public record ProcessedItem<T>(EventType EventType, FileShareRecord<T> PastRecord, AceWrapper Ace, FileEntry<T> Entry);
 
 public enum EventType
