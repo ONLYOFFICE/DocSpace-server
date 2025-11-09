@@ -24,18 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Core;
-using ASC.Api.Utils;
-using ASC.Files.Core;
-using ASC.Files.Core.ApiModels.RequestDto;
-using ASC.Files.Core.ApiModels.ResponseDto;
-using ASC.Files.Core.VirtualRooms;
-using ASC.Web.Files.Classes;
-using ASC.Web.Files.Services.WCFService;
-using ASC.Web.Files.Services.WCFService.FileOperations;
-
-using Swashbuckle.AspNetCore.Annotations;
-
 namespace ASC.AI.Api
 {
     [Scope]
@@ -48,7 +36,12 @@ namespace ASC.AI.Api
         FileDeleteOperationsManager fileDeleteOperationsManager,
         FileOperationDtoHelper fileOperationDtoHelper,
         GlobalFolderHelper globalFolderHelper,
-        FolderContentDtoHelper folderContentDtoHelper)
+        FolderContentDtoHelper folderContentDtoHelper,
+        FilesMessageService filesMessageService,
+        SettingsManager settingsManager,
+        SystemMcpConfig systemMcpConfig,
+        McpService mcpService,
+        ILogger<AgentsController> logger)
         : ControllerBase
     {
         /// <summary>
@@ -121,9 +114,40 @@ namespace ASC.AI.Api
                 lifetime.StartDate = DateTime.UtcNow;
             }
 
-            var room = await fileStorageService.CreateAiAgentAsync(inDto.Title, inDto.Private,
-                inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover,
-                inDto.Tags, inDto.Logo, inDto.ChatSettings);
+            var room = await fileStorageService.CreateAiAgentAsync(
+                inDto.Title, 
+                inDto.Private,
+                inDto.Indexing, 
+                inDto.Share, 
+                inDto.Quota, 
+                lifetime, 
+                inDto.DenyDownload, 
+                inDto.Watermark, 
+                inDto.Color, 
+                inDto.Cover,
+                inDto.Tags, 
+                inDto.Logo, 
+                inDto.ChatSettings);
+
+            if (!inDto.AttachDefaultTools)
+            {
+                return await folderDtoHelper.GetAsync(room);
+            }
+
+            try
+            {
+                var server = systemMcpConfig.Servers.Values.FirstOrDefault(
+                    x => x.Type == ServerType.DocSpace);
+
+                if (server != null)
+                {
+                    await mcpService.AddServersToRoomAsync(room, [server.Id]);
+                }
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
 
             return await folderDtoHelper.GetAsync(room);
         }
@@ -168,6 +192,67 @@ namespace ASC.AI.Api
             await fileDeleteOperationsManager.Publish([inDto.Id], [], false, !inDto.DeleteRoom.DeleteAfter, true);
 
             return await fileOperationDtoHelper.GetAsync((await fileDeleteOperationsManager.GetOperationResults()).FirstOrDefault());
+        }
+
+
+        /// <summary>
+        /// Changes the quota limit for the AI agents with the IDs specified in the request.
+        /// </summary>
+        /// <short>
+        /// Change the AI agent quota limit
+        /// </short>
+        /// <path>api/2.0/ai/agents/agentquota</path>
+        /// <collection>list</collection>
+        [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
+        [HttpPut("agents/agentquota")]
+        public async IAsyncEnumerable<FolderDto<int>> UpdateAgentsQuota(UpdateRoomsQuotaRequestDto<int> inDto)
+        {
+            var (agentIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
+
+            var agentNames = new List<string>();
+
+            foreach (var agentId in agentIntIds)
+            {
+                var agent = await fileStorageService.FolderQuotaChangeAsync(agentId, inDto.Quota);
+                agentNames.Add(agent.Title);
+                yield return await folderDtoHelper.GetAsync(agent);
+            }
+
+            if (inDto.Quota >= 0)
+            {
+                filesMessageService.Send(MessageAction.CustomQuotaPerAiAgentChanged, inDto.Quota.ToString(), agentNames.ToArray());
+            }
+            else
+            {
+                filesMessageService.Send(MessageAction.CustomQuotaPerAiAgentDisabled, string.Join(", ", agentNames.ToArray()));
+            }
+        }
+
+        /// <summary>
+        /// Resets the quota limit for the AI agents with the IDs specified in the request.
+        /// </summary>
+        /// <short>
+        /// Reset the AI agents quota limit
+        /// </short>
+        /// <path>api/2.0/ai/agents/resetquota</path>
+        /// <collection>list</collection>
+        [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
+        [HttpPut("agents/resetquota")]
+        public async IAsyncEnumerable<FolderDto<int>> ResetAgentsQuota(UpdateRoomsRoomIdsRequestDto<int> inDto)
+        {
+            var (agentIntIds, _) = FileOperationsManager.GetIds(inDto.RoomIds);
+            var agentTitles = new List<string>();
+            var quotaAiAgentSettings = await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>();
+
+            foreach (var agentId in agentIntIds)
+            {
+                var agent = await fileStorageService.FolderQuotaChangeAsync(agentId, -2);
+                agentTitles.Add(agent.Title);
+
+                yield return await folderDtoHelper.GetAsync(agent);
+            }
+
+            filesMessageService.Send(MessageAction.CustomQuotaPerAiAgentDefault, quotaAiAgentSettings.DefaultQuota.ToString(), agentTitles.ToArray());
         }
     }
 }

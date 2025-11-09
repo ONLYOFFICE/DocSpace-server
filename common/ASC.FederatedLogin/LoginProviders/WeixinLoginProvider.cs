@@ -91,7 +91,7 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
 
     private LoginProfile RequestProfile(string accessToken)
     {
-        var openidProfile = _requestHelper.PerformRequest(ProfileUrl, headers: new Dictionary<string, string> { { "Authorization", "Bearer " + accessToken } });
+        var openidProfile = _requestHelper.PerformRequest($"{ProfileUrl}?access_token={accessToken}");
         var loginProfile = ProfileFromWeixin(openidProfile);
         return loginProfile;
     }
@@ -100,6 +100,11 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
     {
         var jProfile = JObject.Parse(openidProfile)
                        ?? throw new Exception("Failed to correctly process the response");
+
+        if (jProfile.Value<int>("errcode") != 0)
+        {
+            throw new Exception($"Failed to parse profile: {jProfile.Value<int>("errcode")} - {jProfile.Value<int>("errmsg")}");
+        }
 
         // No names, no email
         var profile = new LoginProfile
@@ -111,6 +116,8 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
             Provider = ProviderConstants.Weixin
         };
 
-        return profile;
+        return string.IsNullOrWhiteSpace(profile.Id)
+            ? throw new Exception($"Failed to parse profile: no id found")
+            : profile;
     }
 }

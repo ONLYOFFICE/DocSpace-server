@@ -94,13 +94,15 @@ public class QuotaHelper(
         {
             var tenantUserQuotaSettingsTask = settingsManager.LoadAsync<TenantUserQuotaSettings>();
             var tenantRoomQuotaSettingsTask = settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            var tenantAiAgentQuotaSettingsTask = settingsManager.LoadAsync<TenantAiAgentQuotaSettings>();
             var tenantQuotaSettingsTask = settingsManager.LoadAsync<TenantQuotaSettings>();
 
-            await Task.WhenAll(tenantUserQuotaSettingsTask, tenantRoomQuotaSettingsTask, tenantQuotaSettingsTask);
+            await Task.WhenAll(tenantUserQuotaSettingsTask, tenantRoomQuotaSettingsTask, tenantQuotaSettingsTask, tenantAiAgentQuotaSettingsTask);
 
-            result.UsersQuota = await tenantUserQuotaSettingsTask;
-            result.RoomsQuota = await tenantRoomQuotaSettingsTask;
-            result.TenantCustomQuota = await tenantQuotaSettingsTask;
+            result.UsersQuota = tenantUserQuotaSettingsTask.Result;
+            result.RoomsQuota = tenantRoomQuotaSettingsTask.Result;
+            result.AiAgentsQuota = tenantAiAgentQuotaSettingsTask.Result;
+            result.TenantCustomQuota = tenantQuotaSettingsTask.Result;
         }
 
         return result;

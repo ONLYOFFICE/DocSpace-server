@@ -30,10 +30,21 @@ public class AnthropicModelClient(HttpClient httpClient) : IModelClient
 {
     public async Task<List<ModelInfo>> GetModelsAsync(string endpoint, string apiKey, Scope? scope, IReadOnlyDictionary<string, string>? headers = null)
     {
+        if (!endpoint.Equals("https://api.anthropic.com/v1"))
+        {
+            throw new HttpRequestException(string.Empty, null, HttpStatusCode.NotFound);
+        }
+        
         var client = new AnthropicClient(new APIAuthentication(apiKey), httpClient);
         
-        var response = await client.Models.ListModelsAsync();
-        
-        return response.Models.Select(x => new ModelInfo { Id = x.Id }).ToList();
+        try
+        {
+            var response = await client.Models.ListModelsAsync(beforeId: "claude-3-5-haiku-20241022", limit: 100);
+            return response.Models.Select(x => new ModelInfo { Id = x.Id }).ToList();
+        }
+        catch (AuthenticationException e)
+        {
+            throw new HttpRequestException(e.Message, e, HttpStatusCode.Unauthorized);
+        }
     }
 }

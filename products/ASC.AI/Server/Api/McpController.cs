@@ -75,6 +75,14 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         
         return NoContent();
     }
+
+    [HttpGet("servers/{id}")]
+    public async Task<McpServerShortDto> GetServerAsync(GetServersRequestDto inDto)
+    {
+        var server = await mcpService.GetServerAsync(inDto.Id);
+        
+        return server.MapToShortDto();
+    }
     
     [HttpGet("servers")]
     public async Task<List<McpServerDto>> GetServersAsync(PaginatedRequestDto inDto)

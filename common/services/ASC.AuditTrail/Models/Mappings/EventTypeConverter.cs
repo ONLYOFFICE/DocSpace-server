@@ -126,13 +126,16 @@ public class EventTypeConverter(
             if (dest.Action is
                     (int)MessageAction.QuotaPerPortalChanged or
                     (int)MessageAction.QuotaPerRoomChanged or
-                    (int)MessageAction.QuotaPerUserChanged
+                    (int)MessageAction.QuotaPerUserChanged or
+                    (int)MessageAction.QuotaPerAiAgentChanged
                 && long.TryParse(dest.Description.FirstOrDefault(), out var size))
             {
                 dest.ActionText = string.Format(map.GetActionText(), CommonFileSizeComment.FilesSizeToString(AuditReportResource.FileSizePostfix, size));
             }
             else if (dest.Action is (int)MessageAction.CustomQuotaPerRoomDefault or
                          (int)MessageAction.CustomQuotaPerRoomChanged or
+                         (int)MessageAction.CustomQuotaPerAiAgentDefault or
+                         (int)MessageAction.CustomQuotaPerAiAgentChanged or
                          (int)MessageAction.CustomQuotaPerUserDefault or
                          (int)MessageAction.CustomQuotaPerUserChanged
                      && long.TryParse(dest.Description.FirstOrDefault(), out var customSize))
