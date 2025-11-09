@@ -671,7 +671,7 @@ public class RoomShareTests(
     }
 
     [Fact]
-    public async Task RoomShare_PersonalRights_PreservedAfterVisitingExternalLinks()
+    public async Task RoomShare_PersonalRights_PreservedAfterVisitingRoomExternalLinks()
     {
         // Arrange: owner creates a room and a file inside it, invites user2 and grants personal Read rights
         await _filesClient.Authenticate(Initializer.Owner);
@@ -758,6 +758,70 @@ public class RoomShareTests(
         // Mark room as recent by Link
         await _sharingApi.GetExternalShareDataWithHttpInfoAsync(editToken, folderId: room.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken);
 
+        var openedFileViaEditLink = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        openedFileViaEditLink.Should().NotBeNull();
+        openedFileViaEditLink.Access.Should().Be(FileShare.Read);
+        openedFileViaEditLink.Security.Read.Should().BeTrue();
+        openedFileViaEditLink.Security.Comment.Should().BeFalse();
+        openedFileViaEditLink.Security.Edit.Should().BeFalse();
+
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+    }
+
+    [Fact]
+    public async Task RoomShare_PersonalRights_PreservedAfterVisitingFileExternalLinks()
+    {
+        // Arrange: owner creates a room and a file inside it, invites user2 and grants personal Read rights
+        await _filesClient.Authenticate(Initializer.Owner);
+        var user2 = await Initializer.InviteContact(EmployeeType.User);
+
+        var room = await CreateCustomRoom("room_personal_rights");
+        var file = await CreateFile("file_in_room_personal_rights.docx", room.Id);
+
+        var setRoomSecurityResult = (await _roomsApi.SetRoomSecurityAsync(room.Id, new RoomInvitationRequest
+        {
+            Invitations = [ new RoomInvitation { Id = user2.Id, Access = FileShare.Read } ]
+        }, TestContext.Current.CancellationToken)).Response;
+
+        setRoomSecurityResult.Should().NotBeNull();
+
+        // Owner creates two external links: Comment and Editing
+        var commentLinkResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, new FileLinkRequest(access: FileShare.Comment, title: "CommentLink"), TestContext.Current.CancellationToken)).Response;
+        var commentToken = commentLinkResponse.SharedLink.RequestToken;
+
+        var editLinkResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, new FileLinkRequest(access: FileShare.Editing, title: "EditLink"), TestContext.Current.CancellationToken)).Response;
+        var editToken = editLinkResponse.SharedLink.RequestToken;
+        
+
+        // Authenticate user2 and open room
+        await _filesClient.Authenticate(user2);
+
+        await _filesApi.AddFileToRecentAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
+        
+        // Check personal Read rights
+        var openedFile = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        openedFile.Should().NotBeNull();
+        openedFile.Access.Should().Be(FileShare.Read);
+
+        // User2 visits Comment link -> should still have personal Read rights on the file
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, commentToken);
+        
+        await _filesApi.AddFileToRecentAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
+
+        var openedFileViaCommentLink = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        openedFileViaCommentLink.Should().NotBeNull();
+        openedFileViaCommentLink.Access.Should().Be(FileShare.Read);
+        openedFileViaCommentLink.Security.Read.Should().BeTrue();
+        openedFileViaCommentLink.Security.Comment.Should().BeFalse();
+        openedFileViaCommentLink.Security.Edit.Should().BeFalse();
+
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+        
+        // User2 visits Edit link -> personal Read rights must still be preserved
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, editToken);
+        
+        await _filesApi.AddFileToRecentAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
+        
         var openedFileViaEditLink = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         openedFileViaEditLink.Should().NotBeNull();
         openedFileViaEditLink.Access.Should().Be(FileShare.Read);
