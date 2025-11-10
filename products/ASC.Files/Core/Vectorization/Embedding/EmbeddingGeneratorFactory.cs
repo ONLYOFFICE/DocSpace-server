@@ -54,8 +54,8 @@ public class EmbeddingGeneratorFactory(
 
             (url, modelId) = settings.ProviderType switch
             {
-                EmbeddingProviderType.OpenAi => ("https://api.openai.com/v1", vectorizationGlobalSettings.Model.Id),
-                EmbeddingProviderType.OpenRouter => ("https://openrouter.ai/api/v1", $"openai/{vectorizationGlobalSettings.Model.Id}"),
+                EmbeddingProviderType.OpenAi => (VectorizationGlobalSettings.OpenAiBaseUrl, vectorizationGlobalSettings.Model.Id),
+                EmbeddingProviderType.OpenRouter => (VectorizationGlobalSettings.OpenRouterBaseUrl, $"openai/{vectorizationGlobalSettings.Model.Id}"),
                 EmbeddingProviderType.None => throw new InvalidOperationException("Vectorization settings are not configured"),
                 _ => throw new ArgumentOutOfRangeException()
             };

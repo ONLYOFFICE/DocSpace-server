@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Core.Provider.Model;
 
-public class TogetherAiModelClient(HttpClient client) : OpenAiModelClient(client)
+public class TogetherAiModelClient(HttpClient client, string url, string apiKey) : OpenAiModelClient(client, url, apiKey)
 {
     protected override async Task<List<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response, Scope? scope)
     {

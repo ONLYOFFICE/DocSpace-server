@@ -26,25 +26,24 @@
 
 namespace ASC.AI.Core.Provider.Model;
 
-public class OpenAiModelClient(HttpClient client) : IModelClient
+public class OpenAiModelClient(HttpClient httpClient, string url, string apiKey) : IModelClient
 {
-    private const string EndpointPart = "models";
-    private const string AuthScheme = "Bearer";
-    
-    public async Task<List<ModelInfo>> GetModelsAsync(string endpoint, string apiKey, Scope? scope, IReadOnlyDictionary<string, string>? headers = null)
+    protected virtual string ModelsEndpoint => "models";
+    protected virtual string PingEndpoint => "models";
+
+    public async Task PingAsync()
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{endpoint.TrimEnd('/')}/{EndpointPart}");
-        request.Headers.Authorization = new AuthenticationHeaderValue(AuthScheme, apiKey);
+        using var response = await SendRequestAsync(
+            $"{url.TrimEnd('/')}/{PingEndpoint}", 
+            HttpCompletionOption.ResponseHeadersRead);
+    }
 
-        if (headers is { Count: > 0 })
-        {
-            foreach (var (key, value) in headers)
-            {
-                request.Headers.Add(key, value);
-            }
-        }
-
-        var response = (await client.SendAsync(request)).EnsureSuccessStatusCode();
+    public async Task<List<ModelInfo>> ListModelsAsync(Scope? scope)
+    {
+        var response = await SendRequestAsync(
+            $"{url.TrimEnd('/')}/{ModelsEndpoint}", 
+            HttpCompletionOption.ResponseContentRead);
+        
         return await GetModelsDataAsync(response, scope);
     }
 
@@ -52,6 +51,15 @@ public class OpenAiModelClient(HttpClient client) : IModelClient
     {
         var content = await response.Content.ReadFromJsonAsync<Response>();
         return content?.Data ?? [];
+    }
+    
+    private async Task<HttpResponseMessage> SendRequestAsync(string url, HttpCompletionOption completionOption)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+        
+        var response = (await httpClient.SendAsync(request, completionOption)).EnsureSuccessStatusCode();
+        return response;
     }
     
     private class Response
