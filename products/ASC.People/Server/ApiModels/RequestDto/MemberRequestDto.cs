@@ -418,6 +418,11 @@ public class GetMemberByEmailRequestDto
     public string Email { get; set; }
 
     /// <summary>
+    /// The user encrypted email address.
+    /// </summary>
+    public string EncEmail { get; set; }
+
+    /// <summary>
     /// Culture
     /// </summary>
     [FromQuery(Name = "culture")]
