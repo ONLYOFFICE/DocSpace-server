@@ -181,14 +181,25 @@ public class AiProviderService(
     
     private async Task<IEnumerable<ModelData>> GetProviderModelsAsync(AiProvider p, Scope? scope)
     {
-        var client = modelClientFactory.Create(p.Type);
-        var models = await GetModelsInternalAsync(client, p.Url, p.Key, scope);
-
-        return models.Select(m => new ModelData
+        var client = modelClientFactory.Create(p.Type, p.Url, p.Key);
+        try
         {
-            Provider = p,
-            ModelId = m.Id
-        });
+            var models = await client.ListModelsAsync(scope);
+            return models.Select(m => new ModelData
+            {
+                Provider = p,
+                ModelId = m.Id
+            });
+        }
+        catch (HttpRequestException httpException)
+        {
+            if (httpException.StatusCode is HttpStatusCode.Unauthorized)
+            {
+                throw new ArgumentException(ErrorMessages.InvalidKey);
+            }
+
+            throw new ArgumentException(ErrorMessages.InvalidUrl);
+        }
     }
     
     private async Task ThrowIfNotAccessAsync()
@@ -201,25 +212,20 @@ public class AiProviderService(
 
     private async Task ThrowIfNotValidAsync(string url, string key, ProviderType type)
     {
-        var modelClient = modelClientFactory.Create(type);
-
-        _ = await GetModelsInternalAsync(modelClient, url, key, null);
-    }
-
-    private static async Task<List<ModelInfo>> GetModelsInternalAsync(IModelClient modelClient, string url, string key, Scope? scope)
-    {
+        var client = modelClientFactory.Create(type, url, key);
+        
         try
         {
-            return await modelClient.GetModelsAsync(url, key, scope);
+            await client.PingAsync();
         }
         catch (HttpRequestException httpException)
         {
             if (httpException.StatusCode is HttpStatusCode.Unauthorized)
             {
-                throw new ArgumentException(ErrorMessages.InvalidProviderKey);
+                throw new ArgumentException(ErrorMessages.InvalidKey);
             }
 
-            throw new ArgumentException(ErrorMessages.InvalidProviderUrl);
+            throw new ArgumentException(ErrorMessages.InvalidUrl);
         }
     }
 }

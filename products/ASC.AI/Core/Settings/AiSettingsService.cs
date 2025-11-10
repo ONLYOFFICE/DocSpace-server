@@ -34,7 +34,8 @@ public class AiSettingsService(
     AiAccessibility accessibility,
     AiGateway aiGateway,
     VectorizationGlobalSettings vectorizationGlobalSettings,
-    SystemMcpConfig systemMcpConfig)
+    SystemMcpConfig systemMcpConfig,
+    ModelClientFactory modelClientFactory)
 {
     public async Task<WebSearchSettings> SetWebSearchSettingsAsync(bool enabled, EngineType type, string? key)
     {
@@ -90,6 +91,31 @@ public class AiSettingsService(
         }
         else
         {
+            ArgumentException.ThrowIfNullOrEmpty(key);
+            
+            var url = type switch
+            {
+                EmbeddingProviderType.OpenAi => VectorizationGlobalSettings.OpenAiBaseUrl,
+                EmbeddingProviderType.OpenRouter => VectorizationGlobalSettings.OpenRouterBaseUrl,
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            };
+            
+            var client = modelClientFactory.Create(type, url, key);
+
+            try
+            {
+                await client.PingAsync();
+            }
+            catch (HttpRequestException httpException)
+            {
+                if (httpException.StatusCode is HttpStatusCode.Unauthorized)
+                {
+                    throw new ArgumentException(ErrorMessages.InvalidKey);
+                }
+
+                throw;
+            }
+            
             settings.Type = type;
             settings.Key = key;
         }

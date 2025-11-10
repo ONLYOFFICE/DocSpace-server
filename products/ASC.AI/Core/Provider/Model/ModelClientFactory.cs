@@ -29,18 +29,30 @@ namespace ASC.AI.Core.Provider.Model;
 [Scope]
 public class ModelClientFactory(IHttpClientFactory httpClientFactory)
 {
-    public IModelClient Create(ProviderType type)
+    public IModelClient Create(ProviderType type, string url, string apiKey)
     {
         return type switch
         {
             ProviderType.OpenAi or ProviderType.OpenAiCompatible => 
-                new OpenAiModelClient(httpClientFactory.CreateClient()),
+                new OpenAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.TogetherAi => 
-                new TogetherAiModelClient(httpClientFactory.CreateClient()),
+                new TogetherAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.Anthropic =>
-                new AnthropicModelClient(httpClientFactory.CreateClient()),
+                new AnthropicModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.DocSpaceAi =>
-                new DocSpaceModelClient(httpClientFactory.CreateClient()),
+                new DocSpaceModelClient(httpClientFactory.CreateClient(), url, apiKey),
+            _ => throw new ArgumentOutOfRangeException(nameof(type))
+        };
+    }
+
+    public IModelClient Create(EmbeddingProviderType type, string url, string apiKey)
+    {
+        return type switch
+        {
+            EmbeddingProviderType.OpenAi => 
+                new OpenAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
+            EmbeddingProviderType.OpenRouter => 
+                new OpenRouterModelClient(httpClientFactory.CreateClient(), url, apiKey),
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
     }

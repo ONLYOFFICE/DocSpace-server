@@ -29,6 +29,8 @@ namespace ASC.Files.Core.Vectorization.Settings;
 [Singleton]
 public class VectorizationGlobalSettings
 {
+    public const string OpenAiBaseUrl = "https://api.openai.com/v1";
+    public const string OpenRouterBaseUrl = "https://openrouter.ai/api/v1";
     public int ChunkSize { get; init; }
     public float ChunkOverlap { get; init; }
     public int ChunksBatchSize { get; init; }

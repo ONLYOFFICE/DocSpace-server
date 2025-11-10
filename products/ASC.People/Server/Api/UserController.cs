@@ -944,7 +944,11 @@ public class UserController(
     {
         var cultureInfo = string.IsNullOrEmpty(inDto.Culture) ? null : new CultureInfo(inDto.Culture);
 
-        var user = await _userManager.GetUserByEmailAsync(inDto.Email);
+        var email = string.IsNullOrEmpty(inDto.Email) && !string.IsNullOrEmpty(inDto.EncEmail)
+            ? emailValidationKeyModelHelper.DecryptEmail(inDto.EncEmail)
+            : inDto.Email;
+
+        var user = await _userManager.GetUserByEmailAsync(email);
 
         var isConfirmLink = _httpContextAccessor.HttpContext!.User.Claims
             .Any(role => role.Type == ClaimTypes.Role &&
