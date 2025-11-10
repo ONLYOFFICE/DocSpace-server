@@ -65,6 +65,7 @@ public class FileSecurity(
     public readonly FileShare DefaultArchiveShare = FileShare.Restrict;
     public readonly FileShare DefaultVirtualRoomsShare = FileShare.Restrict;
     public readonly FileShare DefaultRoomTemplatesShare = FileShare.Restrict;
+    public readonly FileShare DefaultAiAgentsShare = FileShare.Restrict;
 
     public static readonly HashSet<FileShare> PaidShares = [FileShare.RoomManager];
     private static HashSet<FileShare> DefaultFileAccess => [FileShare.Editing, FileShare.FillForms, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None];
@@ -1684,6 +1685,7 @@ public class FileSecurity(
                 FolderType.Privacy => DefaultPrivacyShare,
                 FolderType.Archive => DefaultArchiveShare,
                 FolderType.RoomTemplates => DefaultRoomTemplatesShare,
+                FolderType.AiAgents => DefaultAiAgentsShare,
                 _ => DefaultCommonShare
             };
 
