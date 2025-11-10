@@ -558,6 +558,11 @@ public class FileSharingHelper(
         if (entry == null)
         {
             return false;
+        }        
+        
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            return false;
         }
 
         if (entry.RootFolderType == FolderType.COMMON && await global.IsDocSpaceAdministratorAsync)
@@ -575,11 +580,7 @@ public class FileSharingHelper(
         {
             return true;
         }
-
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
-        {
-            return false;
-        }
+        
 
         return entry.RootFolderType == FolderType.Privacy
                && entry is File<T>
