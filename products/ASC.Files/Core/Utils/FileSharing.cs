@@ -131,7 +131,7 @@ public class FileSharingAceHelper(
             if (file != null)
             {
                 if ((w.Access is not (FileShare.Read or FileShare.Restrict or FileShare.ReadWrite or FileShare.None) && !fileUtility.CanWebView(entry.Title))
-                    || (entry.RootFolderType != FolderType.USER && entry.RootFolderType != FolderType.VirtualRooms))
+                    || (entry.RootFolderType != FolderType.USER && entry.RootFolderType != FolderType.VirtualRooms && entry.RootFolderType != FolderType.AiAgents))
                 {
                     continue;
                 }
