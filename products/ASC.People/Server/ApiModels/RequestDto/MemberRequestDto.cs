@@ -420,6 +420,7 @@ public class GetMemberByEmailRequestDto
     /// <summary>
     /// The user encrypted email address.
     /// </summary>
+    [FromQuery(Name = "encemail")]
     public string EncEmail { get; set; }
 
     /// <summary>
