@@ -100,7 +100,19 @@ public class InvitationService(
                 {
                     if (await fileSecurity.CanReadAsync(folder))
                     {
-                        return true;
+                        var accountId = authContext.CurrentAccount.ID;
+                        if (!await userManager.IsDocSpaceAdminAsync(accountId))
+                        {
+                            return true;
+                        }
+
+                        var record = (await fileSecurity.GetSharesAsync(folder, [accountId]))
+                            .FirstOrDefault(x => x.SubjectType == SubjectType.User);
+
+                        if (record != null)
+                        {
+                            return true;
+                        }
                     }
 
                     var tenantId = tenantManager.GetCurrentTenantId();
