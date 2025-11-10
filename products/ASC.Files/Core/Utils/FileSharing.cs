@@ -436,8 +436,10 @@ public class FileSharingAceHelper(
             if (usersWithoutRight.Count > 0 && share == FileShare.None && w.SubjectType is SubjectType.User or SubjectType.Group)
             {
                 var tagDao = daoFactory.GetTagDao<T>();
-                var tags = await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync();
-                usersWithoutRight = usersWithoutRight.Except(tags.Select(r => r.Owner)).ToList();
+                var tags = await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).Select(r => r.Owner).Distinct().ToListAsync();
+                usersWithoutRight = usersWithoutRight.Except(tags).ToList();
+                
+                await socketManager.AddToSharedAsync(entry, users: tags);
             }
         }
 
