@@ -110,7 +110,7 @@ public class AiSettingsService(
             {
                 if (httpException.StatusCode is HttpStatusCode.Unauthorized)
                 {
-                    throw new ArgumentException(ErrorMessages.InvalidProviderKey);
+                    throw new ArgumentException(ErrorMessages.InvalidKey);
                 }
 
                 throw;

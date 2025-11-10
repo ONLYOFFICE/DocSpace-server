@@ -195,10 +195,10 @@ public class AiProviderService(
         {
             if (httpException.StatusCode is HttpStatusCode.Unauthorized)
             {
-                throw new ArgumentException(ErrorMessages.InvalidProviderKey);
+                throw new ArgumentException(ErrorMessages.InvalidKey);
             }
 
-            throw new ArgumentException(ErrorMessages.InvalidProviderUrl);
+            throw new ArgumentException(ErrorMessages.InvalidUrl);
         }
     }
     
@@ -222,10 +222,10 @@ public class AiProviderService(
         {
             if (httpException.StatusCode is HttpStatusCode.Unauthorized)
             {
-                throw new ArgumentException(ErrorMessages.InvalidProviderKey);
+                throw new ArgumentException(ErrorMessages.InvalidKey);
             }
 
-            throw new ArgumentException(ErrorMessages.InvalidProviderUrl);
+            throw new ArgumentException(ErrorMessages.InvalidUrl);
         }
     }
 }

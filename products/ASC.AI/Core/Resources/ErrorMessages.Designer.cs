@@ -96,6 +96,15 @@ namespace ASC.AI.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Authentication failed. Verify your credentials.
+        /// </summary>
+        internal static string IncorrectServerCredentials {
+            get {
+                return ResourceManager.GetString("IncorrectServerCredentials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid authorization code.
         /// </summary>
         internal static string InvalidAuthCode {
@@ -107,18 +116,9 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The specified API key is invalid or does not have access rights. Verify that the key is correct and try again.
         /// </summary>
-        internal static string InvalidProviderKey {
+        internal static string InvalidKey {
             get {
-                return ResourceManager.GetString("InvalidProviderKey", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The URL path specified is invalid. Please ensure the correct endpoint is used.
-        /// </summary>
-        internal static string InvalidProviderUrl {
-            get {
-                return ResourceManager.GetString("InvalidProviderUrl", resourceCulture);
+                return ResourceManager.GetString("InvalidKey", resourceCulture);
             }
         }
         
@@ -128,6 +128,15 @@ namespace ASC.AI.Core.Resources {
         internal static string InvalidServerName {
             get {
                 return ResourceManager.GetString("InvalidServerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The URL path specified is invalid. Please ensure the correct endpoint is used.
+        /// </summary>
+        internal static string InvalidUrl {
+            get {
+                return ResourceManager.GetString("InvalidUrl", resourceCulture);
             }
         }
         

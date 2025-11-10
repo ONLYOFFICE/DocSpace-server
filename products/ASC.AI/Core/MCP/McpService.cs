@@ -548,6 +548,15 @@ public partial class McpService(
             await using var client = await McpClient.CreateAsync(transport);
             await client.PingAsync();
         }
+        catch (HttpRequestException requestException)
+        {
+            if (requestException.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden or HttpStatusCode.BadRequest)
+            {
+                throw new ArgumentException(ErrorMessages.IncorrectServerCredentials);
+            }
+            
+            throw new ArgumentException(ErrorMessages.InvalidUrl);
+        }
         catch (Exception e)
         {
             logger.ErrorWithException(e);
