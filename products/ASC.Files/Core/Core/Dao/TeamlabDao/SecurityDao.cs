@@ -1128,17 +1128,15 @@ internal abstract class SecurityBaseDao<T>(
         
         var q = filesDbContext.Security.AsNoTracking()
             .Where(s => s.TenantId == tenantId && 
-                        (s.EntryId == entryId && 
-                        s.EntryType == entry.FileEntryType || 
-                        (filterType == ShareFilterType.User ||
-                        filterType == ShareFilterType.Group ||
-                        filterType == ShareFilterType.UserOrGroup) && 
-                        s.EntryType == FileEntryType.Folder && 
-                        filesDbContext.Tree.Any(r => r.FolderId.ToString() == entryId && 
-                                                     filesDbContext.Folders.Any(f => f.TenantId == tenantId && 
-                                                                                     s.EntryId == f.ParentId.ToString() && 
-                                                                                     f.Id == r.ParentId && 
-                                                                                     f.FolderType != FolderType.AiAgents && f.FolderType != FolderType.VirtualRooms && f.FolderType != FolderType.USER))));
+                        (s.EntryId == entryId && s.EntryType == entry.FileEntryType || 
+                        ( !filesDbContext.Security.Any(ds => ds.TenantId == tenantId && ds.EntryId == entryId && ds.EntryType == entry.FileEntryType) &&
+                          (filterType == ShareFilterType.User || filterType == ShareFilterType.Group || filterType == ShareFilterType.UserOrGroup) && 
+                                                             s.EntryType == FileEntryType.Folder && 
+                                                             filesDbContext.Tree.Any(r => r.FolderId.ToString() == entryId && 
+                                                                                          filesDbContext.Folders.Any(f => f.TenantId == tenantId && 
+                                                                                                                          s.EntryId == f.ParentId.ToString() && 
+                                                                                                                          f.Id == r.ParentId && 
+                                                                                                                          f.FolderType != FolderType.AiAgents && f.FolderType != FolderType.VirtualRooms && f.FolderType != FolderType.USER)))));
         
         switch (filterType)
         {
