@@ -433,13 +433,31 @@ public class FileSharingAceHelper(
             });
 
 
-            if (usersWithoutRight.Count > 0 && share == FileShare.None && w.SubjectType is SubjectType.User or SubjectType.Group)
+            if (usersWithoutRight.Count > 0)
             {
-                var tagDao = daoFactory.GetTagDao<T>();
-                var tags = await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).Select(r => r.Owner).Distinct().ToListAsync();
-                usersWithoutRight = usersWithoutRight.Except(tags).ToList();
-                
-                await socketManager.AddToSharedAsync(entry, users: tags);
+                if (share == FileShare.None && w.SubjectType is SubjectType.User or SubjectType.Group)
+                {
+                    var tagDao = daoFactory.GetTagDao<T>();
+                    var tags = await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).Select(r => r.Owner).Distinct().ToListAsync();
+                    usersWithoutRight = usersWithoutRight.Except(tags).ToList();
+
+                    if (tags.Count > 0)
+                    {
+                        await socketManager.AddToSharedAsync(entry, users: tags);
+                    }
+
+                    if (w.SubjectType == SubjectType.Group)
+                    {
+                        var usersShares = await fileSecurity.GetPureSharesAsync(entry, ShareFilterType.User, null, null).Select(r => r.Subject).ToListAsync();
+                        usersWithoutRight = usersWithoutRight.Except(usersShares).ToList();
+                    }
+                }
+
+                if (share == FileShare.Restrict && w.SubjectType is SubjectType.Group)
+                {
+                    var usersShares = await fileSecurity.GetPureSharesAsync(entry, ShareFilterType.User, null, null).Select(r => r.Subject).ToListAsync();
+                    usersWithoutRight = usersWithoutRight.Except(usersShares).ToList();
+                }
             }
         }
 
