@@ -978,10 +978,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         {
                             try
                             {
-                                var title = await global.GetAvailableTitleAsync(file.Title, toFolderId, fileDao.IsExistAsync, FileEntryType.File);
                                 newFile = await FileDao.CopyFileAsync(file.Id, toFolderId); //Stream copy will occur inside dao
-                                newFile.Title = title;
-
+                                
                                 await filesMessageService.SendCopyMessageAsync(newFile, parentFolder, toFolder, toParentFolders, false, _headers, [newFile.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
                                 await webhookManager.PublishAsync(WebhookTrigger.FileCopied, newFile);
 

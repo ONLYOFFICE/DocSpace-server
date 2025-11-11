@@ -127,7 +127,8 @@ public partial class Global(
     UserManager userManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     CustomNamingPeople customNamingPeople,
-    FileSecurityCommon fileSecurityCommon)
+    FileSecurityCommon fileSecurityCommon,
+    IDistributedLockProvider distributedLockProvider)
 {
     private DocThumbnailExtension? _docThumbnailExtension;
     public DocThumbnailExtension DocThumbnailExtension
@@ -254,27 +255,30 @@ public partial class Global(
 
     public async Task<string> GetAvailableTitleAsync<T>(string requestTitle, T parentFolderId, Func<string, T, Task<bool>> isExist, FileEntryType fileEntryType)
     {
-        if (!await isExist(requestTitle, parentFolderId))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync($"{nameof(GetAvailableTitleAsync)}_{parentFolderId}"))
         {
+            if (!await isExist(requestTitle, parentFolderId))
+            {
+                return requestTitle;
+            }
+
+            var re = MyRegex();
+
+            var insertIndex = requestTitle.Length;
+            if (fileEntryType == FileEntryType.File && requestTitle.LastIndexOf('.') != -1)
+            {
+                insertIndex = requestTitle.LastIndexOf('.');
+            }
+
+            requestTitle = requestTitle.Insert(insertIndex, " (1)");
+
+            while (await isExist(requestTitle, parentFolderId))
+            {
+                requestTitle = re.Replace(requestTitle, MatchEvaluator);
+            }
+
             return requestTitle;
         }
-
-        var re = MyRegex();
-
-        var insertIndex = requestTitle.Length;
-        if (fileEntryType == FileEntryType.File && requestTitle.LastIndexOf('.') != -1)
-        {
-            insertIndex = requestTitle.LastIndexOf('.');
-        }
-
-        requestTitle = requestTitle.Insert(insertIndex, " (1)");
-
-        while (await isExist(requestTitle, parentFolderId))
-        {
-            requestTitle = re.Replace(requestTitle, MatchEvaluator);
-        }
-
-        return requestTitle;
     }
 
     private static string MatchEvaluator(Match match)
