@@ -27,3 +27,5 @@
 namespace ASC.Core.Common.Quota.Features;
 
 public class CountRoomFeature(TenantQuota tenantQuota) : TenantQuotaFeatureCount(tenantQuota, "room");
+
+public class CountAIAgentFeature(TenantQuota tenantQuota) : TenantQuotaFeatureCount(tenantQuota, "aiagent");

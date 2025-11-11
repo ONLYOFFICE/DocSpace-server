@@ -72,6 +72,49 @@ public class CountRoomCheckerStatistic(IServiceProvider serviceProvider) : ITena
     }
 }
 
+[Scope]
+public class CountAIAgentChecker(
+    ITenantQuotaFeatureStat<CountAIAgentFeature, int> tenantQuotaFeatureStatistic,
+    TenantManager tenantManager,
+    ITariffService tariffService)
+    : TenantQuotaFeatureCheckerCount<CountAIAgentFeature>(tenantQuotaFeatureStatistic, tenantManager)
+{
+    public override string GetExceptionMessage(long size)
+    {
+        return string.Format(Resource.TariffsFeature_aiagent_exception, size);
+    }
+    public override async Task CheckAddAsync(int tenantId, int newValue)
+    {
+        if ((await tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
+        {
+            throw new BillingNotFoundException(Resource.ErrorNotAllowedOption);
+        }
+
+        await base.CheckAddAsync(tenantId, newValue);
+    }
+}
+
+[Scope]
+public class CountAIAgentCheckerStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<CountAIAgentFeature, int>
+{
+    public async Task<int> GetValueAsync()
+    {
+        var daoFactory = serviceProvider.GetService<IDaoFactory>();
+        var folderDao = serviceProvider.GetService<IFolderDao<int>>();
+        var globalFolder = serviceProvider.GetService<GlobalFolder>();
+
+        var parentId = await globalFolder.GetFolderAiAgentsAsync(daoFactory);
+        if (parentId == 0)
+        {
+            return 0;
+        }
+
+        var aiAgentsCount = await folderDao.GetFoldersCountAsync(parentId, FilterType.None, false, Guid.Empty, string.Empty);
+
+        return aiAgentsCount;
+    }
+}
+
 public static class QuotaFeatureRegister
 {
     public static void RegisterQuotaFeature(this IServiceCollection services)
@@ -79,5 +122,7 @@ public static class QuotaFeatureRegister
         services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
         services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
         services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
+        services.AddScoped<ITenantQuotaFeatureChecker, CountAIAgentChecker>();
+        services.AddScoped<ITenantQuotaFeatureStat<CountAIAgentFeature, int>, CountAIAgentCheckerStatistic>();
     }
 }

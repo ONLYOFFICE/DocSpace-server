@@ -1290,4 +1290,7 @@
   <data name="AiAgentFreeSpaceException" xml:space="preserve">
     <value>AI agent space quota exceeded</value>
   </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>The number of AI agents should not exceed {0}</value>
+  </data>
 </root>

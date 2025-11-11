@@ -33,7 +33,8 @@ public class QuotaUsageManager(
     CoreSettings coreSettings,
     CountPaidUserStatistic countPaidUserStatistic,
     CountUserStatistic activeUsersStatistic,
-    CountRoomCheckerStatistic countRoomCheckerStatistic)
+    CountRoomCheckerStatistic countRoomCheckerStatistic,
+    CountAIAgentCheckerStatistic countAIAgentCheckerStatistic)
 {
     public async Task<QuotaUsageDto> Get(Tenant tenant)
     {
@@ -51,6 +52,8 @@ public class QuotaUsageManager(
 
         var usersCount = await activeUsersStatistic.GetValueAsync();
 
+        var aiAgentsCount = await countAIAgentCheckerStatistic.GetValueAsync();
+
         var result = new QuotaUsageDto
         {
             TenantId = tenant.Id,
@@ -64,7 +67,9 @@ public class QuotaUsageManager(
             MaxUsers = coreBaseSettings.Standalone ? -1 : quota.CountUser,
             UsersCount = usersCount,
             MaxRoomsCount = coreBaseSettings.Standalone ? -1 : quota.CountRoom,
-            RoomsCount = roomsCount
+            RoomsCount = roomsCount,
+            MaxAIAgentsCount = coreBaseSettings.Standalone ? -1 : quota.CountAIAgent,
+            AIAgentsCount = aiAgentsCount
         };
 
         return result;
@@ -86,6 +91,8 @@ public class QuotaUsageDto
     public long UsersCount { get; set; }
     public int MaxRoomsCount { get; set; }
     public int RoomsCount { get; set; }
+    public int MaxAIAgentsCount { get; set; }
+    public int AIAgentsCount { get; set; }
 }
 
 public class TenantOwnerDto
