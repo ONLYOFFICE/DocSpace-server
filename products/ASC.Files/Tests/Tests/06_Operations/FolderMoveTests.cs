@@ -118,4 +118,32 @@ public class FolderMoveTests(
         movedFolder.Should().NotBeNull();
         movedFolder.ParentId.Should().Be(targetFolder.Id);
     }
+    
+    [Fact]
+    public async Task DuplicateFolder_InsideUserFolder_ReturnsValidFolderWithIndex()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        // Create a source file
+        var sourceFolder = await CreateFolderInMy("folder", Initializer.Owner);
+        
+        // Act
+        var results = (await _filesOperationsApi.DuplicateBatchItemsAsync(new DuplicateRequestDto
+        {
+            FolderIds = [new(sourceFolder.Id)]
+        }, TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        if (results.Any(r => !r.Finished))
+        {
+            results = await WaitLongOperation();
+        }
+        
+        // Assert
+        results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
+        var newFolder = results.OfType<FileOperationDto>().FirstOrDefault();
+        newFolder.Should().NotBeNull();
+        newFolder.Folders.Should().Contain(r=> Path.GetFileNameWithoutExtension(r.Title) == Path.GetFileNameWithoutExtension(sourceFolder.Title) + " (1)");
+    }
 }
