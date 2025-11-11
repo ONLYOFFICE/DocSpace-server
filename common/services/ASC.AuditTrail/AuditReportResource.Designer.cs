@@ -96,6 +96,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Added MCP server {0} to agent.
+        /// </summary>
+        public static string AddedServerToAgent {
+            get {
+                return ResourceManager.GetString("AddedServerToAgent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Administrator Added: {0}.
         /// </summary>
         public static string AdministratorAdded {
@@ -569,6 +578,15 @@ namespace ASC.AuditTrail {
         public static string DeletedRoomTags {
             get {
                 return ResourceManager.GetString("DeletedRoomTags", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleted MCP server {0} from agent.
+        /// </summary>
+        public static string DeletedServerFromAgent {
+            get {
+                return ResourceManager.GetString("DeletedServerFromAgent", resourceCulture);
             }
         }
         
@@ -2351,6 +2369,51 @@ namespace ASC.AuditTrail {
         public static string SentInviteInstructions {
             get {
                 return ResourceManager.GetString("SentInviteInstructions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MCP server created: {0}.
+        /// </summary>
+        public static string ServerCreated {
+            get {
+                return ResourceManager.GetString("ServerCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MCP server deleted: {0}.
+        /// </summary>
+        public static string ServerDeleted {
+            get {
+                return ResourceManager.GetString("ServerDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MCP server disabled: {0}.
+        /// </summary>
+        public static string ServerDisabled {
+            get {
+                return ResourceManager.GetString("ServerDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MCP server enabled: {0}.
+        /// </summary>
+        public static string ServerEnabled {
+            get {
+                return ResourceManager.GetString("ServerEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MCP server updated: {0}.
+        /// </summary>
+        public static string ServerUpdated {
+            get {
+                return ResourceManager.GetString("ServerUpdated", resourceCulture);
             }
         }
         

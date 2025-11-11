@@ -98,12 +98,20 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.CustomerWalletToppedUp, MessageAction.CustomerWalletTopUpSettingsUpdated, MessageAction.CustomerSubscriptionUpdated,
                     MessageAction.BannerSettingsChanged, MessageAction.CustomerWalletServicesSettingsUpdated,
                     MessageAction.AIProviderUpdated,
+                    MessageAction.ServerUpdated,
+                    MessageAction.ServerEnabled,
+                    MessageAction.ServerDisabled
                 ]
             },
             {
                 ActionType.Create, [
-                    MessageAction.AdministratorAdded, MessageAction.ProductAddedAdministrator, MessageAction.WebhookCreated,
-                    MessageAction.ApiKeyCreated, MessageAction.CustomerOperationPerformed, MessageAction.AIProviderCreated
+                    MessageAction.AdministratorAdded, 
+                    MessageAction.ProductAddedAdministrator, 
+                    MessageAction.WebhookCreated,
+                    MessageAction.ApiKeyCreated, 
+                    MessageAction.CustomerOperationPerformed, 
+                    MessageAction.AIProviderCreated,
+                    MessageAction.ServerCreated
                 ]
             },
             {
@@ -113,8 +121,12 @@ internal class ProductsActionMapper : ILocationActionMapper
             },
             {
                 ActionType.Delete, [
-                    MessageAction.ProductDeletedAdministrator,MessageAction.PortalDeleted, MessageAction.WebhookDeleted,
-                    MessageAction.ApiKeyDeleted, MessageAction.AIProviderDeleted
+                    MessageAction.ProductDeletedAdministrator, 
+                    MessageAction.PortalDeleted, 
+                    MessageAction.WebhookDeleted,
+                    MessageAction.ApiKeyDeleted, 
+                    MessageAction.AIProviderDeleted,
+                    MessageAction.ServerDeleted
                 ]
             },
             {

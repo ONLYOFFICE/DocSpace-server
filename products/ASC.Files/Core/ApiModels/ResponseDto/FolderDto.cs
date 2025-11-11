@@ -182,6 +182,8 @@ public class FolderDtoHelper(
     AiAccessibility accessibility)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
 {
+    private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
+
     public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null, bool? aiReady = null)
     {
         Task<bool> aiReadyTask = null;
@@ -288,7 +290,7 @@ public class FolderDtoHelper(
             var room = parents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
             if (room != null)
             {
-                result.OwnedBy = await employeeWrapperHelper.GetAsync(room.CreateBy);
+                result.OwnedBy = await _employeeWrapperHelper.GetAsync(room.CreateBy);
             }
         }
 

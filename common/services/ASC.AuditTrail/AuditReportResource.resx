@@ -1074,4 +1074,25 @@
   <data name="AIProviderUpdated" xml:space="preserve">
     <value>AI provider updated: {0}</value>
   </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP server created: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP server updated: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP server deleted: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP server enabled: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP server disabled: {0}</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Added MCP server {0} to agent</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Deleted MCP server {0} from agent</value>
+  </data>
 </root>

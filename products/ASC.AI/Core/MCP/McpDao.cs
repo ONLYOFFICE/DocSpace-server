@@ -334,7 +334,7 @@ public class McpDao(
         return server;
     }
     
-    public async Task DeleteServersAsync(int tenantId, List<Guid> ids)
+    public async Task DeleteServersAsync(int tenantId, HashSet<Guid> ids)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -428,7 +428,7 @@ public class McpDao(
         return await dbContext.GetRoomServersCountAsync(tenantId, roomId);
     }
     
-    public async Task DeleteServersConnectionsAsync(int tenantId, int roomId, List<Guid> serversIds)
+    public async Task DeleteServersConnectionsAsync(int tenantId, int roomId, HashSet<Guid> serversIds)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();

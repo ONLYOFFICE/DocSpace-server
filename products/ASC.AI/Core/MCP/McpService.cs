@@ -26,6 +26,10 @@
 
 using System.Text.RegularExpressions;
 
+using ASC.MessagingSystem.Core;
+using ASC.MessagingSystem.EF.Model;
+using ASC.Web.Files.Helpers;
+
 namespace ASC.AI.Core.MCP;
 
 [Scope]
@@ -43,7 +47,9 @@ public partial class McpService(
     OAuth20TokenHelper oauthTokenHelper,
     IToolPermissionProvider toolPermissionProvider,
     SystemMcpConfig systemMcpConfig,
-    SocketManager socketManager)
+    SocketManager socketManager,
+    MessageService messageService,
+    FilesMessageService filesMessageService)
 {
     private const int MaxMcpServersByRoom = 5;
     private static readonly Regex _serverNameRegex = ServerNameRegex();
@@ -78,7 +84,11 @@ public partial class McpService(
         
         await ThrowIfNotConnectAsync(transport);
         
-        return await mcpDao.AddServerAsync(tenantId, endpoint, name, headers, description, ConnectionType.Direct, iconBase64);
+        var server = await mcpDao.AddServerAsync(tenantId, endpoint, name, headers, description, ConnectionType.Direct, iconBase64);
+        
+        messageService.Send(MessageAction.ServerCreated, MessageTarget.Create(server.Id), server.Name);
+
+        return server;
     }
 
     public async Task<McpServer> UpdateCustomServerAsync(
@@ -134,7 +144,11 @@ public partial class McpService(
 
         if (!needConnect)
         {
-            return await mcpDao.UpdateServerAsync(server, updateIcon, iconBase64);
+            var updatedServer = await mcpDao.UpdateServerAsync(server, updateIcon, iconBase64);
+
+            messageService.Send(MessageAction.ServerUpdated, MessageTarget.Create(updatedServer.Id), updatedServer.Name);
+            
+            return updatedServer;
         }
 
         var options = new HttpClientTransportOptions
@@ -150,7 +164,11 @@ public partial class McpService(
             
         await ThrowIfNotConnectAsync(transport);
 
-        return await mcpDao.UpdateServerAsync(server, updateIcon, iconBase64);
+        var updatedServer1 = await mcpDao.UpdateServerAsync(server, updateIcon, iconBase64);
+
+        messageService.Send(MessageAction.ServerUpdated, MessageTarget.Create(updatedServer1.Id), updatedServer1.Name);
+        
+        return updatedServer1;
     }
     
     public async Task<McpServer> SetServerStateAsync(Guid serverId, bool enabled)
@@ -170,6 +188,13 @@ public partial class McpService(
             await mcpDao.SetServerStateAsync(tenantId, serverId, enabled);
         
             server.Enabled = enabled;
+
+            messageService.Send(
+                enabled 
+                    ? MessageAction.ServerEnabled 
+                    : MessageAction.ServerDisabled, 
+                MessageTarget.Create(serverId), 
+                server.Name);
 
             return server;
         }
@@ -199,11 +224,18 @@ public partial class McpService(
         return await mcpDao.GetActiveServersAsync(tenantId, offset, count);
     }
 
-    public async Task DeleteServersAsync(List<Guid> ids)
+    public async Task DeleteServersAsync(HashSet<Guid> ids)
     {
         await ThrowIfNotAccessAsync();
         
+        var servers = await mcpDao.GetServersAsync(tenantManager.GetCurrentTenantId(), ids);
+        
         await mcpDao.DeleteServersAsync(tenantManager.GetCurrentTenantId(), ids);
+        
+        foreach (var server in servers)
+        {
+            messageService.Send(MessageAction.ServerDeleted, MessageTarget.Create(server.Id), server.Name);
+        }
     }
     
     public async Task<List<McpServerStatus>> AddServersToRoomAsync(int roomId, HashSet<Guid> ids)
@@ -222,7 +254,13 @@ public partial class McpService(
             await socketManager.UpdateFolderAsync(room);
         }
         
-        return await GetServerStatusesAsync(roomId, tenantId);
+        var statuses = await GetServerStatusesAsync(roomId, tenantId);
+        foreach (var status in statuses)
+        {
+            await filesMessageService.SendAsync(MessageAction.AddedServerToAgent, room, status.Name);
+        }
+        
+        return statuses;
     }
 
     public async Task<bool> AddServersToRoomAsync(Folder<int> room, HashSet<Guid> ids)
@@ -254,7 +292,7 @@ public partial class McpService(
         return notify;
     }
 
-    public async Task DeleteServersFromRoomAsync(int roomId, List<Guid> ids)
+    public async Task DeleteServersFromRoomAsync(int roomId, HashSet<Guid> ids)
     {
         var room = await GetRoomAsync(roomId);
         if (!await fileSecurity.CanEditRoomAsync(room))
@@ -264,12 +302,20 @@ public partial class McpService(
         
         var tenantId = tenantManager.GetCurrentTenantId();
         
+        var serversTask = mcpDao.GetServersAsync(tenantId, ids);
+        
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(tenantId)))
         {
             await mcpDao.DeleteServersConnectionsAsync(tenantId, roomId, ids);
         }
         
         await socketManager.UpdateFolderAsync(room);
+        
+        var servers = await serversTask;
+        foreach (var server in servers)
+        {
+            await filesMessageService.SendAsync(MessageAction.DeletedServerFromAgent, room, server.Name);
+        }
     }
 
     public async Task<List<McpServerStatus>> GetServersStatusesAsync(int roomId)

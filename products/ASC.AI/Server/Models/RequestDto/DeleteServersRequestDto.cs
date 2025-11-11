@@ -34,5 +34,5 @@ public class DeleteServersRequestDto
 
 public class DeleteServersRequestBody
 {
-    public required List<Guid> Servers { get; init; }
+    public required HashSet<Guid> Servers { get; init; }
 }

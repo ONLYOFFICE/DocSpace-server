@@ -616,6 +616,12 @@ public enum MessageAction
     
     [SwaggerEnum("Agent deleted")]
     AgentDeleted = 5156,
+    
+    [SwaggerEnum("MCP server added to agent")]
+    AddedServerToAgent = 5157,
+    
+    [SwaggerEnum("MCP server deleted from agent")]
+    DeletedServerFromAgent = 5158,
 
     #endregion
 
@@ -872,6 +878,21 @@ public enum MessageAction
 
     [SwaggerEnum("AI provider deleted")]
     AIProviderDeleted = 6075,
+    
+    [SwaggerEnum("MCP server created")]
+    ServerCreated = 6076,
+    
+    [SwaggerEnum("MCP server updated")]
+    ServerUpdated = 6077,
+    
+    [SwaggerEnum("MCP server enabled")]
+    ServerEnabled = 6078,
+    
+    [SwaggerEnum("MCP server disabled")]
+    ServerDisabled = 6079,
+    
+    [SwaggerEnum("MCP server deleted")]
+    ServerDeleted = 6080,
 
     #endregion
 
