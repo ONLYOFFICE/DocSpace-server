@@ -102,6 +102,10 @@ internal class WebDavDaoBase(
         }
 
         var id = GetId(item);
+        if (string.IsNullOrEmpty(id))
+        {
+            return null;
+        }
         var index = id.LastIndexOf('/');
 
         return index == -1 ? null : id[..index];
