@@ -199,7 +199,10 @@ public class FileStorageService //: IFileStorageService
             {
                 parentRoom = !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
             }
-
+            if (!await fileSecurity.CanReadAsync(parent))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+            }
             (entries, _) = await entryManager.GetEntriesAsync(parent, parentRoom, 0, -1, [FilterType.FoldersOnly], false, Guid.Empty, Guid.Empty, string.Empty, [], false, false, new OrderBy(SortedByType.AZ, true));
         }
         catch (Exception e)
