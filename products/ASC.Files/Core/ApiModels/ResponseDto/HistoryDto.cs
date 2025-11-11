@@ -32,6 +32,11 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 public record HistoryDto
 {
     /// <summary>
+    /// The unique identifier for the file history entry.
+    /// </summary>
+    public required int Id { get; init; }
+    
+    /// <summary>
     /// The action performed on the file.
     /// </summary>
     public required HistoryAction Action { get; init; }
@@ -78,6 +83,7 @@ public class HistoryDtoHelper(EmployeeFullDtoHelper employeeFullDtoHelper, UserM
 
         return new HistoryDto
         {
+            Id = entry.Id,
             Action = entry.Action,
             Initiator = initiator,
             Date = apiDateTimeHelper.Get(entry.Date),

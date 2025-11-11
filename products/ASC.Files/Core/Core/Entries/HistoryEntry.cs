@@ -34,6 +34,11 @@ namespace ASC.Files.Core.Core.Entries;
 public record HistoryEntry
 {
     /// <summary>
+    /// The unique identifier for the history entry.
+    /// </summary>
+    public required int Id { get; init; }
+    
+    /// <summary>
     /// The action performed on the file.
     /// </summary>
     public HistoryAction Action { get; init; }
