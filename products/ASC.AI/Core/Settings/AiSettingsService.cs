@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.MessagingSystem.Core;
+
 namespace ASC.AI.Core.Settings;
 
 [Scope]
@@ -35,7 +37,8 @@ public class AiSettingsService(
     AiGateway aiGateway,
     VectorizationGlobalSettings vectorizationGlobalSettings,
     SystemMcpConfig systemMcpConfig,
-    ModelClientFactory modelClientFactory)
+    ModelClientFactory modelClientFactory,
+    MessageService messageService)
 {
     public async Task<WebSearchSettings> SetWebSearchSettingsAsync(bool enabled, EngineType type, string? key)
     {
@@ -47,6 +50,8 @@ public class AiSettingsService(
         var typeChanged = settings.Type != type;
         settings.Type = type;
 
+        var set = false;
+
         switch (type)
         {
             case EngineType.Exa:
@@ -57,6 +62,8 @@ public class AiSettingsService(
                     {
                         ApiKey = key
                     };
+
+                    set = true;
                 }
                 break;
             
@@ -68,6 +75,15 @@ public class AiSettingsService(
         }
     
         await aiSettingsStore.SetWebSearchSettingsAsync(settings);
+        
+        if (set)
+        {
+            messageService.Send(MessageAction.SetWebSearchSettings, type.ToStringFast());
+        }
+        else
+        {
+            messageService.Send(MessageAction.ResetWebSearchSettings);
+        }
     
         return settings;
     }
@@ -83,7 +99,9 @@ public class AiSettingsService(
     {
         await ThrowIfNotAccess();
 
+        var set = false;
         var settings = await aiSettingsStore.GetVectorizationSettingsAsync();
+        
         if (type == EmbeddingProviderType.None)
         {
             settings.Type = type;
@@ -118,9 +136,20 @@ public class AiSettingsService(
             
             settings.Type = type;
             settings.Key = key;
+            
+            set = true;
         }
 
         await aiSettingsStore.SetVectorizationSettingsAsync(settings);
+        
+        if (set)
+        {
+            messageService.Send(MessageAction.SetVectorizationSettings, type.ToStringFast());
+        }
+        else
+        {
+            messageService.Send(MessageAction.ResetVectorizationSettings);
+        }
 
         return settings;
     }

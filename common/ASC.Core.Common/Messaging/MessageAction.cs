@@ -893,6 +893,18 @@ public enum MessageAction
     
     [SwaggerEnum("MCP server deleted")]
     ServerDeleted = 6080,
+    
+    [SwaggerEnum("WebSearch settings configured")]
+    SetWebSearchSettings = 6081,
+    
+    [SwaggerEnum("WebSearch settings reset")]
+    ResetWebSearchSettings = 6082,
+    
+    [SwaggerEnum("Vectorization settings configured")]
+    SetVectorizationSettings = 6083,
+    
+    [SwaggerEnum("Vectorization settings reset")]
+    ResetVectorizationSettings = 6084,
 
     #endregion
 

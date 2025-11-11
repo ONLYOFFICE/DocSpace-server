@@ -2049,6 +2049,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Vectorization settings have been reset.
+        /// </summary>
+        public static string ResetVectorizationSettings {
+            get {
+                return ResourceManager.GetString("ResetVectorizationSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Web search settings have been reset .
+        /// </summary>
+        public static string ResetWebSearchSettings {
+            get {
+                return ResourceManager.GetString("ResetWebSearchSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Revoked client {0} access.
         /// </summary>
         public static string RevokeUserClient {
@@ -2441,6 +2459,24 @@ namespace ASC.AuditTrail {
         public static string SettingsModule {
             get {
                 return ResourceManager.GetString("SettingsModule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vectorization settings are configured. Provider: {0}.
+        /// </summary>
+        public static string SetVectorizationSettings {
+            get {
+                return ResourceManager.GetString("SetVectorizationSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Web search settings are configured. Engine: {0}.
+        /// </summary>
+        public static string SetWebSearchSettings {
+            get {
+                return ResourceManager.GetString("SetWebSearchSettings", resourceCulture);
             }
         }
         

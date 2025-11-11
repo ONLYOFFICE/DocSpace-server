@@ -111,7 +111,9 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.ApiKeyCreated, 
                     MessageAction.CustomerOperationPerformed, 
                     MessageAction.AIProviderCreated,
-                    MessageAction.ServerCreated
+                    MessageAction.ServerCreated,
+                    MessageAction.SetWebSearchSettings,
+                    MessageAction.SetVectorizationSettings
                 ]
             },
             {
@@ -126,7 +128,9 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.WebhookDeleted,
                     MessageAction.ApiKeyDeleted, 
                     MessageAction.AIProviderDeleted,
-                    MessageAction.ServerDeleted
+                    MessageAction.ServerDeleted,
+                    MessageAction.ResetWebSearchSettings,
+                    MessageAction.ResetVectorizationSettings
                 ]
             },
             {
