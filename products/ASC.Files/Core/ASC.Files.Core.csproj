@@ -17,6 +17,7 @@
     <PackageReference Include="DocuSign.eSign.dll" />
     <PackageReference Include="Dropbox.Api" />
     <PackageReference Include="Google.Apis.Drive.v3" />
+    <PackageReference Include="HtmlAgilityPack" />
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
