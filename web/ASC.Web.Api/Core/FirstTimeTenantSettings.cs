@@ -206,11 +206,9 @@ public class FirstTimeTenantSettings(
 
     private async Task<string> GetResponseString(HttpClient httpClient, HttpMethod method, string requestUrl, Dictionary<string, string> headers)
     {
-        string responseString = null;
-
         if (string.IsNullOrEmpty(requestUrl))
         {
-            return responseString;
+            return null;
         }
 
         var request = new HttpRequestMessage
@@ -223,7 +221,9 @@ public class FirstTimeTenantSettings(
         {
             request.Headers.Add(header.Key, header.Value);
         }
-
+        
+        string responseString = null;
+        
         try
         {
             using (var response = await httpClient.SendAsync(request))

@@ -1039,7 +1039,7 @@ public class StudioNotifyService(
                 Actions.ZoomWelcome,
                 await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false),
                 [EMailSenderName],
-                portalUrl ??= commonLinkUtility.GetFullAbsolutePath(""),
+                portalUrl ?? commonLinkUtility.GetFullAbsolutePath(""),
                 new TagValue(CommonTags.Culture, culture.Name),
                 new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
                 new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
@@ -1058,7 +1058,7 @@ public class StudioNotifyService(
 
     public async Task SendTopUpWalletErrorAsync(UserInfo payer, UserInfo owner)
     {
-        var users = (new UserInfo[] { payer, owner })
+        var users = (new[] { payer, owner })
             .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
             .DistinctBy(user => user.Email);
 

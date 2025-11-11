@@ -2971,7 +2971,6 @@ public class FileStorageService //: IFileStorageService
         else
         {
             checkedFiles.AddRange(filesId);
-            return checkedFiles;
         }
 
         return checkedFiles;
@@ -3424,7 +3423,6 @@ public class FileStorageService //: IFileStorageService
         }
 
         await fileSecurity.RemoveSubjectAsync(userFromId, true);
-        return;
     }
 
     public async Task UpdatePersonalFolderModified(Guid userId, bool checkPermission = false)
@@ -3481,7 +3479,6 @@ public class FileStorageService //: IFileStorageService
             var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{userId}";
             await notifyMyFolder.PublishAsync(new ClearMyFolderItem { Key = cacheKey }, CacheNotifyAction.Remove);
         }
-        return;
     }
 
     private async Task DeleteFilesAsync<T>(IEnumerable<T> fileIds, T folderIdTrash)

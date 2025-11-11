@@ -694,7 +694,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var canEdit = await fileSecurity.CanEditAsync(file);
         var canFill = await fileSecurity.CanFillFormsAsync(file);
 
-        FormOpenSetup<T> result = null;
+        FormOpenSetup<T> result;
         if (file.CreateBy == securityContext.CurrentAccount.ID)
         {
             result = new FormOpenSetup<T>

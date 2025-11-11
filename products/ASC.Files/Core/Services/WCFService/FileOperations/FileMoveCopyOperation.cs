@@ -586,7 +586,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         {
                             var toNewFolderParents = await folderDao.GetParentFoldersAsync(newFolder.Id).ToListAsync();
 
-                            var foldersForCopyIds = new List<T>();
+                            List<T> foldersForCopyIds;
                             if (folder.FolderType == FolderType.FillingFormsRoom)
                             {
                                 var foldersForCopy = await FolderDao.GetFoldersAsync(folder.Id).ToListAsync();

@@ -168,7 +168,7 @@ public class AccountingClient
         var result = _cache.Get<List<Currency>>(key);
         if (result == null)
         {
-            result = await RequestAsync<List<Currency>>(HttpMethod.Get, "/currency/all", null);
+            result = await RequestAsync<List<Currency>>(HttpMethod.Get, "/currency/all");
             _cache.Insert(key, result, DateTime.Now.AddDays(1));
         }
         return result;

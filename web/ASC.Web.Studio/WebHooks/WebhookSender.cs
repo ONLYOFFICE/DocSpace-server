@@ -90,7 +90,7 @@ public class WebhookSender(
             var status = 0;
             DateTime? delivery = null;
             var requestDate = webhookPayload.GetShortUtcNow();
-            string responsePayload = null;
+            string responsePayload;
             string responseHeaders = null;
             var requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
             string requestHeaders = null;

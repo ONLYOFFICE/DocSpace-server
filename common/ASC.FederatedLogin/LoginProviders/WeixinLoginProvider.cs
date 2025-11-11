@@ -85,7 +85,7 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
     public override LoginProfile GetLoginProfile(OAuth20Token token)
     {
         return token is WeixinOAuth20Token weixinOAuth20Token
-            ? GetLoginProfile($"{weixinOAuth20Token?.AccessToken}&openid={weixinOAuth20Token?.UnionId}")
+            ? GetLoginProfile($"{weixinOAuth20Token.AccessToken}&openid={weixinOAuth20Token.UnionId}")
             : GetLoginProfile($"{token?.AccessToken}");
     }
 

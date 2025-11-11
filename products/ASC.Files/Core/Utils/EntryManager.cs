@@ -1469,7 +1469,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if (file.IsForm && file.IsCompletedForm && fileForceSave != ForcesaveType.None)
             {
-                await fileDao.UpdateCategoryAsync(file.Id, file.Version, (int)FilterType.PdfForm, ForcesaveType.None);
+                await fileDao.UpdateCategoryAsync(file.Id, file.Version, (int)FilterType.PdfForm);
                 return file;
             }
 
