@@ -83,6 +83,7 @@ public class MentionMessageWrapper
     /// <summary>
     /// The mention message.
     /// </summary>
+    [StringLength(255)]
     public string Message { get; set; }
 }
 
