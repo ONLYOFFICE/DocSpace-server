@@ -162,6 +162,7 @@ public abstract class SecurityController<T>(
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of access rights information", typeof(List<AceShortWrapper>))]
     [HttpPost("file/{fileId}/sendeditornotify")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<List<AceShortWrapper>> SendEditorNotify(MentionMessageWrapperRequestDto<T> inDto)
     {
         return await fileStorageService.SendEditorNotifyAsync(inDto.FileId, inDto.MentionMessage);
