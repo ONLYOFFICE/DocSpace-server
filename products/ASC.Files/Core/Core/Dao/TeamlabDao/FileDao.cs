@@ -70,7 +70,8 @@ internal class FileDao(
         QuotaSocketManager quotaSocketManager,
         CustomQuota customQuota, 
         VectorStore vectorStore,
-        IEventBus eventBus)
+        IEventBus eventBus,
+        VectorizationGlobalSettings vectorizationGlobalSettings)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -409,6 +410,12 @@ internal class FileDao(
         var folderDao = daoFactory.GetFolderDao<int>();
         var fileDao = daoFactory.GetFileDao<int>();
         var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
+
+        if (currentFolder is { FolderType: FolderType.Knowledge } && 
+            file.ContentLength > vectorizationGlobalSettings.MaxContentLength)
+        {
+            throw FileSizeComment.GetFileSizeException(vectorizationGlobalSettings.MaxContentLength);
+        }
 
         var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
         UserInfo user = null;
@@ -2999,7 +3006,8 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         QuotaSocketManager quotaSocketManager,
         CustomQuota customQuota,
         VectorStore vectorStore,
-        IEventBus eventBus)
+        IEventBus eventBus,
+        VectorizationGlobalSettings vectorizationGlobalSettings)
     : FileDao(
         logger,
         factoryIndexer,
@@ -3041,7 +3049,8 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         quotaSocketManager,
         customQuota, 
         vectorStore,
-        eventBus), ICacheFileDao<int>
+        eventBus,
+        vectorizationGlobalSettings), ICacheFileDao<int>
 {
 
     private readonly ConcurrentDictionary<int, IEnumerable<FormRole>> _cache = new();

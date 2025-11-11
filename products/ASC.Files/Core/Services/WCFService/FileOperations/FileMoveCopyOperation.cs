@@ -940,7 +940,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
             else if (toFolder.FolderType is FolderType.Knowledge && !vectorizationSettings.IsSupportedContentExtraction(file.Title))
             {
-                Err =FilesCommonResource.ErrorMessage_NotSupportedFormat;
+                Err = FilesCommonResource.ErrorMessage_NotSupportedFormat;
+            }
+            else if (toFolder.FolderType is FolderType.Knowledge &&
+                     file.ContentLength > vectorizationSettings.MaxContentLength)
+            {
+                Err = FileSizeComment.GetFileSizeExceptionString(vectorizationSettings.MaxContentLength);
             }
             else
             {

@@ -249,9 +249,14 @@ public class FileUploader(
         
         if (folder is { FolderType: FolderType.Knowledge })
         {
-            if (!vectorizationGlobalSettings.SupportedFormats.Contains(FileUtility.GetFileExtension(fileName)))
+            if (!vectorizationGlobalSettings.IsSupportedContentExtraction(fileName))
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+            }
+
+            if (contentLength > vectorizationGlobalSettings.MaxContentLength)
+            {
+                throw FileSizeComment.GetFileSizeException(vectorizationGlobalSettings.MaxContentLength);
             }
         }
         
