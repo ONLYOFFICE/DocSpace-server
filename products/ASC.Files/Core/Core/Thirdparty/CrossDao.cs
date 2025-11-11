@@ -66,7 +66,7 @@ internal class CrossDao //Additional SharpBox
 
         var toFile = serviceProvider.GetService<File<TTo>>();
 
-        toFile.Title = await global.GetAvailableTitleAsync(fromFile.Title, toFolderId, toFileDao.IsExistAsync, FileEntryType.File);;
+        toFile.Title = await global.GetAvailableTitleAsync(fromFile.Title, toFolderId, toFileDao.IsExistAsync, FileEntryType.File);
         toFile.Encrypted = fromFile.Encrypted;
         toFile.ParentId = toConverter(toFolderId);
         toFile.ThumbnailStatus = Thumbnail.Waiting;
@@ -140,7 +140,7 @@ internal class CrossDao //Additional SharpBox
         var fromFolder = await fromFolderDao.GetFolderAsync(fromConverter(fromFolderId));
 
         var toFolder1 = serviceProvider.GetService<Folder<TTo>>();
-        toFolder1.Title = fromFolder.Title;
+        toFolder1.Title = await global.GetAvailableTitleAsync(fromFolder.Title, toRootFolderId, toFolderDao.IsExistAsync, FileEntryType.File);
         toFolder1.ParentId = toConverter(toRootFolderId);
 
         var toFolder = await toFolderDao.GetFolderAsync(fromFolder.Title, toConverter(toRootFolderId));

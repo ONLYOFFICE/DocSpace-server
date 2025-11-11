@@ -44,6 +44,7 @@ internal class FolderDao(
         FolderMapper mapper,
         GlobalStore globalStore,
     GlobalFolder globalFolder,
+    Global global,
     IDistributedLockProvider distributedLockProvider,
     StorageFactory storageFactory)
     : AbstractDao(dbContextManager,
@@ -1118,7 +1119,7 @@ internal class FolderDao(
         copy.RootId = toFolder.RootId;
         copy.RootCreateBy = toFolder.RootCreateBy;
         copy.RootFolderType = toFolder.RootFolderType;
-        copy.Title = folder.Title;
+        copy.Title =  await global.GetAvailableTitleAsync(folder.Title, toFolderId, IsExistAsync, FileEntryType.Folder);
         copy.FolderType = folder.FolderType is
             FolderType.ReadyFormFolder or
             FolderType.InProcessFormFolder or
@@ -2343,6 +2344,7 @@ internal class CacheFolderDao(
     FolderMapper mapper,
     GlobalStore globalStore,
     GlobalFolder globalFolder,
+    Global global,
     IDistributedLockProvider distributedLockProvider,
     StorageFactory storageFactory)
     : FolderDao(
@@ -2361,7 +2363,8 @@ internal class CacheFolderDao(
         crossDao,
         mapper,
         globalStore,
-        globalFolder,
+        globalFolder, 
+        global,
         distributedLockProvider,
         storageFactory), ICacheFolderDao<int>
 {
