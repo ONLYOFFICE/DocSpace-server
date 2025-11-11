@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,10 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Provider.Model;
+namespace ASC.AI.Models.RequestDto;
 
-public interface IModelClient
+public class GetServersRequestDto
 {
-    public Task PingAsync();
-    public Task<List<ModelInfo>> ListModelsAsync(Scope? scope = null);
+    [FromRoute(Name = "id")]
+    public Guid Id { get; init; }
 }

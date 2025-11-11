@@ -1332,4 +1332,13 @@
   <data name="TariffsFeature_webfetch_wallet_price_count" xml:space="preserve">
     <value>A unit of text page measurement that large language models (LLMs) can handle</value>
   </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Failed to set quota per ai agent. The entered value is greater than the total DocSpace storage.</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>AI agent space quota exceeded</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>The number of AI agents should not exceed {0}</value>
+  </data>
 </root>

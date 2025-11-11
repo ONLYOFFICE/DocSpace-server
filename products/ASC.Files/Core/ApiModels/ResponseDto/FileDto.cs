@@ -230,6 +230,8 @@ public class FileDtoHelper(
     AiAccessibility aiAccessibility)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener) 
 {
+    private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
+
     public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null, bool? aiReady = null)
     {
         Task<bool> aiReadyTask = null;
@@ -583,12 +585,19 @@ public class FileDtoHelper(
                 {
                     result.ExpirationDate = _apiDateTimeHelper.Get(expirationDate);
                 }
-
-                var parent = await folderDao.GetFolderAsync(result.FolderId);
+                
+                var parents = await folderDao.GetParentFoldersAsync(result.FolderId).ToListAsync();
+                var parent = parents.FirstOrDefault();
                 if (!await _fileSecurity.CanReadAsync(parent))
                 {
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
                     result.RootFolderType = FolderType.SHARE;
+                }
+            
+                var room = parents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
+                if (room != null)
+                {
+                    result.OwnedBy = await _employeeWrapperHelper.GetAsync(room.CreateBy);
                 }
             }
             

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.MessagingSystem.Core;
+
 namespace ASC.AI.Core.Settings;
 
 [Scope]
@@ -33,7 +35,10 @@ public class AiSettingsService(
     AiSettingsStore aiSettingsStore,
     AiAccessibility accessibility,
     AiGateway aiGateway,
-    VectorizationGlobalSettings vectorizationGlobalSettings)
+    VectorizationGlobalSettings vectorizationGlobalSettings,
+    SystemMcpConfig systemMcpConfig,
+    ModelClientFactory modelClientFactory,
+    MessageService messageService)
 {
     public async Task<WebSearchSettings> SetWebSearchSettingsAsync(bool enabled, EngineType type, string? key)
     {
@@ -45,6 +50,8 @@ public class AiSettingsService(
         var typeChanged = settings.Type != type;
         settings.Type = type;
 
+        var set = false;
+
         switch (type)
         {
             case EngineType.Exa:
@@ -55,6 +62,8 @@ public class AiSettingsService(
                     {
                         ApiKey = key
                     };
+
+                    set = true;
                 }
                 break;
             
@@ -66,6 +75,15 @@ public class AiSettingsService(
         }
     
         await aiSettingsStore.SetWebSearchSettingsAsync(settings);
+        
+        if (set)
+        {
+            messageService.Send(MessageAction.SetWebSearchSettings, type.ToStringFast());
+        }
+        else
+        {
+            messageService.Send(MessageAction.ResetWebSearchSettings);
+        }
     
         return settings;
     }
@@ -81,7 +99,9 @@ public class AiSettingsService(
     {
         await ThrowIfNotAccess();
 
+        var set = false;
         var settings = await aiSettingsStore.GetVectorizationSettingsAsync();
+        
         if (type == EmbeddingProviderType.None)
         {
             settings.Type = type;
@@ -89,11 +109,47 @@ public class AiSettingsService(
         }
         else
         {
+            ArgumentException.ThrowIfNullOrEmpty(key);
+            
+            var url = type switch
+            {
+                EmbeddingProviderType.OpenAi => VectorizationGlobalSettings.OpenAiBaseUrl,
+                EmbeddingProviderType.OpenRouter => VectorizationGlobalSettings.OpenRouterBaseUrl,
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            };
+            
+            var client = modelClientFactory.Create(type, url, key);
+
+            try
+            {
+                await client.PingAsync();
+            }
+            catch (HttpRequestException httpException)
+            {
+                if (httpException.StatusCode is HttpStatusCode.Unauthorized)
+                {
+                    throw new ArgumentException(ErrorMessages.InvalidKey);
+                }
+
+                throw;
+            }
+            
             settings.Type = type;
             settings.Key = key;
+            
+            set = true;
         }
 
         await aiSettingsStore.SetVectorizationSettingsAsync(settings);
+        
+        if (set)
+        {
+            messageService.Send(MessageAction.SetVectorizationSettings, type.ToStringFast());
+        }
+        else
+        {
+            messageService.Send(MessageAction.ResetVectorizationSettings);
+        }
 
         return settings;
     }
@@ -111,6 +167,9 @@ public class AiSettingsService(
         var vectorizationTask = aiSettingsStore.IsVectorizationEnabledAsync();
         var aiReadyTask = accessibility.IsAiEnabledAsync();
         
+        var docSpaceMcpServer = systemMcpConfig.Servers.Values.FirstOrDefault(
+            x => x.Type == ServerType.DocSpace);
+        
         await Task.WhenAll(webSearchTask, vectorizationTask, aiReadyTask);
         
         return new AiSettings
@@ -119,6 +178,7 @@ public class AiSettingsService(
             VectorizationEnabled = await vectorizationTask,
             AiReady = await aiReadyTask,
             EmbeddingModel = vectorizationGlobalSettings.Model.Id,
+            PortalMcpServerId = docSpaceMcpServer?.Id
         };
     }
     
@@ -126,7 +186,7 @@ public class AiSettingsService(
     {
         if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || aiGateway.Configured)
         {
-            throw new SecurityException();
+            throw new SecurityException(ErrorMessages.AiSettingsAccessDenied);
         }
     }
 }

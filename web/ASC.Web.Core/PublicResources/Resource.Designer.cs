@@ -277,6 +277,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI agent space quota exceeded.
+        /// </summary>
+        public static string AiAgentFreeSpaceException {
+            get {
+                return ResourceManager.GetString("AiAgentFreeSpaceException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to set quota per ai agent. The entered value is greater than the total DocSpace storage..
+        /// </summary>
+        public static string AiAgentQuotaGreaterPortalError {
+            get {
+                return ResourceManager.GetString("AiAgentQuotaGreaterPortalError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Automatic renewal.
         /// </summary>
         public static string AutoRenewal {
@@ -3162,6 +3180,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string Tariffs_startup {
             get {
                 return ResourceManager.GetString("Tariffs_startup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of AI agents should not exceed {0}.
+        /// </summary>
+        public static string TariffsFeature_aiagent_exception {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aiagent_exception", resourceCulture);
             }
         }
         

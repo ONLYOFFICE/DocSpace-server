@@ -96,6 +96,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Added MCP server {0} to agent.
+        /// </summary>
+        public static string AddedServerToAgent {
+            get {
+                return ResourceManager.GetString("AddedServerToAgent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Administrator Added: {0}.
         /// </summary>
         public static string AdministratorAdded {
@@ -164,6 +173,33 @@ namespace ASC.AuditTrail {
         public static string AgentsModule {
             get {
                 return ResourceManager.GetString("AgentsModule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI provider created: {0}.
+        /// </summary>
+        public static string AIProviderCreated {
+            get {
+                return ResourceManager.GetString("AIProviderCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI provider deleted: {0}.
+        /// </summary>
+        public static string AIProviderDeleted {
+            get {
+                return ResourceManager.GetString("AIProviderDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI provider updated: {0}.
+        /// </summary>
+        public static string AIProviderUpdated {
+            get {
+                return ResourceManager.GetString("AIProviderUpdated", resourceCulture);
             }
         }
         
@@ -420,6 +456,33 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI agents [{0}]. Set custom storage quota for AI agents : {1}.
+        /// </summary>
+        public static string CustomQuotaPerAiAgentChanged {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerAiAgentChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI agents  [{0}]. Set default storage quota for AI agents : {1}.
+        /// </summary>
+        public static string CustomQuotaPerAiAgentDefault {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerAiAgentDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI agents  [{0}]. Disabled storage quota for AI agents.
+        /// </summary>
+        public static string CustomQuotaPerAiAgentDisabled {
+            get {
+                return ResourceManager.GetString("CustomQuotaPerAiAgentDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Rooms [{0}]. Set custom storage quota for rooms: {1}.
         /// </summary>
         public static string CustomQuotaPerRoomChanged {
@@ -515,6 +578,15 @@ namespace ASC.AuditTrail {
         public static string DeletedRoomTags {
             get {
                 return ResourceManager.GetString("DeletedRoomTags", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleted MCP server {0} from agent.
+        /// </summary>
+        public static string DeletedServerFromAgent {
+            get {
+                return ResourceManager.GetString("DeletedServerFromAgent", resourceCulture);
             }
         }
         
@@ -1887,6 +1959,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Set default storage quota for AI agents: {0}.
+        /// </summary>
+        public static string QuotaPerAiAgentChanged {
+            get {
+                return ResourceManager.GetString("QuotaPerAiAgentChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disabled default storage quota for AI agents.
+        /// </summary>
+        public static string QuotaPerAiAgentDisabled {
+            get {
+                return ResourceManager.GetString("QuotaPerAiAgentDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Set default storage quota: {0}.
         /// </summary>
         public static string QuotaPerPortalChanged {
@@ -1955,6 +2045,24 @@ namespace ASC.AuditTrail {
         public static string RegenerateSecret {
             get {
                 return ResourceManager.GetString("RegenerateSecret", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vectorization settings have been reset.
+        /// </summary>
+        public static string ResetVectorizationSettings {
+            get {
+                return ResourceManager.GetString("ResetVectorizationSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Web search settings have been reset .
+        /// </summary>
+        public static string ResetWebSearchSettings {
+            get {
+                return ResourceManager.GetString("ResetWebSearchSettings", resourceCulture);
             }
         }
         
@@ -2283,6 +2391,51 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to MCP server created: {0}.
+        /// </summary>
+        public static string ServerCreated {
+            get {
+                return ResourceManager.GetString("ServerCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MCP server deleted: {0}.
+        /// </summary>
+        public static string ServerDeleted {
+            get {
+                return ResourceManager.GetString("ServerDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MCP server disabled: {0}.
+        /// </summary>
+        public static string ServerDisabled {
+            get {
+                return ResourceManager.GetString("ServerDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MCP server enabled: {0}.
+        /// </summary>
+        public static string ServerEnabled {
+            get {
+                return ResourceManager.GetString("ServerEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MCP server updated: {0}.
+        /// </summary>
+        public static string ServerUpdated {
+            get {
+                return ResourceManager.GetString("ServerUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Session Completed.
         /// </summary>
         public static string SessionCompleted {
@@ -2306,6 +2459,24 @@ namespace ASC.AuditTrail {
         public static string SettingsModule {
             get {
                 return ResourceManager.GetString("SettingsModule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vectorization settings are configured. Provider: {0}.
+        /// </summary>
+        public static string SetVectorizationSettings {
+            get {
+                return ResourceManager.GetString("SetVectorizationSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Web search settings are configured. Engine: {0}.
+        /// </summary>
+        public static string SetWebSearchSettings {
+            get {
+                return ResourceManager.GetString("SetWebSearchSettings", resourceCulture);
             }
         }
         

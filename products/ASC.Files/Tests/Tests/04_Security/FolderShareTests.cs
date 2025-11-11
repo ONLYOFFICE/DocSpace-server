@@ -424,7 +424,7 @@ public class FolderShareTests(
         folderAsUser1.Security.Read.Should().BeTrue();
         folderAsUser1.Security.Edit.Should().BeFalse();
         
-        var sharedFolderIdAsUser1 = await GetFolderIdAsync(FolderType.SHARE, user1);
+        var sharedFolderIdAsUser1 = await GetShareFolderIdAsync( user1);
         var sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser1, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser1.Should().NotBeNull();
         sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Read);
@@ -435,7 +435,7 @@ public class FolderShareTests(
         folderAsUser2.Access.Should().Be(FileShare.Editing);
         folderAsUser2.Security.Read.Should().BeTrue();
         
-        var sharedFolderIdAsUser2 = await GetFolderIdAsync(FolderType.SHARE, user2);
+        var sharedFolderIdAsUser2 = await GetShareFolderIdAsync( user2);
         var sharedFolderAsUser2 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser2, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser2.Should().NotBeNull();
         sharedFolderAsUser2.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Editing);
@@ -490,7 +490,7 @@ public class FolderShareTests(
         folderAsUser1.Security.Read.Should().BeTrue();
         folderAsUser1.Security.Edit.Should().BeFalse();
         
-        var sharedFolderIdAsUser1 = await GetFolderIdAsync(FolderType.SHARE, user1);
+        var sharedFolderIdAsUser1 = await GetShareFolderIdAsync( user1);
         var sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser1, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser1.Should().NotBeNull();
         sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Editing);
@@ -501,7 +501,7 @@ public class FolderShareTests(
         folderAsUser2.Access.Should().Be(FileShare.Editing);
         folderAsUser2.Security.Read.Should().BeTrue();
         
-        var sharedFolderIdAsUser2 = await GetFolderIdAsync(FolderType.SHARE, user2);
+        var sharedFolderIdAsUser2 = await GetShareFolderIdAsync( user2);
         var sharedFolderAsUser2 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser2, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser2.Should().NotBeNull();
         sharedFolderAsUser2.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Editing);
@@ -560,7 +560,7 @@ public class FolderShareTests(
         fileAsUser1.Access.Should().Be(FileShare.Editing);
         fileAsUser1.Security.Edit.Should().BeTrue();
 
-        var sharedFolderIdAsUser1 = await GetFolderIdAsync(FolderType.SHARE, user1);
+        var sharedFolderIdAsUser1 = await GetShareFolderIdAsync( user1);
         var sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser1, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser1.Should().NotBeNull();
         sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Editing);
@@ -571,7 +571,7 @@ public class FolderShareTests(
         fileAsUser2.Access.Should().Be(FileShare.Editing);
         fileAsUser2.Security.Edit.Should().BeTrue();
         
-        var sharedFolderIdAsUser2 = await GetFolderIdAsync(FolderType.SHARE, user2);
+        var sharedFolderIdAsUser2 = await GetShareFolderIdAsync( user2);
         var sharedFolderAsUser2 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderIdAsUser2, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser2.Should().NotBeNull();
         sharedFolderAsUser2.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Editing);
@@ -608,7 +608,7 @@ public class FolderShareTests(
         await _filesClient.Authenticate(user2);
 
         // Step 6: Get Folder with type FolderType.SHARE
-        var sharedFolderId = await GetFolderIdAsync(FolderType.SHARE, user2);
+        var sharedFolderId = await GetShareFolderIdAsync( user2);
         var sharedFolder = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Step 7: Check New for equality 1 for empty folder
@@ -634,7 +634,7 @@ public class FolderShareTests(
         await _filesClient.Authenticate(user2);
 
         // Step 11: Get Folder with type FolderType.SHARE
-        var sharedFolderId2 = await GetFolderIdAsync(FolderType.SHARE, user2);
+        var sharedFolderId2 = await GetShareFolderIdAsync( user2);
         var sharedFolder2 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderId2, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Step 12: Check New for equality 2
@@ -651,7 +651,7 @@ public class FolderShareTests(
         await _filesClient.Authenticate(user2);
 
         // Step 16: Get Folder with type FolderType.SHARE
-        var sharedFolderId3 = await GetFolderIdAsync(FolderType.SHARE, user2);
+        var sharedFolderId3 = await GetShareFolderIdAsync( user2);
         var sharedFolder3 = (await _foldersApi.GetFolderByFolderIdAsync(sharedFolderId3, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Step 17: Check New for equality 3

@@ -44,6 +44,12 @@ public class GetFolderRequestDto<T>
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
+    /// The identifier of the user who shared the folder or file.
+    /// </summary>
+    [FromQuery(Name = "sharedBy")]
+    public Guid? SharedBy { get; set; }
+
+    /// <summary>
     /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]

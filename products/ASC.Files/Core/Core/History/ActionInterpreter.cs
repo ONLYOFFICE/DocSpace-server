@@ -64,6 +64,7 @@ public abstract class ActionInterpreter
 
         var historyEntry = new HistoryEntry
         {
+            Id = @event.Id,
             Action = new HistoryAction(processedAction, key),
             InitiatorId = initiatorId,
             InitiatorName = initiatorName,

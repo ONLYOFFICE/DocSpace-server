@@ -88,10 +88,6 @@ public abstract partial class ExportTask<T>(IServiceScopeFactory serviceScopeFac
 
                 var builder = new StringBuilder();
 
-                var counter = 1;
-                var urlToIndex = new Dictionary<string, int>();
-                var sources = new List<(int, string)>();
-
                 await foreach (var message in messages)
                 {
                     if (message.Role == Role.User)
@@ -134,12 +130,6 @@ public abstract partial class ExportTask<T>(IServiceScopeFactory serviceScopeFac
                                     url = commonLinkUtility.GetFullAbsolutePath(url);
                                 }
 
-                                if (urlToIndex.TryAdd(url, counter))
-                                {
-                                    sources.Add((counter, url));
-                                    counter++;
-                                }
-
                                 return isRelativeUrl ? $"[{title}]({url})" : match.Value;
                             }
                             catch
@@ -152,14 +142,6 @@ public abstract partial class ExportTask<T>(IServiceScopeFactory serviceScopeFac
                     }
 
                     builder.AppendLine();
-                }
-
-                if (sources.Count > 0)
-                {
-                    foreach (var (index, url) in sources)
-                    {
-                        builder.AppendLine($"{index}. {url}");
-                    }
                 }
 
                 if (builder.Length == 0)
@@ -186,10 +168,6 @@ public abstract partial class ExportTask<T>(IServiceScopeFactory serviceScopeFac
                 {
                     Status = DistributedTaskStatus.Completed;
                 }
-            }
-            catch
-            {
-                throw;
             }
             finally
             {

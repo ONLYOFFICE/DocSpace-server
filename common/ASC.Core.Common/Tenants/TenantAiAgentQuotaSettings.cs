@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,10 +24,24 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Provider.Model;
+namespace ASC.Core.Tenants;
 
-public interface IModelClient
+/// <summary>
+/// The ai agent quota settings.
+/// </summary>
+[Serializable]
+public class TenantAiAgentQuotaSettings : TenantEntityQuotaSettings, ISettings<TenantAiAgentQuotaSettings>
 {
-    public Task PingAsync();
-    public Task<List<ModelInfo>> ListModelsAsync(Scope? scope = null);
+
+    [JsonIgnore]
+    public Guid ID
+    {
+        get { return new Guid("{6D0B226C-EF0F-4765-836E-0A08B55DC06C}"); }
+    }
+    public TenantAiAgentQuotaSettings GetDefault()
+    {
+        return new TenantAiAgentQuotaSettings();
+    }
+
+    public DateTime LastModified { get; set; }
 }

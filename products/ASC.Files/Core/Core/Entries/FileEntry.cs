@@ -54,6 +54,11 @@ public abstract class FileEntry : ICloneable
     public Guid CreateBy { get; set; }
 
     /// <summary>
+    /// Identifies the user who has shared the file entry.
+    /// </summary>
+    public Guid? SharedBy { get; set; }
+
+    /// <summary>
     /// The name of the user who created the file entry.
     /// </summary>
     [JsonIgnore]
@@ -153,6 +158,11 @@ public abstract class FileEntry : ICloneable
     /// The parent room type of the file entry.
     /// </summary>
     public FolderType? ParentRoomType { get; set; }
+
+    /// <summary>
+    /// Indicates the unique identifier of the user who created the parent room, if applicable.
+    /// </summary>
+    public Guid? ParentRoomCreatedBy { get; set; }
 
     /// <summary>
     /// The ID of the user who created the root folder of the file entry.

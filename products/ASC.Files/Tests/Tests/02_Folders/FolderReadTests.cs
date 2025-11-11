@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,10 +24,34 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Provider.Model;
+extern alias ASCWebApi;
+extern alias ASCPeople;
+using ASC.Files.Tests.ApiFactories;
 
-public interface IModelClient
+namespace ASC.Files.Tests.Tests._02_Folders;
+
+[Collection("Test Collection")]
+[Trait("Category", "CRUD")]
+[Trait("Feature", "Folders")]
+public class FolderReadTests(
+    FilesApiFactory filesFactory, 
+    WepApiFactory apiFactory, 
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram) 
+    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
-    public Task PingAsync();
-    public Task<List<ModelInfo>> ListModelsAsync(Scope? scope = null);
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "78077")]
+    public async Task ReadSubFolder_InOwnerDocuments_ByUser_Returns403()
+    {
+        var folderName = "Test folder";
+        var createdFolder = await CreateFolder(folderName, FolderType.USER, Initializer.Owner);
+        
+        var user = await Initializer.InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(user);
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _foldersApi.GetFoldersAsync(createdFolder.Id, TestContext.Current.CancellationToken));
+        exception.ErrorCode.Should().Be(403);
+    }
 }

@@ -153,7 +153,8 @@ static file class McpQueries
 {
     public static readonly Func<AiDbContext, int, Guid, Task<DbMcpServerUnit?>> GetServerAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, Guid id) =>
-            ctx.McpServers.Where(x => x.TenantId == tenantId && x.Id == id)
+            ctx.McpServers
+                .Where(x => x.TenantId == tenantId && x.Id == id)
                 .Select(x => new DbMcpServerUnit
                 {
                     Server = x,
@@ -195,6 +196,7 @@ static file class McpQueries
     public static readonly Func<AiDbContext, int, int, int, IAsyncEnumerable<DbMcpServerUnit>> GetServersAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int offset, int count) =>
             ctx.McpServers
+                .Where(x => x.TenantId == tenantId)
                 .GroupJoin(
                     ctx.McpServerStates,
                     server => new { TenantId = tenantId, server.Id },
@@ -216,12 +218,17 @@ static file class McpQueries
     public static readonly Func<AiDbContext, int, int, int, IAsyncEnumerable<DbMcpServerUnit>> GetActiveServersAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int offset, int count) =>
             ctx.McpServers
+                .Where(x => x.TenantId == tenantId)
                 .Join(
                     ctx.McpServerStates,
                     server => new { TenantId = tenantId, server.Id },
                     state => new { TenantId = tenantId, Id = state.ServerId },
-                    (server, state) =>
-                        new DbMcpServerUnit { Server = server, State = state })
+                    (server, state) => new DbMcpServerUnit 
+                    { 
+                        Server = server, 
+                        State = state
+                    })
+                .Where(x => x.State != null && x.State.Enabled)
                 .OrderBy(x => x.Server.Id)
                 .Skip(offset)
                 .Take(count)
@@ -230,12 +237,13 @@ static file class McpQueries
     public static readonly Func<AiDbContext, int, Task<int>> GetActiveServersTotalCountAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId) =>
             ctx.McpServers
-                .Join(
-                    ctx.McpServerStates,
+                .Where(
+                    x => x.TenantId == tenantId)
+                .Join(ctx.McpServerStates,
                     server => new { TenantId = tenantId, server.Id },
                     state => new { TenantId = tenantId, Id = state.ServerId },
-                    (server, state) => server)
-                .Count());
+                    (server, state) => new { server, state })
+                .Count(x => x.state.Enabled));
 
     public static readonly Func<AiDbContext, int, int, Task<int>> GetRoomServersCount =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int roomId) =>
@@ -244,7 +252,8 @@ static file class McpQueries
 
     public static readonly Func<AiDbContext, int, int, Guid, IAsyncEnumerable<DbRoomServerUnit>> GetRoomServersAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, int roomId, Guid userId) =>
-            ctx.RoomMcpServers.Where(x => x.TenantId == tenantId && x.RoomId == roomId)
+            ctx.RoomMcpServers
+                .Where(x => x.TenantId == tenantId && x.RoomId == roomId)
                 .GroupJoin(
                     ctx.McpServers,
                     m => new { tenantId = m.TenantId, id = m.ServerId },

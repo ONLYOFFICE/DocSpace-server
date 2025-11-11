@@ -332,6 +332,7 @@ public class EntryManager(IDaoFactory daoFactory,
         IEnumerable<FilterType> filterTypes,
         bool subjectGroup,
         Guid subjectId,
+        Guid sharedBy,
         string searchText,
         string[] extension,
         bool searchInContent,
@@ -395,7 +396,7 @@ public class EntryManager(IDaoFactory daoFactory,
         if (parent.FolderType == FolderType.SHARE)
         {
             //share
-            var shared = await fileSecurity.GetSharesForMeAsync(filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+            var shared = await fileSecurity.GetSharesForMeAsync(filterType, subjectGroup, subjectId, sharedBy, searchText, extension, searchInContent, withSubfolders).ToListAsync();
 
             entries.AddRange(shared);
 
@@ -683,7 +684,8 @@ public class EntryManager(IDaoFactory daoFactory,
 
             data = data.ToList();
         }
-
+        
+        
         await fileMarker.SetTagsNewAsync(parent, data);
 
         //sorting after marking
@@ -734,7 +736,19 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
             }
         }
+        
+        if (parent.ProviderEntry)
+        {
+            var securityDao = daoFactory.GetSecurityDao<string>();
+            var thirdPartyData = thirdPartyFiles.Select(FileEntry<string> (r) => r).Concat(thirdPartyFolders).ToList();
+            var records = await securityDao.GetPureShareRecordsAsync(thirdPartyData).Where(r=> r.IsLink).ToListAsync();
 
+            foreach (var d in thirdPartyData)
+            {
+                d.Shared = records.Any(r => r.EntryId == d.Id && r.EntryType == d.FileEntryType);
+            }
+        }
+        
         var t1 = entryStatusManager.SetFileStatusAsync(internalFiles);
         var t2 = entryStatusManager.SetIsFavoriteFoldersAsync(internalFolders);
         var t3 = entryStatusManager.SetFileStatusAsync(thirdPartyFiles);
@@ -1616,15 +1630,17 @@ public class EntryManager(IDaoFactory daoFactory,
             if (roomId != -1)
             {
                 var currentRoom = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));
-                var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-                if (quotaRoomSettings.EnableQuota)
+                TenantEntityQuotaSettings quotaSettings = currentRoom.FolderType is FolderType.AiRoom
+                   ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                   : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                if (quotaSettings.EnableQuota)
                 {
-                    var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : currentRoom.SettingsQuota;
+                    var roomQuotaLimit = currentRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : currentRoom.SettingsQuota;
                     if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                     {
                         if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
                         {
-                            throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
+                            throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit, currentRoom.FolderType is FolderType.AiRoom);
                         }
                     }
                 }
@@ -2341,7 +2357,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
     private async Task SetOriginsAsync<T>(Folder<T> parent, List<FileEntry> entries)
     {
-        if (parent.FolderType != FolderType.TRASH || entries.Count == 0)
+        if (parent.FolderType != FolderType.TRASH  || entries.Count == 0)
         {
             return;
         }

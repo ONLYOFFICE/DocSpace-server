@@ -182,6 +182,8 @@ public class FolderDtoHelper(
     AiAccessibility accessibility)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
 {
+    private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
+
     public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null, bool? aiReady = null)
     {
         Task<bool> aiReadyTask = null;
@@ -242,13 +244,17 @@ public class FolderDtoHelper(
                      (result.RootFolderType is FolderType.Archive or FolderType.TRASH && result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete) ||
                      await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID)))
             {
-                var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+
                 result.UsedSpace = folder.Counter;
 
-                if (quotaRoomSettings.EnableQuota && result.RootFolderType != FolderType.Archive && result.RootFolderType != FolderType.TRASH)
+                TenantEntityQuotaSettings quotaSettings = folder.FolderType is FolderType.AiRoom
+                ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+
+                if (quotaSettings.EnableQuota && result.RootFolderType != FolderType.Archive && result.RootFolderType != FolderType.TRASH)
                 {
                     result.IsCustomQuota = folder.SettingsQuota > -2;
-                    result.QuotaLimit = folder.SettingsQuota > -2 ? folder.SettingsQuota : quotaRoomSettings.DefaultQuota;
+                    result.QuotaLimit = folder.SettingsQuota > -2 ? folder.SettingsQuota : quotaSettings.DefaultQuota;
                 }
             }
 
@@ -271,11 +277,20 @@ public class FolderDtoHelper(
             {
                 result.ExpirationDate = _apiDateTimeHelper.Get(expirationDate);
             }
-            var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.ParentId);
+
+            var cachedFolder = _daoFactory.GetCacheFolderDao<T>();
+            var parents = await cachedFolder.GetParentFoldersAsync(result.ParentId).ToListAsync();
+            var parent = parents.FirstOrDefault();
             if (!await _fileSecurity.CanReadAsync(parent))
             {
                 result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
                 result.RootFolderType = FolderType.SHARE;
+            }
+            
+            var room = parents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
+            if (room != null)
+            {
+                result.OwnedBy = await _employeeWrapperHelper.GetAsync(room.CreateBy);
             }
         }
 

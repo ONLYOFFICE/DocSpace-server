@@ -1050,4 +1050,61 @@
   <data name="AgentDeleted" xml:space="preserve">
     <value>Agent deleted</value>
   </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Set default storage quota for AI agents: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Disabled default storage quota for AI agents</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI agents [{0}]. Set custom storage quota for AI agents : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI agents  [{0}]. Set default storage quota for AI agents : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI agents  [{0}]. Disabled storage quota for AI agents</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>AI provider created: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>AI provider deleted: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>AI provider updated: {0}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP server created: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP server updated: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP server deleted: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP server enabled: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP server disabled: {0}</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Added MCP server {0} to agent</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Deleted MCP server {0} from agent</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Web search settings are configured. Engine: {0}</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Web search settings have been reset </value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Vectorization settings are configured. Provider: {0}</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Vectorization settings have been reset</value>
+  </data>
 </root>

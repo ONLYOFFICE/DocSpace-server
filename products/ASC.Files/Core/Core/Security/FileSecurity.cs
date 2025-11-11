@@ -65,6 +65,7 @@ public class FileSecurity(
     public readonly FileShare DefaultArchiveShare = FileShare.Restrict;
     public readonly FileShare DefaultVirtualRoomsShare = FileShare.Restrict;
     public readonly FileShare DefaultRoomTemplatesShare = FileShare.Restrict;
+    public readonly FileShare DefaultAiAgentsShare = FileShare.Restrict;
 
     public static readonly HashSet<FileShare> PaidShares = [FileShare.RoomManager];
     private static HashSet<FileShare> DefaultFileAccess => [FileShare.Editing, FileShare.FillForms, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None];
@@ -1684,6 +1685,7 @@ public class FileSecurity(
                 FolderType.Privacy => DefaultPrivacyShare,
                 FolderType.Archive => DefaultArchiveShare,
                 FolderType.RoomTemplates => DefaultRoomTemplatesShare,
+                FolderType.AiAgents => DefaultAiAgentsShare,
                 _ => DefaultCommonShare
             };
 
@@ -2271,14 +2273,19 @@ public class FileSecurity(
                 .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                 .FirstOrDefault(r => Equals(r.EntryId, entry.Id) && r.EntryType == FileEntryType.File);
 
-            if (ace == null)
+            if (ace == null || entry.RootFolderType == FolderType.VirtualRooms)
             {
                 // share on parent folders
-                ace = shares.Where(r => Equals(r.EntryId, entry.ParentId) && r.EntryType == FileEntryType.Folder)
+                var parentAce = shares.Where(r => Equals(r.EntryId, entry.ParentId) && r.EntryType == FileEntryType.Folder)
                     .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                     .ThenBy(r => r.Level)
                     .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                     .FirstOrDefault();
+
+                if (parentAce != null)
+                {
+                    ace = parentAce;
+                }
             }
         }
         else
@@ -2336,14 +2343,14 @@ public class FileSecurity(
         return daoFactory.GetSecurityDao<T>().GetPureSharesCountAsync(entry, filterType, status, text);
     }
 
-    public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
+    public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, Guid sharedBy, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var securityDao = daoFactory.GetSecurityDao<string>();
         var orderedSubjects = await GetUserOrderedSubjectsAsync(authContext.CurrentAccount.ID, true);
         List<FileShareRecord<int>> recordsInternal = [];
         List<FileShareRecord<string>> recordsThirdParty = [];
 
-        await foreach (var r in securityDao.GetSharesAsync(orderedSubjects.Select(s => s.Subject)))
+        await foreach (var r in securityDao.GetSharesAsync(orderedSubjects.Select(s => s.Subject), sharedBy))
         {
             if (int.TryParse(r.EntryId, out _))
             {
@@ -2693,8 +2700,8 @@ public class FileSecurity(
         var fileDao = daoFactory.GetFileDao<T>();
         var securityDao = daoFactory.GetSecurityDao<T>();
 
-        var fileIds = new Dictionary<T, FileShare>();
-        var folderIds = new Dictionary<T, FileShare>();
+        var fileIds = new Dictionary<T, (FileShare, Guid)>();
+        var folderIds = new Dictionary<T, (FileShare, Guid)>();
 
         var recordGroup = records.GroupBy(r => new { r.EntryId, r.EntryType }, (_, group) => new
         {
@@ -2709,14 +2716,14 @@ public class FileSecurity(
             {
                 if (!folderIds.ContainsKey(r.EntryId))
                 {
-                    folderIds.Add(r.EntryId, r.Share);
+                    folderIds.Add(r.EntryId, (r.Share, r.Owner));
                 }
             }
             else
             {
                 if (!fileIds.ContainsKey(r.EntryId))
                 {
-                    fileIds.Add(r.EntryId, r.Share);
+                    fileIds.Add(r.EntryId, (r.Share, r.Owner));
                 }
             }
         }
@@ -2730,9 +2737,10 @@ public class FileSecurity(
 
             await foreach (var x in files)
             {
-                if (fileIds.TryGetValue(x.Id, out _))
+                if (fileIds.TryGetValue(x.Id, out var tuple))
                 {
-                    x.Access = fileIds[x.Id];
+                    x.Access = tuple.Item1;
+                    x.SharedBy = tuple.Item2;
                     x.FolderIdDisplay = share;
                 }
 
@@ -2753,9 +2761,10 @@ public class FileSecurity(
 
             await foreach (var folder in folders)
             {
-                if (folderIds.TryGetValue(folder.Id, out _))
+                if (folderIds.TryGetValue(folder.Id, out var access))
                 {
-                    folder.Access = folderIds[folder.Id];
+                    folder.Access = access.Item1;
+                    folder.SharedBy = access.Item2;
                     folder.FolderIdDisplay = share;
                 }
 
@@ -3055,7 +3064,7 @@ public class FileSecurity(
                 
                 if (s is FileShare.None)
                 {
-                    if (file.CreateBy == authContext.CurrentAccount.ID || subjectTypeForCheck is null or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink)
+                    if (file.CreateBy == authContext.CurrentAccount.ID || subjectTypeForCheck is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink)
                     {
                         sharesToAdd.Add(s);
                     }

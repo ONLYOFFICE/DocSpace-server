@@ -53,11 +53,9 @@ internal class CrossDao //Additional SharpBox
         var securityDao = serviceProvider.GetService<ISecurityDao<TFrom>>();
         var securityDaoTo = serviceProvider.GetService<ISecurityDao<TTo>>();
         var tagDao = serviceProvider.GetService<ITagDao<TFrom>>();
-        var toFolderDao = serviceProvider.GetService<IFolderDao<TTo>>();
 
         var fromFileCopy = (File<TFrom>)fromFile.Clone();
-
-        var toFolderTask = toFolderDao.GetFolderAsync(toFolderId);
+        
         var fromFileShareRecords = securityDao.GetPureShareRecordsAsync(fromFileCopy);
         var fromFileNewTags = tagDao.GetNewTagsAsync(Guid.Empty, fromFileCopy);
         var fromFileLockTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
@@ -71,12 +69,6 @@ internal class CrossDao //Additional SharpBox
         toFile.Encrypted = fromFile.Encrypted;
         toFile.ParentId = toConverter(toFolderId);
         toFile.ThumbnailStatus = Thumbnail.Waiting;
-        
-        var toFolder = await toFolderTask;
-        if (toFolder.FolderType == FolderType.Knowledge)
-        {
-            toFile.VectorizationStatus = VectorizationStatus.InProgress;
-        }
 
         fromFile.Id = fromConverter(fromFile.Id);
 

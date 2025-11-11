@@ -60,11 +60,6 @@ public class ChunkedUploadSession<T>(File<T> file, long bytesTotal) : CommonChun
     public bool CheckQuota = true;
 
     /// <summary>
-    /// Specifies whether to require vectorization of the chunked upload session data or not.
-    /// </summary>
-    public bool RequiredVectorization { get; set; }
-
-    /// <summary>
     /// Clones the chunked upload session data.
     /// </summary>
     public override object Clone()

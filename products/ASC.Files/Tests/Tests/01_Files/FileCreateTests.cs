@@ -101,7 +101,7 @@ public class FileCreateTests(
     public async Task CreateFile_FolderDoesNotExist_ReturnsFileInMy()
     {
         await _filesClient.Authenticate(Initializer.Owner);
-        var folderId = await GetFolderIdAsync(FolderType.USER, Initializer.Owner);
+        var folderId = await GetUserFolderIdAsync( Initializer.Owner);
         
         //Arrange
         var file = new CreateFileJsonElement("test.docx");
@@ -133,7 +133,7 @@ public class FileCreateTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.CreateFileAsync(
-                await GetFolderIdAsync(FolderType.USER, Initializer.Owner), 
+                await GetUserFolderIdAsync( Initializer.Owner), 
                 file, 
                 cancellationToken: TestContext.Current.CancellationToken));
         

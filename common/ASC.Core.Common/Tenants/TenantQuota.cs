@@ -407,6 +407,17 @@ public class TenantQuota
         set => _backup.Value = value;
     }
 
+    private readonly CountAIAgentFeature _countAIAgentFeature;
+
+    /// <summary>
+    /// The number of AI agents.
+    /// </summary>
+    public int CountAIAgent
+    {
+        get => _countAIAgentFeature.Value;
+        set => _countAIAgentFeature.Value = value;
+    }
+
     private readonly WalletFeatureFlag _aiTools;
 
     /// <summary>
@@ -547,6 +558,7 @@ public class TenantQuota
         _yearFeature = new TenantQuotaFeatureFlag(this, "year") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _countFreeBackup = new CountFreeBackupFeature(this) { Order = 6, EmployeeType = EmployeeType.DocSpaceAdmin };
         _backup = new WalletFeatureFlag(this, "backup") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _countAIAgentFeature = new CountAIAgentFeature(this) { Order = 11 };
         _aiTools = new WalletFeatureFlag(this, "aitools") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _aiToolsWebSearch = new WalletFeatureFlag(this, "websearch") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _aiToolsWebFetch = new WalletFeatureFlag(this, "webfetch") { EmployeeType = EmployeeType.DocSpaceAdmin };
@@ -586,6 +598,7 @@ public class TenantQuota
             _yearFeature,
             _countFreeBackup,
             _backup,
+            _countAIAgentFeature,
             _aiTools,
             _aiToolsWebSearch,
             _aiToolsWebFetch,

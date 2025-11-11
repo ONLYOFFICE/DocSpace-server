@@ -52,8 +52,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
     AuthContext authContext,
     IDaoFactory daoFactory,
     IEventBus eventBus,
-    WebhookManager webhookManager,
-    VectorizationTaskPublisher vectorizationTaskPublisher)
+    WebhookManager webhookManager)
 {
     public async Task Invoke(HttpContext context)
     {
@@ -211,14 +210,13 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                 ? new RoomNotifyIntegrationData<string> { RoomId = srId, FileId = sfId }
                                 : null;
 
-                            var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id) { Data = data, ThirdPartyData = thirdPartyData };
+                            var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id)
+                            {
+                                Data = data, 
+                                ThirdPartyData = thirdPartyData
+                            };
 
                             await eventBus.PublishAsync(evt);
-
-                            if (session.RequiredVectorization && session.File is File<int> file)
-                            {
-                                await vectorizationTaskPublisher.PublishAsync(file);
-                            }
                         }
                     }
 

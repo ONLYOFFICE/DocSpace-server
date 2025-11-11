@@ -144,7 +144,7 @@ public class FormFilesTests(
     //     await _filesClient.Authenticate(Initializer.Owner);
     //     
     //     var sourceFile = await CreateFile("file_to_convert.docx", FolderType.USER, Initializer.Owner);
-    //     var destFolderId = await GetFolderIdAsync(FolderType.USER, Initializer.Owner);
+    //     var destFolderId = await GetUserFolderIdAsync( Initializer.Owner);
     //     var newFileName = "converted_file.pdf";
     //     
     //     // Act

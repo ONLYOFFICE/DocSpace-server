@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using HtmlAgilityPack;
+
 using Actions = ASC.Web.Studio.Core.Notify.Actions;
 using ConfigurationConstants = ASC.Core.Configuration.Constants;
 
@@ -237,14 +239,18 @@ public class NotifyClient(WorkContext notifyContext,
                 continue;
             }
             var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-
+            
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(message);
+            var plainText = htmlDoc.DocumentNode.InnerText;
+            
             await client.SendNoticeAsync(
                 NotifyConstants.EventEditorMentions,
                 file.UniqID,
                 recipient,
                 new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
                 new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(documentUrl)),
-                new TagValue(NotifyConstants.TagMessage, message.HtmlEncode()),
+                new TagValue(NotifyConstants.TagMessage, plainText),
                 new TagValue(Tags.ToUserName, user.DisplayUserName(displayUserSettingsHelper)),
                 new TagValue(NotifyConstants.RoomTitle, roomTitle),
                 new TagValue(NotifyConstants.RoomUrl, roomUrl),

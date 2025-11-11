@@ -89,18 +89,31 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.StartStorageDecryption, MessageAction.CookieSettingsUpdated,  MessageAction.MailServiceSettingsUpdated,
                     MessageAction.CustomNavigationSettingsUpdated,MessageAction.AuditSettingsUpdated,MessageAction.PrivacyRoomEnable,
                     MessageAction.PrivacyRoomDisable,
-                    MessageAction.QuotaPerRoomChanged, MessageAction.QuotaPerRoomDisabled, MessageAction.QuotaPerUserChanged, MessageAction.QuotaPerUserDisabled, MessageAction.QuotaPerPortalChanged, MessageAction.QuotaPerPortalDisabled,
+                    MessageAction.QuotaPerRoomChanged, MessageAction.QuotaPerRoomDisabled, MessageAction.QuotaPerUserChanged, MessageAction.QuotaPerUserDisabled, MessageAction.QuotaPerPortalChanged, MessageAction.QuotaPerPortalDisabled, MessageAction.QuotaPerAiAgentChanged, MessageAction.QuotaPerAiAgentDisabled,
                     MessageAction.CustomQuotaPerRoomDefault, MessageAction.CustomQuotaPerRoomChanged, MessageAction.CustomQuotaPerRoomDisabled, MessageAction.CustomQuotaPerUserDefault, MessageAction.CustomQuotaPerUserChanged, MessageAction.CustomQuotaPerUserDisabled,
+                    MessageAction.CustomQuotaPerAiAgentDefault, MessageAction.CustomQuotaPerAiAgentChanged, MessageAction.CustomQuotaPerAiAgentDisabled,
                     MessageAction.DevToolsAccessSettingsChanged,
                     MessageAction.WebhookUpdated,
                     MessageAction.ApiKeyUpdated,
                     MessageAction.CustomerWalletToppedUp, MessageAction.CustomerWalletTopUpSettingsUpdated, MessageAction.CustomerSubscriptionUpdated,
-                    MessageAction.BannerSettingsChanged, MessageAction.CustomerWalletServicesSettingsUpdated
+                    MessageAction.BannerSettingsChanged, MessageAction.CustomerWalletServicesSettingsUpdated,
+                    MessageAction.AIProviderUpdated,
+                    MessageAction.ServerUpdated,
+                    MessageAction.ServerEnabled,
+                    MessageAction.ServerDisabled
                 ]
             },
             {
                 ActionType.Create, [
-                    MessageAction.AdministratorAdded, MessageAction.ProductAddedAdministrator, MessageAction.WebhookCreated, MessageAction.ApiKeyCreated, MessageAction.CustomerOperationPerformed
+                    MessageAction.AdministratorAdded, 
+                    MessageAction.ProductAddedAdministrator, 
+                    MessageAction.WebhookCreated,
+                    MessageAction.ApiKeyCreated, 
+                    MessageAction.CustomerOperationPerformed, 
+                    MessageAction.AIProviderCreated,
+                    MessageAction.ServerCreated,
+                    MessageAction.SetWebSearchSettings,
+                    MessageAction.SetVectorizationSettings
                 ]
             },
             {
@@ -110,7 +123,14 @@ internal class ProductsActionMapper : ILocationActionMapper
             },
             {
                 ActionType.Delete, [
-                    MessageAction.ProductDeletedAdministrator,MessageAction.PortalDeleted, MessageAction.WebhookDeleted, MessageAction.ApiKeyDeleted
+                    MessageAction.ProductDeletedAdministrator, 
+                    MessageAction.PortalDeleted, 
+                    MessageAction.WebhookDeleted,
+                    MessageAction.ApiKeyDeleted, 
+                    MessageAction.AIProviderDeleted,
+                    MessageAction.ServerDeleted,
+                    MessageAction.ResetWebSearchSettings,
+                    MessageAction.ResetVectorizationSettings
                 ]
             },
             {

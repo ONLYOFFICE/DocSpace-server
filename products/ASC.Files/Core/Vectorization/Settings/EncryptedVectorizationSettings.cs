@@ -26,6 +26,7 @@
 
 namespace ASC.Files.Core.Vectorization.Settings;
 
+[EnumExtensions]
 public enum EmbeddingProviderType
 {
     None,

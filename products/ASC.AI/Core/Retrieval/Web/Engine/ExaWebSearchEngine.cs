@@ -64,22 +64,30 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
         
         request.Headers.Add("x-api-key", config.ApiKey);
         
-        var response = await httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
-        
-        var responseContent = await response.Content.ReadFromJsonAsync<ExaSearchResponse>(cancellationToken: cancellationToken);
-        if (responseContent == null || responseContent.Results.Count == 0)
+        try
         {
-            return [];
-        }
+            var response = await httpClient.SendAsync(request, cancellationToken);
+            response.EnsureSuccessStatusCode();
 
-        return responseContent.Results.Select(x => new WebSearchResult
+            var responseContent =
+                await response.Content.ReadFromJsonAsync<ExaSearchResponse>(cancellationToken: cancellationToken);
+            if (responseContent == null || responseContent.Results.Count == 0)
+            {
+                return [];
+            }
+
+            return responseContent.Results.Select(x => new WebSearchResult
+            {
+                Title = x.Title, 
+                Url = x.Url, 
+                FaviconUrl = x.Favicon, 
+                Text = x.Text
+            });
+        }
+        catch (HttpRequestException e)
         {
-            Title = x.Title,
-            Url = x.Url,
-            FaviconUrl = x.Favicon,
-            Text = x.Text
-        });
+            throw ProcessError(e);
+        }
     }
 
     public async Task<WebSearchResult?> GetPageContentAsync(PageContentQuery query, CancellationToken cancellationToken = default)
@@ -107,22 +115,40 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
         
         request.Headers.Add("x-api-key", config.ApiKey);
         
-        var response = await httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
-        
-        var responseContent = await response.Content.ReadFromJsonAsync<ExaSearchResponse>(cancellationToken: cancellationToken);
-        if (responseContent == null || responseContent.Results.Count == 0)
+        try
         {
-            return null;
+            var response = await httpClient.SendAsync(request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var responseContent =
+                await response.Content.ReadFromJsonAsync<ExaSearchResponse>(cancellationToken: cancellationToken);
+            if (responseContent == null || responseContent.Results.Count == 0)
+            {
+                return null;
+            }
+
+            var result = responseContent.Results[0];
+            return new WebSearchResult
+            {
+                Title = result.Title, Url = result.Url, FaviconUrl = result.Favicon, Text = result.Text
+            };
         }
-        
-        var result = responseContent.Results[0];
-        return new WebSearchResult
+        catch (HttpRequestException e)
         {
-            Title = result.Title,
-            Url = result.Url,
-            FaviconUrl = result.Favicon,
-            Text = result.Text
+            throw ProcessError(e);
+        }
+    }
+    
+    private static Exception ProcessError(HttpRequestException e)
+    {
+        return e.StatusCode switch
+        {
+            HttpStatusCode.BadRequest or HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden => new
+                ArgumentException("The specified API key is invalid or does not have access rights. " +
+                                  "Verify that the key is correct and try again"),
+            HttpStatusCode.InternalServerError or HttpStatusCode.BadGateway or HttpStatusCode.TooManyRequests =>
+                new Exception("Web search service unavailable"),
+            _ => e
         };
     }
 }

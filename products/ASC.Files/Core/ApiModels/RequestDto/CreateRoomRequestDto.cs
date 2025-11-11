@@ -47,8 +47,8 @@ public enum RoomType
     [SwaggerEnum(Description = "Virtual data room")]
     VirtualDataRoom = 8,
     
-    [SwaggerEnum(Description = "Virtual data room")]
-    AiRoom = 9,
+    [SwaggerEnum(Description = "AI Room")]
+    AiRoom = 9
 }
 
 public static class RoomTypeExtensions

@@ -93,7 +93,15 @@ namespace ASC.AI.Models.RequestDto
         /// The collection of sharing parameters.
         /// </summary>
         public IEnumerable<FileShareParams>? Share { get; set; }
-
+        
+        /// <summary>
+        /// The chat settings.
+        /// </summary>
         public required ChatSettings ChatSettings { get; set; }
+
+        /// <summary>
+        /// Specifies whether to attach default tools to the agent or not.
+        /// </summary>
+        public bool AttachDefaultTools { get; set; } = true;
     }
 }

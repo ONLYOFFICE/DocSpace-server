@@ -29,7 +29,7 @@ namespace ASC.Files.Core.Security;
 public interface ISecurityDao<T>
 {
     Task SetShareAsync(FileShareRecord<T> r);
-    IAsyncEnumerable<FileShareRecord<T>> GetSharesAsync(IEnumerable<Guid> subjects);
+    IAsyncEnumerable<FileShareRecord<T>> GetSharesAsync(IEnumerable<Guid> subjects, Guid? ownerId = null);
     Task<IEnumerable<FileShareRecord<T>>> GetSharesAsync(FileEntry<T> entry, IEnumerable<Guid> subjects = null);
     Task RemoveBySubjectAsync(Guid subject, bool withoutOwner);
     Task RemoveSecuritiesAsync(Guid subject, Guid ownerId, SubjectType subjectType);

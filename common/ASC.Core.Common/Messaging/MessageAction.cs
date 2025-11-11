@@ -616,6 +616,12 @@ public enum MessageAction
     
     [SwaggerEnum("Agent deleted")]
     AgentDeleted = 5156,
+    
+    [SwaggerEnum("MCP server added to agent")]
+    AddedServerToAgent = 5157,
+    
+    [SwaggerEnum("MCP server deleted from agent")]
+    DeletedServerFromAgent = 5158,
 
     #endregion
 
@@ -848,6 +854,57 @@ public enum MessageAction
 
     [SwaggerEnum("Customer wallet services settings updated")]
     CustomerWalletServicesSettingsUpdated = 6067,
+
+    [SwaggerEnum("Quota per AI agent changed")]
+    QuotaPerAiAgentChanged = 6068,
+
+    [SwaggerEnum("Quota per AI agent disabled")]
+    QuotaPerAiAgentDisabled = 6069,
+
+    [SwaggerEnum("Custom quota per AI agent default")]
+    CustomQuotaPerAiAgentDefault = 6070,
+
+    [SwaggerEnum("Custom quota per AI agent changed")]
+    CustomQuotaPerAiAgentChanged = 6071,
+
+    [SwaggerEnum("Custom quota per AI agent disabled")]
+    CustomQuotaPerAiAgentDisabled = 6072,
+
+    [SwaggerEnum("AI provider created")]
+    AIProviderCreated = 6073,
+
+    [SwaggerEnum("AI provider updated")]
+    AIProviderUpdated = 6074,
+
+    [SwaggerEnum("AI provider deleted")]
+    AIProviderDeleted = 6075,
+    
+    [SwaggerEnum("MCP server created")]
+    ServerCreated = 6076,
+    
+    [SwaggerEnum("MCP server updated")]
+    ServerUpdated = 6077,
+    
+    [SwaggerEnum("MCP server enabled")]
+    ServerEnabled = 6078,
+    
+    [SwaggerEnum("MCP server disabled")]
+    ServerDisabled = 6079,
+    
+    [SwaggerEnum("MCP server deleted")]
+    ServerDeleted = 6080,
+    
+    [SwaggerEnum("WebSearch settings configured")]
+    SetWebSearchSettings = 6081,
+    
+    [SwaggerEnum("WebSearch settings reset")]
+    ResetWebSearchSettings = 6082,
+    
+    [SwaggerEnum("Vectorization settings configured")]
+    SetVectorizationSettings = 6083,
+    
+    [SwaggerEnum("Vectorization settings reset")]
+    ResetVectorizationSettings = 6084,
 
     #endregion
 

@@ -74,6 +74,7 @@ public class FileStorageService //: IFileStorageService
     FileShareParamsHelper fileShareParamsHelper,
     EncryptionLoginProvider encryptionLoginProvider,
     CountRoomChecker countRoomChecker,
+    CountAIAgentChecker countAIAgentChecker,
     InvitationService invitationService,
     InvitationValidator invitationValidator,
     StudioNotifyService studioNotifyService,
@@ -198,8 +199,11 @@ public class FileStorageService //: IFileStorageService
             {
                 parentRoom = !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
             }
-
-            (entries, _) = await entryManager.GetEntriesAsync(parent, parentRoom, 0, -1, [FilterType.FoldersOnly], false, Guid.Empty, string.Empty, [], false, false, new OrderBy(SortedByType.AZ, true));
+            if (!await fileSecurity.CanReadAsync(parent))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+            }
+            (entries, _) = await entryManager.GetEntriesAsync(parent, parentRoom, 0, -1, [FilterType.FoldersOnly], false, Guid.Empty, Guid.Empty, string.Empty, [], false, false, new OrderBy(SortedByType.AZ, true));
         }
         catch (Exception e)
         {
@@ -216,6 +220,7 @@ public class FileStorageService //: IFileStorageService
         IEnumerable<FilterType> filterTypes,
         bool subjectGroup,
         string subject,
+        Guid sharedBy,
         string searchText,
         string[] extension,
         bool searchInContent,
@@ -265,6 +270,7 @@ public class FileStorageService //: IFileStorageService
                 parentRoom = !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms && !parent.ProviderEntry ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
 
                 parent.ParentRoomType = parentRoom.FolderType;
+                parent.ParentRoomCreatedBy = parentRoom.CreateBy;
             }
 
             if (parent.RootFolderType == FolderType.RoomTemplates)
@@ -272,6 +278,7 @@ public class FileStorageService //: IFileStorageService
                 parentRoom = !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.RoomTemplates && !parent.ProviderEntry ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
 
                 parent.ParentRoomType = parentRoom.FolderType;
+                parent.ParentRoomCreatedBy = parentRoom.CreateBy;
             }
 
             if (parent.FolderType == FolderType.AiRoom)
@@ -353,6 +360,7 @@ public class FileStorageService //: IFileStorageService
                 filterTypes,
                 subjectGroup,
                 subjectId,
+                sharedBy,
                 searchText,
                 extension,
                 searchInContent,
@@ -419,6 +427,7 @@ public class FileStorageService //: IFileStorageService
             entries = entries.Select(r =>
             {
                 r.ParentRoomType = parentRoom.FolderType;
+                r.ParentRoomCreatedBy = parentRoom.CreateBy;
                 return r;
             });
         }
@@ -574,9 +583,9 @@ public class FileStorageService //: IFileStorageService
 
         return await CreateRoomAsync(async () =>
         {
-            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
+            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetAIAgentsCountCheckKey(tenantId)))
             {
-                await countRoomChecker.CheckAppend();
+                await countAIAgentChecker.CheckAppend();
                 return await InternalCreateFolderAsync(parentId, title, FolderType.AiRoom, privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo, chatSettings);
             }
         }, privacy, share);
@@ -636,7 +645,6 @@ public class FileStorageService //: IFileStorageService
                 });
 
                 folder.FolderType = folderType;
-                folder.Shared = folderType == FolderType.PublicRoom;
                 folder.RootFolderType = FolderType.VirtualRooms;
                 folder.FolderIdDisplay = IdConverter.Convert<string>(await globalFolderHelper.FolderVirtualRoomsAsync);
 
@@ -1272,16 +1280,18 @@ public class FileStorageService //: IFileStorageService
             {
                 if (updateData.Quota >= 0)
                 {
-                    filesMessageService.Send(MessageAction.CustomQuotaPerRoomChanged, updateData.Quota.ToString(), [folder.Title]);
+                    filesMessageService.Send(folder.FolderType is FolderType.AiRoom ? MessageAction.CustomQuotaPerAiAgentChanged : MessageAction.CustomQuotaPerRoomChanged, updateData.Quota.ToString(), [folder.Title]);
                 }
                 else if (updateData.Quota == -1)
                 {
-                    filesMessageService.Send(MessageAction.CustomQuotaPerRoomDisabled, folder.Title);
+                    filesMessageService.Send(folder.FolderType is FolderType.AiRoom ? MessageAction.CustomQuotaPerAiAgentDisabled : MessageAction.CustomQuotaPerRoomDisabled, folder.Title);
                 }
                 else
                 {
-                    var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-                    filesMessageService.Send(MessageAction.CustomQuotaPerRoomDefault, quotaRoomSettings.DefaultQuota.ToString(), [folder.Title]);
+                    TenantEntityQuotaSettings quotaSettings = folder.FolderType is FolderType.AiRoom
+                        ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                        : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                    filesMessageService.Send(folder.FolderType is FolderType.AiRoom ? MessageAction.CustomQuotaPerAiAgentDefault : MessageAction.CustomQuotaPerRoomDefault, quotaSettings.DefaultQuota.ToString(), [folder.Title]);
                 }
             }
         }
@@ -3246,6 +3256,7 @@ public class FileStorageService //: IFileStorageService
                     new List<FilterType> { FilterType.FoldersOnly },
                     false,
                     user.ToString(),
+                    Guid.Empty,
                     "",
                     [],
                     false,
@@ -3277,6 +3288,7 @@ public class FileStorageService //: IFileStorageService
                 [FilterType.FoldersOnly],
                 false,
                 user.ToString(),
+                Guid.Empty,
                 "",
                 [],
                 false,
@@ -5387,6 +5399,7 @@ public class FileStorageService //: IFileStorageService
             if (room != null)
             {
                 entry.ParentRoomType = room.FolderType;
+                entry.ParentRoomCreatedBy = room.CreateBy;
             }
         }
     }

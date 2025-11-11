@@ -209,9 +209,11 @@ internal class AgentsActionMapper : ILocationActionMapper
                 EntryType.Room, new Dictionary<ActionType, MessageAction[]>
                 {
                     { ActionType.Create, [MessageAction.AgentCreated] },
-                    {
-                        ActionType.Update, [MessageAction.AgentRenamed]
-                    },
+                    { ActionType.Update, [
+                        MessageAction.AgentRenamed, 
+                        MessageAction.AddedServerToAgent, 
+                        MessageAction.DeletedServerFromAgent
+                    ] },
                     { ActionType.Delete, [MessageAction.AgentDeleted] }
                 }
             },

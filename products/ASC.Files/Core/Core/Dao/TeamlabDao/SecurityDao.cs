@@ -170,11 +170,11 @@ internal abstract class SecurityBaseDao<T>(
         }
     }
 
-    public async IAsyncEnumerable<FileShareRecord<T>> GetSharesAsync(IEnumerable<Guid> subjects)
+    public async IAsyncEnumerable<FileShareRecord<T>> GetSharesAsync(IEnumerable<Guid> subjects, Guid? ownerId = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q = filesDbContext.SharesAsync(tenantId, subjects);
+        var q = filesDbContext.SharesAsync(tenantId, subjects, ownerId ?? Guid.Empty);
 
         await foreach (var e in q)
         {
@@ -1121,14 +1121,41 @@ internal abstract class SecurityBaseDao<T>(
 
         return result;
     }
-
+    
     private async Task<IQueryable<DbFilesSecurity>> GetPureSharesQuery(int tenantId, FileEntry<T> entry, ShareFilterType filterType, FilesDbContext filesDbContext)
     {
         var entryId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
+        var entryParentId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.ParentId);
+        Expression<Func<DbFilesSecurity, bool>> exp = s => s.TenantId == tenantId && s.EntryId == entryId && s.EntryType == entry.FileEntryType;
 
-        var q = filesDbContext.Security.AsNoTracking()
-            .Where(s => s.TenantId == tenantId && s.EntryId == entryId && s.EntryType == entry.FileEntryType);
-
+        if (filterType is ShareFilterType.User or ShareFilterType.Group or ShareFilterType.UserOrGroup)
+        {
+            var exp1 = exp;
+            exp = exp.Or(s => !filesDbContext.Security.Any(exp1) &&
+                              s.TenantId == tenantId &&
+                              s.EntryType == FileEntryType.Folder &&
+                              s.EntryId == 
+                              
+                              
+                              filesDbContext.Tree.Where(r => 
+                                  r.FolderId.ToString() == (entry.FileEntryType ==  FileEntryType.File ? entryParentId : entryId) &&
+                                   filesDbContext.Folders.Any(f => 
+                                       f.TenantId == tenantId &&
+                                       f.Id == r.ParentId &&
+                                       f.FolderType != FolderType.AiAgents && f.FolderType != FolderType.VirtualRooms && f.FolderType != FolderType.USER) &&
+                                   filesDbContext.Security.Any(b => b.TenantId == tenantId && b.EntryId == r.ParentId.ToString() && b.EntryType == FileEntryType.Folder))
+                                  .OrderBy(r=> r.Level)
+                                  .Select(r=> r.ParentId.ToString())
+                                  .FirstOrDefault()
+                              
+                              
+                              
+                              );
+        }
+        
+        var q = filesDbContext.Security
+            .Where(exp);
+        
         switch (filterType)
         {
             case ShareFilterType.UserOrGroup:

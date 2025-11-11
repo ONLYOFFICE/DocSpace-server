@@ -56,6 +56,16 @@ public abstract class FileEntryBaseDto
     public FileShare Access { get; set; }
 
     /// <summary>
+    /// Provides information about the employee who shared the file or folder.
+    /// </summary>
+    public EmployeeDto SharedBy { get; set; }
+
+    /// <summary>
+    /// The information about the employee who owns the file entry.
+    /// </summary>
+    public EmployeeDto OwnedBy { get; set; }
+
+    /// <summary>
     /// Specifies if the file entry is shared via link or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
@@ -169,6 +179,7 @@ public abstract class FileEntryBaseDto
 /// <summary>
 /// The generic file entry information.
 /// </summary>
+[DebuggerDisplay("{Title} ({Id})")]
 public abstract class FileEntryDto<T> : FileEntryBaseDto
 {
     /// <summary>
@@ -346,12 +357,21 @@ public class FileEntryDtoHelper(
             }
         }
 
+        var sharedBy = entry.SharedBy ?? entry.ShareRecord?.Owner;
+        Guid? ownedBy = null;
+        if (sharedBy.HasValue)
+        {
+            ownedBy = entry.ParentRoomCreatedBy ?? entry.RootCreateBy;
+        }
+
         return new T
         {
             Id = entry.Id,
             Title = entry.Title,
             Access = entry.Access,
             Shared = entry.Shared,
+            SharedBy = sharedBy.HasValue ? await employeeWrapperHelper.GetAsync(sharedBy.Value) : null,
+            OwnedBy = ownedBy.HasValue ? await employeeWrapperHelper.GetAsync(ownedBy.Value) : null,
             SharedForUser = entry.SharedForUser,
             ParentShared = entry.ParentShared,
             ShortWebUrl = shortWebUrl,

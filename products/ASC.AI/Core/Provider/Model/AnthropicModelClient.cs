@@ -26,14 +26,35 @@
 
 namespace ASC.AI.Core.Provider.Model;
 
-public class AnthropicModelClient(HttpClient httpClient) : IModelClient
+public class AnthropicModelClient(HttpClient httpClient, string url, string apiKey) : IModelClient, IDisposable
 {
-    public async Task<List<ModelInfo>> GetModelsAsync(string endpoint, string apiKey, Scope? scope, IReadOnlyDictionary<string, string>? headers = null)
+    private readonly AnthropicClient _innerClient = new(new APIAuthentication(apiKey), httpClient);
+
+    public async Task<List<ModelInfo>> ListModelsAsync(Scope? scope = null)
     {
-        var client = new AnthropicClient(new APIAuthentication(apiKey), httpClient);
+        if (!url.Equals("https://api.anthropic.com/v1"))
+        {
+            throw new HttpRequestException(string.Empty, null, HttpStatusCode.NotFound);
+        }
         
-        var response = await client.Models.ListModelsAsync();
-        
-        return response.Models.Select(x => new ModelInfo { Id = x.Id }).ToList();
+        try
+        {
+            var response = await _innerClient.Models.ListModelsAsync(beforeId: "claude-3-5-haiku-20241022", limit: 100);
+            return response.Models.Select(x => new ModelInfo { Id = x.Id }).ToList();
+        }
+        catch (AuthenticationException e)
+        {
+            throw new HttpRequestException(e.Message, e, HttpStatusCode.Unauthorized);
+        }
+    }
+    
+    public Task PingAsync()
+    {
+        return ListModelsAsync();
+    }
+
+    public void Dispose()
+    {
+        _innerClient.Dispose();
     }
 }
