@@ -1074,6 +1074,7 @@ public class UserController(
     [Tags("People / Search")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
+    [AllowNotPayment]
     [HttpGet("filter")]
     public async IAsyncEnumerable<EmployeeFullDto> SearchUsersByExtendedFilter(SimpleByFilterRequestDto inDto)
     {
