@@ -70,6 +70,7 @@ public class WebPluginManager(
     private const string StorageModuleName = "webplugins";
     private const string ConfigFileName = "config.json";
     private const string PluginFileName = "plugin.js";
+    private const string PluginCssFileName = "plugin.css";
     private const string AssetsFolderName = "assets";
 
     private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
@@ -569,6 +570,14 @@ public class WebPluginManager(
             }
 
             await ExtractEntry(zipFile, pluginFile, tempDir);
+
+
+            // extract plugin css file
+            var pluginCssFile = zipFile.GetEntry(PluginCssFileName);
+            if (pluginCssFile != null)
+            {
+                await ExtractEntry(zipFile, pluginCssFile, tempDir);
+            }
 
 
             // extract assets
