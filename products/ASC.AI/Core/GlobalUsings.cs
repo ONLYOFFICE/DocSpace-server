@@ -98,6 +98,7 @@ global using OpenAI;
 global using System.ClientModel;
 global using System.ClientModel.Primitives;
 global using System.ComponentModel;
+global using System.Collections.Concurrent;
 global using System.Collections.Frozen;
 global using System.ComponentModel.DataAnnotations;
 global using System.Net;
