@@ -95,6 +95,9 @@ public class PathProvider(WebImageSupplier webImageSupplier,
             case FolderType.RoomTemplates:
                 result = string.Format($"rooms/shared/{urlPathEncode}/filter?folder={urlPathEncode}");
                 break;
+            case FolderType.AiAgents:
+                result = string.Format($"ai-agents/{urlPathEncode}/filter?folder={urlPathEncode}");
+                break;
         }
 
         if (!string.IsNullOrEmpty(key))
