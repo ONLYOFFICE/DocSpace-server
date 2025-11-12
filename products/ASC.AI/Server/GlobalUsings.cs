@@ -58,6 +58,7 @@ global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Core.Vectorization;
 global using ASC.Files.Core.Vectorization.Settings;
 global using ASC.MessagingSystem.Core;
+global using ASC.MessagingSystem.EF.Model;
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
 global using ASC.Web.Files.Classes;
@@ -66,6 +67,7 @@ global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Services.WCFService.FileOperations;
 
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.RateLimiting;
 
 global using System.ComponentModel.DataAnnotations;
 global using System.Text;
