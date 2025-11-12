@@ -122,7 +122,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         //Filter
         if (subjectID != Guid.Empty)
         {
-            files = files.WhereAwait(async x => subjectGroup
+            files = files.Where(async (x, _) => subjectGroup
                 ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                 : x.CreateBy == subjectID);
         }
@@ -215,7 +215,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
         if (subjectID != Guid.Empty)
         {
-            files = files.WhereAwait(async x => subjectGroup
+            files = files.Where(async (x, _) => subjectGroup
                 ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                 : x.CreateBy == subjectID);
         }

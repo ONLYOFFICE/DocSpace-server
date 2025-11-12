@@ -766,31 +766,34 @@ public class FileSecurity(
                 defaultRecords = null;
                 break;
         }
-
-
-        var defaultAccessUsers = (defaultRecords ?? []).ToAsyncEnumerable().SelectManyAwait(async x => await ToGuidAsync(x)).Distinct();
-
-        await foreach (var userId in defaultAccessUsers)
+        
+        foreach (var r in (defaultRecords ?? []))
         {
-            if (await CheckAccessAsync(userId, action))
+            var users = await ToGuidAsync(r);
+            await foreach (var userId in users)
             {
-                directAccess.Add(userId);
-            }
-        }
-
-        var manyShares = shares.ToAsyncEnumerable().SelectManyAwait(async x => await ToGuidAsync(x)).Distinct();
-
-        await foreach (var userId in manyShares)
-        {
-            if (await CheckAccessAsync(userId, action))
-            {
-                if (sharedAsDirect)
+                if (await CheckAccessAsync(userId, action))
                 {
                     directAccess.Add(userId);
                 }
-                else
+            }
+        }
+
+        foreach (var r in shares)
+        {            
+            var users = await ToGuidAsync(r);
+            await foreach (var userId in users)
+            {
+                if (await CheckAccessAsync(userId, action))
                 {
-                    sharedAccess.Add(userId);
+                    if (sharedAsDirect)
+                    {
+                        directAccess.Add(userId);
+                    }
+                    else
+                    {
+                        sharedAccess.Add(userId);
+                    }
                 }
             }
         }

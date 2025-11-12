@@ -486,7 +486,8 @@ public class DiscDataStore(
             }
             return !Path.GetFileName(r).StartsWith(QuotaController.ExcludePattern);
         }
-        ).ToAsyncEnumerable().SelectAwait(async r => await _crypt.GetFileSizeAsync(r)).SumAsync();
+        ).ToAsyncEnumerable()
+            .Select(async (string r, CancellationToken _) => await _crypt.GetFileSizeAsync(r)).SumAsync();
 
         var subDirs = Directory.GetDirectories(targetDir, "*", SearchOption.AllDirectories).ToList();
         subDirs.Reverse();
@@ -517,7 +518,7 @@ public class DiscDataStore(
         {
             return await Directory.GetFiles(target, "*.*", SearchOption.AllDirectories)
                 .ToAsyncEnumerable()
-                .SelectAwait(async entry => await _crypt.GetFileSizeAsync(entry))
+                .Select(async (string entry, CancellationToken _) => await _crypt.GetFileSizeAsync(entry))
                 .SumAsync();
         }
 
@@ -656,7 +657,10 @@ public class DiscDataStore(
         if (Directory.Exists(target))
         {
             var entries = Directory.GetFiles(target, "*.*", SearchOption.AllDirectories);
-            size = await entries.ToAsyncEnumerable().SelectAwait(async entry => await _crypt.GetFileSizeAsync(entry)).SumAsync();
+            size = await entries
+                .ToAsyncEnumerable()
+                .Select(async (string entry, CancellationToken _) => await _crypt.GetFileSizeAsync(entry))
+                .SumAsync();
         }
         return size;
     }

@@ -393,7 +393,10 @@ public class TariffService(
         ArgumentNullException.ThrowIfNull(tariff);
 
         if (tariff.Quotas == null ||
-            (quotas ??= await tariff.Quotas.ToAsyncEnumerable().SelectAwait(async q => await quotaService.GetTenantQuotaAsync(q.Id)).ToListAsync()).Any(q => q == null))
+            (quotas ??= await tariff.Quotas
+                .ToAsyncEnumerable()
+                .Select(async (Quota q, CancellationToken _) => await quotaService.GetTenantQuotaAsync(q.Id)).ToListAsync())
+            .Any(q => q == null))
         {
             return;
         }
@@ -861,7 +864,9 @@ public class TariffService(
 
         if (TrialEnabled)
         {
-            var trial = await tariff.Quotas.ToAsyncEnumerable().AnyAwaitAsync(async q => (await quotaService.GetTenantQuotaAsync(q.Id)).Trial);
+            var trial = await tariff.Quotas
+                .ToAsyncEnumerable()
+                .AnyAsync(async (q, _) => (await quotaService.GetTenantQuotaAsync(q.Id)).Trial);
             if (trial)
             {
                 setDelay = false;
@@ -1059,7 +1064,7 @@ public class TariffService(
 
     public async Task<bool> IsFreeTariffAsync(Tariff tariff)
     {
-        var freeTariff = await tariff.Quotas.ToAsyncEnumerable().FirstOrDefaultAwaitAsync(async tariffRow =>
+        var freeTariff = await tariff.Quotas.ToAsyncEnumerable().FirstOrDefaultAsync(async (tariffRow, _) =>
         {
             var q = await quotaService.GetTenantQuotaAsync(tariffRow.Id);
             return q == null

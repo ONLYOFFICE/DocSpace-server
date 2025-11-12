@@ -92,16 +92,16 @@ public class UserManager(
         switch (type)
         {
             case EmployeeType.RoomAdmin:
-                users = users.WhereAwait(async u => !await this.IsGuestAsync(u) && !await this.IsUserAsync(u) && !await this.IsDocSpaceAdminAsync(u));
+                users = users.Where(async (u, _) => !await this.IsGuestAsync(u) && !await this.IsUserAsync(u) && !await this.IsDocSpaceAdminAsync(u));
                 break;
             case EmployeeType.DocSpaceAdmin:
-                users = users.WhereAwait(async u => await this.IsDocSpaceAdminAsync(u));
+                users = users.Where(async (u, _) => await this.IsDocSpaceAdminAsync(u));
                 break;
             case EmployeeType.User:
-                users = users.WhereAwait(async u => await this.IsUserAsync(u));
+                users = users.Where(async (u, _) => await this.IsUserAsync(u));
                 break;
             case EmployeeType.Guest:
-                users = users.WhereAwait(async u => await this.IsGuestAsync(u));
+                users = users.Where(async (u, _) => await this.IsGuestAsync(u));
                 break;
         }
 

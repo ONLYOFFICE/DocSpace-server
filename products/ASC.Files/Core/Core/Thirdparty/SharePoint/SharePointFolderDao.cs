@@ -87,7 +87,9 @@ internal class SharePointFolderDao(
             yield break;
         }
 
-        var rooms = roomsIds.ToAsyncEnumerable().SelectAwait(async e => await GetFolderAsync(e).ConfigureAwait(false));
+        var rooms = roomsIds
+            .ToAsyncEnumerable()
+            .Select(async (string e, CancellationToken _) => await GetFolderAsync(e).ConfigureAwait(false));
 
         rooms = FilterByRoomType(rooms, filterTypes);
         rooms = FilterBySubject(rooms, subjectId, excludeSubject, subjectFilter, subjectEntriesIds);
@@ -132,7 +134,7 @@ internal class SharePointFolderDao(
         //Filter
         if (subjectID != Guid.Empty)
         {
-            folders = folders.WhereAwait(async x => subjectGroup
+            folders = folders.Where(async (x, _) => subjectGroup
                                              ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                                              : x.CreateBy == subjectID);
         }
@@ -163,11 +165,11 @@ internal class SharePointFolderDao(
             return AsyncEnumerable.Empty<Folder<string>>();
         }
 
-        var folders = folderIds.ToAsyncEnumerable().SelectAwait(async e => await GetFolderAsync(e));
+        var folders = folderIds.ToAsyncEnumerable().Select(async (string e, CancellationToken _) => await GetFolderAsync(e));
 
         if (subjectID.HasValue && subjectID != Guid.Empty)
         {
-            folders = folders.WhereAwait(async x => subjectGroup
+            folders = folders.Where(async (x, _) => subjectGroup
                                              ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID.Value)
                                              : x.CreateBy == subjectID);
         }

@@ -407,7 +407,9 @@ public class FileStorageService //: IFileStorageService
             parent.RootFolderType == FolderType.Privacy ||
             await shareableTask;
 
-        entries = entries.ToAsyncEnumerable().WhereAwait(async x =>
+        entries = await entries
+            .ToAsyncEnumerable()
+            .Where(async (x, _) =>
         {
             if (x.FileEntryType == FileEntryType.Folder)
             {
@@ -420,7 +422,7 @@ public class FileStorageService //: IFileStorageService
             }
 
             return x is File<int> f2 && !await fileConverter.IsConverting(f2);
-        }).ToEnumerable();
+        }).ToListAsync();
 
         if (parentRoom != null)
         {
@@ -4354,7 +4356,7 @@ public class FileStorageService //: IFileStorageService
         var result = await users
             .Where(u => u.Status != EmployeeStatus.Terminated)
             .ToAsyncEnumerable()
-            .SelectAwait(async u => await mentionWrapperCreator.CreateMentionWrapperAsync(u))
+            .Select(async (UserInfo u, CancellationToken _) => await mentionWrapperCreator.CreateMentionWrapperAsync(u))
             .OrderBy(u => u.User, UserInfoComparer.Default)
             .ToListAsync();
 
@@ -4997,7 +4999,7 @@ public class FileStorageService //: IFileStorageService
             .Where(user => !user.Id.Equals(authContext.CurrentAccount.ID)
                            && !user.Id.Equals(Constants.LostUser.Id))
             .ToAsyncEnumerable()
-            .SelectAwait(async user => await mentionWrapperCreator.CreateMentionWrapperAsync(user))
+            .Select(async (UserInfo user, CancellationToken _) => await mentionWrapperCreator.CreateMentionWrapperAsync(user))
             .ToListAsync();
 
         users = users
@@ -5349,7 +5351,7 @@ public class FileStorageService //: IFileStorageService
 
     private async Task<List<AceWrapper>> GetFullAceWrappersAsync(IEnumerable<FileShareParams> share)
     {
-        var dict = await share.ToAsyncEnumerable().SelectAwait(async s => await fileShareParamsHelper.ToAceObjectAsync(s)).ToDictionaryAsync(k => k.Id, v => v);
+        var dict = await share.ToAsyncEnumerable().Select(async (FileShareParams s, CancellationToken _) => await fileShareParamsHelper.ToAceObjectAsync(s)).ToDictionaryAsync(k => k.Id, v => v);
 
         var admins = await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
         var onlyFilesAdmins = await userManager.GetUsersByGroupAsync(WebItemManager.DocumentsProductID);

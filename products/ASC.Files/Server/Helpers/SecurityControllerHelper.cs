@@ -75,7 +75,9 @@ public class SecurityControllerHelper(
             yield break;
         }
 
-        var fileShares = await share.ToAsyncEnumerable().SelectAwait(async s => await fileShareParamsHelper.ToAceObjectAsync(s)).ToListAsync();
+        var fileShares = await share
+            .ToAsyncEnumerable()
+            .Select(async (FileShareParams s, CancellationToken _) => await fileShareParamsHelper.ToAceObjectAsync(s)).ToListAsync();
 
         var aceCollection = new AceCollection<T>
         {
