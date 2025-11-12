@@ -1067,7 +1067,9 @@ public class FileSecurity(
         }
 
         if (action is FilesSecurityActions.AscAi &&
-            (file == null || !vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title)))
+            (file == null || 
+             file.ContentLength > vectorizationGlobalSettings.MaxContentLength || 
+             !vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title)))
         {
             return false;
         }
