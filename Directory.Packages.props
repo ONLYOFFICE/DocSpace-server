@@ -65,14 +65,9 @@
     <PackageVersion Include="DistributedLock.Redis" Version="1.1.1" />
     <PackageVersion Include="DistributedLock.ZooKeeper" Version="1.0.0" />
     <PackageVersion Include="JWT" Version="11.0.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.10.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Primitives" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Resilience" Version="9.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Resilience" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Windows.Compatibility" Version="10.0.0" />
     <PackageVersion Include="EtaEmre.NetEscapades.EnumGenerators" Version="1.0.0-beta07" />
     <PackageVersion Include="NLog" Version="5.5.0" />
@@ -89,11 +84,11 @@
     <PackageVersion Include="Amazon.Extensions.S3.Encryption" Version="2.2.1" />
     <PackageVersion Include="Anthropic.SDK" Version="5.8.0" />
     <PackageVersion Include="Apache.NMS.AMQP" Version="2.4.0" />
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.5.2" />
-    <PackageVersion Include="Aspire.Hosting.MySql" Version="9.5.2" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.0.0" />
+    <PackageVersion Include="Aspire.Hosting.MySql" Version="13.0.0" />
     <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
-    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="9.5.2" />
-    <PackageVersion Include="Aspire.Hosting.Redis" Version="9.5.2" />
+    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.0.0" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.UI" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
     <PackageVersion Include="AWSSDK.CloudFront" Version="3.7.404.55" />
@@ -135,8 +130,8 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.Extensions.AI" Version="9.10.1" />
-    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="9.10.1" />
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="9.10.1-preview.1.25521.4" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.CommandLine" Version="10.0.0" />
@@ -148,7 +143,7 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
     <PackageVersion Include="Microsoft.OneDriveSDK" Version="2.1.0" />
-    <PackageVersion Include="Microsoft.SemanticKernel.Core" Version="1.66.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Core" Version="1.67.1" />
     <PackageVersion Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
     <PackageVersion Include="ModelContextProtocol" Version="0.4.0-preview.3" />
     <PackageVersion Include="Moq" Version="4.18.4" />
