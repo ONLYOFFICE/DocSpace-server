@@ -177,6 +177,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Agent Manager.
+        /// </summary>
+        public static string AgentManager {
+            get {
+                return ResourceManager.GetString("AgentManager", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to To work with the file you must grant access to it.
         /// </summary>
         public static string AppAccessDenied {

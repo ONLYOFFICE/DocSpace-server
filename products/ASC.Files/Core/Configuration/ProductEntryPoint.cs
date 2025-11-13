@@ -249,7 +249,7 @@ public class ProductEntryPoint : Product
 
             if (e.Action == (int)MessageAction.RoomUpdateAccessForUser)
             {
-                activityInfo.UserRole = GetRoomRoleString((FileShare)additionalInfo.UserRole);
+                activityInfo.UserRole = GetRoomRoleString((FileShare)additionalInfo.UserRole, activityInfo.IsAgent);
             }
 
             result.Add(activityInfo);
@@ -373,8 +373,13 @@ public class ProductEntryPoint : Product
         };
     }
 
-    private static string GetRoomRoleString(FileShare userRoomRole)
+    private static string GetRoomRoleString(FileShare userRoomRole, bool isAgent)
     {
+        if (isAgent && userRoomRole == FileShare.RoomManager)
+        {
+            return FilesCommonResource.AgentManager;
+        }
+        
         return userRoomRole switch
         {
             FileShare.Read or

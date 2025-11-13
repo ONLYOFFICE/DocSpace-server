@@ -581,6 +581,18 @@
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_room_invite_existing_user|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
+  <!-- saas agent invite -->
+  <pattern id="saas_agent_invite">
+    <subject resource="|subject_saas_agent_invite|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_agent_invite|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- saas agent invite existing user -->
+  <pattern id="saas_agent_invite_existing_user">
+    <subject resource="|subject_saas_agent_invite_existing_user|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_agent_invite_existing_user|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
   <!-- saas docspace invite -->
   <pattern id="saas_docspace_invite">
     <subject resource="|subject_saas_docspace_invite|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>

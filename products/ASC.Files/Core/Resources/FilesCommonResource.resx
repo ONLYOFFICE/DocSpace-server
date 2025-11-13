@@ -584,4 +584,7 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="KnowledgeFolder" xml:space="preserve">
     <value>Knowledge</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Agent Manager</value>
+  </data>
 </root>
