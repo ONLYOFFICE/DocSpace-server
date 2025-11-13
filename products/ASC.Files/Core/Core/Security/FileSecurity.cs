@@ -1172,7 +1172,7 @@ public class FileSecurity(
             if (folder.FolderType == FolderType.Knowledge)
             {
                 if (action is not (FilesSecurityActions.Read or FilesSecurityActions.MoveTo
-                    or FilesSecurityActions.CopyTo or FilesSecurityActions.Create))
+                    or FilesSecurityActions.CopyTo or FilesSecurityActions.Create or FilesSecurityActions.Download))
                 {
                     return false;
                 }
