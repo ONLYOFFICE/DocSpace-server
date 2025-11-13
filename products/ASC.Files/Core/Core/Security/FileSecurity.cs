@@ -288,7 +288,7 @@ public class FileSecurity(
                     FilesSecurityActions.StopFilling,
                     FilesSecurityActions.OpenForm,
                     FilesSecurityActions.Vectorization,
-                    FilesSecurityActions.AscAi
+                    FilesSecurityActions.AskAi
                 }
             },
             {
@@ -1066,7 +1066,7 @@ public class FileSecurity(
             return false;
         }
 
-        if (action is FilesSecurityActions.AscAi &&
+        if (action is FilesSecurityActions.AskAi &&
             (file == null || 
              file.ContentLength > vectorizationGlobalSettings.MaxContentLength || 
              !vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title)))
@@ -2207,7 +2207,7 @@ public class FileSecurity(
                         break;
                 }
                 break;
-            case FilesSecurityActions.AscAi:
+            case FilesSecurityActions.AskAi:
                 return e.Access != FileShare.Restrict;
             case FilesSecurityActions.UseChat:
                 switch (e.RootFolderType)
@@ -3489,7 +3489,7 @@ public class FileSecurity(
         Vectorization,
         
         [Description("Asc AI")]
-        AscAi,
+        AskAi,
         
         [Description("Use chat")]
         UseChat

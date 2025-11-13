@@ -374,9 +374,9 @@ public class FileDtoHelper(
         
         if (aiReady is false)
         {
-            if (result.Security.ContainsKey(FileSecurity.FilesSecurityActions.AscAi))
+            if (result.Security.ContainsKey(FileSecurity.FilesSecurityActions.AskAi))
             {
-                result.Security[FileSecurity.FilesSecurityActions.AscAi] = false;
+                result.Security[FileSecurity.FilesSecurityActions.AskAi] = false;
             }
         }
 
