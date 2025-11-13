@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "7.13.0"
+  },
+  "generatorName": "my-php",
+  "inputSpec": "./json/api-docs.json",
+  "outputDir": "php-sdk",
+  "additionalProperties": {
+    "packageName": "OnlyOffice\\DocSpaceApiSdk",
+    "packageVersion": "3.5.0-preview.1",
+    "licenseName": "Apache-2.0",
+    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-php",
+    "library": "guzzle",
+    "excludeTests": true
+  }
+}
