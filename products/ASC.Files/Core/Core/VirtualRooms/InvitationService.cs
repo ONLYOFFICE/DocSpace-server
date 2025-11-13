@@ -237,7 +237,8 @@ public class InvitationService(
             LinkType = result.LinkType,
             ConfirmType = result.ConfirmType,
             User = result.User,
-            EmployeeType = employeeType
+            EmployeeType = employeeType,
+            LinkId = result.LinkId
         };
 
         if (result.LinkType is not InvitationLinkType.CommonToRoom)
@@ -381,5 +382,6 @@ public class InvitationLinkData
     public EmployeeType EmployeeType { get; set; }
     public EmailValidationKeyProvider.ValidationResult Result { get; set; }
     public UserInfo User { get; set; }
+    public Guid LinkId { get; set; }
     public bool IsCorrect => Result == EmailValidationKeyProvider.ValidationResult.Ok;
 }

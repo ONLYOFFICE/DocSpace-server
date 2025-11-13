@@ -340,6 +340,16 @@ public class UserController(
         {
             user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, inDto.Type,
                 inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
+
+            if (linkData is { IsCorrect: true, ConfirmType: ConfirmType.LinkInvite } && linkData.LinkId != Guid.Empty)
+            {
+                var invitationLink = await _userManager.GetInvitationLinkAsync(linkData.LinkId);
+                if (invitationLink != null && invitationLink.MaxUseCount > 0)
+                {
+                    await _userManager.UpdateInvitationLinkUsageAsync(linkData.LinkId, invitationLink.CurrentUseCount + 1);
+                }
+            }
+
             if (inDto.Type is EmployeeType.Guest)
             {
                 await socketManager.AddGuestAsync(user);

@@ -24,25 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModels.RequestsDto;
+using ASC.Core.Common.EF.Model;
+
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The request paarmeters for handling invitation link requests with specific user type parameters.
+/// The invitation link parameters.
 /// </summary>
-public class InvitationLinkRequestDto
+public class InvitationLinkDto
 {
     /// <summary>
-    /// The type of employee role for the invitation link (All, RoomAdmin, Guest, DocSpaceAdmin, User).
+    /// The ID of the invitation link.
     /// </summary>
-    [FromRoute(Name = "employeeType")]
-    public required EmployeeType EmployeeType { get; set; }
-}
+    public Guid Id { get; set; }
 
-/// <summary>
-/// The request paarmeters for handling invitation link requests with specific user type parameters.
-/// </summary>
-public class InvitationLinkCreateRequestDto
-{
     /// <summary>
     /// The type of employee role for the invitation link (All, RoomAdmin, Guest, DocSpaceAdmin, User).
     /// </summary>
@@ -51,43 +46,27 @@ public class InvitationLinkCreateRequestDto
     /// <summary>
     /// The expiration date of the invitation link.
     /// </summary>
-    public DateTime? Expiration { get; set; }
+    public DateTime Expiration { get; set; }
 
     /// <summary>
     /// The maximum number of times the invitation link can be used.
     /// </summary>
     public int MaxUseCount { get; set; }
+
+    /// <summary>
+    /// The current number of times the invitation link has been used.
+    /// </summary>
+    public int CurrentUseCount { get; set; }
+
+    /// <summary>
+    /// The URL of the invitation link.
+    /// </summary>
+    public string Url { get; set; }
 }
 
 
-/// <summary>
-/// The request paarmeters for handling invitation link requests with specific user type parameters.
-/// </summary>
-public class InvitationLinkUpdateRequestDto
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class InvitationLinkDtoMapper
 {
-    /// <summary>
-    /// The ID of the invitation link.
-    /// </summary>
-    public required Guid Id { get; set; }
-
-    /// <summary>
-    /// The expiration date of the invitation link.
-    /// </summary>
-    public DateTime? Expiration { get; set; }
-
-    /// <summary>
-    /// The maximum number of times the invitation link can be used.
-    /// </summary>
-    public int MaxUseCount { get; set; }
-}
-
-/// <summary>
-/// The request paarmeters for handling invitation link requests with specific user type parameters.
-/// </summary>
-public class InvitationLinkDeleteRequestDto
-{
-    /// <summary>
-    /// The ID of the invitation link.
-    /// </summary>
-    public required Guid Id { get; set; }
+    public static partial InvitationLinkDto MapToDto(this InvitationLink source);
 }

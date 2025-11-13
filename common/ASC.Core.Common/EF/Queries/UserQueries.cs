@@ -245,6 +245,42 @@ public partial class UserDbContext
     {
         return Queries.DeleteUserRelationAsync(this, tenantId, sourceUserId, targetUserId);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<InvitationLink> GetInvitationLinkAsync(int tenantId, Guid id)
+    {
+        return Queries.GetInvitationLinkByIdAsync(this, tenantId, id);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, EmployeeType.User])]
+    public Task<InvitationLink> GetInvitationLinkAsync(int tenantId, EmployeeType employeeType)
+    {
+        return Queries.GetInvitationLinkByTypeAsync(this, tenantId, employeeType);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public IAsyncEnumerable<InvitationLink> GetInvitationLinksAsync(int tenantId)
+    {
+        return Queries.GetInvitationLinksAsync(this, tenantId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultDateTime, PreCompileQuery.DefaultInt])]
+    public Task<int> UpdateInvitationLinkAsync(int tenantId, Guid id, DateTime expiration, int maxUseCount)
+    {
+        return Queries.UpdateInvitationLinkAsync(this, tenantId, id, expiration, maxUseCount);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
+    public Task<int> UpdateInvitationLinkUsageAsync(int tenantId, Guid id, int currentUseCount)
+    {
+        return Queries.UpdateInvitationLinkUsageAsync(this, tenantId, id, currentUseCount);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<int> DeleteInvitationLinkAsync(int tenantId, Guid id)
+    {
+        return Queries.DeleteInvitationLinkAsync(this, tenantId, id);
+    }
 }
 
 static file class Queries
@@ -512,5 +548,45 @@ static file class Queries
                         r.TenantId == tenantId &&
                         r.SourceUserId == sourceUserId &&
                         r.TargetUserId == targetUserId)
+                    .ExecuteDelete());
+
+    public static readonly Func<UserDbContext, int, Guid, Task<InvitationLink>> GetInvitationLinkByIdAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid id) =>
+                ctx.InvitationLinks
+                    .FirstOrDefault(r => r.TenantId == tenantId && r.Id == id));
+
+    public static readonly Func<UserDbContext, int, EmployeeType, Task<InvitationLink>> GetInvitationLinkByTypeAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, EmployeeType employeeType) =>
+                ctx.InvitationLinks
+                    .FirstOrDefault(r => r.TenantId == tenantId && (employeeType == EmployeeType.All || r.EmployeeType == employeeType)));
+
+    public static readonly Func<UserDbContext, int, IAsyncEnumerable<InvitationLink>> GetInvitationLinksAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId) =>
+                ctx.InvitationLinks
+                    .Where(r => r.TenantId == tenantId));
+
+    public static readonly Func<UserDbContext, int, Guid, DateTime, int, Task<int>> UpdateInvitationLinkAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid id, DateTime expiration, int maxUseCount) =>
+                ctx.InvitationLinks
+                    .Where(r => r.TenantId == tenantId && r.Id == id)
+                    .ExecuteUpdate(q => q.SetProperty(p => p.Expiration, expiration)
+                                         .SetProperty(p => p.MaxUseCount, maxUseCount)));
+
+    public static readonly Func<UserDbContext, int, Guid, int, Task<int>> UpdateInvitationLinkUsageAsync =
+    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (UserDbContext ctx, int tenantId, Guid id, int currentUseCount) =>
+            ctx.InvitationLinks
+                .Where(r => r.TenantId == tenantId && r.Id == id)
+                .ExecuteUpdate(q => q.SetProperty(p => p.CurrentUseCount, currentUseCount)));
+
+    public static readonly Func<UserDbContext, int, Guid, Task<int>> DeleteInvitationLinkAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid id) =>
+                ctx.InvitationLinks
+                    .Where(r => r.TenantId == tenantId && r.Id == id)
                     .ExecuteDelete());
 }

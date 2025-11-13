@@ -373,4 +373,39 @@ public class CachedUserService : IUserService
     {
         return await _service.GetDavUserEmailsAsync(tenant);
     }
+
+    public async Task<InvitationLink> CreateInvitationLinkAsync(int tenantId, EmployeeType employeeType, DateTime expiration, int maxUseCount)
+    {
+        return await _service.CreateInvitationLinkAsync(tenantId, employeeType, expiration, maxUseCount);
+    }
+
+    public async Task<InvitationLink> GetInvitationLinkAsync(int tenantId, Guid id)
+    {
+        return await _service.GetInvitationLinkAsync(tenantId, id);
+    }
+
+    public async Task<InvitationLink> GetInvitationLinkAsync(int tenantId, EmployeeType employeeType)
+    {
+        return await _service.GetInvitationLinkAsync(tenantId, employeeType);
+    }
+
+    public async Task<List<InvitationLink>> GetInvitationLinksAsync(int tenantId)
+    {
+        return await _service.GetInvitationLinksAsync(tenantId);
+    }
+
+    public async Task UpdateInvitationLinkAsync(int tenantId, Guid id, DateTime expiration, int maxUseCount)
+    {
+        await _service.UpdateInvitationLinkAsync(tenantId, id, expiration, maxUseCount);
+    }
+
+    public async Task UpdateInvitationLinkUsageAsync(int tenantId, Guid id, int currentUseCount)
+    {
+        await _service.UpdateInvitationLinkUsageAsync(tenantId, id, currentUseCount);
+    }
+
+    public async Task DeleteInvitationLinkAsync(int tenantId, Guid id)
+    {
+        await _service.DeleteInvitationLinkAsync(tenantId, id);
+    }
 }
