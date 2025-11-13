@@ -40,11 +40,17 @@ public class ProviderSettings
 
     public ProviderSettingsData? Get(ProviderType type)
     {
-        return _settings.GetValueOrDefault(type);
+        var provider = _settings.GetValueOrDefault(type);
+        return provider is { Enabled: true } ? provider : null;
     }
 
     public IEnumerable<ProviderSettingsData> GetAvailableProviders()
     {
-        return _settings.Values;
+        return _settings.Values.Where(x => x.Enabled);
+    }
+    
+    public HashSet<string>? GetSupportedModels(ProviderType type)
+    {
+        return _settings.GetValueOrDefault(type)?.Models;
     }
 }

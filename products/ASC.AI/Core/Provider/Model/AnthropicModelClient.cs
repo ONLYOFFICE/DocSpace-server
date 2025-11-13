@@ -30,7 +30,7 @@ public class AnthropicModelClient(HttpClient httpClient, string url, string apiK
 {
     private readonly AnthropicClient _innerClient = new(new APIAuthentication(apiKey), httpClient);
 
-    public async Task<List<ModelInfo>> ListModelsAsync(Scope? scope = null)
+    public async Task<IEnumerable<ModelInfo>> ListModelsAsync(Scope? scope = null)
     {
         if (!url.Equals("https://api.anthropic.com/v1"))
         {
@@ -39,8 +39,8 @@ public class AnthropicModelClient(HttpClient httpClient, string url, string apiK
         
         try
         {
-            var response = await _innerClient.Models.ListModelsAsync(beforeId: "claude-3-5-haiku-20241022", limit: 100);
-            return response.Models.Select(x => new ModelInfo { Id = x.Id }).ToList();
+            var response = await _innerClient.Models.ListModelsAsync(beforeId: "claude-opus-4-20250514", limit: 100);
+            return response.Models.Select(x => new ModelInfo { Id = x.Id });
         }
         catch (AuthenticationException e)
         {

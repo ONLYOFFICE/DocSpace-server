@@ -29,4 +29,5 @@ namespace ASC.AI.Core.Provider.Model;
 public class ModelInfo
 {
     public required string Id { get; init; }
+    public int Created { get; init; }
 }

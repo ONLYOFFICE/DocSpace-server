@@ -28,7 +28,7 @@ namespace ASC.AI.Core.Provider.Model;
 
 public class TogetherAiModelClient(HttpClient client, string url, string apiKey) : OpenAiModelClient(client, url, apiKey)
 {
-    protected override async Task<List<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response, Scope? scope)
+    protected override async Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response, Scope? scope)
     {
         var content = await response.Content.ReadFromJsonAsync<IEnumerable<TogetherModel>>();
         if (content == null)
@@ -41,7 +41,7 @@ public class TogetherAiModelClient(HttpClient client, string url, string apiKey)
             content = content.Where(x => x.Type == "chat");
         }
 
-        return content.OfType<ModelInfo>().ToList();
+        return content.OrderByDescending(x => x.Created);
     }
 
     private class TogetherModel : ModelInfo

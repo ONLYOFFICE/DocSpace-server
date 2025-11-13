@@ -30,4 +30,6 @@ public class ProviderSettingsData
 {
     public ProviderType Type { get; init; }
     public required string Url { get; init; }
+    public HashSet<string>? Models { get; init; }
+    public bool Enabled { get; init; }
 }
