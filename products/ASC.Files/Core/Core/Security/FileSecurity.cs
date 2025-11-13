@@ -2274,21 +2274,6 @@ public class FileSecurity(
                 .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                 .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                 .FirstOrDefault(r => Equals(r.EntryId, entry.Id) && r.EntryType == FileEntryType.File);
-
-            if (ace == null || entry.RootFolderType == FolderType.VirtualRooms)
-            {
-                // share on parent folders
-                var parentAce = shares.Where(r => Equals(r.EntryId, entry.ParentId) && r.EntryType == FileEntryType.Folder)
-                    .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
-                    .ThenBy(r => r.Level)
-                    .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
-                    .FirstOrDefault();
-
-                if (parentAce != null)
-                {
-                    ace = parentAce;
-                }
-            }
         }
         else
         {
@@ -2299,6 +2284,21 @@ public class FileSecurity(
                 .FirstOrDefault();
         }
 
+        if (ace == null || entry.RootFolderType == FolderType.VirtualRooms)
+        {
+            // share on parent folders
+            var parentAce = shares.Where(r => (Equals(r.ParentId, entry.ParentId) || Equals(r.EntryId, entry.ParentId)) && r.EntryType == FileEntryType.Folder)
+                .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
+                .ThenBy(r => r.Level)
+                .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
+                .FirstOrDefault();
+
+            if (parentAce != null)
+            {
+                ace = parentAce;
+            }
+        }
+        
         return ace;
     }
 
