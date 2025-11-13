@@ -27,24 +27,24 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request paarmeters for handling invitation link requests with specific user type parameters.
+/// The request parameters for receiving an invitation link.
 /// </summary>
 public class InvitationLinkRequestDto
 {
     /// <summary>
-    /// The type of employee role for the invitation link (All, RoomAdmin, Guest, DocSpaceAdmin, User).
+    /// The type of employee role for the invitation link.
     /// </summary>
     [FromRoute(Name = "employeeType")]
     public required EmployeeType EmployeeType { get; set; }
 }
 
 /// <summary>
-/// The request paarmeters for handling invitation link requests with specific user type parameters.
+/// The request parameters for creating an invitation link.
 /// </summary>
 public class InvitationLinkCreateRequestDto
 {
     /// <summary>
-    /// The type of employee role for the invitation link (All, RoomAdmin, Guest, DocSpaceAdmin, User).
+    /// The type of employee role for the invitation link.
     /// </summary>
     public required EmployeeType EmployeeType { get; set; }
 
@@ -59,9 +59,8 @@ public class InvitationLinkCreateRequestDto
     public int MaxUseCount { get; set; }
 }
 
-
 /// <summary>
-/// The request paarmeters for handling invitation link requests with specific user type parameters.
+/// The request parameters for updating an invitation link.
 /// </summary>
 public class InvitationLinkUpdateRequestDto
 {
@@ -82,7 +81,7 @@ public class InvitationLinkUpdateRequestDto
 }
 
 /// <summary>
-/// The request paarmeters for handling invitation link requests with specific user type parameters.
+/// The request parameters for deleting an invitation link.
 /// </summary>
 public class InvitationLinkDeleteRequestDto
 {

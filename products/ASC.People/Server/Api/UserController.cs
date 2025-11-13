@@ -343,11 +343,7 @@ public class UserController(
 
             if (linkData is { IsCorrect: true, ConfirmType: ConfirmType.LinkInvite } && linkData.LinkId != Guid.Empty)
             {
-                var invitationLink = await _userManager.GetInvitationLinkAsync(linkData.LinkId);
-                if (invitationLink != null && invitationLink.MaxUseCount > 0)
-                {
-                    await _userManager.UpdateInvitationLinkUsageAsync(linkData.LinkId, invitationLink.CurrentUseCount + 1);
-                }
+                await _userManager.IncreaseInvitationLinkUsageAsync(linkData.LinkId);
             }
 
             if (inDto.Type is EmployeeType.Guest)

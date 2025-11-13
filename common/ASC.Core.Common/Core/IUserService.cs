@@ -65,6 +65,6 @@ public interface IUserService
     Task<InvitationLink> GetInvitationLinkAsync(int tenantId, EmployeeType employeeType);
     Task<List<InvitationLink>> GetInvitationLinksAsync(int tenantId);
     Task UpdateInvitationLinkAsync(int tenantId, Guid id, DateTime expiration, int maxUseCount);
-    Task UpdateInvitationLinkUsageAsync(int tenantId, Guid id, int currentUseCount);
+    Task IncreaseInvitationLinkUsageAsync(int tenantId, Guid id);
     Task DeleteInvitationLinkAsync(int tenantId, Guid id);
 }

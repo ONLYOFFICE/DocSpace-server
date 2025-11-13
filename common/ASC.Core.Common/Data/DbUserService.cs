@@ -1071,10 +1071,10 @@ public class EFUserService(
         await userDbContext.UpdateInvitationLinkAsync(tenantId, id, expiration, maxUseCount);
     }
 
-    public async Task UpdateInvitationLinkUsageAsync(int tenantId, Guid id, int currentUseCount)
+    public async Task IncreaseInvitationLinkUsageAsync(int tenantId, Guid id)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-        await userDbContext.UpdateInvitationLinkUsageAsync(tenantId, id, currentUseCount);
+        await userDbContext.IncreaseInvitationLinkUsageAsync(tenantId, id);
     }
 
     public async Task DeleteInvitationLinkAsync(int tenantId, Guid id)

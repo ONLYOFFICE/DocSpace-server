@@ -46,7 +46,7 @@ public class InvitationLinkDto
     /// <summary>
     /// The expiration date of the invitation link.
     /// </summary>
-    public DateTime Expiration { get; set; }
+    public ApiDateTime Expiration { get; set; }
 
     /// <summary>
     /// The maximum number of times the invitation link can be used.
@@ -64,9 +64,35 @@ public class InvitationLinkDto
     public string Url { get; set; }
 }
 
-
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class InvitationLinkDtoMapper
+[Scope]
+public class InvitationLinkDtoHelper(
+    ApiDateTimeHelper apiDateTimeHelper,
+    Signature signature,
+    CommonLinkUtility commonLinkUtility,
+    IUrlShortener urlShortener)
 {
-    public static partial InvitationLinkDto MapToDto(this InvitationLink source);
+    public async Task<InvitationLinkDto> GetAsync(InvitationLink source, string tenantAlias, Guid currentAccountId)
+    {
+        if (source == null)
+        {
+            return default;
+        }
+
+        var result = new InvitationLinkDto()
+        {
+            Id = source.Id,
+            EmployeeType = source.EmployeeType,
+            Expiration = apiDateTimeHelper.Get(source.Expiration),
+            MaxUseCount = source.MaxUseCount,
+            CurrentUseCount = source.CurrentUseCount
+        };
+
+        var key = signature.Create((int)source.EmployeeType + "." + source.Id.ToString() + "." + tenantAlias);
+
+        var link = commonLinkUtility.GetConfirmationUrl(key, ConfirmType.LinkInvite, currentAccountId);
+
+        result.Url = await urlShortener.GetShortenLinkAsync($"{link}&emplType={source.EmployeeType:d}");
+
+        return result;
+    }
 }

@@ -271,9 +271,9 @@ public partial class UserDbContext
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
-    public Task<int> UpdateInvitationLinkUsageAsync(int tenantId, Guid id, int currentUseCount)
+    public Task<int> IncreaseInvitationLinkUsageAsync(int tenantId, Guid id)
     {
-        return Queries.UpdateInvitationLinkUsageAsync(this, tenantId, id, currentUseCount);
+        return Queries.IncreaseInvitationLinkUsageAsync(this, tenantId, id);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
@@ -576,12 +576,12 @@ static file class Queries
                     .ExecuteUpdate(q => q.SetProperty(p => p.Expiration, expiration)
                                          .SetProperty(p => p.MaxUseCount, maxUseCount)));
 
-    public static readonly Func<UserDbContext, int, Guid, int, Task<int>> UpdateInvitationLinkUsageAsync =
-    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-        (UserDbContext ctx, int tenantId, Guid id, int currentUseCount) =>
-            ctx.InvitationLinks
-                .Where(r => r.TenantId == tenantId && r.Id == id)
-                .ExecuteUpdate(q => q.SetProperty(p => p.CurrentUseCount, currentUseCount)));
+    public static readonly Func<UserDbContext, int, Guid, Task<int>> IncreaseInvitationLinkUsageAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid id) =>
+                ctx.InvitationLinks
+                    .Where(r => r.TenantId == tenantId && r.Id == id)
+                    .ExecuteUpdate(q => q.SetProperty(p => p.CurrentUseCount, p => p.CurrentUseCount + 1)));
 
     public static readonly Func<UserDbContext, int, Guid, Task<int>> DeleteInvitationLinkAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

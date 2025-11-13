@@ -42,7 +42,6 @@ namespace ASC.Web.Api.Controllers;
 [ControllerName("portal")]
 public class PortalController(
     ILogger<PortalController> logger,
-    Signature signature,
     UserManager userManager,
     TenantManager tenantManager,
     ITariffService tariffService,
@@ -75,7 +74,8 @@ public class PortalController(
     ApiDateTimeHelper apiDateTimeHelper,
     IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
-    IdentityClient client)
+    IdentityClient client,
+    InvitationLinkDtoHelper invitationLinkDtoHelper)
     : ControllerBase
 {
     /// <summary>
@@ -176,32 +176,28 @@ public class PortalController(
     public async Task<InvitationLinkDto> CreateInvitationLink(InvitationLinkCreateRequestDto inDto)
     {
         var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
-
         if (!invitationSettings.AllowInvitingMembers)
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        if (inDto.EmployeeType is EmployeeType.All or EmployeeType.Guest)
+        {
+            throw new ArgumentException(nameof(inDto.EmployeeType));
+        }
 
-        if ((inDto.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(tenantManager.GetCurrentTenant()))
-            || !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.EmployeeType), Constants.Action_AddRemoveUser))
+        var tenant = tenantManager.GetCurrentTenant();
+        var currentUserId = authContext.CurrentAccount.ID;
+
+        if ((inDto.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUserId.IsOwner(tenant)) ||
+            !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.EmployeeType), Constants.Action_AddRemoveUser))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var tenant = tenantManager.GetCurrentTenant();
-
         var invitationLink = await userManager.CreateInvitationLinkAsync(inDto.EmployeeType, inDto.Expiration ?? DateTime.UtcNow.AddDays(7), inDto.MaxUseCount);
 
-        var key = signature.Create((int)invitationLink.EmployeeType + "." + invitationLink.Id.ToString() + "." + tenant.Alias);
-
-        var link = commonLinkUtility.GetConfirmationUrl(key, ConfirmType.LinkInvite, authContext.CurrentAccount.ID)
-            + $"&lid={invitationLink.Id}&emplType={invitationLink.EmployeeType:d}";
-
-        var result = invitationLink.MapToDto();
-
-        result.Url = await urlShortener.GetShortenLinkAsync(link);
+        var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
 
         return result;
     }
@@ -219,37 +215,27 @@ public class PortalController(
     public async Task<InvitationLinkDto> GetInvitationLinkByEmployeeType(InvitationLinkRequestDto inDto)
     {
         var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
-
         if (!invitationSettings.AllowInvitingMembers)
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var tenant = tenantManager.GetCurrentTenant();
+        var currentUserId = authContext.CurrentAccount.ID;
 
-        if ((inDto.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(tenantManager.GetCurrentTenant()))
-            || !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.EmployeeType), Constants.Action_AddRemoveUser))
+        if ((inDto.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUserId.IsOwner(tenant)) ||
+            !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.EmployeeType), Constants.Action_AddRemoveUser))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var tenant = tenantManager.GetCurrentTenant();
-
         var invitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
-
         if (invitationLink == null)
         {
-            return null;
+            throw new ItemNotFoundException();
         }
 
-        var key = signature.Create((int)invitationLink.EmployeeType + "." + invitationLink.Id.ToString() + "." + tenant.Alias);
-
-        var link = commonLinkUtility.GetConfirmationUrl(key, ConfirmType.LinkInvite, authContext.CurrentAccount.ID)
-            + $"&emplType={invitationLink.EmployeeType:d}";
-
-        var result = invitationLink.MapToDto();
-
-        result.Url = await urlShortener.GetShortenLinkAsync(link);
+        var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
 
         return result;
     }
@@ -267,23 +253,22 @@ public class PortalController(
     public async Task<InvitationLinkDto> UpdateInvitationLink(InvitationLinkUpdateRequestDto inDto)
     {
         var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
-
         if (!invitationSettings.AllowInvitingMembers)
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         var invitationLink = await userManager.GetInvitationLinkAsync(inDto.Id);
-
         if (invitationLink == null)
         {
-            return null;
+            throw new ItemNotFoundException();
         }
 
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var tenant = tenantManager.GetCurrentTenant();
+        var currentUserId = authContext.CurrentAccount.ID;
 
-        if ((invitationLink.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(tenantManager.GetCurrentTenant()))
-            || !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, invitationLink.EmployeeType), Constants.Action_AddRemoveUser))
+        if ((invitationLink.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUserId.IsOwner(tenant)) ||
+            !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, invitationLink.EmployeeType), Constants.Action_AddRemoveUser))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
@@ -291,18 +276,9 @@ public class PortalController(
         invitationLink.Expiration = inDto.Expiration ?? DateTime.UtcNow.AddDays(7);
         invitationLink.MaxUseCount = inDto.MaxUseCount;
 
-        var tenant = tenantManager.GetCurrentTenant();
-
         await userManager.UpdateInvitationLinkAsync(invitationLink.Id, invitationLink.Expiration, invitationLink.MaxUseCount);
 
-        var key = signature.Create((int)invitationLink.EmployeeType + "." + invitationLink.Id.ToString() + "." + tenant.Alias);
-
-        var link = commonLinkUtility.GetConfirmationUrl(key, ConfirmType.LinkInvite, authContext.CurrentAccount.ID)
-            + $"&lid={invitationLink.Id}&emplType={invitationLink.EmployeeType:d}";
-
-        var result = invitationLink.MapToDto();
-
-        result.Url = await urlShortener.GetShortenLinkAsync(link);
+        var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
 
         return result;
     }
@@ -317,23 +293,22 @@ public class PortalController(
     public async Task DeleteInvitationLink(InvitationLinkDeleteRequestDto inDto)
     {
         var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
-
         if (!invitationSettings.AllowInvitingMembers)
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         var invitationLink = await userManager.GetInvitationLinkAsync(inDto.Id);
-
         if (invitationLink == null)
         {
-            return;
+            throw new ItemNotFoundException();
         }
 
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var tenant = tenantManager.GetCurrentTenant();
+        var currentUserId = authContext.CurrentAccount.ID;
 
-        if ((invitationLink.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(tenantManager.GetCurrentTenant()))
-            || !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, invitationLink.EmployeeType), Constants.Action_AddRemoveUser))
+        if ((invitationLink.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUserId.IsOwner(tenant)) ||
+            !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, invitationLink.EmployeeType), Constants.Action_AddRemoveUser))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }

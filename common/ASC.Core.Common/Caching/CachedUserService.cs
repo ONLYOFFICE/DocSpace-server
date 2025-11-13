@@ -399,9 +399,9 @@ public class CachedUserService : IUserService
         await _service.UpdateInvitationLinkAsync(tenantId, id, expiration, maxUseCount);
     }
 
-    public async Task UpdateInvitationLinkUsageAsync(int tenantId, Guid id, int currentUseCount)
+    public async Task IncreaseInvitationLinkUsageAsync(int tenantId, Guid id)
     {
-        await _service.UpdateInvitationLinkUsageAsync(tenantId, id, currentUseCount);
+        await _service.IncreaseInvitationLinkUsageAsync(tenantId, id);
     }
 
     public async Task DeleteInvitationLinkAsync(int tenantId, Guid id)

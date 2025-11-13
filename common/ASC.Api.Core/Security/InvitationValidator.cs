@@ -209,16 +209,21 @@ public class InvitationValidator(
             return (EmailValidationKeyProvider.ValidationResult.Invalid, linkId);
         }
 
-        var link = await userManager.GetInvitationLinkAsync(linkId, false);
+        var link = await userManager.GetInvitationLinkAsync(linkId);
 
         if (link == null || link.EmployeeType != employeeType)
         {
             return (EmailValidationKeyProvider.ValidationResult.Invalid, linkId);
         }
 
-        if (link.Expiration < DateTime.UtcNow || link.MaxUseCount <= link.CurrentUseCount)
+        if (link.Expiration < DateTime.UtcNow)
         {
             return (EmailValidationKeyProvider.ValidationResult.Expired, linkId);
+        }
+
+        if (link.MaxUseCount > 0 && link.MaxUseCount <= link.CurrentUseCount)
+        {
+            return (EmailValidationKeyProvider.ValidationResult.QuotaFailed, linkId);
         }
 
         return (EmailValidationKeyProvider.ValidationResult.Ok, linkId);
