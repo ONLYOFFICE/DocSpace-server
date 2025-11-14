@@ -890,7 +890,7 @@ public class FileSecurity(
 
         await foreach (var entry in entries)
         {
-            if (entry.Security != null)
+            if (entry.Security.TryGetValue(userId, out _))
             {
                 yield return entry;
             }
@@ -904,7 +904,7 @@ public class FileSecurity(
                 security[action] = await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders);
             }
 
-            entry.Security = security;
+            entry.Security.TryAdd(userId, security);
 
             yield return entry;
         }
@@ -951,7 +951,7 @@ public class FileSecurity(
             return false;
         }
 
-        if (entry.Security != null && entry.Security.TryGetValue(action, out var result))
+        if (entry.Security != null && entry.Security.TryGetValue(userId, out var security) && security.TryGetValue(action, out var result))
         {
             return result;
         }
@@ -3010,14 +3010,20 @@ public class FileSecurity(
                     action != FilesSecurityActions.Lock &&
                     action != FilesSecurityActions.Download)
                 {
-                    file.Security[action] = false;
+                    foreach (var k in file.Security.Keys)
+                    {
+                        file.Security[k][action] = false;
+                    }
                 }
             }
         }
 
         if (file.CustomFilterEnabledBy != null)
-        {
-            file.Security[FilesSecurityActions.Edit] = false;
+        {                    
+            foreach (var k in file.Security.Keys)
+            {
+                file.Security[k][FilesSecurityActions.Edit] = false;
+            }
         }
     }
 

@@ -257,7 +257,7 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
     /// <summary>
     /// The actions that can be performed with the file entry.
     /// </summary>
-    public IDictionary<FilesSecurityActions, bool> Security { get; set; }
+    public Dictionary<Guid, IDictionary<FilesSecurityActions, bool>> Security { get; set; } = new();
 
     private T _folderIdDisplay;
 
