@@ -369,12 +369,7 @@ public class FileEntryDtoHelper(
         {
             ownedBy = entry.ParentRoomCreatedBy ?? entry.RootCreateBy;
         }
-        
-        if(!entry.Security.TryGetValue(securityContext.CurrentAccount.ID, out var security))
-        {
-            security = new Dictionary<FilesSecurityActions, bool>();
-        }
-        
+
         return new T
         {
             Id = entry.Id,
@@ -398,7 +393,7 @@ public class FileEntryDtoHelper(
             ProviderId = entry.ProviderId.NullIfDefault(),
             CanShare = canSetAccess,
             ShareSettings = shareSettings,
-            Security = security,
+            Security = entry.Security,
             OriginId = entry.OriginId,
             OriginTitle = entry.OriginTitle,
             OriginRoomId = entry.OriginRoomId,

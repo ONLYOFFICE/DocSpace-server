@@ -265,8 +265,7 @@ public class FolderDtoHelper(
         {
             result.External = Equals(folder.ShareRecord.EntryId, folder.Id);;
             result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) &&
-                                       folder.Security.TryGetValue(authContext.CurrentAccount.ID, out var security) &&
-                                       security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) &&
+                                       folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) &&
                                        !canRead;
 
 #pragma warning disable CS0618 // Type or member is obsolete

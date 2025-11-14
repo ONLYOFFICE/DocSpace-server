@@ -201,7 +201,7 @@ public abstract class EditorController<T>(
 
         var result = await configurationConverter.Convert(configuration, file);
 
-        if (formOpenSetup is { DisableEmbeddedConfig: true } && result.EditorConfig.Embedded != null)
+        if (formOpenSetup != null && formOpenSetup.DisableEmbeddedConfig && result.EditorConfig.Embedded != null)
         {
             result.EditorConfig.Embedded.EmbedUrl = "";
             result.EditorConfig.Embedded.ShareUrl = "";
@@ -212,11 +212,7 @@ public abstract class EditorController<T>(
         {
             if (formOpenSetup.RootFolder.FolderType is FolderType.VirtualDataRoom)
             {
-                if (file.Security.TryGetValue(securityContext.CurrentAccount.ID, out var security))
-                {
-                    result.StartFilling = security[FileSecurity.FilesSecurityActions.StartFilling];
-                }
-
+                result.StartFilling = file.Security[FileSecurity.FilesSecurityActions.StartFilling];
                 result.StartFillingMode = StartFillingMode.StartFilling;
                 result.Document.ReferenceData.RoomId = formOpenSetup.RootFolder.Id.ToString();
                 result.Document.ReferenceData.CanEditRoom = formOpenSetup.CanEditRoom;
