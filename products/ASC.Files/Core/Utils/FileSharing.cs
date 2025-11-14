@@ -936,12 +936,13 @@ public class FileSharing(
     {
         var aces = await GetSharedInfoAsync([file.Id], []);
         var inRoom = file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive;
+        var inAgent = file.RootFolderType == FolderType.AiRoom;
 
         return
         [
             ..aces
                 .Where(aceWrapper => aceWrapper.Access != FileShare.Restrict && aceWrapper.SubjectType != SubjectType.InvitationLink)
-                .Select(aceWrapper => new AceShortWrapper(aceWrapper.SubjectName, FileShareExtensions.GetAccessString(aceWrapper.Access, inRoom), aceWrapper.IsLink))
+                .Select(aceWrapper => new AceShortWrapper(aceWrapper.SubjectName, FileShareExtensions.GetAccessString(aceWrapper.Access, inRoom, inAgent), aceWrapper.IsLink))
         ];
     }
 

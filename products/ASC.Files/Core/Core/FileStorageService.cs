@@ -3977,7 +3977,7 @@ public class FileStorageService //: IFileStorageService
                                             await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, pastRecord.Share, true, name);
                                             await notifyClient.SendRoomUpdateAccessForUser(folder, user, ace.Access);
 
-                                            var role = FileShareExtensions.GetAccessString(ace.Access, true);
+                                            var role = FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom);
                                             var url = commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}");
                                             await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.Title, url, role);
                                             break;
@@ -4008,18 +4008,20 @@ public class FileStorageService //: IFileStorageService
                                 var isSystem = await userManager.IsSystemGroup(group.ID);
                                 if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
                                 {
+                                    var isAgent = folder.FolderType == FolderType.AiRoom;
+                                    
                                     switch (eventType)
                                     {
                                         case EventType.Create:
-                                            await filesMessageService.SendAsync(MessageAction.RoomGroupAdded, entry, group.Name, FileShareExtensions.GetAccessString(ace.Access, true), group.ID.ToString(), isSystem.ToString(CultureInfo.InvariantCulture));
+                                            await filesMessageService.SendAsync(MessageAction.RoomGroupAdded, entry, group.Name, FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom), group.ID.ToString(), isSystem.ToString(CultureInfo.InvariantCulture));
                                             break;
                                         case EventType.Remove:
                                             await filesMessageService.SendAsync(MessageAction.RoomGroupRemove, entry, group.Name, group.ID.ToString(), isSystem.ToString(CultureInfo.InvariantCulture));
                                             break;
                                         case EventType.Update:
                                             await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForGroup, entry, group.Name,
-                                                FileShareExtensions.GetAccessString(ace.Access, true), group.ID.ToString(),
-                                                FileShareExtensions.GetAccessString(pastRecord.Share, true), isSystem.ToString(CultureInfo.InvariantCulture));
+                                                FileShareExtensions.GetAccessString(ace.Access, true, isAgent), group.ID.ToString(),
+                                                FileShareExtensions.GetAccessString(pastRecord.Share, true, isAgent), isSystem.ToString(CultureInfo.InvariantCulture));
                                             break;
                                     }
                                 }
@@ -4105,7 +4107,7 @@ public class FileStorageService //: IFileStorageService
         var result = await SetAceLinkAsync(room, SubjectType.InvitationLink, linkId, share, options);
 
         await filesMessageService.SendAsync(_roomMessageActions[SubjectType.InvitationLink][result.EventType], room, result.Ace.Id, result.Ace.FileShareOptions?.Title,
-            FileShareExtensions.GetAccessString(result.Ace.Access, true));
+            FileShareExtensions.GetAccessString(result.Ace.Access, true, room.FolderType == FolderType.AiRoom));
 
         return (await fileSharing.GetPureSharesAsync(room, [result.Ace.Id]).FirstOrDefaultAsync());
     }
@@ -5235,6 +5237,7 @@ public class FileStorageService //: IFileStorageService
 
         var folder = entry as Folder<T>;
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
+        var isAgent = folder is { FolderType: FolderType.AiRoom };
 
         var actions = folder == null ? _fileMessageActions : isRoom ? _roomMessageActions : _folderMessageActions;
 
@@ -5281,12 +5284,12 @@ public class FileStorageService //: IFileStorageService
             if (isRoom)
             {
                 await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, ace.FileShareOptions?.Title,
-                    FileShareExtensions.GetAccessString(ace.Access, isRoom), ace.Id.ToString());
+                    FileShareExtensions.GetAccessString(ace.Access, isRoom, isAgent), ace.Id.ToString());
             }
             else
             {
                 await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, entry.Title, ace.FileShareOptions?.Title,
-                    FileShareExtensions.GetAccessString(ace.Access, isRoom), ace.Id.ToString());
+                    FileShareExtensions.GetAccessString(ace.Access, isRoom, isAgent), ace.Id.ToString());
             }
         }
         else
