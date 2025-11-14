@@ -186,6 +186,11 @@ public class PortalController(
             throw new ArgumentException(nameof(inDto.EmployeeType));
         }
 
+        if (inDto.Expiration.HasValue && inDto.Expiration.Value < DateTime.UtcNow)
+        {
+            throw new ArgumentException(nameof(inDto.Expiration));
+        }
+
         var tenant = tenantManager.GetCurrentTenant();
         var currentUserId = authContext.CurrentAccount.ID;
 
@@ -262,6 +267,11 @@ public class PortalController(
         if (invitationLink == null)
         {
             throw new ItemNotFoundException();
+        }
+
+        if (inDto.Expiration.HasValue && inDto.Expiration.Value < DateTime.UtcNow)
+        {
+            throw new ArgumentException(nameof(inDto.Expiration));
         }
 
         var tenant = tenantManager.GetCurrentTenant();
