@@ -70,6 +70,34 @@ public class FileCopyTests(
     }
     
     [Fact]
+    public async Task DuplicateFile_InsideUserFolder_ReturnsValidFileWithIndex()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        // Create a source file
+        var sourceFile = await CreateFileInMy("source_document.docx", Initializer.Owner);
+        
+        // Act
+        var results = (await _filesOperationsApi.DuplicateBatchItemsAsync(new DuplicateRequestDto
+        {
+            FileIds = [new(sourceFile.Id)]
+        }, TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        if (results.Any(r => !r.Finished))
+        {
+            results = await WaitLongOperation();
+        }
+        
+        // Assert
+        results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
+        var newFile = results.OfType<FileOperationDto>().FirstOrDefault();
+        newFile.Should().NotBeNull();
+        newFile.Files.Should().Contain(r=> Path.GetFileNameWithoutExtension(r.Title) == Path.GetFileNameWithoutExtension(sourceFile.Title) + " (1)");
+    }
+    
+    [Fact]
     public async Task CopyFile_WithRename_ReturnsRenamedFile()
     {
         // Arrange

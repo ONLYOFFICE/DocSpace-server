@@ -26,7 +26,7 @@
 
 
 
-namespace ASC.Files.Core.Mapping;
+//namespace ASC.Files.Core.Mapping;
 
 // public class LocationConverter: IValueConverter<DbFolder, string>
 // {

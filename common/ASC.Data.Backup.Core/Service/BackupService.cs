@@ -448,7 +448,7 @@ public class BackupService(
     public async Task<ScheduleDto> GetScheduleAsync(bool? dump)
     {
         await DemandPermissionsBackupAsync();
-        ScheduleResponse response = null;
+        ScheduleResponse response;
         if (dump.HasValue && dump.Value)
         {
             response = await InnerGetScheduleAsync(-1, dump);

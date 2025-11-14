@@ -110,7 +110,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
             if (Dump)
             {
-                var tenants = await _tenantManager.GetTenantsAsync(true);
+                var tenants = await _tenantManager.GetTenantsAsync();
 
                 foreach (var t in tenants)
                 {

@@ -89,7 +89,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         else if (schema.Type == "array")
         {
             originalSchemaRef = schema.Items?.Reference?.Id;
-            var schemaArray = schema.Items ?? null;
+            var schemaArray = schema.Items;
             OpenApiSchema arrayResponseProperty;
 
             if (schema.OneOf != null && schema.OneOf.Any(s => s.Items != null))

@@ -46,8 +46,8 @@ public class AiProviderService(
             throw new ArgumentException(ErrorMessages.IncorrectProvider);
         }
         
-        ArgumentException.ThrowIfNullOrEmpty(title, nameof(title));
-        ArgumentException.ThrowIfNullOrEmpty(key, nameof(key));
+        ArgumentException.ThrowIfNullOrEmpty(title);
+        ArgumentException.ThrowIfNullOrEmpty(key);
         
         url = string.IsNullOrEmpty(url) ? settings.Url : new Uri(url).ToString();
         
@@ -185,6 +185,13 @@ public class AiProviderService(
         try
         {
             var models = await client.ListModelsAsync(scope);
+            
+            var supported = providerSettings.GetSupportedModels(p.Type);
+            if (supported != null)
+            {
+                models = models.Where(m => supported.Contains(m.Id));
+            }
+            
             return models.Select(m => new ModelData
             {
                 Provider = p,

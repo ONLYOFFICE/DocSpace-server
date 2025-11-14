@@ -1352,7 +1352,7 @@ internal class FileDao(
         var copy = _serviceProvider.GetService<File<int>>();
         copy.SetFileStatus(status & ~flagsToRemove);
         copy.ParentId = toFolderId;
-        copy.Title = file.Title;
+        copy.Title = await global.GetAvailableTitleAsync(file.Title, toFolderId, IsExistAsync, FileEntryType.File);
         copy.ConvertedType = file.ConvertedType;
         copy.Comment = FilesCommonResource.CommentCopy;
         copy.Encrypted = file.Encrypted;

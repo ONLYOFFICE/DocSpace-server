@@ -522,11 +522,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     roomsCountCheckLock = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(CurrentTenantId));
                                     await countRoomChecker.CheckAppend();
                                 }
-
-                                var title = await global.GetAvailableTitleAsync(folder.Title, toFolderId, folderDao.IsExistAsync, FileEntryType.Folder);
+                                
                                 newFolder = await FolderDao.CopyFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                newFolder.Title = title;
-                                newFolder.Id = await folderDao.SaveFolderAsync(newFolder);
                             }
                             finally
                             {
@@ -589,7 +586,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         {
                             var toNewFolderParents = await folderDao.GetParentFoldersAsync(newFolder.Id).ToListAsync();
 
-                            var foldersForCopyIds = new List<T>();
+                            List<T> foldersForCopyIds;
                             if (folder.FolderType == FolderType.FillingFormsRoom)
                             {
                                 var foldersForCopy = await FolderDao.GetFoldersAsync(folder.Id).ToListAsync();
@@ -978,10 +975,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         {
                             try
                             {
-                                var title = await global.GetAvailableTitleAsync(file.Title, toFolderId, fileDao.IsExistAsync, FileEntryType.File);
                                 newFile = await FileDao.CopyFileAsync(file.Id, toFolderId); //Stream copy will occur inside dao
-                                newFile.Title = title;
-
+                                
                                 await filesMessageService.SendCopyMessageAsync(newFile, parentFolder, toFolder, toParentFolders, false, _headers, [newFile.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
                                 await webhookManager.PublishAsync(WebhookTrigger.FileCopied, newFile);
 

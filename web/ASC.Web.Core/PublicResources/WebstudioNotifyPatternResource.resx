@@ -2653,4 +2653,33 @@ ${LetterLogoText} Support Team
   <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; was assigned the role of &lt;b&gt;{1}&lt;/b&gt; in the agent: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Hello!
+
+You are invited to join a DocSpace agent at "${__VirtualRootPath}":"${__VirtualRootPath}". Accept the invitation by clicking the link:
+
+$OrangeButton
+
+After clicking on the invitation link, please set a new password for your account.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Hello!
+
+$__AuthorName invited you to join the agent "$Message":"$InviteLink" on "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Join ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>You're invited to the ${LetterLogoText} DocSpace agent</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Join agent</value>
+  </data>
 </root>

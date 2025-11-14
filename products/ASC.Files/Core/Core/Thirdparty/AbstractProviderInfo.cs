@@ -220,7 +220,7 @@ public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
 
         var items = await _cache.GetOrSetAsync<List<TItem>>(key, async (ctx, token) =>
         {
-            List<TItem> items = null;
+            List<TItem> items;
             if (folder != null && storage is IGoogleDriveItemStorage<TItem> googleStorage)
             {
                 items = await googleStorage.GetItemsAsync(folderId, folder);

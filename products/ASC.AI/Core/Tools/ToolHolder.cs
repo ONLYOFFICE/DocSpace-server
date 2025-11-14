@@ -126,5 +126,4 @@ public class ToolContext
     public required string Name { get; init; }
     public int RoomId { get; init; }
     public bool AutoInvoke { get; set; }
-    public Task<ToolExecutionDecision>? PermissionRequest { get; set; }
 }

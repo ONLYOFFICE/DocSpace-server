@@ -374,9 +374,9 @@ public class FileDtoHelper(
         
         if (aiReady is false)
         {
-            if (result.Security.ContainsKey(FileSecurity.FilesSecurityActions.AscAi))
+            if (result.Security.ContainsKey(FileSecurity.FilesSecurityActions.AskAi))
             {
-                result.Security[FileSecurity.FilesSecurityActions.AscAi] = false;
+                result.Security[FileSecurity.FilesSecurityActions.AskAi] = false;
             }
         }
 
@@ -578,7 +578,7 @@ public class FileDtoHelper(
             {
                 result.IsLinkExpired = file.ShareRecord.Options?.IsExpired;
                 result.RequestToken = await _externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
-                result.External = true;
+                result.External = Equals(file.ShareRecord.EntryId, file.Id);
                 
                 var expirationDate = file.ShareRecord?.Options?.ExpirationDate;
                 if (expirationDate != null && expirationDate != DateTime.MinValue)
@@ -587,7 +587,7 @@ public class FileDtoHelper(
                 }
                 
                 var parents = await folderDao.GetParentFoldersAsync(result.FolderId).ToListAsync();
-                var parent = parents.FirstOrDefault();
+                var parent = parents.Count >= 2 ? parents[^2] : null;
                 if (!await _fileSecurity.CanReadAsync(parent))
                 {
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();

@@ -288,7 +288,7 @@ public class FileSecurity(
                     FilesSecurityActions.StopFilling,
                     FilesSecurityActions.OpenForm,
                     FilesSecurityActions.Vectorization,
-                    FilesSecurityActions.AscAi
+                    FilesSecurityActions.AskAi
                 }
             },
             {
@@ -1066,8 +1066,10 @@ public class FileSecurity(
             return false;
         }
 
-        if (action is FilesSecurityActions.AscAi &&
-            (file == null || !vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title)))
+        if (action is FilesSecurityActions.AskAi &&
+            (file == null || 
+             file.ContentLength > vectorizationGlobalSettings.MaxContentLength || 
+             !vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title)))
         {
             return false;
         }
@@ -1170,7 +1172,7 @@ public class FileSecurity(
             if (folder.FolderType == FolderType.Knowledge)
             {
                 if (action is not (FilesSecurityActions.Read or FilesSecurityActions.MoveTo
-                    or FilesSecurityActions.CopyTo or FilesSecurityActions.Create))
+                    or FilesSecurityActions.CopyTo or FilesSecurityActions.Create or FilesSecurityActions.Download))
                 {
                     return false;
                 }
@@ -2205,7 +2207,7 @@ public class FileSecurity(
                         break;
                 }
                 break;
-            case FilesSecurityActions.AscAi:
+            case FilesSecurityActions.AskAi:
                 return e.Access != FileShare.Restrict;
             case FilesSecurityActions.UseChat:
                 switch (e.RootFolderType)
@@ -2272,21 +2274,6 @@ public class FileSecurity(
                 .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                 .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                 .FirstOrDefault(r => Equals(r.EntryId, entry.Id) && r.EntryType == FileEntryType.File);
-
-            if (ace == null || entry.RootFolderType == FolderType.VirtualRooms)
-            {
-                // share on parent folders
-                var parentAce = shares.Where(r => Equals(r.EntryId, entry.ParentId) && r.EntryType == FileEntryType.Folder)
-                    .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
-                    .ThenBy(r => r.Level)
-                    .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
-                    .FirstOrDefault();
-
-                if (parentAce != null)
-                {
-                    ace = parentAce;
-                }
-            }
         }
         else
         {
@@ -2297,6 +2284,21 @@ public class FileSecurity(
                 .FirstOrDefault();
         }
 
+        if (ace == null || entry.RootFolderType == FolderType.VirtualRooms)
+        {
+            // share on parent folders
+            var parentAce = shares.Where(r => (Equals(r.ParentId, entry.ParentId) || Equals(r.EntryId, entry.ParentId)) && r.EntryType == FileEntryType.Folder)
+                .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
+                .ThenBy(r => r.Level)
+                .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
+                .FirstOrDefault();
+
+            if (parentAce != null)
+            {
+                ace = parentAce;
+            }
+        }
+        
         return ace;
     }
 
@@ -3487,7 +3489,7 @@ public class FileSecurity(
         Vectorization,
         
         [Description("Asc AI")]
-        AscAi,
+        AskAi,
         
         [Description("Use chat")]
         UseChat

@@ -2971,7 +2971,6 @@ public class FileStorageService //: IFileStorageService
         else
         {
             checkedFiles.AddRange(filesId);
-            return checkedFiles;
         }
 
         return checkedFiles;
@@ -3424,7 +3423,6 @@ public class FileStorageService //: IFileStorageService
         }
 
         await fileSecurity.RemoveSubjectAsync(userFromId, true);
-        return;
     }
 
     public async Task UpdatePersonalFolderModified(Guid userId, bool checkPermission = false)
@@ -3481,7 +3479,6 @@ public class FileStorageService //: IFileStorageService
             var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{userId}";
             await notifyMyFolder.PublishAsync(new ClearMyFolderItem { Key = cacheKey }, CacheNotifyAction.Remove);
         }
-        return;
     }
 
     private async Task DeleteFilesAsync<T>(IEnumerable<T> fileIds, T folderIdTrash)
@@ -4884,7 +4881,7 @@ public class FileStorageService //: IFileStorageService
                 }
 
                 var link = invitationService.GetInvitationLink(user.Email, ace.Access, authContext.CurrentAccount.ID, room.Id.ToString());
-                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, await urlShortener.GetShortenLinkAsync(link));
+                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, await urlShortener.GetShortenLinkAsync(link), room.FolderType == FolderType.AiRoom);
                 await filesMessageService.SendAsync(MessageAction.RoomInviteResend, room, user.Email, user.Id.ToString());
             }
 
@@ -4919,7 +4916,7 @@ public class FileStorageService //: IFileStorageService
                 var link = invitationService.GetInvitationLink(user.Email, ace.Access, authContext.CurrentAccount.ID, id.ToString());
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, shortenLink);
+                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, shortenLink, room.FolderType == FolderType.AiRoom);
                 await filesMessageService.SendAsync(MessageAction.RoomInviteResend, room, user.Email, user.Id.ToString());
             }
 

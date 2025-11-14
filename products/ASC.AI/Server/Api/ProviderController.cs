@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.MessagingSystem.EF.Model;
-
 using ProviderDto = ASC.AI.Models.ResponseDto.ProviderDto;
 
 namespace ASC.AI.Api;
@@ -41,6 +39,7 @@ public class ProviderController(
     ProviderMapper providerMapper) : ControllerBase
 {
     [HttpPost("providers")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<ProviderDto> AddProviderAsync(CreateProviderRequestDto inDto)
     {
         var provider = await providerService.AddProviderAsync(inDto.Title, inDto.Url, inDto.Key, inDto.Type);
@@ -67,6 +66,7 @@ public class ProviderController(
     }
     
     [HttpPut("providers/{id}")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<ProviderDto> UpdateProviderAsync(UpdateProviderRequestDto inDto)
     {
         var provider = await providerService.UpdateProviderAsync(inDto.Id, inDto.Body.Title, inDto.Body.Url, inDto.Body.Key);

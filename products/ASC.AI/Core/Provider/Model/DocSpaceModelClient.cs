@@ -28,7 +28,7 @@ namespace ASC.AI.Core.Provider.Model;
 
 public class DocSpaceModelClient(HttpClient client, string url, string apiKey) : OpenAiModelClient(client, url, apiKey)
 {
-    protected override async Task<List<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response, Scope? scope)
+    protected override async Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response, Scope? scope)
     {
         var content = await response.Content.ReadFromJsonAsync<Response>();
         if (content == null)
@@ -37,8 +37,8 @@ public class DocSpaceModelClient(HttpClient client, string url, string apiKey) :
         }
 
         return scope is Scope.Chat 
-            ? content.Data.Where(x => x.Type == "chat").OfType<ModelInfo>().ToList() 
-            : content.Data.OfType<ModelInfo>().ToList();
+            ? content.Data.Where(x => x.Type == "chat")
+            : content.Data;
     }
     
     private class Response

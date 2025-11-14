@@ -628,10 +628,6 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                         return userInfo;
                     }
                 }
-                else
-                {
-                    return userInfo;
-                }
             }
             else
             {

@@ -38,7 +38,7 @@ public class OpenAiModelClient(HttpClient httpClient, string url, string apiKey)
             HttpCompletionOption.ResponseHeadersRead);
     }
 
-    public async Task<List<ModelInfo>> ListModelsAsync(Scope? scope)
+    public async Task<IEnumerable<ModelInfo>> ListModelsAsync(Scope? scope)
     {
         var response = await SendRequestAsync(
             $"{url.TrimEnd('/')}/{ModelsEndpoint}", 
@@ -47,19 +47,20 @@ public class OpenAiModelClient(HttpClient httpClient, string url, string apiKey)
         return await GetModelsDataAsync(response, scope);
     }
 
-    protected virtual async Task<List<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response, Scope? scope)
+    protected virtual async Task<IEnumerable<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response, Scope? scope)
     {
         var content = await response.Content.ReadFromJsonAsync<Response>();
-        return content?.Data ?? [];
+        return content?.Data == null
+            ? []
+            : content.Data.OrderByDescending(x => x.Created);
     }
     
-    private async Task<HttpResponseMessage> SendRequestAsync(string url, HttpCompletionOption completionOption)
+    private async Task<HttpResponseMessage> SendRequestAsync(string endpoint, HttpCompletionOption completionOption)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
         
-        var response = (await httpClient.SendAsync(request, completionOption)).EnsureSuccessStatusCode();
-        return response;
+        return (await httpClient.SendAsync(request, completionOption)).EnsureSuccessStatusCode();
     }
     
     private class Response

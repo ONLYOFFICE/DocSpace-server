@@ -31,6 +31,8 @@ public class ManagedFunctionInvokingChatClient(
     ToolHolder toolHolder,
     IToolPermissionRequester permissionRequester) : FunctionInvokingChatClient(innerClient)
 {
+    private readonly ConcurrentDictionary<string, Task<ToolExecutionDecision>> _permissionRequests = [];
+    
     public override async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
         IEnumerable<ChatMessage> messages, 
         ChatOptions? options = null, 
@@ -57,7 +59,9 @@ public class ManagedFunctionInvokingChatClient(
                         Name = context.Name
                     };
                     
-                    context.PermissionRequest = permissionRequester.RequestPermissionAsync(callData, cancellationToken);
+                    var request = permissionRequester.RequestPermissionAsync(callData, cancellationToken);
+
+                    _permissionRequests.TryAdd(functionCallContent.CallId, request);
                 }
 
                 if (context.McpServerInfo is not null)
@@ -83,12 +87,15 @@ public class ManagedFunctionInvokingChatClient(
             return await base.InvokeFunctionAsync(context, cancellationToken);
         }
 
-        if (toolContext.PermissionRequest == null)
+        if (!_permissionRequests.TryGetValue(context.CallContent.CallId, out var permissionRequest))
         {
             throw new ArgumentException("Permission request is not set for the tool.");
         }
 
-        var decision = await toolContext.PermissionRequest;
+        var decision = await permissionRequest;
+        
+        _permissionRequests.TryRemove(context.CallContent.CallId, out _);
+        
         if (decision is ToolExecutionDecision.Deny)
         {
             return new

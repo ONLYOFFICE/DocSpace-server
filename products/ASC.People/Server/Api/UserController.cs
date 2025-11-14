@@ -2696,7 +2696,13 @@ public class UserControllerAdditional<T>(
         }
 
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
-        var parentUserIds = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(fileEntry.ParentId).Where(r => r.FolderType != FolderType.VirtualRooms).Select(r => r.CreateBy).Where(r => !r.Equals(fileEntry.CreateBy)).Distinct().ToListAsync();
+        var parentUserIds = await daoFactory.GetCacheFolderDao<T>()
+            .GetParentFoldersAsync(fileEntry.ParentId)
+            .Where(r => r.FolderType != FolderType.VirtualRooms && r.FolderType != FolderType.AiAgents)
+            .Select(r => r.CreateBy)
+            .Where(r => !r.Equals(fileEntry.CreateBy))
+            .Distinct()
+            .ToListAsync();
 
         if (!parentUserIds.Contains(fileEntry.CreateBy))
         {

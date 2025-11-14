@@ -263,7 +263,7 @@ public class FolderDtoHelper(
 
         if (folder.ShareRecord is { IsLink: true })
         {
-            result.External = true;
+            result.External = Equals(folder.ShareRecord.EntryId, folder.Id);;
             result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) &&
                                        folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) &&
                                        !canRead;
@@ -280,7 +280,7 @@ public class FolderDtoHelper(
 
             var cachedFolder = _daoFactory.GetCacheFolderDao<T>();
             var parents = await cachedFolder.GetParentFoldersAsync(result.ParentId).ToListAsync();
-            var parent = parents.FirstOrDefault();
+            var parent = parents.LastOrDefault();
             if (!await _fileSecurity.CanReadAsync(parent))
             {
                 result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();

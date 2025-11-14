@@ -449,7 +449,7 @@ public class NotifyClient(WorkContext notifyContext,
         }
 
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
-        var accessString = FileShareExtensions.GetAccessString(currentRole, false);
+        var accessString = FileShareExtensions.GetAccessString(currentRole);
 
         await client.SendNoticeAsync(
             NotifyConstants.EventRoomUpdateAccessForUser,

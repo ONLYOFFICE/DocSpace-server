@@ -370,7 +370,13 @@ public class FileSharingAceHelper(
                 var link = invitationService.GetInvitationLink(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-                await studioNotifyService.SendEmailRoomInviteAsync(w.Email, entry.Title, shortenLink, culture, true);
+                await studioNotifyService.SendEmailRoomInviteAsync(
+                    w.Email, 
+                    entry.Title, 
+                    shortenLink, 
+                    entry is IFolder { FolderType: FolderType.AiRoom }, 
+                    culture, 
+                    true);
             }
             else
             {
@@ -378,7 +384,7 @@ public class FileSharingAceHelper(
                 {
                     var user = await userManager.GetUsersAsync(w.Id);
 
-                    await studioNotifyService.SendEmailRoomInviteExistingUserAsync(user, room.Title, roomUrl);
+                    await studioNotifyService.SendEmailRoomInviteExistingUserAsync(user, room.Title, roomUrl, room.FolderType is FolderType.AiRoom);
                 }
             }
 
