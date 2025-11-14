@@ -4112,7 +4112,7 @@ public class FileStorageService //: IFileStorageService
             Title = !string.IsNullOrEmpty(title)
                 ? title
                 : FilesCommonResource.DefaultInvitationLinkTitle,
-            ExpirationDate = expirationDate,
+            ExpirationDate = expirationDateUtc,
             MaxUseCount = maxUseCount
         };
 
