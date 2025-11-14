@@ -201,7 +201,13 @@ public class StudioNotifyService(
                     new TagValue(Tags.UserDisplayName, (user.DisplayUserName(displayUserSettingsHelper) ?? string.Empty).Trim()));
     }
 
-    public async Task SendEmailRoomInviteAsync(string email, string roomTitle, string confirmationUrl, string culture = null, bool limitation = false)
+    public async Task SendEmailRoomInviteAsync(
+        string email, 
+        string roomTitle, 
+        string confirmationUrl,
+        bool isAgent,
+        string culture = null, 
+        bool limitation = false)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? (GetCulture(null)) : new CultureInfo(culture);
 
@@ -216,12 +222,16 @@ public class StudioNotifyService(
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
         };
+        
+        var action = isAgent 
+            ? Actions.SaasAgentInvite
+            : Actions.SaasRoomInvite;
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
-            Actions.SaasRoomInvite,
-                await studioNotifyHelper.RecipientFromEmailAsync(email, false),
-                [EMailSenderName],
-                tags.ToArray());
+            action, 
+            await studioNotifyHelper.RecipientFromEmailAsync(email, false), 
+            [EMailSenderName], 
+            tags.ToArray());
 
         if (limitation)
         {
@@ -229,11 +239,14 @@ public class StudioNotifyService(
         }
     }
 
-    public async Task SendEmailRoomInviteExistingUserAsync(UserInfo user, string roomTitle, string roomUrl)
+    public async Task SendEmailRoomInviteExistingUserAsync(UserInfo user, string roomTitle, string roomUrl, bool isAgent)
     {
         var cultureInfo = GetCulture(user);
 
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonJoinRoom", cultureInfo);
+        var orangeButtonText = isAgent 
+            ? WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonJoinAgent", cultureInfo)
+            : WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonJoinRoom", cultureInfo);
+            
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         var tags = new List<ITagValue>
@@ -244,9 +257,13 @@ public class StudioNotifyService(
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
         };
+        
+        var action = isAgent 
+            ? Actions.SaasAgentInviteExistingUser 
+            : Actions.SaasRoomInviteExistingUser;
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
-            Actions.SaasRoomInviteExistingUser,
+            action,
             [user],
             [EMailSenderName],
             tags.ToArray());

@@ -95,7 +95,9 @@ public static class Actions
     public static readonly INotifyAction StorageDecryptionError = new NotifyAction("storage_decryption_error");
 
     public static readonly INotifyAction SaasRoomInvite = new NotifyAction("saas_room_invite");
+    public static readonly INotifyAction SaasAgentInvite = new NotifyAction("saas_agent_invite");
     public static readonly INotifyAction SaasRoomInviteExistingUser = new NotifyAction("saas_room_invite_existing_user");
+    public static readonly INotifyAction SaasAgentInviteExistingUser = new NotifyAction("saas_agent_invite_existing_user");
     public static readonly INotifyAction SaasDocSpaceInvite = new NotifyAction("saas_docspace_invite");
     public static readonly INotifyAction SaasDocSpaceRegistration = new NotifyAction("saas_docspace_registration");
 

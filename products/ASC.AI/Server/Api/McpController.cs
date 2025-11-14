@@ -33,6 +33,7 @@ namespace ASC.AI.Api;
 public class McpController(McpService mcpService, ApiContext apiContext) : ControllerBase
 {
     [HttpPost("servers")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<McpServerDto> AddServerAsync(AddServerRequestDto inDto)
     {
         var server = await mcpService.AddCustomServerAsync(
@@ -46,6 +47,7 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
     }
     
     [HttpPut("servers/{id}")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<McpServerDto> UpdateServerAsync(UpdateServerRequestDto inDto)
     {
         var server = await mcpService.UpdateCustomServerAsync(

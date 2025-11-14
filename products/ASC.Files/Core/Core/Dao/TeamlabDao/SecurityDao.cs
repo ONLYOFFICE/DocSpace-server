@@ -1116,7 +1116,7 @@ internal abstract class SecurityBaseDao<T>(
 
         if (r.FolderId != 0)
         {
-            result.EntryId = (T)Convert.ChangeType(r.FolderId, typeof(T));
+            result.ParentId = (T)Convert.ChangeType(r.FolderId, typeof(T));
         }
 
         return result;

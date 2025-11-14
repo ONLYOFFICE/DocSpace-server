@@ -143,7 +143,7 @@ public class ChatCompletionRunner(
 
         var contents = new List<AIContent>(attachments.Count + 1);
         contents.AddRange(attachments.Select(attachment => (AIContent)attachment));
-        contents.Add(new TextContent(message));
+        contents.Add(new TextContent($"##User query: {message}"));
 
         return new ChatMessage { Role = ChatRole.User, Contents = contents };
     }

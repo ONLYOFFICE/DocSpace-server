@@ -357,9 +357,15 @@ public class FileEntryDtoHelper(
             }
         }
 
-        var sharedBy = entry.SharedBy ?? entry.ShareRecord?.Owner;
+        var sharedBy = entry.SharedBy;
+
+        if (sharedBy == null &&  entry.ShareRecord != null && Equals(entry.Id, entry.ShareRecord.EntryId))
+        {
+            sharedBy = entry.ShareRecord?.Owner;
+        }
+
         Guid? ownedBy = null;
-        if (sharedBy.HasValue)
+        if (entry.ShareRecord != null)
         {
             ownedBy = entry.ParentRoomCreatedBy ?? entry.RootCreateBy;
         }

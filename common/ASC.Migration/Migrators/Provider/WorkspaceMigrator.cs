@@ -499,20 +499,37 @@ public class WorkspaceMigrator : Migrator
         using var streamFiles = _dataReader.GetEntry("databases/projects/projects_project_participant");
         var datafiles = new DataTable();
         datafiles.ReadXml(streamFiles);
+        var openProjects = new List<int>();
         foreach (var row in datafiles.Rows.Cast<DataRow>())
         {
+            var projectIdStr = row["project_id"].ToString();
+
             if (row["removed"].ToString() == "0"
-                && mapper.ContainsKey(row["project_id"].ToString())
-                && storage.Folders.FirstOrDefault(f => f.Id == int.Parse(mapper[row["project_id"].ToString()])).Private)
+                && mapper.ContainsKey(projectIdStr))
             {
+                var projectId = int.Parse(mapper[projectIdStr]);
+
                 var security = new MigrationSecurity
                 {
                     Subject = row["participant_id"].ToString(),
-                    EntryId = int.Parse(mapper[row["project_id"].ToString()]),
+                    EntryId = projectId,
                     EntryType = 1,
                     Security = (int)Files.Core.Security.FileShare.ContentCreator
                 };
                 storage.Securities.Add(security);
+
+                if (!openProjects.Contains(projectId) && !storage.Folders.FirstOrDefault(f => f.Id == projectId).Private)
+                {
+                    var everyoneSecurity = new MigrationSecurity
+                    {
+                        Subject = Constants.GroupEveryone.ID.ToString(),
+                        EntryId = projectId,
+                        EntryType = 1,
+                        Security = (int)Files.Core.Security.FileShare.Read
+                    };
+                    storage.Securities.Add(everyoneSecurity);
+                    openProjects.Add(projectId);
+                }
             }
         }
     }
