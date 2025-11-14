@@ -262,7 +262,7 @@ public class SocketManager(
 
         if (users == null)
         {
-            (users, sharedUsers) = await WhoCanRead(entry);
+            (users, sharedUsers) = await WhoCanRead(entry, folderIdDisplay);
         }
 
         if (action != null)
@@ -401,7 +401,7 @@ public class SocketManager(
         };
     }
 
-    private async Task<(IEnumerable<Guid> directAccess, IEnumerable<Guid> sharedAccess)> WhoCanRead<T>(FileEntry<T> entry)
+    private async Task<(IEnumerable<Guid> directAccess, IEnumerable<Guid> sharedAccess)> WhoCanRead<T>(FileEntry<T> entry, T parentFolderId)
     {
         var (direct, shared) = await fileSecurity.WhoCanReadSeparatelyAsync(entry);
 
@@ -411,11 +411,34 @@ public class SocketManager(
             direct = direct.Concat(admins);
         }
 
-        direct = direct.Concat([entry.CreateBy]).Distinct();
+        var directAccess = new HashSet<Guid>(direct)
+        {
+            entry.CreateBy
+        };
 
-        shared = shared.Where(x => !direct.Contains(x));
+        var sharedAccess = new HashSet<Guid>(shared.Where(x => !directAccess.Contains(x)));
 
-        return (direct, shared);
+        if (sharedAccess.Count == 0)
+        {
+            return (directAccess, sharedAccess);
+        }
+
+        var parent = await daoFactory.GetFolderDao<T>().GetFolderAsync(parentFolderId);
+        var whoCanReadParent = await fileSecurity.WhoCanReadAsync(parent, true);
+        var sharedAccessWhoCantReadParent = new List<Guid>();
+        foreach (var s in sharedAccess)
+        {
+            if (whoCanReadParent.Contains(s))
+            {
+                directAccess.Add(s);
+            }
+            else
+            {
+                sharedAccessWhoCantReadParent.Add(s);
+            }
+        }
+
+        return (directAccess, sharedAccessWhoCantReadParent);
     }
 
     private List<Guid> _admins;
