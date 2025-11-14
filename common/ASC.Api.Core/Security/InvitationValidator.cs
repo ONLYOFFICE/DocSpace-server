@@ -70,7 +70,7 @@ public class InvitationValidator(
 
             if (commonLinkResult == EmailValidationKeyProvider.ValidationResult.Invalid)
             {
-                (commonLinkResult, linkId) = await ValidateCommonLinkAsync(key, employeeType, tenant.Alias);
+                (commonLinkResult, linkId) = await ValidateCommonLinkAsync(key, employeeType, userId.Value, tenant.Alias);
             }
         }
 
@@ -187,7 +187,7 @@ public class InvitationValidator(
         return linkId == Guid.Empty ? (EmailValidationKeyProvider.ValidationResult.Invalid, default) : (EmailValidationKeyProvider.ValidationResult.Ok, linkId);
     }
 
-    private async Task<(EmailValidationKeyProvider.ValidationResult, Guid)> ValidateCommonLinkAsync(string key, EmployeeType employeeType, string tenantAlias)
+    private async Task<(EmailValidationKeyProvider.ValidationResult, Guid)> ValidateCommonLinkAsync(string key, EmployeeType employeeType, Guid userId, string tenantAlias)
     {
         Guid linkId = default;
 
@@ -195,10 +195,11 @@ public class InvitationValidator(
         if (!string.IsNullOrEmpty(combined))
         {
             var split = combined.Split('.');
-            if (split.Length == 3 &&
+            if (split.Length == 4 &&
                 split[0].Equals(((int)employeeType).ToString()) &&
                 Guid.TryParse(split[1], out var id) &&
-                split[2].Equals(tenantAlias))
+                Guid.TryParse(split[2], out var uId) && uId.Equals(userId) &&
+                split[3].Equals(tenantAlias))
             {
                 linkId = id;
             }

@@ -87,7 +87,7 @@ public class InvitationLinkDtoHelper(
             CurrentUseCount = source.CurrentUseCount
         };
 
-        var key = signature.Create((int)source.EmployeeType + "." + source.Id.ToString() + "." + tenantAlias);
+        var key = signature.Create((int)source.EmployeeType + "." + source.Id + "." + currentAccountId + "." + tenantAlias);
 
         var link = commonLinkUtility.GetConfirmationUrl(key, ConfirmType.LinkInvite, currentAccountId);
 
