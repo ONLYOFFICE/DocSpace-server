@@ -276,6 +276,7 @@ public class InvitationService(
             : EmailValidationKeyProvider.ValidationResult.Expired;
 
         if (data.Result == EmailValidationKeyProvider.ValidationResult.Ok &&
+            record.Options.MaxUseCount > 0 &&
             record.Options.MaxUseCount <= record.Options.CurrentUseCount)
         {
             data.Result = EmailValidationKeyProvider.ValidationResult.QuotaFailed;
