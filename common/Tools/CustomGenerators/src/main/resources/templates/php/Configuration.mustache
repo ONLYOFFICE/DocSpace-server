@@ -77,7 +77,7 @@ class Configuration
      *
      * @var string
      */
-    protected $userAgent = '{{{httpUserAgent}}}{{^httpUserAgent}}OpenAPI-Generator/{{{artifactVersion}}}{{^artifactVersion}}1.0.0{{/artifactVersion}}/PHP{{/httpUserAgent}}';
+    protected $userAgent = '{{{httpUserAgent}}}{{^httpUserAgent}}OpenAPI-Generator/{{{packageVersion}}}/PHP{{/httpUserAgent}}';
 
     /**
      * Debug switch (default set to false)
@@ -409,9 +409,7 @@ class Configuration
         $report  = 'PHP SDK ({{invokerPackage}}) Debug Report:' . PHP_EOL;
         $report .= '    OS: ' . php_uname() . PHP_EOL;
         $report .= '    PHP Version: ' . PHP_VERSION . PHP_EOL;
-        {{#artifactVersion}}
-        $report .= '    SDK Package Version: {{.}}' . PHP_EOL;
-        {{/artifactVersion}}
+        $report .= '    SDK Package Version: {{packageVersion}}' . PHP_EOL;
         $report .= '    Temp Folder Path: ' . self::getDefaultConfiguration()->getTempFolderPath() . PHP_EOL;
 
         return $report;
@@ -453,7 +451,7 @@ class Configuration
         {{#servers}}
             [
                 "url" => "{{{url}}}",
-                "description" => "{{{description}}}{{^description}}No description provided{{/description}}",
+                "description" => "A simple PHP SDK for integrating with the ONLYOFFICE DocSpace API",
                 {{#variables}}
                 {{#-first}}
                 "variables" => [

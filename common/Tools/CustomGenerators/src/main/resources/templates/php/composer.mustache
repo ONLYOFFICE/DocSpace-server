@@ -1,28 +1,27 @@
 {
-    {{#composerPackageName}}
-    "name": "{{{.}}}",
-    {{/composerPackageName}}
-    {{#artifactVersion}}
-    "version": "{{{.}}}",
-    {{/artifactVersion}}
-    "description": "{{{appDescription}}}",
+    "name": "{{{packageName}}}",
+    "type": "library",
+    "version": "{{{packageVersion}}}",
+    "description": "A simple PHP SDK for integrating with the ONLYOFFICE DocSpace API",
     "keywords": [
-        "openapitools",
-        "openapi-generator",
-        "openapi",
-        "php",
-        "sdk",
-        "rest",
-        "api"
+        "onlyoffice",
+        "docspace",
+        "sdk"
     ],
-    "homepage": "{{{artifactUrl}}}",
+    "homepage": "https://www.onlyoffice.com",
     "license": "{{{licenseName}}}",
     "authors": [
         {
-            "name": "{{{developerOrganization}}}",
-            "homepage": "{{{developerOrganizationUrl}}}"
+            "name": "Ascensio System SIA",
+            "homepage": "https://www.onlyoffice.com"
         }
     ],
+    "support": {
+        "issues": "{{repositoryUrl}}/issues",
+        "source": "{{repositoryUrl}}",
+        "email": "support@onlyoffice.com",
+        "forum": "https://forum.onlyoffice.com/"
+    },
     "require": {
         "php": "^8.1",
         "ext-curl": "*",
