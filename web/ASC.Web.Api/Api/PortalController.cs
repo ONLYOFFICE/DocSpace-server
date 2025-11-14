@@ -44,6 +44,7 @@ public class PortalController(
     ILogger<PortalController> logger,
     UserManager userManager,
     TenantManager tenantManager,
+    TenantUtil tenantUtil,
     ITariffService tariffService,
     CommonLinkUtility commonLinkUtility,
     IUrlShortener urlShortener,
@@ -137,6 +138,7 @@ public class PortalController(
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "Invitation link", typeof(string))]
     [HttpGet("users/invite/{employeeType}")]
+    [Obsolete("Use CRUD /api/2.0/portal/users/invitationlink instead")]
     public async Task<string> GetInvitationLink(InvitationLinkRequestDto inDto)
     {
         var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
@@ -186,9 +188,14 @@ public class PortalController(
             throw new ArgumentException(nameof(inDto.EmployeeType));
         }
 
-        if (inDto.Expiration.HasValue && inDto.Expiration.Value < DateTime.UtcNow)
+        var expiration = DateTime.UtcNow.AddDays(7);
+        if (inDto.Expiration.HasValue)
         {
-            throw new ArgumentException(nameof(inDto.Expiration));
+            expiration = tenantUtil.DateTimeToUtc(inDto.Expiration.Value);
+            if (expiration < DateTime.UtcNow)
+            {
+                throw new ArgumentException(nameof(inDto.Expiration));
+            }
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -200,7 +207,7 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var invitationLink = await userManager.CreateInvitationLinkAsync(inDto.EmployeeType, inDto.Expiration ?? DateTime.UtcNow.AddDays(7), inDto.MaxUseCount);
+        var invitationLink = await userManager.CreateInvitationLinkAsync(inDto.EmployeeType, expiration, inDto.MaxUseCount);
 
         var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
 
@@ -237,7 +244,7 @@ public class PortalController(
         var invitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
         if (invitationLink == null)
         {
-            throw new ItemNotFoundException();
+            return null;
         }
 
         var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
@@ -274,6 +281,16 @@ public class PortalController(
             throw new ArgumentException(nameof(inDto.Expiration));
         }
 
+        var expiration = DateTime.UtcNow.AddDays(7);
+        if (inDto.Expiration.HasValue)
+        {
+            expiration = tenantUtil.DateTimeToUtc(inDto.Expiration.Value);
+            if (expiration < DateTime.UtcNow)
+            {
+                throw new ArgumentException(nameof(inDto.Expiration));
+            }
+        }
+
         var tenant = tenantManager.GetCurrentTenant();
         var currentUserId = authContext.CurrentAccount.ID;
 
@@ -283,7 +300,7 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        invitationLink.Expiration = inDto.Expiration ?? DateTime.UtcNow.AddDays(7);
+        invitationLink.Expiration = expiration;
         invitationLink.MaxUseCount = inDto.MaxUseCount;
 
         await userManager.UpdateInvitationLinkAsync(invitationLink.Id, invitationLink.Expiration, invitationLink.MaxUseCount);

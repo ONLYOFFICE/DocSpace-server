@@ -66,6 +66,7 @@ public class InvitationLinkDto
 
 [Scope]
 public class InvitationLinkDtoHelper(
+    TenantUtil tenantUtil,
     ApiDateTimeHelper apiDateTimeHelper,
     Signature signature,
     CommonLinkUtility commonLinkUtility,
@@ -82,7 +83,7 @@ public class InvitationLinkDtoHelper(
         {
             Id = source.Id,
             EmployeeType = source.EmployeeType,
-            Expiration = apiDateTimeHelper.Get(source.Expiration),
+            Expiration = apiDateTimeHelper.Get(tenantUtil.DateTimeFromUtc(source.Expiration)),
             MaxUseCount = source.MaxUseCount,
             CurrentUseCount = source.CurrentUseCount
         };
