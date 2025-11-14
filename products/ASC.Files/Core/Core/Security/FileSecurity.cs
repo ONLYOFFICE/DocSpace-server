@@ -890,7 +890,7 @@ public class FileSecurity(
 
         await foreach (var entry in entries)
         {
-            if (entry.Security != null)
+            if (entry.SecurityByUsers != null && entry.SecurityByUsers.TryGetValue(userId, out _))
             {
                 yield return entry;
             }
@@ -905,6 +905,10 @@ public class FileSecurity(
             }
 
             entry.Security = security;
+            
+            entry.SecurityByUsers ??= new Dictionary<Guid, IDictionary<FilesSecurityActions, bool>>();
+            
+            entry.SecurityByUsers.TryAdd(userId, security);
 
             yield return entry;
         }
@@ -951,7 +955,7 @@ public class FileSecurity(
             return false;
         }
 
-        if (entry.Security != null && entry.Security.TryGetValue(action, out var result))
+        if (entry.SecurityByUsers != null && entry.SecurityByUsers.TryGetValue(userId, out var sec) && sec.TryGetValue(action, out var result))
         {
             return result;
         }
@@ -985,7 +989,7 @@ public class FileSecurity(
 
 
     private async IAsyncEnumerable<Tuple<FileEntry<T>, bool>> CanAsync<T>(IAsyncEnumerable<FileEntry<T>> entries, Guid userId, FilesSecurityActions action)
-    { ;
+    { 
         var isOutsider = await userManager.IsOutsiderAsync(userId);
         var userType = await userManager.GetUserTypeAsync(userId);
         var isGuest = userType is EmployeeType.Guest;
@@ -2287,7 +2291,7 @@ public class FileSecurity(
         if (ace == null || entry.RootFolderType == FolderType.VirtualRooms)
         {
             // share on parent folders
-            var parentAce = shares.Where(r => (Equals(r.ParentId, entry.ParentId) || Equals(r.EntryId, entry.ParentId)) && r.EntryType == FileEntryType.Folder)
+            var parentAce = shares.Where(r => (Equals(r.ParentId, entry.Id) || Equals(r.ParentId, entry.ParentId) || Equals(r.EntryId, entry.ParentId)) && r.EntryType == FileEntryType.Folder)
                 .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                 .ThenBy(r => r.Level)
                 .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
