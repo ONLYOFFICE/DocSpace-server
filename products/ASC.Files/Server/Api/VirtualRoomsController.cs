@@ -547,7 +547,7 @@ public abstract class VirtualRoomsController<T>(
     {
         var linkAce = inDto.RoomLink.LinkType switch
         {
-            LinkType.Invitation => await _fileStorageService.SetInvitationLinkAsync(inDto.Id, inDto.RoomLink.LinkId, inDto.RoomLink.Title, inDto.RoomLink.Access),
+            LinkType.Invitation => await _fileStorageService.SetInvitationLinkAsync(inDto.Id, inDto.RoomLink.LinkId, inDto.RoomLink.Title, inDto.RoomLink.Access, inDto.RoomLink.ExpirationDate, inDto.RoomLink.MaxUseCount),
             LinkType.External => await _fileStorageService.SetExternalLinkAsync(
                 inDto.Id,
                 FileEntryType.Folder,

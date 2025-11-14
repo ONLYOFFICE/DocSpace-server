@@ -57,6 +57,16 @@ public class FileShareOptions
     public bool Internal { get; set; }
 
     /// <summary>
+    /// The maximum number of times the invitation link can be used.
+    /// </summary>
+    public int MaxUseCount { get; set; }
+
+    /// <summary>
+    /// The current number of times the invitation link has been used.
+    /// </summary>
+    public int CurrentUseCount { get; set; }
+
+    /// <summary>
     /// Specifies if the shared link is expired or not.
     /// </summary>
     [JsonIgnore]

@@ -72,6 +72,16 @@ public class RoomLinkRequest
     /// Specifies if downloading the file from the link is disabled or not.
     /// </summary>
     public bool DenyDownload { get; set; }
+
+    /// <summary>
+    /// The maximum number of times the invitation link can be used.
+    /// </summary>
+    public int MaxUseCount { get; set; }
+
+    /// <summary>
+    /// The current number of times the invitation link has been used.
+    /// </summary>
+    public int CurrentUseCount { get; set; }
 }
 
 /// <summary>

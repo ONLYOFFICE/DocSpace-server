@@ -168,6 +168,13 @@ public class InvitationService(
 
                     await fileSecurity.ShareAsync(folder.Id, FileEntryType.Folder, currentUserId, data.Share);
 
+                    var link = data.LinkId == Guid.Empty ? null : (await fileSecurity.GetSharesAsync(folder, [data.LinkId])).FirstOrDefault();
+                    if (link != null)
+                    {
+                        link.Options.CurrentUseCount += 1;
+                        await fileSecurity.ShareAsync(link.EntryId, link.EntryType, link.Subject, link.Share, link.SubjectType, link.Options, link.Owner);
+                    }
+
                     switch (entry)
                     {
                         case FileEntry<int> entryInt:
@@ -268,6 +275,12 @@ public class InvitationService(
             ? EmailValidationKeyProvider.ValidationResult.Ok
             : EmailValidationKeyProvider.ValidationResult.Expired;
 
+        if (data.Result == EmailValidationKeyProvider.ValidationResult.Ok &&
+            record.Options.MaxUseCount <= record.Options.CurrentUseCount)
+        {
+            data.Result = EmailValidationKeyProvider.ValidationResult.QuotaFailed;
+        }
+
         data.Share = record.Share;
         data.RoomId = record.EntryId;
         data.EmployeeType = FileSecurity.GetTypeByShare(record.Share);
@@ -314,6 +327,13 @@ public class InvitationService(
             }
 
             await fileSecurity.ShareAsync(roomId, FileEntryType.Folder, user.Id, data.Share);
+
+            var link = data.LinkId == Guid.Empty ? null : (await fileSecurity.GetSharesAsync(room, [data.LinkId])).FirstOrDefault();
+            if (link != null)
+            {
+                link.Options.CurrentUseCount += 1;
+                await fileSecurity.ShareAsync(link.EntryId, link.EntryType, link.Subject, link.Share, link.SubjectType, link.Options, link.Owner);
+            }
 
             await filesMessageService.SendAsync(MessageAction.RoomCreateUser, room, user.Id, data.Share, null, true,
                 user.DisplayUserName(false, displayUserSettingsHelper));

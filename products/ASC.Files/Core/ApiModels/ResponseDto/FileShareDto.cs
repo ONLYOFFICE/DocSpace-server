@@ -158,6 +158,16 @@ public class FileShareLink
     /// The token for validating access requests.
     /// </summary>
     public string RequestToken { get; set; }
+
+    /// <summary>
+    /// The maximum number of times the invitation link can be used.
+    /// </summary>
+    public int? MaxUseCount { get; set; }
+
+    /// <summary>
+    /// The current number of times the invitation link has been used.
+    /// </summary>
+    public int? CurrentUseCount { get; set; }
 }
 
 /// <summary>
@@ -225,6 +235,13 @@ public class FileShareDtoHelper(
                     Internal = aceWrapper.FileShareOptions?.Internal,
                     RequestToken = aceWrapper.RequestToken
                 };
+
+                if (result.SharedLink.LinkType == LinkType.Invitation)
+                {
+                    result.SharedLink.MaxUseCount = aceWrapper.FileShareOptions?.MaxUseCount;
+                    result.SharedLink.CurrentUseCount = aceWrapper.FileShareOptions?.CurrentUseCount;
+                }
+
                 result.SharedTo = result.SharedLink;
             }
             else
