@@ -2,7 +2,7 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 
 group = '{{groupId}}'
-version = '{{artifactVersion}}'
+version = '{{packageVersion}}'
 
 buildscript {
     repositories {
@@ -84,7 +84,7 @@ if(hasProperty('target') && target == 'android') {
     publishing {
         publications {
             maven(MavenPublication) {
-               artifactId = '{{artifactId}}'
+               artifactId = '{{packageName}}'
 
                from components.java
             }

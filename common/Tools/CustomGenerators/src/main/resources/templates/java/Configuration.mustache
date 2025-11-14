@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 
 {{>generatedAnnotation}}
 public class Configuration {
-  public static final String VERSION = "{{{artifactVersion}}}";
+  public static final String VERSION = "{{{packageVersion}}}";
 
   private static final AtomicReference<ApiClient> defaultApiClient = new AtomicReference<>();
   private static volatile Supplier<ApiClient> apiClientFactory = ApiClient::new;

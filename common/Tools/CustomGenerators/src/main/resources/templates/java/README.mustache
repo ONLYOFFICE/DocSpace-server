@@ -1,4 +1,4 @@
-# {{artifactId}}
+# {{packageName}}
 
 {{appName}}
 
@@ -43,8 +43,8 @@ Add this dependency to your project's POM:
 ```xml
 <dependency>
   <groupId>{{{groupId}}}</groupId>
-  <artifactId>{{{artifactId}}}</artifactId>
-  <version>{{{artifactVersion}}}</version>
+  <artifactId>{{{packageName}}}</artifactId>
+  <version>{{{packageVersion}}}</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -55,12 +55,12 @@ Add this dependency to your project's build file:
 
 ```groovy
   repositories {
-    mavenCentral()     // Needed if the '{{{artifactId}}}' jar has been published to maven central.
-    mavenLocal()       // Needed if the '{{{artifactId}}}' jar has been published to the local maven repo.
+    mavenCentral()     // Needed if the '{{{packageName}}}' jar has been published to maven central.
+    mavenLocal()       // Needed if the '{{{packageName}}}' jar has been published to the local maven repo.
   }
 
   dependencies {
-     implementation "{{{groupId}}}:{{{artifactId}}}:{{{artifactVersion}}}"
+     implementation "{{{groupId}}}:{{{packageName}}}:{{{packageVersion}}}"
   }
 ```
 
@@ -74,7 +74,7 @@ mvn clean package
 
 Then manually install the following JARs:
 
-- `target/{{{artifactId}}}-{{{artifactVersion}}}.jar`
+- `target/{{{packageName}}}-{{{packageVersion}}}.jar`
 - `target/lib/*.jar`
 
 {{#jersey2}}

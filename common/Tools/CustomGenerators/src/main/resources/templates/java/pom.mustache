@@ -1,43 +1,36 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>{{groupId}}</groupId>
-    <artifactId>{{artifactId}}</artifactId>
+    <artifactId>{{packageName}}</artifactId>
+    <version>{{packageVersion}}</version>
     <packaging>jar</packaging>
-    <name>{{artifactId}}</name>
-    <version>{{artifactVersion}}</version>
-    <url>{{artifactUrl}}</url>
-    <description>{{artifactDescription}}</description>
-    <scm>
-        <connection>{{scmConnection}}</connection>
-        <developerConnection>{{scmDeveloperConnection}}</developerConnection>
-        <url>{{scmUrl}}</url>
-    </scm>
-{{#parentOverridden}}
-    <parent>
-        <groupId>{{{parentGroupId}}}</groupId>
-        <artifactId>{{{parentArtifactId}}}</artifactId>
-        <version>{{{parentVersion}}}</version>
-    </parent>
-{{/parentOverridden}}
+
+    <name>{{groupId}}:{{packageName}}</name>
+    <description>A simple Java SDK for integrating with the ONLYOFFICE DocSpace API</description>
+    <url>{{repositoryUrl}}</url>
 
     <licenses>
         <license>
             <name>{{licenseName}}</name>
-            <url>{{licenseUrl}}</url>
-            <distribution>repo</distribution>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
 
     <developers>
         <developer>
-            <name>{{developerName}}</name>
-            <email>{{developerEmail}}</email>
-            <organization>{{developerOrganization}}</organization>
-            <organizationUrl>{{developerOrganizationUrl}}</organizationUrl>
+            <email>integration@onlyoffice.com</email>
+            <organization>Ascensio System SIA</organization>
+            <organizationUrl>https://www.onlyoffice.com/</organizationUrl>
         </developer>
     </developers>
 
+    <scm>
+        <connection>scm:git:git@github.com:{{repositoryName}}.git</connection>
+        <developerConnection>scm:git:git@github.com:{{repositoryName}}.git</developerConnection>
+        <url>{{repositoryUrl}}</url>
+    </scm>
     <build>
         <plugins>
             <plugin>
