@@ -102,7 +102,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
                         excludeSubject, provider, subjectFilter, subjectEntriesIds);
                 })
                 .Where(r => r != null))
-                .SelectAwait(async r => await ResolveParentAsync(r));
+                .Select(async (Folder<string> r, CancellationToken _) => await ResolveParentAsync(r));
         }
 
         result = FilterByProvider(result, provider);
@@ -232,7 +232,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
                         filterType, subjectGroup, subjectID, searchText, searchSubfolders, checkShare, excludeSubject);
                 })
                 .Where(r => r != null))
-                .SelectAwait(async r => await ResolveParentAsync(r));
+                .Select(async (Folder<string> r, CancellationToken _) => await ResolveParentAsync(r));
         }
 
         return result.Distinct();

@@ -111,7 +111,10 @@ internal class LinkDao<T>(
         var tenantId = _tenantManager.GetCurrentTenantId();
         var mapping = daoFactory.GetMapping<T>();
 
-        var mappedIds = await sourceIds.ToAsyncEnumerable().SelectAwait(async x => await mapping.MappingIdAsync(x)).ToListAsync();
+        var mappedIds = await sourceIds
+            .ToAsyncEnumerable()
+            .Select(async (T x, CancellationToken _) => await mapping.MappingIdAsync(x))
+            .ToListAsync();
         var source = mappedIds.Select(x => x.ToString());
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();

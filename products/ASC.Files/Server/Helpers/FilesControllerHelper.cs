@@ -199,7 +199,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
     public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync<T>(T fileId)
     {
-        return _fileStorageService.GetFileHistoryAsync(fileId).SelectAwait(async e => await _fileDtoHelper.GetAsync(e));
+        return _fileStorageService.GetFileHistoryAsync(fileId).Select(async (File<T> e, CancellationToken _) => await _fileDtoHelper.GetAsync(e));
     }
 
     public async Task<FileDto<T>> LockFileAsync<T>(T fileId, bool lockFile)

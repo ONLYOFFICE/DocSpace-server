@@ -561,8 +561,8 @@ public abstract class FilesController<T>(
     [HttpPut("order")]
     public IAsyncEnumerable<FileEntryDto<T>> SetFilesOrder(OrdersRequestDto<T> inDto)
     {
-        return fileStorageService.SetOrderAsync(inDto.Items).SelectAwait<FileEntry<T>, FileEntryDto<T>>(
-            async e => e.FileEntryType == FileEntryType.Folder ?
+        return fileStorageService.SetOrderAsync(inDto.Items).Select<FileEntry<T>, FileEntryDto<T>>(
+            async (e, _) => e.FileEntryType == FileEntryType.Folder ?
                 await _folderDtoHelper.GetAsync(e as Folder<T>) :
                 await _fileDtoHelper.GetAsync(e as File<T>));
     }

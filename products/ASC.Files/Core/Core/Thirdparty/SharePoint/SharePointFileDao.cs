@@ -103,7 +103,7 @@ internal class SharePointFileDao(
         //Filter
         if (subjectID != Guid.Empty)
         {
-            files = files.WhereAwait(async x => subjectGroup
+            files = files.Where(async (x, _) => subjectGroup
                                          ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                                          : x.CreateBy == subjectID);
         }
@@ -188,7 +188,7 @@ internal class SharePointFileDao(
         //Filter
         if (subjectID != Guid.Empty)
         {
-            files = files.WhereAwait(async x => subjectGroup
+            files = files.Where(async (x, _) => subjectGroup
                                          ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                                          : x.CreateBy == subjectID);
         }

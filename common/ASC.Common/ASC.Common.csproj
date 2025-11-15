@@ -30,13 +30,8 @@
     <PackageReference Include="DistributedLock.Redis" />
     <PackageReference Include="DistributedLock.ZooKeeper" />
     <PackageReference Include="JWT" />
-    <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
-    <PackageReference Include="Microsoft.Extensions.Primitives" />
     <PackageReference Include="Microsoft.Extensions.Resilience" />
     <PackageReference Include="Microsoft.Windows.Compatibility" />
     <PackageReference Include="EtaEmre.NetEscapades.EnumGenerators" />
@@ -59,7 +54,6 @@
     <PackageReference Include="StackExchange.Redis.Extensions.Core" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" />
-    <PackageReference Include="System.Linq.Async" />
     <PackageReference Include="ZiggyCreatures.FusionCache" />
   </ItemGroup>
   <ItemGroup>

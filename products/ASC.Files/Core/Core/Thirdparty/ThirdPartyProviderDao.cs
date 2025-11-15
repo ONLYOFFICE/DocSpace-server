@@ -334,7 +334,7 @@ internal abstract class ThirdPartyProviderDao
         if (withoutTags)
         {
             return rooms.Join(Queries.AllThirdPartyIdMappingsAsync(filesDbContext), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
-                .WhereAwait(async r => !await Queries.AnyTagLinksAsync(filesDbContext, r.HashId))
+                .Where(async (r, _) => !await Queries.AnyTagLinksAsync(filesDbContext, r.HashId))
                 .Select(r => r.folder);
         }
 

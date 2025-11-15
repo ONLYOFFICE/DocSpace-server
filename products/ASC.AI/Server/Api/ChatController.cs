@@ -92,7 +92,7 @@ public class ChatController(
         var totalCountTask = chatService.GetChatsTotalCountAsync(inDto.RoomId);
         
         var chats = chatService.GetChatsAsync(inDto.RoomId, inDto.StartIndex, inDto.Count);
-        var chatsDto = await chats.SelectAwait(async x => await x.ToDtoAsync(employeeDtoHelper, apiDateTimeHelper))
+        var chatsDto = await chats.Select(async (ChatSession x, CancellationToken _) => await x.ToDtoAsync(employeeDtoHelper, apiDateTimeHelper))
             .ToListAsync();
         
         apiContext.SetCount(chatsDto.Count).SetTotalCount(await totalCountTask);
@@ -106,8 +106,7 @@ public class ChatController(
         var totalCountTask = chatService.GetMessagesTotalCountAsync(inDto.ChatId);
         
         var messages = chatService.GetMessagesAsync(inDto.ChatId, inDto.StartIndex, inDto.Count);
-        var messagesDto = await messages.SelectAwait(
-            async x => await dtoConverter.ConvertAsync(x)).ToListAsync();
+        var messagesDto = await messages.Select(async (Message x, CancellationToken _) => await dtoConverter.ConvertAsync(x)).ToListAsync();
         
         apiContext.SetCount(messagesDto.Count).SetTotalCount(await totalCountTask);
         
