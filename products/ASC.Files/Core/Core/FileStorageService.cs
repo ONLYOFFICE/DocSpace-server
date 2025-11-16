@@ -4273,18 +4273,15 @@ public class FileStorageService //: IFileStorageService
             var id = HttpUtility.ParseQueryString(url.Query)[FilesLinkUtility.FileId];
             if (!string.IsNullOrEmpty(id))
             {
-                if (fileId is string)
+                if (int.TryParse(id, out var resultId))
                 {
-                    var dao = daoFactory.GetFileDao<string>();
-                    file = await dao.GetFileAsync(id) as File<T>;
+                    var dao = daoFactory.GetFileDao<int>();
+                    file = await dao.GetFileAsync(resultId) as File<T>;
                 }
                 else
                 {
-                    if (int.TryParse(id, out var resultId))
-                    {
-                        var dao = daoFactory.GetFileDao<int>();
-                        file = await dao.GetFileAsync(resultId) as File<T>;
-                    }
+                    var dao = daoFactory.GetFileDao<string>();
+                    file = await dao.GetFileAsync(id) as File<T>;
                 }
             }
         }
