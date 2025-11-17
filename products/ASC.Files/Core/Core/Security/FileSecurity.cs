@@ -379,7 +379,19 @@ public class FileSecurity(
     {
         return await CanCommentAsync(entry, authContext.CurrentAccount.ID);
     }
+    public async Task<bool> CanFillFormAsync<T>(FileEntry<T> entry, Guid userId)
+    {
+        await foreach (var (_, canFill) in CanAsync(WrapSingle(entry), userId, FilesSecurityActions.FillForms))
+        {
+            return canFill;
+        }
 
+        return false;
+    }
+    private async IAsyncEnumerable<FileEntry<T>> WrapSingle<T>(FileEntry<T> entry)
+    {
+        yield return entry;
+    }
     public async Task<bool> CanFillFormsAsync<T>(FileEntry<T> entry, Guid userId)
     {
         return await CanAsync(entry, userId, FilesSecurityActions.FillForms);

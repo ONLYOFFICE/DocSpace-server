@@ -1032,10 +1032,14 @@ public class CustomizationConfig<T>(
 
     public async Task<SubmitForm> GetSubmitForm(File<T> file)
     {
+        if (!file.IsForm)
+        {
+            return null;
+        }
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
         return new SubmitForm
         {
-            Visible = file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormsAsync(file) && (properties is { FormFilling.StartFilling: true } or { FormFilling.CollectFillForm: true }),
+            Visible = file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormAsync(file, authContext.CurrentAccount.ID) && (properties is { FormFilling.StartFilling: true } or { FormFilling.CollectFillForm: true }),
             ResultMessage = ""
         };
     }
