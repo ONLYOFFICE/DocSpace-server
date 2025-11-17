@@ -9,7 +9,7 @@
   "outputDir": "Swift6",
   "additionalProperties": {
     "packageName": "DocSpaceApiSDK",
-    "packageVersion": "3.5.0-preview.1",
+    "packageVersion": "4.0.0",
     "licenseName": "Apache-2.0",
     "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-swift6",
     "library": "alamofire",
