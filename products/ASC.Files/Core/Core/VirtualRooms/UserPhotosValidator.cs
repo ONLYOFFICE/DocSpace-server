@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,9 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Core.Users;
+namespace ASC.Files.Core.VirtualRooms;
 
-public class UserPhotosValidator(SecurityContext securityContext, UserManager userManager) : IDataStoreValidator
+public class UserPhotosValidator(SecurityContext securityContext, UserManager userManager, FileSecurity fileSecurity) : IDataStoreValidator
 {
     public async Task<bool> Validate(string path)
     {
@@ -38,8 +38,18 @@ public class UserPhotosValidator(SecurityContext securityContext, UserManager us
         var userId = securityContext.CurrentAccount.ID;
         var userType = await userManager.GetUserTypeAsync(userId);
 
-        if (userType == EmployeeType.Guest && !path.Contains(userId.ToString()))
+        if (userType == EmployeeType.Guest)
         {
+            if (path.Contains(userId.ToString()))
+            {
+                return true;
+            }
+
+            if (await fileSecurity.GetUserRecordsAsync().AnyAsync(r => path.Contains(r.Owner.ToString())))
+            {
+                return true;
+            }
+            
             return false;
         }
 
