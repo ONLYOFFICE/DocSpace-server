@@ -773,8 +773,11 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         }
                                     }
                                     else
-                                    {
-                                        newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                    {                                            
+                                        await socketManager.DeleteFolder(folder, action: async () =>
+                                        {
+                                            newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                        });
 
                                         if (folder.RootFolderType is FolderType.USER or FolderType.Privacy && DocSpaceHelper.IsRoom(toFolder.FolderType))
                                         {
