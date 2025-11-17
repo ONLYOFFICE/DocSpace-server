@@ -173,7 +173,7 @@ public class WebhookSender(
                     entry.Config.Enabled = false;
                 }
 
-                logger.ErrorWithException(e);
+                logger.WarningWithException(e);
             }
             catch (Exception e)
             {

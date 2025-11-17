@@ -92,7 +92,10 @@ public class LdapUserImporter(
             return users;
         }
 
-        var usersToAdd = await AllDomainUsers.ToAsyncEnumerable().SelectAwait(async ldapObject => await ldapObjectExtension.ToUserInfoAsync(ldapObject, this)).ToListAsync();
+        var usersToAdd = await AllDomainUsers
+            .ToAsyncEnumerable()
+            .Select(async (LdapObject ldapObject, CancellationToken _) => await ldapObjectExtension.ToUserInfoAsync(ldapObject, this))
+            .ToListAsync();
 
         users.AddRange(usersToAdd);
 
@@ -731,7 +734,7 @@ public class LdapUserImporter(
 
         var users = await LdapHelper.GetUsers(searchTerm, !string.IsNullOrEmpty(email) ? -1 : 1).ToAsyncEnumerable()
             .Where(user => user != null)
-            .ToLookupAwaitAsync(async lu =>
+            .ToLookupAsync(async (lu, _) =>
             {
                 var ui = Constants.LostUser;
 

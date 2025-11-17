@@ -52,7 +52,7 @@ public class ChatSocketClient(
     {
         var currentUser = securityContext.CurrentAccount.ID;
         var room = $"{GetRoom(chatId)}-{currentUser}";
-        await MakeRequest("chat-export", new { room, resultFile = resultFile?.MapToDto() });
+        await MakeRequest("chat-export", new { room, resultFile = resultFile?.MapToDto<T>() });
     }
 
     private string GetRoom(Guid chatId)

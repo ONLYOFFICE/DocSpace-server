@@ -600,7 +600,7 @@ internal abstract class SecurityBaseDao<T>(
                 q = q.Take(count);
             }
 
-            var records = q.ToAsyncEnumerable().SelectAwait(async r => await ToFileShareRecordAsync(r));
+            var records = q.ToAsyncEnumerable().Select(async (DbFilesSecurity r, CancellationToken _) => await ToFileShareRecordAsync(r));
 
             await foreach (var r in DeleteExpiredAsync(records, filesDbContext))
             {
@@ -1116,7 +1116,7 @@ internal abstract class SecurityBaseDao<T>(
 
         if (r.FolderId != 0)
         {
-            result.EntryId = (T)Convert.ChangeType(r.FolderId, typeof(T));
+            result.ParentId = (T)Convert.ChangeType(r.FolderId, typeof(T));
         }
 
         return result;

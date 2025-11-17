@@ -370,7 +370,13 @@ public class FileSharingAceHelper(
                 var link = invitationService.GetInvitationLink(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-                await studioNotifyService.SendEmailRoomInviteAsync(w.Email, entry.Title, shortenLink, culture, true);
+                await studioNotifyService.SendEmailRoomInviteAsync(
+                    w.Email, 
+                    entry.Title, 
+                    shortenLink, 
+                    entry is IFolder { FolderType: FolderType.AiRoom }, 
+                    culture, 
+                    true);
             }
             else
             {
@@ -378,7 +384,7 @@ public class FileSharingAceHelper(
                 {
                     var user = await userManager.GetUsersAsync(w.Id);
 
-                    await studioNotifyService.SendEmailRoomInviteExistingUserAsync(user, room.Title, roomUrl);
+                    await studioNotifyService.SendEmailRoomInviteExistingUserAsync(user, room.Title, roomUrl, room.FolderType is FolderType.AiRoom);
                 }
             }
 
@@ -930,12 +936,13 @@ public class FileSharing(
     {
         var aces = await GetSharedInfoAsync([file.Id], []);
         var inRoom = file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive;
+        var inAgent = file.RootFolderType == FolderType.AiRoom;
 
         return
         [
             ..aces
                 .Where(aceWrapper => aceWrapper.Access != FileShare.Restrict && aceWrapper.SubjectType != SubjectType.InvitationLink)
-                .Select(aceWrapper => new AceShortWrapper(aceWrapper.SubjectName, FileShareExtensions.GetAccessString(aceWrapper.Access, inRoom), aceWrapper.IsLink))
+                .Select(aceWrapper => new AceShortWrapper(aceWrapper.SubjectName, FileShareExtensions.GetAccessString(aceWrapper.Access, inRoom, inAgent), aceWrapper.IsLink))
         ];
     }
 
