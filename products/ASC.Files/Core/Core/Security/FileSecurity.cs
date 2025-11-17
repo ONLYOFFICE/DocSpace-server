@@ -1448,11 +1448,6 @@ public class FileSecurity(
                         return true;
                     }
 
-                    if (action == FilesSecurityActions.EditAccess && !isRoom)
-                    {
-                        return true;
-                    }
-
                     switch (action)
                     {
                         case FilesSecurityActions.Read or FilesSecurityActions.Copy:
