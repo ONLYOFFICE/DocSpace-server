@@ -77,6 +77,20 @@ public static class ChatPromptTemplate
         If the tool is related to docspace tools, such as docspace_upload_file, and requires an identifier that the user has not provided to you, then use the following:
         - For folderId, use the folder id from the current <context>
         </tool_calling_guidelines>
+        {0}
+        {1}
+        <context>
+        The current date is: {2}
+        The work folder id is: {3}
+        The work room id is: {4}
+        The current user's name is: {5}
+        The current user's email is: {6}
+        </context>
+        {7}
+        """;
+    
+    private const string KnowledgeSearchRules = 
+        """
         <knowledge_search_tool_usage_rules>
         **CRITICAL: ALWAYS use knowledge base search for ANY user question or information request.**
         This is a mandatory requirement: before providing any substantive answer, you MUST perform a knowledge base search. No exceptions except for the minimal cases listed below.
@@ -132,6 +146,10 @@ public static class ChatPromptTemplate
         - You can combine knowledge base results with web search for comprehensive answers
         Remember: **DEFAULT ACTION = SEARCH KNOWLEDGE BASE. Always search first, answer second.**
         </knowledge_search_tool_usage_rules>
+        """;
+
+    private const string WebSearchRules =
+        """
         <web_search_tools_usage_rules>
         **IMPORTANT: Use web search proactively for external information, current events, and general knowledge verification.**
         Web search is an equal and essential tool for providing comprehensive, up-to-date answers. Use it liberally whenever external or current information would improve your response.
@@ -164,9 +182,9 @@ public static class ChatPromptTemplate
         If web search would improve your answer, just do it immediately.
         Examples of web search usage:
         - User asks "What's the weather today?" → Use web search
-        - User asks "What are current trends in AI?" → Use web search (after KB search)
+        - User asks "What are current trends in AI?" → Use web search
         - User asks "What happened in the news today?" → Use web search
-        - User asks "What's the latest Python version?" → Use web search (after KB search)
+        - User asks "What's the latest Python version?" → Use web search
         - User writes "bitcoin price" → Use web search
         **Combined search strategy:**
         For many questions, using BOTH knowledge base and web search provides the best answer:
@@ -176,15 +194,7 @@ public static class ChatPromptTemplate
         - Provides comprehensive coverage
         - Cite each source appropriately based on where it came from
         Remember: **Both search tools are equally valuable. Knowledge base is ALWAYS first, web search supplements when needed.**
-        <web_search_tools_usage_rules>
-        <context>
-        The current date is: {0}
-        The work folder id is: {1}
-        The work room id is: {2}
-        The current user's name is: {3}
-        The current user's email is: {4}
-        </context>
-        {5}
+        </web_search_tools_usage_rules>
         """;
 
     private const string UserPromptTemplate = 
@@ -198,16 +208,30 @@ public static class ChatPromptTemplate
         </additional_user_instruction>
         """;
     
-    public static string GetPrompt(string? instruction, int contextFolderId, int contextRoomId, string userName, string userEmail) 
+    public static string GetPrompt(
+        string? instruction, 
+        int contextFolderId, 
+        int contextRoomId, 
+        string userName, 
+        string userEmail,
+        bool knowledgeSearch,
+        bool webSearch) 
     { 
         var date = DateTime.UtcNow.ToString("D");
         
-        if (string.IsNullOrEmpty(instruction))
-        {
-            return string.Format(SystemPromptTemplate, date, contextFolderId, contextRoomId, userName, userEmail, string.Empty);
-        }
-
-        var userPrompt = string.Format(UserPromptTemplate, instruction);
-        return string.Format(SystemPromptTemplate, date, contextFolderId, contextRoomId, userName, userEmail, userPrompt);
+        var knowledgeSearchRules = knowledgeSearch ? KnowledgeSearchRules : string.Empty;
+        var webSearchRules = webSearch ? WebSearchRules : string.Empty;
+        var userPrompt = string.IsNullOrEmpty(instruction) ? string.Empty : string.Format(UserPromptTemplate, instruction);
+        
+        return string.Format(
+            SystemPromptTemplate, 
+            knowledgeSearchRules, 
+            webSearchRules, 
+            date, 
+            contextFolderId, 
+            contextRoomId, 
+            userName, 
+            userEmail, 
+            userPrompt);
     }
 }

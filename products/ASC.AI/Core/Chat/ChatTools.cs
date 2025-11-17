@@ -44,7 +44,7 @@ public class ChatTools(
         {
             var knowledgeFunc = knowledgeSearchTool.Init(roomId);
             var knowledgeWrapper = ToWrapper(roomId, knowledgeFunc);
-            holder.AddTool(knowledgeWrapper);
+            holder.AddTool(SystemToolType.KnowledgeSearch, knowledgeWrapper);
         }
 
         if (!chatSettings.WebSearchEnabled)
@@ -60,7 +60,7 @@ public class ChatTools(
 
         var webTool = webSearchTool.Init(config);
         var webWrapper = ToWrapper(roomId, webTool);
-        holder.AddTool(webWrapper);
+        holder.AddTool(SystemToolType.WebSearch, webWrapper);
 
         if (!config.CrawlingSupported())
         {
@@ -69,7 +69,7 @@ public class ChatTools(
 
         var crawlTool = webCrawlingTool.Init(config);
         var crawlWrapper = ToWrapper(roomId, crawlTool);
-        holder.AddTool(crawlWrapper);
+        holder.AddTool(SystemToolType.WebCrawling, crawlWrapper);
 
         return holder;
     }

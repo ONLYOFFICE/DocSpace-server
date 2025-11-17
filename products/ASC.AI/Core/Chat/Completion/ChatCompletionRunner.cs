@@ -55,7 +55,9 @@ public class ChatCompletionRunner(
             context.ContextFolderId, 
             context.Room.Id,
             context.User.FirstName,
-            context.User.Email);
+            context.User.Email,
+            context.Tools.ContainsSystemTool(SystemToolType.KnowledgeSearch),
+            context.Tools.ContainsSystemTool(SystemToolType.WebSearch));
         
         var messages = new List<ChatMessage>
         {
@@ -99,7 +101,9 @@ public class ChatCompletionRunner(
             context.ContextFolderId, 
             context.Room.Id,
             context.User.FirstName,
-            context.User.Email);
+            context.User.Email,
+            context.Tools.ContainsSystemTool(SystemToolType.KnowledgeSearch),
+            context.Tools.ContainsSystemTool(SystemToolType.WebSearch));
         
         var systemMessage = new ChatMessage(ChatRole.System, systemPrompt);
         
