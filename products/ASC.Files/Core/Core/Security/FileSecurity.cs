@@ -2723,7 +2723,9 @@ public class FileSecurity(
 
         var fileIds = new Dictionary<T, (FileShare, Guid)>();
         var folderIds = new Dictionary<T, (FileShare, Guid)>();
-
+        
+        var share = await globalFolder.GetFolderShareAsync<T>(daoFactory);
+        
         var recordGroup = records.GroupBy(r => new { r.EntryId, r.EntryType }, (_, group) => new
         {
             firstRecord = group.OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
@@ -2754,8 +2756,7 @@ public class FileSecurity(
         if (filterType != FilterType.FoldersOnly)
         {
             var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
-            var share = await globalFolder.GetFolderShareAsync<T>(daoFactory);
-
+            
             await foreach (var x in files)
             {
                 if (fileIds.TryGetValue(x.Id, out var tuple))
@@ -2778,8 +2779,6 @@ public class FileSecurity(
                 folders = FilterReadAsync(folders);
             }
 
-            var share = await globalFolder.GetFolderShareAsync<T>(daoFactory);
-
             await foreach (var folder in folders)
             {
                 if (folderIds.TryGetValue(folder.Id, out var access))
@@ -2797,7 +2796,18 @@ public class FileSecurity(
         {
             IAsyncEnumerable<FileEntry<T>> filesInSharedFolders = fileDao.GetFilesAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
             filesInSharedFolders = FilterReadAsync(filesInSharedFolders);
-            entries.AddRange(await filesInSharedFolders.Distinct().ToListAsync());
+            
+            await foreach (var x in filesInSharedFolders)
+            {
+                if (!entries.Any(r => Equals(r.Id, x.Id) && r.FileEntryType == x.FileEntryType) && fileIds.TryGetValue(x.Id, out var tuple))
+                {
+                    x.Access = tuple.Item1;
+                    x.SharedBy = tuple.Item2;
+                    x.FolderIdDisplay = share;
+
+                    entries.Add(x);
+                }
+            }
         }
 
         var data = entries.Where(f =>
