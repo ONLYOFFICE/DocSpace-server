@@ -39,8 +39,9 @@ public class InvitationLinkDto
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The type of employee role for the invitation link (All, RoomAdmin, Guest, DocSpaceAdmin, User).
+    /// The type of employee role for the invitation link.
     /// </summary>
+    [JsonConverter(typeof(JsonNumberEnumConverter<EmployeeType>))]
     public required EmployeeType EmployeeType { get; set; }
 
     /// <summary>
