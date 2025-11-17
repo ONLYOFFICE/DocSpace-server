@@ -95,8 +95,18 @@ public class FileShareConverter : JsonConverter<FileShare>
 
 public static partial class FileShareExtensions
 {
-    public static string GetAccessString(FileShare fileShare, bool useRoomFormat = false, CultureInfo cultureInfo = null)
+    public static string GetAccessString(
+        FileShare fileShare,
+        bool useRoomFormat = false,
+        bool isAgent = false,
+        CultureInfo cultureInfo = null)
     {
+        if (isAgent && fileShare == FileShare.RoomManager)
+        {
+            return FilesCommonResource.AgentManager;
+        }
+        
+        
         var prefix = useRoomFormat && fileShare != FileShare.ReadWrite ? "RoleEnum_" : "AceStatusEnum_";
 
         return fileShare switch

@@ -843,7 +843,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (subjectId != Guid.Empty)
         {
-            entries = entries.WhereAwait(async f =>
+            entries = entries.Where(async (f, _) =>
                                     subjectGroup
                                         ? (await userManager.GetUsersByGroupAsync(subjectId)).Any(s => s.Id == f.CreateBy)
                                         : f.CreateBy == subjectId

@@ -30,17 +30,9 @@ namespace ASC.AI.Core.Chat;
 public class AttachmentHandler(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    ITextExtractor textExtractor)
+    ITextExtractor textExtractor,
+    VectorizationGlobalSettings vectorizationGlobalSettings)
 {
-    private static readonly HashSet<string> _supportedExtensions =
-    [
-        ".txt",
-        ".doc",
-        ".docx",
-        ".pdf",
-        ".xls",
-        ".xlsx"
-    ];
     
     public async IAsyncEnumerable<AttachmentMessageContent> HandleAsync(IEnumerable<int> filesIds, IEnumerable<string> thirdPartyFilesIds)
     {
@@ -65,9 +57,9 @@ public class AttachmentHandler(
             {
                 continue;
             }
-            
-            var extension = FileUtility.GetFileExtension(file.Title);
-            if (!_supportedExtensions.Contains(extension))
+
+            if (!vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title) ||
+                file.ContentLength > vectorizationGlobalSettings.MaxContentLength)
             {
                 continue;
             }
@@ -87,7 +79,7 @@ public class AttachmentHandler(
             {
                 Id = JsonSerializer.SerializeToElement(file.Id),
                 Title = file.Title,
-                Extension = extension,
+                Extension = FileUtility.GetFileExtension(file.Title),
                 Content = content
             };
         }

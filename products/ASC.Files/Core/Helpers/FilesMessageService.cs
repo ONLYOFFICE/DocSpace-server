@@ -83,11 +83,13 @@ public class FilesMessageService(
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, Guid userId, FileShare currentRole, FileShare? oldRole = null, bool useRoomFormat = false, params string[] description)
     {
-        var desc = description.Append(FileShareExtensions.GetAccessString(currentRole, useRoomFormat));
+        var isAgent = entry is IFolder { FolderType: FolderType.AiRoom };
+        
+        var desc = description.Append(FileShareExtensions.GetAccessString(currentRole, useRoomFormat, isAgent));
 
         if (oldRole.HasValue)
         {
-            desc = desc.Append(FileShareExtensions.GetAccessString(oldRole.Value, useRoomFormat));
+            desc = desc.Append(FileShareExtensions.GetAccessString(oldRole.Value, useRoomFormat, isAgent));
         }
 
         await SendAsync(action, entry, null, userId, currentRole, desc.ToArray());

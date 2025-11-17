@@ -78,11 +78,11 @@ public class StudioNotifyHelper(
             if (toguests)
             {
                 return await (await userManager.GetUsersAsync()).ToAsyncEnumerable()
-                                  .WhereAwait(async u => !await userManager.IsUserInGroupAsync(u.Id, Constants.GroupAdmin.ID)).ToListAsync();
+                                  .Where(async (u, _) => !await userManager.IsUserInGroupAsync(u.Id, Constants.GroupAdmin.ID)).ToListAsync();
             }
 
             return await (await userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.RoomAdmin)).ToAsyncEnumerable()
-                              .WhereAwait(async u => !await userManager.IsUserInGroupAsync(u.Id, Constants.GroupAdmin.ID)).ToListAsync();
+                              .Where(async (u, _) => !await userManager.IsUserInGroupAsync(u.Id, Constants.GroupAdmin.ID)).ToListAsync();
         }
 
         if (toguests)

@@ -68,7 +68,9 @@ public class StorageDto
 
         var props = result.Current
             ? current.Props
-            : await current.Switch(consumer).AdditionalKeys.ToAsyncEnumerable().ToDictionaryAwaitAsync(ValueTask.FromResult, async a => await consumer.GetAsync(a));
+            : await current.Switch(consumer).AdditionalKeys
+                .ToAsyncEnumerable()
+                .ToDictionaryAsync((s, _) => ValueTask.FromResult(s), async (a, _) => await consumer.GetAsync(a));
 
         result.Properties = props.Select(
             r => new AuthKey

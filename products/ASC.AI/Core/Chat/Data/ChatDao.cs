@@ -197,7 +197,7 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
 
         var messages = dbContext.GetMessagesAsync(chatId);
 
-        await foreach (var msg in messages.AsAsyncEnumerable())
+        await foreach (var msg in messages)
         {
             yield return new Message(
                 msg.Id,
@@ -261,7 +261,7 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
 
         var messages = dbContext.GetMessagesAsync(chatId, offset, limit);
 
-        await foreach (var msg in messages.AsAsyncEnumerable())
+        await foreach (var msg in messages)
         {
             yield return new Message(
                 msg.Id,

@@ -104,7 +104,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             yield break;
         }
 
-        var rooms = roomsIds.ToAsyncEnumerable().SelectAwait(async e => await GetFolderAsync(e).ConfigureAwait(false));
+        var rooms = roomsIds.ToAsyncEnumerable().Select(async (string e, CancellationToken _) => await GetFolderAsync(e).ConfigureAwait(false));
 
         rooms = FilterByRoomType(rooms, filterTypes);
         rooms = FilterBySubject(rooms, subjectId, excludeSubject, subjectFilter, subjectEntriesIds);
@@ -147,7 +147,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         if (subjectID != Guid.Empty)
         {
-            folders = folders.WhereAwait(async x => subjectGroup
+            folders = folders.Where(async (x, _) => subjectGroup
                                              ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                                              : x.CreateBy == subjectID);
         }
@@ -179,11 +179,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             return AsyncEnumerable.Empty<Folder<string>>();
         }
 
-        var folders = folderIds.ToAsyncEnumerable().SelectAwait(async e => await GetFolderAsync(e));
+        var folders = folderIds.ToAsyncEnumerable().Select(async (string e, CancellationToken _) => await GetFolderAsync(e));
 
         if (subjectID.HasValue && subjectID != Guid.Empty)
         {
-            folders = folders.WhereAwait(async x => subjectGroup
+            folders = folders.Where(async (x, _) => subjectGroup
                                              ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID.Value)
                                              : x.CreateBy == subjectID);
         }
@@ -763,8 +763,10 @@ internal abstract class BaseFolderDao
         if (withoutTags)
         {
             return rooms.Join(filesDbContext.ThirdpartyIdMapping.ToAsyncEnumerable(), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
-                .WhereAwait(async r => !await filesDbContext.TagLink.Join(filesDbContext.Tag, l => l.TagId, t => t.Id, (link, tag) => new { link.EntryId, tag })
-                    .Where(tag => tag.tag.Type == TagType.Custom).ToAsyncEnumerable().AnyAsync(t => t.EntryId == r.HashId))
+                .Where(async (r, _) => !await filesDbContext.TagLink.Join(filesDbContext.Tag, l => l.TagId, t => t.Id, (link, tag) => new { link.EntryId, tag })
+                    .Where(tag => tag.tag.Type == TagType.Custom)
+                    .ToAsyncEnumerable()
+                    .AnyAsync(t => t.EntryId == r.HashId))
                 .Select(r => r.folder);
         }
 

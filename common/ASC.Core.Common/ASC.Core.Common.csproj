@@ -46,7 +46,6 @@
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Json.Microsoft" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
-    <PackageReference Include="System.Linq.Async" />
     <PackageReference Include="Telegram.Bot" />
   </ItemGroup>
   <ItemGroup>

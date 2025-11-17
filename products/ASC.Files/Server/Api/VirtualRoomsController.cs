@@ -460,14 +460,14 @@ public abstract class VirtualRoomsController<T>(
             await inDto.RoomInvitation.Invitations
                 .Where(r => r.Id != Guid.Empty && r.Access != FileShare.None)
                 .ToAsyncEnumerable()
-                .AnyAwaitAsync(async i => await userManager.IsGuestAsync(i.Id));
+                .AnyAsync(async (i, _) => await userManager.IsGuestAsync(i.Id));
 
         var usersInvited =
             inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email) && i.Access != FileShare.None) ||
             await inDto.RoomInvitation.Invitations
                 .Where(r => r.Id != Guid.Empty && r.Access != FileShare.None)
                 .ToAsyncEnumerable()
-                .AnyAwaitAsync(async i => await userManager.IsUserAsync(i.Id));
+                .AnyAsync(async (i, _) => await userManager.IsUserAsync(i.Id));
 
         if (newGuestsInvited)
         {
@@ -505,7 +505,7 @@ public abstract class VirtualRoomsController<T>(
 
         result.Warning = (await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.RoomInvitation.Notify, inDto.RoomInvitation.Culture)).Select(r => r.Warning).FirstOrDefault();
         result.Members = await _fileStorageService.GetRoomSharedInfoAsync(inDto.Id, inDto.RoomInvitation.Invitations.Select(s => s.Id))
-            .SelectAwait(async a => await fileShareDtoHelper.Get(a))
+            .Select(async (AceWrapper a, CancellationToken _) => await fileShareDtoHelper.Get(a))
             .ToListAsync();
 
         return result;

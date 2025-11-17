@@ -260,7 +260,7 @@ public class StudioNotifyService(
         
         var action = isAgent 
             ? Actions.SaasAgentInviteExistingUser 
-            : Actions.SaasRoomInvite;
+            : Actions.SaasRoomInviteExistingUser;
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
             action,

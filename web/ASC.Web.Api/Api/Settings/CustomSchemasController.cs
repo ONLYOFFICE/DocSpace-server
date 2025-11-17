@@ -48,9 +48,9 @@ public class CustomSchemasController(
     [HttpGet("")]
     public async Task<List<SchemaRequestsDto>> GetPeopleSchemas()
     {
-        return await customNamingPeople
-                .GetSchemas().ToAsyncEnumerable()
-                .SelectAwait(async r =>
+        return await customNamingPeople.GetSchemas()
+                .ToAsyncEnumerable()
+                .Select(async (KeyValuePair<string, string> r, CancellationToken _) =>
                 {
                     var names = await customNamingPeople.GetPeopleNamesAsync(r.Key);
 

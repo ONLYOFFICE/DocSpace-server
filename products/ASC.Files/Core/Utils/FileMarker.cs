@@ -175,7 +175,10 @@ public class FileMarker(
 
             if (fileEntry.ProviderEntry)
             {
-                userIDs = await userIDs.ToAsyncEnumerable().WhereAwait(async u => !await userManager.IsGuestAsync(u)).ToListAsync();
+                userIDs = await userIDs
+                    .ToAsyncEnumerable()
+                    .Where(async (u, _) => !await userManager.IsGuestAsync(u))
+                    .ToListAsync();
 
                 if (fileEntry.RootFolderType == FolderType.VirtualRooms)
                 {

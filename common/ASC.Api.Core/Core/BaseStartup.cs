@@ -33,7 +33,7 @@ using ASC.MessagingSystem;
 
 using Flurl.Util;
 
-using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
+using IPNetwork = System.Net.IPNetwork;
 
 namespace ASC.Api.Core;
 
@@ -94,7 +94,7 @@ public abstract class BaseStartup
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             options.ForwardLimit = null;
-            options.KnownNetworks.Clear();
+            options.KnownIPNetworks.Clear();
             options.KnownProxies.Clear();
 
             var knownProxies = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownProxies").Get<List<String>>();
@@ -123,7 +123,7 @@ public abstract class BaseStartup
                     var prefix = IPAddress.Parse(knownNetwork.Split("/")[0]);
                     var prefixLength = Convert.ToInt32(knownNetwork.Split("/")[1]);
 
-                    options.KnownNetworks.Add(new IPNetwork(prefix, prefixLength));
+                    options.KnownIPNetworks.Add(new IPNetwork(prefix, prefixLength));
                 }
             }
         });

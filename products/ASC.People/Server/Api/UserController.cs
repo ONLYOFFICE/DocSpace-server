@@ -890,7 +890,7 @@ public class UserController(
         {
             var groupId = new Guid(inDto.Text);
             //Filter by group
-            list = list.WhereAwait(async x => await _userManager.IsUserInGroupAsync(x.Id, groupId));
+            list = list.Where(async (x, _) => await _userManager.IsUserInGroupAsync(x.Id, groupId));
         }
 
         list = list.Where(x => x.FirstName != null && x.FirstName.Contains(inDto.Query, StringComparison.OrdinalIgnoreCase) ||
@@ -1243,8 +1243,11 @@ public class UserController(
 
         await CheckReassignProcessAsync(inDto.UserIds);
 
-        var users = await inDto.UserIds.ToAsyncEnumerable().SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
-            .Where(u => !_userManager.IsSystemUser(u.Id) && !u.IsLDAP()).ToListAsync();
+        var users = await inDto.UserIds
+            .ToAsyncEnumerable()
+            .Select(async (Guid userId, CancellationToken _) => await _userManager.GetUsersAsync(userId))
+            .Where(u => !_userManager.IsSystemUser(u.Id) && !u.IsLDAP())
+            .ToListAsync();
 
         var userNames = users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)).ToList();
         var tenant = tenantManager.GetCurrentTenant();
@@ -1328,7 +1331,7 @@ public class UserController(
         {
             users = await inDto.UserIds.ToAsyncEnumerable()
                 .Where(userId => !_userManager.IsSystemUser(userId))
-                .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
+                .Select(async (Guid userId, CancellationToken _) => await _userManager.GetUsersAsync(userId))
                 .ToListAsync();
         }
 
@@ -1934,8 +1937,11 @@ public class UserController(
         await _permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var tenant = tenantManager.GetCurrentTenant();
-        var users = await inDto.UpdateMembers.UserIds.ToAsyncEnumerable().SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
-            .Where(u => !_userManager.IsSystemUser(u.Id) && !u.IsLDAP()).ToListAsync();
+        var users = await inDto.UpdateMembers.UserIds
+            .ToAsyncEnumerable()
+            .Select(async (Guid userId, CancellationToken _) => await _userManager.GetUsersAsync(userId))
+            .Where(u => !_userManager.IsSystemUser(u.Id) && !u.IsLDAP())
+            .ToListAsync();
 
         foreach (var user in users)
         {
@@ -2057,7 +2063,7 @@ public class UserController(
         var users = await inDto.UpdateMembers.UserIds
             .ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
-            .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
+            .Select(async (Guid userId, CancellationToken _) => await _userManager.GetUsersAsync(userId))
             .Where(r => r.Status != EmployeeStatus.Terminated)
             .ToListAsync();
 
@@ -2249,7 +2255,7 @@ public class UserController(
 
         var users = await inDto.UserIds.ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
-            .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
+            .Select(async (Guid userId, CancellationToken _) => await _userManager.GetUsersAsync(userId))
             .ToListAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -2321,7 +2327,7 @@ public class UserController(
 
         var users = await inDto.UserIds.ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
-            .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
+            .Select(async (Guid userId, CancellationToken _) => await _userManager.GetUsersAsync(userId))
             .ToListAsync();
 
         var tenant = tenantManager.GetCurrentTenant();

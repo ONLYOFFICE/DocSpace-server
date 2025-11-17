@@ -35,6 +35,6 @@ public class AttachmentMessageContent : MessageContent
 
     public static implicit operator AIContent(AttachmentMessageContent attachment)
     {
-        return new TextContent(attachment.Content);
+        return new TextContent($"##Attachment: {attachment.Title}\n\n{attachment.Content}\n\n");
     }
 }

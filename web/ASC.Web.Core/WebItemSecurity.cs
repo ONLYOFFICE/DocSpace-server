@@ -192,12 +192,13 @@ public class WebItemSecurity(
 
             Users = await info
                            .ToAsyncEnumerable()
-                           .SelectAwait(async i => await userManager.GetUsersAsync(i.Item1))
-                           .Where(u => u.Id != Constants.LostUser.Id).ToListAsync(),
+                           .Select(async (Tuple<Guid, bool> i, CancellationToken _) => await userManager.GetUsersAsync(i.Item1))
+                           .Where(u => u.Id != Constants.LostUser.Id)
+                           .ToListAsync(),
 
             Groups = await info
                            .ToAsyncEnumerable()
-                           .SelectAwait(async i => await userManager.GetGroupInfoAsync(i.Item1))
+                           .Select(async (Tuple<Guid, bool> i, CancellationToken _) => await userManager.GetGroupInfoAsync(i.Item1))
                            .Where(g => g.ID != Constants.LostGroupInfo.ID && g.CategoryID != Constants.SysGroupCategoryId).ToListAsync()
         };
     }
