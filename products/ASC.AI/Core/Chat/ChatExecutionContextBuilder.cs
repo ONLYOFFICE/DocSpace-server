@@ -41,13 +41,13 @@ public class ChatExecutionContextBuilder(
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         
-        var room = await folderDao.GetFolderAsync(roomId);
-        if (room == null)
+        var agent = await folderDao.GetFolderAsync(roomId);
+        if (agent == null)
         {
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        if (!await fileSecurity.CanUseChatAsync(room))
+        if (!await fileSecurity.CanUseChatAsync(agent))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
@@ -55,9 +55,9 @@ public class ChatExecutionContextBuilder(
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
         
-        var providerTask = providerService.GetProviderAsync(room.SettingsChatProviderId);
-        var resultStorageTask = folderDao.GetFoldersAsync(room.Id, FolderType.ResultStorage).FirstAsync();
-        var knowledgeTask = folderDao.GetFoldersAsync(room.Id, FolderType.Knowledge).FirstAsync();
+        var providerTask = providerService.GetProviderAsync(agent.SettingsChatProviderId);
+        var resultStorageTask = folderDao.GetFoldersAsync(agent.Id, FolderType.ResultStorage).FirstAsync();
+        var knowledgeTask = folderDao.GetFoldersAsync(agent.Id, FolderType.Knowledge).FirstAsync();
         var chatSettingsTask = chatDao.GetUserChatSettingsAsync(tenantId, roomId, userId);
         var userTask = userManager.GetUsersAsync(userId);
         
@@ -80,16 +80,16 @@ public class ChatExecutionContextBuilder(
         {
             TenantId = tenantId,
             User = user,
-            Room = room,
+            Agent = agent,
             ClientOptions = new ChatClientOptions
             {
                 Provider = provider.Type,
                 Endpoint= provider.Url,
                 Key = provider.Key,
-                ModelId = room.SettingsChatParameters.ModelId
+                ModelId = agent.SettingsChatParameters.ModelId
             },
-            Instruction = room.SettingsChatParameters.Prompt,
-            ContextFolderId = resultStorage.Id,
+            Instruction = agent.SettingsChatParameters.Prompt,
+            ResultStorageId = resultStorage.Id,
             ChatSettings = chatSettings,
             Tools = tools
         };
@@ -102,10 +102,10 @@ public class ChatExecutionContext : IAsyncDisposable
 {
     public int TenantId { get; init; }
     public required UserInfo User { get; init; }
-    public required Folder<int> Room { get; init; }
+    public required Folder<int> Agent { get; init; }
     public required ChatClientOptions ClientOptions { get; init; }
     public string? Instruction { get; init; }
-    public int ContextFolderId { get; init; }
+    public int ResultStorageId { get; init; }
     public required UserChatSettings ChatSettings { get; init; }
     public required ToolHolder Tools { get; init; }
     public ChatMessage? UserMessage { get; set; }

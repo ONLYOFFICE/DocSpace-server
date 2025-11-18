@@ -52,8 +52,9 @@ public class ChatCompletionRunner(
 
         var content = ChatPromptTemplate.GetPrompt(
             context.Instruction, 
-            context.ContextFolderId, 
-            context.Room.Id,
+            context.ResultStorageId, 
+            context.Agent.Id,
+            context.Agent.Title,
             context.User.FirstName,
             context.User.Email,
             context.Tools.ContainsSystemTool(SystemToolType.KnowledgeSearch),
@@ -98,8 +99,9 @@ public class ChatCompletionRunner(
         
         var systemPrompt = ChatPromptTemplate.GetPrompt(
             context.Instruction, 
-            context.ContextFolderId, 
-            context.Room.Id,
+            context.ResultStorageId, 
+            context.Agent.Id,
+            context.Agent.Title,
             context.User.FirstName,
             context.User.Email,
             context.Tools.ContainsSystemTool(SystemToolType.KnowledgeSearch),

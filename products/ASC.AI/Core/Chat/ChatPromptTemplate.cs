@@ -75,18 +75,24 @@ public static class ChatPromptTemplate
         - If the missing tool is docspace_knowledge_search, it means that there are no documents in the knowledge base; please inform the user about this.
         # DocSpace tools
         If the tool is related to docspace tools, such as docspace_upload_file, and requires an identifier that the user has not provided to you, then use the following:
-        - For folderId, use the folder id from the current <context>
+        - For folderId, use the current result storage id from the <context>
+        - For roomId or agentId, use the current agent id from the <context>
+        All tools for rooms are also applicable to agents
         </tool_calling_guidelines>
         {0}
         {1}
         <context>
         The current date is: {2}
-        The work folder id is: {3}
-        The work room id is: {4}
-        The current user's name is: {5}
-        The current user's email is: {6}
+        The current result storage:
+         - folderId: {3}
+         - name: Result Storage
+        The current agent:
+         - agentId: {4}
+         - name: {5}
+        The current user's name is: {6}
+        The current user's email is: {7}
         </context>
-        {7}
+        {8}
         """;
     
     private const string KnowledgeSearchRules = 
@@ -210,8 +216,9 @@ public static class ChatPromptTemplate
     
     public static string GetPrompt(
         string? instruction, 
-        int contextFolderId, 
-        int contextRoomId, 
+        int resultStorageId,
+        int agentId,
+        string agentName,
         string userName, 
         string userEmail,
         bool knowledgeSearch,
@@ -228,8 +235,9 @@ public static class ChatPromptTemplate
             knowledgeSearchRules, 
             webSearchRules, 
             date, 
-            contextFolderId, 
-            contextRoomId, 
+            resultStorageId, 
+            agentId,
+            agentName,
             userName, 
             userEmail, 
             userPrompt);
