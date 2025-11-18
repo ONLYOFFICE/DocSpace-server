@@ -110,7 +110,8 @@ public class ChatCompletionGenerator(
                     
                     yield return new MessageStartCompletion
                     {
-                        ChatId = context.Chat.Id
+                        ChatId = context.Chat.Id,
+                        Error = context.Error
                     };
                     
                     started = true;

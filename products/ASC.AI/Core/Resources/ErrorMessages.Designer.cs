@@ -211,5 +211,14 @@ namespace ASC.AI.Core.Resources {
                 return ResourceManager.GetString("ServersRoomLimit", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MCP servers are unavailable: {0}. Check connection settings.
+        /// </summary>
+        internal static string UnavailableServers {
+            get {
+                return ResourceManager.GetString("UnavailableServers", resourceCulture);
+            }
+        }
     }
 }

@@ -69,4 +69,7 @@
     <data name="IncorrectServerCredentials" xml:space="preserve">
         <value>Authentication failed. Verify your credentials</value>
     </data>
+    <data name="UnavailableServers" xml:space="preserve">
+        <value>MCP servers are unavailable: {0}. Check connection settings</value>
+    </data>
 </root>

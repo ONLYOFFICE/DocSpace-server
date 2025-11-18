@@ -36,9 +36,9 @@ public class ChatTools(
     AiGateway aiGateway,
     AiAccessibility aiAccessibility)
 {
-    public async Task<ToolHolder> GetAsync(int roomId, UserChatSettings chatSettings, bool knowledgeHasFiles)
+    public async Task<(ToolHolder, string? error)> GetAsync(int roomId, UserChatSettings chatSettings, bool knowledgeHasFiles)
     {
-        var holder = await mcpService.GetToolsAsync(roomId);
+        var (holder, error) = await mcpService.GetToolsAsync(roomId);
 
         if (knowledgeHasFiles && await aiAccessibility.IsVectorizationEnabledAsync())
         {
@@ -49,13 +49,13 @@ public class ChatTools(
 
         if (!chatSettings.WebSearchEnabled)
         {
-            return holder;
+            return (holder, error);
         }
 
         var config = await GetWebConfigAsync();
         if (config == null)
         {
-            return holder;
+            return (holder, error);
         }
 
         var webTool = webSearchTool.Init(config);
@@ -64,14 +64,14 @@ public class ChatTools(
 
         if (!config.CrawlingSupported())
         {
-            return holder;
+            return (holder, error);
         }
 
         var crawlTool = webCrawlingTool.Init(config);
         var crawlWrapper = ToWrapper(roomId, crawlTool);
         holder.AddTool(SystemToolType.WebCrawling, crawlWrapper);
 
-        return holder;
+        return (holder, error);
     }
 
     private async Task<EngineConfig?> GetWebConfigAsync()

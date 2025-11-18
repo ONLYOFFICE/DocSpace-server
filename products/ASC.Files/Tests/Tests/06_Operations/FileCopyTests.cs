@@ -81,13 +81,16 @@ public class FileCopyTests(
         // Act
         var results = (await _filesOperationsApi.DuplicateBatchItemsAsync(new DuplicateRequestDto
         {
-            FileIds = [new(sourceFile.Id)]
+            FileIds = [new(sourceFile.Id)],
+            ReturnSingleOperation =  true
         }, TestContext.Current.CancellationToken)).Response;
+
+        var operationId = results.FirstOrDefault()?.Id;
         
         // Assert
         if (results.Any(r => !r.Finished))
         {
-            results = await WaitLongOperation();
+            results = await WaitLongOperation(operationId);
         }
         
         // Assert
@@ -143,14 +146,17 @@ public class FileCopyTests(
             DestFolderId = new  BatchRequestDtoAllOfDestFolderId(targetFolder.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new(sourceFile.Id)],
-            FolderIds = []
+            FolderIds = [],
+            ReturnSingleOperation = true
         };
         
         var results = (await _filesOperationsApi.MoveBatchItemsAsync(moveParams, TestContext.Current.CancellationToken)).Response;
         
+        var operationId = results.FirstOrDefault()?.Id;
+        
         if (results.Any(r => !r.Finished))
         {
-            results = await WaitLongOperation();
+            results = await WaitLongOperation(operationId);
         }
         
         // Assert

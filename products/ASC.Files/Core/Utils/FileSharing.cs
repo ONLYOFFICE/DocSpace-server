@@ -464,12 +464,9 @@ public class FileSharingAceHelper(
                     {
                         await socketManager.AddToSharedAsync(entry, users: tags);
                     }
-
-                    if (w.SubjectType == SubjectType.Group)
-                    {
-                        var usersShares = await fileSecurity.GetPureSharesAsync(entry, ShareFilterType.User, null, null).Select(r => r.Subject).ToListAsync();
-                        usersWithoutRight = usersWithoutRight.Except(usersShares).ToList();
-                    }
+                    
+                    var usersShares = await fileSecurity.GetPureSharesAsync(entry, ShareFilterType.User, null, null).Select(r => r.Subject).ToListAsync();
+                    usersWithoutRight = usersWithoutRight.Except(usersShares).ToList();
                 }
 
                 if (share == FileShare.Restrict && w.SubjectType is SubjectType.Group)
