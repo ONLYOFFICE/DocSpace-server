@@ -73,7 +73,7 @@ public class ChatExecutionContextBuilder(
         var toolsTask = chatTools.GetAsync(roomId, chatSettings, knowledge.FilesCount > 0);
         
         var resultStorage = await resultStorageTask;
-        var tools = await toolsTask;
+        var (tools, error) = await toolsTask;
         var user = await userTask;
 
         var context = new ChatExecutionContext
@@ -91,7 +91,8 @@ public class ChatExecutionContextBuilder(
             Instruction = agent.SettingsChatParameters.Prompt,
             ResultStorageId = resultStorage.Id,
             ChatSettings = chatSettings,
-            Tools = tools
+            Tools = tools,
+            Error = error
         };
         
         return context;
@@ -112,6 +113,7 @@ public class ChatExecutionContext : IAsyncDisposable
     public string RawMessage { get; set; } = string.Empty;
     public List<AttachmentMessageContent> Attachments { get; set; } = [];
     public ChatSession? Chat { get; set; }
+    public string? Error { get; set; }
 
     public async ValueTask DisposeAsync()
     {
