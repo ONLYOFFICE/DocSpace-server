@@ -542,7 +542,7 @@
     <value>Telefonní číslo od společnosti Twilio (vyžadováno pro autorizaci SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Připojte aplikaci k přihlášení do portálu pomocí Twitteru.</value>
+    <value>Připojte aplikaci k přihlášení do portálu pomocí X.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Povolte aplikaci importovat uživatele ze služby Yahoo.</value>
@@ -611,7 +611,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Heslo</value>
@@ -830,7 +830,7 @@
     <value>ID klienta</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Zapnutím této aplikace umožníte svým uživatelům přihlásit se do {LogoText} pomocí Twitteru a propojit účty Twitter svých zákazníků s modulem CRM. {0}Přejděte na portál Twitter Developers Portal a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Zapnutím této aplikace umožníte svým uživatelům přihlásit se do {LogoText} pomocí X a propojit účty X svých zákazníků s modulem CRM. {0}Přejděte na portál X Developers Portal a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>Klíč API</value>

@@ -517,7 +517,7 @@
     <value>رقم هاتف من Twilio (مطلوب لمصادقة الرسائل القصيرة)</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>تويتر</value>
+    <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
     <value>معرف العميل</value>

@@ -620,7 +620,7 @@
     <value>来自Twilio的电话号码（需短信授权）</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>启动应用程序，以使用推特（Twitter）账户登录门户网站。</value>
+    <value>启动应用程序，以使用推特（X）账户登录门户网站。</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>启用雅虎联系人导入的应用程序。</value>
@@ -695,7 +695,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>密码</value>
@@ -884,7 +884,7 @@
     <value>客户端 ID</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>启用此应用以允许用户使用 Twitter 登录 {LogoText} 并在 CRM 模块中链接客户的 Twitter 账户。{0}前往 Twitter 开发者门户并为 {LogoText} 集成创建新应用。请在下方填写获得的信息：</value>
+    <value>启用此应用以允许用户使用 X 登录 {LogoText} 并在 CRM 模块中链接客户的 Twitter 账户。{0}前往 X 开发者门户并为 {LogoText} 集成创建新应用。请在下方填写获得的信息：</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>

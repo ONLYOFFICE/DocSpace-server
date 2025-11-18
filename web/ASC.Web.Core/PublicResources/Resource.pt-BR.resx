@@ -749,10 +749,10 @@
     <value>Número de telefone do Twilio (exigido para autorização SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Conecte o aplicativo para entrar no portal usando uma conta do Twitter.</value>
+    <value>Conecte o aplicativo para entrar no portal usando uma conta do X.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Habilite este aplicativo para permitir que seus usuários acessem a {LogoText} usando seu Twitter e vinculem as contas de seus clientes no Twitter ao módulo CRM. {0} Vá para o Portal de Desenvolvedores do Twitter e crie um novo aplicativo de integração {LogoText}. Insira os dados que você recebeu abaixo:</value>
+    <value>Habilite este aplicativo para permitir que seus usuários acessem a {LogoText} usando seu X e vinculem as contas de seus clientes no X ao módulo CRM. {0} Vá para o Portal de Desenvolvedores do X e crie um novo aplicativo de integração {LogoText}. Insira os dados que você recebeu abaixo:</value>
   </data>
   <data name="ConsumersVkDescription" xml:space="preserve">
     <value>Habilite o aplicativo a entrar no portal usando uma conta VK.</value>
@@ -839,7 +839,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Senha</value>

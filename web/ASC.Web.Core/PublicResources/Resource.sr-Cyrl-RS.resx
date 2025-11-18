@@ -520,7 +520,7 @@
     <value>Број телефона са Twilio (потребно за SMS ауторизацију)</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
     <value>ID клијента</value>
@@ -529,10 +529,10 @@
     <value>Тајна клијента</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Омогућите апликацију да бисте се пријавили на портал користећи Twitter налог.</value>
+    <value>Омогућите апликацију да бисте се пријавили на портал користећи X налог.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на {LogoText} користец́и свој Тwиттер и повежу Twitter налоге својих клијената са CRM модулом. {0}Идите на Twitter Developers портал и направите нову интеграцију апликације {LogoText}. Унесите податке које сте примили испод:</value>
+    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на {LogoText} користец́и свој X и повежу X налоге својих клијената са CRM модулом. {0}Идите на X Developers портал и направите нову интеграцију апликације {LogoText}. Унесите податке које сте примили испод:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API кључ</value>

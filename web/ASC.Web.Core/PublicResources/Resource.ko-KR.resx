@@ -332,7 +332,7 @@
     <value>LDAP 서버에 연결할 수 없습니다. 서버 주소와 포트 번호가 올바른지 확인해주세요.</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersTwilio" xml:space="preserve">
     <value>Twilio</value>
@@ -905,7 +905,7 @@
     <value>Box 계정을 문서 모듈에 연결하려면 이 앱을 활성화하세요. {LogoText} 사용자와 함께 Box의 파일을 관리, 편집 및 공유할 수 있습니다. {0}Box 개발자 페이지에서 계정에 로그인한 뒤 {LogoText} 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>사용자가 Twitter를 사용하여 {LogoText}에 로그인하고 고객의 Twitter 계정을 CRM 모듈에 연결할 수 있도록 하려면 이 앱을 활성화하세요. {0}Twitter 개발자 포털로 이동하여 {LogoText} 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
+    <value>사용자가 X를 사용하여 {LogoText}에 로그인하고 고객의 X 계정을 CRM 모듈에 연결할 수 있도록 하려면 이 앱을 활성화하세요. {0}X 개발자 포털로 이동하여 {LogoText} 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>사용자가 LinkedIn 계정을 사용하여 {LogoText}에 로그인하도록 하려면 이 앱을 활성화하세요. {0}LinkedIn 개발자 포털로 이동하여 {LogoText} 통합을 위한 새 앱을 생성하세요. 수신한 데이터를 아래에 입력하세요:</value>
@@ -938,7 +938,7 @@
     <value>VK 계정을 사용하여 포털에 로그인하려면 애플리케이션을 활성화하세요.</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Twitter 계정을 사용하여 포털에 로그인하고 연락처를 검색하려면 애플리케이션을 활성화하세요.</value>
+    <value>X 계정을 사용하여 포털에 로그인하고 연락처를 검색하려면 애플리케이션을 활성화하세요.</value>
   </data>
   <data name="ConsumersMicrosoftDescription" xml:space="preserve">
     <value>Microsoft 계정을 사용하여 포털에 로그인하려면 애플리케이션을 활성화하세요.</value>

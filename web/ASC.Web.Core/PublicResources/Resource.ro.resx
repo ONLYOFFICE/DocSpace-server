@@ -400,7 +400,7 @@
     <value>Permiteți aplicației conectarea la portalul folosind contul Microsoft.</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Permiteţi aplicaţiei conectarea la portalul folosind contul Twitter.</value>
+    <value>Permiteţi aplicaţiei conectarea la portalul folosind contul X.</value>
   </data>
   <data name="ConsumersVkDescription" xml:space="preserve">
     <value>Permiteți aplicației conectarea la portalul folosind contul VK.</value>
@@ -436,7 +436,7 @@
     <value>Autorizați aplicația să permite utilizatorilor să se conecteze la {LogoText} utilizând contul LinkedIn. {0}Accesați site-ul pentru dezvoltatori LinkedIn și creați o soluție nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Autorizaţi aplicaţia să permite utilizatorilor să se conecteze la {LogoText} utilizând Twitter și să conecteze conturile de Twitter ale clienţilor la modulul CRM. {0}Accesați Portalul pentru dezvoltatori Twitter și creați o aplicație nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
+    <value>Autorizaţi aplicaţia să permite utilizatorilor să se conecteze la {LogoText} utilizând X și să conecteze conturile de X ale clienţilor la modulul CRM. {0}Accesați Portalul pentru dezvoltatori X și creați o aplicație nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Autorizați aplicația să permite utilizatorilor să se conecteze la {LogoText} utilizând contul Zoom. {0}Accesați site-ul pentru dezvoltatori Zoom și creați o soluție nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
@@ -934,7 +934,7 @@
     <value>Twilio</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="LdapSettingsErrorWrongServerOrPort" xml:space="preserve">
     <value>Imposibil de conectat la serverul LDAP. Verificaţi dacă adresa serverului și numărul de port sunt corecte.</value>

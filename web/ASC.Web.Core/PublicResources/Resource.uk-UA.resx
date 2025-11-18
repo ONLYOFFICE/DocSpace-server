@@ -413,7 +413,7 @@
     <value>Номер телефону від Twilio (необхідний для авторизації SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Підключіть програму для входу на портал за допомогою облікового запису Twitter.</value>
+    <value>Підключіть програму для входу на портал за допомогою облікового запису X.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Увімкніть додаток для імпорту контактів Yahoo.</value>
@@ -503,7 +503,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Пароль</value>
@@ -788,7 +788,7 @@
     <value>Секрет клієнта</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою Twitter і пов’язувати облікові записи Twitter своїх клієнтів із модулем CRM. {0}Перейдіть до порталу Twitter Developer і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
+    <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою X і пов’язувати облікові записи X своїх клієнтів із модулем CRM. {0}Перейдіть до порталу X Developer і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>Ключ API</value>

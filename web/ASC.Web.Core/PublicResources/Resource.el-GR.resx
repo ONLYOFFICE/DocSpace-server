@@ -476,7 +476,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Συνθηματικό</value>
@@ -779,10 +779,10 @@
     <value>Αναγνωριστικό πελάτη</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Ενεργοποιήστε την εφαρμογή για να συνδεθείτε στην πύλη χρησιμοποιώντας έναν λογαριασμό Twitter.</value>
+    <value>Ενεργοποιήστε την εφαρμογή για να συνδεθείτε στην πύλη χρησιμοποιώντας έναν λογαριασμό X.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Ενεργοποιήστε αυτήν την εφαρμογή για να επιτρέψετε στους χρήστες σας να συνδεθούν στο {LogoText} χρησιμοποιώντας το Twitter τους και να συνδέσουν τους λογαριασμούς Twitter των πελατών τους με την ενότητα CRM. {0}Πηγαίνετε στην πύλη προγραμματιστών του Twitter και δημιουργήστε μια νέα ενσωμάτωση εφαρμογής {LogoText}. Εισάγετε τα δεδομένα που λάβατε παρακάτω:</value>
+    <value>Ενεργοποιήστε αυτήν την εφαρμογή για να επιτρέψετε στους χρήστες σας να συνδεθούν στο {LogoText} χρησιμοποιώντας το X τους και να συνδέσουν τους λογαριασμούς X των πελατών τους με την ενότητα CRM. {0}Πηγαίνετε στην πύλη προγραμματιστών του X και δημιουργήστε μια νέα ενσωμάτωση εφαρμογής {LogoText}. Εισάγετε τα δεδομένα που λάβατε παρακάτω:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>Κλειδί API</value>

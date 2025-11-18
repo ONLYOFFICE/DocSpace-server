@@ -521,7 +521,7 @@
     <value>Numer telefonu z Twilio (wymagany do autoryzacji SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Podłącz aplikację do logowania się do portalu za pomocą konta Twitter.</value>
+    <value>Podłącz aplikację do logowania się do portalu za pomocą konta X.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Włącz aplikację dla importu kontaktów Yahoo.</value>
@@ -575,7 +575,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Hasło</value>
@@ -860,7 +860,7 @@
     <value>Sekret klienta</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Włącz tę aplikację, aby umożliwić użytkownikom logowanie w {LogoText} za pośrednictwem Twittera i łączenie kont swoich klientów na Twitterze z modułem CRM. {0}Przejdź do portalu Twittera dla programistów i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
+    <value>Włącz tę aplikację, aby umożliwić użytkownikom logowanie w {LogoText} za pośrednictwem X i łączenie kont swoich klientów na X z modułem CRM. {0}Przejdź do portalu X dla programistów i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>Klucz API</value>

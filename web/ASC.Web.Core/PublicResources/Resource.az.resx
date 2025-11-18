@@ -632,10 +632,10 @@
     <value>Twilio-dan telefon nömrəsi (SMS icazəsi üçün tələb olunur)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Twitter hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
+    <value>X hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>İstifadəçilərinizə Twitter-dən istifadə edərək {LogoText}-a daxil olmaq və müştərilərinin Twitter hesablarını CRM modulu ilə əlaqələndirmək üçün bu proqramı işə salın. {0}Twitter Developers Portalına keçin və yeni tətbiq {LogoText} inteqrasiyası yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
+    <value>İstifadəçilərinizə X-dən istifadə edərək {LogoText}-a daxil olmaq və müştərilərinin X hesablarını CRM modulu ilə əlaqələndirmək üçün bu proqramı işə salın. {0}X Developers Portalına keçin və yeni tətbiq {LogoText} inteqrasiyası yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
   </data>
   <data name="ConsumersVkDescription" xml:space="preserve">
     <value>VK hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
@@ -890,7 +890,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Parol</value>

@@ -520,7 +520,7 @@
     <value>Numri i telefonit nga Twilio (kërkohet për autorizim SMS)</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
     <value>ID-ja e klientit</value>
@@ -529,10 +529,10 @@
     <value>Sekreti i klientit</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari Twitter.</value>
+    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari X.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen ne {LogoText} duke përdorur Twitter-in e tyre dhe të lidhin llogaritë e tyre në Twitter të klientëve të tyre me modulin CRM. {0}Shkoni te portali i zhvilluesve të Twitter dhe krijoni një aplikacion të ri me integrim {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
+    <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen ne {LogoText} duke përdorur X-in e tyre dhe të lidhin llogaritë e tyre në X të klientëve të tyre me modulin CRM. {0}Shkoni te portali i zhvilluesve të X dhe krijoni një aplikacion të ri me integrim {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>Çelësi API</value>

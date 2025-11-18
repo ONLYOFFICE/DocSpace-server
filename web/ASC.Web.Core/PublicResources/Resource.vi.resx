@@ -515,7 +515,7 @@
     <value>Số điện thoại từ Twilio (được yêu cầu để cho phép gửi SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản Twitter.</value>
+    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản X.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Bật ứng dụng cho phép nhập liên hệ từ Yahoo.</value>
@@ -578,7 +578,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Mật khẩu</value>
@@ -854,7 +854,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Twitter và liên kết tài khoản Twitter của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển Twitter và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
+    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng X và liên kết tài khoản X của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển X và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>

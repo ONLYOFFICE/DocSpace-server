@@ -419,7 +419,7 @@
     <value>Yhdistä Twilio ja voit soittaa Asiakkuudenhallinnan kontakteja suoraan selaimessa.</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Yhdistä sovellus jotta voit kirjautua sisään käyttämällä Twitter tiliä.</value>
+    <value>Yhdistä sovellus jotta voit kirjautua sisään käyttämällä X tiliä.</value>
   </data>
   <data name="ErrorFileNotImage" xml:space="preserve">
     <value>Tuntematon kuvatiedoston tyyppi</value>
@@ -482,7 +482,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Salasana</value>
@@ -782,7 +782,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön, jotta käyttäjäsi voivat kirjautua sisään {LogoText}:en käyttämällä Twitteriä ja linkittää heidän asiakkaidensa Twitter-tilit CRM-moduuliin. {0} Mene Twitter-kehittäjien portaaliin ja luo uusi sovellus {LogoText}-integraatiolle. Syötä alle saamasi tiedot:</value>
+    <value>Ota tämä sovellus käyttöön, jotta käyttäjäsi voivat kirjautua sisään {LogoText}:en käyttämällä X ja linkittää heidän asiakkaidensa X-tilit CRM-moduuliin. {0} Mene X-kehittäjien portaaliin ja luo uusi sovellus {LogoText}-integraatiolle. Syötä alle saamasi tiedot:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API-avain</value>

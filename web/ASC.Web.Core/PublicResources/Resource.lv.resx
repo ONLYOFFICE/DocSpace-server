@@ -521,7 +521,7 @@
     <value>Tālruņa numurs no Twilio (nepieciešams SMS autorizācijai)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai ieietu portālā ar Twitter kontu.</value>
+    <value>Pievienojiet lietotni, lai ieietu portālā ar X kontu.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Iespējot lietotni Yahoo kontaktu importēšanai.</value>
@@ -575,7 +575,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Parole</value>
@@ -860,7 +860,7 @@
     <value>Klienta noslēpums</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietotni, lai ļautu saviem lietotājiem pierakstīties {LogoText}, izmantojot viņu Twitter, un saistīt savu klientu Twitter kontus ar CRM moduli. {0}Dodieties uz Twitter izstrādātāju portālu un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
+    <value>Iespējojiet šo lietotni, lai ļautu saviem lietotājiem pierakstīties {LogoText}, izmantojot viņu X, un saistīt savu klientu X kontus ar CRM moduli. {0}Dodieties uz X izstrādātāju portālu un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API atslēga</value>

@@ -359,7 +359,7 @@
     <value>Número telefónico de Twilio (se requiere para la autenticación SMS)</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
     <value>Client ID</value>
@@ -368,10 +368,10 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Conectar la aplicación para acceder al portal usando la cuenta Twitter.</value>
+    <value>Conectar la aplicación para acceder al portal usando la cuenta X.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en {LogoText} usando su Twitter y vincular las cuentas de Twitter de sus clientes al módulo CRM. {0}Vaya al Portal de Desarrolladores de Twitter y cree una nueva aplicación de integración de {LogoText}. Inserte los datos que recibió a continuación:</value>
+    <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en {LogoText} usando su X y vincular las cuentas de X de sus clientes al módulo CRM. {0}Vaya al Portal de Desarrolladores de X y cree una nueva aplicación de integración de {LogoText}. Inserte los datos que recibió a continuación:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>

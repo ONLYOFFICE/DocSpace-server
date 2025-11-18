@@ -620,7 +620,7 @@
     <value>Телефонен номер от Twilio (изисква се за SMS разрешение)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Свържете приложението, за да влезете в портала, като използвате профил в Twitter.</value>
+    <value>Свържете приложението, за да влезете в портала, като използвате профил в X.</value>
   </data>
   <data name="ConsumersWordpressDescription" xml:space="preserve">
     <value>Свържете приложението за публикуване на документи в WordPress.</value>
@@ -701,7 +701,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Парола</value>
@@ -890,7 +890,7 @@
     <value>ID на клиента</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Активирайте това приложение, за да позволите на вашите потребители да влизат в {LogoText}, ползвайки техния Twitter и да свържат Twitter акаунтите на своите клиенти към CRM модула. {0}Отидете на портала за разработчици на Twitter и създайте нова интеграция за {LogoText}. Въведете данните, които сте получили по-долу:</value>
+    <value>Активирайте това приложение, за да позволите на вашите потребители да влизат в {LogoText}, ползвайки техния X и да свържат X акаунтите на своите клиенти към CRM модула. {0}Отидете на портала за разработчици на X и създайте нова интеграция за {LogoText}. Въведете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API ключ</value>
