@@ -243,6 +243,14 @@ public class FileSharingAceHelper(
                     if (!user.Equals(Constants.LostUser))
                     {
                         w.Id = user.Id;
+
+                        existedShare = await fileSecurity.GetPureSharesAsync(entry, [w.Id]).FirstOrDefaultAsync();
+
+                        if (existedShare != null)
+                        {
+                            eventType = w.Access == FileShare.None ? EventType.Remove : EventType.Update;
+                        }
+
                         await userManager.AddUserRelationAsync(authContext.CurrentAccount.ID, user.Id);
 
                         if (user.ActivationStatus != EmployeeActivationStatus.Pending)
@@ -278,6 +286,11 @@ public class FileSharingAceHelper(
                         }
                     }
                 }
+            }
+
+            if (existedShare != null && !w.IsLink && eventType == EventType.Update && existedShare.Share == w.Access)
+            {
+                continue;
             }
 
             var subjects = await fileSecurity.GetUserSubjectsAsync(w.Id);
