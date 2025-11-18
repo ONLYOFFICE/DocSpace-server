@@ -1126,31 +1126,28 @@ internal abstract class SecurityBaseDao<T>(
     {
         var entryId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         var entryParentId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.ParentId);
+        
         Expression<Func<DbFilesSecurity, bool>> exp = s => s.TenantId == tenantId && s.EntryId == entryId && s.EntryType == entry.FileEntryType;
 
         if (filterType is ShareFilterType.User or ShareFilterType.Group or ShareFilterType.UserOrGroup)
         {
-            var exp1 = exp;
-            exp = exp.Or(s => !filesDbContext.Security.Any(exp1) &&
+            exp = exp.Or(s => !filesDbContext.Security.Any(f => f.TenantId == tenantId && f.EntryId == entryId && f.EntryType == entry.FileEntryType && f.Subject == s.Subject) &&
                               s.TenantId == tenantId &&
                               s.EntryType == FileEntryType.Folder &&
                               s.EntryId == 
                               
-                              
                               filesDbContext.Tree.Where(r => 
-                                  r.FolderId.ToString() == (entry.FileEntryType ==  FileEntryType.File ? entryParentId : entryId) &&
-                                   filesDbContext.Folders.Any(f => 
-                                       f.TenantId == tenantId &&
-                                       f.Id == r.ParentId &&
-                                       f.FolderType != FolderType.AiAgents && f.FolderType != FolderType.VirtualRooms && f.FolderType != FolderType.USER) &&
-                                   filesDbContext.Security.Any(b => b.TenantId == tenantId && b.EntryId == r.ParentId.ToString() && b.EntryType == FileEntryType.Folder))
+                                      r.FolderId.ToString() == (entry.FileEntryType ==  FileEntryType.File ? entryParentId : entryId) &&
+                                      filesDbContext.Folders.Any(f => 
+                                          f.TenantId == tenantId &&
+                                          f.Id == r.ParentId &&
+                                          f.FolderType != FolderType.AiAgents && f.FolderType != FolderType.VirtualRooms && f.FolderType != FolderType.USER) &&
+                                      filesDbContext.Security.Any(b => b.TenantId == tenantId && b.EntryId == r.ParentId.ToString() && b.EntryType == FileEntryType.Folder))
                                   .OrderBy(r=> r.Level)
                                   .Select(r=> r.ParentId.ToString())
                                   .FirstOrDefault()
                               
-                              
-                              
-                              );
+            );
         }
         
         var q = filesDbContext.Security
