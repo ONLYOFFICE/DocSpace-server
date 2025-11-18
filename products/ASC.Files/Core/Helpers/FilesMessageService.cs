@@ -454,7 +454,7 @@ public class FilesMessageService(
             case MessageAction.RoomRenamed or MessageAction.AgentRenamed when !string.IsNullOrEmpty(oldTitle):
                 desc.RoomOldTitle = oldTitle;
                 break;
-            case MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser when userid != Guid.Empty:
+            case MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser or MessageAction.RoomChangeOwner when userid != Guid.Empty:
                 desc.UserIds = [userid];
                 break;
             case MessageAction.RoomUpdateAccessForUser when (userRole != FileShare.None) && userid != Guid.Empty:

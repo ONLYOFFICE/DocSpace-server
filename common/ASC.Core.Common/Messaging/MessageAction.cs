@@ -623,6 +623,9 @@ public enum MessageAction
     [SwaggerEnum("MCP server deleted from agent")]
     DeletedServerFromAgent = 5158,
 
+    [SwaggerEnum("Room change owner")]
+    RoomChangeOwner = 5159,
+
     #endregion
 
     #region Settings

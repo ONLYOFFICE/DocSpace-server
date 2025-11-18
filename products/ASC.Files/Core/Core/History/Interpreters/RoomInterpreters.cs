@@ -110,6 +110,11 @@ public class RoomUserRemovedInterpreter : RoomUserAccessBaseInterpreter
     protected override string GetAccess(List<string> description) => null;
 }
 
+public class RoomRoomChangeOwnerInterpreter : RoomUserAccessBaseInterpreter
+{
+    protected override string GetAccess(List<string> description) => null;
+}
+
 public class RoomGroupAddedInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)

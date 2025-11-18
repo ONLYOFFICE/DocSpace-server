@@ -340,7 +340,8 @@ public class ProductEntryPoint : Product
         {
             if (action is MessageAction.RoomRenamed or 
                 MessageAction.RoomArchived or 
-                MessageAction.RoomCreateUser or 
+                MessageAction.RoomCreateUser or
+                MessageAction.RoomChangeOwner or
                 MessageAction.RoomRemoveUser or 
                 MessageAction.AgentRenamed)
             {
