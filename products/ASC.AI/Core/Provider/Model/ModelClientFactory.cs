@@ -41,6 +41,8 @@ public class ModelClientFactory(IHttpClientFactory httpClientFactory)
                 new AnthropicModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.DocSpaceAi =>
                 new DocSpaceModelClient(httpClientFactory.CreateClient(), url, apiKey),
+            ProviderType.OpenRouter =>
+                new OpenRouterModelClient(httpClientFactory.CreateClient(), url, apiKey),
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
     }
