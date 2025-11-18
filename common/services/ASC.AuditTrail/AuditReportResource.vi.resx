@@ -448,7 +448,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>Đã bật SSO</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Bắt đầu sao lưu</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">

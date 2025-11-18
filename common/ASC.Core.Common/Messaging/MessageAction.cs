@@ -816,8 +816,23 @@ public enum MessageAction
     [SwaggerEnum("Start transfer setting")]
     StartTransferSetting = 5040,
 
-    [SwaggerEnum("Start backup setting")]
-    StartBackupSetting = 5041,
+    [SwaggerEnum("Backup started")]
+    BackupStarted = 5041,
+
+    [SwaggerEnum("Backup completed")]
+    BackupCompleted = 5125,
+
+    [SwaggerEnum("Backup failed")]
+    BackupFailed = 5126,
+
+    [SwaggerEnum("Scheduled backup started")]
+    ScheduledBackupStarted = 5127,
+
+    [SwaggerEnum("Scheduled backup completed")]
+    ScheduledBackupCompleted = 5128,
+
+    [SwaggerEnum("Scheduled backup failed")]
+    ScheduledBackupFailed = 5129,
 
     [SwaggerEnum("License key uploaded")]
     LicenseKeyUploaded = 5042,
