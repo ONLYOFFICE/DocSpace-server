@@ -51,6 +51,7 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
     }
     
     [HttpPut("config/vectorization")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<VectorizationSettingsDto> SetVectorizationSettingsAsync(SetEmbeddingConfigRequestDto inDto)
     {
         var settings = await aiSettingsService.SetVectorizationSettingsAsync(inDto.Body.Type, inDto.Body.Key);
