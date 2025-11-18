@@ -757,23 +757,8 @@ internal class FolderDao(
 
         var initQuery = filesDbContext.Tag
             .Where(x => x.TenantId == tenantId && x.Owner == tagOwner && tagType.Contains(x.Type))
-            .Join(filesDbContext.TagLink,
-                t => new
-                {
-                    t.TenantId,
-                    TagId = t.Id
-                },
-                l => new
-                {
-                    l.TenantId,
-                    l.TagId
-                },
-                (t, l) => new { t, l })
-            .Where(x => x.l.EntryType == FileEntryType.Folder)
-            .Join(filesDbContext.Folders,
-                x => Convert.ToInt32(x.l.EntryId),
-                f => f.Id,
-                (x, f) => new { f, x.l, x.t });
+            .Join(filesDbContext.TagLink, t => new { t.Id, EntryType = FileEntryType.Folder, TenantId = tenantId }, l => new { Id = l.TagId, l.EntryType, l.TenantId }, (t, l) => new { t, l })
+            .Join(filesDbContext.Folders, x => new { Id = Convert.ToInt32(x.l.EntryId), TenantId = tenantId }, f => new { f.Id, f.TenantId }, (x, f) => new { f, x.l, x.t });
 
         if (trashId != 0)
         {
@@ -783,7 +768,7 @@ internal class FolderDao(
         var query = initQuery.Select(x => new FolderByTagQuery
         {
             Entry = x.f,
-            Tag = x.t,
+            Tag = x.t.Type,
             LastOpened = x.l.CreateOn,
             Security = filesDbContext.Security
                 .FirstOrDefault(s => s.TenantId == tenantId &&
@@ -793,8 +778,7 @@ internal class FolderDao(
             OriginRoom = x.t.Type != TagType.RecentByLink ?
                 filesDbContext.Folders
                 .Where(f => f.TenantId == tenantId && f.FolderType != FolderType.VirtualRooms)
-                .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
-                .Where(t => t.tree.FolderId == x.f.ParentId)
+                .Join(filesDbContext.Tree, f => new { f.Id, x.f.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
                 .OrderByDescending(t => t.tree.Level)
                 .Select(t => new DbFolder { Id = t.folder.Id, Title = t.folder.Title })
                 .FirstOrDefault() :
@@ -802,8 +786,7 @@ internal class FolderDao(
             Origin = x.t.Type != TagType.RecentByLink ?
                 filesDbContext.Folders
                     .Where(f => f.TenantId == tenantId && f.FolderType != FolderType.VirtualRooms)
-                    .Join(filesDbContext.Tree, f => f.Id, t => t.FolderId, (folder, tree) => new { folder, tree })
-                    .Where(t => t.tree.FolderId == x.f.ParentId)
+                    .Join(filesDbContext.Tree, f => new { f.Id, x.f.ParentId }, t => new { Id = t.FolderId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
                     .OrderByDescending(t => t.tree.Level)
                     .Select(t => new DbFolder { Id = t.folder.Id, Title = t.folder.Title })
                     .FirstOrDefault() :
@@ -817,40 +800,28 @@ internal class FolderDao(
             query = location switch
             {
                 Location.Documents =>
-                    query.Where(x => x.Tag.Type == documentsTagType &&
+                    query.Where(x => x.Tag == documentsTagType &&
                        filesDbContext.Folders
                         .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.USER)
-                        .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
-                        .Where(t => t.tree.FolderId == x.Entry.ParentId)
-                        .OrderByDescending(t => t.tree.Level)
-                        .Select(t => t.folder.Id)
+                        .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
                         .Any()),
                 Location.Room =>
-                    query.Where(x => x.Tag.Type == documentsTagType &&
+                    query.Where(x => x.Tag == documentsTagType &&
                          filesDbContext.Folders
-                             .Where(f => f.TenantId == tenantId && (f.FolderType == FolderType.CustomRoom || f.FolderType == FolderType.EditingRoom || f.FolderType == FolderType.FillingFormsRoom || f.FolderType == FolderType.PublicRoom || f.FolderType == FolderType.VirtualDataRoom))
-                             .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
-                             .Where(t => t.tree.FolderId == x.Entry.ParentId)
-                             .OrderByDescending(t => t.tree.Level)
-                             .Select(t => t.folder.Id)
-                             .Any()),
+                         .Where(f => f.TenantId == tenantId && (f.FolderType == FolderType.CustomRoom || f.FolderType == FolderType.EditingRoom || f.FolderType == FolderType.FillingFormsRoom || f.FolderType == FolderType.PublicRoom || f.FolderType == FolderType.VirtualDataRoom))
+                         .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
+                         .Any()),
                 Location.Link => query.Where(x =>
-                    (x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)) &&
+                    (x.Tag == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)) &&
                      !filesDbContext.Folders
                          .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.TRASH)
-                         .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
-                         .Where(t => t.tree.FolderId == x.Entry.ParentId)
-                         .OrderByDescending(t => t.tree.Level)
-                         .Select(t => t.folder.Id)
+                         .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
                          .Any())),
                 _ => documentsTagType == TagType.Favorite ? query : query.Where(x =>
-                    (x.Tag.Type == TagType.Recent || x.Tag.Type == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow))) &&
+                    (x.Tag == TagType.Recent || x.Tag == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow))) &&
                         !filesDbContext.Folders
                         .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.TRASH)
-                        .Join(filesDbContext.Tree, f => f.Id, t => t.ParentId, (folder, tree) => new { folder, tree })
-                        .Where(t => t.tree.FolderId == x.Entry.ParentId)
-                        .OrderByDescending(t => t.tree.Level)
-                        .Select(t => t.folder.Id)
+                        .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
                         .Any())
             };
         }
@@ -2292,7 +2263,7 @@ public class DbFolderQuery
 public class FolderByTagQuery : IQueryResult<DbFolder>
 {
     public DbFolder Entry { get; set; }
-    public DbFilesTag Tag { get; set; }
+    public TagType Tag { get; set; }
 
     public DbFolder Origin { get; set; }
     public DbFolder OriginRoom { get; set; }
