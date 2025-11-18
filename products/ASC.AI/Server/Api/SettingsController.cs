@@ -33,6 +33,7 @@ namespace ASC.AI.Api;
 public class SettingsController(AiSettingsService aiSettingsService) : ControllerBase
 {
     [HttpPut("config/web-search")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<WebSearchSettingsDto> SetWebSearchSettingsAsync(SetWebSearchConfigRequestDto inDto)
     {
         var settings = await aiSettingsService.SetWebSearchSettingsAsync(
