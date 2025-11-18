@@ -117,46 +117,55 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Установка пароля</value>
+  <data name="AiSettingsAccessDenied" xml:space="preserve">
+    <value>Sie haben keine Berechtigung, die KI-Einstellungen zu verwalten</value>
   </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>Файл резервной копии недействителен. Пожалуйста, используйте файл, созданный на том же портале.</value>
+  <data name="ChatAccessDenied" xml:space="preserve">
+    <value>Sie haben keine Berechtigung, den Chat zu nutzen</value>
   </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>Размер резервной копии превышает общий размер портала</value>
+  <data name="ChatNotFound" xml:space="preserve">
+    <value>Chat nicht gefunden</value>
   </data>
-  <data name="BackupException" xml:space="preserve">
-    <value>При создании резервной копии что-то пошло не так. Попробуйте создать ее еще раз или обратитесь в службу поддержки.</value>
+  <data name="IncorrectProvider" xml:space="preserve">
+    <value>Falscher Anbietertyp</value>
   </data>
-  <data name="BackupInvalid" xml:space="preserve">
-    <value>Файл резервной копии недействителен.</value>
+  <data name="IncorrectServerCredentials" xml:space="preserve">
+    <value>Authentifizierung fehlgeschlagen. Überprüfen Sie Ihre Anmeldedaten</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>При восстановлении резервной копии что-то пошло не так. Попробуйте восстановить ее снова или обратитесь в службу поддержки.</value>
+  <data name="InvalidAuthCode" xml:space="preserve">
+    <value>Ungültiger Autorisierungscode</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Автоматическое резервное копирование</value>
+  <data name="InvalidKey" xml:space="preserve">
+    <value>Der angegebene API-Schlüssel ist ungültig oder verfügt nicht über die erforderlichen Zugriffsrechte. Überprüfen Sie, ob der Schlüssel korrekt ist, und versuchen Sie es erneut</value>
   </data>
-  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
-    <value>Custom cloud</value>
+  <data name="InvalidServerName" xml:space="preserve">
+    <value>Ungültiger MCP-Servername. Zulässig sind nur Buchstaben, Zahlen, Unterstriche und Bindestriche</value>
   </data>
-  <data name="BackupStorageTypeDataStore" xml:space="preserve">
-    <value>Временное хранилище</value>
+  <data name="InvalidUrl" xml:space="preserve">
+    <value>Der angegebene URL-Pfad ist ungültig. Bitte stellen Sie sicher, dass der korrekte Endpunkt verwendet wird</value>
   </data>
-  <data name="BackupStorageTypeDocuments" xml:space="preserve">
-    <value>Резервная комната</value>
+  <data name="ManageProviders" xml:space="preserve">
+    <value>Sie haben keine Berechtigung zur Verwaltung von Anbietern</value>
   </data>
-  <data name="BackupStorageTypeLocal" xml:space="preserve">
-    <value>Локальный файл</value>
+  <data name="ManageServers" xml:space="preserve">
+    <value>Sie haben keine Berechtigung zur Verwaltung von MCP-Servern</value>
   </data>
-  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
-    <value>Стороннее хранилище</value>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>Anbieter nicht gefunden</value>
   </data>
-  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
-    <value>Сторонний ресурс</value>
+  <data name="ReservedServerName" xml:space="preserve">
+    <value>Der Name des MCP-Servers ist nicht zulässig</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Некоторые файлы не были включены в резервную копию. Подробнее см. в разделе {0}</value>
+  <data name="ServerFailedConnect" xml:space="preserve">
+    <value>Verbindung zum MCP-Server fehlgeschlagen</value>
+  </data>
+  <data name="ServerNameExists" xml:space="preserve">
+    <value>Der MCP-Servername ist bereits vergeben</value>
+  </data>
+  <data name="ServerNotFound" xml:space="preserve">
+    <value>MCP-Server nicht gefunden</value>
+  </data>
+  <data name="ServersRoomLimit" xml:space="preserve">
+    <value>Die maximale Anzahl an Servern pro Raum beträgt {0}</value>
   </data>
 </root>

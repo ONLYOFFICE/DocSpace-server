@@ -979,4 +979,73 @@
   <data name="LoginSuccessSocialAccount" xml:space="preserve">
     <value>Успешный вход через аккаунт социальной сети</value>
   </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Добавлен MCP-сервер {0} к агенту</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Агент создан</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Агент удален</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Агент переименован: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Агенты</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Создан ИИ-провайдер: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>ИИ-провайдер удален: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>ИИ-поставщик обновлен: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>ИИ-агенты [{0}]. Установить пользовательскую квоту хранения для ИИ-агентов: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>ИИ-агенты [{0}]. Установить квоту хранения по умолчанию для ИИ-агентов: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>ИИ-агенты [{0}]. Отключена квота хранения для агентов ИИ</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>MCP-сервер {0} удален из агента</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Установить квоту хранилища по умолчанию для ИИ-агентов: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Отключить квоту хранилища по умолчанию для ИИ-агентов</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Настройки векторизации сброшены</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Настройки веб-поиска сброшены </value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP-сервер создан: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP-сервер удален: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP-сервер отключен: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP-сервер включен: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP-сервер обновлен: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Настройки векторизации сконфигурированы. Провайдер: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Настройки веб-поиска сконфигурированы. Движок: {0}</value>
+  </data>
 </root>

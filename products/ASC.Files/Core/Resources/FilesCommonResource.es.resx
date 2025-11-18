@@ -518,4 +518,7 @@
   <data name="FolderNameForReassignedData" xml:space="preserve">
     <value>Documentos del usuario {0} {1}</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Gestor de agentes</value>
+  </data>
 </root>

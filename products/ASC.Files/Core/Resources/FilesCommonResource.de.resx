@@ -518,4 +518,7 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="FolderNameForReassignedData" xml:space="preserve">
     <value>Dokumente des Benutzers {0} {1}</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Agentenmanager</value>
+  </data>
 </root>

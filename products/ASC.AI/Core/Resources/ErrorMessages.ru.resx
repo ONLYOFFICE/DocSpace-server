@@ -117,46 +117,58 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Установка пароля</value>
+  <data name="AiSettingsAccessDenied" xml:space="preserve">
+    <value>У вас нет разрешения на управление настройками ИИ</value>
   </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>Файл резервной копии недействителен. Пожалуйста, используйте файл, созданный на том же портале.</value>
+  <data name="ChatAccessDenied" xml:space="preserve">
+    <value>У вас нет разрешения на использование чата</value>
   </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>Размер резервной копии превышает общий размер портала</value>
+  <data name="ChatNotFound" xml:space="preserve">
+    <value>Чат не найден</value>
   </data>
-  <data name="BackupException" xml:space="preserve">
-    <value>При создании резервной копии что-то пошло не так. Попробуйте создать ее еще раз или обратитесь в службу поддержки.</value>
+  <data name="IncorrectProvider" xml:space="preserve">
+    <value>Неправильный тип провайдера</value>
   </data>
-  <data name="BackupInvalid" xml:space="preserve">
-    <value>Файл резервной копии недействителен.</value>
+  <data name="IncorrectServerCredentials" xml:space="preserve">
+    <value>Не удалось выполнить аутентификацию. Проверьте свои учетные данные</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>При восстановлении резервной копии что-то пошло не так. Попробуйте восстановить ее снова или обратитесь в службу поддержки.</value>
+  <data name="InvalidAuthCode" xml:space="preserve">
+    <value>Неверный код авторизации</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Автоматическое резервное копирование</value>
+  <data name="InvalidKey" xml:space="preserve">
+    <value>Указанный ключ API недействителен или не предоставляет прав доступа. Проверьте правильность ключа и повторите попытку</value>
   </data>
-  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
-    <value>Custom cloud</value>
+  <data name="InvalidServerName" xml:space="preserve">
+    <value>Недопустимое имя MCP-сервера. Допускаются только буквы, цифры, символы подчеркивания и дефисы</value>
   </data>
-  <data name="BackupStorageTypeDataStore" xml:space="preserve">
-    <value>Временное хранилище</value>
+  <data name="InvalidUrl" xml:space="preserve">
+    <value>Указанный URL-путь недействителен. Убедитесь, что используется правильная конечная точка</value>
   </data>
-  <data name="BackupStorageTypeDocuments" xml:space="preserve">
-    <value>Резервная комната</value>
+  <data name="ManageProviders" xml:space="preserve">
+    <value>У вас нет разрешения на управление провайдерами</value>
   </data>
-  <data name="BackupStorageTypeLocal" xml:space="preserve">
-    <value>Локальный файл</value>
+  <data name="ManageServers" xml:space="preserve">
+    <value>У вас нет разрешения на управление MCP-серверами</value>
   </data>
-  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
-    <value>Стороннее хранилище</value>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>Провайдер не найден</value>
   </data>
-  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
-    <value>Сторонний ресурс</value>
+  <data name="ReservedServerName" xml:space="preserve">
+    <value>Имя MCP-сервера недопустимо</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Некоторые файлы не были включены в резервную копию. Подробнее см. в разделе {0}</value>
+  <data name="ServerFailedConnect" xml:space="preserve">
+    <value>Не удалось подключиться к MCP-серверу</value>
+  </data>
+  <data name="ServerNameExists" xml:space="preserve">
+    <value>Имя MCP-сервера уже существует</value>
+  </data>
+  <data name="ServerNotFound" xml:space="preserve">
+    <value>MCP-сервер не найден</value>
+  </data>
+  <data name="ServersRoomLimit" xml:space="preserve">
+    <value>Максимальное количество серверов в комнате: {0}</value>
+  </data>
+  <data name="UnavailableServers" xml:space="preserve">
+    <value>Серверы MCP недоступны: {0}. Проверьте настройки подключения</value>
   </data>
 </root>

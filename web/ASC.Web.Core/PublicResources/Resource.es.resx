@@ -1204,4 +1204,34 @@
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
     <value>Ha conectado correctamente Telegram para recibir notificaciones de su DocSpace.</value>
   </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vectorización</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Herramientas de IA</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Se ha superado la cuota de espacio del agente de IA</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Error al establecer la cuota por agente de IA. El valor introducido es mayor que el almacenamiento total de DocSpace.</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>El número de agentes de IA no debe superar {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Herramientas de IA</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Active las funciones de IA en su DocSpace para aumentar la productividad.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Búsqueda web con IA</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Añada fondos a su monedero para desbloquear la búsqueda web con IA.</value>
+  </data>
 </root>
