@@ -2798,23 +2798,15 @@ internal class FileDao(
         var initQuery = filesDbContext.Tag
             .Where(x => x.TenantId == tenantId && x.Owner == tagOwner && tagType.Contains(x.Type))
             .Join(filesDbContext.TagLink,
-                t => new
-                {
-                    t.TenantId,
-                    TagId = t.Id
-                },
-                l => new
-                {
-                    l.TenantId,
-                    l.TagId
-                },
+                t => new { TagId = t.Id },
+                l => new { l.TagId },
                 (t, l) => new { t, l })
-            .Where(x => x.l.EntryType == FileEntryType.File)
+            .Where(x => x.l.TenantId == tenantId && x.l.EntryType == FileEntryType.File)
             .Join(filesDbContext.Files,
                 x => Convert.ToInt32(x.l.EntryId),
                 f => f.Id,
                 (x, f) => new { f, x.l, x.t })
-            .Where(x => x.f.CurrentVersion);
+            .Where(x => x.f.CurrentVersion && x.f.TenantId == tenantId);
 
         if (trashId != 0)
         {
