@@ -2377,7 +2377,7 @@ internal class FileDao(
                          orderby t.Level descending
                          select t.ParentId
                          ).FirstOrDefault()
-                        where f.TenantId == r.TenantId
+                        where f.TenantId == tenantId
                         select f
                           ).FirstOrDefault(),
                 Order = (
