@@ -743,7 +743,7 @@ public class FileSecurity(
             case FolderType.VirtualRooms:
                 defaultRecords = null;
 
-                if (entry is not Folder<T> || entry is Folder<T> folder && folder.FolderType != FolderType.VirtualRooms)
+                if (entry is not Folder<T> || entry is Folder<T> f1 && f1.FolderType != FolderType.VirtualRooms)
                 {
                     break;
                 }
@@ -762,7 +762,7 @@ public class FileSecurity(
                     }
                 ];
 
-                if (!shares.Any())
+                if (shares.Count == 0)
                 {
                     foreach (var defaultRecord in defaultRecords)
                     {
@@ -773,7 +773,39 @@ public class FileSecurity(
                 }
 
                 break;
+            case FolderType.AiAgents:
+                defaultRecords = null;
 
+                if (entry is not Folder<T> || entry is Folder<T> f2 && f2.FolderType != FolderType.AiAgents)
+                {
+                    break;
+                }
+
+                defaultRecords =
+                [
+                    new FileShareRecord<T>
+                    {
+                        Level = int.MaxValue,
+                        EntryId = entry.Id,
+                        EntryType = entry.FileEntryType,
+                        Share = FileShare.Read,
+                        Subject = Constants.GroupEveryone.ID,
+                        TenantId = tenantId,
+                        Owner = entry.RootCreateBy
+                    }
+                ];
+
+                if (shares.Count == 0)
+                {
+                    foreach (var defaultRecord in defaultRecords)
+                    {
+                        directAccess.AddRange((await userManager.GetUsersByGroupAsync(defaultRecord.Subject)).Where(x => x.Status == EmployeeStatus.Active).Select(y => y.Id).Distinct());
+                    }
+
+                    return (directAccess, sharedAccess);
+                }
+
+                break;
             default:
                 defaultRecords = null;
                 break;

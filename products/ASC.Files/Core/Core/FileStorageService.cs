@@ -2482,14 +2482,14 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async Task<IEnumerable<KeyValuePair<DateTime, IEnumerable<KeyValuePair<FileEntry, IEnumerable<FileEntry>>>>>> GetNewRoomFilesAsync()
+    public async Task<IEnumerable<KeyValuePair<DateTime, IEnumerable<KeyValuePair<FileEntry, IEnumerable<FileEntry>>>>>> GetNewRootFilesAsync(int rootId)
     {
         try
         {
-            var newFiles = await fileMarker.GetRoomGroupedNewItemsAsync();
+            var newFiles = await fileMarker.GetRootGroupedNewItemsAsync(rootId);
             if (newFiles.Count == 0)
             {
-                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync)], []);
+                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(rootId)], []);
             }
 
             return newFiles
