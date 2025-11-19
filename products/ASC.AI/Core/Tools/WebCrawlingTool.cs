@@ -46,14 +46,14 @@ public class WebCrawlingTool(WebSearchEngineFactory searchEngineFactory, IFavico
         
         async Task<ToolResponse<WebSearchResult>> Function(
             [Description("URL to crawl and extract content from")] string url,
-            [Description("Maximum characters to extract (default: 3000)")] int? maxCharacters)
+            [Description("Maximum characters to extract (default: 10000)")] int? maxCharacters)
         {
             try
             {
                 var result = await engine.GetPageContentAsync(new PageContentQuery
                 {
                     Url = url,
-                    MaxCharacters = maxCharacters ?? 3000
+                    MaxCharacters = maxCharacters ?? 10000
                 });
 
                 if (result != null && !string.IsNullOrEmpty(url))
