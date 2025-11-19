@@ -75,8 +75,10 @@ public class AttachmentHandler(
             
             await using var memoryStream = new MemoryStream();
             await stream.CopyToAsync(memoryStream);
+            
+            var slice = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
 
-            var content = await textExtractor.ExtractAsync(memoryStream.GetBuffer());
+            var content = await textExtractor.ExtractAsync(slice);
             if (string.IsNullOrEmpty(content))
             {
                 yield return new AttachmentResult
