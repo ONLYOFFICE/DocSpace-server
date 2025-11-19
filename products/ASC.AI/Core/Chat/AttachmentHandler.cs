@@ -26,6 +26,13 @@
 
 namespace ASC.AI.Core.Chat;
 
+public class AttachmentResult
+{
+    public required FileEntry File { get; init; }
+    public AttachmentMessageContent? AttachmentContent { get; init; }
+    public bool Success { get; init; }
+}
+
 [Scope]
 public class AttachmentHandler(
     IDaoFactory daoFactory,
@@ -34,7 +41,7 @@ public class AttachmentHandler(
     VectorizationGlobalSettings vectorizationGlobalSettings)
 {
     
-    public async IAsyncEnumerable<AttachmentMessageContent> HandleAsync(IEnumerable<int> filesIds, IEnumerable<string> thirdPartyFilesIds)
+    public async IAsyncEnumerable<AttachmentResult> HandleAsync(IEnumerable<int> filesIds, IEnumerable<string> thirdPartyFilesIds)
     {
         await foreach (var files in HandleAsync(filesIds))
         {
@@ -47,7 +54,7 @@ public class AttachmentHandler(
         }
     }
     
-    private async IAsyncEnumerable<AttachmentMessageContent> HandleAsync<T>(IEnumerable<T> filesIds)
+    private async IAsyncEnumerable<AttachmentResult> HandleAsync<T>(IEnumerable<T> filesIds)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         
@@ -72,15 +79,26 @@ public class AttachmentHandler(
             var content = await textExtractor.ExtractAsync(memoryStream.GetBuffer());
             if (string.IsNullOrEmpty(content))
             {
+                yield return new AttachmentResult
+                {
+                    File = file,
+                    Success = false
+                };
+                
                 continue;
             }
-            
-            yield return new AttachmentMessageContent
+
+            yield return new AttachmentResult
             {
-                Id = JsonSerializer.SerializeToElement(file.Id),
-                Title = file.Title,
-                Extension = FileUtility.GetFileExtension(file.Title),
-                Content = content
+                File = file,
+                Success = true,
+                AttachmentContent = new AttachmentMessageContent
+                {
+                    Id = JsonSerializer.SerializeToElement(file.Id),
+                    Title = file.Title,
+                    Extension = FileUtility.GetFileExtension(file.Title),
+                    Content = content
+                }
             };
         }
     }

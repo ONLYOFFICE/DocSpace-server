@@ -69,6 +69,15 @@ namespace ASC.AI.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot process files: {0}. Files may be corrupted or encrypted.
+        /// </summary>
+        internal static string AttachmentProcessFailed {
+            get {
+                return ResourceManager.GetString("AttachmentProcessFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have permission to use chat.
         /// </summary>
         internal static string ChatAccessDenied {
