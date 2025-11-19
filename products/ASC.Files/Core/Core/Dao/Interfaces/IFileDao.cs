@@ -81,6 +81,7 @@ public interface IFileDao<T>
     ///     Gets the file (s) by ID (s) for share
     /// </summary>
     /// <param name="fileIds">id file</param>
+    /// <param name="excludeParentsIds"></param>
     /// <param name="filterType"></param>
     /// <param name="subjectGroup"></param>
     /// <param name="subjectID"></param>
@@ -88,7 +89,7 @@ public interface IFileDao<T>
     /// <param name="extension"></param>
     /// <param name="searchInContent"></param>
     /// <returns></returns>
-    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent);
+    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, IEnumerable<T> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent);
 
     /// <summary>
     /// 

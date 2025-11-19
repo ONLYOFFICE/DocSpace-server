@@ -2755,7 +2755,7 @@ public class FileSecurity(
 
         if (filterType != FilterType.FoldersOnly)
         {
-            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), folderIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
             
             await foreach (var x in files)
             {
@@ -2927,7 +2927,7 @@ public class FileSecurity(
 
         if (filterType != FilterType.FoldersOnly)
         {
-            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), [], filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
             var privateFolder = await globalFolder.GetFolderPrivacyAsync<T>(daoFactory);
 
             await foreach (var x in files)

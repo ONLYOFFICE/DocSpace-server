@@ -114,7 +114,7 @@ internal class ProviderFileDao(
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent)
+    public async IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, IEnumerable<string> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent)
     {
         foreach (var (selectorLocal, matchedIds) in _selectorFactory.GetSelectors(fileIds))
         {
@@ -127,7 +127,7 @@ internal class ProviderFileDao(
             {
                 var fileDao = selectorLocal.GetFileDao(matchedId.FirstOrDefault());
 
-                await foreach (var file in fileDao.GetFilesFilteredAsync(matchedId.Select(selectorLocal.ConvertId).ToArray(), filterType, subjectGroup, subjectID, searchText,
+                await foreach (var file in fileDao.GetFilesFilteredAsync(matchedId.Select(selectorLocal.ConvertId).ToArray(), excludeParentsIds, filterType, subjectGroup, subjectID, searchText,
                                    extension, searchInContent))
                 {
                     if (file != null)
