@@ -1115,7 +1115,8 @@ public class FileSecurity(
                 FilesSecurityActions.Download or 
                 FilesSecurityActions.Delete or 
                 FilesSecurityActions.Vectorization or 
-                FilesSecurityActions.Copy))
+                FilesSecurityActions.Copy or
+                FilesSecurityActions.AskAi))
             {
                 return false;
             }
