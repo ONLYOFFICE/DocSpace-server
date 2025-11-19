@@ -2379,8 +2379,13 @@ public class FileSecurity(
         }
 
 
-        var firstTask = GetSharesForMeAsync(recordsInternal, orderedSubjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
-        var secondTask = GetSharesForMeAsync(recordsThirdParty, orderedSubjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+        var firstTask = recordsInternal.Count == 0 ?
+            ValueTask.FromResult(new List<FileEntry>(0)) :
+            GetSharesForMeAsync(recordsInternal, orderedSubjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+        
+        var secondTask = recordsThirdParty.Count == 0 ?
+            ValueTask.FromResult(new List<FileEntry>(0)) :
+            GetSharesForMeAsync(recordsThirdParty, orderedSubjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
 
         foreach (var items in await Task.WhenAll(firstTask.AsTask(), secondTask.AsTask()))
         {
