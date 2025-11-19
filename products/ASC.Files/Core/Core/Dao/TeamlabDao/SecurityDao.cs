@@ -1137,7 +1137,7 @@ internal abstract class SecurityBaseDao<T>(
                               s.EntryId == 
                               
                               filesDbContext.Tree.Where(r => 
-                                      r.FolderId.ToString() == (entry.FileEntryType ==  FileEntryType.File ? entryParentId : entryId) &&
+                                      r.FolderId.ToString() == entryParentId &&
                                       filesDbContext.Folders.Any(f => 
                                           f.TenantId == tenantId &&
                                           f.Id == r.ParentId &&
