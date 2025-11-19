@@ -117,46 +117,55 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Definir senha</value>
+  <data name="AiSettingsAccessDenied" xml:space="preserve">
+    <value>AI設定を管理する権限がありません</value>
   </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>O arquivo de backup é inválido. Use o arquivo criado no mesmo portal.</value>
+  <data name="ChatAccessDenied" xml:space="preserve">
+    <value>チャットを使用する権限がありません</value>
   </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>O backup é maior que o tamanho total do portal</value>
+  <data name="ChatNotFound" xml:space="preserve">
+    <value>チャットが見つかりません</value>
   </data>
-  <data name="BackupException" xml:space="preserve">
-    <value>Algo deu errado ao criar o backup. Tente criá-lo novamente ou entre em contato com o suporte.</value>
+  <data name="IncorrectProvider" xml:space="preserve">
+    <value>プロバイダーの種類が正しくありません</value>
   </data>
-  <data name="BackupInvalid" xml:space="preserve">
-    <value>O arquivo de backup é inválido.</value>
+  <data name="IncorrectServerCredentials" xml:space="preserve">
+    <value>認証に失敗しました。資格情報を確認してください</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Algo deu errado ao restaurar o backup. Tente restaurá-lo novamente ou entre em contato com o suporte.</value>
+  <data name="InvalidAuthCode" xml:space="preserve">
+    <value>無効な認証コードです</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Backup automático</value>
+  <data name="InvalidKey" xml:space="preserve">
+    <value>指定されたAPIキーが無効、またはアクセス権がありません。キーを確認して再試行してください</value>
   </data>
-  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
-    <value>Custom cloud</value>
+  <data name="InvalidServerName" xml:space="preserve">
+    <value>無効なMCPサーバー名です。使用できるのは英数字、アンダースコア、ハイフンのみです</value>
   </data>
-  <data name="BackupStorageTypeDataStore" xml:space="preserve">
-    <value>Armazenamento temporário</value>
+  <data name="InvalidUrl" xml:space="preserve">
+    <value>指定されたURLパスが無効です。正しいエンドポイントを使用しているか確認してください</value>
   </data>
-  <data name="BackupStorageTypeDocuments" xml:space="preserve">
-    <value>Sala de backup</value>
+  <data name="ManageProviders" xml:space="preserve">
+    <value>プロバイダーを管理する権限がありません</value>
   </data>
-  <data name="BackupStorageTypeLocal" xml:space="preserve">
-    <value>Arquivo local</value>
+  <data name="ManageServers" xml:space="preserve">
+    <value>MCPサーバーを管理する権限がありません</value>
   </data>
-  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
-    <value>Armazenamento de terceiros</value>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>プロバイダーが見つかりません</value>
   </data>
-  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
-    <value>Recurso de terceiros</value>
+  <data name="ReservedServerName" xml:space="preserve">
+    <value>このMCPサーバー名は使用できません</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Alguns arquivos não foram incluídos no backup. Para mais detalhes, verifique {0}</value>
+  <data name="ServerFailedConnect" xml:space="preserve">
+    <value>MCPサーバーへの接続に失敗しました</value>
+  </data>
+  <data name="ServerNameExists" xml:space="preserve">
+    <value>MCPサーバー名はすでに存在します</value>
+  </data>
+  <data name="ServerNotFound" xml:space="preserve">
+    <value>MCPサーバーが見つかりません</value>
+  </data>
+  <data name="ServersRoomLimit" xml:space="preserve">
+    <value>ルームごとに設定できるサーバーの最大数は {0} です</value>
   </data>
 </root>

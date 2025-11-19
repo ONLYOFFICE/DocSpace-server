@@ -117,46 +117,55 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Definir senha</value>
+  <data name="AiSettingsAccessDenied" xml:space="preserve">
+    <value>Nuk keni leje për të menaxhuar cilësimet e AI</value>
   </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>O arquivo de backup é inválido. Use o arquivo criado no mesmo portal.</value>
+  <data name="ChatAccessDenied" xml:space="preserve">
+    <value>Nuk keni leje për të përdorur chat</value>
   </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>O backup é maior que o tamanho total do portal</value>
+  <data name="ChatNotFound" xml:space="preserve">
+    <value>Biseda nuk u gjend</value>
   </data>
-  <data name="BackupException" xml:space="preserve">
-    <value>Algo deu errado ao criar o backup. Tente criá-lo novamente ou entre em contato com o suporte.</value>
+  <data name="IncorrectProvider" xml:space="preserve">
+    <value>Lloji i ofruesit është i pasaktë</value>
   </data>
-  <data name="BackupInvalid" xml:space="preserve">
-    <value>O arquivo de backup é inválido.</value>
+  <data name="IncorrectServerCredentials" xml:space="preserve">
+    <value>Autentikimi dështoi. Verifikoni kredencialet tuaja</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Algo deu errado ao restaurar o backup. Tente restaurá-lo novamente ou entre em contato com o suporte.</value>
+  <data name="InvalidAuthCode" xml:space="preserve">
+    <value>Kodi i autorizimit është i pavlefshëm</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Backup automático</value>
+  <data name="InvalidKey" xml:space="preserve">
+    <value>Çelësi API i specifikuar është i pavlefshëm ose nuk ka të drejta qasje. Verifikoni që çelësi është i saktë dhe provoni përsëri</value>
   </data>
-  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
-    <value>Custom cloud</value>
+  <data name="InvalidServerName" xml:space="preserve">
+    <value>Emri i serverit MCP i pavlefshëm. Lejohen vetëm shkronja, numra, nënvije dhe vizë</value>
   </data>
-  <data name="BackupStorageTypeDataStore" xml:space="preserve">
-    <value>Armazenamento temporário</value>
+  <data name="InvalidUrl" xml:space="preserve">
+    <value>Rruga e URL-së e specifikuar është e pavlefshme. Ju lutemi sigurohuni që të përdoret endpoint-i i saktë</value>
   </data>
-  <data name="BackupStorageTypeDocuments" xml:space="preserve">
-    <value>Sala de backup</value>
+  <data name="ManageProviders" xml:space="preserve">
+    <value>Nuk keni leje për të menaxhuar ofruesit</value>
   </data>
-  <data name="BackupStorageTypeLocal" xml:space="preserve">
-    <value>Arquivo local</value>
+  <data name="ManageServers" xml:space="preserve">
+    <value>Nuk keni leje për të menaxhuar serverat MCP</value>
   </data>
-  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
-    <value>Armazenamento de terceiros</value>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>Ofruesi nuk u gjet</value>
   </data>
-  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
-    <value>Recurso de terceiros</value>
+  <data name="ReservedServerName" xml:space="preserve">
+    <value>Emri i serverit MCP nuk lejohet</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Alguns arquivos não foram incluídos no backup. Para mais detalhes, verifique {0}</value>
+  <data name="ServerFailedConnect" xml:space="preserve">
+    <value>Dështoi lidhja me serverin MCP</value>
+  </data>
+  <data name="ServerNameExists" xml:space="preserve">
+    <value>Emri i serverit MCP ekziston tashmë</value>
+  </data>
+  <data name="ServerNotFound" xml:space="preserve">
+    <value>Serveri MCP nuk u gjet</value>
+  </data>
+  <data name="ServersRoomLimit" xml:space="preserve">
+    <value>Numri maksimal i serverave për dhomë është {0}</value>
   </data>
 </root>

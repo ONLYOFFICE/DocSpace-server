@@ -475,7 +475,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI agents  [{0}]. Disabled storage quota for AI agents.
+        ///   Looks up a localized string similar to AI agents [{0}]. Disabled storage quota for AI agents.
         /// </summary>
         public static string CustomQuotaPerAiAgentDisabled {
             get {
@@ -2059,7 +2059,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Web search settings have been reset .
+        ///   Looks up a localized string similar to Web search settings have been reset.
         /// </summary>
         public static string ResetWebSearchSettings {
             get {

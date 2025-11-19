@@ -980,7 +980,7 @@
     <value>Espaço na nuvem para os documentos do seu escritório</value>
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Integrações de terceiros</value>
+    <value>Pro integrações</value>
   </data>
   <data name="ConsumersZoom" xml:space="preserve">
     <value>Zoom</value>
@@ -1203,5 +1203,35 @@
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
     <value>Você se conectou com sucesso ao Telegram para receber notificações do seu DocSpace.</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vetorização</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Ferramentas de IA</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Cota de espaço do agente de IA excedida</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a quota por agente de IA. O valor inserido é maior que o armazenamento total do DocSpace.</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>O número de agentes de IA não deve exceder {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Ferramentas de IA</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Ative as funcionalidades de IA no seu DocSpace para impulsionar a produtividade.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Pesquisa web com IA</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Adicione fundos à sua carteira para desbloquear a pesquisa web por IA.</value>
   </data>
 </root>

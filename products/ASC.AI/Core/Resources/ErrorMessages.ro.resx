@@ -117,46 +117,55 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Definir senha</value>
+  <data name="AiSettingsAccessDenied" xml:space="preserve">
+    <value>Nu aveți permisiunea pentru a gestiona setările IA</value>
   </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>O arquivo de backup é inválido. Use o arquivo criado no mesmo portal.</value>
+  <data name="ChatAccessDenied" xml:space="preserve">
+    <value>Nu aveți permisiunea pentru a folosi chat-ul</value>
   </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>O backup é maior que o tamanho total do portal</value>
+  <data name="ChatNotFound" xml:space="preserve">
+    <value>Nu s-au găsit chat-ul</value>
   </data>
-  <data name="BackupException" xml:space="preserve">
-    <value>Algo deu errado ao criar o backup. Tente criá-lo novamente ou entre em contato com o suporte.</value>
+  <data name="IncorrectProvider" xml:space="preserve">
+    <value>Tip furnizor incorect</value>
   </data>
-  <data name="BackupInvalid" xml:space="preserve">
-    <value>O arquivo de backup é inválido.</value>
+  <data name="IncorrectServerCredentials" xml:space="preserve">
+    <value>Autentificare nereușită. Verificați informații de conectare</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Algo deu errado ao restaurar o backup. Tente restaurá-lo novamente ou entre em contato com o suporte.</value>
+  <data name="InvalidAuthCode" xml:space="preserve">
+    <value>Codul de autorizare nevalid</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Backup automático</value>
+  <data name="InvalidKey" xml:space="preserve">
+    <value>Ați introdus o cheie API nevalidă sau care nu include permisiuni de acces. Verificați dacă cheia este corectă și încercaţi din nou</value>
   </data>
-  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
-    <value>Custom cloud</value>
+  <data name="InvalidServerName" xml:space="preserve">
+    <value>Denumire server MCP nevalidă. Nume de server este compus doar din litere, cifre, caractere de subliniere și cratime</value>
   </data>
-  <data name="BackupStorageTypeDataStore" xml:space="preserve">
-    <value>Armazenamento temporário</value>
+  <data name="InvalidUrl" xml:space="preserve">
+    <value>Ați introdus o adresa URL nevalidă. Verificați dacă folosiți un punct final corect</value>
   </data>
-  <data name="BackupStorageTypeDocuments" xml:space="preserve">
-    <value>Sala de backup</value>
+  <data name="ManageProviders" xml:space="preserve">
+    <value>Nu aveți permisiunea pentru a gestiona furnizori</value>
   </data>
-  <data name="BackupStorageTypeLocal" xml:space="preserve">
-    <value>Arquivo local</value>
+  <data name="ManageServers" xml:space="preserve">
+    <value>Nu aveți permisiunea pentru a gestiona servere MCP</value>
   </data>
-  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
-    <value>Armazenamento de terceiros</value>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>Nu s-a găsit furnizorul</value>
   </data>
-  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
-    <value>Recurso de terceiros</value>
+  <data name="ReservedServerName" xml:space="preserve">
+    <value>Numele de server MCP nu este permis</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Alguns arquivos não foram incluídos no backup. Para mais detalhes, verifique {0}</value>
+  <data name="ServerFailedConnect" xml:space="preserve">
+    <value>Conectarea la serverul MCP a eșuat</value>
+  </data>
+  <data name="ServerNameExists" xml:space="preserve">
+    <value>Numele de server MCP deja existent</value>
+  </data>
+  <data name="ServerNotFound" xml:space="preserve">
+    <value>Nu s-a găsit serverul MCP</value>
+  </data>
+  <data name="ServersRoomLimit" xml:space="preserve">
+    <value>Numărul maxim de servere per sală {0}</value>
   </data>
 </root>

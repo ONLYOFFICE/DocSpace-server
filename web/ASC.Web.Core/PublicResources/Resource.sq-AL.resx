@@ -1263,4 +1263,34 @@
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
     <value>Ju jeni lidhur me sukses me Telegram për të marrë njoftime nga DocSpace.</value>
   </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vectorizimi</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Mjetet AI</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokenët</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Kuota e hapësirës së agjentit AI tejkalohet</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Dështoi vendosja e kuotës për agjent AI. Vlera e futur është më e madhe se gjithsej hapësira DocSpace.</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Numri i agjentëve AI nuk duhet të tejkalojë {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Mjetet AI</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Aktivizoni funksionalitetet AI në DocSpace për të rritur produktivitetin.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Kërkimi në internet AI</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Shtoni fonde në portofolin tuaj për të aktivizuar kërkimin në internet AI.</value>
+  </data>
 </root>

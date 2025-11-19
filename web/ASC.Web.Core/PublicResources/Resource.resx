@@ -1042,7 +1042,7 @@
     <value>What's New</value>
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Third-party integrations</value>
+    <value>Pro integrations</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Too many login attempts. Please try again later</value>

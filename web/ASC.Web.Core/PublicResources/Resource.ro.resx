@@ -1263,4 +1263,34 @@
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
     <value>Ați conectat cu succes contul Telegram pentru a primi notificări de DocSpace.</value>
   </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vectorizare</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Instrumente de IA</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Token-uri</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Spațiu de stocare pentru agenți de IA a fost depășit</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Definirea cotei de stocare per agent nu a reușit. Valoarea introdusă depășește  cota spațiului de stocare DocSpace.</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Numărul de agenți de IA nu trebuie să depășească {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Instrumente de IA</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Activați funcțiile de IA în spațiul dvs DocSpace pentru a crește productivitatea.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Căutare pe web pentru IA</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Depuneți banii în portofelul dvs pentru a activa funcția de căutare pe web pentru IA.</value>
+  </data>
 </root>

@@ -577,4 +577,7 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="FolderNameForReassignedData" xml:space="preserve">
     <value>Documentele utilizatorului {0} {1}</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Administrator de agent</value>
+  </data>
 </root>

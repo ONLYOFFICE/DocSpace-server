@@ -3346,7 +3346,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Third-party integrations.
+        ///   Looks up a localized string similar to Pro integrations.
         /// </summary>
         public static string TariffsFeature_thirdparty {
             get {

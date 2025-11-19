@@ -979,4 +979,52 @@
   <data name="LoginSuccessSocialAccount" xml:space="preserve">
     <value>Login por conta social bem-sucedido</value>
   </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Adicionado servidor MCP {0} ao agente</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agente criado</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agente apagado</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agente renomeado: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agentes</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Provedor de IA criado: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Provedor de IA removido: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Provedor de IA atualizado: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Agentes de IA [{0}]. Definir quota de armazenamento personalizada para agentes de IA: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Agentes de IA [{0}]. Definir cota de armazenamento padrão para agentes de IA: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Agentes de IA [{0}]. Quota de armazenamento desativada para agentes de IA</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Servidor MCP {0} excluído do agente</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Definir quota de armazenamento padrão para agentes de IA: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Desativada a cota de armazenamento padrão para agentes de IA</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>As configurações de vetorização foram redefinidas.</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>As configurações de pesquisa na web foram redefinidas</value>
+  </data>
 </root>

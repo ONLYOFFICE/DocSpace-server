@@ -117,46 +117,55 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Definir senha</value>
+  <data name="AiSettingsAccessDenied" xml:space="preserve">
+    <value>您没有管理 AI 设置的权限</value>
   </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>O arquivo de backup é inválido. Use o arquivo criado no mesmo portal.</value>
+  <data name="ChatAccessDenied" xml:space="preserve">
+    <value>您没有使用对话功能的权限</value>
   </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>O backup é maior que o tamanho total do portal</value>
+  <data name="ChatNotFound" xml:space="preserve">
+    <value>未找到对话功能</value>
   </data>
-  <data name="BackupException" xml:space="preserve">
-    <value>Algo deu errado ao criar o backup. Tente criá-lo novamente ou entre em contato com o suporte.</value>
+  <data name="IncorrectProvider" xml:space="preserve">
+    <value>提供商类型错误</value>
   </data>
-  <data name="BackupInvalid" xml:space="preserve">
-    <value>O arquivo de backup é inválido.</value>
+  <data name="IncorrectServerCredentials" xml:space="preserve">
+    <value>身份验证失败。请验证您的凭据</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Algo deu errado ao restaurar o backup. Tente restaurá-lo novamente ou entre em contato com o suporte.</value>
+  <data name="InvalidAuthCode" xml:space="preserve">
+    <value>无效的授权码</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Backup automático</value>
+  <data name="InvalidKey" xml:space="preserve">
+    <value>指定的 API 密钥无效或没有访问权限。请验证密钥是否正确并重试</value>
   </data>
-  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
-    <value>Custom cloud</value>
+  <data name="InvalidServerName" xml:space="preserve">
+    <value>无效的 MCP 服务器名称。仅允许使用字母、数字、下划线和连字符</value>
   </data>
-  <data name="BackupStorageTypeDataStore" xml:space="preserve">
-    <value>Armazenamento temporário</value>
+  <data name="InvalidUrl" xml:space="preserve">
+    <value>指定的 URL 路径无效。请确保使用正确的端点</value>
   </data>
-  <data name="BackupStorageTypeDocuments" xml:space="preserve">
-    <value>Sala de backup</value>
+  <data name="ManageProviders" xml:space="preserve">
+    <value>您没有管理提供商的权限</value>
   </data>
-  <data name="BackupStorageTypeLocal" xml:space="preserve">
-    <value>Arquivo local</value>
+  <data name="ManageServers" xml:space="preserve">
+    <value>您没有管理 MCP 服务器的权限</value>
   </data>
-  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
-    <value>Armazenamento de terceiros</value>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>未找到提供商</value>
   </data>
-  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
-    <value>Recurso de terceiros</value>
+  <data name="ReservedServerName" xml:space="preserve">
+    <value>不允许使用 MCP 服务器名称</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Alguns arquivos não foram incluídos no backup. Para mais detalhes, verifique {0}</value>
+  <data name="ServerFailedConnect" xml:space="preserve">
+    <value>无法连接到 MCP 服务器</value>
+  </data>
+  <data name="ServerNameExists" xml:space="preserve">
+    <value>MCP 服务器名称已存在</value>
+  </data>
+  <data name="ServerNotFound" xml:space="preserve">
+    <value>未找到 MCP 服务器</value>
+  </data>
+  <data name="ServersRoomLimit" xml:space="preserve">
+    <value>每个房间的最大服务器数量为 {0}</value>
   </data>
 </root>

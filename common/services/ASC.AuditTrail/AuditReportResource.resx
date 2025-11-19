@@ -1063,7 +1063,7 @@
     <value>AI agents  [{0}]. Set default storage quota for AI agents : {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>AI agents  [{0}]. Disabled storage quota for AI agents</value>
+    <value>AI agents [{0}]. Disabled storage quota for AI agents</value>
   </data>
   <data name="AIProviderCreated" xml:space="preserve">
     <value>AI provider created: {0}</value>
@@ -1099,7 +1099,7 @@
     <value>Web search settings are configured. Engine: {0}</value>
   </data>
   <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Web search settings have been reset </value>
+    <value>Web search settings have been reset</value>
   </data>
   <data name="SetVectorizationSettings" xml:space="preserve">
     <value>Vectorization settings are configured. Provider: {0}</value>
