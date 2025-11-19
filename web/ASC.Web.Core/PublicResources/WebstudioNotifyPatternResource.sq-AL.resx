@@ -2150,4 +2150,10 @@ $TrulyYours</value>
   <data name="subject_backup_failed" xml:space="preserve">
     <value>Backup-i i DocSpace tuaj dështoi</value>
   </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Bashkohuni në DocSpace të ${LetterLogoText}</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Je i ftuar në agjentin ${LetterLogoText} DocSpace</value>
+  </data>
 </root>
