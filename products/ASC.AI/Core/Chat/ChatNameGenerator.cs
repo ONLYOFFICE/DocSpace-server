@@ -77,9 +77,13 @@ public class ChatNameGenerator(
             var content = message.Contents.First();
             var textContent = content as TextContent;
 
-            return string.IsNullOrEmpty(textContent?.Text) 
-                ? throw new InvalidOperationException() 
-                : ProcessTitle(textContent.Text);
+            if (string.IsNullOrEmpty(textContent?.Text))
+            {
+                throw new InvalidOperationException();
+            }
+            
+            var processedText = TextContentUtils.CutThink(textContent.Text);
+            return ProcessTitle(processedText);
         }
         catch (Exception e)
         {
