@@ -231,8 +231,17 @@ public class FileSharingAceHelper(
 
             if (room != null && !w.IsLink && (existedShare == null || (!existedShare.IsLink && existedShare.SubjectType != SubjectType.Group)))
             {
-                if (room.RootId is int root && root != await globalFolderHelper.FolderRoomTemplatesAsync && (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) ||
-                                                                                                             !userAccesses.Contains(w.Access)))
+                if (room.FolderType == FolderType.AiRoom &&
+                    currentUserType == EmployeeType.Guest &&
+                    w.Access is FileShare.RoomManager or FileShare.ContentCreator)
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+                }
+                
+                if (room.RootId is int root && 
+                    root != await globalFolderHelper.FolderRoomTemplatesAsync && 
+                    (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) || 
+                     !userAccesses.Contains(w.Access)))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
