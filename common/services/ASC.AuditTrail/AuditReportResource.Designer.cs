@@ -466,7 +466,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI agents  [{0}]. Set default storage quota for AI agents : {1}.
+        ///   Looks up a localized string similar to AI agents [{0}]. Set default storage quota for AI agents : {1}.
         /// </summary>
         public static string CustomQuotaPerAiAgentDefault {
             get {

@@ -1025,7 +1025,7 @@
     <value>Настройки векторизации сброшены</value>
   </data>
   <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Настройки веб-поиска сброшены </value>
+    <value>Настройки веб-поиска сброшены</value>
   </data>
   <data name="ServerCreated" xml:space="preserve">
     <value>MCP-сервер создан: {0}</value>

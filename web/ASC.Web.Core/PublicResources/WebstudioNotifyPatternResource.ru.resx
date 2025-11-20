@@ -2086,4 +2086,13 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Присоединяйтесь к ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Вас пригласили в агент ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Не удалось выполнить резервное копирование вашего DocSpace</value>
+  </data>
 </root>

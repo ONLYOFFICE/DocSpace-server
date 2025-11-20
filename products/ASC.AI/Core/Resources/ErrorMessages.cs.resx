@@ -118,57 +118,57 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AiSettingsAccessDenied" xml:space="preserve">
-    <value>Nu aveți permisiunea pentru a gestiona setările IA</value>
+    <value>Nemáte oprávnění spravovat nastavení AI</value>
   </data>
   <data name="ChatAccessDenied" xml:space="preserve">
-    <value>Nu aveți permisiunea pentru a folosi chat-ul</value>
+    <value>Nemáte oprávnění používat chat</value>
   </data>
   <data name="ChatNotFound" xml:space="preserve">
-    <value>Nu s-au găsit chat-ul</value>
+    <value>Chat nebyl nalezen</value>
   </data>
   <data name="IncorrectProvider" xml:space="preserve">
-    <value>Tip furnizor incorect</value>
+    <value>Nesprávný typ poskytovatele</value>
   </data>
   <data name="IncorrectServerCredentials" xml:space="preserve">
-    <value>Autentificare nereușită. Verificați informații de conectare</value>
+    <value>Ověření se nezdařilo. Ověřte své přihlašovací údaje</value>
   </data>
   <data name="InvalidAuthCode" xml:space="preserve">
-    <value>Codul de autorizare nevalid</value>
+    <value>Neplatný autorizační kód</value>
   </data>
   <data name="InvalidKey" xml:space="preserve">
-    <value>Ați introdus o cheie API nevalidă sau care nu include permisiuni de acces. Verificați dacă cheia este corectă și încercaţi din nou</value>
+    <value>Zadaný klíč API je neplatný nebo nemá přístupová práva. Ověřte, zda je klíč správný, a zkuste to znovu</value>
   </data>
   <data name="InvalidServerName" xml:space="preserve">
-    <value>Denumire server MCP nevalidă. Nume de server este compus doar din litere, cifre, caractere de subliniere și cratime</value>
+    <value>Neplatný název serveru MCP. Jsou povolena pouze písmena, číslice, podtržítka a pomlčky</value>
   </data>
   <data name="InvalidUrl" xml:space="preserve">
-    <value>Ați introdus o adresa URL nevalidă. Verificați dacă folosiți un punct final corect</value>
+    <value>Zadaná URL cesta je neplatná. Zkontrolujte, zda je použit správný koncový bod</value>
   </data>
   <data name="ManageProviders" xml:space="preserve">
-    <value>Nu aveți permisiunea pentru a gestiona furnizori</value>
+    <value>Nemáte oprávnění spravovat poskytovatele</value>
   </data>
   <data name="ManageServers" xml:space="preserve">
-    <value>Nu aveți permisiunea pentru a gestiona servere MCP</value>
+    <value>Nemáte oprávnění spravovat servery MCP</value>
   </data>
   <data name="ProviderNotFound" xml:space="preserve">
-    <value>Nu s-a găsit furnizorul</value>
+    <value>Poskytovatel nebyl nalezen</value>
   </data>
   <data name="ReservedServerName" xml:space="preserve">
-    <value>Numele de server MCP nu este permis</value>
+    <value>Název serveru MCP není povolen</value>
   </data>
   <data name="ServerFailedConnect" xml:space="preserve">
-    <value>Conectarea la serverul MCP a eșuat</value>
+    <value>Nepodařilo se připojit k serveru MCP</value>
   </data>
   <data name="ServerNameExists" xml:space="preserve">
-    <value>Numele de server MCP deja existent</value>
+    <value>Název serveru MCP již existuje</value>
   </data>
   <data name="ServerNotFound" xml:space="preserve">
-    <value>Nu s-a găsit serverul MCP</value>
+    <value>Server MCP nebyl nalezen</value>
   </data>
   <data name="ServersRoomLimit" xml:space="preserve">
-    <value>Numărul maxim de servere per sală {0}</value>
+    <value>Maximální počet serverů na místnost je {0}</value>
   </data>
   <data name="UnavailableServers" xml:space="preserve">
-    <value>Serverele MCP nu sunt disponibile: {0}. Verificați setările de conexiune</value>
+    <value>Servery MCP nejsou k dispozici: {0}. Zkontrolujte nastavení připojení.</value>
   </data>
 </root>

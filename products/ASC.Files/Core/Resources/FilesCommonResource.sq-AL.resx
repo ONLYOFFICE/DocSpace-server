@@ -580,4 +580,10 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="AgentManager" xml:space="preserve">
     <value>Menaxheri i agjentit</value>
   </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Njohuri</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Ruajtja e rezultateve</value>
+  </data>
 </root>

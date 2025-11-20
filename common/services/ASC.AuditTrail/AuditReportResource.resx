@@ -1060,7 +1060,7 @@
     <value>AI agents [{0}]. Set custom storage quota for AI agents : {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>AI agents  [{0}]. Set default storage quota for AI agents : {1}</value>
+    <value>AI agents [{0}]. Set default storage quota for AI agents : {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
     <value>AI agents [{0}]. Disabled storage quota for AI agents</value>

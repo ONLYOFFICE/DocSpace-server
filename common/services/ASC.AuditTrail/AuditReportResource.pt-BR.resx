@@ -1022,9 +1022,30 @@
     <value>Desativada a cota de armazenamento padrão para agentes de IA</value>
   </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
-    <value>As configurações de vetorização foram redefinidas.</value>
+    <value>As configurações de vetorização foram redefinidas</value>
   </data>
   <data name="ResetWebSearchSettings" xml:space="preserve">
     <value>As configurações de pesquisa na web foram redefinidas</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>Servidor MCP criado: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Servidor MCP atualizado: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Servidor MCP ativado: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Servidor MCP desativado: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>Servidor MCP apagado: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>As configurações de vetorização foram configuradas. Provedor: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>As configurações de pesquisa na web foram configuradas. Motor de busca: {0}</value>
   </data>
 </root>

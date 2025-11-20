@@ -1025,7 +1025,7 @@
     <value>Se han restablecido los ajustes de vectorización</value>
   </data>
   <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Se ha restablecido la configuración de búsqueda web </value>
+    <value>Se ha restablecido la configuración de búsqueda web</value>
   </data>
   <data name="ServerCreated" xml:space="preserve">
     <value>Servidor MCP creado: {0}</value>
