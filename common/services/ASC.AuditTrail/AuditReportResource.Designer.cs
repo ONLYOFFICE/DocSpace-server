@@ -3074,5 +3074,32 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("WebhookUpdated", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Plugin deleted: {0}.
+        /// </summary>
+        public static string WebpluginDeleted {
+            get {
+                return ResourceManager.GetString("WebpluginDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Plugin updated: {0}.
+        /// </summary>
+        public static string WebpluginUpdated {
+            get {
+                return ResourceManager.GetString("WebpluginUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Plugin uploaded: {0}.
+        /// </summary>
+        public static string WebpluginUploaded {
+            get {
+                return ResourceManager.GetString("WebpluginUploaded", resourceCulture);
+            }
+        }
     }
 }

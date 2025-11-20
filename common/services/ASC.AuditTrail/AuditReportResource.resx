@@ -1122,4 +1122,13 @@
   <data name="ScheduledBackupStarted" xml:space="preserve">
     <value>Scheduled backup started</value>
   </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Plugin deleted: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Plugin updated: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Plugin uploaded: {0}</value>
+  </data>
 </root>

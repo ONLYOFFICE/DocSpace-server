@@ -921,6 +921,15 @@ public enum MessageAction
     [SwaggerEnum("Vectorization settings reset")]
     ResetVectorizationSettings = 6084,
 
+    [SwaggerEnum("Webplugin uploaded")]
+    WebpluginUploaded = 6085,
+
+    [SwaggerEnum("Webplugin updated")]
+    WebpluginUpdated = 6086,
+
+    [SwaggerEnum("Webplugin deleted")]
+    WebpluginDeleted = 6087,
+
     #endregion
 
     #region others
