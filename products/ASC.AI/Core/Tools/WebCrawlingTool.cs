@@ -50,6 +50,9 @@ public class WebCrawlingTool(WebSearchEngineFactory searchEngineFactory, IFavico
         {
             try
             {
+                url = url.Trim();
+                ArgumentException.ThrowIfNullOrEmpty(url);
+                
                 var result = await engine.GetPageContentAsync(new PageContentQuery
                 {
                     Url = url,
