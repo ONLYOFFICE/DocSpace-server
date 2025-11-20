@@ -309,11 +309,12 @@ public class NotifyClient(WorkContext notifyContext,
 
         var managerButtonText = FilesPatternResource.ResourceManager.GetString("button_CheckReadyForms", managerCulture);
 
-        await client.SendNoticeAsync(
+        await client.SendNoticeToAsync(
             NotifyConstants.EventFormSubmitted,
             filledForm.UniqID,
-            user,
-            ConfigurationConstants.NotifyEMailSenderSysName,
+            [user],
+            [ConfigurationConstants.NotifyEMailSenderSysName, ConfigurationConstants.NotifyTelegramSenderSysName],
+            true,
             new TagValue(NotifyConstants.TagMessage, originalForm.Title),
             new TagValue(NotifyConstants.TagDocumentTitle, filledForm.Title),
             new TagValue(NotifyConstants.TagDocumentUrl, documentUrl),
@@ -324,12 +325,12 @@ public class NotifyClient(WorkContext notifyContext,
             new TagValue(CommonTags.Culture, userCulture.Name),
             TagValues.OrangeButton(userButtonText, documentParentUrl)
             );
-
-        await client.SendNoticeAsync(
+        await client.SendNoticeToAsync(
             NotifyConstants.EventFormReceived,
             filledForm.UniqID,
-            manager,
-            ConfigurationConstants.NotifyEMailSenderSysName,
+            [manager],
+            [ConfigurationConstants.NotifyEMailSenderSysName, ConfigurationConstants.NotifyTelegramSenderSysName],
+            true,
             new TagValue(NotifyConstants.TagMessage, originalForm.Title),
             new TagValue(NotifyConstants.TagDocumentTitle, filledForm.Title),
             new TagValue(NotifyConstants.TagDocumentUrl, documentUrl),
@@ -340,6 +341,7 @@ public class NotifyClient(WorkContext notifyContext,
             new TagValue(CommonTags.Culture, managerCulture.Name),
             TagValues.OrangeButton(managerButtonText, documentParentUrl)
             );
+
         await client.SendNoticeAsync(
             NotifyConstants.EventFormSubmitted,
             filledForm.UniqID,
@@ -395,11 +397,12 @@ public class NotifyClient(WorkContext notifyContext,
                 continue;
             }
 
-            await client.SendNoticeAsync(
+            await client.SendNoticeToAsync(
                 NotifyConstants.EventRoomRemoved,
                 folder.UniqID,
-                recipient,
-                ConfigurationConstants.NotifyEMailSenderSysName,
+                [recipient],
+                [ConfigurationConstants.NotifyEMailSenderSysName, ConfigurationConstants.NotifyTelegramSenderSysName],
+                true,
                 new TagValue(NotifyConstants.RoomTitle, folder.Title),
                 new TagValue(NotifyConstants.RoomUrl, roomUrl)
                 );
