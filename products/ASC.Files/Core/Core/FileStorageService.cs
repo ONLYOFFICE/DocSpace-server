@@ -2514,7 +2514,9 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
-            var newFiles = await fileMarker.MarkedItemsAsync(folder).ToListAsync();
+            var newFiles = await fileMarker.MarkedItemsAsync(folder)
+                .Where(x => x.FileEntryType == FileEntryType.File)
+                .ToListAsync();
             if (newFiles.Count == 0)
             {
                 await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(folder.Id)], []);
