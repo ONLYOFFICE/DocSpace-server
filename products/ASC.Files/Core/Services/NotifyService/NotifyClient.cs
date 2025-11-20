@@ -624,11 +624,12 @@ public class NotifyClient(WorkContext notifyContext,
         {
             var recipient = await recipientsProvider.GetRecipientAsync(ace.ToString());
 
-            await client.SendNoticeAsync(
+            await client.SendNoticeToAsync(
                 action,
                 room.UniqID,
-                recipient,
-                ConfigurationConstants.NotifyEMailSenderSysName,
+                [recipient],
+                [ConfigurationConstants.NotifyEMailSenderSysName, ConfigurationConstants.NotifyTelegramSenderSysName],
+                true,
                 new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id))),
                 new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
                 new TagValue(NotifyConstants.RoomTitle, room.Title),
