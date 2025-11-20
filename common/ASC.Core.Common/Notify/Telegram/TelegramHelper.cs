@@ -140,9 +140,10 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
             return new TelegramBotClient(token);
         }
 
-        var httpClient = httpClientFactory.CreateClient();
-
-        httpClient.BaseAddress = new Uri(proxy);
+        var httpClient = new HttpClient(new HttpClientHandler() {
+            UseProxy = true,
+            Proxy = new WebProxy(proxy)
+        });
 
         return new TelegramBotClient(token, httpClient);
     }
