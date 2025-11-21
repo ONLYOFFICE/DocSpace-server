@@ -119,6 +119,7 @@ public record HistoryEntry
 [JsonDerivedType(typeof(RenameEntryData))]
 [JsonDerivedType(typeof(TagData))]
 [JsonDerivedType(typeof(UserHistoryData))]
+[JsonDerivedType(typeof(ChangeRoomOwnerHistoryData))]
 [JsonDerivedType(typeof(UserFileUpdateData))]
 [JsonDerivedType(typeof(FileData))]
 [JsonDerivedType(typeof(FileOperationData))]

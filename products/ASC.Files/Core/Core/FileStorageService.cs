@@ -4739,8 +4739,8 @@ public class FileStorageService //: IFileStorageService
 
                     await entryStatusManager.SetIsFavoriteFolderAsync(folder);
                 }
-                await filesMessageService.SendAsync(MessageAction.RoomChangeOwner, newFolder, userInfo.Id, FileShare.None, null, true, userInfo.DisplayUserName(false, displayUserSettingsHelper));
-
+                var createByInfo = await userManager.GetUsersAsync(createBy); 
+                await filesMessageService.SendAsync(MessageAction.RoomChangeOwner, newFolder, userInfo.Id.ToString(), userInfo.DisplayUserName(false, displayUserSettingsHelper), createByInfo.Id.ToString(), createByInfo.DisplayUserName(false, displayUserSettingsHelper));
 
                 await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, newFolder);
             }

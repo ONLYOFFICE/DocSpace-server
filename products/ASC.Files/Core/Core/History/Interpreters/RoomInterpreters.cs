@@ -320,12 +320,58 @@ public class RoomInviteResendInterpreter : ActionInterpreter
         };
     }
 }
+public class ChangeRoomOwnerInterpreter : ActionInterpreter
+{
+    protected override async ValueTask<HistoryData> GetDataAsync(
+        IServiceProvider serviceProvider,
+        string target,
+        List<string> description)
+    {
+        var newOwnerId = Guid.Parse(description[0]);
+        var newOwnerName = description[1];
+
+        var oldOwnerId = Guid.Parse(description[2]);
+        var oldOwnerName = description[3];
+
+        var userManager = serviceProvider.GetRequiredService<UserManager>();
+        var employeeDtoHelper = serviceProvider.GetRequiredService<EmployeeDtoHelper>();
+
+        async Task<EmployeeDto> GetUserDtoAsync(Guid id, string name)
+        {
+            var user = await userManager.GetUsersAsync(id);
+
+            var isInvalid =
+                user == null ||
+                user.Id == Constants.LostUser.Id ||
+                user.Id == ASC.Core.Configuration.Constants.Guest.ID;
+
+            return isInvalid
+                ? new EmployeeDto { DisplayName = name }
+                : await employeeDtoHelper.GetAsync(user);
+        }
+
+        var ownerDto = await GetUserDtoAsync(newOwnerId, newOwnerName);
+        var oldOwnerDto = await GetUserDtoAsync(oldOwnerId, oldOwnerName);
+
+        return new ChangeRoomOwnerHistoryData
+        {
+            Owner = ownerDto,
+            OldOwner = oldOwnerDto
+        };
+    }
+}
 
 public record UserHistoryData : HistoryData
 {
     public EmployeeDto User { get; set; }
     public string Access { get; set; }
     public string OldAccess { get; set; }
+}
+
+public record ChangeRoomOwnerHistoryData : HistoryData
+{
+    public EmployeeDto Owner { get; set; }
+    public EmployeeDto OldOwner { get; set; }
 }
 
 public record GroupHistoryData : HistoryData
