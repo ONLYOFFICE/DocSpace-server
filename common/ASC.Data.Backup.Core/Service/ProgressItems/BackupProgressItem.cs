@@ -241,6 +241,19 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
             {
                 SaveAuditEvent(messageService, MessageAction.CustomerOperationPerformed);
             }
+
+            if (backupStorage is DocumentsBackupStorage documentsBackupStorage)
+            {
+                var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
+                if (int.TryParse(storagePath, out var fileId))
+                {
+                    await SentDocumentsStorageNotification(documentsBackupStorage, socketManager, fileMarker, fileId);
+                }
+                else
+                {
+                    await SentDocumentsStorageNotification(documentsBackupStorage, socketManager, fileMarker, storagePath);
+                }
+            }
         }
         catch (Exception error)
         {
@@ -305,6 +318,13 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
         {
             messageService.SendHeadersMessage(messageAction, target: null, _httpHeaders, null);
         }
+    }
+
+    private async Task SentDocumentsStorageNotification<T>(DocumentsBackupStorage documentsBackupStorage, SocketManager socketManager, FileMarker fileMarker, T fileId)
+    {
+        var file = await documentsBackupStorage.GetAsync(fileId);
+        await socketManager.CreateFileAsync(file);
+        await fileMarker.MarkAsNewAsync(file);
     }
 
     public override object Clone()
