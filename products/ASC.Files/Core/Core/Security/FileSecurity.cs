@@ -934,7 +934,8 @@ public class FileSecurity(
         var isAuthenticated = authContext.IsAuthenticated;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
         var isUser = userType is EmployeeType.User;
-
+        var cachedFileDao = daoFactory.GetCacheFileDao<T>();
+        
         await foreach (var entry in entries)
         {
             if (entry.SecurityByUsers != null && entry.SecurityByUsers.TryGetValue(userId, out _))
@@ -945,10 +946,9 @@ public class FileSecurity(
             var security = new Dictionary<FilesSecurityActions, bool>();
             var parentFolders = await GetFileParentFolders(entry.ParentId);
 
-
             foreach (var action in Enum.GetValues<FilesSecurityActions>().Where(r => _securityEntries[entry.FileEntryType].Contains(r)))
             {
-                security[action] = await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders);
+                security[action] = await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
             }
 
             entry.Security = security;
@@ -1022,8 +1022,9 @@ public class FileSecurity(
 
         var accessSnapshot = entry.Access;
         var parentFolders = await GetFileParentFolders(entry.ParentId);
-
-        var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders);
+        var cachedFileDao = daoFactory.GetCacheFileDao<T>();
+        
+        var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
 
         if (!setEntryAccess)
         {
@@ -1043,21 +1044,31 @@ public class FileSecurity(
         var isAuthenticated = authContext.IsAuthenticated;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
         var isUser = userType is EmployeeType.User;
-
+        var cachedFileDao = daoFactory.GetCacheFileDao<T>();
+        
         await foreach (var entry in entries)
         {
             var parentFolders = await GetFileParentFolders(entry.ParentId);
-            yield return new Tuple<FileEntry<T>, bool>(entry, await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders));
+            yield return new Tuple<FileEntry<T>, bool>(entry, await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao));
         }
     }
 
-    private async Task<bool> FilterEntryAsync<T>(FileEntry<T> e, FilesSecurityActions action, Guid userId, IEnumerable<FileShareRecord<T>> shares, bool isOutsider, bool isGuest,
-        bool isAuthenticated, bool isDocSpaceAdmin, bool isUser, List<Folder<T>> parentFolders)
+    private async Task<bool> FilterEntryAsync<T>(
+        FileEntry<T> e, 
+        FilesSecurityActions action, 
+        Guid userId, 
+        IEnumerable<FileShareRecord<T>> shares, 
+        bool isOutsider, 
+        bool isGuest,
+        bool isAuthenticated, 
+        bool isDocSpaceAdmin, 
+        bool isUser, 
+        List<Folder<T>> parentFolders,
+        IFileDao<T> cacheFileDao)
     {
         var file = e as File<T>;
         var folder = e as Folder<T>;
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
-        var cacheFileDao = daoFactory.GetCacheFileDao<T>();
         
         if (file != null && action == FilesSecurityActions.FillForms && !file.IsForm)
         {
