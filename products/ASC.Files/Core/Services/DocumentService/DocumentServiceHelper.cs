@@ -387,7 +387,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             runs.Add(new Run(userInfo.DisplayUserName(false, displayUserSettingsHelper)));
             runs.Add(new Run(Environment.NewLine, false));
         }
-        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserEmail))
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserEmail) && !string.IsNullOrWhiteSpace(userInfo.Email))
         {
             runs.Add(new Run(userInfo.Email));
             runs.Add(new Run(Environment.NewLine, false));
