@@ -557,6 +557,8 @@ public class BackupService(
 
     public async Task<int> GetBackupsCountAsync(int tenantId, bool paid, DateTime from, DateTime to)
     {
+        await DemandPermissionsBackupAsync();
+
         return await backupRepository.GetBackupsCountAsync(tenantId, paid, from, to);
     }
 
