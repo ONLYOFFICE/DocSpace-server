@@ -1151,7 +1151,11 @@ public class FileStorageService //: IFileStorageService
 
         var folderAccess = folder.Access;
 
-        var titleChanged = !string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) && updateData.Title != null;
+        updateData.Title = updateData.Title?.Trim();
+
+        var titleChanged = !string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) && 
+                                !string.IsNullOrEmpty(updateData.Title);
+        
         var quotaChanged = folder.SettingsQuota != updateData.Quota && updateData.Quota != null;
         var indexingChanged = updateData.Indexing.HasValue && folder.SettingsIndexing != updateData.Indexing;
         var denyDownloadChanged = updateData.DenyDownload.HasValue && folder.SettingsDenyDownload != updateData.DenyDownload;
