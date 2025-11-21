@@ -308,7 +308,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             ModifyFilter = rightModifyFilter,
             Print = rightToDownload,
             Download = rightToDownload && noWatermark,
-            Copy = rightToDownload && noWatermark,
+            Copy = rightToDownload,
             Protect = authContext.IsAuthenticated,
             Chat = file.Access != FileShare.Read
         };
