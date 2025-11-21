@@ -2518,22 +2518,19 @@ internal class FileDao(
 
         try
         {
-            byte[] buffer;
-            await using (var stream = await GetFileStreamForTenantAsync(file, tenantId))
+            await using var stream = await GetFileStreamForTenantAsync(file, tenantId);
+            
+            if (stream == null)
             {
-                if (stream == null)
-                {
-                    return dbFile;
-                }
-
-                using var ms = new MemoryStream();
-                await stream.CopyToAsync(ms);
-                buffer = ms.GetBuffer();
+                return dbFile;
             }
 
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            var buffer = ms.GetBuffer();
             dbFile.Document = new Document
             {
-                Data = Convert.ToBase64String(buffer)
+                Data = Convert.ToBase64String(buffer, 0, (int)ms.Length)
             };
         }
         catch (FileNotFoundException)
