@@ -646,6 +646,8 @@ public class FileStorageService //: IFileStorageService
                     Cover = cover
                 });
 
+                folder.SettingsCover = cover;
+                folder.SettingsColor = color;
                 folder.FolderType = folderType;
                 folder.RootFolderType = FolderType.VirtualRooms;
                 folder.FolderIdDisplay = IdConverter.Convert<string>(await globalFolderHelper.FolderVirtualRoomsAsync);
@@ -907,7 +909,7 @@ public class FileStorageService //: IFileStorageService
             newFolder.ParentId = parent.Id;
             newFolder.FolderType = folderType;
             newFolder.SettingsPrivate = parent.SettingsPrivate ? parent.SettingsPrivate : privacy;
-            newFolder.SettingsColor = roomLogoManager.GetRandomColour();
+            newFolder.SettingsColor = string.IsNullOrEmpty(color) ? roomLogoManager.GetRandomColour() : color;
 
             if (indexing.HasValue)
             {
