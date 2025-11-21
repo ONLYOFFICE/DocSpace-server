@@ -980,4 +980,39 @@ public class FileShareTests(
         var sharedFile = sharedFolder.Files.First(f => f.Title == file.Title);
         sharedFile.Access.Should().Be(FileShare.Read);
     }
+    
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "78660")]
+    public async Task SetFileSecurityInfo_InSharedFolder_OverridesParentFolderPermissions()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var folder = await CreateFolderInMy("folder", Initializer.Owner);
+        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = user1.Id, Access = FileShare.ReadWrite }]
+        };
+        
+        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken);
+        await _filesClient.Authenticate(user1);
+        var file = await CreateFile("fileName.docx", folder.Id);
+        
+        // Act
+        await _filesClient.Authenticate(Initializer.Owner);
+        securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = user1.Id, Access = FileShare.Read }]
+        };
+        
+        await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest, TestContext.Current.CancellationToken);
+        
+        // Assert
+        var response = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        response.Should().NotBeNull();
+        response.Should().Contain(r=> r.SharedToUser.Id == user1.Id && r.Access == FileShare.Read);
+    }
 }
