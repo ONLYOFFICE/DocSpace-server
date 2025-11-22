@@ -533,20 +533,25 @@ public class FileSharingAceHelper(
         var currentId = authContext.CurrentAccount.ID;
         var entryType = entry.FileEntryType;
         var tagDao = daoFactory.GetTagDao<T>();
-
-        List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry)];
-        tags.AddRange(await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync());
+        
+        var tagRecent = await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync();
+        List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry), ..tagRecent];
 
         var currentShare = await fileSecurity.GetSharesAsync(entry, [currentId]);
-        if (currentShare != null && currentShare.Any() || entry is Folder<T>)
+        var currentShareIsNullOrEmpty = currentShare == null || !currentShare.Any();
+        
+        if (!currentShareIsNullOrEmpty || entry is Folder<T>)
         {
             var defaultShare = entry.RootFolderType == FolderType.USER
                 ? fileSecurity.DefaultMyShare
                 : fileSecurity.DefaultPrivacyShare;
 
-            if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
+            if (entry is Folder<T> folder)
             {
-                defaultShare = FileShare.None;
+                if (DocSpaceHelper.IsRoom(folder.FolderType) || currentShareIsNullOrEmpty && tagRecent.Count != 0)
+                {
+                    defaultShare = FileShare.None;
+                }
             }
 
             await fileSecurity.ShareAsync(entry.Id, entryType, currentId, defaultShare);
