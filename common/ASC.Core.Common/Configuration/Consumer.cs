@@ -30,6 +30,7 @@ public class Consumer() : IDictionary<string, string>
 {
     public bool CanSet { get; private set; }
     public int Order { get; private set; }
+    public bool Paid { get; private set; }
     public string Name { get; private set; }
 
     protected readonly Dictionary<string, string> _props = new();
@@ -109,11 +110,12 @@ public class Consumer() : IDictionary<string, string>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        string name, int order, Dictionary<string, string> additional)
+        string name, int order, bool paid, Dictionary<string, string> additional)
         : this(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory)
     {
         Name = name;
         Order = order;
+        Paid = paid;
         _props = new Dictionary<string, string>();
         _additional = additional;
     }
@@ -125,11 +127,12 @@ public class Consumer() : IDictionary<string, string>
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
         : this(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory)
     {
         Name = name;
         Order = order;
+        Paid = paid;
         _props = props ?? new Dictionary<string, string>();
         _additional = additional ?? new Dictionary<string, string>();
 
@@ -287,8 +290,8 @@ public class DataStoreConsumer : Consumer, ICloneable
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        string name, int order, Dictionary<string, string> additional)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, additional)
+        string name, int order, bool paid, Dictionary<string, string> additional)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, additional)
     {
         InitAsync(additional).Wait();
     }
@@ -300,8 +303,8 @@ public class DataStoreConsumer : Consumer, ICloneable
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         InitAsync(additional).Wait();
     }
@@ -349,12 +352,12 @@ public class DataStoreConsumer : Consumer, ICloneable
         }
         additional.Add(HandlerTypeKey, HandlerType.AssemblyQualifiedName);
 
-        return new DataStoreConsumer(fromConfig.TenantManager, fromConfig.CoreBaseSettings, fromConfig.CoreSettings, fromConfig.Configuration, fromConfig.Cache, fromConfig.ConsumerFactory, fromConfig.Name, fromConfig.Order, props, additional);
+        return new DataStoreConsumer(fromConfig.TenantManager, fromConfig.CoreBaseSettings, fromConfig.CoreSettings, fromConfig.Configuration, fromConfig.Cache, fromConfig.ConsumerFactory, fromConfig.Name, fromConfig.Order, fromConfig.Paid, props, additional);
     }
 
     public object Clone()
     {
-        return new DataStoreConsumer(TenantManager, CoreBaseSettings, CoreSettings, Configuration, Cache, ConsumerFactory, Name, Order, _props.ToDictionary(r => r.Key, r => r.Value), _additional.ToDictionary(r => r.Key, r => r.Value));
+        return new DataStoreConsumer(TenantManager, CoreBaseSettings, CoreSettings, Configuration, Cache, ConsumerFactory, Name, Order, Paid, _props.ToDictionary(r => r.Key, r => r.Value), _additional.ToDictionary(r => r.Key, r => r.Value));
     }
 }
 
