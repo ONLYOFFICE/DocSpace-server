@@ -117,55 +117,58 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Archive" xml:space="preserve">
-    <value>أرشفة</value>
+  <data name="AiSettingsAccessDenied" xml:space="preserve">
+    <value>ليس لديكم صلاحية لإدارة إعدادات الذكاء الاصطناعي</value>
   </data>
-  <data name="CorporateFiles" xml:space="preserve">
-    <value>شائع</value>
+  <data name="ChatAccessDenied" xml:space="preserve">
+    <value>ليس لديكم صلاحية لاستخدام الدردشة</value>
   </data>
-  <data name="Favorites" xml:space="preserve">
-    <value>المفضلة</value>
+  <data name="ChatNotFound" xml:space="preserve">
+    <value>الدردشة غير موجودة</value>
   </data>
-  <data name="FilesWillBeCompressedTarGz" xml:space="preserve">
-    <value>الملفات سيتم ضغطها في {0}.tar.gz ملف{1}</value>
+  <data name="IncorrectProvider" xml:space="preserve">
+    <value>نوع المزود غير صحيح</value>
   </data>
-  <data name="FilesWillBeCompressedZip" xml:space="preserve">
-    <value>الملفات سيتم ضغطها في {0}.zip ملف{1}</value>
+  <data name="InvalidAuthCode" xml:space="preserve">
+    <value>رمز التفويض غير صالح</value>
   </data>
-  <data name="MyFiles" xml:space="preserve">
-    <value>ملفاتي</value>
+  <data name="IncorrectServerCredentials" xml:space="preserve">
+    <value>فشلت المصادقة. تحققوا من بيانات اعتمادكم</value>
   </data>
-  <data name="Personal" xml:space="preserve">
-    <value>شخصي</value>
+  <data name="InvalidKey" xml:space="preserve">
+    <value>مفتاح API المحدد غير صالح أو ليس لديه حقوق الوصول. تحققوا من صحة المفتاح وحاولوا مرة أخرى</value>
   </data>
-  <data name="PrivacyRoom" xml:space="preserve">
-    <value>غرفة خاصة</value>
+  <data name="InvalidServerName" xml:space="preserve">
+    <value>اسم خادم MCP غير صالح. يسمح فقط بالأحرف والأرقام والشرطات السفلية والواصلات</value>
   </data>
-  <data name="ProjectFiles" xml:space="preserve">
-    <value>في المشاريع</value>
+  <data name="InvalidUrl" xml:space="preserve">
+    <value>مسار URL المحدد غير صالح. يرجى التأكد من استخدام نقطة النهاية الصحيحة</value>
   </data>
-  <data name="Recent" xml:space="preserve">
-    <value>مؤخراً</value>
+  <data name="ManageProviders" xml:space="preserve">
+    <value>ليس لديكم صلاحية لإدارة المزودين</value>
   </data>
-  <data name="SharedForMe" xml:space="preserve">
-    <value>تمت مشاركتها معي</value>
+  <data name="ManageServers" xml:space="preserve">
+    <value>ليس لديكم صلاحية لإدارة خوادم MCP</value>
   </data>
-  <data name="Trash" xml:space="preserve">
-    <value>محذوفات</value>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>المزود غير موجود</value>
   </data>
-  <data name="VirtualRooms" xml:space="preserve">
-    <value>غرف</value>
+  <data name="ReservedServerName" xml:space="preserve">
+    <value>اسم خادم MCP غير مسموح به</value>
   </data>
-  <data name="InProcessFormFolder" xml:space="preserve">
-    <value>قيد التنفيذ</value>
+  <data name="ServerFailedConnect" xml:space="preserve">
+    <value>فشل الاتصال بخادم MCP</value>
   </data>
-  <data name="ReadyFormFolder" xml:space="preserve">
-    <value>أكمل</value>
+  <data name="ServerNameExists" xml:space="preserve">
+    <value>اسم خادم MCP موجود بالفعل</value>
   </data>
-  <data name="RoomTemplates" xml:space="preserve">
-    <value>قوالب</value>
+  <data name="ServerNotFound" xml:space="preserve">
+    <value>خادم MCP غير موجود</value>
   </data>
-  <data name="AiAgents" xml:space="preserve">
-    <value>وكلاء الذكاء الاصطناعي</value>
+  <data name="ServersRoomLimit" xml:space="preserve">
+    <value>الحد الأقصى لعدد الخوادم لكل غرفة هو {0}</value>
+  </data>
+  <data name="UnavailableServers" xml:space="preserve">
+    <value>خوادم MCP غير متوفرة: {0}. التحقق من إعدادات الاتصال</value>
   </data>
 </root>

@@ -169,6 +169,6 @@
     <value>Maximální počet serverů na místnost je {0}</value>
   </data>
   <data name="UnavailableServers" xml:space="preserve">
-    <value>Servery MCP nejsou k dispozici: {0}. Zkontrolujte nastavení připojení.</value>
+    <value>Servery MCP nejsou k dispozici: {0}. Zkontrolujte nastavení připojení</value>
   </data>
 </root>

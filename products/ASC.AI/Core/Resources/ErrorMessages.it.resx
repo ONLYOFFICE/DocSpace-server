@@ -168,4 +168,7 @@
   <data name="ServersRoomLimit" xml:space="preserve">
     <value>Numero massimo di server per stanza: {0}</value>
   </data>
+  <data name="UnavailableServers" xml:space="preserve">
+    <value>I server MCP non sono disponibili: {0}. Verifica le impostazioni di connessione</value>
+  </data>
 </root>

@@ -1035,4 +1035,76 @@
   <data name="RoomExternalLinkRevoked" xml:space="preserve">
     <value>Eksterna veza opozvana: {1}</value>
   </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Dodat MCP server {0} agentu</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agent je kreiran</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agent je obrisan</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agent preimenovan: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agenti</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>AI provajder kreiran: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>AI provajder obrisan: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>AI provajder ažuriran: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI agenti [{0}]. Podešena prilagođena kvota prostora za AI agente: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI agenti [{0}]. Podešena podrazumevana kvota prostora za AI agente: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI agenti [{0}]. Onemogućena kvota prostora za AI agente</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Obrisan MCP server {0} iz agenta</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Login Via Social Account Success</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Podešena podrazumevana kvota prostora za AI agente: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Onemogućena podrazumevana kvota prostora za AI agente</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Podešavanja vektorizacije su resetovana</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Podešavanja veb pretrage su resetovana</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP server kreiran: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP server obrisan: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP server onemogućen: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP server omogućen: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP server ažuriran: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Podešene su vektorizacione postavke. Provajder: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Podešene su postavke veb pretrage. Pretraživač: {0}</value>
+  </data>
 </root>

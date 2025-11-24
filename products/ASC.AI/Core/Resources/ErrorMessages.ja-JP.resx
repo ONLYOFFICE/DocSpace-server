@@ -168,4 +168,7 @@
   <data name="ServersRoomLimit" xml:space="preserve">
     <value>ルームごとに設定できるサーバーの最大数は {0} です</value>
   </data>
+  <data name="UnavailableServers" xml:space="preserve">
+    <value>MCPサーバーが利用できません: {0}。接続設定を確認してください</value>
+  </data>
 </root>

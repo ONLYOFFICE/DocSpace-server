@@ -1263,4 +1263,34 @@
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
     <value>Успешно сте повезали Telegram да примате обавештења из свог DocSpace-а.</value>
   </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Векторизација</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>AI алати</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Токени</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Квота простора AI агента је прекорачена</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Неуспешно подешавање квоте по AI агенту. Унета вредност је већа од укупног DocSpace складишта.</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Број AI агената не сме прећи {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>AI алати</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Омогућите AI функције у вашем DocSpace-у да бисте повећали продуктивност.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>AI веб претрага</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Додајте средства у новчаник да откључате AI веб претрагу.</value>
+  </data>
 </root>

@@ -353,7 +353,7 @@
     <value>Вход успех</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Вход чрез социален профил Успех</value>
+    <value>Вход чрез социален профил успешно: {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Успешно влизане чрез социално приложение</value>
@@ -929,6 +929,123 @@
     <value>Актуализирани са настройките за услуги с активиран клиентски портфейл</value>
   </data>
   <data name="LoginSuccessSocialAccount" xml:space="preserve">
-    <value>Вход чрез социален профил Успех</value>
+    <value>Вход чрез социален профил успешно</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Добавен е MCP сървър {0} към агент</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Агентът е създаден</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Агентът е изтрит</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Агентът е преименуван: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Агенти</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>AI доставчикът е създаден: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>AI доставчикът е изтрит: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>AI доставчикът е актуализиран: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI агенти [{0}]. Задаване на персонализирана квота за съхранение за AI агенти: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI агенти [{0}]. Задаване на квота за съхранение по подразбиране за AI агенти: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI агенти [{0}]. Деактивирана квота за съхранение за AI агенти</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>MCP сървърът {0} е изтрит от агент</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Файлове [{0}]. Създадена външна връзка: {1}. Роля: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Файлове [{0}]. Изтрит външен линк: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Файлове [{0}]. Актуализиран външен линк: {1}. Роля: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Файлът е маркиран като любим: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Файлът е премахнат от любими: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Файлът е премахнат от "Споделени с мен": {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Файлове [{0}]. Актуализиран достъп за {1}. Роля: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Изтеглена папка: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Папки [{0}]. Създаден външен линк: {1}. Роля: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Папки [{0}]. Изтрит външен линк: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Папки [{0}]. Актуализиран външен линк: {1}. Роля: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Папката е преместена от "Споделени с мен": {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Папки [{0}]. Актуализиран достъп до {1}. Роля: {2}</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Успешно влизане чрез OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Успешно влизане чрез потребителско име и парола</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Задаване на квота за съхранение по подразбиране за AI агенти: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Деактивирана квота за съхранение по подразбиране за AI агенти</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Настройките за векторизация са нулирани</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Настройките за уеб търсене са нулирани</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Отменен външен линк: {1}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP сървър е създаден: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP сървър е изтрит: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP сървър е деактивиран: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP сървър е активиран: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP сървър е актуализиран: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Настройките за векторизация са конфигурирани. Доставчик: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Настройките за уеб търсене са конфигурирани. Търсачка: {0}</value>
   </data>
 </root>

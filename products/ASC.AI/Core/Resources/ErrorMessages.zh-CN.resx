@@ -168,4 +168,7 @@
   <data name="ServersRoomLimit" xml:space="preserve">
     <value>每个房间的最大服务器数量为 {0}</value>
   </data>
+  <data name="UnavailableServers" xml:space="preserve">
+    <value>MCP 服务器不可用：{0}。请检查连接设置</value>
+  </data>
 </root>
