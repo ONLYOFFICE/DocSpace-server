@@ -938,7 +938,7 @@ public class FileSecurity(
         
         await foreach (var entry in entries)
         {
-            if (entry.SecurityByUsers != null && entry.SecurityByUsers.TryGetValue(userId, out _))
+            if (entry.Security != null && entry.SecurityByUsers != null && entry.SecurityByUsers.TryGetValue(userId, out _))
             {
                 yield return entry;
             }
