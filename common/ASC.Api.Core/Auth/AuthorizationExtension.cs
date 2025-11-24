@@ -24,13 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Collections.Specialized;
-
 namespace ASC.Api.Core.Auth;
 
 public static class AuthorizationExtension
 {
-    
+
     public static readonly Dictionary<string, string[]> ScopesMap = new()
     {
         { "GET api/[0-9].[0-9]/files/rooms", [ "rooms:read", "rooms:write" ] },
@@ -41,20 +39,22 @@ public static class AuthorizationExtension
         { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people/@self", [ "accounts.self:write" ] },
         { "GET api/[0-9].[0-9]/people", [ "accounts:read", "accounts:write" ] },
         { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people", [ "accounts:write" ] },
+        { "GET api/[0-9].[0-9]/group", [ "accounts:read" ] },
+        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/group", [ "accounts:write" ] },
         { "(GET|POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/keys(/.*)?", [ "*" ] },
     };
-    
+
     private static string GetAuthorizePolicy(string routePattern, string httpMethod)
     {
         string[] globalScopes;
 
         if (httpMethod == "GET")
         {
-            globalScopes = [ AuthConstants.Claim_ScopeGlobalRead.Value, AuthConstants.Claim_ScopeGlobalWrite.Value ];
+            globalScopes = [AuthConstants.Claim_ScopeGlobalRead.Value, AuthConstants.Claim_ScopeGlobalWrite.Value];
         }
         else
         {
-            globalScopes = [ AuthConstants.Claim_ScopeGlobalWrite.Value ];
+            globalScopes = [AuthConstants.Claim_ScopeGlobalWrite.Value];
         }
 
         string[] localScopes = [];
@@ -74,12 +74,12 @@ public static class AuthorizationExtension
             {
                 localScopes = ScopesMap.SelectMany(r => r.Value).Except(["*"]).ToArray();
             }
-            
+
             break;
         }
 
         var scopes = globalScopes.Concat(localScopes).Distinct().ToArray();
-        
+
         return string.Join(",", scopes);
     }
 
@@ -94,7 +94,7 @@ public static class AuthorizationExtension
         return services;
 
     }
-    
+
     public static IServiceCollection AddApiKeyBearerAuthentication(this IServiceCollection services)
     {
         services.AddSingleton<IAuthorizationHandler, ScopesAuthorizationHandler>();
@@ -131,5 +131,3 @@ public static class AuthorizationExtension
         return builder;
     }
 }
-
-

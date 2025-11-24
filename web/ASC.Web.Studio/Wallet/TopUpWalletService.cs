@@ -148,7 +148,13 @@ public class TopUpWalletService(
             var truncated = Math.Truncate(subAccount.Amount * 100) / 100; // Truncate to 2 decimal places
             var amount = settings.UpToBalance - truncated;
 
-            var result = await tariffService.TopUpDepositAsync(data.TenantId, amount, settings.Currency, Resource.AutoTopUp, true);
+            var metadata = new Dictionary<string, string> { { BillingClient.MetadataDetails, Resource.AutoTopUp } };
+
+            var coreSettings = scope.ServiceProvider.GetRequiredService<CoreSettings>();
+
+            var siteName = tenant.GetTenantDomain(coreSettings);
+
+            var result = await tariffService.TopUpDepositAsync(data.TenantId, amount, settings.Currency, null, siteName, metadata, true);
 
             if (result)
             {

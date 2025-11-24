@@ -100,6 +100,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Tema da cor alterado</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Contatos</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Configurações de cookie atualizadas</value>
   </data>
@@ -268,9 +271,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Configurações do Sphinx atualizadas</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Geral</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Configurações da página de boas-vindas foram atualizadas</value>
   </data>
@@ -279,9 +279,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Grupo excluído: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Grupos</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Grupo atualizado: {0}</value>
@@ -368,7 +365,7 @@
     <value>Login bem-sucedido</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Login por conta social bem-sucedido</value>
+    <value>Login via conta social bem-sucedido: {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Login bem sucedido via aplicação social</value>
@@ -466,9 +463,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista de produtos atualizada</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Produtos</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Reassinar</value>
   </data>
@@ -484,13 +478,16 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Seção iniciada</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Configurações</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO desabilitado</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO habilitado</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Iniciar backup</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -609,9 +606,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Usuários [{0}]. Instruções de alteração de senha enviadas</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Usuários</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Usuários [{0}]. Instruções de ativação enviadas</value>
@@ -823,9 +817,6 @@
   <data name="GeneratePersonalAccessToken" xml:space="preserve">
     <value>Token de acesso pessoal gerado para o cliente {0}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Segredo do cliente {0} regenerado</value>
   </data>
@@ -927,5 +918,65 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>Sincronização LDAP concluída</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Configurações de visibilidade de banners promocionais alteradas</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Configurações de serviços habilitados para carteira do cliente atualizadas</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Localização</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Login bem-sucedido via OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Login e senha efetuados com sucesso</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Arquivos [{0}]. Link externo criado: {1}. Função: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Arquivos [{0}]. Link externo excluído: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Arquivos [{0}]. Link externo atualizado: {1}. Função: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Arquivo marcado como favorito: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Arquivo removido dos favoritos: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Arquivo removido de "Compartilhado comigo": {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Arquivos [{0}]. Acesso atualizado para {1}. Função: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Pasta baixada: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Pastas [{0}]. Link externo criado: {1}. Função: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Pastas [{0}]. Link externo excluído: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Pastas [{0}]. Link externo atualizado: {1}. Função: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Pasta removida de "Compartilhado comigo": {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Pastas [{0}]. Acesso atualizado para {1}. Função: {2}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Link externo revogado: {1}</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Login por conta social bem-sucedido</value>
   </data>
 </root>

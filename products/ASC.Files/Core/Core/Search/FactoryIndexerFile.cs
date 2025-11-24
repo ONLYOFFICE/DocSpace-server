@@ -75,7 +75,7 @@ public class FactoryIndexerFile(
             var j = 0;
             var tasks = new List<Task>();
             var now = DateTime.UtcNow;
-            
+
             await foreach (var data in _indexer.IndexAllAsync(GetCount, GetIds, GetData))
             {
                 if (settings.Threads == 1)
@@ -167,7 +167,7 @@ public class FactoryIndexerFile(
     public override async Task<bool> CanIndexByContentAsync(DbFile t)
     {
         return await base.CanIndexByContentAsync(t) && fileUtility.CanIndex(t.Title);
-}
+    }
 }
 
 public class FileTenant
@@ -229,9 +229,10 @@ static file class Queries
                     .Where(r => r.Id >= start && r.Id <= stop && r.CurrentVersion)
                     .Select(file => new FilesFoldersPair
                     {
-                        File = file, Folders = ctx.Tree.Where(b => b.FolderId == file.ParentId).ToList()
+                        File = file,
+                        Folders = ctx.Tree.Where(b => b.FolderId == file.ParentId).ToList()
                     }));
-    
+
     public static readonly Func<FilesDbContext, DateTime, long, int> FileId = EF.CompileQuery(
     (FilesDbContext ctx, DateTime lastIndexed, long start) =>
         ctx.Files

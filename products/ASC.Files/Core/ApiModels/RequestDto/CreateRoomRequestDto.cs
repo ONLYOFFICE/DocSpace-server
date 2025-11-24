@@ -45,7 +45,10 @@ public enum RoomType
     PublicRoom = 6,
 
     [SwaggerEnum(Description = "Virtual data room")]
-    VirtualDataRoom = 8
+    VirtualDataRoom = 8,
+    
+    [SwaggerEnum(Description = "AI Room")]
+    AiRoom = 9
 }
 
 public static class RoomTypeExtensions
@@ -56,7 +59,7 @@ public static class RoomTypeExtensions
         {
             return null;
         }
-        
+
         return types.Select(x => x switch
         {
             RoomType.FillingFormsRoom => FilterType.FillingFormsRooms,
@@ -64,6 +67,7 @@ public static class RoomTypeExtensions
             RoomType.CustomRoom => FilterType.CustomRooms,
             RoomType.PublicRoom => FilterType.PublicRooms,
             RoomType.VirtualDataRoom => FilterType.VirtualDataRooms,
+            RoomType.AiRoom => FilterType.AiRooms,
             _ => FilterType.CustomRooms
         }).ToHashSet();
     }
@@ -142,4 +146,6 @@ public class CreateRoomRequestDto
     /// The collection of sharing parameters.
     /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
+    
+    public ChatSettings ChatSettings { get; set; }
 }

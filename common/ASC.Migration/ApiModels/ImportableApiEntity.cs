@@ -26,11 +26,14 @@
 
 namespace ASC.Migration.Core.Models.Api;
 
+/// <summary>
+/// The parameters of an importable API entity.
+/// </summary>
 [ProtoContract]
 public abstract class ImportableApiEntity
 {
     /// <summary>
-    /// Should import
+    /// Specifies whether the API entity should be imported.
     /// </summary>
     [ProtoMember(1)]
     public bool ShouldImport { get; set; }

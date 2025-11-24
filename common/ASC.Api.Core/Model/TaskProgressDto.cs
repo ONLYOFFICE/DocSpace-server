@@ -42,5 +42,3 @@ public class TaskProgressDto
     [SwaggerSchemaCustom(Example = 0)]
     public int Progress { get; set; }
 }
-
-

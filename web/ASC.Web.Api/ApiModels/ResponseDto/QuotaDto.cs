@@ -34,47 +34,52 @@ public class QuotaDto
     /// <summary>
     /// The quota ID.
     /// </summary>
-    public int Id { get; set; }
+    public required int Id { get; set; }
 
     /// <summary>
     /// The quota title.
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// The price parameters.
     /// </summary>
-    public PriceDto Price { get; set; }
+    public required PriceDto Price { get; set; }
 
     /// <summary>
     /// Specifies if the quota is nonprofit or not.
     /// </summary>
-    public bool NonProfit { get; set; }
+    public required bool NonProfit { get; set; }
 
     /// <summary>
     /// Specifies if the quota is free or not.
     /// </summary>
-    public bool Free { get; set; }
+    public required bool Free { get; set; }
 
     /// <summary>
     /// Specifies if the quota is trial or not.
     /// </summary>
-    public bool Trial { get; set; }
+    public required bool Trial { get; set; }
 
     /// <summary>
     /// The list of tenant quota features.
     /// </summary>
-    public IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
+    public required IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
 
     /// <summary>
     /// The user quota.
     /// </summary>
-    public TenantEntityQuotaSettings UsersQuota {  get; set; }
+    public TenantEntityQuotaSettings UsersQuota { get; set; }
 
     /// <summary>
     /// The room quota.
     /// </summary>
-    public TenantEntityQuotaSettings RoomsQuota {  get; set; }
+    public TenantEntityQuotaSettings RoomsQuota { get; set; }
+
+    /// <summary>
+    /// The ai agent quota.
+    /// </summary>
+    public TenantEntityQuotaSettings AiAgentsQuota { get; set; }
 
     /// <summary>
     /// The tenant custom quota.
@@ -171,7 +176,7 @@ public class FeatureUsedDto
     /// <summary>
     /// The used space value.
     /// </summary>
-    public object Value { get; set; }
+    public required object Value { get; set; }
 
     /// <summary>
     /// The used space title.

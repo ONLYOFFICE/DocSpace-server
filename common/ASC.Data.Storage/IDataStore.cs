@@ -66,7 +66,7 @@ public interface IDataStore
     /// <param name="headers"></param>
     /// <returns></returns>
     Task<Uri> GetPreSignedUriAsync(string domain, string path, TimeSpan expire, IEnumerable<string> headers);
-    
+
     ///<summary>
     /// Supporting generate uri to the file
     ///</summary>
@@ -120,7 +120,7 @@ public interface IDataStore
     Task<Stream> GetReadStreamAsync(string domain, string path, long offset);
 
     Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length);
-    
+
     ///<summary>
     /// Saves the contents of the stream in the repository.
     ///</summary>

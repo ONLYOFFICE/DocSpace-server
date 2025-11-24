@@ -1045,7 +1045,7 @@
     <value>Fillimi</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Ndjekja e hyrjeve dhe veprimeve të përdoruesve</value>
+    <value>Gjurmimi i hyrjeve dhe veprimeve</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding &amp; personalizim</value>
@@ -1063,7 +1063,7 @@
     <value>Numri i administratorëve</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Rezervimi dhe rikuperimi automatik</value>
+    <value>Rikuperimi i të dhënave</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Numri i pakufizuar i dhomave aktive</value>
@@ -1102,7 +1102,7 @@
     <value>Përdoruesit në dhomë:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Numri i pakufizuar i përdoruesve</value>
+    <value>Numri i pakufizuar përdoruesish dhe të ftuarish</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Numri i përdoruesve nuk duhet të kalojë {0}</value>
@@ -1150,16 +1150,10 @@
     <value>Monedha</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Data dhe ora</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Përshkrimi</value>
+    <value>Data</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Sasia</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Emri i shërbimit</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Hapësira në disk</value>
@@ -1173,9 +1167,6 @@
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Raporti i operacioneve të klientit ({0}-{1})</value>
   </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Tërheqje</value>
-  </data>
   <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
     <value>Hapësirë shtesë në disk</value>
   </data>
@@ -1184,5 +1175,92 @@
   </data>
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Hapësira e ruajtjes së përdorur:</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Rinovim automatik</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Numri i kopjeve rezervë falas nuk duhet të kalojë {0} brenda një muaji</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Aktivizoni kopjen rezervë për DocSpace-in tënd. Kostot do të faturohen automatikisht.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Kopje rezervë</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Kopje rezervë</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Kopje rezervë</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detaje</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debitim</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Kontakt</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Historiku i transaksioneve</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Kreditim automatik</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} kopje rezervë falas në muaj</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Kërkohet pagesë</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Lloji</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID e klientit</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Sekreti i klientit</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin për të hyrë në portal duke përdorur një llogari WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Aktivizoni aplikacionin për të hyrë në portal duke përdorur një llogari WeChat.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Emri</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Mbiemri</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Kuota e Shërbimit të Dokumenteve ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Numri i shtojcave e kalon limitin</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Ndodhi një gabim i papritur. Ju lutemi provoni sërish.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Ju jeni lidhur me sukses me Telegram për të marrë njoftime nga DocSpace.</value>
   </data>
 </root>

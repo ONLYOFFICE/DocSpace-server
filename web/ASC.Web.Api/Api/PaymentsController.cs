@@ -24,7 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.Utils;
+using ASC.Files.Core.ApiModels.ResponseDto;
+using ASC.Files.Core.IntegrationEvents.Events;
+using ASC.Files.Core.Services.DocumentBuilderService;
 
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -40,6 +42,7 @@ namespace ASC.Web.Api.Controllers;
 [AllowNotPayment]
 [ControllerName("portal")]
 public class PaymentController(
+    CoreSettings coreSettings,
     UserManager userManager,
     TenantManager tenantManager,
     SettingsManager settingsManager,
@@ -54,10 +57,12 @@ public class PaymentController(
     PermissionContext permissionContext,
     TenantUtil tenantUtil,
     ApiDateTimeHelper apiDateTimeHelper,
-    TempStream tempStream,
     EmployeeDtoHelper employeeWrapperHelper,
-    CsvFileHelper csvFileHelper,
-    CsvFileUploader csvFileUploader)
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    IEventBus eventBus,
+    CommonLinkUtility commonLinkUtility,
+    DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
+    IServiceProvider serviceProvider)
     : ControllerBase
 {
     private readonly int _maxCount = 10;
@@ -301,7 +306,7 @@ public class PaymentController(
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency, false, securityContext.CurrentAccount.ID.ToString());
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency, false, securityContext.CurrentAccount.ID.ToString(), null);
 
         if (result)
         {
@@ -312,10 +317,10 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Calculate amount of the wallet payment with the parameters specified in the request.
+    /// Calculates an amount of the wallet payment with the parameters specified in the request.
     /// </summary>
     /// <short>
-    /// Calculate amount of the wallet payment
+    /// Calculate the wallet payment amount
     /// </short>
     /// <path>api/2.0/portal/payment/calculatewallet</path>
     [Tags("Portal / Payment")]
@@ -429,9 +434,9 @@ public class PaymentController(
     /// </short>
     /// <path>api/2.0/portal/payment/prices</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "List of available portal prices", typeof(object))]
+    [SwaggerResponse(200, "List of available portal prices", typeof(Dictionary<string, decimal>))]
     [HttpGet("prices")]
-    public async Task<object> GetPortalPrices()
+    public async Task<Dictionary<string, decimal>> GetPortalPrices()
     {
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
         var result = (await tenantManager.GetProductPriceInfoAsync())
@@ -510,7 +515,7 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Returns the wallet services.
+    /// Returns the specified wallet service.
     /// </summary>
     /// <short>
     /// Get wallet service
@@ -556,7 +561,7 @@ public class PaymentController(
         {
             throw new SecurityException();
         }
-        
+
         return await tariffHelper.GetCurrentQuotaAsync(inDto.Refresh);
     }
 
@@ -640,10 +645,10 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Returns the customer info.
+    /// Returns the customer information.
     /// </summary>
     /// <short>
-    /// Get the customer info
+    /// Get the customer information
     /// </short>
     /// <path>api/2.0/portal/payment/customerinfo</path>
     [Tags("Portal / Payment")]
@@ -680,7 +685,7 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Returns result of putting money on deposit.
+    /// Returns the result of putting money on deposit.
     /// </summary>
     /// <short>
     /// Put money on deposit
@@ -714,7 +719,9 @@ public class PaymentController(
 
         await DemandPayerAsync(customerInfo);
 
-        var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), true);
+        var siteName = tenant.GetTenantDomain(coreSettings);
+
+        var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), siteName, null, true);
 
         if (result)
         {
@@ -787,22 +794,29 @@ public class PaymentController(
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
-        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
+        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.ParticipantName, inDto.Credit, inDto.Debit, inDto.Offset, inDto.Limit);
 
-        return report == null ? null : new ReportDto(report, apiDateTimeHelper);
+        if (report == null)
+        {
+            return null;
+        }
+
+        var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper);
+
+        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames);
     }
 
     /// <summary>
-    /// Generates the customer operations report as csv file and save in Documents.
+    /// Starts generating a customer operations report as an "xlsx" file and saves it in Documents.
     /// </summary>
     /// <short>
-    /// Generate the customer operations report
+    /// Start the customer operations report generation
     /// </short>
     /// <path>api/2.0/portal/payment/customer/operationsreport</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "URL to the csv report file", typeof(string))]
+    [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
     [HttpPost("customer/operationsreport")]
-    public async Task<string> CreateCustomerOperationsReport(CustomerOperationsReportRequestDto inDto)
+    public async Task<DocumentBuilderTaskDto> CreateCustomerOperationsReport(CustomerOperationsReportRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -811,9 +825,9 @@ public class PaymentController(
             return null;
         }
 
-        var tenant = tenantManager.GetCurrentTenant();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
         if (customerInfo == null)
         {
             return null;
@@ -821,87 +835,93 @@ public class PaymentController(
 
         inDto = inDto ?? new CustomerOperationsReportRequestDto();
 
-        var utcStartDate = inDto.StartDate != null ? tenantUtil.DateTimeToUtc(inDto.StartDate.Value) : tenant.CreationDateTime;
-        var utcEndDate = inDto.EndDate != null ? tenantUtil.DateTimeToUtc(inDto.EndDate.Value) : DateTime.UtcNow;
+        var userId = securityContext.CurrentAccount.ID;
 
-        var reportName = string.Format(Resource.AccountingCustomerOperationsReportName + ".csv",
-            utcStartDate.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture),
-            utcEndDate.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture));
+        var task = serviceProvider.GetService<CustomerOperationsReportTask>();
 
-        await using var stream = tempStream.Create();
+        var baseUri = commonLinkUtility.ServerRootPath;
 
-        var partialRecords = GetCustomerOperationsReportDataAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal);
+        task.Init(baseUri, tenantId, userId, null);
 
-        await csvFileHelper.CreateLargeFileAsync(stream, partialRecords, new OperationMap());
+        var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
 
-        var result = await csvFileUploader.UploadFile(stream, reportName);
+        var headers = MessageSettings.GetHttpHeaders(Request)?.ToDictionary(x => x.Key, x => x.Value.ToString()) ?? [];
 
-        messageService.Send(MessageAction.CustomerOperationsReportDownloaded);
+        var evt = new CustomerOperationsReportIntegrationEvent(userId, tenantId, baseUri, inDto.StartDate, inDto.EndDate, inDto.ParticipantName, inDto.Credit, inDto.Debit, headers, false);
 
-        return result;
-    }
+        await eventBus.PublishAsync(evt);
 
-    private async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal)
-    {
-        var offset = 0;
-        var limit = 1000;
-
-        while (true)
-        {
-            var report = await tariffService.GetCustomerOperationsAsync(tenantId, utcStartDate, utcEndDate, credit, withdrawal, offset, limit);
-
-            if (report?.Collection == null)
-            {
-                yield return null;
-                break;
-            }
-
-            foreach (var operation in report.Collection)
-            {
-                operation.Description = OperationDto.GetServiceDesc(operation.Service);
-                operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
-
-                if (string.IsNullOrEmpty(operation.Service))
-                {
-                    operation.Quantity = 0;
-                }
-            }
-
-            yield return report.Collection;
-
-            if (report.CurrentPage == report.TotalPage)
-            {
-                break;
-            }
-
-            offset += limit;
-        }
-    }
-
-    internal class OperationMap : ClassMap<Operation>
-    {
-        public OperationMap()
-        {
-            Map(item => item.Date).TypeConverter<CsvFileHelper.CsvDateTimeConverter>();
-
-            Map(item => item.Date).Name(Resource.AccountingCustomerOperationDate);
-            Map(item => item.Description).Name(Resource.AccountingCustomerOperationDescription);
-            Map(item => item.Service).Name(Resource.AccountingCustomerOperationService);
-            Map(item => item.ServiceUnit).Name(Resource.AccountingCustomerOperationServiceUnit);
-            Map(item => item.Quantity).Name(Resource.AccountingCustomerOperationQuantity);
-            Map(item => item.Currency).Name(Resource.AccountingCustomerOperationCurrency);
-            Map(item => item.Credit).Name(Resource.AccountingCustomerOperationCredit);
-            Map(item => item.Withdrawal).Name(Resource.AccountingCustomerOperationWithdrawal);
-        }
+        return DocumentBuilderTaskDto.Get(taskProgress);
     }
 
     /// <summary>
-    /// Returns the list of currencies from accounting service.
+    /// Returns the status of generating a customer operations report.
+    /// </summary>
+    /// <short>Get the status of the customer operations report generation</short>
+    /// <path>api/2.0/portal/payment/customer/operationsreport</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
+    [HttpGet("customer/operationsreport")]
+    public async Task<DocumentBuilderTaskDto> GetCustomerOperationsReport()
+    {
+        await DemandAdminAsync();
+
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        var task = await documentBuilderTaskManager.GetTask(tenantId, securityContext.CurrentAccount.ID);
+
+        return DocumentBuilderTaskDto.Get(task);
+    }
+
+    /// <summary>
+    /// Terminates generating a customer operations report.
+    /// </summary>
+    /// <short>Terminate the customer operations report generation</short>
+    /// <path>api/2.0/portal/payment/customer/operationsreport</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Ok")]
+    [HttpDelete("customer/operationsreport")]
+    public async Task TerminateCustomerOperationsReport()
+    {
+        await DemandAdminAsync();
+
+        if (!tariffService.IsConfigured())
+        {
+            return;
+        }
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        if (customerInfo == null)
+        {
+            return;
+        }
+
+        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, terminate: true);
+
+        await eventBus.PublishAsync(evt);
+    }
+
+    /// <summary>
+    /// Returns the list of available currencies from the accounting service.
     /// </summary>
     /// <short>
-    /// Get list of currencies
+    /// Get currencies from the accounting service
     /// </short>
     /// <path>api/2.0/portal/payment/accounting/currencies</path>
+    /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The list of currencies", typeof(List<Currency>))]
@@ -920,14 +940,14 @@ public class PaymentController(
 
         var allCurrencies = await tariffService.GetAllAccountingCurrenciesAsync();
 
-        return allCurrencies.Where(x=> supportedCurrencies.Contains(x.Code)).ToList();
+        return allCurrencies.Where(x => supportedCurrencies.Contains(x.Code)).ToList();
     }
 
     /// <summary>
-    /// Returns the wallet auto top up settings.
+    /// Returns the wallet auto top-up settings.
     /// </summary>
     /// <short>
-    /// Get wallet auto top up settings
+    /// Get wallet auto top-up settings
     /// </short>
     /// <path>api/2.0/portal/payment/topupsettings</path>
     [Tags("Portal / Payment")]
@@ -943,10 +963,10 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Set the wallet auto top up settings.
+    /// Sets the wallet auto top-up settings.
     /// </summary>
     /// <short>
-    /// Set wallet auto top up settings
+    /// Set wallet auto top-up settings
     /// </short>
     /// <path>api/2.0/portal/payment/topupsettings</path>
     [Tags("Portal / Payment")]
@@ -986,7 +1006,7 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Get the wallet services settings.
+    /// Returns the wallet services settings.
     /// </summary>
     /// <short>
     /// Get wallet services settings
@@ -1011,7 +1031,7 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Change wallet service state.
+    /// Changes the wallet service state.
     /// </summary>
     /// <short>
     /// Change wallet service state

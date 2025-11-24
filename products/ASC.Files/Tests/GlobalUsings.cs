@@ -12,7 +12,6 @@ global using System.Web;
 global using ASC.Core.Common.EF;
 global using ASC.Files.Core.ApiModels.ResponseDto;
 global using ASC.Files.Tests.Data;
-global using ASC.Files.Tests.Factory;
 global using ASC.Migrations;
 global using ASC.Migrations.Core;
 

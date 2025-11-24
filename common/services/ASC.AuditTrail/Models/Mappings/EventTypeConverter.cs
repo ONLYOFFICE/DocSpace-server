@@ -24,168 +24,185 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Common.Utils;
-
 using Constants = ASC.Core.Configuration.Constants;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace ASC.AuditTrail.Models.Mappings;
 
 [Scope]
-internal class EventTypeConverter(
+public class EventTypeConverter(
     UserFormatter userFormatter,
     AuditActionMapper actionMapper,
     TenantUtil tenantUtil)
-    : ITypeConverter<LoginEventQuery, LoginEvent>,
-      ITypeConverter<AuditEventQuery, AuditEvent>
 {
-    public LoginEvent Convert(LoginEventQuery source, LoginEvent destination, ResolutionContext context)
+    public void Convert(LoginEventQuery source, LoginEvent dest, bool limitedActionText)
     {
         if (source?.Event == null)
         {
-            return null;
+            return;
         }
-
-        var result = context.Mapper.Map<LoginEvent>(source.Event);
 
         if (source.Event.DescriptionRaw != null)
         {
-            result.Description = JsonSerializer.Deserialize<IList<string>>(source.Event.DescriptionRaw);
+            dest.Description = JsonSerializer.Deserialize<IList<string>>(source.Event.DescriptionRaw);
         }
 
         if (!(string.IsNullOrEmpty(source.FirstName) || string.IsNullOrEmpty(source.LastName)))
         {
-            result.UserName = userFormatter.GetUserName(source.FirstName, source.LastName);
+            dest.UserName = userFormatter.GetUserName(source.FirstName, source.LastName);
         }
         else if (!string.IsNullOrEmpty(source.FirstName))
         {
-            result.UserName = source.FirstName;
+            dest.UserName = source.FirstName;
         }
         else if (!string.IsNullOrEmpty(source.LastName))
         {
-            result.UserName = source.LastName;
+            dest.UserName = source.LastName;
         }
-        else if (!string.IsNullOrWhiteSpace(result.Login))
+        else if (!string.IsNullOrWhiteSpace(dest.Login))
         {
-            result.UserName = result.Login;
+            dest.UserName = dest.Login;
         }
-        else if (result.UserId == Constants.Guest.ID)
+        else if (dest.UserId == Constants.Guest.ID)
         {
-            result.UserName = AuditReportResource.GuestAccount;
+            dest.UserName = AuditReportResource.GuestAccount;
         }
         else
         {
-            result.UserName = AuditReportResource.UnknownAccount;
+            dest.UserName = AuditReportResource.UnknownAccount;
         }
 
-        result.ActionText = actionMapper.GetActionText(actionMapper.GetMessageMaps(result.Action), result);
+        dest.ActionText = actionMapper.GetActionText(actionMapper.GetMessageMaps(dest.Action), dest, limitedActionText);
 
-        result.Date = tenantUtil.DateTimeFromUtc(result.Date);
-        result.IP = result.IP.Split(':').Length > 1 ? result.IP.Split(':')[0] : result.IP;
-
-        return result;
+        dest.Date = tenantUtil.DateTimeFromUtc(dest.Date);
+        dest.IP = dest.IP.Split(':').Length > 1 ? dest.IP.Split(':')[0] : dest.IP;
     }
 
-    public AuditEvent Convert(AuditEventQuery source, AuditEvent destination, ResolutionContext context)
+    public void Convert(AuditEventQuery source, AuditEvent dest, bool limitedActionText)
     {
         if (source?.Event == null)
         {
-            return null;
+            return;
         }
 
         var target = source.Event.Target;
         source.Event.Target = null;
-        var result = context.Mapper.Map<AuditEvent>(source.Event);
 
-        result.Target = MessageTarget.Parse(target);
+        dest.Target = MessageTarget.Parse(target);
 
         if (source.Event.DescriptionRaw != null)
         {
-            result.Description = JsonSerializer.Deserialize<IList<string>>(source.Event.DescriptionRaw);
+            dest.Description = JsonSerializer.Deserialize<IList<string>>(source.Event.DescriptionRaw);
         }
 
-        if (result.UserId == Constants.CoreSystem.ID)
+        if (dest.UserId == Constants.CoreSystem.ID)
         {
-            result.UserName = AuditReportResource.SystemAccount;
+            dest.UserName = AuditReportResource.SystemAccount;
         }
-        else if (result.UserId == Constants.Guest.ID)
+        else if (dest.UserId == Constants.Guest.ID)
         {
-            result.UserName = AuditReportResource.GuestAccount;
+            dest.UserName = AuditReportResource.GuestAccount;
         }
         else if (!(string.IsNullOrEmpty(source.UserData?.FirstName) || string.IsNullOrEmpty(source.UserData?.LastName)))
         {
-            result.UserName = userFormatter.GetUserName(source.UserData?.FirstName, source.UserData?.LastName);
+            dest.UserName = userFormatter.GetUserName(source.UserData?.FirstName, source.UserData?.LastName);
         }
         else if (!string.IsNullOrEmpty(source.UserData?.FirstName))
         {
-            result.UserName = source.UserData.FirstName;
+            dest.UserName = source.UserData.FirstName;
         }
         else if (!string.IsNullOrEmpty(source.UserData?.LastName))
         {
-            result.UserName = source.UserData.LastName;
+            dest.UserName = source.UserData.LastName;
         }
         else
         {
-            result.UserName = result.Initiator ?? AuditReportResource.UnknownAccount;
+            dest.UserName = dest.Initiator ?? AuditReportResource.UnknownAccount;
         }
 
-        var map = actionMapper.GetMessageMaps(result.Action);
+        var map = actionMapper.GetMessageMaps(dest.Action);
         if (map != null)
         {
-            if (result.Action is 
-                (int)MessageAction.QuotaPerPortalChanged or 
-                (int)MessageAction.QuotaPerRoomChanged or 
-                (int)MessageAction.QuotaPerUserChanged
-                && long.TryParse(result.Description.FirstOrDefault(), out var size))
-            { 
-                result.ActionText = string.Format(map.GetActionText(), CommonFileSizeComment.FilesSizeToString(AuditReportResource.FileSizePostfix, size));
-            }
-            else if (result.Action is (int)MessageAction.CustomQuotaPerRoomDefault or
-                (int)MessageAction.CustomQuotaPerRoomChanged or
-                (int)MessageAction.CustomQuotaPerUserDefault or
-                (int)MessageAction.CustomQuotaPerUserChanged
-                && long.TryParse(result.Description.FirstOrDefault(), out var customSize))
+            if (dest.Action is
+                    (int)MessageAction.QuotaPerPortalChanged or
+                    (int)MessageAction.QuotaPerRoomChanged or
+                    (int)MessageAction.QuotaPerUserChanged or
+                    (int)MessageAction.QuotaPerAiAgentChanged
+                && long.TryParse(dest.Description.FirstOrDefault(), out var size))
             {
-                result.ActionText = string.Format(map.GetActionText(), result.Description.LastOrDefault(), CommonFileSizeComment.FilesSizeToString(AuditReportResource.FileSizePostfix, customSize));
+                dest.ActionText = string.Format(map.GetActionText(), CommonFileSizeComment.FilesSizeToString(AuditReportResource.FileSizePostfix, size));
+            }
+            else if (dest.Action is (int)MessageAction.CustomQuotaPerRoomDefault or
+                         (int)MessageAction.CustomQuotaPerRoomChanged or
+                         (int)MessageAction.CustomQuotaPerAiAgentDefault or
+                         (int)MessageAction.CustomQuotaPerAiAgentChanged or
+                         (int)MessageAction.CustomQuotaPerUserDefault or
+                         (int)MessageAction.CustomQuotaPerUserChanged
+                     && long.TryParse(dest.Description.FirstOrDefault(), out var customSize))
+            {
+                dest.ActionText = string.Format(map.GetActionText(), dest.Description.LastOrDefault(), CommonFileSizeComment.FilesSizeToString(AuditReportResource.FileSizePostfix, customSize));
             }
             else
             {
-                result.ActionText = actionMapper.GetActionText(map, result);
+                dest.ActionText = actionMapper.GetActionText(map, dest, limitedActionText);
             }
 
-            result.ActionTypeText = actionMapper.GetActionTypeText(map);
-            result.Context = actionMapper.GetLocationText(map);
+            dest.ActionTypeText = actionMapper.GetActionTypeText(map);
+            dest.Context = actionMapper.GetLocationText(map);
         }
-        
-        result.Date = tenantUtil.DateTimeFromUtc(result.Date);
-        if (!string.IsNullOrEmpty(result.IP))
+
+        dest.Date = tenantUtil.DateTimeFromUtc(dest.Date);
+        if (!string.IsNullOrEmpty(dest.IP))
         {
-            var splitIp = result.IP.Split(':');
+            var splitIp = dest.IP.Split(':');
             if (splitIp.Length > 1)
             {
-                result.IP = splitIp[0];
+                dest.IP = splitIp[0];
             }
         }
 
         if (map?.ProductType == ProductType.Documents)
         {
-            var rawNotificationInfo = result.Description?.LastOrDefault();
+            var rawNotificationInfo = dest.Description?.LastOrDefault();
 
             if (!string.IsNullOrEmpty(rawNotificationInfo) && rawNotificationInfo.StartsWith('{') && rawNotificationInfo.EndsWith('}'))
             {
                 var notificationInfo = JsonSerializer.Deserialize<EventDescription<JsonElement>>(rawNotificationInfo);
 
-                var newContext = result.Action == (int)MessageAction.RoomRenamed ? 
-                    notificationInfo.RoomOldTitle :
-                    !string.IsNullOrEmpty(notificationInfo.RoomTitle) ? notificationInfo.RoomTitle : notificationInfo.RootFolderTitle;
+                string newContext;
+                
+                switch (dest.Action)
+                {
+                    case (int)MessageAction.AgentRenamed:
+                        newContext = $"{AuditReportResource.AgentsModule}: {notificationInfo.RoomOldTitle}";
+                        break;
+                    case (int)MessageAction.RoomRenamed:
+                        newContext = $"{AuditReportResource.RoomsModule}: {notificationInfo.RoomOldTitle}";
+                        break;
+                    default:
+                        {
+                            if (notificationInfo.IsAgent.HasValue && notificationInfo.IsAgent.Value)
+                            {
+                                newContext = $"{AuditReportResource.AgentsModule}: {notificationInfo.RoomTitle}";
+                            }
+                            else if (!string.IsNullOrEmpty(notificationInfo.RoomTitle))
+                            {
+                                newContext = $"{AuditReportResource.RoomsModule}: {notificationInfo.RoomTitle}";
+                            }
+                            else
+                            {
+                                newContext = notificationInfo.RootFolderTitle;
+                            }
+
+                            break;
+                        }
+                }
 
                 if (newContext != null)
                 {
-                    result.Context = newContext;
+                    dest.Context = newContext;
                 }
             }
         }
-
-        return result;
     }
 }

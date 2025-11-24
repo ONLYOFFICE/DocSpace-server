@@ -27,12 +27,9 @@
 namespace ASC.Files.Core.Mapping;
 
 [Scope]
-public class FilesMappingAction(TenantUtil tenantUtil) : 
-    IMappingAction<DbFolderQuery, Folder<int>>, 
-    IMappingAction<FileShareRecord<int>, DbFilesSecurity>,
-    IMappingAction<FileShareRecord<string>, DbFilesSecurity>
+public class FilesMappingAction(TenantUtil tenantUtil)
 {
-    public void Process(DbFolderQuery source, Folder<int> destination, ResolutionContext context)
+    public void Process(Folder<int> destination)
     {
         switch (destination.FolderType)
         {
@@ -75,6 +72,9 @@ public class FilesMappingAction(TenantUtil tenantUtil) :
             case FolderType.InProcessFormFolder:
                 destination.Title = FilesUCResource.InProcessFormFolder;
                 break;
+            case FolderType.AiAgents:
+                destination.Title = FilesUCResource.AiAgents;
+                break;
             case FolderType.BUNCH:
                 try
                 {
@@ -105,24 +105,24 @@ public class FilesMappingAction(TenantUtil tenantUtil) :
             }
         }
     }
-    
-    public void Process(FileShareRecord<int> source, DbFilesSecurity destination, ResolutionContext context)
+
+    public void Process(FileShareRecord<int> source, DbFilesSecurity destination)
     {
-        Process<int>(source, destination, context);
+        Process<int>(source, destination);
     }
 
-    public void Process(FileShareRecord<string> source, DbFilesSecurity destination, ResolutionContext context)
+    public void Process(FileShareRecord<string> source, DbFilesSecurity destination)
     {
-        Process<string>(source, destination, context);
+        Process<string>(source, destination);
     }
-    
-    private void Process<T>(FileShareRecord<T> source, DbFilesSecurity destination, ResolutionContext context)
+
+    private void Process<T>(FileShareRecord<T> source, DbFilesSecurity destination)
     {
         if (source.Options == null)
         {
             return;
         }
-        
+
         source.Options.ExpirationDate = tenantUtil.DateTimeToUtc(source.Options.ExpirationDate);
     }
 

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Encodings.Web;
+
 namespace ASC.Studio.Notify;
 
 public class Startup : BaseWorkerStartup
@@ -34,7 +36,7 @@ public class Startup : BaseWorkerStartup
         if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
-        }        
+        }
     }
 
     public override async Task ConfigureServices(WebApplicationBuilder builder)
@@ -43,11 +45,11 @@ public class Startup : BaseWorkerStartup
 
         var services = builder.Services;
         services.AddHttpClient();
-        services.AddAutoMapper(GetAutoMapperProfileAssemblies());//toDo
         services.AddHostedService<ServiceLauncher>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddActivePassiveHostedService<NotifySchedulerService>(Configuration, "StudioNotifySchedulerService");
         services.RegisterQuotaFeature();
+        services.AddScoped(_ => UrlEncoder.Default);
     }
 }

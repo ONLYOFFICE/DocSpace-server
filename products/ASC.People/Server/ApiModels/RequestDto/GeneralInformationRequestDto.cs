@@ -27,7 +27,7 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The general information request parameters.
+/// The request parameters for getting the general group information.
 /// </summary>
 public class GeneralInformationRequestDto
 {
@@ -42,7 +42,7 @@ public class GeneralInformationRequestDto
     /// </summary>
     [FromQuery(Name = "manager")]
     public bool? Manager { get; set; }
-    
+
     /// <summary>
     /// The number of records to retrieve.
     /// </summary>

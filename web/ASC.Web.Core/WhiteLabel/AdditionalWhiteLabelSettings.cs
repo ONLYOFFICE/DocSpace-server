@@ -102,24 +102,6 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
             LicenseAgreementsEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Common.GetDefaultRegionalFullEntry("license"))
         };
     }
-    
+
     public DateTime LastModified { get; set; }
-}
-
-[Scope]
-public class AdditionalWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externalResourceSettingsHelper)
-{
-    public bool IsDefault(AdditionalWhiteLabelSettings settings)
-    {
-        settings.ExternalResourceSettingsHelper ??= externalResourceSettingsHelper;
-
-        var defaultSettings = settings.GetDefault();
-
-        return settings.StartDocsEnabled == defaultSettings.StartDocsEnabled &&
-                settings.HelpCenterEnabled == defaultSettings.HelpCenterEnabled &&
-                settings.FeedbackAndSupportEnabled == defaultSettings.FeedbackAndSupportEnabled &&
-                settings.UserForumEnabled == defaultSettings.UserForumEnabled &&
-                settings.VideoGuidesEnabled == defaultSettings.VideoGuidesEnabled &&
-                settings.LicenseAgreementsEnabled == defaultSettings.LicenseAgreementsEnabled;
-    }
 }

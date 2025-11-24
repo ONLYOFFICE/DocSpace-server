@@ -26,16 +26,16 @@
 
 namespace ASC.Core;
 
-public class AzRecord : IMapFrom<Acl>
+public class AzRecord
 {
     public Guid Subject { get; set; }
-    
+
     public Guid Action { get; set; }
-    
+
     public string Object { get; set; }
-    
+
     public AceType AceType { get; set; }
-    
+
     public int TenantId { get; set; }
 
     public AzRecord() { }
@@ -71,4 +71,12 @@ public class AzRecord : IMapFrom<Acl>
             (Object ?? string.Empty).GetHashCode() ^
             AceType.GetHashCode();
     }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class AzRecordMapper
+{
+    public static partial AzRecord Map(this Acl source);
+    public static partial IQueryable<AzRecord> Project(this IQueryable<Acl> source);
+    public static partial Acl Map(this AzRecord source);
 }

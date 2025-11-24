@@ -33,4 +33,3 @@ public enum EventState
     Published = 2,
     PublishedFailed = 3
 }
-

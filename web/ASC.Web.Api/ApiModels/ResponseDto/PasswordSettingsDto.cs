@@ -34,42 +34,42 @@ public class PasswordSettingsDto
     /// <summary>
     /// The minimum number of characters required for valid passwords.
     /// </summary>
-    public int MinLength { get; set; }
+    public required int MinLength { get; set; }
 
     /// <summary>
     /// Specifies whether the password should contain the uppercase letters or not.
     /// </summary>
-    public bool UpperCase { get; set; }
+    public required bool UpperCase { get; set; }
 
     /// <summary>
     /// Specifies whether the password should contain the digits or not.
     /// </summary>
-    public bool Digits { get; set; }
+    public required bool Digits { get; set; }
 
     /// <summary>
     /// Specifies whether the password should contain the special symbols or not.
     /// </summary>
-    public bool SpecSymbols { get; set; }
+    public required bool SpecSymbols { get; set; }
 
     /// <summary>
     /// The allowed password characters in the regex string format.
     /// </summary>
-    public string AllowedCharactersRegexStr { get; set; }
+    public required string AllowedCharactersRegexStr { get; set; }
 
     /// <summary>
     /// The password digits in the regex string format.
     /// </summary>
-    public string DigitsRegexStr { get; set; }
+    public required string DigitsRegexStr { get; set; }
 
     /// <summary>
     /// The password uppercase letters in the regex string format.
     /// </summary>
-    public string UpperCaseRegexStr { get; set; }
+    public required string UpperCaseRegexStr { get; set; }
 
     /// <summary>
     /// The passaword special symbols in the regex string format.
     /// </summary>
-    public string SpecSymbolsRegexStr { get; set; }
+    public required string SpecSymbolsRegexStr { get; set; }
 }
 
 [Singleton]

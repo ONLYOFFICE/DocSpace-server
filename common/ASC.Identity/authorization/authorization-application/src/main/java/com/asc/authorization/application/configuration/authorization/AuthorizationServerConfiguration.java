@@ -72,6 +72,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @RequiredArgsConstructor
 public class AuthorizationServerConfiguration {
+  private static final String CLIENT_SECRET_BASIC = "client_secret_basic";
+  private static final String CLIENT_SECRET_POST = "client_secret_post";
+
+  private static final String AUTHORIZATION_CODE = "authorization_code";
+  private static final String PERSONAL_ACCESS_TOKEN = "personal_access_token";
+  private static final String REFRESH_TOKEN = "refresh_token";
+
   private final AuthorizationFormConfiguration formConfiguration;
 
   private final RateLimiterFilter rateLimiterFilter;
@@ -104,6 +111,12 @@ public class AuthorizationServerConfiguration {
   public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) {
     var authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
     var endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
+    var supportedScopes =
+        List.of(
+            "accounts:read", "accounts:write",
+            "rooms:read", "rooms:write",
+            "accounts.self:read", "accounts.self:write",
+            "files:read", "files:write");
 
     http.securityMatcher(endpointsMatcher)
         .authorizeHttpRequests(
@@ -116,6 +129,32 @@ public class AuthorizationServerConfiguration {
         .apply(authorizationServerConfigurer);
 
     http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+        .authorizationServerMetadataEndpoint(
+            authorizationMetadataEndpoint ->
+                authorizationMetadataEndpoint.authorizationServerMetadataCustomizer(
+                    metadataConfigurer ->
+                        metadataConfigurer
+                            .grantTypes(
+                                types -> {
+                                  types.retainAll(List.of(AUTHORIZATION_CODE, REFRESH_TOKEN));
+                                  types.add(PERSONAL_ACCESS_TOKEN);
+                                })
+                            .scopes(scopes -> scopes.addAll(supportedScopes))
+                            .tokenEndpointAuthenticationMethods(
+                                methods -> {
+                                  methods.clear();
+                                  methods.add(CLIENT_SECRET_POST);
+                                })
+                            .tokenIntrospectionEndpointAuthenticationMethods(
+                                methods -> {
+                                  methods.clear();
+                                  methods.add(CLIENT_SECRET_POST);
+                                })
+                            .tokenRevocationEndpointAuthenticationMethods(
+                                methods -> {
+                                  methods.clear();
+                                  methods.add(CLIENT_SECRET_POST);
+                                })))
         .oidc(
             oidcConfigurer ->
                 oidcConfigurer
@@ -127,17 +166,25 @@ public class AuthorizationServerConfiguration {
                                         .grantTypes(
                                             types -> {
                                               types.retainAll(
-                                                  List.of("authorization_code", "refresh_token"));
-                                              types.add("personal_access_token");
+                                                  List.of(AUTHORIZATION_CODE, REFRESH_TOKEN));
+                                              types.add(PERSONAL_ACCESS_TOKEN);
                                             })
-                                        .scopes(
-                                            scopes ->
-                                                scopes.addAll(
-                                                    List.of(
-                                                        "contacts:read", "contacts:write",
-                                                        "rooms:read", "rooms:write",
-                                                        "contacts.self:read", "contacts.self:write",
-                                                        "files:read", "files:write")))
+                                        .scopes(scopes -> scopes.addAll(supportedScopes))
+                                        .tokenEndpointAuthenticationMethods(
+                                            methods -> {
+                                              methods.clear();
+                                              methods.add(CLIENT_SECRET_POST);
+                                            })
+                                        .tokenIntrospectionEndpointAuthenticationMethods(
+                                            methods -> {
+                                              methods.clear();
+                                              methods.add(CLIENT_SECRET_POST);
+                                            })
+                                        .tokenRevocationEndpointAuthenticationMethods(
+                                            methods -> {
+                                              methods.clear();
+                                              methods.add(CLIENT_SECRET_POST);
+                                            })
                                         .build()))
                     .userInfoEndpoint(
                         uinfoConfigurer ->

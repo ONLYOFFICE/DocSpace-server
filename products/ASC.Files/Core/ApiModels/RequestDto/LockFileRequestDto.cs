@@ -52,5 +52,5 @@ public class LockFileRequestDto<T>
     /// The parameters for locking a file.
     /// </summary>
     [FromBody]
-    public LockFileParameters File { get; set; }
+    public required LockFileParameters File { get; set; }
 }

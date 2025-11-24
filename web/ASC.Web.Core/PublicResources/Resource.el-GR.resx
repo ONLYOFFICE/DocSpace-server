@@ -206,7 +206,7 @@
     <value>Τι νέο υπάρχει</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Παρακολούθηση των συνδέσεων και των ενεργειών των χρηστών</value>
+    <value>Παρακολούθηση συνδέσεων και ενεργειών</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Μέγ. μέγεθος αρχείου</value>
@@ -221,7 +221,7 @@
     <value>Ο αριθμός των διαχειριστών</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Αυτόματη δημιουργία αντιγράφων ασφαλείας και ανάκτηση</value>
+    <value>Ανάκτηση δεδομένων</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Απεριόριστος αριθμός ενεργών δωματίων</value>
@@ -248,7 +248,7 @@
     <value>Χρήστες στο δωμάτιο:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Απεριόριστος αριθμός χρηστών</value>
+    <value>Απεριόριστος αριθμός χρηστών και φιλοξενουμένων</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Ο αριθμός των χρηστών πρέπει να είναι ίσος ή μικρότερος από {0}</value>
@@ -1088,16 +1088,10 @@
     <value>Νόμισμα</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Ημερομηνία και ώρα</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Περιγραφή</value>
+    <value>Ημερομηνία</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Ποσότητα</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Όνομα υπηρεσίας</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Χώρος αποθήκευσης στον δίσκο</value>
@@ -1111,9 +1105,6 @@
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Αναφορά λειτουργιών πελάτη ({0}-{1})</value>
   </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Ανάληψη</value>
-  </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>Δεν βρέθηκε η ομάδα</value>
   </data>
@@ -1125,5 +1116,50 @@
   </data>
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Αποθηκευτικός χώρος που χρησιμοποιήθηκε:</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Αυτόματη ανανέωση</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Αντίγραφο ασφαλείας</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Αντίγραφο ασφαλείας</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Αντίγραφο ασφαλείας</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Τύπος</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Απαιτείται πληρωμή</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} δωρεάν αντίγραφα ασφαλείας ανά μήνα</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Καθέκαστα</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Επαφή</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Χρέος</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Ιστορικό συναλλαγών</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Αυτόματη ανανέωση</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Ενεργοποιήστε τα αντίγραφα ασφαλείας για το DocSpace σας. Το κόστος θα χρεώνεται αυτόματα.</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Ο αριθμός των δωρεάν αντιγράφων ασφαλείας δεν πρέπει να υπερβαίνει τα {0} εντός ενός μήνα</value>
   </data>
 </root>

@@ -165,6 +165,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Boja teme promenjena</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kontakti</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Podešavanja kolačića ažurirana</value>
   </data>
@@ -342,9 +345,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Podešavanja Sphinx-a su ažurirana</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Generalno</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Podešavanja dobrodošli stranice ažurirana</value>
   </data>
@@ -353,9 +353,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Grupa obrisana: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Grupe</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Grupe ažurirane: {0}</value>
@@ -451,7 +448,7 @@
     <value>Uspešna prijava putem API i SMS koda</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Prijava putem društvenog naloga upešna</value>
+    <value>Uspešna prijava putem društvenog naloga: {0}</value>
   </data>
   <data name="LoginSuccessViaApiTfa" xml:space="preserve">
     <value>Uspešna prijava putem API i autentifikator aplikacije</value>
@@ -543,9 +540,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista proizvoda ažurirana</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Proizvodi</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Ponovna dodela</value>
   </data>
@@ -612,13 +606,16 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesija započeta</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Podešavanja</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO onemogućen</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO omogućen</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Počni rezervnu kopiju</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -747,9 +744,6 @@
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Korisnicima [{0}]. Poslata uputstva za promenu lozinke</value>
   </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Korisnici</value>
-  </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Korisnicima [{0}]. Poslata uputstva za aktivaciju</value>
   </data>
@@ -863,9 +857,6 @@
   </data>
   <data name="FolderIndexReordered" xml:space="preserve">
     <value>Folder: {0}. Indeksi su preuređeni</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="RoomDenyDownloadDisabled" xml:space="preserve">
     <value>Soba: {0}. Zabrani preuzimanje onemogućeno</value>
@@ -986,5 +977,62 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP sinhronizacija završena</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Podešavanja vidljivosti promotivnih banera su promenjena</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Podešavanja usluga omogućenih za korisnički novčanik su ažurirana</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Lokacija</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Uspešna prijava putem OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Uspešna prijava putem korisničkog imena i lozinke</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Datoteke [{0}]. Kreirana je eksterna veza: {1}. Uloga: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Datoteke [{0}]. Eksterna veza obrisana: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Datoteke [{0}]. Eksterna veza ažurirana: {1}. Uloga: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Datoteka označena kao omiljena: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Datoteka uklonjena iz omiljenih: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Datoteka uklonjena iz „Deljeno sa mnom“: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Datoteke [{0}]. Pristup ažuriran za {1}. Uloga: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Fascikla preuzeta: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Fascikle [{0}]. Kreirana je eksterna veza: {1}. Uloga: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Fascikle [{0}]. Eksterna veza obrisana: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Fascikle [{0}]. Eksterna veza ažurirana: {1}. Uloga: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Fascikla uklonjena iz „Deljeno sa mnom“: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Fascikle [{0}]. Pristup ažuriran za {1}. Uloga: {2}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Eksterna veza opozvana: {1}</value>
   </data>
 </root>

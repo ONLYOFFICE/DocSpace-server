@@ -53,7 +53,7 @@ public class VersionController(
     }
 
     /// <summary>
-    /// Returns a list of the available portal versions including the current version.
+    /// Returns a list of the available portal versions, including the current version.
     /// </summary>
     /// <short>
     /// Get the portal versions
@@ -85,7 +85,7 @@ public class VersionController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         (await tenantManager.GetTenantVersionsAsync()).FirstOrDefault(r => r.Id == inDto.VersionId).NotFoundIfNull();
-        
+
         var tenant = tenantManager.GetCurrentTenant();
         await tenantManager.SetTenantVersionAsync(tenant, inDto.VersionId);
 

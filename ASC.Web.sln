@@ -49,6 +49,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0E35EB77-EC53-44C2-99EB-3D845C79675D}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		Directory.Packages.props = Directory.Packages.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Data.Encryption", "common\ASC.Data.Encryption\ASC.Data.Encryption.csproj", "{C4DF1A63-C9EB-4D8F-A4E5-4FD9249A5089}"
@@ -92,6 +93,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.Migrations.Core", "common\Tools\ASC.Migrations.Core\ASC.Migrations.Core.csproj", "{80C02200-492A-4102-903C-2C5CB24ABA48}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.Migrations.PostgreSql.SaaS", "migrations\postgre\SaaS\ASC.Migrations.PostgreSql.SaaS.csproj", "{1A086922-36A5-4E1D-9CC7-96232126DFB7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AI.Core", "products\ASC.AI\Core\ASC.AI.Core.csproj", "{C1A27301-B158-472A-B9C8-F98ABCB4AEAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AI", "products\ASC.AI\Server\ASC.AI.csproj", "{1F2AEF6E-12EB-4E8E-8A13-D12F711F51A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AI.Service", "products\ASC.AI\Service\ASC.AI.Service.csproj", "{91B8E070-9067-4198-9619-1157E2559106}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -259,6 +266,18 @@ Global
 		{1A086922-36A5-4E1D-9CC7-96232126DFB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A086922-36A5-4E1D-9CC7-96232126DFB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A086922-36A5-4E1D-9CC7-96232126DFB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1A27301-B158-472A-B9C8-F98ABCB4AEAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1A27301-B158-472A-B9C8-F98ABCB4AEAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1A27301-B158-472A-B9C8-F98ABCB4AEAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1A27301-B158-472A-B9C8-F98ABCB4AEAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F2AEF6E-12EB-4E8E-8A13-D12F711F51A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F2AEF6E-12EB-4E8E-8A13-D12F711F51A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F2AEF6E-12EB-4E8E-8A13-D12F711F51A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F2AEF6E-12EB-4E8E-8A13-D12F711F51A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91B8E070-9067-4198-9619-1157E2559106}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91B8E070-9067-4198-9619-1157E2559106}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91B8E070-9067-4198-9619-1157E2559106}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91B8E070-9067-4198-9619-1157E2559106}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

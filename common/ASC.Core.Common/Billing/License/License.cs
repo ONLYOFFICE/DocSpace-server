@@ -102,7 +102,7 @@ public class License
     /// <summary>
     /// Indicates whether the license is Developer or not.
     /// </summary>
-    [JsonPropertyName("docspace_dev")] 
+    [JsonPropertyName("docspace_dev")]
     public bool Developer { get; set; }
 
     public static License Parse(string licenseString)

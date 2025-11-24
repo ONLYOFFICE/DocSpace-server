@@ -76,7 +76,6 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Saved file parameters", typeof(FileDto<int>))]
-    [SwaggerResponse(200, "Saved file parameters", typeof(FileDto<string>))]
     [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("{fileId}/saveediting")]
@@ -109,7 +108,6 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
-    [SwaggerResponse(200, "File information", typeof(FileDto<string>))]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("{fileId}/startfilling")]
     public async Task<FileDto<T>> StartFillingFile(StartFillingRequestDto<T> inDto)
@@ -143,7 +141,6 @@ public abstract class EditorController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Configuration parameters", typeof(ConfigurationDto<int>))]
-    [SwaggerResponse(200, "Configuration parameters", typeof(ConfigurationDto<string>))]
     [SwaggerResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]
     [AllowNotPayment]
@@ -156,7 +153,6 @@ public abstract class EditorController<T>(
         var rootFolder = await documentServiceHelper.GetRootFolderAsync(file);
         if (file.IsForm && rootFolder.RootFolderType != FolderType.RoomTemplates)
         {
-
             formOpenSetup = rootFolder.FolderType switch
             {
                 FolderType.FillingFormsRoom => await documentServiceHelper.GetFormOpenSetupForFillingRoomAsync(file, rootFolder, inDto.EditorType, inDto.Edit, entryManager),
@@ -170,14 +166,15 @@ public abstract class EditorController<T>(
                     CanFill = inDto.Fill,
                 }
             };
+
             formOpenSetup.RootFolder = rootFolder;
         }
 
         var docParams = await documentServiceHelper.GetParamsAsync(
-            formOpenSetup is { Draft: not null } ? formOpenSetup.Draft : file, 
+            formOpenSetup is { Draft: not null } ? formOpenSetup.Draft : file,
             lastVersion,
             await documentServiceHelper.CheckCustomQuota(rootFolder) && (formOpenSetup?.CanEdit ?? !file.IsCompletedForm),
-            !inDto.View, 
+            !inDto.View,
             true, formOpenSetup == null || formOpenSetup.CanFill,
             formOpenSetup?.EditorType ?? inDto.EditorType,
             formOpenSetup is { IsSubmitOnly: true });
@@ -197,6 +194,10 @@ public abstract class EditorController<T>(
                 };
             }
         }
+        if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
+        {
+            file.FormInfo = new FormInfo<T> { FillingSessionId = formOpenSetup.FillingSessionId };
+        }
 
         var result = await configurationConverter.Convert(configuration, file);
 
@@ -206,7 +207,7 @@ public abstract class EditorController<T>(
             result.EditorConfig.Embedded.ShareUrl = "";
             result.EditorConfig.Customization.Goback = await configuration.EditorConfig?.Customization.GetGoBack(inDto.EditorType, file);
         }
-        
+
         if (formOpenSetup != null)
         {
             if (formOpenSetup.RootFolder.FolderType is FolderType.VirtualDataRoom)
@@ -221,6 +222,10 @@ public abstract class EditorController<T>(
                 {
                     result.EditorConfig.User.Roles = [formOpenSetup.RoleName];
                     result.FillingStatus = true;
+                }
+                if (!formOpenSetup.HasRole)
+                {
+                    result.EditorConfig.Customization.SubmitForm.Visible = false;
                 }
             }
             else
@@ -238,13 +243,6 @@ public abstract class EditorController<T>(
         if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
         {
             result.FillingSessionId = formOpenSetup.FillingSessionId;
-            if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
-            {
-                result.EditorConfig.User = new UserConfig
-                {
-                    Id = formOpenSetup.FillingSessionId
-                };
-            }
         }
 
         if (rootFolder.RootFolderType == FolderType.RoomTemplates)
@@ -276,9 +274,14 @@ public abstract class EditorController<T>(
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionWrapper>))]
     [HttpGet("{fileId}/sharedusers")]
-    public async Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
+    public Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
     {
-        return await fileStorageService.SharedUsersAsync(inDto.FileId);
+        if (!securityContext.IsAuthenticated)
+        {
+            return Task.FromResult<List<MentionWrapper>>(null);
+        }
+
+        return fileStorageService.SharedUsersAsync(inDto.FileId);
     }
 
     /// <summary>
@@ -452,7 +455,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             DocServiceUrlApi = url,
             DocServicePreloadUrl = preloadUrl,
             DocServiceUrl = filesLinkUtility.GetDocServiceUrl(),
-            DocServiceUrlInternal =filesLinkUtility.GetDocServiceUrlInternal(),
+            DocServiceUrlInternal = filesLinkUtility.GetDocServiceUrlInternal(),
             DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),
             DocServiceSignatureHeader = await filesLinkUtility.GetDocServiceSignatureHeaderAsync(),
             DocServiceSslVerification = await filesLinkUtility.GetDocServiceSslVerificationAsync(),

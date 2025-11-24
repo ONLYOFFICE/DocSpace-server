@@ -85,11 +85,12 @@ public class MigrationInfo
 
         if (CommonStorage != null)
         {
-            CommonStorage.ShouldImport = apiInfo.ImportSharedFiles;
+            CommonStorage.ShouldImport = apiInfo.ImportCommonFiles;
         }
+
         if (ProjectStorage != null)
-        { 
-            ProjectStorage.ShouldImport = apiInfo.ImportSharedFolders;
+        {
+            ProjectStorage.ShouldImport = apiInfo.ImportProjectFiles;
             ProjectStorage.ShouldImportSharedFiles = true;
             ProjectStorage.ShouldImportSharedFolders = true;
         }

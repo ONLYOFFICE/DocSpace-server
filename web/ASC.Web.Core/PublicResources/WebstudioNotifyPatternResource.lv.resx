@@ -866,7 +866,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace ir &lt;span style="color: #FF6F3D;"&gt;deaktivizēts&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace ir &lt;span style="color: #FF6F3D;"&gt;dzēsts&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Jūsu ${LetterLogoText} DocSpace ir veiksmīgi deaktivizēts. Ņemiet vērā, ka visi jūsu dati tiks izdzēsti saskaņā ar mūsu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Konfidencialitātes politiku&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1089,7 +1089,7 @@ $TrulyYours</value>
     <value>Pievienojieties ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace ir deaktivizēts</value>
+    <value>${LetterLogoText} DocSpace ir dzēsts</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Lietotājs (a-) ir izdzēsis (-usi) savu profilu</value>
@@ -1973,5 +1973,29 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Nepieciešama darbība: Neizdevās automātiski papildināt Maka atlikumu Jūsu ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Jūsu parole ir veiksmīgi nomainīta</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Atvērt DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1. Parole veiksmīgi nomainīta
+
+Jūsu konta *$UserName*, *$UserEmail* parole tika veiksmīgi nomainīta *$Date* vietnē DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Ierīce: *$Device*
+#if($Location != "")
+Atrašanās vieta: *$Location*
+#end
+Pārlūkprogramma: *$Browser*
+
+Ja šo darbību veicāt jūs, nekādas turpmākas darbības nav nepieciešamas. Ja šīs izmaiņas šķiet aizdomīgas vai jūs tās neatļāvāt, lūdzu, nekavējoties atiestatiet paroli un atspējojiet piekļuvi DocSpace šai ierīcei.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

@@ -16,14 +16,14 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 type: "tinyint(1)",
                 nullable: true);
 
-           /*
-            migrationBuilder.UpdateData(
-                table: "core_user",
-                keyColumn: "id",
-                keyValue: "66faa6e4-f133-11ea-b126-00ffeec8b4ef",
-                column: "spam",
-                value: null);
-           */
+            /*
+             migrationBuilder.UpdateData(
+                 table: "core_user",
+                 keyColumn: "id",
+                 keyValue: "66faa6e4-f133-11ea-b126-00ffeec8b4ef",
+                 column: "spam",
+                 value: null);
+            */
 
             migrationBuilder.Sql("UPDATE core_user JOIN tenants_tenants ON core_user.id = tenants_tenants.owner_id SET core_user.spam = tenants_tenants.spam");
 

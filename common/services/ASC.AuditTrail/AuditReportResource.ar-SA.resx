@@ -162,6 +162,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>تم تغيير لون السمات</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>جهات الاتصال</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>تم تحديث إعدادات ملفات تعريف الارتباط</value>
   </data>
@@ -333,9 +336,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>تم تحديث إعدادات Sphinx</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>عام</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>تم تحديث إعدادات البوابة الترحيبية</value>
   </data>
@@ -344,9 +344,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>تم حذف المجموعة: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>المجموعات</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>تم تحديث المجموعات: {0}</value>
@@ -431,9 +428,6 @@
   </data>
   <data name="LoginSuccess" xml:space="preserve">
     <value>تم تسجيل الدخول بنجاح</value>
-  </data>
-  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>تم تسجيل الدخول من خلال حسابات مواقع التواصل الاجتماعي بنجاح</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>تم تسجيل الدخول من خلال تطبيق مواقع التواصل الاجتماعي</value>
@@ -531,9 +525,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>تم تحديث قائمة المنتجات</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>المنتجات</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>إعادات التعيين</value>
   </data>
@@ -591,13 +582,16 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>تم بدء الجلسة</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>الإعدادات</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>تم تعطيل بوابة الدخول الموحد</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>تم تفعيل بوابة الدخول الموحد</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>بدء النسخ الاحتياطي</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -726,9 +720,6 @@
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>تم ارسال تعليمات تغيير كلمة المرور بواسطة المستخدمين [{0}]</value>
   </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>المستخدمين</value>
-  </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>تم ارسال تعليمات التفعيل بواسطة المستخدمين [{0}]</value>
   </data>
@@ -854,9 +845,6 @@
   </data>
   <data name="RoomInviteResend" xml:space="preserve">
     <value>تم إرسال الدعوات مرة أخرى: {0}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>تم تغيير تنشيط {0} للعميل</value>
@@ -986,5 +974,65 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>اكتملت مزامنة LDAP</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>الموقع</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>تم تغيير إعدادات رؤية اللافتات الترويجية</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>تم تحديث إعدادات الخدمات الممكّنة لمحفظة العملاء</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>تسجيل الدخول بنجاح عبر OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>تم تسجيل الدخول بنجاح عبر تسجيل الدخول وكلمة المرور</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>الملفات [{0}]. تم إنشاء الرابط الخارجي: {1}. الدور: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>الملفات [{0}]. تم حذف الرابط الخارجي: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>الملفات [{0}]. تم تحديث الرابط الخارجي: {1}. الدور: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>تم تمييز الملف كمفضل: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>تمت إزالة الملف من المفضلة: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>تمت إزالة الملف من "المشارك معي": {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>الملفات [{0}]. تم تحديث الوصول لـ {1}. الدور: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>تم تنزيل المجلد: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>المجلدات [{0}]. تم إنشاء الرابط الخارجي: {1}. الدور: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>المجلدات [{0}]. تم حذف الرابط الخارجي: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>المجلدات [{0}]. تم تحديث الرابط الخارجي: {1}. الدور: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>تمت إزالة المجلد من "المشارك معي": {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>المجلدات [{0}]. تم تحديث الوصول لـ {1}. الدور: {2}</value>
+  </data>
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
+    <value>تم تسجيل الدخول بنجاح عبر حساب التواصل الاجتماعي: {0}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>تم إلغاء الرابط الخارجي: {1}</value>
   </data>
 </root>

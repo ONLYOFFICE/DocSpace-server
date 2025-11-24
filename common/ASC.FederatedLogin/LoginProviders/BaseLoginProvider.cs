@@ -70,7 +70,10 @@ public enum LoginProvider
     Yahoo,
 
     [SwaggerEnum("Yandex")]
-    Yandex
+    Yandex,
+    
+    [SwaggerEnum("Github")]
+    Github,
 }
 
 public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : Consumer, ILoginProvider, new()
@@ -93,12 +96,12 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
     public abstract string ClientSecret { get; }
     public virtual string Scopes => string.Empty;
 
-    protected readonly OAuth20TokenHelper _oAuth20TokenHelper;
+    protected readonly IOAuth20TokenHelper _oAuth20TokenHelper;
 
     protected BaseLoginProvider() { }
 
     protected BaseLoginProvider(
-        OAuth20TokenHelper oAuth20TokenHelper,
+        IOAuth20TokenHelper oAuth20TokenHelper,
         TenantManager tenantManager,
         CoreBaseSettings coreBaseSettings,
         CoreSettings coreSettings,

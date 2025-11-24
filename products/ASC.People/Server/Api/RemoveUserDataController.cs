@@ -39,7 +39,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         AuthContext authContext,
         TenantManager tenantManager)
     : ApiControllerBase
-    {
+{
     /// <summary>
     /// Returns the progress of the started data deletion for the user with the ID specified in the request.
     /// </summary>
@@ -74,7 +74,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var tenant = tenantManager.GetCurrentTenant();
-        
+
         if (user.IsLDAP() || user.IsOwner(tenant))
         {
             throw new SecurityException();
@@ -109,15 +109,15 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         }
 
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-        var currentUserType = await userManager.GetUserTypeAsync(currentUser.Id); 
-        
+        var currentUserType = await userManager.GetUserTypeAsync(currentUser.Id);
+
         var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) || user.IsMe(authContext) || user.Status != EmployeeStatus.Terminated)
         {
             throw new ArgumentException("Can not delete user with id = " + inDto.UserId);
         }
-        
-        var userType = await userManager.GetUserTypeAsync(user); 
+
+        var userType = await userManager.GetUserTypeAsync(user);
 
         switch (userType)
         {
@@ -125,8 +125,8 @@ public class RemoveUserDataController(PermissionContext permissionContext,
             case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
                 throw new SecurityException(Resource.ErrorAccessDenied);
         }
-        
-        var isGuest = await userManager.IsGuestAsync(user);
+
+        var isGuest = await userManager.IsGuestAsync(user.Id);
 
         var progressItem = await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, true, true, isGuest);
 

@@ -124,7 +124,6 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <path>api/2.0/files/{folderId}/insert</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
-    [SwaggerResponse(200, "Inserted file", typeof(FileDto<string>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "Folder not found")]
     [HttpPost("{folderId}/insert", Order = 1)]
@@ -216,8 +215,6 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     [HttpPost("@common/upload")]
     public async Task<object> UploadFileToCommon([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
-        inDto.CreateNewIfExist = false;
-
         return await filesControllerHelper.UploadFileAsync(await globalFolderHelper.FolderCommonAsync, inDto);
     }
 
@@ -241,8 +238,6 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     [HttpPost("@my/upload")]
     public async Task<object> UploadFileToMy([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
-        inDto.CreateNewIfExist = false;
-
         return await filesControllerHelper.UploadFileAsync(await globalFolderHelper.FolderMyAsync, inDto);
     }
 }

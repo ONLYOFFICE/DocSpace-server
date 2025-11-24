@@ -67,6 +67,6 @@ public class UserPhotoThumbnailSettings : ISettings<UserPhotoThumbnailSettings>
             IsDefault = true
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 }

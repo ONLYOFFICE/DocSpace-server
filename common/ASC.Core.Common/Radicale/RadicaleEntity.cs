@@ -56,10 +56,10 @@ public abstract class RadicaleEntity(IConfiguration configuration, InstanceCrypt
         }
         return requestUrl;
     }
-    
+
     public async Task<string> GetSystemAuthorizationAsync()
-    {   
-        if(configuration["radicale:admin"] == null || configuration["radicale:admin"] == "")
+    {
+        if (configuration["radicale:admin"] == null || configuration["radicale:admin"] == "")
         {
             return null;
         }

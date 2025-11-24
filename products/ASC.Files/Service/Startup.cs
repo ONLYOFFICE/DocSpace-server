@@ -24,11 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Encodings.Web;
+
 using ASC.Data.Storage.Encryption;
 using ASC.Files.Core.RoomTemplates.Operations;
 using ASC.Files.Core.Services.NotifyService;
 using ASC.Files.Service.Services;
-using ASC.Files.Service.Services.Thumbnail;
 using ASC.Web.Files.Configuration;
 
 namespace ASC.Files.Service;
@@ -47,11 +48,11 @@ public class Startup : BaseWorkerStartup
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
         await base.ConfigureServices(builder);
-        
+
         var services = builder.Services;
         services.AddHttpClient();
 
-        
+
         if (!Enum.TryParse<ElasticLaunchType>(Configuration["elastic:mode"], true, out var elasticLaunchType))
         {
             elasticLaunchType = ElasticLaunchType.Inclusive;
@@ -85,18 +86,21 @@ public class Startup : BaseWorkerStartup
                 services.AddActivePassiveHostedService<RefreshLicenseService>(Configuration);
             }
         }
-        
+
         services.RegisterQueue<RoomIndexExportTask>();
         services.RegisterQueue<FileDeleteOperation>(10);
         services.RegisterQueue<FileMoveCopyOperation>(10);
         services.RegisterQueue<FileDuplicateOperation>(10);
-        services.RegisterQueue<FileDownloadOperation>(10);
+        services.RegisterQueue<FileDownloadOperation>(10, timeUntilUnregisterInSeconds: 60 * 2);
         services.RegisterQueue<FileMarkAsReadOperation>(10);
         services.RegisterQueue<FormFillingReportTask>();
         services.RegisterQueue<CreateRoomTemplateOperation>();
         services.RegisterQueue<CreateRoomFromTemplateOperation>();
         services.RegisterQueue<EncryptionOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
-        
+        services.RegisterQueue<CustomerOperationsReportTask>();
+        services.RegisterQueue<AsyncTaskData<int>>();
+        services.RegisterQueue<AsyncTaskData<string>>();
+
         services.RegisterQuotaFeature();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
@@ -105,5 +109,7 @@ public class Startup : BaseWorkerStartup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);
         services.AddDocumentServiceHttpClient(Configuration);
+
+        services.AddScoped(_ => UrlEncoder.Default);
     }
 }

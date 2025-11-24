@@ -31,7 +31,7 @@ public class RegisterInstanceDao<T>(
     IDbContextFactory<InstanceRegistrationContext> dbContextFactory) : IRegisterInstanceDao<T> where T : IHostedService
 {
     private readonly InstanceRegistrationContext _instanceRegistrationContext = dbContextFactory.CreateDbContext();
-    
+
     public async Task AddOrUpdateAsync(InstanceRegistration obj)
     {
         var inst = await _instanceRegistrationContext.InstanceRegistrations.FindAsync(obj.InstanceRegistrationId);
@@ -50,7 +50,7 @@ public class RegisterInstanceDao<T>(
 
         do
         {
-            saveFailed = false; 
+            saveFailed = false;
 
             try
             {
@@ -106,10 +106,10 @@ public class RegisterInstanceDao<T>(
 
 }
 
- static file class Queries
- {
-     public static readonly Func<InstanceRegistrationContext, string, IAsyncEnumerable<InstanceRegistration>>
-         InstanceRegistrationsAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-             (InstanceRegistrationContext ctx, string workerTypeName) =>
-                 ctx.InstanceRegistrations.Where(x => x.WorkerTypeName == workerTypeName));
- }
+static file class Queries
+{
+    public static readonly Func<InstanceRegistrationContext, string, IAsyncEnumerable<InstanceRegistration>>
+        InstanceRegistrationsAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (InstanceRegistrationContext ctx, string workerTypeName) =>
+                ctx.InstanceRegistrations.Where(x => x.WorkerTypeName == workerTypeName));
+}

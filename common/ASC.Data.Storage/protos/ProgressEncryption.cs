@@ -35,4 +35,3 @@ public record ProgressEncryption
     [ProtoMember(2)]
     public int TenantId { get; set; }
 }
-

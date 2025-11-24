@@ -50,7 +50,7 @@ public class FolderContentDto<T>
     /// The folder path.
     /// </summary>
     [SwaggerSchemaCustom(Example = "{key = \"Key\", path = \"//path//to//folder\"}")]
-    public object PathParts { get; set; }
+    public required object PathParts { get; set; }
 
     /// <summary>
     /// The folder start index.
@@ -68,7 +68,7 @@ public class FolderContentDto<T>
     /// The total number of elements in the folder.
     /// </summary>
     [SwaggerSchemaCustom(Example = 4)]
-    public int Total { get; set; }
+    public required int Total { get; set; }
 
     /// <summary>
     /// The new element index in the folder.
@@ -85,20 +85,27 @@ public class FolderContentDtoHelper(
     BadgesSettingsHelper badgesSettingsHelper,
     FileSecurityCommon fileSecurityCommon,
     AuthContext authContext,
-    BreadCrumbsManager breadCrumbsManager)
+    BreadCrumbsManager breadCrumbsManager,
+    AiAccessibility accessibility)
 {
-    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null)
+    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null)
     {
         var types = filterType.HasValue ? new[] { filterType.Value } : null;
 
-        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, text, extension, searchArea ?? SearchArea.Active, formsItemDto, location, sortByFilter, sortOrder, startIndex, limit);
+        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, sharedBy ?? Guid.Empty,types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, text, extension, searchArea ?? SearchArea.Active, formsItemDto, location, sortByFilter, sortOrder, startIndex, limit);
 
         return folderContentWrapper.NotFoundIfNull();
     }
 
     public async Task<FolderContentDto<T>> GetAsync<T>(T parentId, DataWrapper<T> folderItems, int startIndex)
     {
-        var result = new FolderContentDto<T> { PathParts = folderItems.FolderPathParts, StartIndex = startIndex, Total = folderItems.Total, Count = folderItems.Entries.Count };
+        var result = new FolderContentDto<T>
+        {
+            PathParts = folderItems.FolderPathParts, 
+            StartIndex = startIndex, 
+            Total = folderItems.Total, 
+            Count = folderItems.Entries.Count
+        };
         
         var expiration = TimeSpan.MaxValue;
         if (folderItems.ParentRoom is { SettingsLifetime: not null })
@@ -113,6 +120,8 @@ public class FolderContentDtoHelper(
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
         }
         
+        var aiReady = await accessibility.IsAiEnabledAsync();
+
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {
             var order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(parentId);
@@ -139,21 +148,31 @@ public class FolderContentDtoHelper(
                 }
             }
 
-            var foldersTask = GetFoldersDto(folders, contextFolder: folderItems.FolderInfo).ToListAsync();
-            var filesTask = GetFilesDto(files, contextFolder: folderItems.FolderInfo).ToListAsync();
-            result.Files = await filesTask;
-            result.Folders = await foldersTask;
+            var foldersTask = GetFoldersDto(folders, contextFolder: folderItems.FolderInfo).ToListAsync().AsTask();
+            var filesTask = GetFilesDto(files, contextFolder: folderItems.FolderInfo).ToListAsync().AsTask();
+
+            await Task.WhenAll(foldersTask, filesTask);
+
+            result.Files = filesTask.Result;
+            result.Folders = foldersTask.Result;
         }
         
         
-        var currentTask = GetFolderDto(folderItems.FolderInfo);
+        var currentTask = GetFolderDto(folderItems.FolderInfo, contextFolder: folderItems.FolderInfo);
         var isEnableBadges = badgesSettingsHelper.GetEnabledForCurrentUserAsync();
+
+        await Task.WhenAll(currentTask, isEnableBadges);
 
         result.PathParts = folderItems.FolderPathParts;
         result.StartIndex = startIndex;
         result.Total = folderItems.Total;
-        result.New = (await isEnableBadges) ? folderItems.New : 0;
-        result.Current = (FolderDto<T>)(await currentTask);
+        result.New = (isEnableBadges.Result) ? folderItems.New : 0;
+        result.Current = (FolderDto<T>)(currentTask.Result);
+
+        if (folderItems.ParentRoom is { FolderType: FolderType.AiRoom })
+        {
+            result.Current.RootRoomType = DocSpaceHelper.MapToRoomType(folderItems.ParentRoom.FolderType);
+        }
 
         return result;
 
@@ -184,7 +203,7 @@ public class FolderContentDtoHelper(
         {
             return fileEntry switch
             {
-                File<int> fol1 => await fileWrapperHelper.GetAsync(fol1, entriesOrder, expiration, contextFolder),
+                File<int> fol1 => await fileWrapperHelper.GetAsync(fol1, entriesOrder, expiration, contextFolder, aiReady),
                 File<string> fol2 => await fileWrapperHelper.GetAsync(fol2, entriesOrder, expiration, contextFolder),
                 _ => null
             };
@@ -209,7 +228,7 @@ public class FolderContentDtoHelper(
                     {
                         currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
                     }
-                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder);
+                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, aiReady);
                 case Folder<string> fol2:
                     if (currentUsersRecords == null &&
                         DocSpaceHelper.IsRoom(fol2.FolderType) &&
@@ -227,6 +246,7 @@ public class FolderContentDtoHelper(
     private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(
         T folderId, 
         Guid userIdOrGroupId, 
+        Guid sharedBy, 
         IEnumerable<FilterType> filterTypes, 
         T roomId, 
         bool searchInContent, 
@@ -255,7 +275,8 @@ public class FolderContentDtoHelper(
             count, 
             filterTypes, 
             filterTypes?.FirstOrDefault() == FilterType.ByUser, 
-            userIdOrGroupId.ToString(), 
+            userIdOrGroupId.ToString(),
+            sharedBy,
             text,
             extension, 
             searchInContent, 

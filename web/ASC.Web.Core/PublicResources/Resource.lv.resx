@@ -368,7 +368,7 @@
     <value>Kas Jauns</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Lietotāju pieteikšanās un darbību izsekošana</value>
+    <value>Izsekošana pieteikšanās un darbības</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Maksimālais faila lielums</value>
@@ -383,7 +383,7 @@
     <value>Administratoru skaits</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Automātiska dublēšana un atkopšana</value>
+    <value>Datu atgūšana</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Neierobežots aktīvo telpu skaits</value>
@@ -410,7 +410,7 @@
     <value>Lietotāji telpā:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Neierobežots lietotāju skaits</value>
+    <value>Neierobežots lietotāju un viesu skaits</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Lietotāju skaits nedrīkst pārsniegt {0}</value>
@@ -1088,16 +1088,10 @@
     <value>Valūta</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Datums un laiks</value>
-  </data>
-  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
-    <value>Apraksts</value>
+    <value>Datums</value>
   </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Daudzums</value>
-  </data>
-  <data name="AccountingCustomerOperationService" xml:space="preserve">
-    <value>Pakalpojuma nosaukums</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Diska vieta</value>
@@ -1111,9 +1105,6 @@
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Klienta darbību ziņojums ({0}-{1})</value>
   </data>
-  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
-    <value>Izņemšana</value>
-  </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>Grupa nav atrasta</value>
   </data>
@@ -1125,5 +1116,50 @@
   </data>
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Izmantotā krātuves vieta:</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Dublējums</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Dublējums</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Dublējums</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debets</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Kontaktinformācija</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Darījumu vēsture</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Automātiska papildināšana</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} bezmaksas dublējumkopijas mēnesī</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Nepieciešams maksājums</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tips</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detaļas</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Automātiska atjaunošana</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Bezmaksas dublējumu skaits nedrīkst pārsniegt {0} mēneša laikā</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Iespējojiet savas DocSpace dublējumkopijas. Izmaksas tiks aprēķinātas automātiski.</value>
   </data>
 </root>

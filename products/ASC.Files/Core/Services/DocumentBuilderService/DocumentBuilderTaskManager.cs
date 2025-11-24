@@ -26,6 +26,7 @@
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
+[Singleton(GenericArguments = [typeof(CustomerOperationsReportTask), typeof(int), typeof(CustomerOperationsReportTaskData)])]
 [Singleton(GenericArguments = [typeof(FormFillingReportTask), typeof(int), typeof(FormFillingReportTaskData)])]
 [Singleton(GenericArguments = [typeof(RoomIndexExportTask), typeof(int), typeof(RoomIndexExportTaskData)])]
 public class DocumentBuilderTaskManager<T, TId, TData> where T : DocumentBuilderTask<TId, TData>
@@ -38,7 +39,7 @@ public class DocumentBuilderTaskManager<T, TId, TData> where T : DocumentBuilder
     {
         _queue = queueFactory.CreateQueue<T>();
     }
-    
+
     public async Task<T> GetTask(int tenantId, Guid userId)
     {
         var taskId = DocumentBuilderTaskManager.GetTaskId(tenantId, userId);

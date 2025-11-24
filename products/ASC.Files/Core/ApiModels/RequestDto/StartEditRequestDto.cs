@@ -52,5 +52,5 @@ public class StartEditRequestDto<T>
     /// The file parameters to start editing.
     /// </summary>
     [FromBody]
-    public StartEdit File { get; set; }
+    public required StartEdit File { get; set; }
 }

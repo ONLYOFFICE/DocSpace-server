@@ -26,7 +26,4 @@
 
 namespace ASC.Core.Common.Quota.Features;
 
-public class CountFreeBackupFeature(TenantQuota tenantQuota) : TenantQuotaFeatureFixedCount(tenantQuota)
-{
-    public override string Name { get => "free_backup"; }
-}
+public class CountFreeBackupFeature(TenantQuota tenantQuota) : TenantQuotaFeatureFixedCount(tenantQuota, "free_backup");

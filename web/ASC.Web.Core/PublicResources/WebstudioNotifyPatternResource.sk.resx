@@ -875,7 +875,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace bol &lt;span style="color: #FF6F3D;"&gt;deaktivovaný&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace bol &lt;span style="color: #FF6F3D;"&gt;odstránený&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Váš účet ${LetterLogoText} DocSpace bol úspešne deaktivovaný. Upozorňujeme, že všetky Vaše údaje budú vymazané v súlade s našimi &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Zásadami ochrany osobných údajov&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1080,7 +1080,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Zmena hesla poštovej schránky</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace bol deaktivovaný</value>
+    <value>Dokumentačný priestor ${LetterLogoText} bol odstránený</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Používateľ vymazal svoj profil</value>
@@ -1931,5 +1931,29 @@ $TrulyYours</value>
   </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Prejsť na Nastavenia peňaženky</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Vaše heslo bolo úspešne zmenené</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Otvoriť DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Heslo bolo úspešne zmenené
+
+Vaše heslo pre účet *$UserName*, *$UserEmail* bolo úspešne zmenené dňa *$Date* v DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Zariadenie: *$Device*
+#if($Location != "")
+Poloha: *$Location*
+#end
+Prehliadač: *$Browser*
+
+Ak ste túto akciu vykonali vy, nie sú potrebné žiadne ďalšie kroky. Ak táto zmena vyzerá podozrivo alebo ste ju neschválili, okamžite si obnovte heslo a zakážte prístup k DocSpace pre toto zariadenie.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

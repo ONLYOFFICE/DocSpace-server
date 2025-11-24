@@ -96,7 +96,7 @@ public class AutoCleanTrashService(
             var now = DateTime.UtcNow;
 
             var trashId = await folderDao.GetFolderIDTrashAsync(false, tenantUser.UserId);
-            if(trashId == 0)
+            if (trashId == 0)
             {
                 return;
             }

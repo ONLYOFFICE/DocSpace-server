@@ -81,13 +81,13 @@ public class EmailValidationKeyProvider
         {
             validVisitLinkInterval = TimeSpan.FromMinutes(15);
         }
-       
+
         ValidEmailKeyInterval = validInterval;
         ValidAuthKeyInterval = authValidInterval;
         ValidVisitLinkInterval = validVisitLinkInterval;
         _logger = logger;
     }
-    
+
 
     public string GetEmailKey(string email, int? tenantId = null)
     {
@@ -130,7 +130,7 @@ public class EmailValidationKeyProvider
         return result;
     }
 
-    private ValidationResult ValidateEmailKey(string email, string key, TimeSpan validInterval, int tenantId)
+    public ValidationResult ValidateEmailKey(string email, string key, TimeSpan validInterval, int tenantId)
     {
         ArgumentException.ThrowIfNullOrEmpty(email);
         ArgumentNullException.ThrowIfNull(key);

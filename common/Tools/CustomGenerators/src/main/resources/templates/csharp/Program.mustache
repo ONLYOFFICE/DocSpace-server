@@ -59,7 +59,7 @@ public class Program
 
             var sort = SortedByType.DateAndTime;
 
-            var getRoom = await roomInstance.GetRoomsFolderAsync(null, null, 0, null, null, null, null, null, null, null, 100, null, sort.ToString(), SortOrder.Descending, null, "current.security,folders.id");
+            var getRoom = await roomInstance.WithFields("current.security,folders.id").GetRoomsFolderAsync(null, null, 0, null, null, null, null, null, null, null, 100, null, sort.ToString(), SortOrder.Descending, null);
 
             Console.WriteLine(getRoom.Response);
 

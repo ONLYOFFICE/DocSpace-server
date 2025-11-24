@@ -72,7 +72,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
         var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
-        
+
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream, action);
@@ -148,7 +148,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
                 }
             }
         }
-        
+
         await stream.DisposeAsync();
     }
 
@@ -186,7 +186,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
         _streams.Add(stream);
         _tasks.Add(InternalUploadAsync(_chunkedUploadSession, stream, stream.Length, _chunkNumber++));
     }
-    
+
     private async Task InternalUploadAsync(CommonChunkedUploadSession uploadSession, Stream stream, long length, int number)
     {
         await _sessionHolder.UploadChunkAsync(uploadSession, stream, length, number);

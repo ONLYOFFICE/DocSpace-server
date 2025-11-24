@@ -26,12 +26,15 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The wallet services settings.
+/// </summary>
 [Scope]
 [Serializable]
 public class TenantWalletServiceSettings : ISettings<TenantWalletServiceSettings>
 {
     /// <summary>
-    /// Enabled services
+    /// The list of the enabled wallet services.
     /// </summary>
     public List<TenantWalletService> EnabledServices { get; set; }
 
@@ -46,5 +49,8 @@ public class TenantWalletServiceSettings : ISettings<TenantWalletServiceSettings
         return new TenantWalletServiceSettings();
     }
 
+    /// <summary>
+    /// The date and time when the wallet services settings were last modified.
+    /// </summary>
     public DateTime LastModified { get; set; }
 }

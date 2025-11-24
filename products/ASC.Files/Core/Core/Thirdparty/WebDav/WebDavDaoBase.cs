@@ -35,13 +35,13 @@ internal class WebDavDaoBase(
     TenantUtil tenantUtil,
     IDbContextFactory<FilesDbContext> dbContextFactory,
     FileUtility fileUtility,
-    RegexDaoSelectorBase<WebDavEntry, WebDavEntry, WebDavEntry> regexDaoSelectorBase) 
+    RegexDaoSelectorBase<WebDavEntry, WebDavEntry, WebDavEntry> regexDaoSelectorBase)
     : ThirdPartyProviderDao<WebDavEntry, WebDavEntry, WebDavEntry>(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, fileUtility, regexDaoSelectorBase),
         IDaoBase<WebDavEntry, WebDavEntry, WebDavEntry>
 {
 
     private WebDavProviderInfo _providerInfo;
-    
+
     public void Init(string pathPrefix, IProviderInfo<WebDavEntry, WebDavEntry, WebDavEntry> providerInfo)
     {
         PathPrefix = pathPrefix;
@@ -69,7 +69,7 @@ internal class WebDavDaoBase(
     {
         return IsRoot(folder.Id);
     }
-    
+
     private static bool IsRoot(string folderId)
     {
         return folderId == "/";
@@ -93,17 +93,21 @@ internal class WebDavDaoBase(
             return id;
         }
     }
-    
+
     public string GetParentFolderId(WebDavEntry item)
     {
         if (item == null || IsRoot(item))
         {
             return null;
         }
-        
+
         var id = GetId(item);
+        if (string.IsNullOrEmpty(id))
+        {
+            return null;
+        }
         var index = id.LastIndexOf('/');
-    
+
         return index == -1 ? null : id[..index];
     }
 
@@ -119,8 +123,8 @@ internal class WebDavDaoBase(
             return PathPrefix;
         }
 
-        return path.StartsWith('/') 
-            ? $"{PathPrefix}-{WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(path))}" 
+        return path.StartsWith('/')
+            ? $"{PathPrefix}-{WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(path))}"
             : $"{PathPrefix}-{path}";
     }
 
@@ -137,7 +141,7 @@ internal class WebDavDaoBase(
     public string MakeFileTitle(WebDavEntry file)
     {
         var name = GetName(file);
-        
+
         return string.IsNullOrEmpty(name) ? ProviderInfo.ProviderKey : Global.ReplaceInvalidCharsAndTruncate(name);
     }
 
@@ -163,9 +167,10 @@ internal class WebDavDaoBase(
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
+        folder.SettingsCover = ProviderInfo.Cover;
+        
         ProcessFolderAsRoom(folder);
         SetDateTime(webDavFolder, folder);
-        folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return folder;
     }
@@ -188,7 +193,6 @@ internal class WebDavDaoBase(
         file.Title = MakeFileTitle(webDavFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
-        file.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
         SetDateTime(webDavFile, file);
 
         return file;
@@ -219,7 +223,7 @@ internal class WebDavDaoBase(
     public async Task<WebDavEntry> GetFolderAsync(string folderId)
     {
         var id = MakeThirdId(folderId);
-        
+
         try
         {
             return await _providerInfo.GetFolderAsync(id);
@@ -243,7 +247,7 @@ internal class WebDavDaoBase(
             return new ErrorWebDavEntry(e.Message, fileId);
         }
     }
-    
+
     public override async Task<IEnumerable<string>> GetChildrenAsync(string folderId)
     {
         var items = await GetItemsAsync(folderId);
@@ -261,11 +265,11 @@ internal class WebDavDaoBase(
             return items;
         }
 
-        return folder.Value 
-            ? items.Where(x => x.IsCollection).ToList() 
+        return folder.Value
+            ? items.Where(x => x.IsCollection).ToList()
             : items.Where(x => !x.IsCollection).ToList();
     }
-    
+
     private File<string> ToErrorFile(ErrorWebDavEntry errorEntry)
     {
         if (errorEntry == null)
@@ -278,7 +282,7 @@ internal class WebDavDaoBase(
 
         return file;
     }
-    
+
     private Folder<string> ToErrorFolder(ErrorWebDavEntry errorEntry)
     {
         if (errorEntry == null)

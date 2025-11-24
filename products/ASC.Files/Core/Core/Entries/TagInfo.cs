@@ -29,7 +29,7 @@ namespace ASC.Files.Core.Entries;
 /// <summary>
 /// The tag information.
 /// </summary>
-public class TagInfo : IMapFrom<DbFilesTag>
+public class TagInfo
 {
     /// <summary>
     /// The tag ID.
@@ -60,4 +60,12 @@ public class TagInfo : IMapFrom<DbFilesTag>
     /// The file entry type for which the tag has been created.
     /// </summary>
     public FileEntryType EntryType { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class TagInfoMapper
+{
+    public static partial DbFilesTag MapToDbFilesTag(this TagInfo source);
+    public static partial TagInfo MapToTagInfo(this DbFilesTag source);
+    public static partial void ApplyUpdate(DbFilesTagLink link, TagInfo source);
 }

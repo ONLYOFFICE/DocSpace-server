@@ -210,9 +210,6 @@
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>사용자 [{0}]. 활성화 지침이 전송되었습니다</value>
   </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>사용자</value>
-  </data>
   <data name="UserUpdated" xml:space="preserve">
     <value>사용자가 업데이트되었습니다: {0}</value>
   </data>
@@ -336,7 +333,7 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>포털 리전 마이그레이션 시작</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>백업 시작</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
@@ -365,6 +362,9 @@
   </data>
   <data name="SessionCompleted" xml:space="preserve">
     <value>세션이 완료되었습니다</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>설정</value>
   </data>
   <data name="FileSendAccessLink" xml:space="preserve">
     <value>[{0}] 파일로 공유 링크가 발송되었습니다. 수신자: [{1}]</value>
@@ -398,9 +398,6 @@
   </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>프로덕트 [{0}]. 액세스가 열렸습니다</value>
-  </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>프로덕트</value>
   </data>
   <data name="ProductCol" xml:space="preserve">
     <value>프로덕트</value>
@@ -549,9 +546,6 @@
   <data name="GuestAccount" xml:space="preserve">
     <value>게스트</value>
   </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>그룹</value>
-  </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>그룹이 업데이트되었습니다: {0}</value>
   </data>
@@ -560,9 +554,6 @@
   </data>
   <data name="GroupCreated" xml:space="preserve">
     <value>그룹이 생성되었습니다: {0}</value>
-  </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>일반</value>
   </data>
   <data name="DocumentsForcesave" xml:space="preserve">
     <value>강제 저장 설정이 업데이트되었습니다</value>
@@ -741,6 +732,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>색상 테마가 변경되었습니다</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>연락처</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>쿠키 설정이 업데이트되었습니다</value>
   </data>
@@ -854,9 +848,6 @@
   </data>
   <data name="RoomInviteResend" xml:space="preserve">
     <value>초대장이 다시 전송되었습니다: {0}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>클라이언트의 {0} 활성화가 변경되었습니다</value>
@@ -986,5 +977,14 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP 동기화가 완료되었습니다</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>위치</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>프로모션 배너 가시성 설정이 변경되었습니다</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>고객 지갑 활성화 서비스 설정이 업데이트되었습니다</value>
   </data>
 </root>

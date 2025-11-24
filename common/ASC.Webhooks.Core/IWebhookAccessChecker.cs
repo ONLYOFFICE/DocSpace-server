@@ -24,12 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Webhooks.Core
-{
-    public interface IWebhookAccessChecker<T>
-    {
-        public bool CheckIsTarget(T data, string targetId);
+namespace ASC.Webhooks.Core;
 
-        public Task<bool> CheckAccessAsync(T data, Guid userId);
-    }
+public interface IWebhookAccessChecker<T>
+{
+    public bool CheckIsTarget(T data, string targetId);
+
+    public Task<bool> CheckAccessAsync(T data, Guid userId);
 }

@@ -58,7 +58,7 @@ public class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAccessor,
             var shouldSerialize = true;
             var newOptions = options;
             var newFullPropertyName = fullPropertyName;
-            
+
             if (propertyValue != null)
             {
                 var fields = httpContextAccessor.HttpContext?.Request.Query.GetRequestArray("fields");
@@ -86,7 +86,7 @@ public class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAccessor,
                                 {
                                     newFullPropertyName = checkName;
                                 }
-                                
+
                                 return result;
                             }
 
@@ -110,13 +110,14 @@ public class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAccessor,
                             var enumerableInterfaces = interfaces.FirstOrDefault(t => t.IsGenericType && (t.GetGenericTypeDefinition() == typeof(IEnumerable<>)));
                             if (enumerableInterfaces != null)
                             {
-                                var types = ((IEnumerable)propertyValue).Cast<object>().Select(r=> r.GetType()).Distinct();
+                                var types = ((IEnumerable)propertyValue).Cast<object>().Select(r => r.GetType()).Distinct();
                                 foreach (var type in types)
                                 {
                                     newOptions = JsonSerializerOptions(type, newFullPropertyName, newOptions);
                                 }
-                            } else if (asyncEnumerableInterface != null)
-                            {   
+                            }
+                            else if (asyncEnumerableInterface != null)
+                            {
                                 var elementType = asyncEnumerableInterface.GetGenericArguments()[0];
                                 newOptions = JsonSerializerOptions(elementType, newFullPropertyName, newOptions);
                             }
@@ -169,5 +170,6 @@ public class ConfigureJsonOptions(IHttpContextAccessor httpContextAccessor) : IC
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
         options.JsonSerializerOptions.Converters.Add(new DynamicIgnoreConverter<SuccessApiResponse>(httpContextAccessor));
+        options.JsonSerializerOptions.Converters.Add(new ApiDateTimeConverter());
     }
 }

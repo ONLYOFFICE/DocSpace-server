@@ -73,4 +73,8 @@ public static class KeyHelper
     {
         return $"{GetStorage()}/restore_info";
     }
+    public static string GetStoragestoraMissingZipKey()
+    {
+        return $"{GetStorage()}/missing_info";
+    }
 }

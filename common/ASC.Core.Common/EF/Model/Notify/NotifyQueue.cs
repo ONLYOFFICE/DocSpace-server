@@ -185,6 +185,6 @@ public static class NotifyQueueExtension
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
         });
-        
+
     }
 }

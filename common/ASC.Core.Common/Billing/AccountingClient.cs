@@ -26,6 +26,8 @@
 
 using System.Collections.Specialized;
 
+using ASC.Web.Core.Users;
+
 namespace ASC.Core.Billing;
 
 [Singleton]
@@ -62,7 +64,7 @@ public class AccountingClient
 
         _configuration.Currencies = _configuration.Currencies == null || _configuration.Currencies.Count == 0 ? ["USD"] : _configuration.Currencies;
 
-        if (!string.IsNullOrEmpty(_configuration.Url)) 
+        if (!string.IsNullOrEmpty(_configuration.Url))
         {
             Configured = true;
         }
@@ -74,12 +76,12 @@ public class AccountingClient
         return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/balance/{portalId}", addPolicy: addPolicy);
     }
 
-    public async Task<Session> OpenCustomerSessionAsync(string portalId, int serviceAccount, string externalRef, int quantity, int duration)
+    public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef, int quantity, int duration)
     {
         var data = new
         {
             CustomerName = portalId,
-            ServiceAccount = serviceAccount,
+            ServiceName = serviceName,
             ExternalRef = externalRef,
             Quantity = quantity,
             Duration = duration
@@ -109,21 +111,22 @@ public class AccountingClient
         return await RequestAsync<Session>(HttpMethod.Put, $"/session/extend", queryParams);
     }
 
-    public async Task CompleteCustomerSessionAsync(string portalId, int serviceAccount, int sessionId, int quantity, string customerParticipantName)
+    public async Task CompleteCustomerSessionAsync(string portalId, string serviceName, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
         var data = new
         {
             CustomerName = portalId,
-            ServiceAccount = serviceAccount,
+            ServiceName = serviceName,
             SessionId = sessionId,
             Quantity = quantity,
-            CustomerParticipantName = customerParticipantName
+            CustomerParticipantName = customerParticipantName,
+            Metadata = metadata
         };
 
         _ = await RequestAsync<string>(HttpMethod.Post, "/operation/sessionComplete", data: data);
     }
 
-    public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal, int? offset, int? limit)
+    public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? debit, int? offset, int? limit)
     {
         var queryParams = new NameValueCollection
         {
@@ -131,14 +134,19 @@ public class AccountingClient
             { "endDate", utcEndDate.ToString("o") }
         };
 
+        if (!string.IsNullOrEmpty(participantName))
+        {
+            queryParams.Add("participantName", participantName.Trim());
+        }
+
         if (credit.HasValue)
         {
             queryParams.Add("credit", credit.Value.ToString().ToLowerInvariant());
         }
 
-        if (withdrawal.HasValue)
+        if (debit.HasValue)
         {
-            queryParams.Add("withdrawal", withdrawal.Value.ToString().ToLowerInvariant());
+            queryParams.Add("debit", debit.Value.ToString().ToLowerInvariant());
         }
 
         if (offset.HasValue)
@@ -160,7 +168,7 @@ public class AccountingClient
         var result = _cache.Get<List<Currency>>(key);
         if (result == null)
         {
-            result = await RequestAsync<List<Currency>>(HttpMethod.Get, "/currency/all", null);
+            result = await RequestAsync<List<Currency>>(HttpMethod.Get, "/currency/all");
             _cache.Insert(key, result, DateTime.Now.AddDays(1));
         }
         return result;
@@ -171,14 +179,14 @@ public class AccountingClient
         return _configuration.Currencies;
     }
 
-    public async Task<ServiceInfo> GetServiceInfoAsync(int serviceAccount)
+    public async Task<ServiceInfo> GetServiceInfoAsync(string serviceName)
     {
-        return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/account/{serviceAccount}");
+        return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/name/{serviceName}");
     }
 
-    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, string[] serviceAccounts)
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, List<string> serviceNames)
     {
-        var key = $"accounting-prices-{partnerId}-{string.Join(",", serviceAccounts)}";
+        var key = $"accounting-prices-{partnerId}-{string.Join(",", serviceNames)}";
         var result = _cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
 
         if (result != null)
@@ -189,14 +197,9 @@ public class AccountingClient
         var currencies = await GetAllCurrenciesAsync();
 
         result = [];
-        foreach (var serviceAccount in serviceAccounts)
+        foreach (var serviceName in serviceNames)
         {
-            if (!int.TryParse(serviceAccount, out var serviceAccountId))
-            {
-                continue;
-            }
-
-            var serviceInfo = await GetServiceInfoAsync(serviceAccountId);
+            var serviceInfo = await GetServiceInfoAsync(serviceName);
             if (serviceInfo == null)
             {
                 continue;
@@ -205,7 +208,7 @@ public class AccountingClient
             var currency = currencies.FirstOrDefault(c => c.Id == serviceInfo.CurrencyId);
             var currencyCode = currency?.Code ?? "USD";
 
-            result.Add(serviceAccount, new Dictionary<string, decimal>
+            result.Add(serviceName, new Dictionary<string, decimal>
             {
                 { currencyCode, serviceInfo.PriceValue }
             });
@@ -377,7 +380,7 @@ public class Balance
 }
 
 /// <summary>
-/// Represents a sub-account with a specific currency and amount.
+/// Represents a sub-account with a specific currency and balance.
 /// </summary>
 public class SubAccount
 {
@@ -386,7 +389,7 @@ public class SubAccount
     /// </summary>
     public string Currency { get; init; }
     /// <summary>
-    /// The amount of the sub-account.
+    /// The balance of the sub-account in the specified currency.
     /// </summary>
     public decimal Amount { get; init; }
 }
@@ -477,6 +480,27 @@ public class Report
     /// Current page number of the report.
     /// </summary>
     public int CurrentPage { get; set; }
+
+    public async Task<Dictionary<string, string>> GetParticipantDisplayNamesAsync(DisplayUserSettingsHelper displayUserSettingsHelper)
+    {
+        var participantDisplayNames = new Dictionary<string, string>();
+
+        foreach (var operation in Collection)
+        {
+            if (string.IsNullOrEmpty(operation.ParticipantName) || participantDisplayNames.ContainsKey(operation.ParticipantName))
+            {
+                continue;
+            }
+
+            if (Guid.TryParse(operation.ParticipantName, out var userId))
+            {
+                var participantDisplayName = await displayUserSettingsHelper.GetFullUserNameAsync(userId, true, false);
+                participantDisplayNames.Add(operation.ParticipantName, participantDisplayName);
+            }
+        }
+
+        return participantDisplayNames;
+    }
 }
 
 /// <summary>
@@ -497,6 +521,10 @@ public class Operation
     /// </summary>
     public string Description { get; set; }
     /// <summary>
+    /// Brief details of the operation.
+    /// </summary>
+    public string Details { get; set; }
+    /// <summary>
     /// Unit of the service.
     /// </summary>
     public string ServiceUnit { get; set; }
@@ -513,9 +541,21 @@ public class Operation
     /// </summary>
     public decimal Credit { get; set; }
     /// <summary>
-    /// Withdrawal amount of the operation.
+    /// Debit amount of the operation.
     /// </summary>
-    public decimal Withdrawal { get; set; }
+    public decimal Debit { get; set; }
+    /// <summary>
+    /// Original name of the participant.
+    /// </summary>
+    public string ParticipantName { get; set; }
+    /// <summary>
+    /// Display name of the participant.
+    /// </summary>
+    public string ParticipantDisplayName { get; set; }
+    /// <summary>
+    /// Metadata of the operation.
+    /// </summary>
+    public Dictionary<string, string> Metadata { get; set; }
 }
 
 /// <summary>
@@ -524,7 +564,7 @@ public class Operation
 public class Currency
 {
     /// <summary>
-    /// Unique identifier of the currency.
+    /// The currency unique identifier.
     /// </summary>
     public int Id { get; init; }
 

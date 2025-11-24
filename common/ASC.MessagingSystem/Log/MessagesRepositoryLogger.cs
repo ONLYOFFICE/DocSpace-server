@@ -29,7 +29,7 @@ internal static partial class MessagesRepositoryLogger
 {
     [LoggerMessage(LogLevel.Error, "FlushCache {id}")]
     public static partial void ErrorFlushCache(this ILogger<MessagesRepository> logger, int id, Exception exception);
-    
+
     [LoggerMessage(LogLevel.Error, "Send Message")]
     public static partial void ErrorSendMassage(this ILogger<MessagesRepository> logger, Exception exception);
 }

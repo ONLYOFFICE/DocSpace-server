@@ -153,7 +153,7 @@ public class RenewSubscriptionService(
 
             var walletQuotaFeatureName = walletQuota.Features.Split(':').FirstOrDefault(); // wallet quota must contains only one feature
 
-            var nextQuantity = data.NextQuantity.HasValue ?  data.NextQuantity.Value : data.Quantity;
+            var nextQuantity = data.NextQuantity.HasValue ? data.NextQuantity.Value : data.Quantity;
 
             var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync(refresh: true);
 
@@ -190,7 +190,9 @@ public class RenewSubscriptionService(
             // TODO: support other currencies
             var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
 
-            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, ProductQuantityType.Renew, defaultCurrency, false, Resource.AutoRenewal);
+            var metadata = new Dictionary<string, string> { { BillingClient.MetadataDetails, Resource.AutoRenewal } };
+
+            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, ProductQuantityType.Renew, defaultCurrency, false, null, metadata);
 
             if (result)
             {
@@ -250,14 +252,15 @@ static file class Queries
                         (tariffRow, tenant) => tariffRow
                     )
                     .GroupBy(tariffRow => tariffRow.TenantId)
-                    .Select(group => new {
+                    .Select(group => new
+                    {
                         TenantId = group.Key,
                         MaxTariffId = group.Max(tariffRow => tariffRow.TariffId)
                     })
                     .Join(
                         ctx.TariffRows,
-                        x => new { TenantId = x.TenantId, MaxTariffId = x.MaxTariffId },
-                        tariffRow => new { TenantId = tariffRow.TenantId, MaxTariffId = tariffRow.TariffId },
+                        x => new { x.TenantId, x.MaxTariffId },
+                        tariffRow => new { tariffRow.TenantId, MaxTariffId = tariffRow.TariffId },
                         (x, tariffRow) => tariffRow
                     )
                     .Where(r => quotas.Contains(r.Quota) && r.DueDate.HasValue && r.DueDate > from && r.DueDate < to)

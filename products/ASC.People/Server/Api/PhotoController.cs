@@ -122,15 +122,14 @@ public class PhotoController(
     {
         var user = await GetUserInfoAsync(inDto.UserId);
 
-        if (_userManager.IsSystemUser(user.Id))
+        if (_userManager.IsSystemUser(user.Id) || user.Status == EmployeeStatus.Terminated)
         {
             throw new SecurityException();
         }
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
-
-        var tenant = tenantManager.GetCurrentTenant();
-        if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != securityContext.CurrentAccount.ID)
+        
+        if (user.Id != securityContext.CurrentAccount.ID)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }

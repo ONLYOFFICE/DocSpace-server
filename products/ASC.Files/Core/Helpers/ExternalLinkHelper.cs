@@ -141,12 +141,14 @@ public class ExternalLinkHelper(
                 });
             }
 
-            if (!result.Shared && result.Status == Status.Ok && !isDocSpaceAdmin)
+            if (!result.Shared && result.Status == Status.Ok)
             {
                 result.Shared = entry switch
                 {
                     Folder<int> folderInt => await MarkAsync(folderInt, data.Id, userId),
                     Folder<string> folderString => await MarkAsync(folderString, data.Id, userId),
+                    File<int> fileInt => await MarkAsync(fileInt, data.Id, userId),
+                    File<string> fileString => await MarkAsync(fileString, data.Id, userId),
                     _ => false
                 };
             }
@@ -255,20 +257,27 @@ public class ExternalLinkHelper(
 
     private async Task<bool> MarkAsync<T>(Folder<T> room, Guid linkId, Guid userId)
     {
-        var result = await fileMarker.MarkAsRecentByLink(room, linkId);
-        switch (result)
+        await fileMarker.MarkAsRecentByLink(room, linkId);
+
+        if (DocSpaceHelper.IsRoom(room.FolderType))
         {
-            case MarkResult.NotMarked:
-                return false;
-            case MarkResult.MarkExists:
-                return true;
-            case MarkResult.Marked:
-                room.FolderIdDisplay = IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync);
-                await socketManager.CreateFolderAsync(room, [userId]);
-                return true;
-            default:
-                throw new ArgumentOutOfRangeException();
+            room.FolderIdDisplay = IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync);
+            await socketManager.CreateFolderAsync(room, [userId]);
         }
+        else
+        {
+            await socketManager.AddToSharedAsync(room, [userId]);
+        }
+
+        return true;
+    }
+
+    private async Task<bool> MarkAsync<T>(File<T> file, Guid linkId, Guid userId)
+    {
+        await fileMarker.MarkAsRecentByLink(file, linkId);
+        await socketManager.AddToSharedAsync(file, [userId]);
+
+        return true;
     }
 
     private async Task<bool> IsSharedAsync<T>(FileEntry<T> entry, Guid userId, bool isDocSpaceAdmin)

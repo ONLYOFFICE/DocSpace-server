@@ -59,7 +59,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             eventBus,
             tenantManager,
             authContext)
-    {
+{
     private readonly ILogger _logger = logger;
 
     public async IAsyncEnumerable<FileDto<T>> ChangeHistoryAsync<T>(T fileId, int version, bool continueVersion)
@@ -162,7 +162,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         var extension = ".txt";
         if (!string.IsNullOrEmpty(content) && Regex.IsMatch(content, @"<([^\s>]*)(\s[^<]*)>"))
         {
-                extension = ".html";
+            extension = ".html";
         }
 
         return await CreateFileAsync(folderId, title, content, extension, updateIfExist);
@@ -199,7 +199,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
     public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync<T>(T fileId)
     {
-        return _fileStorageService.GetFileHistoryAsync(fileId).SelectAwait(async e => await _fileDtoHelper.GetAsync(e));
+        return _fileStorageService.GetFileHistoryAsync(fileId).Select(async (File<T> e, CancellationToken _) => await _fileDtoHelper.GetAsync(e));
     }
 
     public async Task<FileDto<T>> LockFileAsync<T>(T fileId, bool lockFile)
@@ -209,12 +209,6 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await _fileDtoHelper.GetAsync(result);
     }
 
-    public async Task<FileDto<T>> SetCustomFilterTagAsync<T>(T fileId, bool enabled)
-    {
-        var result = await _fileStorageService.SetCustomFilterTagAsync(fileId, enabled);
-
-        return await _fileDtoHelper.GetAsync(result);
-    }
 
     public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null)
     {

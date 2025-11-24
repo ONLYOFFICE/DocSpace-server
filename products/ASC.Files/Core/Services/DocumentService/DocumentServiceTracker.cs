@@ -165,9 +165,7 @@ public class DocumentServiceTrackerHelper(
     FileTrackerHelper fileTracker,
     IHttpClientFactory clientFactory,
     IHttpContextAccessor httpContextAccessor,
-    WebhookManager webhookManager,
-    ExternalShare externalShare,
-    FileSecurity fileSecurity)
+    WebhookManager webhookManager)
 {
     public string GetCallbackUrl<T>(T fileId, int? tenantId = null)
     {
@@ -186,21 +184,26 @@ public class DocumentServiceTrackerHelper(
                 queryParams["request-user-agent"] = header.First();
             }
         }
-        
-        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}?{queryParams}"); 
+
+        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}?{queryParams}");
 
         callbackUrl = documentServiceConnector.ReplaceCommunityAddress(callbackUrl);
 
         return callbackUrl;
     }
 
-    public async Task<bool> StartTrackAsync<T>(T fileId, string docKeyForTrack, string token = null, int? tenantId = null)
+    public async Task<bool> StartTrackAsync<T>(T fileId, string docKeyForTrack, string token = null, int? tenantId = null, string fillingSessionId = null)
     {
         var callbackUrl = GetCallbackUrl(fileId, tenantId);
 
         if (!string.IsNullOrEmpty(token))
         {
             callbackUrl = QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.ShareKey, token);
+        }
+
+        if (!string.IsNullOrEmpty(fillingSessionId))
+        {
+            callbackUrl = QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.FillingSessionId, fillingSessionId);
         }
 
         return await documentServiceConnector.CommandAsync(CommandMethod.Info, docKeyForTrack, fileId, callbackUrl);
@@ -222,7 +225,7 @@ public class DocumentServiceTrackerHelper(
 
             case TrackerStatus.MustSave:
             case TrackerStatus.Closed:
-                if(fileData.Status == TrackerStatus.Closed)
+                if (fileData.Status == TrackerStatus.Closed)
                 {
                     await fileTracker.RemoveAsync(fileId);
                     await socketManager.StopEditAsync(fileId);
@@ -230,22 +233,24 @@ public class DocumentServiceTrackerHelper(
                 var fileDao = daoFactory.GetFileDao<T>();
                 var folderDao = daoFactory.GetFolderDao<T>();
                 var properties = await fileDao.GetProperties(fileId);
-                if(properties?.FormFilling != null)
+                if (properties?.FormFilling != null)
                 {
                     var fileForDeletion = await documentServiceHelper.CheckNeedDeletion(fileDao, fileId, properties.FormFilling);
                     if (fileForDeletion != null)
                     {
+                        await fileTracker.RemoveAsync(fileForDeletion.Id);
+                        await socketManager.StopEditAsync(fileForDeletion.Id);
                         await fileDao.SaveProperties(fileForDeletion.Id, null);
                         await socketManager.DeleteFileAsync(fileForDeletion);
                         await folderDao.ChangeTreeFolderSizeAsync(fileForDeletion.ParentId, (-1) * fileForDeletion.ContentLength);
                         await fileDao.DeleteFileAsync(fileForDeletion.Id, ASC.Core.Configuration.Constants.CoreSystem.ID);
                     }
-                    else if(fileData.Status == TrackerStatus.MustSave)
+                    else if (fileData.Status == TrackerStatus.MustSave)
                     {
                         return await ProcessSaveAsync(fileId, fileData);
                     }
                 }
-                else if(fileData.Status == TrackerStatus.MustSave)
+                else if (fileData.Status == TrackerStatus.MustSave)
                 {
                     return await ProcessSaveAsync(fileId, fileData);
                 }
@@ -276,34 +281,40 @@ public class DocumentServiceTrackerHelper(
             if (!documentServiceHelper.IsDocSubmitKey(docKey, fileData.Key))
             {
                 logger.InformationDocServiceEditingFile(fileId.ToString(), docKey, fileData.Key, fileData.Users);
+                usersDrop = fileData.Users;
             }
-            return;
+            else
+            {
+                return;
+            }
         }
-
-        foreach (var user in fileData.Users)
+        else
         {
-            if (!Guid.TryParse(user, out var userId))
+            foreach (var user in fileData.Users)
             {
-                if (!string.IsNullOrEmpty(user) && user.StartsWith("uid-"))
+                if (!Guid.TryParse(user, out var userId))
                 {
-                    userId = Guid.Empty;
+                    if (!string.IsNullOrEmpty(user) && user.StartsWith("uid-"))
+                    {
+                        userId = Guid.Empty;
+                    }
+                    else
+                    {
+                        logger.InformationDocServiceUserIdIsNotGuid(user);
+                        continue;
+                    }
                 }
-                else
-                {
-                    logger.InformationDocServiceUserIdIsNotGuid(user);
-                    continue;
-                }
-            }
-            users.Remove(userId);
+                users.Remove(userId);
 
-            try
-            {
-                file = await entryManager.TrackEditingAsync(fileId, userId, userId, tenantManager.GetCurrentTenant());
-            }
-            catch (Exception e)
-            {
-                logger.DebugDropCommand(fileId.ToString(), fileData.Key, user, e);
-                usersDrop.Add(userId.ToString());
+                try
+                {
+                    file = await entryManager.TrackEditingAsync(fileId, userId, userId, tenantManager.GetCurrentTenant(), fillingSessionId: httpContextAccessor.HttpContext.Request.Query[FilesLinkUtility.FillingSessionId].FirstOrDefault());
+                }
+                catch (Exception e)
+                {
+                    logger.DebugDropCommand(fileId.ToString(), fileData.Key, user, e);
+                    usersDrop.Add(userId.ToString());
+                }
             }
         }
 
@@ -328,7 +339,7 @@ public class DocumentServiceTrackerHelper(
                     await securityContext.AuthenticateMeWithoutCookieAsync(userId); //hack
                 }
                 catch
-                { 
+                {
                     // ignored
                 }
             }
@@ -343,20 +354,7 @@ public class DocumentServiceTrackerHelper(
             {
                 await filesMessageService.SendAsync(MessageAction.FileOpenedForChange, file, file.Title);
             }
-            
-            if (securityContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry && await fileSecurity.CanReadAsync(file))
-            {
-                var linkId = await externalShare.GetLinkIdAsync();
 
-                if (linkId != Guid.Empty && file.RootFolderType == FolderType.USER && file.CreateBy != securityContext.CurrentAccount.ID)
-                {
-                    await entryManager.MarkFileAsRecentByLink(file, linkId);
-                }
-                else
-                {
-                    await entryManager.MarkAsRecent(file);
-                }
-            }
             securityContext.Logout();
         }
     }
@@ -517,9 +515,9 @@ public class DocumentServiceTrackerHelper(
                     .FirstOrDefault();
 
                 nameInEditor = RemoveGuestPart(nameInEditor);
-                
-                userName = string.IsNullOrEmpty(nameInEditor) 
-                    ? AuditReportResource.GuestAccount 
+
+                userName = string.IsNullOrEmpty(nameInEditor)
+                    ? AuditReportResource.GuestAccount
                     : nameInEditor;
             }
             catch
@@ -527,7 +525,7 @@ public class DocumentServiceTrackerHelper(
                 userName = AuditReportResource.GuestAccount;
             }
         }
-        
+
         await filesMessageService.SendAsync(forceSave && fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit ? MessageAction.FormSubmit : MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, userName, file.Title);
 
         await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
@@ -538,14 +536,14 @@ public class DocumentServiceTrackerHelper(
         }
 
         return new TrackResponse { Message = saveMessage };
-        
+
         string RemoveGuestPart(string name)
         {
             if (string.IsNullOrEmpty(name))
             {
                 return name;
             }
-            
+
             var index = name.LastIndexOf('(');
             if (index != -1)
             {

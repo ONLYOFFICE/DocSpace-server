@@ -32,4 +32,3 @@ public record TenantCacheItem
     [ProtoMember(1)]
     public int TenantId { get; set; }
 }
-

@@ -417,7 +417,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Spațiul ${LetterLogoText} DocSpace a &lt;span style="color: #FF6F3D;"&gt;fost activat&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Spațiul ${LetterLogoText} DocSpace a fost&lt;span style="color: #FF6F3D;"&gt;șters&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Spațiul dvs ${LetterLogoText} DocSpace a fost dezactivat cu succes. Va rugam sa rețineți că, datele dumneavoastră vor fi șterse în conformitate cu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;politica noastră de confidențialitate&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -782,7 +782,7 @@ Echipă de Asistență ${LetterLogoText}
 [$__AuthorName]($__AuthorUrl) s-a alăturat portalului dvs [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>Spațiul ${LetterLogoText} DocSpace a fost activat</value>
+    <value>${LetterLogoText} DocSpace a fost șters</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
     <value>Dezactivare cont</value>
@@ -2032,5 +2032,56 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Acțiune necesară: Problema de alimentare automată a contului de Portofel dvs din DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Parola a fost schimbată cu succes</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Deschidere DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Parola a fost schimbată cu succes
+
+Parola dvs pentru contul *$UserName*, *$UserEmail* a fost schimbată cu succes la data de *$Date* în spațiul DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Dispozitivul: *$Device*
+#if($Location != "")
+Locaţia: *$Location*
+#end
+Browser: *$Browser*
+
+Dacă această acţiune a fost întreprinsă de dumneavoastră, nu trebuie să faci nimic altceva. Dacă ați observat această activitate suspectă sau dacă nu recunoașteți această activitate, schimbați imediat parola și blocați accesul la DocSpace pentru acest dispozitiv.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Copierea de rezervă automată a spațiului DocSpace a eșuat</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Stimate, $UserName,
+
+Copierea de rezervă programată a spațiului DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" a eșuat.
+
+Vă recomandăm să verificați setările pentru "Copiere de rezervă":"${__VirtualRootPath}/portal-settings/backup/data-backup" și "Servicii":"${__VirtualRootPath}/portal-settings/services".
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Stimate, $UserName,
+
+Copierea de rezervă programată a spațiului DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) a eșuat.
+
+Vă recomandăm să verificați setările pentru [Copiere de rezervă](${__VirtualRootPath}/portal-settings/backup/data-backup) și [Servicii](${__VirtualRootPath}/portal-settings/services).
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SupportLink}](${__SupportLink})
+
+Cu stimă,
+${LetterLogoText} Echipă de Asistență
+[${__SiteLink}](${__SiteLink})</value>
   </data>
 </root>

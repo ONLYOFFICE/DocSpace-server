@@ -94,6 +94,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Kleurthema Veranderd</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Contacten</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Cookie Instellingen Geüpdatet</value>
   </data>
@@ -253,9 +256,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sphinx instellingen geüpdatet</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Algemeen</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Welkomstpagina Instellingen Geüpdatet</value>
   </data>
@@ -264,9 +264,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Groep Verwijderd: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Groepen</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Groep Geüpdatet: {0}</value>
@@ -424,9 +421,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Productenlijst Geüpdatet</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Producten</value>
-  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Verzenden</value>
   </data>
@@ -439,13 +433,16 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Sessie Gestart</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Instellingen</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO Uitgeschakeld</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO Ingeschakeld</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Start back-up</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
@@ -540,9 +537,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Gebruikers [{0}]. Verzonden Instructies voor Wachtwoord Veranderen</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Gebruikers</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Gebruikers [{0}]. Activeringsinstructies Verzonden</value>
@@ -796,9 +790,6 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Uitnodigingen opnieuw verstuurd: {0}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Activatie van client {0} gewijzigd</value>
   </data>
@@ -927,5 +918,17 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP-synchronisatie voltooid</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Locatie</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Zichtbaarheidsinstellingen voor promotionele banners gewijzigd</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Instellingen voor ingeschakelde klantportemonnee-services bijgewerkt</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Inloggen via Social Media Gelukt</value>
   </data>
 </root>

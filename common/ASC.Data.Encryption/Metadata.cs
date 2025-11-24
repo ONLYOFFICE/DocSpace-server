@@ -256,10 +256,7 @@ public class Metadata(IConfiguration configuration)
 
     private byte[] GenerateKey()
     {
-        using var deriveBytes = new Rfc2898DeriveBytes(Password, Salt, Iterations, HashAlgorithmName.SHA256);
-        var key = deriveBytes.GetBytes(keyLength);
-
-        return key;
+        return Rfc2898DeriveBytes.Pbkdf2(Password, Salt, Iterations, HashAlgorithmName.SHA256, keyLength);
     }
 
     private byte[] GenerateHmacKey()
@@ -306,4 +303,3 @@ public class Metadata(IConfiguration configuration)
         }
     }
 }
-

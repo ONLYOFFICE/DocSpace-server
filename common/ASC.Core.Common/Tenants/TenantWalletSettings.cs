@@ -27,33 +27,36 @@
 namespace ASC.Core.Tenants;
 
 /// <summary>
-/// Tenant wallet settings
+/// The wrapper for the tenant wallet settings.
 /// </summary>
 public class TenantWalletSettingsWrapper
 {
     /// <summary>
-    /// Tenant wallet settings
+    /// The tenant wallet settings.
     /// </summary>
     public TenantWalletSettings Settings { get; set; }
 }
 
+/// <summary>
+/// The tenant wallet settings.
+/// </summary>
 [Scope]
 [Serializable]
 public class TenantWalletSettings : ISettings<TenantWalletSettings>
 {
     /// <summary>
-    /// Enabled
+    /// Specifies whether automatic top-up for the tenant wallet is enabled.
     /// </summary>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Minimun balance
+    /// The minimum wallet balance at which automatic top-up will be triggered. Must be between 5 and 1000.
     /// </summary>
     [Range(5, 1000)]
     public int MinBalance { get; set; }
 
     /// <summary>
-    /// Up to balance
+    /// The maximum wallet balance at which automatic top-up will be triggered. Must be between 6 and 5000.
     /// </summary>
     [Range(6, 5000)]
     public int UpToBalance { get; set; }
@@ -75,5 +78,8 @@ public class TenantWalletSettings : ISettings<TenantWalletSettings>
         return new TenantWalletSettings();
     }
 
+    /// <summary>
+    /// The date and time when the tenant wallet settings were last modified.
+    /// </summary>
     public DateTime LastModified { get; set; }
 }

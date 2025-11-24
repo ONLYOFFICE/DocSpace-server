@@ -29,13 +29,13 @@ internal static partial class StudioNotifyServiceLogger
 {
     [LoggerMessage(LogLevel.Error, "SendMsgProfileHasDeletedItself")]
     public static partial void ErrorSendMsgProfileHasDeletedItself(this ILogger logger, Exception exception);
-    
+
     [LoggerMessage(LogLevel.Error, "SendCongratulations")]
-    public static partial void ErrorSendCongratulations(this ILogger logger, Exception exception); 
-    
+    public static partial void ErrorSendCongratulations(this ILogger logger, Exception exception);
+
     [LoggerMessage(LogLevel.Error, "PortalRenameNotify")]
-    public static partial void ErrorPortalRenameNotify(this ILogger logger, Exception exception); 
-    
+    public static partial void ErrorPortalRenameNotify(this ILogger logger, Exception exception);
+
     [LoggerMessage(LogLevel.Error, "SendRegData")]
     public static partial void ErrorSendRegData(this ILogger logger, Exception exception);
 }

@@ -44,7 +44,7 @@ public class UserGroupObject : SecurityObject
     protected override IEnumerable<IRole> GetTargetRoles(IRoleProvider roleProvider)
     {
         if (_groupId == Constants.GroupAdmin.ID)
-        { 
+        {
             return [AuthConstants.DocSpaceAdmin];
         }
 

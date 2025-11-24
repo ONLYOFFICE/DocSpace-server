@@ -159,6 +159,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Գունային ոճ փոխվել է</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Կոնտակտներ</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Թխուկի կարգավորումները թարմացվել են</value>
   </data>
@@ -330,17 +333,11 @@
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Ողջույնի էջի կարգավորումները թարմացվել են</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Ընդհանուր</value>
-  </data>
   <data name="GroupCreated" xml:space="preserve">
     <value>Ստեղծվել է խումբ: {0}</value>
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Խումբը ջնջված է: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Խմբեր</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Խումբը թարմացվել է: {0}</value>
@@ -427,7 +424,7 @@
     <value>Հաջողությամբ մուտք է գործել</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Մուտք գործել սոցիալական հաշվի միջոցով հաջողվեց</value>
+    <value>Մուտք սոցիալական հաշվի միջոցով՝ հաջողությամբ՝ {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Հաջող մուտք սոցիալական հավելվածի միջոցով</value>
@@ -525,9 +522,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Արտադրանքների ցանկը թարմացվել է</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Արտադրանքներ</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Վերագրումներ</value>
   </data>
@@ -543,13 +537,16 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Աշխատաշրջանը սկսված է</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Կարգավորումներ</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO անջատված</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO միացված է</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Մեկնարկել պահուստավորումը</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -668,9 +665,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Օգտվողներ [{0}]. Ուղարկված գաղտնաբառի փոփոխման հրահանգներ</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Օգտվողներ</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Օգտվողներ [{0}]. Ակտիվացման հրահանգները ուղարկված են</value>
@@ -849,9 +843,6 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Օգտատերեր [{0}]: Ներկայացված ձևը՝ {1}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Հաճախորդի {0} ակտիվացումը փոխվել է</value>
   </data>
@@ -986,5 +977,62 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP սինխրոնիզացիան ավարտվեց</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Լոկացիա</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Գովազդային պաստառների տեսանելիության կարգավորումները փոխվել են</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Հաճախորդի դրամապանակի միացված ծառայությունների կարգավորումները թարմացվել են</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Հաջող մուտք OAuth 2.0 միջոցով</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Հաջող մուտք՝ օգտագործելով մուտք և գաղտնաբառ</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Ֆայլեր [{0}]: Արտաքին հղումը ստեղծվել է՝ {1}: Դեր՝ {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Ֆայլեր [{0}]: Արտաքին հղումը ջնջվել է՝ {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Ֆայլեր [{0}]: Արտաքին հղումը թարմացվել է՝ {1}: Դեր՝ {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Ֆայլը նշվել է որպես Նախընտրելի՝ {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Ֆայլը հեռացվել է նախընտրելիից՝ {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Ֆայլը հեռացվել է «Ինձ հետ կիսված» բաժնից՝ {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Ֆայլեր [{0}]: Մուտքը թարմացվել է {1}-ի համար: Դեր՝ {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Թղթապանակը ներբեռնվել է՝ {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Թղթապանակները [{0}]: Արտաքին հղումը ստեղծվել է՝ {1}: Դեր՝ {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Թղթապանակները[{0}]: Արտաքին հղումը ջնջվել է՝ {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Թղթապանակները [{0}]: Արտաքին հղումը թարմացվել է՝ {1}: Դեր՝ {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Թղթապանակը հեռացվել է «Ինձ հետ կիսված»-ից՝ {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Թղթապանակները [{0}]: Մուտքը թարմացվել է {1}-ի համար: Դեր՝ {2}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Արտաքին հղումը չեղարկվել է՝ {1}</value>
   </data>
 </root>

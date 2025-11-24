@@ -41,7 +41,13 @@ public static class DbTenantForbidenExtension
             .Add(PgSqlAddDbTenantForbiden, Provider.PostgreSql)
             .HasData(
             new DbTenantForbiden { Address = "controlpanel" },
-            new DbTenantForbiden { Address = "localhost" }
+            new DbTenantForbiden { Address = "localhost" },
+            new DbTenantForbiden { Address = "settings" },
+            new DbTenantForbiden { Address = "api-system-eu-central-1" },
+            new DbTenantForbiden { Address = "api-system-us-east-2" },
+            new DbTenantForbiden { Address = "identity-eu-central-1" },
+            new DbTenantForbiden { Address = "identity-us-east-2" },
+            new DbTenantForbiden { Address = "oauth" }
             );
 
         return modelBuilder;

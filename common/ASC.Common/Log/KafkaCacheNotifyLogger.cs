@@ -34,8 +34,8 @@ internal static partial class KafkaCacheNotifyLogger
     public static partial void ErrorKafkaCacheNotifyPublishAsync(this ILogger logger, Exception exception);
 
     [LoggerMessage(LogLevel.Error, "Kafka onmessage")]
-    public static partial void ErrorKafkaOnmessage(this ILogger logger, Exception exception);   
-    
+    public static partial void ErrorKafkaOnmessage(this ILogger logger, Exception exception);
+
     [LoggerMessage(LogLevel.Error, "Subscribe")]
     public static partial void ErrorSubscribe(this ILogger logger, Exception exception);
 }

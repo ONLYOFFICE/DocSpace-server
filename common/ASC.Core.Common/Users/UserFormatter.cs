@@ -34,7 +34,7 @@ public class UserFormatter : IComparer<UserInfo>
         { "ru", new Dictionary<DisplayUserNameFormat, string>{ { DisplayUserNameFormat.Default, "{1} {0}" }, { DisplayUserNameFormat.FirstLast, "{0} {1}" }, { DisplayUserNameFormat.LastFirst, "{1} {0}" } } },
         { "default", new Dictionary<DisplayUserNameFormat, string>{ {DisplayUserNameFormat.Default, "{0} {1}" }, { DisplayUserNameFormat.FirstLast, "{0} {1}" }, { DisplayUserNameFormat.LastFirst, "{1}, {0}" } } }
     };
-    
+
     private readonly IConfiguration _configuration;
     private readonly DisplayUserNameFormat _format;
     private bool _forceFormatChecked;
@@ -83,10 +83,10 @@ public class UserFormatter : IComparer<UserInfo>
             {
                 return 0;
             }
-            
+
             return -1;
         }
-        
+
         if (y == null)
         {
             return +1;
@@ -117,7 +117,7 @@ public class UserFormatter : IComparer<UserInfo>
 
         return result;
     }
-    
+
     private string GetUserDisplayFormat(DisplayUserNameFormat format, string firstName, string lastName)
     {
         string formatString;
@@ -131,7 +131,7 @@ public class UserFormatter : IComparer<UserInfo>
 
             _forceFormatChecked = true;
         }
-        
+
         if (_forceFormat != null)
         {
             formatString = _forceFormat;
@@ -154,7 +154,7 @@ public class UserFormatter : IComparer<UserInfo>
         {
             formatString = "{1}{0}";
         }
-        
+
         return string.Format(formatString, firstName, lastName);
     }
 
@@ -168,7 +168,7 @@ public class UserFormatter : IComparer<UserInfo>
         var pattern = @"[\u4e00-\u9fff]";
         return Regex.IsMatch(text, pattern);
     }
-    
+
     public static DisplayUserNameFormat GetUserDisplayDefaultOrder()
     {
         var culture = CultureInfo.CurrentCulture.Name;

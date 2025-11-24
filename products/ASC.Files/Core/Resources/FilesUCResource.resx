@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AiAgents" xml:space="preserve">
+    <value>AI agents</value>
+  </data>
   <data name="Archive" xml:space="preserve">
     <value>Archive</value>
   </data>
@@ -136,7 +139,7 @@
     <value>In process</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Documents</value>
+    <value>My documents</value>
   </data>
   <data name="Personal" xml:space="preserve">
     <value>Personal</value>

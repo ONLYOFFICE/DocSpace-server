@@ -87,6 +87,11 @@ public class MessageSettings
         return request?.Headers.Referer.FirstOrDefault();
     }
 
+    public static string GetRequestPath(HttpRequest request)
+    {
+        return request == null ? null : $"{request.Scheme}://{request.Host}{request.PathBase}{request.Path}{request.QueryString}";
+    }
+
     public static string GetReferer(IDictionary<string, StringValues> headers)
     {
         return headers.TryGetValue(RefererHeader, out var header) ? (string)header : null;

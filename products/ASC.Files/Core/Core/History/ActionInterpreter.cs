@@ -37,13 +37,13 @@ public abstract class ActionInterpreter
         { MessageAction.FileRestoreVersion, MessageAction.UserFileUpdated },
         { MessageAction.FileUploadedWithOverwriting, MessageAction.UserFileUpdated }
     }.ToFrozenDictionary();
-    
+
     public async ValueTask<HistoryEntry> InterpretAsync(DbAuditEvent @event, DbFilesAuditReference reference, IServiceProvider serviceProvider)
     {
         var messageAction = @event.Action.HasValue ? (MessageAction)@event.Action.Value : MessageAction.None;
         var processedAction = _aliases.GetValueOrDefault(messageAction, messageAction);
         var key = processedAction != MessageAction.None ? processedAction.ToStringFast() : null;
-        
+
         var description = JsonSerializer.Deserialize<List<string>>(@event.DescriptionRaw);
         var data = await GetDataAsync(serviceProvider, @event.Target, description);
 
@@ -51,19 +51,20 @@ public abstract class ActionInterpreter
         {
             identifiedData.Id = 0;
         }
-        
+
         var initiatorId = @event.UserId ?? ASC.Core.Configuration.Constants.Guest.ID;
         string initiatorName = null;
 
         if (!string.IsNullOrEmpty(data?.InitiatorName) && initiatorId == ASC.Core.Configuration.Constants.Guest.ID)
         {
-            initiatorName = data.InitiatorName != AuditReportResource.GuestAccount 
-                ? $"{data.InitiatorName} ({FilesCommonResource.ExternalUser})" 
+            initiatorName = data.InitiatorName != AuditReportResource.GuestAccount
+                ? $"{data.InitiatorName} ({FilesCommonResource.ExternalUser})"
                 : data.InitiatorName;
         }
-        
+
         var historyEntry = new HistoryEntry
         {
+            Id = @event.Id,
             Action = new HistoryAction(processedAction, key),
             InitiatorId = initiatorId,
             InitiatorName = initiatorName,
@@ -73,7 +74,7 @@ public abstract class ActionInterpreter
 
         return historyEntry;
     }
-    
+
     protected static EventDescription<int> GetAdditionalDescription(List<string> description)
     {
         return JsonSerializer.Deserialize<EventDescription<int>>(description.Last());
@@ -104,7 +105,7 @@ public record EntryData : IdentifiedData
         ParentType = parentType;
         Type = currentType;
     }
-    
+
     public override int GetId() => ParentId ?? 0;
 }
 
@@ -115,7 +116,7 @@ public record RenameEntryData : IdentifiedData
     public int? ParentId { get; }
     public string ParentTitle { get; }
     public int? ParentType { get; }
-    
+
     public RenameEntryData(string id, string oldTitle, string newTitle, int? parentId = null, string parentTitle = null, int? parentType = null)
     {
         Id = string.IsNullOrEmpty(id) ? null : int.Parse(id);
@@ -138,7 +139,7 @@ public record EntryOperationData : IdentifiedData
     public string FromParentTitle { get; }
     public int? FromParentType { get; }
     public int? FromFolderId { get; }
-    
+
     public EntryOperationData(
         string id,
         string title,

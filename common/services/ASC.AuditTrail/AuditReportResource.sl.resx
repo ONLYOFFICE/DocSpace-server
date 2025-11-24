@@ -91,6 +91,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Barva teme spremenjena</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kontakti</value>
+  </data>
   <data name="CopyActionType" xml:space="preserve">
     <value>Kopiraj</value>
   </data>
@@ -226,9 +229,6 @@
   <data name="FollowActionType" xml:space="preserve">
     <value>Sledi</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Splošen</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Nastavitve pozdrava posodobljene</value>
   </data>
@@ -237,9 +237,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Skupina izbrisana: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Skupine</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Skupina posodobljena: {0}</value>
@@ -379,9 +376,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Seznam izdelkov posodobljen</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Izdelki</value>
-  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Pošlji</value>
   </data>
@@ -393,6 +387,9 @@
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Seja začeta</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Nastavitve</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO onemogočen</value>
@@ -489,9 +486,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Uporabniki [{0}]. Poslana navodila za spremembo gesla</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Uporabniki</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Uporabniki [{0}]. Aktivacijska navodila poslana</value>
@@ -664,7 +658,7 @@
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Prerazporeditve</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Začni varnostno kopiranje</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -796,9 +790,6 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Ponovno poslana vabila: {0}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Aktivacija odjemalca {0} je spremenjena</value>
   </data>
@@ -927,5 +918,17 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>Sinhronizacija LDAP je končana</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Lokacija</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Nastavitve vidnosti promocijskih pasic so bile spremenjene</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Nastavitve storitev, omogočenih za denarnico strank, so bile posodobljene</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Uspešen vpis preko socialnega računa</value>
   </data>
 </root>

@@ -528,4 +528,4 @@ public class StorageController(
     {
         return RegionEndpoint.EnumerableAllRegions;
     }
-    }
+}

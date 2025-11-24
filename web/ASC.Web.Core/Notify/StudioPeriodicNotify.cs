@@ -343,6 +343,11 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                         if (nowDate >= startDateToRemoveUnusedPortals && nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
                         {
+                            if (await tenantManager.IsForbiddenDomainAsync(tenant.Alias))
+                            {
+                                continue;
+                            }
+
                             var tenantDomain = tenant.GetTenantDomain(coreSettings);
 
                             _log.InformationStartRemovingUnusedFreeTenant(tenant.Id, tenantDomain);
@@ -437,6 +442,11 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     }
                     else if (tariff.State == TariffState.NotPaid && dueDateIsNotMax && dueDate.AddMonths(6).AddDays(7) <= nowDate)
                     {
+                        if (await tenantManager.IsForbiddenDomainAsync(tenant.Alias))
+                        {
+                            continue;
+                        }
+
                         var tenantDomain = tenant.GetTenantDomain(coreSettings);
 
                         _log.InformationStartRemovingUnusedPaidTenant(tenant.Id, tenantDomain);
@@ -478,7 +488,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     }
                 }
                 var asyncUsers = users.ToAsyncEnumerable();
-                await foreach (var u in asyncUsers.WhereAwait(async u => paymentMessage || await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
+                await foreach (var u in asyncUsers.Where(async (u, _) => paymentMessage || await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
                 {
                     var culture = string.IsNullOrEmpty(u.CultureName) ? tenant.GetCulture() : u.GetCulture();
                     CultureInfo.CurrentCulture = culture;
@@ -746,7 +756,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                 var users = await studioNotifyHelper.GetRecipientsAsync(toadmins, tousers, false);
 
-                await foreach (var u in users.ToAsyncEnumerable().WhereAwait(async u => paymentMessage || await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
+                await foreach (var u in users.ToAsyncEnumerable().Where(async (u, _) => paymentMessage || await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
                 {
                     var culture = string.IsNullOrEmpty(u.CultureName) ? tenant.GetCulture() : u.GetCulture();
                     CultureInfo.CurrentCulture = culture;
@@ -759,7 +769,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         u,
                         senderName,
                         new TagValue(CommonTags.Culture, culture.Name),
-                        new TagValue(Tags.UserName, u.FirstName.HtmlEncode()), 
+                        new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
                         new TagValue(Tags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
                         new TagValue(Tags.Price, rquota.Price),
                         new TagValue(Tags.PricePeriod, rquota.Year ? UserControlsCommonResource.TariffPerYear : UserControlsCommonResource.TariffPerMonth),
@@ -843,7 +853,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     var topGif = studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
 
-                    await foreach (var u in users.ToAsyncEnumerable().WhereAwait(async u => await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
+                    await foreach (var u in users.ToAsyncEnumerable().Where(async (u, _) => await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
                     {
                         var culture = string.IsNullOrEmpty(u.CultureName) ? tenant.GetCulture() : u.GetCulture();
                         Thread.CurrentThread.CurrentCulture = culture;

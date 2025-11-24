@@ -113,7 +113,7 @@ public class CustomTagsService(
         var tagDao = daoFactory.GetTagDao<T>();
 
         var tagsInfo = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
-        var tags = tagsInfo.Select(tagInfo => new Tag { EntryId = tagInfo.EntryId, Id = tagInfo.Id, Owner = tagInfo.Owner, Type = tagInfo.Type, Name = tagInfo.Name, EntryType = tagInfo.EntryType}).ToList();
+        var tags = tagsInfo.Select(tagInfo => new Tag { EntryId = tagInfo.EntryId, Id = tagInfo.Id, Owner = tagInfo.Owner, Type = tagInfo.Type, Name = tagInfo.Name, EntryType = tagInfo.EntryType }).ToList();
 
         await tagDao.RemoveTagsAsync(tags);
 
@@ -188,15 +188,15 @@ public class CustomTagsService(
             if (!string.IsNullOrEmpty(searchText))
             {
                 var lowerText = searchText.ToLower().Trim().Replace("%", "\\%").Replace("_", "\\_");
-                
+
                 tags = tags.Where(r => r.Contains(lowerText, StringComparison.CurrentCultureIgnoreCase));
             }
-            
+
             foreach (var tag in tags.Skip(from).Take(count))
-            { 
+            {
                 yield return tag;
             }
-            
+
             yield break;
         }
 

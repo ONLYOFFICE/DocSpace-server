@@ -209,6 +209,11 @@ public class EmployeeFullDto : EmployeeDto
     public int? LoginEventId { get; set; }
 
     /// <summary>
+    /// The auth cookie lifetime in seconds.
+    /// </summary>
+    public double? AuthCookieLifetime { get; set; }
+
+    /// <summary>
     /// The user who created the current user.
     /// </summary>
     public EmployeeDto CreatedBy { get; set; }
@@ -230,7 +235,6 @@ public class EmployeeFullDto : EmployeeDto
 }
 [Scope]
 public class EmployeeFullDtoHelper(
-        ApiContext httpContext,
         UserManager userManager,
         AuthContext authContext,
         UserPhotoManager userPhotoManager,
@@ -246,7 +250,7 @@ public class EmployeeFullDtoHelper(
         GroupSummaryDtoHelper groupSummaryDtoHelper,
         TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
         ILogger<EmployeeDtoHelper> logger)
-    : EmployeeDtoHelper(httpContext, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
+    : EmployeeDtoHelper(displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
 {
     // public static Expression<Func<User, UserInfo>> GetExpression(ApiContext apiContext)
     // {
@@ -282,7 +286,7 @@ public class EmployeeFullDtoHelper(
     //
     //     return lambda;
     // }
-    
+
     public async Task<EmployeeFullDto> GetSimple(UserInfo userInfo, bool withGroups = true)
     {
         var result = new EmployeeFullDto
@@ -393,7 +397,7 @@ public class EmployeeFullDtoHelper(
         await FillGroupsAsync(result, userInfo);
 
         var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
-        
+
         result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
         result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
@@ -403,9 +407,9 @@ public class EmployeeFullDtoHelper(
         {
             result.ListAdminModules = listAdminModules;
         }
-        
+
         result.RegistrationDate = apiDateTimeHelper.Get(userInfo.CreateDate);
-        
+
         if (!isDocSpaceAdmin)
         {
             return result;
@@ -426,6 +430,11 @@ public class EmployeeFullDtoHelper(
 
     private async Task FillGroupsAsync(EmployeeFullDto result, UserInfo userInfo)
     {
+        if (await _userManager.IsUserAsync(_authContext.CurrentAccount.ID) && _authContext.CurrentAccount.ID != userInfo.Id)
+        {
+            return;
+        }
+        
         var groupsFromDb = (await _userManager.GetUserGroupsAsync(userInfo.Id));
         List<GroupSummaryDto> groups = [];
 
@@ -433,7 +442,7 @@ public class EmployeeFullDtoHelper(
         {
             groups.Add(await groupSummaryDtoHelper.GetAsync(g));
         }
-        
+
 
         if (groups.Count > 0)
         {

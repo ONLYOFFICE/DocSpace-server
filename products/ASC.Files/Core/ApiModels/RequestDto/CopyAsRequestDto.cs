@@ -72,5 +72,5 @@ public class CopyAsRequestDto<T>
     /// The parameters for copying a file.
     /// </summary>
     [FromBody]
-    public CopyAs<JsonElement> File { get; set; }
+    public required CopyAs<JsonElement> File { get; set; }
 }

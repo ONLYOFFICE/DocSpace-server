@@ -43,7 +43,7 @@ public class RemoveProgressItem : DistributedTaskProgress
     /// <summary>The user whose data is deleted</summary>
     /// <type>ASC.Core.Users.UserInfo, ASC.Core.Common</type>
     public UserInfo User { get; private set; }
-    
+
     public bool IsGuest { get; private set; }
 
     //private readonly IFileStorageService _docService;
@@ -58,9 +58,9 @@ public class RemoveProgressItem : DistributedTaskProgress
 
     public RemoveProgressItem()
     {
-        
+
     }
-    
+
     /// <summary>
     /// </summary>
     public RemoveProgressItem(IServiceScopeFactory serviceScopeFactory)
@@ -92,7 +92,7 @@ public class RemoveProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<RemoveProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, webItemManagerSecurity,  userFormatter, options, client) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, webItemManagerSecurity, userFormatter, options, client) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         var userName = userFormatter.GetUserName(User);
@@ -114,20 +114,26 @@ public class RemoveProgressItem : DistributedTaskProgress
 
             var wrapper = await GetUsageSpace(webItemManagerSecurity);
 
-            await fileStorageService.MoveSharedFilesAsync(UserId, _currentUserId);
+            await fileStorageService.MoveSharedEntriesAsync(UserId, _currentUserId);
+
             Percentage = 30;
             await PublishChanges();
 
             await fileStorageService.DeletePersonalDataAsync(UserId);
 
-            Percentage = 50;
+            Percentage = 45;
+            await PublishChanges();
+
+            await fileStorageService.ReassignProvidersAsync(UserId, _currentUserId);
+
+            Percentage = 60;
             await PublishChanges();
 
             await fileStorageService.ReassignRoomsFilesAsync(UserId);
-                
+
             Percentage = 70;
             await PublishChanges();
-                
+
             await fileStorageService.ReassignRoomsFoldersAsync(UserId);
 
             Percentage = 95;

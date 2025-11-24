@@ -54,15 +54,54 @@ public class ThirdPartyRequestDto
     /// <summary>
     /// The customer title. 
     /// </summary>
-    public string CustomerTitle { get; set; }
+    public required string CustomerTitle { get; set; }
 
     /// <summary>
     /// The provider key.
     /// </summary>
-    public string ProviderKey { get; set; }
+    public required string ProviderKey { get; set; }
 
     /// <summary>
     /// The provider ID.
     /// </summary>
+    [JsonConverter(typeof(ProviderIdConverter))]
     public int? ProviderId { get; set; }
+}
+
+/// <summary>
+/// The JSON converter for handling order values in different formats.
+/// </summary>
+public class ProviderIdConverter : JsonConverter<int?>
+{
+    public override int? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.Number && reader.TryGetInt32(out var providerId))
+        {
+            return providerId;
+        }
+
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            var providerIdString = reader.GetString();
+            if (string.IsNullOrEmpty(providerIdString))
+            {
+                return null;
+            }
+
+            if (int.TryParse(providerIdString, out var result))
+            {
+                return result;
+            }
+        }
+
+        throw new ArgumentException("providerId");
+    }
+
+    public override void Write(Utf8JsonWriter writer, int? value, JsonSerializerOptions options)
+    {
+        if (value.HasValue)
+        {
+            writer.WriteStringValue(value.ToString());
+        }
+    }
 }

@@ -44,7 +44,7 @@ public class PrivacyRoomSettings : ISettings<PrivacyRoomSettings>
             EnabledSetting = true
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 
     public static async Task<bool> GetEnabledAsync(SettingsManager settingsManager)

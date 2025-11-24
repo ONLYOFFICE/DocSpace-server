@@ -52,4 +52,9 @@ public static class LockKeyHelper
     {
         return $"free_backups_count_check_{tenantId}";
     }
+
+    public static string GetAIAgentsCountCheckKey(int tenantId)
+    {
+        return $"aiagents_count_check_{tenantId}";
+    }
 }

@@ -32,18 +32,18 @@ public class WorkspaceMigrator : Migrator
     private CancellationToken _cancellationToken;
     private string _backup;
     private IDataReadOperator _dataReader;
-    
+
     public WorkspaceMigrator(SecurityContext securityContext,
         UserManager userManager,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager, 
+        QuotaSocketManager quotaSocketManager,
         FileStorageService fileStorageService,
-        GlobalFolderHelper globalFolderHelper, 
+        GlobalFolderHelper globalFolderHelper,
         IServiceProvider serviceProvider,
-        IDaoFactory daoFactory, 
-        EntryManager entryManager, 
+        IDaoFactory daoFactory,
+        EntryManager entryManager,
         MigrationLogger migrationLogger,
-        AuthContext authContext, 
+        AuthContext authContext,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         UserManagerWrapper userManagerWrapper,
         UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
@@ -86,8 +86,8 @@ public class WorkspaceMigrator : Migrator
                 return null;
             }
 
-            var folders =  _dataReader.GetDirectories("");
-            if (folders.Any(f=> Path.GetFileNameWithoutExtension(f).Contains("databases")))
+            var folders = _dataReader.GetDirectories("");
+            if (folders.Any(f => Path.GetFileNameWithoutExtension(f).Contains("databases")))
             {
                 await InnerParseAsync(reportProgress);
             }
@@ -101,7 +101,7 @@ public class WorkspaceMigrator : Migrator
             }
 
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_backup));
             var error = string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_backup));
@@ -155,7 +155,7 @@ public class WorkspaceMigrator : Migrator
         {
             await ReportProgressAsync(_lastProgressUpdate + (double)10 / count, MigrationResource.DataProcessing);
         }
-        if (MigrationInfo.ProjectStorage == null) 
+        if (MigrationInfo.ProjectStorage == null)
         {
             MigrationInfo.ProjectStorage = new MigrationStorage
             {
@@ -231,10 +231,10 @@ public class WorkspaceMigrator : Migrator
                 }
             };
 
-            var drivePath = (Directory.Exists(Path.Combine(_dataReader.GetFolder(), "userPhotos")) 
-                                ? Path.Combine(_dataReader.GetFolder(), "userPhotos") 
-                                : null) ?? 
-                            (Directory.GetFiles(_dataReader.GetFolder()).Any(f=> Path.GetFileName(f).StartsWith("userPhotos")) ? _dataReader.GetFolder() : null);
+            var drivePath = (Directory.Exists(Path.Combine(_dataReader.GetFolder(), "userPhotos"))
+                                ? Path.Combine(_dataReader.GetFolder(), "userPhotos")
+                                : null) ??
+                            (Directory.GetFiles(_dataReader.GetFolder()).Any(f => Path.GetFileName(f).StartsWith("userPhotos")) ? _dataReader.GetFolder() : null);
 
             if (drivePath == null)
             {
@@ -246,7 +246,7 @@ public class WorkspaceMigrator : Migrator
                 u.HasPhoto = u.PathToPhoto != null;
             }
 
-            if(!u.HasPhoto)
+            if (!u.HasPhoto)
             {
                 await using var streamPhotos = _dataReader.GetEntry("databases/core/core_userphoto");
                 var dataPhotots = new DataTable();
@@ -414,8 +414,8 @@ public class WorkspaceMigrator : Migrator
                 storage.Folders.Add(folder);
             }
         }
-        
-        if (storage.Type == FolderType.BUNCH) 
+
+        if (storage.Type == FolderType.BUNCH)
         {
             var remove = new List<string>();
             foreach (var entry in folderTree)
@@ -427,9 +427,9 @@ public class WorkspaceMigrator : Migrator
                 }
             }
             var removeFolder = new List<MigrationFolder>();
-            foreach(var entry in storage.Folders)
+            foreach (var entry in storage.Folders)
             {
-                if(entry.ParentId != 0 && storage.Folders.All(f => f.Id != entry.ParentId))
+                if (entry.ParentId != 0 && storage.Folders.All(f => f.Id != entry.ParentId))
                 {
                     remove.Add(entry.Id.ToString());
                     removeFolder.Add(entry);
@@ -463,7 +463,7 @@ public class WorkspaceMigrator : Migrator
                     Created = DateTime.Parse(row["create_on"].ToString()),
                     Modified = DateTime.Parse(row["modified_on"].ToString())
                 };
-                file.Path = Path.Combine(_dataReader.GetFolder(),$"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}");
+                file.Path = Path.Combine(_dataReader.GetFolder(), $"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}");
                 storage.Files.Add(file);
                 storage.BytesTotal += int.Parse(row["content_length"].ToString());
             }
@@ -489,7 +489,7 @@ public class WorkspaceMigrator : Migrator
         var mapper = new Dictionary<string, string>();
         foreach (var row in dataProject.Rows.Cast<DataRow>())
         {
-            if (row["right_node"].ToString().StartsWith("projects/project/") && storage.Folders.Any(f=> f.Id == int.Parse(row["left_node"].ToString())))
+            if (row["right_node"].ToString().StartsWith("projects/project/") && storage.Folders.Any(f => f.Id == int.Parse(row["left_node"].ToString())))
             {
                 var split = row["right_node"].ToString().Split('/');
                 mapper.Add(split.Last(), row["left_node"].ToString());
@@ -499,24 +499,41 @@ public class WorkspaceMigrator : Migrator
         using var streamFiles = _dataReader.GetEntry("databases/projects/projects_project_participant");
         var datafiles = new DataTable();
         datafiles.ReadXml(streamFiles);
+        var openProjects = new List<int>();
         foreach (var row in datafiles.Rows.Cast<DataRow>())
         {
-            if (row["removed"].ToString() == "0" 
-                && mapper.ContainsKey(row["project_id"].ToString()) 
-                && storage.Folders.FirstOrDefault(f=> f.Id == int.Parse(mapper[row["project_id"].ToString()])).Private)
+            var projectIdStr = row["project_id"].ToString();
+
+            if (row["removed"].ToString() == "0"
+                && mapper.ContainsKey(projectIdStr))
             {
+                var projectId = int.Parse(mapper[projectIdStr]);
+
                 var security = new MigrationSecurity
                 {
                     Subject = row["participant_id"].ToString(),
-                    EntryId = int.Parse(mapper[row["project_id"].ToString()]),
+                    EntryId = projectId,
                     EntryType = 1,
                     Security = (int)Files.Core.Security.FileShare.ContentCreator
                 };
                 storage.Securities.Add(security);
+
+                if (!openProjects.Contains(projectId) && !storage.Folders.FirstOrDefault(f => f.Id == projectId).Private)
+                {
+                    var everyoneSecurity = new MigrationSecurity
+                    {
+                        Subject = Constants.GroupEveryone.ID.ToString(),
+                        EntryId = projectId,
+                        EntryType = 1,
+                        Security = (int)Files.Core.Security.FileShare.Read
+                    };
+                    storage.Securities.Add(everyoneSecurity);
+                    openProjects.Add(projectId);
+                }
             }
         }
     }
-    
+
     private void DbExtractFilesSecurity(MigrationStorage storage, string createBy)
     {
         using var streamGroup = _dataReader.GetEntry("databases/files/files_security");
@@ -530,7 +547,7 @@ public class WorkspaceMigrator : Migrator
             {
                 continue;
             }
-            if (row["owner"].ToString() == createBy && (storage.Files.Select(f => f.Id).ToList().Contains(id) || storage.Folders.Select(f=> f.Id).ToList().Contains(id)))
+            if (row["owner"].ToString() == createBy && (storage.Files.Select(f => f.Id).ToList().Contains(id) || storage.Folders.Select(f => f.Id).ToList().Contains(id)))
             {
                 var security = new MigrationSecurity
                 {
@@ -556,9 +573,9 @@ public class WorkspaceMigrator : Migrator
         var dataGroup = new DataTable();
         dataGroup.ReadXml(streamGroup);
 
-        foreach(var row in dataGroup.Rows.Cast<DataRow>())
+        foreach (var row in dataGroup.Rows.Cast<DataRow>())
         {
-            if(int.TryParse(row["removed"].ToString(), out var result))
+            if (int.TryParse(row["removed"].ToString(), out var result))
             {
                 if (result == 1)
                 {

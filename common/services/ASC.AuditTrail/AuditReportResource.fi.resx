@@ -94,6 +94,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Väriteema muutettu</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Yhteystiedot</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Evästeen asetukset päivitetty</value>
   </data>
@@ -250,9 +253,6 @@
   <data name="FollowActionType" xml:space="preserve">
     <value>Seuraa</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Yleiset</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Tervetuloa sivun asetukset päivitetty</value>
   </data>
@@ -261,9 +261,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Ryhmät. Poistettu: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Ryhmät</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Ryhmät. Päivitetty: {0}</value>
@@ -421,9 +418,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Tuoteluettelo päivitetty</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Tuotteet</value>
-  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Lähetä</value>
   </data>
@@ -436,13 +430,16 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Istunto aloitettu</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Asetukset</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Kertakirjautuminen (SSO) poistettu käytöstä</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>Kertakirjautuminen (SSO) otettu käyttöön</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Aloita turvatalletus</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
@@ -534,9 +531,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Käyttäjät [{0}]. Salasanan muutosohjeet lähetetty</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Käyttäjät</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Käyttäjät [{0}]. Aktivointiohjeet lähetetty</value>
@@ -796,9 +790,6 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Kutsut on jälleen lähetetty: {0}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Asiakasohjelman {0} aktivointi muutettu</value>
   </data>
@@ -927,5 +918,17 @@
   </data>
   <data name="LdapSync" xml:space="preserve">
     <value>LDAP-synkronointi valmis</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Sijainti</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Kampanjabannerien näkyvyysasetuksia muutettu</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Asiakkaan lompakkoa käyttävien palveluiden asetukset päivitetty</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Kirjautuminen sosiaalisella tilillä onnistui</value>
   </data>
 </root>

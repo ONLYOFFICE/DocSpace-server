@@ -29,10 +29,10 @@ namespace ASC.Common.Security.Authorizing;
 public class AuthorizingException : Exception
 {
     public override string Message { get; }
-    
+
     public AuthorizingException(ISubject subject, IAction[] actions, ISubject[] denySubjects, IAction[] denyActions) =>
         Message = FormatErrorMessage(subject, actions, denySubjects, denyActions);
-    
+
     public AuthorizingException(ISubject subject, IAction action, ISubject denySubject, IAction denyAction) =>
         Message = FormatErrorMessage(subject, action, denySubject, denyAction);
 
@@ -86,12 +86,12 @@ public class AuthorizingException : Exception
 
         return $"\"{(subject is IRole ? "role:" : "") + subject.Name}\" access denied \"{sections}\". Cause: {reasons}.";
     }
-    
+
     private static string FormatErrorMessage(ISubject subject, IAction action, ISubject denySubject, IAction denyAction)
     {
         ArgumentNullException.ThrowIfNull(subject);
         ArgumentNullException.ThrowIfNull(action);
-        
+
         string reason;
         if (denySubject != null && denyAction != null)
         {
@@ -101,7 +101,7 @@ public class AuthorizingException : Exception
         {
             reason = $"{action.Name}: access denied.";
         }
-        
+
         return $"\"{(subject is IRole ? "role:" : "") + subject.Name}\" access denied \"{action}\". Cause: {reason}.";
     }
 }

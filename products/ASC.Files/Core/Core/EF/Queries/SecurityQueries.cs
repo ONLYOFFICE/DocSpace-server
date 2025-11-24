@@ -28,84 +28,102 @@ namespace ASC.Files.Core.EF;
 
 public partial class FilesDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File, PreCompileQuery.DefaultGuid])]
-    public IAsyncEnumerable<DbFilesSecurity> ForDeleteShareRecordsAsync(int tenantId, FileEntryType entryType, Guid subject)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File, PreCompileQuery.DefaultGuid, null])]
+    public IAsyncEnumerable<DbFilesSecurity> ForDeleteShareRecordsAsync(int tenantId, FileEntryType entryType, Guid subject, string entryId)
     {
-        return SecurityQueries.ForDeleteShareRecordsAsync(this, tenantId, entryType, subject);
+        return SecurityQueries.ForDeleteShareRecordsAsync(this, tenantId, entryType, subject, entryId);
     }
-    
+
     [PreCompileQuery([null])]
     public IAsyncEnumerable<int> FolderIdsAsync(string entryId)
     {
         return SecurityQueries.FolderIdsAsync(this, entryId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public IAsyncEnumerable<string> FilesIdsAsync(int tenantId, IEnumerable<int> folders)
     {
         return SecurityQueries.FilesIdsAsync(this, tenantId, folders);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null, FileEntryType.File])]
     public Task<int> DeleteForSetShareAsync(int tenantId, Guid subject, IEnumerable<string> entryIds, FileEntryType type)
     {
         return SecurityQueries.DeleteForSetShareAsync(this, tenantId, subject, entryIds, type);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, FileEntryType.File, null])]
     public Task<bool> IsPureSharedAsync(int tenantId, string entryId, FileEntryType type, IEnumerable<SubjectType> subjectTypes)
     {
         return SecurityQueries.IsPureSharedAsync(this, tenantId, entryId, type, subjectTypes);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
     public Task<bool> IsSharedAsync(int tenantId, int folderId, IEnumerable<SubjectType> subjectTypes)
     {
         return SecurityQueries.IsSharedAsync(this, tenantId, folderId, subjectTypes);
     }
-    
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
-    public IAsyncEnumerable<DbFilesSecurity> SharesAsync(int tenantId, IEnumerable<Guid> subjects)
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
+    public IAsyncEnumerable<DbFilesSecurity> SharesAsync(int tenantId, IEnumerable<Guid> subjects, Guid ownerId)
     {
-        return SecurityQueries.SharesAsync(this, tenantId, subjects);
+        return SecurityQueries.SharesAsync(this, tenantId, subjects, ownerId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, null])]
     public IAsyncEnumerable<DbFilesSecurity> PureShareRecordsDbAsync(int tenantId, IEnumerable<string> files, IEnumerable<string> folders)
     {
         return SecurityQueries.PureShareRecordsDbAsync(this, tenantId, files, folders);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public Task<int> RemoveBySubjectAsync(int tenantId, Guid subject)
     {
         return SecurityQueries.RemoveBySubjectAsync(this, tenantId, subject);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public Task<int> RemoveBySubjectWithoutOwnerAsync(int tenantId, Guid subject)
     {
         return SecurityQueries.RemoveBySubjectWithoutOwnerAsync(this, tenantId, subject);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, FileEntryType.File, null])]
     public IAsyncEnumerable<DbFilesSecurity> EntrySharesBySubjectsAsync(int tenantId, string entryId, FileEntryType entryType, IEnumerable<Guid> subjects)
     {
         return SecurityQueries.EntrySharesBySubjectsAsync(this, tenantId, entryId, entryType, subjects);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, SubjectType.User])]
     public Task<int> RemoveSecuritiesAsync(int tenantId, Guid subject, Guid owner, SubjectType subjectType)
     {
         return SecurityQueries.RemoveSecuritiesAsync(this, tenantId, subject, owner, subjectType);
     }
-} 
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<int> RemoveUserRoomChatsAsync(int tenantId, int roomId, Guid userId)
+    {
+        return SecurityQueries.RemoveUserRoomChatsAsync(this, tenantId, roomId, userId);
+    }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<int> RemoveUserRoomChatsSettingsAsync(int tenantId, int roomId, Guid userId)
+    {
+        return SecurityQueries.RemoveUserRoomChatsSettingsAsync(this, tenantId, roomId, userId);
+    }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<int> RemoveUserRoomMcpSettingsAsync(int tenantId, int roomId, Guid userId)
+    {
+        return SecurityQueries.RemoveUserRoomMcpSettingsAsync(this, tenantId, roomId, userId);
+    }
+}
 
 static file class SecurityQueries
 {
-    public static readonly Func<FilesDbContext, int, FileEntryType, Guid, IAsyncEnumerable<DbFilesSecurity>> ForDeleteShareRecordsAsync = 
+    public static readonly Func<FilesDbContext, int, FileEntryType, Guid, string, IAsyncEnumerable<DbFilesSecurity>> ForDeleteShareRecordsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, FileEntryType entryType, Guid subject) =>
+            (FilesDbContext ctx, int tenantId, FileEntryType entryType, Guid subject, string entryId) =>
                 ctx.Security
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.EntryType == entryType)
@@ -124,7 +142,7 @@ static file class SecurityQueries
                     .Select(r => r.Id.ToString()));
 
     public static readonly
-        Func<FilesDbContext, int, Guid, IEnumerable<string>, FileEntryType, Task<int>> DeleteForSetShareAsync = 
+        Func<FilesDbContext, int, Guid, IEnumerable<string>, FileEntryType, Task<int>> DeleteForSetShareAsync =
             Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<string> entryIds, FileEntryType type) =>
                 ctx.Security
@@ -147,11 +165,11 @@ static file class SecurityQueries
                     .Join(ctx.Tree.Where(x => x.FolderId == folderId), s => s.EntryId, t => t.ParentId.ToString(), (s, t) => s)
                     .Any());
 
-    public static readonly Func<FilesDbContext, int, IEnumerable<Guid>, IAsyncEnumerable<DbFilesSecurity>> SharesAsync =
+    public static readonly Func<FilesDbContext, int, IEnumerable<Guid>, Guid, IAsyncEnumerable<DbFilesSecurity>> SharesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<Guid> subjects) =>
+            (FilesDbContext ctx, int tenantId, IEnumerable<Guid> subjects, Guid ownerId) =>
                 ctx.Security
-                    .Where(r => r.TenantId == tenantId && subjects.Contains(r.Subject)));
+                    .Where(r => r.TenantId == tenantId && subjects.Contains(r.Subject) && (ownerId == Guid.Empty || ownerId == r.Owner)));
 
     public static readonly
         Func<FilesDbContext, int, IEnumerable<string>, IEnumerable<string>, IAsyncEnumerable<DbFilesSecurity>> PureShareRecordsDbAsync =
@@ -168,7 +186,7 @@ static file class SecurityQueries
                     .Where(r => r.TenantId == tenantId
                                 && (r.Subject == subject || r.Owner == subject))
                     .ExecuteDelete());
-    
+
     public static readonly Func<FilesDbContext, int, Guid, Task<int>> RemoveBySubjectWithoutOwnerAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid subject) =>
@@ -178,18 +196,39 @@ static file class SecurityQueries
 
     public static readonly Func<FilesDbContext, int, string, FileEntryType, IEnumerable<Guid>, IAsyncEnumerable<DbFilesSecurity>> EntrySharesBySubjectsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string entryId, FileEntryType entryType, IEnumerable<Guid> subjects) => 
+            (FilesDbContext ctx, int tenantId, string entryId, FileEntryType entryType, IEnumerable<Guid> subjects) =>
                 ctx.Security
                     .Where(r => r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == entryType && subjects.Contains(r.Subject)));
-    
+
     public static readonly Func<FilesDbContext, int, Guid, Guid, SubjectType, Task<int>> RemoveSecuritiesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid subject, Guid owner, SubjectType subjectType) =>
                 ctx.Security
-                    .Where(r => 
-                        r.TenantId == tenantId && 
-                        r.Subject == subject && 
-                        r.Owner == owner && 
+                    .Where(r =>
+                        r.TenantId == tenantId &&
+                        r.Subject == subject &&
+                        r.Owner == owner &&
                         r.SubjectType == subjectType)
+                    .ExecuteDelete());
+    
+    public static readonly Func<FilesDbContext, int, int, Guid, Task<int>> RemoveUserRoomChatsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId, Guid userId) =>
+                ctx.Chats
+                    .Where(r => r.TenantId == tenantId && r.RoomId == roomId && r.UserId == userId)
+                    .ExecuteDelete());
+    
+    public static readonly Func<FilesDbContext, int, int, Guid, Task<int>> RemoveUserRoomChatsSettingsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId, Guid userId) =>
+                ctx.UserChatSettings
+                    .Where(r => r.TenantId == tenantId && r.RoomId == roomId && r.UserId == userId)
+                    .ExecuteDelete());
+    
+    public static readonly Func<FilesDbContext, int, int, Guid, Task<int>> RemoveUserRoomMcpSettingsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId, Guid userId) =>
+                ctx.McpServerSettings
+                    .Where(r => r.TenantId == tenantId && r.RoomId == roomId && r.UserId == userId)
                     .ExecuteDelete());
 }

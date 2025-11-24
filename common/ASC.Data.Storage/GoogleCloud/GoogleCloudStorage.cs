@@ -107,7 +107,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         props.TryGetValue("subdir", out _subDir);
 
         DataStoreValidator = dataStoreValidator;
-        
+
         return Task.FromResult<IDataStore>(this);
     }
 
@@ -155,14 +155,14 @@ public class GoogleCloudStorage(TempStream tempStream,
     {
         return await GetReadStreamAsync(domain, path, offset, long.MaxValue);
     }
-    
+
     public override async Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length)
     {
         var tempStream = _tempStream.Create();
 
         var storage = await GetStorageAsync();
         DownloadObjectOptions options = null;
-        
+
         if (length > 0 && (offset > 0 || offset == 0 && length != long.MaxValue))
         {
             options = new DownloadObjectOptions
@@ -170,7 +170,7 @@ public class GoogleCloudStorage(TempStream tempStream,
                 Range = new RangeHeaderValue(offset, offset + length - 1)
             };
         }
-        
+
         await storage.DownloadObjectAsync(_bucket, MakePath(domain, path), tempStream, options);
 
         if (offset > 0)
@@ -444,7 +444,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         return GetObjectsAsync(domain, path, recursive)
                .Select(x => x.Name[MakePath(domain, path + "/").Length..]);
     }
-    
+
 
     private IAsyncEnumerable<Object> GetObjectsAsync(string domain, string path, bool recursive)
     {
@@ -521,7 +521,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         var objToDel = storage
                           .ListObjectsAsync(_bucket, MakePath(domain, path));
 
-        return await objToDel.Where(obj => obj.Size.HasValue).SumAsync(obj => Convert.ToInt64(obj.Size));
+        return await objToDel.Where(obj => obj.Size.HasValue).Select(((obj, _) => Convert.ToInt64(obj.Size))).SumAsync();
     }
 
     public override async Task<long> ResetQuotaAsync(string domain)
@@ -533,7 +533,7 @@ public class GoogleCloudStorage(TempStream tempStream,
 
         if (QuotaController != null)
         {
-            var size = await objects.Where(obj => obj.Size.HasValue).SumAsync(obj => Convert.ToInt64(obj.Size));
+            var size = await objects.Where(obj => obj.Size.HasValue).Select(((obj, _) => Convert.ToInt64(obj.Size))).SumAsync();
 
             await QuotaController.QuotaUsedSetAsync(Modulename, domain, DataList.GetData(domain), size);
 
@@ -551,7 +551,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         var objects = storage
                           .ListObjectsAsync(_bucket, MakePath(domain, string.Empty));
 
-        return await objects.Where(obj => obj.Size.HasValue).SumAsync(obj => Convert.ToInt64(obj.Size));
+        return await objects.Where(obj => obj.Size.HasValue).Select(((obj, _) => Convert.ToInt64(obj.Size))).SumAsync();
     }
 
     public override async Task<Uri> CopyAsync(string srcDomain, string srcpath, string newDomain, string newPath)
@@ -800,14 +800,14 @@ public class GoogleCloudStorage(TempStream tempStream,
 
     private StorageClient GetStorage()
     {
-        var credential = GoogleCredential.FromJson(_json);
+        var credential =  CredentialFactory.FromJson<GoogleCredential>(_json);
 
         return StorageClient.Create(credential);
     }
 
     private async Task<StorageClient> GetStorageAsync()
     {
-        var credential = GoogleCredential.FromJson(_json);
+        var credential = CredentialFactory.FromJson<GoogleCredential>(_json);
 
         return await StorageClient.CreateAsync(credential);
     }

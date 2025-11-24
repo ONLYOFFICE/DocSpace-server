@@ -113,17 +113,17 @@ public class SmsManager(UserManager userManager,
         }
     }
 
-    public async Task ValidateSmsCodeAsync(UserInfo user, string code, bool isEntryPoint = false)
+    public async Task<(bool, string)> ValidateSmsCodeAsync(UserInfo user, string code, bool isEntryPoint = false)
     {
-        if (!await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync()
-            || !await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
+        if (!await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() || 
+            !await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
-            return;
+            return (false, null);
         }
 
         if (user == null || Equals(user, Constants.LostUser))
         {
-            throw new Exception(Resource.ErrorUserNotFound);
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         var valid = await smsKeyStorage.ValidateKeyAsync(user.MobilePhone, code);
@@ -143,10 +143,11 @@ public class SmsManager(UserManager userManager,
             throw new Exception("Error: " + valid);
         }
 
+        string token = null;
         if (!securityContext.IsAuthenticated)
         {
             var action = isEntryPoint ? MessageAction.LoginSuccessViaApiSms : MessageAction.LoginSuccessViaSms;
-            await cookieManager.AuthenticateMeAndSetCookiesAsync(user.Id, action);
+            token = await cookieManager.AuthenticateMeAndSetCookiesAsync(user.Id, action);
         }
 
         if (user.MobilePhoneActivationStatus == MobilePhoneActivationStatus.NotActivated)
@@ -154,5 +155,7 @@ public class SmsManager(UserManager userManager,
             user.MobilePhoneActivationStatus = MobilePhoneActivationStatus.Activated;
             await userManager.UpdateUserInfoAsync(user);
         }
+
+        return (true, token);
     }
 }

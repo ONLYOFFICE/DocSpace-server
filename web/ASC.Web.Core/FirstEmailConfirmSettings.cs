@@ -40,6 +40,6 @@ public class FirstEmailConfirmSettings : ISettings<FirstEmailConfirmSettings>
     {
         return new FirstEmailConfirmSettings();
     }
-    
+
     public DateTime LastModified { get; set; }
 }

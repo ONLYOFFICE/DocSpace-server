@@ -32,7 +32,7 @@ public class DbUserRelation : BaseEntity
     public Guid SourceUserId { get; set; }
     public Guid TargetUserId { get; set; }
     public DbTenant Tenant { get; set; }
-    
+
     public override object[] GetKeys()
     {
         return [TenantId, SourceUserId, TargetUserId];
@@ -53,25 +53,25 @@ public static class UserRelationExtension
 
         return modelBuilder;
     }
-    
+
     private static void MySqlAddUserRelation(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbUserRelation>(builder =>
         {
             builder.ToTable("core_user_relations");
-            
+
             builder.HasKey(e => new { e.TenantId, e.SourceUserId, e.TargetUserId })
                 .HasName("PRIMARY");
 
             builder.Property(e => e.TenantId)
                 .HasColumnName("tenant");
-            
+
             builder.Property(e => e.SourceUserId)
                 .HasColumnName("source_user_id")
                 .HasColumnType("varchar(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
-            
+
             builder.Property(e => e.TargetUserId)
                 .HasColumnName("target_user_id")
                 .HasColumnType("varchar(36)")

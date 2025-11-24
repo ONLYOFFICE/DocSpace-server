@@ -24,11 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core.Common.EF;
 
-public class UserGroup : BaseEntity, IMapFrom<UserGroupRef>
+public class UserGroup : BaseEntity
 {
     public int TenantId { get; set; }
     public Guid Userid { get; set; }
@@ -43,11 +41,13 @@ public class UserGroup : BaseEntity, IMapFrom<UserGroupRef>
     {
         return [TenantId, Userid, UserGroupId, RefType];
     }
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<UserGroupRef, UserGroup>()
-            .ForMember(dest => dest.UserGroupId, opt => opt.MapFrom(src => src.GroupId));
-    }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class UserGroupMapper
+{
+    [MapProperty(nameof(UserGroupRef.GroupId), nameof(UserGroup.UserGroupId))]
+    public static partial UserGroup Map(this UserGroupRef source);
 }
 
 public static class DbUserGroupExtension

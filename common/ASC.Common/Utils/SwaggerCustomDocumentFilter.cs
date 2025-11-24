@@ -24,12 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Web.Services.Description;
-
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 
-using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
@@ -39,44 +36,6 @@ public class HideRouteDocumentFilter(string routeToHide) : IDocumentFilter
     public void Apply(OpenApiDocument document, DocumentFilterContext context)
     {
         document.Paths.Remove(routeToHide);
-    }
-}
-
-public class OneOfResponseFilter : IOperationFilter
-{
-    public void Apply(OpenApiOperation operation, OperationFilterContext context)
-    {
-        var method = context.MethodInfo;
-        var responseAttributes = method.GetCustomAttributes<SwaggerResponseAttribute>().Where(attr => attr.StatusCode == 200 && attr.Type != null).ToList();
-        if (responseAttributes.Count > 1)
-        {
-            var intType = responseAttributes.Select(attr => attr.Type).FirstOrDefault(t => t is { IsGenericType: true } && t.GetGenericArguments().Length == 1 && t.GetGenericArguments()[0] == typeof(int));
-            if (intType == null)
-            {
-                return;
-            }
-            var intTypeSchema = context.SchemaGenerator.GenerateSchema(intType, context.SchemaRepository);
-
-            if (operation.Responses.TryGetValue("200", out var response))
-            {
-                foreach (var content in response.Content)
-                {
-                    var schema = content.Value.Schema;
-                    if (schema.Type == "array")
-                    {
-                        content.Value.Schema = new OpenApiSchema
-                        {
-                            Items = intTypeSchema,
-                            Type = "array"
-                        };
-                    }
-                    else
-                    {
-                        content.Value.Schema = intTypeSchema;
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -245,7 +204,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
 
         swaggerDoc.Tags = customTags
             .Where(tag => _tagDescriptions.ContainsKey(tag))
-            .Select(tag => 
+            .Select(tag =>
             {
                 var tagParts = tag.Split(" / ");
                 var displayName = tagParts.Length > 1 ? tagParts[1] : tagParts[0];
@@ -271,7 +230,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
             var groupObject = new OpenApiObject();
             var tagsArray = new OpenApiArray();
 
-            foreach(var tag in group.Value)
+            foreach (var tag in group.Value)
             {
                 tagsArray.Add(new OpenApiString(tag));
             }

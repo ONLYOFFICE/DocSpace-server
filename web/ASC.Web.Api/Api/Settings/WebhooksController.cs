@@ -37,7 +37,7 @@ public class WebhooksController(
     DbWorker dbWorker,
     TenantManager tenantManager,
     UserManager userManager,
-    IMapper mapper,
+    WebhooksLogDtoMapper mapper,
     IWebhookPublisher webhookPublisher,
     MessageService messageService,
     SettingsManager settingsManager,
@@ -233,11 +233,11 @@ public class WebhooksController(
         }
 
         context.SetTotalCount(await dbWorker.GetTotalByQuery(inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, inDto.UserId, inDto.Trigger));
-        
+
         await foreach (var j in dbWorker.ReadJournal(inDto.StartIndex, inDto.Count, inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, inDto.UserId, inDto.Trigger))
         {
             j.Log.Config = j.Config;
-            yield return mapper.Map<DbWebhooksLog, WebhooksLogDto>(j.Log);
+            yield return mapper.Map(j.Log);
         }
     }
 
@@ -278,7 +278,7 @@ public class WebhooksController(
 
         var result = await webhookPublisher.RetryPublishAsync(item);
 
-        return mapper.Map<DbWebhooksLog, WebhooksLogDto>(result);
+        return mapper.Map(result);
     }
 
     /// <summary>
@@ -314,7 +314,7 @@ public class WebhooksController(
 
             var result = await webhookPublisher.RetryPublishAsync(item);
 
-            yield return mapper.Map<DbWebhooksLog, WebhooksLogDto>(result);
+            yield return mapper.Map(result);
         }
     }
 
@@ -336,14 +336,14 @@ public class WebhooksController(
 
     private async Task<bool> CheckAdminPermissionsAsync()
     {
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserId = authContext.CurrentAccount.ID;
 
-        if (await userManager.IsDocSpaceAdminAsync(currentUser))
+        if (await userManager.IsDocSpaceAdminAsync(currentUserId))
         {
             return true;
         }
 
-        if (await userManager.IsGuestAsync(currentUser))
+        if (await userManager.IsGuestAsync(currentUserId))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }

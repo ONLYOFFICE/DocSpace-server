@@ -29,18 +29,19 @@ namespace ASC.Core.Common.Notify.Telegram;
 [Scope]
 public class TelegramDao(IDbContextFactory<TelegramDbContext> dbContextFactory)
 {
-    public async Task RegisterUserAsync(Guid userId, int tenantId, long telegramId)
+    public async Task RegisterUserAsync(Guid userId, int tenantId, long telegramId, string telegramUsername)
     {
         var user = new TelegramUser
         {
             PortalUserId = userId,
             TenantId = tenantId,
-            TelegramUserId = telegramId
+            TelegramUserId = telegramId,
+            TelegramUsername = telegramUsername,
         };
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        await dbContext.AddOrUpdateAsync(q => q.Users, user);
-        await dbContext.SaveChangesAsync();
+        _ = await dbContext.AddOrUpdateAsync(q => q.Users, user);
+        _ = await dbContext.SaveChangesAsync();
     }
 
     public async Task<TelegramUser> GetUserAsync(Guid userId, int tenantId)
@@ -60,14 +61,14 @@ public class TelegramDao(IDbContextFactory<TelegramDbContext> dbContextFactory)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        await Queries.DeleteTelegramUsersAsync(dbContext, tenantId, userId);
+        _ = await Queries.DeleteTelegramUsersAsync(dbContext, tenantId, userId);
     }
 
     public async Task DeleteAsync(long telegramId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        await Queries.DeleteTelegramUsersByTelegramIdAsync(dbContext, telegramId);
+        _ = await Queries.DeleteTelegramUsersByTelegramIdAsync(dbContext, telegramId);
     }
 }
 
@@ -77,7 +78,7 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (TelegramDbContext ctx, long telegramId) =>
                 ctx.Users
-                    
+
                     .Where(r => r.TelegramUserId == telegramId));
 
     public static readonly Func<TelegramDbContext, int, Guid, Task<int>> DeleteTelegramUsersAsync =

@@ -34,10 +34,10 @@ public class CoversResultDto
     /// <summary>
     /// The cover unique identifier.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// The cover image data.
     /// </summary>
-    public string Data { get; set; }
+    public required string Data { get; set; }
 }
