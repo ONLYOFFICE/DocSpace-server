@@ -1053,7 +1053,7 @@ public partial class SettingsController(
 
         var consumer = consumerFactory.GetByKey<Consumer>(inDto.Name);
 
-        if (consumer.CanSet)
+        if (!consumer.CanSet)
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
