@@ -52,18 +52,6 @@ public partial class FilesDbContext
         return SecurityQueries.DeleteForSetShareAsync(this, tenantId, subject, entryIds, type);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, FileEntryType.File, null])]
-    public Task<bool> IsPureSharedAsync(int tenantId, string entryId, FileEntryType type, IEnumerable<SubjectType> subjectTypes)
-    {
-        return SecurityQueries.IsPureSharedAsync(this, tenantId, entryId, type, subjectTypes);
-    }
-
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
-    public Task<bool> IsSharedAsync(int tenantId, int folderId, IEnumerable<SubjectType> subjectTypes)
-    {
-        return SecurityQueries.IsSharedAsync(this, tenantId, folderId, subjectTypes);
-    }
-
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
     public IAsyncEnumerable<DbFilesSecurity> SharesAsync(int tenantId, IEnumerable<Guid> subjects, Guid ownerId)
     {
@@ -151,19 +139,6 @@ static file class SecurityQueries
                                 a.EntryType == type &&
                                 a.Subject == subject)
                     .ExecuteDelete());
-
-    public static readonly Func<FilesDbContext, int, string, FileEntryType, IEnumerable<SubjectType>, Task<bool>> IsPureSharedAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string entryId, FileEntryType type, IEnumerable<SubjectType> subjectTypes) =>
-                ctx.Security.Any(r => r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == type && subjectTypes.Contains(r.SubjectType)));
-
-    public static readonly Func<FilesDbContext, int, int, IEnumerable<SubjectType>, Task<bool>> IsSharedAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId, IEnumerable<SubjectType> subjectTypes) =>
-                ctx.Security
-                    .Where(x => x.TenantId == tenantId && x.EntryType == FileEntryType.Folder && subjectTypes.Contains(x.SubjectType))
-                    .Join(ctx.Tree.Where(x => x.FolderId == folderId), s => s.EntryId, t => t.ParentId.ToString(), (s, t) => s)
-                    .Any());
 
     public static readonly Func<FilesDbContext, int, IEnumerable<Guid>, Guid, IAsyncEnumerable<DbFilesSecurity>> SharesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

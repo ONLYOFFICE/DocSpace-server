@@ -80,17 +80,6 @@ internal abstract class SecurityBaseDao<T>(
         await filesDbContext.SaveChangesAsync();
     }
 
-    public async Task<bool> IsPureSharedAsync(T entryId, FileEntryType type, IEnumerable<SubjectType> subjectTypes)
-    {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-
-        var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entryId);
-
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        return await filesDbContext.IsPureSharedAsync(tenantId, mappedId, type, subjectTypes);
-    }
-
     public async Task SetShareAsync(FileShareRecord<T> r)
     {
         var mapping = daoFactory.GetMapping<T>();
@@ -1294,30 +1283,6 @@ internal class SecurityDao(
             .ThenByDescending(r => r.Share, new FileShareRecord<int>.ShareComparer(entry.RootFolderType));
 
         return await DeleteExpiredAsync(records, filesDbContext).ToListAsync();
-    }
-
-    public async Task<bool> IsSharedAsync(FileEntry<int> entry, IEnumerable<SubjectType> subjectTypes)
-    {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        if (entry.RootFolderType is FolderType.USER)
-        {
-            return entry.FileEntryType is FileEntryType.File &&
-                   await filesDbContext.IsPureSharedAsync(tenantId, entry.Id.ToString(), FileEntryType.File, subjectTypes);
-        }
-
-        if (entry.RootFolderType is not FolderType.VirtualRooms)
-        {
-            return false;
-        }
-
-        if (entry is Folder<int> folder && DocSpaceHelper.IsRoom(folder.FolderType))
-        {
-            return await filesDbContext.IsPureSharedAsync(tenantId, entry.Id.ToString(), FileEntryType.Folder, subjectTypes);
-        }
-
-        return await filesDbContext.IsSharedAsync(tenantId, entry.ParentId, subjectTypes);
     }
 }
 
