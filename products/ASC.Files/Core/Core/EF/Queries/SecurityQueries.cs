@@ -35,7 +35,7 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery([null])]
-    public IAsyncEnumerable<int> FolderIdsAsync(string entryId)
+    public IAsyncEnumerable<int> FolderIdsAsync(int entryId)
     {
         return SecurityQueries.FolderIdsAsync(this, entryId);
     }
@@ -115,12 +115,12 @@ static file class SecurityQueries
                 ctx.Security
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.EntryType == entryType)
-                    .Where(r => r.Subject == subject));
+                    .Where(r => r.Subject == subject));//TODO: check entryId
 
-    public static readonly Func<FilesDbContext, string, IAsyncEnumerable<int>> FolderIdsAsync =
+    public static readonly Func<FilesDbContext, int, IAsyncEnumerable<int>> FolderIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, string entryId) =>
-                ctx.Tree.Where(r => r.ParentId.ToString() == entryId)
+            (FilesDbContext ctx, int entryId) =>
+                ctx.Tree.Where(r => r.ParentId == entryId)
                     .Select(r => r.FolderId));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<int>> FilesIdsAsync =
