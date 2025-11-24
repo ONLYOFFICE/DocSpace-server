@@ -41,15 +41,15 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
-    public IAsyncEnumerable<string> FilesIdsAsync(int tenantId, IEnumerable<int> folders)
+    public IAsyncEnumerable<int> FilesIdsAsync(int tenantId, IEnumerable<int> folders)
     {
         return SecurityQueries.FilesIdsAsync(this, tenantId, folders);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null, FileEntryType.File])]
-    public Task<int> DeleteForSetShareAsync(int tenantId, Guid subject, IEnumerable<string> entryIds, FileEntryType type)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null, null, FileEntryType.File])]
+    public Task<int> DeleteForSetShareAsync(int tenantId, Guid subject, IEnumerable<int> internalEntryIds, IEnumerable<string> thirdPartyEntryIds, FileEntryType type)
     {
-        return SecurityQueries.DeleteForSetShareAsync(this, tenantId, subject, entryIds, type);
+        return SecurityQueries.DeleteForSetShareAsync(this, tenantId, subject, internalEntryIds, thirdPartyEntryIds, type);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
@@ -123,19 +123,18 @@ static file class SecurityQueries
                 ctx.Tree.Where(r => r.ParentId.ToString() == entryId)
                     .Select(r => r.FolderId));
 
-    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<string>> FilesIdsAsync =
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<int>> FilesIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<int> folders) =>
-                ctx.Files.Where(r => r.TenantId == tenantId && folders.Contains(r.ParentId))
-                    .Select(r => r.Id.ToString()));
+                ctx.Files.Where(r => r.TenantId == tenantId && folders.Contains(r.ParentId)).Select(r => r.Id));
 
     public static readonly
-        Func<FilesDbContext, int, Guid, IEnumerable<string>, FileEntryType, Task<int>> DeleteForSetShareAsync =
+        Func<FilesDbContext, int, Guid, IEnumerable<int>, IEnumerable<string>, FileEntryType, Task<int>> DeleteForSetShareAsync =
             Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<string> entryIds, FileEntryType type) =>
+            (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<int> internalEntryIds, IEnumerable<string> thirdPartyEntryIds, FileEntryType type) =>
                 ctx.Security
                     .Where(a => a.TenantId == tenantId &&
-                                entryIds.Contains(a.EntryId) &&
+                                (thirdPartyEntryIds.Contains(a.EntryId) || internalEntryIds.Contains(a.InternalEntryId)) &&
                                 a.EntryType == type &&
                                 a.Subject == subject)
                     .ExecuteDelete());

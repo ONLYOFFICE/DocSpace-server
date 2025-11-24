@@ -101,32 +101,36 @@ internal abstract class SecurityBaseDao<T>(
                 await using var context = await _dbContextFactory.CreateDbContextAsync();
                 await using var tr = await context.Database.BeginTransactionAsync();
 
-                var files = new List<string>();
+                List<int> internalFiles = [];
+                List<string> thirdPartyFiles = [];
 
                 if (r.EntryType == FileEntryType.Folder)
                 {
-                    var folders = new List<string>();
+                    List<string> thirdPartyFolders = [];
+                    List<int> internalFolders = [];
+                    
                     if (int.TryParse(entryId, out _))
                     {
                         var foldersInt = await context.FolderIdsAsync(entryId).ToListAsync();
 
-                        folders.AddRange(foldersInt.Select(folderInt => folderInt.ToString()));
-                        files.AddRange(await context.FilesIdsAsync(tenantId, foldersInt).ToListAsync());
+                        internalFolders.AddRange(foldersInt);
+                        internalFiles.AddRange(await context.FilesIdsAsync(tenantId, foldersInt).ToListAsync());
                     }
                     else
                     {
-                        folders.Add(entryId);
+                        thirdPartyFolders.Add(entryId);
                     }
-                    await context.DeleteForSetShareAsync(r.TenantId, r.Subject, folders, FileEntryType.Folder);
+                    
+                    await context.DeleteForSetShareAsync(r.TenantId, r.Subject, internalFolders, thirdPartyFolders, FileEntryType.Folder);
                 }
                 else
                 {
-                    files.Add(entryId);
+                    thirdPartyFiles.Add(entryId);
                 }
 
-                if (files.Count > 0)
+                if (internalFiles.Count > 0 || thirdPartyFiles.Count > 0)
                 {
-                    await context.DeleteForSetShareAsync(r.TenantId, r.Subject, files, FileEntryType.File);
+                    await context.DeleteForSetShareAsync(r.TenantId, r.Subject, internalFiles, thirdPartyFiles, FileEntryType.File);
                 }
 
                 if (r.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
@@ -181,7 +185,7 @@ internal abstract class SecurityBaseDao<T>(
         return InternalGetPureShareRecordsAsync(entries);
     }
 
-    internal async IAsyncEnumerable<FileShareRecord<T>> InternalGetPureShareRecordsAsync(IEnumerable<FileEntry<T>> entries)
+    private async IAsyncEnumerable<FileShareRecord<T>> InternalGetPureShareRecordsAsync(IEnumerable<FileEntry<T>> entries)
     {
         var files = new List<string>();
         var folders = new List<string>();
