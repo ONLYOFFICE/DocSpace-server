@@ -1002,7 +1002,7 @@ internal class FileDao(
 
             await context.DeleteTagsAsync(tenantId);
 
-            await context.DeleteSecurityAsync(tenantId, fileId.ToString());
+            await context.DeleteSecurityAsync(tenantId, fileId);
 
             await DeleteCustomOrder(filesDbContext, fileId);
 
@@ -1267,7 +1267,7 @@ internal class FileDao(
                     await filesDbContext.Security.Where(x => x.TenantId == tenantId && x.InternalEntryId == fileId && x.EntryType == FileEntryType.File).ExecuteDeleteAsync();
                     await filesDbContext.DeleteTagLinksByTypeAsync(tenantId, fileId.ToString(), FileEntryType.File, TagType.RecentByLink);
                     await filesDbContext.DeleteTagsAsync(tenantId);
-                    await filesDbContext.DeleteLinksAsync(tenantId, fileId.ToString(), FileEntryType.File);
+                    await filesDbContext.DeleteLinksAsync(tenantId, fileId, FileEntryType.File);
                 }
 
                 if (needDeleteVectors)

@@ -147,8 +147,8 @@ public partial class FilesDbContext
         return FileQueries.PdfTenantFileIdsAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
-    public Task<int> DeleteSecurityAsync(int tenantId, string fileId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<int> DeleteSecurityAsync(int tenantId, int fileId)
     {
         return FileQueries.DeleteSecurityAsync(this, tenantId, fileId);
     }
@@ -680,12 +680,12 @@ static file class FileQueries
                     .Where(r => r.Title.EndsWith(".pdf"))
                     .Select(r => r.Id));
 
-    public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteSecurityAsync =
+    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteSecurityAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string fileId) =>
+            (FilesDbContext ctx, int tenantId, int fileId) =>
                 ctx.Security
                     .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.EntryId == fileId)
+                    .Where(r => r.InternalEntryId == fileId)
                     .Where(r => r.EntryType == FileEntryType.File)
                     .ExecuteDelete());
 
@@ -891,8 +891,7 @@ static file class FileQueries
                                 select f
                             ).FirstOrDefault()
                     })
-                    .Join(ctx.Security.DefaultIfEmpty(), r => r.File.Id.ToString(), s => s.EntryId,
-                        (f, s) => new DbFileQueryWithSecurity { DbFileQuery = f, Security = s })
+                    .Join(ctx.Security.DefaultIfEmpty(), r => r.File.Id, s => s.InternalEntryId, (f, s) => new DbFileQueryWithSecurity { DbFileQuery = f, Security = s })
                     .Where(r => r.Security.TenantId == tenantId)
                     .Where(r => r.Security.EntryType == FileEntryType.File)
                     .Where(r => r.Security.Share == FileShare.Restrict));

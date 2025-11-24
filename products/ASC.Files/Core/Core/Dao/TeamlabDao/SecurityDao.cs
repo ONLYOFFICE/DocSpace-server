@@ -1243,7 +1243,7 @@ internal class SecurityDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = Query(filesDbContext.Security)
-            .Join(filesDbContext.Tree, r => r.EntryId, a => a.ParentId.ToString(),
+            .Join(filesDbContext.Tree, r => r.InternalEntryId, a => a.ParentId,
                 (s, t) => new SecurityTreeRecord
                 {
                     TenantId = s.TenantId,

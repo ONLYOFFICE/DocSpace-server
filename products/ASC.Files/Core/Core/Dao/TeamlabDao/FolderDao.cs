@@ -901,7 +901,7 @@ internal class FolderDao(
 
             await filesDbContext.DeleteTagOriginAsync(tenantId, folderId.ToString(), subfoldersStrings);
 
-            await filesDbContext.DeleteFilesSecurityAsync(tenantId, subfoldersStrings);
+            await filesDbContext.DeleteFilesSecurityAsync(tenantId, subfolders.Select(r => r));
 
             await filesDbContext.DeleteBunchObjectsAsync(tenantId, folderId.ToString());
 
