@@ -399,13 +399,13 @@ static file class FolderQueries
                                 ).FirstOrDefault(),
                             UserShared = ctx.Security.Where(x =>
                                     x.TenantId == tenantId &&
-                                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder)
+                                    x.InternalEntryId == r.Id && x.EntryType == FileEntryType.Folder)
                                 .Select(s => s.SubjectType).ToList(),
                             ParentShared = ctx.Security.Any(x =>
                                 x.TenantId == tenantId &&
                                 (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                                  x.EntryType == FileEntryType.Folder &&
-                                ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
+                                ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId == x.InternalEntryId)),
                             Settings = ctx.RoomSettings.Where(x => x.TenantId == tenantId && x.RoomId == r.Id).Distinct().FirstOrDefault(),
                             Order = (
                                 from f in ctx.FileOrder
