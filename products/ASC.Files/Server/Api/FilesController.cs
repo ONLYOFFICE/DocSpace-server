@@ -261,7 +261,11 @@ public abstract class FilesController<T>(
     {
         var completedFormId = await hybridCache.GetOrDefaultAsync<string>(inDto.FillingSessionId);
 
-        return await filesControllerHelper.GetFillResultAsync((T)Convert.ChangeType(completedFormId, typeof(T)));
+        if (completedFormId != null)
+        {
+            return await filesControllerHelper.GetFillResultAsync((T)Convert.ChangeType(completedFormId, typeof(T)));
+        }
+        throw new ItemNotFoundException();
     }
 
     /// <summary>
