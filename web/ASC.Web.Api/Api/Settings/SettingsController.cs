@@ -1051,7 +1051,14 @@ public partial class SettingsController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var saveAvailable = coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId())).ThirdParty;
+        var consumer = consumerFactory.GetByKey<Consumer>(inDto.Name);
+
+        if (!consumer.CanSet)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var saveAvailable = !consumer.Paid || coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId())).ThirdParty;
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.ThirdPartyAuthorization))
             || !saveAvailable)
         {
@@ -1059,7 +1066,6 @@ public partial class SettingsController(
         }
 
         var changed = false;
-        var consumer = consumerFactory.GetByKey<Consumer>(inDto.Name);
 
         var validateKeyProvider = consumer as IValidateKeysProvider;
 

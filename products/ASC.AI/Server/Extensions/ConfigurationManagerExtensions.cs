@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,43 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Core.Jabber;
+namespace ASC.AI.Extensions;
 
-public class FireBase : Consumer
+public static class ConfigurationManagerExtension
 {
-    public string Authorization
+    public static ConfigurationManager AddAiConfiguration(
+        this ConfigurationManager config,
+        IHostEnvironment env)
     {
-        get { return this["firebase_authorization"]; }
-    }
+        config
+            .AddJsonFile("elastic.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"elastic.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
-    public string ProjectId
-    {
-        get { return this["firebase_projectId"]; }
-    }
-
-    public string ApiKey
-    {
-        get { return this["firebase_apiKey"]; }
-    }
-
-    public string MessagingSenderId
-    {
-        get { return this["firebase_messagingSenderId"]; }
-    }
-
-    public FireBase()
-    {
-    }
-
-    public FireBase(
-        TenantManager tenantManager,
-        CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings,
-        IConfiguration configuration,
-        ICacheNotify<ConsumerCacheItem> cache,
-        ConsumerFactory consumerFactory,
-        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
-    {
+        return config;
     }
 }

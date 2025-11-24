@@ -330,12 +330,13 @@ public class FileDtoHelper(
         
         var currentUserId = authContext.CurrentAccount.ID;
         if (file.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(file.RootCreateBy, currentUserId))
-        {
+        {                   
             switch (contextFolder)
             {
                 case { FolderType: FolderType.Recent }:
                 case { FolderType: FolderType.SHARE }:
                 case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, currentUserId):
+                case null:
                     var folderShareAsync = await _globalFolderHelper.GetFolderShareAsync<T>();
                     result.RootFolderType = FolderType.SHARE;
                     result.RootFolderId = folderShareAsync;
