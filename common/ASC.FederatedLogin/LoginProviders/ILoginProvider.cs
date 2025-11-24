@@ -69,6 +69,7 @@ public class OauthProvider : Consumer, IOAuthProvider
         ConsumerFactory consumerFactory,
         string name, 
         int order, 
+        bool paid,
         Dictionary<string, string> props, 
         Dictionary<string, string> additional = null) 
         : base(tenantManager, 
@@ -79,6 +80,7 @@ public class OauthProvider : Consumer, IOAuthProvider
             consumerFactory, 
             name, 
             order, 
+            paid,
             props,
             additional)
     { }
