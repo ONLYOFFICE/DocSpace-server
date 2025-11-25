@@ -117,46 +117,58 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Aseta salasana</value>
+  <data name="AiSettingsAccessDenied" xml:space="preserve">
+    <value>Δεν έχετε άδεια να διαχειρίζεστε τις ρυθμίσεις AI</value>
   </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>Varmuuskopiotiedosto on virheellinen. Käytä samassa portaalissa luotua tiedostoa.</value>
+  <data name="ChatAccessDenied" xml:space="preserve">
+    <value>Δεν έχετε άδεια να χρησιμοποιείτε τη συνομιλία</value>
   </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>Varmuuskopio on suurempi kuin portaalin koko</value>
+  <data name="ChatNotFound" xml:space="preserve">
+    <value>Δεν βρέθηκε συνομιλία</value>
   </data>
-  <data name="BackupException" xml:space="preserve">
-    <value>Jokin meni vikaan varmuuskopiota luodessa. Ole hyvä ja kokeile luoda sitä uudelleen tai ota yhteyttä tukeen.</value>
+  <data name="IncorrectProvider" xml:space="preserve">
+    <value>Λανθασμένος τύπος παρόχου</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Jokin meni vikaan palautettaessa varmuuskopiota. Ole hyvä ja kokeile palautusta uudelleen tai ota yhteyttä tukeen.</value>
+  <data name="IncorrectServerCredentials" xml:space="preserve">
+    <value>Η πιστοποίηση απέτυχε. Επαληθεύστε τα διαπιστευτήριά σας</value>
   </data>
-  <data name="BackupInvalid" xml:space="preserve">
-    <value>Varmuuskopiotiedosto on virheellinen.</value>
+  <data name="InvalidAuthCode" xml:space="preserve">
+    <value>Μη έγκυρος κωδικός εξουσιοδότησης</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Automaattinen varmuuskopiointi</value>
+  <data name="InvalidKey" xml:space="preserve">
+    <value>Το καθορισμένο κλειδί API δεν είναι έγκυρο ή δεν έχει δικαιώματα πρόσβασης. Επαληθεύστε ότι το κλειδί είναι σωστό και προσπαθήστε ξανά</value>
   </data>
-  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
-    <value>Custom cloud</value>
+  <data name="InvalidServerName" xml:space="preserve">
+    <value>Μη έγκυρο όνομα διακομιστή MCP. Επιτρέπονται μόνο γράμματα, αριθμοί, κάτω παύλες και παύλες</value>
   </data>
-  <data name="BackupStorageTypeDataStore" xml:space="preserve">
-    <value>Väliaikainen varastointi</value>
+  <data name="InvalidUrl" xml:space="preserve">
+    <value>Η καθορισμένη διαδρομή URL δεν είναι έγκυρη. Βεβαιωθείτε ότι χρησιμοποιείται το σωστό τελικό σημείο</value>
   </data>
-  <data name="BackupStorageTypeDocuments" xml:space="preserve">
-    <value>Varmuuskopioi huone</value>
+  <data name="ManageProviders" xml:space="preserve">
+    <value>Δεν έχετε άδεια να διαχειρίζεστε παρόχους</value>
   </data>
-  <data name="BackupStorageTypeLocal" xml:space="preserve">
-    <value>Paikallinen tiedosto</value>
+  <data name="ManageServers" xml:space="preserve">
+    <value>Δεν έχετε άδεια να διαχειρίζεστε διακομιστές MCP</value>
   </data>
-  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
-    <value>Kolmannen osapuolen tallennus</value>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>Δεν βρέθηκε πάροχος</value>
   </data>
-  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
-    <value>Kolmannen osapuolen resurssi</value>
+  <data name="ReservedServerName" xml:space="preserve">
+    <value>Το όνομα διακομιστή MCP δεν επιτρέπεται</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Jotkut tiedostot ei ole mukana varmuuskopiossa. Ole hyvä ja katso lisätietoja {0}</value>
+  <data name="ServerFailedConnect" xml:space="preserve">
+    <value>Αποτυχία σύνδεσης με διακομιστή MCP</value>
+  </data>
+  <data name="ServerNameExists" xml:space="preserve">
+    <value>Το όνομα διακομιστή MCP υπάρχει ήδη</value>
+  </data>
+  <data name="ServerNotFound" xml:space="preserve">
+    <value>Δεν βρέθηκε διακομιστής MCP</value>
+  </data>
+  <data name="ServersRoomLimit" xml:space="preserve">
+    <value>Ο μέγιστος αριθμός διακομιστών ανά δωμάτιο είναι {0}</value>
+  </data>
+  <data name="UnavailableServers" xml:space="preserve">
+    <value>Οι διακομιστές MCP δεν είναι διαθέσιμοι: {0}. Ελέγξτε τις ρυθμίσεις σύνδεσης</value>
   </data>
 </root>

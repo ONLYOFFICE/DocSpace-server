@@ -1162,4 +1162,76 @@
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Tyyppi</value>
   </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vektorisaatio</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Tekoälytyökalut</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokenit</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Tekoälyagenttitilan kiintiö ylitetty</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Kiintiön asetus per tekoälyagentti epäonnistui. Syötetty arvo on suurempi kuin DocSpace tila yhteensä.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>Asiakas ID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Asiakassalaisuus</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Ota sovellus käyttöön kirjautuaksesi portaaliin käyttäen WeChat-tiliä.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Ota sovellus käyttöön kirjautuaksesi portaaliin käyttäen WeChat-tiliä.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Päivämäärä</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Sähköposti</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Etunimi</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Sukunimi</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Asiakirjapalvelun kiintiö ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Laajennusten määrä ylittää rajan</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Tekoälyagenttien määrän ei tulisi ylittää {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Tekoälytyökalut</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Ota käyttöön DocSpacessasi tekoälyominaisuudet tehostaaksesi tuottavuutta.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Tekoälyverkkohaku</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Lisää rahaa lompakkoosi saadaksesi tekoälyverkkohaku käyttöön.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Odottamaton virhe. Ole hyvä ja yritä uudelleen.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Sinut on onnistuneesti yhdistetty Telegramiin saadaksesi ilmoituksia DocSpacestasi.</value>
+  </data>
 </root>
