@@ -298,11 +298,11 @@ public class ProductEntryPoint : Product
             var uniqId = $"{record.EntryType.ToStringLowerFast()}_{record.EntryId}";
             if (record.Owner == userId || record.Share == FileShare.RoomManager)
             {
-                result.TryAdd(record.EntryId, true);
+                result.TryAdd(uniqId, true);
             }
             else if (record.Share != FileShare.Restrict)
             {
-                result.TryAdd(record.EntryId, false);
+                result.TryAdd(uniqId, false);
             }
         }
         var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
