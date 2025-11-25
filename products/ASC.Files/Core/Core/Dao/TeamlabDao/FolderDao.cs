@@ -276,7 +276,7 @@ internal class FolderDao(
         
         var q = await GetFoldersQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, withSubfolders, excludeSubject, roomId, filesDbContext);
 
-        q = q.Where(r => !filesDbContext.Security.Any(x => x.TenantId == tenantId && x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder && x.Share == FileShare.Restrict && x.Subject == currentUserId));
+        q = q.Where(r => !filesDbContext.Security.Any(x => x.TenantId == tenantId && x.InternalEntryId == r.Id && x.EntryType == FileEntryType.Folder && x.Share == FileShare.Restrict && x.Subject == currentUserId));
 
         if (containingMyFiles)
         {
@@ -773,7 +773,7 @@ internal class FolderDao(
             Security = filesDbContext.Security
                 .FirstOrDefault(s => s.TenantId == tenantId &&
                                      s.EntryType == FileEntryType.Folder &&
-                                     s.EntryId == x.f.Id.ToString() &&
+                                     s.InternalEntryId == x.f.Id &&
                                      s.Subject.ToString() == x.t.Name),
             OriginRoom = x.t.Type != TagType.RecentByLink ?
                 filesDbContext.Folders
@@ -901,7 +901,7 @@ internal class FolderDao(
 
             await filesDbContext.DeleteTagOriginAsync(tenantId, folderId.ToString(), subfoldersStrings);
 
-            await filesDbContext.DeleteFilesSecurityAsync(tenantId, subfoldersStrings);
+            await filesDbContext.DeleteFilesSecurityAsync(tenantId, subfolders.Select(r => r));
 
             await filesDbContext.DeleteBunchObjectsAsync(tenantId, folderId.ToString());
 
@@ -1821,13 +1821,13 @@ internal class FolderDao(
                     ).FirstOrDefault(),
                 UserShared = filesDbContext.Security.Where(x =>
                         x.TenantId == tenantId &&
-                        x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder)
+                        x.InternalEntryId == r.Id && x.EntryType == FileEntryType.Folder)
                     .Select(s => s.SubjectType).ToList(),
                 ParentShared = filesDbContext.Security.Any(x =>
                     x.TenantId == tenantId &&
                     (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                     x.EntryType == FileEntryType.Folder &&
-                    filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
+                    filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId == x.InternalEntryId)),
                 Order = (
                     from f in filesDbContext.FileOrder
                     where (
@@ -2232,7 +2232,7 @@ internal class FolderDao(
         var q = GetFolderQuery(filesDbContext)
                 .Join(filesDbContext.Tree, folder => folder.Id, tree => tree.FolderId, (folder, tree) => new { folder, tree })
                 .Where(r => r.tree.ParentId == parentId && r.tree.Level != 0)
-                .Join(filesDbContext.Security, r => r.folder.Id.ToString(), security => security.EntryId, (r, security) => new { r.folder, security })
+                .Join(filesDbContext.Security, r => r.folder.Id, security => security.InternalEntryId, (r, security) => new { r.folder, security })
                 .Where(r => r.security.TenantId == tenantId
                     && r.security.EntryType == FileEntryType.Folder
                     && (r.security.SubjectType == SubjectType.ExternalLink || 
