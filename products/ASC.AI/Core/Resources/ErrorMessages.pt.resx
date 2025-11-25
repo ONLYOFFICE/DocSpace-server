@@ -117,46 +117,58 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>Файл резервної копії недійсний. Будь ласка, використовуйте файл, створений на тому ж порталі.</value>
+  <data name="AiSettingsAccessDenied" xml:space="preserve">
+    <value>Não tem permissão para gerir as definições de IA</value>
   </data>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Встановити пароль</value>
+  <data name="ChatAccessDenied" xml:space="preserve">
+    <value>Não tem permissão para usar o chat</value>
   </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>Резервна копія перевищує загальний розмір порталу</value>
+  <data name="ChatNotFound" xml:space="preserve">
+    <value>Chat não encontrado</value>
   </data>
-  <data name="BackupException" xml:space="preserve">
-    <value>Під час створення резервної копії сталася помилка. Спробуйте створити її ще раз або зверніться до служби підтримки.</value>
+  <data name="IncorrectProvider" xml:space="preserve">
+    <value>Tipo de provedor incorreto</value>
   </data>
-  <data name="BackupInvalid" xml:space="preserve">
-    <value>Файл резервної копії недійсний.</value>
+  <data name="IncorrectServerCredentials" xml:space="preserve">
+    <value>Falha na autenticação. Verifique as suas credenciais</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Під час відновлення резервної копії сталася помилка. Спробуйте відновити її ще раз або зверніться до служби підтримки.</value>
+  <data name="InvalidAuthCode" xml:space="preserve">
+    <value>Código de autorização inválido</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Автоматичне резервне копіювання</value>
+  <data name="InvalidKey" xml:space="preserve">
+    <value>A chave API especificada é inválida ou não tem direitos de acesso. Verifique se a chave está correta e tente novamente</value>
   </data>
-  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
-    <value>Custom cloud</value>
+  <data name="InvalidServerName" xml:space="preserve">
+    <value>Nome do servidor MCP inválido. Apenas letras, números, sublinhados e hífens são permitidos</value>
   </data>
-  <data name="BackupStorageTypeDataStore" xml:space="preserve">
-    <value>Тимчасове сховище</value>
+  <data name="InvalidUrl" xml:space="preserve">
+    <value>O caminho da URL especificado é inválido. Certifique-se de que o ponto final correto é utilizado</value>
   </data>
-  <data name="BackupStorageTypeDocuments" xml:space="preserve">
-    <value>Резервна кімната</value>
+  <data name="ManageProviders" xml:space="preserve">
+    <value>Não tem permissão para gerir fornecedores</value>
   </data>
-  <data name="BackupStorageTypeLocal" xml:space="preserve">
-    <value>Локальний файл</value>
+  <data name="ManageServers" xml:space="preserve">
+    <value>Não tem permissão para gerir servidores MCP</value>
   </data>
-  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
-    <value>Стороннє сховище</value>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>Fornecedor não encontrado</value>
   </data>
-  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
-    <value>Сторонній ресурс</value>
+  <data name="ReservedServerName" xml:space="preserve">
+    <value>O nome do servidor MCP não é permitido</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Деякі файли не було включено до резервної копії. Щоб дізнатися більше, перегляньте {0}</value>
+  <data name="ServerFailedConnect" xml:space="preserve">
+    <value>Falha ao conectar-se ao servidor MCP</value>
+  </data>
+  <data name="ServerNameExists" xml:space="preserve">
+    <value>O nome do servidor MCP já existe</value>
+  </data>
+  <data name="ServerNotFound" xml:space="preserve">
+    <value>Servidor MCP não encontrado</value>
+  </data>
+  <data name="ServersRoomLimit" xml:space="preserve">
+    <value>O número máximo de servidores por sala é {0}</value>
+  </data>
+  <data name="UnavailableServers" xml:space="preserve">
+    <value>Servidores MCP indisponíveis: {0}. Verifique as definições de ligação</value>
   </data>
 </root>

@@ -117,46 +117,58 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>Файл резервної копії недійсний. Будь ласка, використовуйте файл, створений на тому ж порталі.</value>
+  <data name="AiSettingsAccessDenied" xml:space="preserve">
+    <value>U heeft niet de rechten om AI-instellingen te beheren</value>
   </data>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Встановити пароль</value>
+  <data name="ChatAccessDenied" xml:space="preserve">
+    <value>U heeft niet de rechten om de chat te gebruiken</value>
   </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>Резервна копія перевищує загальний розмір порталу</value>
+  <data name="ChatNotFound" xml:space="preserve">
+    <value>Chat niet gevonden</value>
   </data>
-  <data name="BackupException" xml:space="preserve">
-    <value>Під час створення резервної копії сталася помилка. Спробуйте створити її ще раз або зверніться до служби підтримки.</value>
+  <data name="IncorrectProvider" xml:space="preserve">
+    <value>Onjuist type leverancier</value>
   </data>
-  <data name="BackupInvalid" xml:space="preserve">
-    <value>Файл резервної копії недійсний.</value>
+  <data name="IncorrectServerCredentials" xml:space="preserve">
+    <value>Authenticatie mislukt. Verifieer uw inloggegevens</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Під час відновлення резервної копії сталася помилка. Спробуйте відновити її ще раз або зверніться до служби підтримки.</value>
+  <data name="InvalidAuthCode" xml:space="preserve">
+    <value>Ongeldige autorisatiecode</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Автоматичне резервне копіювання</value>
+  <data name="InvalidKey" xml:space="preserve">
+    <value>De opgegeven API-sleutel is ongeldig of heeft geen toegangsrechten. Controleer of de key juist is en probeer het opnieuw</value>
   </data>
-  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
-    <value>Custom cloud</value>
+  <data name="InvalidServerName" xml:space="preserve">
+    <value>Ongeldige MCP-servernaam. Alleen letters, cijfers, onderstrepingstekens en koppeltekens zijn toegestaan</value>
   </data>
-  <data name="BackupStorageTypeDataStore" xml:space="preserve">
-    <value>Тимчасове сховище</value>
+  <data name="InvalidUrl" xml:space="preserve">
+    <value>Het opgegeven URL-pad is ongeldig. Zorg ervoor dat het juiste endpoint wordt gebruikt</value>
   </data>
-  <data name="BackupStorageTypeDocuments" xml:space="preserve">
-    <value>Резервна кімната</value>
+  <data name="ManageProviders" xml:space="preserve">
+    <value>U heeft niet de rechten om providers te beheren</value>
   </data>
-  <data name="BackupStorageTypeLocal" xml:space="preserve">
-    <value>Локальний файл</value>
+  <data name="ReservedServerName" xml:space="preserve">
+    <value>Kan geen verbinding maken met MCP-server</value>
   </data>
-  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
-    <value>Стороннє сховище</value>
+  <data name="ServerFailedConnect" xml:space="preserve">
+    <value>Kan geen verbinding maken met MCP-server</value>
   </data>
-  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
-    <value>Сторонній ресурс</value>
+  <data name="ServerNameExists" xml:space="preserve">
+    <value>MCP-servernaam bestaat al</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Деякі файли не було включено до резервної копії. Щоб дізнатися більше, перегляньте {0}</value>
+  <data name="ServersRoomLimit" xml:space="preserve">
+    <value>Het maximale aantal servers per kamer is {0}</value>
+  </data>
+  <data name="ServerNotFound" xml:space="preserve">
+    <value>MCP-server niet gevonden</value>
+  </data>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>Provider niet gevonden</value>
+  </data>
+  <data name="ManageServers" xml:space="preserve">
+    <value>U heeft niet de rechten om MCP-servers te beheren</value>
+  </data>
+  <data name="UnavailableServers" xml:space="preserve">
+    <value>MCP-servers zijn niet beschikbaar: {0}. Controleer de verbindingsinstellingen</value>
   </data>
 </root>

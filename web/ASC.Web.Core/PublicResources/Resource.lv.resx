@@ -1162,4 +1162,76 @@
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
     <value>Iespējojiet savas DocSpace dublējumkopijas. Izmaksas tiks aprēķinātas automātiski.</value>
   </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vektorizācija</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>MI rīki</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Pilnvaras</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>MI aģenta vietas kvota pārsniegta</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Neizdevās iestatīt kvotu katram MI aģentam. Ievadītā vērtība ir lielāka par kopējo DocSpace krātuves apjomu.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>Klienta ID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Klienta privātā atslēga</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Iespējojiet opciju lietojumprogrammai pierakstīties portālā, izmantojot WeChat kontu.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Iespējojiet opciju lietojumprogrammai pierakstīties portālā, izmantojot WeChat kontu.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Datums</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-pasts</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Vārds</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Uzvārds</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Dokumentu pārvaldnieka kvota ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Spraudņu skaits pārsniedz ierobežojumu</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>MI aģentu skaits nedrīkst pārsniegt {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>MI rīki</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Iespējojiet MI funkcijas savā DocSpace, lai palielinātu produktivitāti.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Meklēšana tīmeklī ar MI</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Papildiniet maku, lai aktivizētu meklēšanu tīmeklī ar MI.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Radās neparedzēta kļūda. Lūdzu, mēģiniet vēlreiz.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Telegram ir veiksmīgi pievienots paziņojumu saņemšanai no DocSpace.</value>
+  </data>
 </root>
