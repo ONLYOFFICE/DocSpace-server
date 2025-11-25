@@ -52,7 +52,7 @@
         <value>MCP server name is not allowed</value>
     </data>
   <data name="ServerNameExists" xml:space="preserve">
-        <value>MCP server name already exists</value>
+        <value>MCP server name is already exists</value>
     </data>
   <data name="ChatNotFound" xml:space="preserve">
         <value>Chat not found</value>

@@ -1162,4 +1162,76 @@
   <data name="AccountingCustomerOperationDebit" xml:space="preserve">
     <value>Debet</value>
   </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vektorlaşdırma</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>AI alətləri</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokenlər</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>AI agentinin yaddaş sahəsi limiti aşıldı</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>AI agenti üçün kvota təyin etmək mümkün olmadı. Daxil edilmiş dəyər ümumi DocSpace yaddaşından böyükdür.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>Müştəri ID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Müştəri Sirri</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>WeChat hesabınızdan istifadə edərək portala daxil olmaq üçün proqramı aktivləşdirin.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>WeChat hesabınızdan istifadə edərək portala daxil olmaq üçün proqramı aktivləşdirin.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Tarix</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-poçt</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Ad</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Soyad</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Sənəd Xidməti Kvotası ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Qoşmaların sayı limiti keçir</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>AI agentlərinin sayı {0}-dan çox olmamalıdır</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>AI alətləri</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Məhsuldarlığı artırmaq üçün DocSpace-də AI xüsusiyyətlərini aktivləşdirin.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>AI veb axtarışı</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>AI veb axtarışını açmaq üçün pul kisənizə vəsait əlavə edin.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Gözlənilməz xəta baş verdi. Lütfən, yenidən cəhd edin.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>DocSpace-dən bildirişlər almaq üçün Telegram-a uğurla qoşuldunuz.</value>
+  </data>
 </root>
