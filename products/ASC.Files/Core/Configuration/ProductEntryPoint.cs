@@ -159,9 +159,13 @@ public class ProductEntryPoint : Product
 
         var result = new List<ActivityInfo>();
 
-        var sharedFolderId = await _globalFolder.GetFolderShareAsync(_daoFactory);
-        var sharedFolder = await _daoFactory.GetFolderDao<int>().GetFolderAsync(sharedFolderId);
+        var folderDao = _daoFactory.GetFolderDao<int>();
+        var fileDao = _daoFactory.GetFileDao<int>();
 
+        var sharedFolderId = await _globalFolder.GetFolderShareAsync(_daoFactory);
+        var sharedFolder = await folderDao.GetFolderAsync(sharedFolderId);
+
+        var checkedFiles = new Dictionary<int, bool>();
         string fileId = null;
 
         foreach (var e in events)
@@ -230,8 +234,14 @@ public class ProductEntryPoint : Product
 
             if (roomId <= 0 && additionalInfo.ParentType == (int)FolderType.USER && int.TryParse(fileId, out var fileIdInt))
             {
-                var entry = await _daoFactory.GetFileDao<int>().GetFileAsync(fileIdInt);
-                if (await _fileSecurity.CanReadAsync(entry, userId))
+                if (!checkedFiles.TryGetValue(fileIdInt, out var canRead))
+                {
+                    var entry = await fileDao.GetFileAsync(fileIdInt);
+                    canRead = await _fileSecurity.CanReadAsync(entry, userId);
+                    checkedFiles.Add(fileIdInt, canRead);
+                }
+
+                if (canRead)
                 {
                     activityInfo.RoomUri = _pathProvider.GetFolderUrl(sharedFolder);
                     activityInfo.RoomTitle = FilesUCResource.SharedForMe;
@@ -291,7 +301,7 @@ public class ProductEntryPoint : Product
         var securityDao = _daoFactory.GetSecurityDao<string>();
 
         var currentUserSubjects = await _fileSecurity.GetUserSubjectsAsync(userId);
-        var currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects).ToListAsync(); //todo not only rooms!!!!
+        var currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects).ToListAsync();
 
         foreach (var record in currentUsersRecords)
         {
