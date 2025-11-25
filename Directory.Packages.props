@@ -6,10 +6,11 @@
   </PropertyGroup>
   <!-- Common properties for all projects -->
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Company>Ascensio System SIA</Company>
-    <AssemblyVersion>3.5.0</AssemblyVersion>
+      <TargetFramework>net10.0</TargetFramework>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <Company>Ascensio System SIA</Company>
+      <AssemblyVersion>3.6.0</AssemblyVersion>
+      <ProductVersion>3.6.0</ProductVersion>
     <Copyright>(c) Ascensio System SIA. All rights reserved</Copyright>
   </PropertyGroup>
   <!-- Release configuration properties -->

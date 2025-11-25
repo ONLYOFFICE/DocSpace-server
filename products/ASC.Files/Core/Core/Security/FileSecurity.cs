@@ -2331,7 +2331,7 @@ public class FileSecurity(
             ace = shares
                 .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                 .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
-                .FirstOrDefault(r => Equals(r.EntryId, entry.Id) && r.EntryType == FileEntryType.File);
+                .FirstOrDefault();
         }
         else
         {
