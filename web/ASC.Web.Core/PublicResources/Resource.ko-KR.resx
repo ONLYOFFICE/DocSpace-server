@@ -1130,7 +1130,7 @@
     <value>자동 갱신</value>
   </data>
   <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
-    <value>한 달 동안 무료 백업 횟수는 {0}회를 초과할 수 없습니다.</value>
+    <value>한 달 동안 무료 백업 횟수는 {0}회를 초과할 수 없습니다</value>
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
     <value>DocSpace 백업을 활성화하세요. 비용은 자동으로 청구됩니다.</value>
@@ -1161,5 +1161,77 @@
   </data>
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>세부</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>벡터화</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>AI 도구</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>토큰</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>AI 에이전트 공간 할당량을 초과했습니다</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>AI 에이전트당 할당량을 설정하는 데 실패했습니다. 입력한 값이 총 DocSpace 저장 공간보다 큽니다.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>클라이언트 ID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>클라이언트 시크릿</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>애플리케이션에서 WeChat 계정을 사용하여 포털에 로그인할 수 있도록 합니다.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>애플리케이션에서 WeChat 계정을 사용하여 포털에 로그인할 수 있도록 합니다.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>날짜</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>이메일</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>이름</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>성</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>문서 서비스 할당량 ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>플러그인 수가 한도를 초과했습니다</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>에이전트 수는 다음 한도를 초과할 수 없습니다: {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>AI 도구</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>DocSpace에서 AI 기능을 활성화하여 생산성을 향상시키세요.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>AI 웹 검색</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>AI 웹 검색의 잠금을 해제하려면 지갑에 자금을 추가하세요.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>DocSpace에서 알림을 수신할 수 있도록 Telegram에 연결되었습니다.</value>
   </data>
 </root>

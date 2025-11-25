@@ -117,46 +117,58 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>Tệp sao lưu không hợp lệ. Vui lòng sử dụng tệp được tạo trong cùng một cổng thông tin.</value>
+  <data name="AiSettingsAccessDenied" xml:space="preserve">
+    <value>AI 설정을 관리할 권한이 없습니다</value>
   </data>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Đặt mật khẩu</value>
+  <data name="ChatAccessDenied" xml:space="preserve">
+    <value>채팅을 사용할 권한이 없습니다</value>
   </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>Sao lưu lớn hơn tổng kích thước của cổng thông tin</value>
+  <data name="ChatNotFound" xml:space="preserve">
+    <value>채팅을 찾지 못했습니다</value>
   </data>
-  <data name="BackupException" xml:space="preserve">
-    <value>Đã xảy ra lỗi khi tạo bản sao lưu. Xin hãy thử tạo lại hoặc liên hệ với bộ phận hỗ trợ.</value>
+  <data name="IncorrectProvider" xml:space="preserve">
+    <value>유효하지 않은 공급자 유형입니다</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Đã xảy ra lỗi khi khôi phục bản sao lưu. Vui lòng thử khôi phục lại hoặc liên hệ với bộ phận hỗ trợ.</value>
+  <data name="IncorrectServerCredentials" xml:space="preserve">
+    <value>인증에 실패했습니다. 자격 증명을 확인하세요</value>
   </data>
-  <data name="BackupInvalid" xml:space="preserve">
-    <value>Tập tin sao lưu không hợp lệ.</value>
+  <data name="InvalidAuthCode" xml:space="preserve">
+    <value>유효하지 않은 인증 코드입니다</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Tự động sao lưu</value>
+  <data name="InvalidKey" xml:space="preserve">
+    <value>지정된 API 키가 유효하지 않거나 액세스 권한이 없습니다. 키가 올바른지 확인한 뒤 다시 시도하세요</value>
   </data>
-  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
-    <value>Custom cloud</value>
+  <data name="InvalidServerName" xml:space="preserve">
+    <value>유효하지 않은 MCP 서버 이름입니다. 문자, 숫자, 밑줄, 하이픈만 허용됩니다</value>
   </data>
-  <data name="BackupStorageTypeDataStore" xml:space="preserve">
-    <value>Lưu trữ tạm thời</value>
+  <data name="InvalidUrl" xml:space="preserve">
+    <value>지정된 URL 경로가 유효하지 않습니다. 올바른 엔드포인트가 사용되었는지 확인하세요</value>
   </data>
-  <data name="BackupStorageTypeDocuments" xml:space="preserve">
-    <value>Phòng dự phòng</value>
+  <data name="ManageProviders" xml:space="preserve">
+    <value>제공자를 관리할 권한이 없습니다</value>
   </data>
-  <data name="BackupStorageTypeLocal" xml:space="preserve">
-    <value>Tập tin cục bộ</value>
+  <data name="ManageServers" xml:space="preserve">
+    <value>MCP 서버를 관리할 권한이 없습니다</value>
   </data>
-  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
-    <value>Lưu trữ của bên thứ ba</value>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>제공자를 찾지 못했습니다</value>
   </data>
-  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
-    <value>Tài nguyên của bên thứ ba</value>
+  <data name="ReservedServerName" xml:space="preserve">
+    <value>허용되지 않는 MCP 서버 이름입니다</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Một số tập tin không được bao gồm trong bản sao lưu. Để biết thêm chi tiết, xin vui lòng kiểm tra {0}</value>
+  <data name="ServerFailedConnect" xml:space="preserve">
+    <value>MCP 서버에 연결하는 데 실패했습니다</value>
+  </data>
+  <data name="ServerNameExists" xml:space="preserve">
+    <value>이미 존재하는 MCP 서버 이름입니다</value>
+  </data>
+  <data name="ServerNotFound" xml:space="preserve">
+    <value>MCP 서버를 찾지 못했습니다</value>
+  </data>
+  <data name="ServersRoomLimit" xml:space="preserve">
+    <value>룸당 최대 서버 수는 다음과 같습니다: {0}</value>
+  </data>
+  <data name="UnavailableServers" xml:space="preserve">
+    <value>MCP 서버를 사용할 수 없습니다: {0}. 연결 설정을 확인하세요</value>
   </data>
 </root>
