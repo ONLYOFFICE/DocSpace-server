@@ -134,7 +134,7 @@ static file class SecurityQueries
             (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<int> internalEntryIds, IEnumerable<string> thirdPartyEntryIds, FileEntryType type) =>
                 ctx.Security
                     .Where(a => a.TenantId == tenantId &&
-                                (thirdPartyEntryIds.Contains(a.EntryId) || internalEntryIds.Contains(a.InternalEntryId)) &&
+                                (internalEntryIds.Contains(a.InternalEntryId) || thirdPartyEntryIds.Contains(a.EntryId)) &&
                                 a.EntryType == type &&
                                 a.Subject == subject)
                     .ExecuteDelete());

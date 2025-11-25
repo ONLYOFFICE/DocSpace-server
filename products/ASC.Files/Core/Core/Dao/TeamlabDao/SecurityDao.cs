@@ -125,7 +125,14 @@ internal abstract class SecurityBaseDao<T>(
                 }
                 else
                 {
-                    thirdPartyFiles.Add(entryId);
+                    if (internalEntryId != 0)
+                    {
+                        internalFiles.Add(internalEntryId);
+                    }
+                    else
+                    {
+                        thirdPartyFiles.Add(entryId);
+                    }
                 }
 
                 if (internalFiles.Count > 0 || thirdPartyFiles.Count > 0)
