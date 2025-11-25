@@ -33,7 +33,7 @@ public class ModelClientFactory(IHttpClientFactory httpClientFactory)
     {
         return type switch
         {
-            ProviderType.OpenAi or ProviderType.OpenAiCompatible => 
+            ProviderType.OpenAi or ProviderType.OpenAiCompatible or ProviderType.DeepSeek => 
                 new OpenAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.TogetherAi => 
                 new TogetherAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
