@@ -2047,42 +2047,42 @@ ${LetterLogoText} Equipo de soporte
   </data>
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Hola, $UserName,
- 
+
 El proceso de copia de seguridad de su DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}" ha fallado.
- 
+
 Si tiene alguna pregunta o necesita ayuda, no dude en ponerse en contacto con nosotros a través de "${__SupportLink}":"${__SupportLink}"
- 
+
 $TrulyYours</value>
   </data>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Hola, $UserName,
- 
+
 El proceso de copia de seguridad de su DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ha fallado.
- 
+
 Si tiene alguna pregunta o necesita ayuda, no dude en ponerse en contacto con nosotros a través de [${__SupportLink}](${__SupportLink})
- 
+
 Atentamente,
 ${LetterLogoText} Equipo de soporte
 [${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_saas_agent_invite" xml:space="preserve">
     <value>¡Hola!
- 
+
 Se le invita a unirse a un agente de DocSpace en "${__VirtualRootPath}":"${__VirtualRootPath}". Acepte la invitación haciendo clic en el enlace:
- 
+
 $OrangeButton
- 
+
 Después de hacer clic en el enlace de invitación, establezca una nueva contraseña para su cuenta.
- 
+
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
     <value>¡Hola!
- 
+
 $__AuthorName le ha invitado a unirse al agente "$Message":"$InviteLink" en "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 $OrangeButton
- 
+
 $TrulyYours</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">

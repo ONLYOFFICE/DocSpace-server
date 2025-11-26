@@ -2047,42 +2047,42 @@ ${LetterLogoText} Support Team
   </data>
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>Hallo $UserName,
- 
+
 Die Sicherung Ihres DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ist fehlgeschlagen.
- 
+
 Bei Fragen oder falls Sie Hilfe benötigen, kontaktieren Sie uns bitte über "${__SupportLink}":"${__SupportLink}"
- 
+
 $TrulyYours</value>
   </data>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>Hallo $UserName,
- 
+
 Die Sicherung Ihres DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ist fehlgeschlagen.
- 
+
 Bei Fragen oder falls Sie Hilfe benötigen, kontaktieren Sie uns bitte über [${__SupportLink}](${__SupportLink})
- 
+
 Beste Grüße,
 ${LetterLogoText} Support Team
 [${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_saas_agent_invite" xml:space="preserve">
     <value>Hallo!
- 
+
 Sie sind eingeladen, einem DocSpace-Agenten unter "${__VirtualRootPath}":"${__VirtualRootPath}" beizutreten. Nehmen Sie die Einladung an, indem Sie auf den folgenden Link klicken:
- 
+
 $OrangeButton
- 
+
 Nachdem Sie auf den Einladungslink geklickt haben, legen Sie bitte ein neues Passwort für Ihr Konto fest.
- 
+
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
     <value>Hallo!
- 
+
 $__AuthorName hat Sie eingeladen, dem Agenten "$Message":"$InviteLink" unter "${__VirtualRootPath}":"${__VirtualRootPath}" beizutreten.
- 
+
 $OrangeButton
- 
+
 $TrulyYours</value>
   </data>
   <data name="subject_backup_failed" xml:space="preserve">

@@ -932,19 +932,19 @@
     <value>Prihlásenie prostredníctvom účtu sociálnej siete bolo úspešné</value>
   </data>
   <data name="AddedServerToAgent" xml:space="preserve">
-    <value>Added MCP server {0} to agent</value>
+    <value>Server MCP {0} bol pridaný do agenta</value>
   </data>
   <data name="AgentCreated" xml:space="preserve">
-    <value>Agent created</value>
+    <value>Agent bol vytvorený</value>
   </data>
   <data name="AgentDeleted" xml:space="preserve">
-    <value>Agent deleted</value>
+    <value>Agent bol odstránený</value>
   </data>
   <data name="AgentRenamed" xml:space="preserve">
-    <value>Agent renamed: {0}</value>
+    <value>Agent bol premenovaný: {0}</value>
   </data>
   <data name="AgentsModule" xml:space="preserve">
-    <value>Agents</value>
+    <value>Agenti</value>
   </data>
   <data name="AIProviderCreated" xml:space="preserve">
     <value>AI provider bol vytvorený: {0}</value>

@@ -986,7 +986,7 @@
     <value>Les paramètres de recherche web ont été réinitialisés</value>
   </data>
   <data name="RoomExternalLinkRevoked" xml:space="preserve">
-    <value>Lien externe révoqué : {1}</value>
+    <value>Lien externe révoqué : {1}</value>
   </data>
   <data name="ServerCreated" xml:space="preserve">
     <value>Serveur MCP créé : {0}</value>
@@ -1010,13 +1010,13 @@
     <value>Paramètres de recherche web configurés. Moteur : {0}</value>
   </data>
   <data name="FileExternalLinkCreated" xml:space="preserve">
-    <value>Fichiers [{0}]. Lien externe créé : {1}. Rôle : {2}</value>
+    <value>Fichiers [{0}]. Lien externe créé : {1}. Rôle : {2}</value>
   </data>
   <data name="FileExternalLinkDeleted" xml:space="preserve">
-    <value>Fichiers [{0}]. Lien externe supprimé : {1}</value>
+    <value>Fichiers [{0}]. Lien externe supprimé : {1}</value>
   </data>
   <data name="FileExternalLinkUpdated" xml:space="preserve">
-    <value>Fichiers [{0}]. Lien externe mis à jour : {1}. Rôle : {2}</value>
+    <value>Fichiers [{0}]. Lien externe mis à jour : {1}. Rôle : {2}</value>
   </data>
   <data name="FileMarkedAsFavorite" xml:space="preserve">
     <value>Fichier marqué comme favori : {0}</value>
@@ -1028,24 +1028,24 @@
     <value>Fichier supprimé de « Partagé avec moi » : {0}</value>
   </data>
   <data name="FileUpdatedAccessFor" xml:space="preserve">
-    <value>Fichiers [{0}]. Accès mis à jour pour {1}. Rôle : {2}</value>
+    <value>Fichiers [{0}]. Accès mis à jour pour {1}. Rôle : {2}</value>
   </data>
   <data name="FolderRemovedFromList" xml:space="preserve">
     <value>Dossier supprimé de « Partagé avec moi » : {0}</value>
   </data>
   <data name="FolderUpdatedAccessFor" xml:space="preserve">
-    <value>Dossiers [{0}]. Accès mis à jour pour {1}. Rôle : {2}</value>
+    <value>Dossiers [{0}]. Accès mis à jour pour {1}. Rôle : {2}</value>
   </data>
   <data name="FolderDownloaded" xml:space="preserve">
-    <value>Dossier téléchargé : {0}</value>
+    <value>Dossier téléchargé : {0}</value>
   </data>
   <data name="FolderExternalLinkCreated" xml:space="preserve">
-    <value>Dossiers [{0}]. Lien externe créé : {1}. Rôle : {2}</value>
+    <value>Dossiers [{0}]. Lien externe créé : {1}. Rôle : {2}</value>
   </data>
   <data name="FolderExternalLinkDeleted" xml:space="preserve">
-    <value>Dossiers [{0}]. Lien externe supprimé : {1}</value>
+    <value>Dossiers [{0}]. Lien externe supprimé : {1}</value>
   </data>
   <data name="FolderExternalLinkUpdated" xml:space="preserve">
-    <value>Dossiers [{0}]. Lien externe mis à jour : {1}. Rôle : {2}</value>
+    <value>Dossiers [{0}]. Lien externe mis à jour : {1}. Rôle : {2}</value>
   </data>
 </root>

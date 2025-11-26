@@ -1001,7 +1001,7 @@
     <value>Klasörler [{0}]. Harici bağlantı güncellendi: {1}. Rol: {2}</value>
   </data>
   <data name="FolderRemovedFromList" xml:space="preserve">
-    <value>Klasör “Benimle paylaşılanlar”dan kaldırıldı: {0}</value>
+    <value>Klasör “Benimle paylaşılanlar” dan kaldırıldı: {0}</value>
   </data>
   <data name="FolderUpdatedAccessFor" xml:space="preserve">
     <value>Klasörler [{0}]. {1} için erişim güncellendi. Rol: {2}</value>
