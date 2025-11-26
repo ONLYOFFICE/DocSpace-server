@@ -117,55 +117,58 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Archive" xml:space="preserve">
-    <value>Պահոց</value>
+  <data name="AiSettingsAccessDenied" xml:space="preserve">
+    <value>Դուք չունեք ԱԲ կարգավորումները կառավարելու թույլտվություն</value>
   </data>
-  <data name="CorporateFiles" xml:space="preserve">
-    <value>Ընդհանուր</value>
+  <data name="ChatAccessDenied" xml:space="preserve">
+    <value>Դուք չունեք չատն օգտագործելու թույլտվություն</value>
   </data>
-  <data name="Favorites" xml:space="preserve">
-    <value>Ընտրյալներ</value>
+  <data name="ChatNotFound" xml:space="preserve">
+    <value>Չատը չի գտնվել</value>
   </data>
-  <data name="FilesWillBeCompressedTarGz" xml:space="preserve">
-    <value>Ֆայլերը կսեղմվեն {0}.tar.gz ֆայլում{1}</value>
+  <data name="IncorrectProvider" xml:space="preserve">
+    <value>Սխալ մատակարարի տեսակ</value>
   </data>
-  <data name="FilesWillBeCompressedZip" xml:space="preserve">
-    <value>Ֆայլերը կսեղմվեն {0}.zip ֆայլի մեջ{1}</value>
+  <data name="IncorrectServerCredentials" xml:space="preserve">
+    <value>Նույնականացումը ձախողվեց։ Ստուգեք ձեր մուտքի տվյալները</value>
   </data>
-  <data name="MyFiles" xml:space="preserve">
-    <value>Իմ փաստաթղթերը</value>
+  <data name="InvalidAuthCode" xml:space="preserve">
+    <value>Անվավեր լիազորման կոդ</value>
   </data>
-  <data name="Personal" xml:space="preserve">
-    <value>Անձնական</value>
+  <data name="InvalidKey" xml:space="preserve">
+    <value>Նշված API բանալին անվավեր է կամ մուտքի իրավունքներ չունի: Ստուգեք, որ բանալին ճիշտ է և փորձեք կրկին</value>
   </data>
-  <data name="PrivacyRoom" xml:space="preserve">
-    <value>Անձնական սենյակ</value>
+  <data name="InvalidServerName" xml:space="preserve">
+    <value>MCP սերվերի անունն անվավեր է։ Թույլատրվում են միայն տառեր, թվեր, ընդգծման նշաններ և գծիկներ</value>
   </data>
-  <data name="ProjectFiles" xml:space="preserve">
-    <value>Նախագծերում</value>
+  <data name="InvalidUrl" xml:space="preserve">
+    <value>Նշված URL ուղին անվավեր է: Համոզվեք, որ օգտագործվում է ճիշտ վերջնակետը</value>
   </data>
-  <data name="Recent" xml:space="preserve">
-    <value>Վերջին</value>
+  <data name="ManageProviders" xml:space="preserve">
+    <value>Դուք չունեք մատակարարներին կառավարելու թույլտվություն</value>
   </data>
-  <data name="SharedForMe" xml:space="preserve">
-    <value>Համօգտագործած ինձ հետ</value>
+  <data name="ManageServers" xml:space="preserve">
+    <value>Դուք չունեք MCP սերվերներ կառավարելու թույլտվություն</value>
   </data>
-  <data name="Trash" xml:space="preserve">
-    <value>Աղբարկղ</value>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>Մատակարարը չի գտնվել</value>
   </data>
-  <data name="VirtualRooms" xml:space="preserve">
-    <value>Սենյակներ</value>
+  <data name="ReservedServerName" xml:space="preserve">
+    <value>MCP սերվերի անունը թույլատրված չէ</value>
   </data>
-  <data name="InProcessFormFolder" xml:space="preserve">
-    <value>Ընթացքի մեջ</value>
+  <data name="ServerFailedConnect" xml:space="preserve">
+    <value>Չհաջողվեց միանալ MCP սերվերին</value>
   </data>
-  <data name="ReadyFormFolder" xml:space="preserve">
-    <value>Ամբողջական</value>
+  <data name="ServerNameExists" xml:space="preserve">
+    <value>MCP սերվերի անունն արդեն գոյություն ունի</value>
   </data>
-  <data name="RoomTemplates" xml:space="preserve">
-    <value>Կաղապարներ</value>
+  <data name="ServerNotFound" xml:space="preserve">
+    <value>MCP սերվերը չի գտնվել</value>
   </data>
-  <data name="AiAgents" xml:space="preserve">
-    <value>ԱԲ գործակալներ</value>
+  <data name="ServersRoomLimit" xml:space="preserve">
+    <value>Սենյակում սերվերների առավելագույն քանակը {0} է</value>
+  </data>
+  <data name="UnavailableServers" xml:space="preserve">
+    <value>MCP սերվերները հասանելի չեն՝ {0}: Ստուգեք կապի կարգավորումները</value>
   </data>
 </root>
