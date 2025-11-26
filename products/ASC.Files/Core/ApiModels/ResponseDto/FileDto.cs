@@ -333,6 +333,7 @@ public class FileDtoHelper(
         {                   
             switch (contextFolder)
             {
+                case { FolderType: FolderType.Favorites }:
                 case { FolderType: FolderType.Recent }:
                 case { FolderType: FolderType.SHARE }:
                 case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, currentUserId):

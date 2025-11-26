@@ -373,9 +373,11 @@ public class FolderDtoHelper(
         {
             switch (contextFolder)
             {
+                case { FolderType: FolderType.Favorites }:
                 case { FolderType: FolderType.Recent }:
                 case { FolderType: FolderType.SHARE }:
                 case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, authContext.CurrentAccount.ID):
+                case null:
                     result.RootFolderType = FolderType.SHARE;
                     result.RootFolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
                     var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.ParentId);
