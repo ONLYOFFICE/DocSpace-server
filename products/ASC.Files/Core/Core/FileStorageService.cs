@@ -245,6 +245,9 @@ public class FileStorageService //: IFileStorageService
 
         Folder<T> parent = null;
         Folder<T> parentRoom = null;
+        
+        ArgumentOutOfRangeException.ThrowIfLessThan(from, 0);
+        ArgumentOutOfRangeException.ThrowIfLessThan(count, 0);
 
         try
         {
