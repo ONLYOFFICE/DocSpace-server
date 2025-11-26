@@ -3415,6 +3415,11 @@ public class FileSecurity(
                 return 1;
             }
 
+            if (orderedSubjectX.OrderType == orderedSubjectY.OrderType)
+            {
+                return y.EntryType.CompareTo(x.EntryType);
+            }
+            
             return orderedSubjectX.OrderType.CompareTo(orderedSubjectY.OrderType);
         }
     }
