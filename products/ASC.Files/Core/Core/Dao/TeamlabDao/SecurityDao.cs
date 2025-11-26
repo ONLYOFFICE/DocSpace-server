@@ -1138,8 +1138,6 @@ internal abstract class SecurityBaseDao<T>(
             exp = exp.Or(s => !filesDbContext.Security.Any(f => f.TenantId == tenantId && f.EntryId == entryId && f.EntryType == entry.FileEntryType && f.Subject == s.Subject) &&
                               s.TenantId == tenantId &&
                               s.EntryType == FileEntryType.Folder &&
-                              s.InternalEntryId == 
-                              
                               filesDbContext.Tree.Where(r => 
                                       r.FolderId == entryParentId &&
                                       filesDbContext.Folders.Any(f => 
@@ -1147,9 +1145,7 @@ internal abstract class SecurityBaseDao<T>(
                                           f.Id == r.ParentId &&
                                           f.FolderType != FolderType.AiAgents && f.FolderType != FolderType.VirtualRooms && f.FolderType != FolderType.USER) &&
                                       filesDbContext.Security.Any(b => b.TenantId == tenantId && b.InternalEntryId == r.ParentId && b.EntryType == FileEntryType.Folder))
-                                  .OrderBy(r=> r.Level)
-                                  .Select(r=> r.ParentId)
-                                  .FirstOrDefault()
+                                  .Any(r=> s.InternalEntryId == r.ParentId)
                               
             );
         }
