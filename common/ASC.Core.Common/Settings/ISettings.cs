@@ -28,7 +28,7 @@ namespace ASC.Core.Common.Settings;
 
 public interface ISettings<out T> where T : ISettings<T>
 {
-    Guid ID { get; }
+    static abstract Guid ID { get; }
     T GetDefault();
     DateTime LastModified { get; set; }
 }

@@ -34,8 +34,7 @@ public class DarkThemeSettings : ISettings<DarkThemeSettings>
     /// <summary>
     /// The theme settings ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{38362061-066D-4C57-A23E-8953CF34EFC3}"); }
     }

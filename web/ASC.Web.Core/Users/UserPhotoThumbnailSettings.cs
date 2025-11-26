@@ -30,11 +30,11 @@ namespace ASC.Web.Core.Users;
 
 public class UserPhotoThumbnailSettings : ISettings<UserPhotoThumbnailSettings>
 {
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{CC3AA821-43CA-421B-BDCD-81FB6D3361CF}"); }
     }
+    
     public UserPhotoThumbnailSettings()
     {
 

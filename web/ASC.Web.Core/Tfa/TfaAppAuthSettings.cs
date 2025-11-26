@@ -26,10 +26,9 @@
 
 namespace ASC.Web.Studio.Core.TFA;
 
-public class TfaAppAuthSettings : TfaSettingsBase<TfaAppAuthSettings>
+public class TfaAppAuthSettings : TfaSettingsBase<TfaAppAuthSettings>, ISettings<TfaAppAuthSettings>
 {
-    [JsonIgnore]
-    public override Guid ID
+    public static new Guid ID
     {
         get { return new Guid("{822CA059-AA8F-4588-BEE3-6CD2AA920CDB}"); }
     }

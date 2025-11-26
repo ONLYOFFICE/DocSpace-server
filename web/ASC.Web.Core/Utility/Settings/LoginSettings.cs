@@ -49,7 +49,7 @@ public class LoginSettings : ISettings<LoginSettings>
     /// <summary>
     /// The login ID.
     /// </summary>
-    public Guid ID => new("{588C7E01-8D41-4FCE-9779-D4126E019765}");
+    public static Guid ID => new("{588C7E01-8D41-4FCE-9779-D4126E019765}");
 
     public LoginSettings GetDefault()
     {

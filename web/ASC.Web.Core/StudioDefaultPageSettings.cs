@@ -30,8 +30,7 @@ public class StudioDefaultPageSettings : ISettings<StudioDefaultPageSettings>
 {
     public Guid DefaultProductID { get; init; }
 
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{F3FF27C5-BDE3-43ae-8DD0-2E8E0D7044F1}"); }
     }

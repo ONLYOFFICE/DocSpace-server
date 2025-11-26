@@ -35,8 +35,7 @@ public class TenantRoomQuotaSettings : TenantEntityQuotaSettings, ISettings<Tena
     /// <summary>
     /// The tenant ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{A5B050F0-2D20-4ABF-A8F6-16C6038FF018}"); }
     }

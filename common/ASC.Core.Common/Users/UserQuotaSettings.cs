@@ -30,8 +30,7 @@ public class UserQuotaSettings : ISettings<UserQuotaSettings>
 {
     public const int NoQuota = -1;
 
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{5A097CFA-1A8E-45CB-A4BB-FE8D2B5E5908}"); }
     }

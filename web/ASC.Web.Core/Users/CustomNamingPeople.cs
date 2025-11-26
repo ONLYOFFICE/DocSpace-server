@@ -28,8 +28,7 @@ namespace ASC.Web.Core.Users;
 
 public class PeopleNamesSettings : ISettings<PeopleNamesSettings>
 {
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("47F34957-6A70-4236-9681-C8281FB762FA"); }
     }
