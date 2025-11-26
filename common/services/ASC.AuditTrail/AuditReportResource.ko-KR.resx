@@ -333,7 +333,7 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>포털 리전 마이그레이션 시작</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>백업 시작</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">

@@ -387,6 +387,11 @@ public class FolderDtoHelper(
                     break;
             }
         }
+
+        if (folder.FolderType == FolderType.AiRoom)
+        {
+            result.FoldersCount -= 2;
+        }
         
         if (aiReadyTask != null)
         {

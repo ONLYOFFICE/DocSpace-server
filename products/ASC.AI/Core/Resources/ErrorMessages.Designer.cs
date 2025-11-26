@@ -69,6 +69,15 @@ namespace ASC.AI.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot process files: {0}. Files may be corrupted or encrypted.
+        /// </summary>
+        internal static string AttachmentProcessFailed {
+            get {
+                return ResourceManager.GetString("AttachmentProcessFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have permission to use chat.
         /// </summary>
         internal static string ChatAccessDenied {
@@ -209,6 +218,15 @@ namespace ASC.AI.Core.Resources {
         internal static string ServersRoomLimit {
             get {
                 return ResourceManager.GetString("ServersRoomLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MCP servers are unavailable: {0}. Check connection settings.
+        /// </summary>
+        internal static string UnavailableServers {
+            get {
+                return ResourceManager.GetString("UnavailableServers", resourceCulture);
             }
         }
     }

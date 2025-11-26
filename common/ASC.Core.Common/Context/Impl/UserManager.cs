@@ -583,7 +583,8 @@ public class UserManager(
 
     private async Task<List<GroupInfo>> GetUserGroupsAsync(Guid userID, IncludeType includeType, Guid? categoryId)
     {
-        var httpRequestDictionary = new HttpRequestDictionary<List<GroupInfo>>(httpContextAccessor?.HttpContext, "GroupInfo");
+        var key = (categoryId.HasValue ? GroupCaheKeys.SpecificGroupInfo : GroupCaheKeys.FullGroupInfo).ToStringFast();
+        var httpRequestDictionary = new HttpRequestDictionary<List<GroupInfo>>(httpContextAccessor?.HttpContext, key);
         var result = httpRequestDictionary.Get(userID.ToString());
         if (result is { Count: > 0 })
         {
@@ -730,8 +731,17 @@ public class UserManager(
 
     internal void ResetGroupCache(Guid userID)
     {
-        new HttpRequestDictionary<List<GroupInfo>>(httpContextAccessor?.HttpContext, "GroupInfo").Reset(userID.ToString());
-        new HttpRequestDictionary<List<Guid>>(httpContextAccessor?.HttpContext, "GroupInfoID").Reset(userID.ToString());
+        new HttpRequestDictionary<List<GroupInfo>>(httpContextAccessor?.HttpContext, GroupCaheKeys.SpecificGroupInfo.ToStringFast()).Reset(userID.ToString());
+        new HttpRequestDictionary<List<GroupInfo>>(httpContextAccessor?.HttpContext, GroupCaheKeys.FullGroupInfo.ToStringFast()).Reset(userID.ToString());
+        new HttpRequestDictionary<List<Guid>>(httpContextAccessor?.HttpContext, GroupCaheKeys.GroupInfoID.ToStringFast()).Reset(userID.ToString());
+    }
+
+    [EnumExtensions]
+    internal enum GroupCaheKeys
+    {
+        SpecificGroupInfo,
+        FullGroupInfo,
+        GroupInfoID
     }
 
     public async Task ChangeUserCulture(UserInfo user, string cultureName)

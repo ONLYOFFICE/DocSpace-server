@@ -328,18 +328,32 @@ public class FileDtoHelper(
             }
         }
         
-        if (file.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
-        {
+        var currentUserId = authContext.CurrentAccount.ID;
+        if (file.RootFolderType == FolderType.USER && authContext.IsAuthenticated && !Equals(file.RootCreateBy, currentUserId))
+        {                   
             switch (contextFolder)
             {
                 case { FolderType: FolderType.Recent }:
                 case { FolderType: FolderType.SHARE }:
-                case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, authContext.CurrentAccount.ID):
+                case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, currentUserId):
+                case null:
                     var folderShareAsync = await _globalFolderHelper.GetFolderShareAsync<T>();
                     result.RootFolderType = FolderType.SHARE;
                     result.RootFolderId = folderShareAsync;
                     var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.FolderId);
-                    if (!await _fileSecurity.CanReadAsync(parent))
+
+                    if (!parent.SecurityByUsers.TryGetValue(currentUserId, out _))
+                    {
+                        parent.SecurityByUsers.Add(currentUserId, new Dictionary<FileSecurity.FilesSecurityActions, bool>());
+                    }
+
+                    if (!parent.SecurityByUsers[currentUserId].TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canReadParent))
+                    {
+                        canReadParent = await _fileSecurity.CanReadAsync(parent);
+                        parent.SecurityByUsers[currentUserId][FileSecurity.FilesSecurityActions.Read] = canReadParent;
+                    }
+                    
+                    if (!canReadParent)
                     {
                         result.FolderId = folderShareAsync;
                     }

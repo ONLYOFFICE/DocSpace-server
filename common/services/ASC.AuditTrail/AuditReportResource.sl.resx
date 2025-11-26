@@ -658,7 +658,7 @@
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Prerazporeditve</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Začni varnostno kopiranje</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">

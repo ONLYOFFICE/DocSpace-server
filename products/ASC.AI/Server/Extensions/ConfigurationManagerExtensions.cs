@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,25 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Core.Users;
+namespace ASC.AI.Extensions;
 
-public class UserPhotosValidator(SecurityContext securityContext, UserManager userManager) : IDataStoreValidator
+public static class ConfigurationManagerExtension
 {
-    public async Task<bool> Validate(string path)
+    public static ConfigurationManager AddAiConfiguration(
+        this ConfigurationManager config,
+        IHostEnvironment env)
     {
-        if (!securityContext.CurrentAccount.IsAuthenticated)
-        {
-            return true;
-        }
+        config
+            .AddJsonFile("elastic.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"elastic.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
-        var userId = securityContext.CurrentAccount.ID;
-        var userType = await userManager.GetUserTypeAsync(userId);
-
-        if (userType == EmployeeType.Guest && !path.Contains(userId.ToString()))
-        {
-            return false;
-        }
-
-        return true;
+        return config;
     }
 }

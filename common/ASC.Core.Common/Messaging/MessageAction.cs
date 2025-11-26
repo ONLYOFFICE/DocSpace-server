@@ -819,8 +819,23 @@ public enum MessageAction
     [SwaggerEnum("Start transfer setting")]
     StartTransferSetting = 5040,
 
-    [SwaggerEnum("Start backup setting")]
-    StartBackupSetting = 5041,
+    [SwaggerEnum("Backup started")]
+    BackupStarted = 5041,
+
+    [SwaggerEnum("Backup completed")]
+    BackupCompleted = 5125,
+
+    [SwaggerEnum("Backup failed")]
+    BackupFailed = 5126,
+
+    [SwaggerEnum("Scheduled backup started")]
+    ScheduledBackupStarted = 5127,
+
+    [SwaggerEnum("Scheduled backup completed")]
+    ScheduledBackupCompleted = 5128,
+
+    [SwaggerEnum("Scheduled backup failed")]
+    ScheduledBackupFailed = 5129,
 
     [SwaggerEnum("License key uploaded")]
     LicenseKeyUploaded = 5042,
@@ -908,6 +923,15 @@ public enum MessageAction
     
     [SwaggerEnum("Vectorization settings reset")]
     ResetVectorizationSettings = 6084,
+
+    [SwaggerEnum("Webplugin uploaded")]
+    WebpluginUploaded = 6085,
+
+    [SwaggerEnum("Webplugin updated")]
+    WebpluginUpdated = 6086,
+
+    [SwaggerEnum("Webplugin deleted")]
+    WebpluginDeleted = 6087,
 
     #endregion
 

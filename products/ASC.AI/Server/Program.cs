@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.AI;
+using ASC.AI.Extensions;
 using ASC.Api.Core.Extensions;
 
 using Autofac;
@@ -43,7 +44,7 @@ var builder = WebApplication.CreateBuilder(options);
 
 builder.Configuration
     .AddDefaultConfiguration(builder.Environment)
-    .AddJsonFile("elastic.json", optional: false, reloadOnChange: true)
+    .AddAiConfiguration(builder.Environment)
     .AddEnvironmentVariables()
     .AddCommandLine(args);
 

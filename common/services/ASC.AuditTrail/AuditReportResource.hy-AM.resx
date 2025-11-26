@@ -546,7 +546,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO միացված է</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Մեկնարկել պահուստավորումը</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">

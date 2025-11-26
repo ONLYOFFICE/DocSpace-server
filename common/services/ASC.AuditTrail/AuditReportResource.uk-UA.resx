@@ -442,7 +442,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO ввімкнено</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Почати резервне копіювання</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">

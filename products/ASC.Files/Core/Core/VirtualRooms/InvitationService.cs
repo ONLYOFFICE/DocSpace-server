@@ -152,6 +152,8 @@ public class InvitationService(
                     }
 
                     var type = await userManager.GetUserTypeAsync(currentUserId);
+                    
+                    ProcessForAgent(folder, type, data);
 
                     if (FileSecurity.PaidShares.Contains(data.Share) && type is EmployeeType.Guest or EmployeeType.User)
                     {
@@ -302,6 +304,9 @@ public class InvitationService(
         {
             await usersInRoomChecker.CheckAppend();
             var room = await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
+            var type = await userManager.GetUserTypeAsync(user);
+
+            ProcessForAgent(room, type, data);
 
             if (quotaLimit && FileSecurity.PaidShares.Contains(data.Share))
             {
@@ -359,6 +364,16 @@ public class InvitationService(
             }
 
             return true;
+        }
+    }
+    
+    private static void ProcessForAgent<T>(Folder<T> folder, EmployeeType type, InvitationLinkData data)
+    {
+        if (folder.FolderType == FolderType.AiRoom && 
+            type == EmployeeType.Guest && 
+            data.Share is FileShare.RoomManager or FileShare.ContentCreator)
+        {
+            data.Share = FileShare.Read;
         }
     }
 }

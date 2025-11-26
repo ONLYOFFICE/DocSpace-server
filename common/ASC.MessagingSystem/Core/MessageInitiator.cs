@@ -35,5 +35,6 @@ public enum MessageInitiator
     DocsService,
     ThirdPartyProvider,
     AutoCleanUp,
-    PaymentService
+    PaymentService,
+    BackupService,
 }

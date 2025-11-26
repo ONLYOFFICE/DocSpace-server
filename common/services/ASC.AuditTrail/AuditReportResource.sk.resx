@@ -448,7 +448,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO povolené</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Spustiť zálohovanie</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">

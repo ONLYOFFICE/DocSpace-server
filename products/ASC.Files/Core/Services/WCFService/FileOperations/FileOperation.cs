@@ -305,19 +305,9 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
         {
             CancellationToken = cancellationToken;
 
-            await using var scope = _serviceProvider.CreateAsyncScope();
+            await using var scope = await CreateScopeAsync();
             var scopeClass = scope.ServiceProvider.GetService<FileOperationScope>();
-            var (tenantManager, daoFactory, fileSecurity, logger) = scopeClass;
-            await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
-
-            if (CurrentUserId != ASC.Core.Configuration.Constants.Guest.ID)
-            {
-                var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-                await securityContext.AuthenticateMeWithoutCookieAsync(CurrentUserId);
-            }
-
-            var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-            externalShare.Initialize(SessionSnapshot);
+            var (daoFactory, fileSecurity, logger) = scopeClass;
 
             CustomSynchronizationContext.CurrentContext.CurrentPrincipal = _principal;
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(_culture);
@@ -364,8 +354,22 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
     public async Task<AsyncServiceScope> CreateScopeAsync()
     {
         var scope = _serviceProvider.CreateAsyncScope();
-        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
+
+        var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
         await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
+
+        var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+        if (CurrentUserId != ASC.Core.Configuration.Constants.Guest.ID)
+        {
+            await securityContext.AuthenticateMeWithoutCookieAsync(CurrentTenantId, CurrentUserId);
+        }
+        else if (SessionSnapshot.SessionId != Guid.Empty)
+        {
+            var authManager = scope.ServiceProvider.GetRequiredService<AuthManager>();
+            var account = await authManager.GetAccountByIDAsync(CurrentTenantId, CurrentUserId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(account, session: SessionSnapshot.SessionId);
+        }
+
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
         externalShare.Initialize(SessionSnapshot);
 
@@ -420,7 +424,6 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
 
 [Scope]
 public record FileOperationScope(
-    TenantManager TenantManager,
     IDaoFactory DaoFactory,
     FileSecurity FileSecurity,
     ILogger<FileOperationScope> Options);

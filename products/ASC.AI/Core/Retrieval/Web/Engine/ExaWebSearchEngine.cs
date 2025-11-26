@@ -95,14 +95,9 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
         var requestBody = new ExaCrawlRequest 
         { 
             Urls = [query.Url], 
-            Contents = new Contents
-            {
-                Text = new Text
-                {
-                    MaxCharacters = query.MaxCharacters
-                },
-                Livecrawl = "preferred"
-            }
+            Livecrawl = "preferred",
+            Context = true,
+            Text = new Text { MaxCharacters = query.MaxCharacters }
         };
         
         var request = new HttpRequestMessage(HttpMethod.Post, "https://api.exa.ai/contents")
@@ -128,9 +123,13 @@ public class ExaWebSearchEngine(HttpClient httpClient, ExaConfig config) : IWebS
             }
 
             var result = responseContent.Results[0];
+            
             return new WebSearchResult
             {
-                Title = result.Title, Url = result.Url, FaviconUrl = result.Favicon, Text = result.Text
+                Title = result.Title, 
+                Url = result.Url, 
+                FaviconUrl = result.Favicon, 
+                Text = responseContent.Context ?? result.Text
             };
         }
         catch (HttpRequestException e)
@@ -189,5 +188,7 @@ class ExaSearchResult
 class ExaCrawlRequest
 {
     public required List<string> Urls { get; init; }
-    public required Contents Contents { get; init; }
+    public required Text Text { get; init; }
+    public bool Context { get; init; }
+    public string Livecrawl { get; init; } = "preferred";
 }
