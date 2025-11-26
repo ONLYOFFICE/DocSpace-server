@@ -93,7 +93,7 @@ public class FileSharingAceHelper(
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
         {
-            if (entry.CreateBy == w.Id && (!beforeOwnerChange || w.Access != FileShare.RoomManager && w.Access != FileShare.ContentCreator))
+            if ((w.IsLink && entry.CreateBy == w.Id) && (!beforeOwnerChange || w.Access != FileShare.RoomManager && w.Access != FileShare.ContentCreator))
             {
                 continue;
             }
@@ -231,8 +231,17 @@ public class FileSharingAceHelper(
 
             if (room != null && !w.IsLink && (existedShare == null || (!existedShare.IsLink && existedShare.SubjectType != SubjectType.Group)))
             {
-                if (room.RootId is int root && root != await globalFolderHelper.FolderRoomTemplatesAsync && (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) ||
-                                                                                                             !userAccesses.Contains(w.Access)))
+                if (room.FolderType == FolderType.AiRoom &&
+                    currentUserType == EmployeeType.Guest &&
+                    w.Access is FileShare.RoomManager or FileShare.ContentCreator)
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+                }
+                
+                if (room.RootId is int root && 
+                    root != await globalFolderHelper.FolderRoomTemplatesAsync && 
+                    (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) || 
+                     !userAccesses.Contains(w.Access)))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
@@ -464,12 +473,9 @@ public class FileSharingAceHelper(
                     {
                         await socketManager.AddToSharedAsync(entry, users: tags);
                     }
-
-                    if (w.SubjectType == SubjectType.Group)
-                    {
-                        var usersShares = await fileSecurity.GetPureSharesAsync(entry, ShareFilterType.User, null, null).Select(r => r.Subject).ToListAsync();
-                        usersWithoutRight = usersWithoutRight.Except(usersShares).ToList();
-                    }
+                    
+                    var usersShares = await fileSecurity.GetPureSharesAsync(entry, ShareFilterType.User, null, null).Select(r => r.Subject).ToListAsync();
+                    usersWithoutRight = usersWithoutRight.Except(usersShares).ToList();
                 }
 
                 if (share == FileShare.Restrict && w.SubjectType is SubjectType.Group)
@@ -527,20 +533,25 @@ public class FileSharingAceHelper(
         var currentId = authContext.CurrentAccount.ID;
         var entryType = entry.FileEntryType;
         var tagDao = daoFactory.GetTagDao<T>();
-
-        List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry)];
-        tags.AddRange(await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync());
+        
+        var tagRecent = await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync();
+        List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry), ..tagRecent];
 
         var currentShare = await fileSecurity.GetSharesAsync(entry, [currentId]);
-        if (currentShare != null && currentShare.Any() || entry is Folder<T>)
+        var currentShareIsNullOrEmpty = currentShare == null || !currentShare.Any();
+        
+        if (!currentShareIsNullOrEmpty || entry is Folder<T>)
         {
             var defaultShare = entry.RootFolderType == FolderType.USER
                 ? fileSecurity.DefaultMyShare
                 : fileSecurity.DefaultPrivacyShare;
 
-            if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
+            if (entry is Folder<T> folder)
             {
-                defaultShare = FileShare.None;
+                if (DocSpaceHelper.IsRoom(folder.FolderType) || currentShareIsNullOrEmpty && tagRecent.Count != 0)
+                {
+                    defaultShare = FileShare.None;
+                }
             }
 
             await fileSecurity.ShareAsync(entry.Id, entryType, currentId, defaultShare);

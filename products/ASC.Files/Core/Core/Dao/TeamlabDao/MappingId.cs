@@ -30,33 +30,33 @@ namespace ASC.Files.Core.Data;
 [Scope(typeof(IMappingId<int>))]
 internal class MappingId : IMappingId<int>
 {
-    public ValueTask<string> MappingIdAsync(int id, bool saveIfNotExist = false)
+    public ValueTask<(string, int)> MappingIdAsync(int id, bool saveIfNotExist = false)
     {
-        return ValueTask.FromResult(id.ToString());
+        return ValueTask.FromResult<(string, int)>((id.ToString(), id));
     }
 }
 
 [Scope(typeof(IMappingId<string>))]
 internal class ThirdPartyMappingId(TenantManager tenantManager, IDbContextFactory<FilesDbContext> dbContextFactory) : IMappingId<string>
 {
-    public ValueTask<string> MappingIdAsync(string id, bool saveIfNotExist = false)
+    public ValueTask<(string, int)> MappingIdAsync(string id, bool saveIfNotExist = false)
     {
         if (id == null)
         {
-            return ValueTask.FromResult<string>(null);
+            return ValueTask.FromResult<(string, int)>((null, 0));
         }
 
         var isNumeric = int.TryParse(id, out var n);
 
         if (isNumeric)
         {
-            return ValueTask.FromResult(n.ToString());
+            return  ValueTask.FromResult<(string, int)>((n.ToString(), n));
         }
 
         return InternalMappingIdAsync(id, saveIfNotExist);
     }
 
-    private async ValueTask<string> InternalMappingIdAsync(string id, bool saveIfNotExist = false)
+    private async ValueTask<(string, int)> InternalMappingIdAsync(string id, bool saveIfNotExist = false)
     {
         string result;
 
@@ -87,6 +87,6 @@ internal class ThirdPartyMappingId(TenantManager tenantManager, IDbContextFactor
             await filesDbContext.SaveChangesAsync();
         }
 
-        return result;
+        return (result, 0);
     }
 }

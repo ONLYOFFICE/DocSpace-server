@@ -445,7 +445,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>Włączona możliwość SSO</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Uruchom kopię zapasową</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">

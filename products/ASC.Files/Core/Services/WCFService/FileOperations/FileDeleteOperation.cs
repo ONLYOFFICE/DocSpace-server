@@ -195,6 +195,10 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             {
                 Err = FilesCommonResource.ErrorMessage_FolderNotFound;
             }
+            else if (!_immediately && DocSpaceHelper.IsRoom(folder.FolderType))
+            {
+                Err = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
+            }
             else if (!_ignoreException && checkPermissions && !canDelete)
             {
                 canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;

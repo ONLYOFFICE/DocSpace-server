@@ -445,7 +445,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO Etkinleştirildi</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Yedeklemeyi başlat</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">

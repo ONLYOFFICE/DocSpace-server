@@ -36,7 +36,8 @@ public class ChatCompletionRunner(
     ILogger<ChatCompletionGenerator> logger,
     AttachmentHandler attachmentHandler,
     SocketManager socketManager,
-    ChatNameGenerator chatNameGenerator)
+    ChatNameGenerator chatNameGenerator,
+    IServiceScopeFactory serviceScopeFactory)
 {
     public async Task<ChatCompletionGenerator> StartNewChatAsync(
         int roomId, string message, IEnumerable<JsonElement>? files = null)
@@ -45,9 +46,8 @@ public class ChatCompletionRunner(
         
         var context = await contextBuilder.BuildAsync(roomId);
         
-        var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
+        var attachments = await GetAttachmentsAsync(files).ToListAsync();
         
-        var attachments = await attachmentsTask;
         var userMessage = FormatUserMessage(message, attachments);
 
         var content = ChatPromptTemplate.GetPrompt(
@@ -76,7 +76,15 @@ public class ChatCompletionRunner(
         
         var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
         
-        return new ChatCompletionGenerator(client, logger, socketManager, messages, chatHistory, chatNameGenerator, context);
+        return new ChatCompletionGenerator(
+            client, 
+            logger, 
+            socketManager, 
+            messages, 
+            chatHistory, 
+            chatNameGenerator, 
+            context,
+            serviceScopeFactory);
     }
 
     public async Task<ChatCompletionGenerator> StartChatAsync(
@@ -125,19 +133,48 @@ public class ChatCompletionRunner(
         
         var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
 
-        return new ChatCompletionGenerator(client, logger, socketManager, messages, chatHistory, chatNameGenerator, context);
+        return new ChatCompletionGenerator(
+            client, 
+            logger, 
+            socketManager, 
+            messages, 
+            chatHistory, 
+            chatNameGenerator, 
+            context,
+            serviceScopeFactory);
     }
 
-    private IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(IEnumerable<JsonElement>? files)
+    private async IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(IEnumerable<JsonElement>? files)
     {
         if (files == null)
         {
-            return AsyncEnumerable.Empty<AttachmentMessageContent>();
+            yield break;
         }
         
         var (ids, thirdPartyIds) = FileOperationsManager.GetIds(files);
 
-        return attachmentHandler.HandleAsync(ids, thirdPartyIds);
+        var failedEntries = new List<FileEntry>();
+
+        await foreach (var result in attachmentHandler.HandleAsync(ids, thirdPartyIds))
+        {
+            if (!result.Success)
+            {
+                failedEntries.Add(result.File);
+            }
+            
+            if (result.AttachmentContent != null)
+            {
+                yield return result.AttachmentContent;
+            }
+        }
+
+        if (failedEntries.Count <= 0)
+        {
+            yield break;
+        }
+
+        var names = string.Join(", ", failedEntries.Select(x => x.Title));
+        throw new ArgumentException(string.Format(ErrorMessages.AttachmentProcessFailed, names));
     }
     
     private static ChatMessage FormatUserMessage(string message, List<AttachmentMessageContent> attachments)

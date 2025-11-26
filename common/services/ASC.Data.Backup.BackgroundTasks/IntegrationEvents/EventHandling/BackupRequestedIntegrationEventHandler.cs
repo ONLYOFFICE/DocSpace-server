@@ -68,7 +68,7 @@ public class BackupRequestedIntegrationEventHandler(
             }
             else
             {
-                await backupService.StartBackupAsync(@event.StorageType, @event.StorageParams, @event.ServerBaseUri, @event.Dump, true, @event.TaskId, @event.BillingSessionId, @event.BillingSessionExpire);
+                await backupService.StartBackupAsync(@event.StorageType, @event.StorageParams, @event.ServerBaseUri, @event.Dump, true, @event.TaskId, @event.BillingSessionId, @event.BillingSessionExpire, @event.Headers);
             }
         }
     }

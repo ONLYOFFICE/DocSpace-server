@@ -27,10 +27,10 @@
 namespace ASC.Core.Common.Notify;
 
 [Scope]
-public class TelegramHelper(ConsumerFactory consumerFactory,
+public class TelegramHelper(
+    ConsumerFactory consumerFactory,
     TelegramDao telegramDao,
     TelegramServiceClient telegramServiceClient,
-    IHttpClientFactory httpClientFactory,
     ILogger<TelegramHelper> logger)
 {
     public async Task<string> RegisterUserAsync(Guid userId, int tenantId)
@@ -65,7 +65,7 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
     {
         var tgUser = await telegramDao.GetUserAsync(userId, tenantId);
         return tgUser == null
-            ? (IsAwaitingRegistration(userId, tenantId) ? RegStatus.linking : RegStatus.unlinked, null)
+            ? (await IsAwaitingRegistration(userId, tenantId) ? RegStatus.linking : RegStatus.unlinked, null)
             : (RegStatus.linked, tgUser.TelegramUsername);
     }
 
@@ -85,9 +85,9 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
         await telegramDao.DeleteAsync(userId, tenantId);
     }
 
-    private bool IsAwaitingRegistration(Guid userId, int tenantId)
+    private async Task<bool> IsAwaitingRegistration(Guid userId, int tenantId)
     {
-        return GetCurrentToken(userId, tenantId) != null;
+        return (await GetCurrentToken(userId, tenantId)) != null;
     }
 
     private async Task<string> GetCurrentToken(Guid userId, int tenantId)
@@ -140,9 +140,10 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
             return new TelegramBotClient(token);
         }
 
-        var httpClient = httpClientFactory.CreateClient();
-
-        httpClient.BaseAddress = new Uri(proxy);
+        var httpClient = new HttpClient(new HttpClientHandler() {
+            UseProxy = true,
+            Proxy = new WebProxy(proxy)
+        });
 
         return new TelegramBotClient(token, httpClient);
     }

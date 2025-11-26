@@ -460,7 +460,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO已启用</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>开始备份</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">

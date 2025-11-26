@@ -47,6 +47,9 @@ public class WebSearchTool(WebSearchEngineFactory searchEngineFactory, IFaviconS
         {
             try
             {
+                query = query.Trim();
+                ArgumentException.ThrowIfNullOrEmpty(query);
+                
                 var results = await engine.SearchAsync(new SearchQuery
                 {
                     Query = query, 

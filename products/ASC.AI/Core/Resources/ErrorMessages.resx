@@ -69,4 +69,7 @@
   <data name="UnavailableServers" xml:space="preserve">
         <value>MCP servers are unavailable: {0}. Check connection settings</value>
     </data>
+    <data name="AttachmentProcessFailed" xml:space="preserve">
+        <value>Cannot process files: {0}. Files may be corrupted or encrypted</value>
+    </data>
 </root>

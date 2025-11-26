@@ -286,6 +286,33 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Backup completed.
+        /// </summary>
+        public static string BackupCompleted {
+            get {
+                return ResourceManager.GetString("BackupCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Backup failed.
+        /// </summary>
+        public static string BackupFailed {
+            get {
+                return ResourceManager.GetString("BackupFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Backup started.
+        /// </summary>
+        public static string BackupStarted {
+            get {
+                return ResourceManager.GetString("BackupStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Promotional banners visibility settings changed.
         /// </summary>
         public static string BannerSettingsChanged {
@@ -2365,6 +2392,33 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Scheduled backup completed.
+        /// </summary>
+        public static string ScheduledBackupCompleted {
+            get {
+                return ResourceManager.GetString("ScheduledBackupCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Scheduled backup failed.
+        /// </summary>
+        public static string ScheduledBackupFailed {
+            get {
+                return ResourceManager.GetString("ScheduledBackupFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Scheduled backup started.
+        /// </summary>
+        public static string ScheduledBackupStarted {
+            get {
+                return ResourceManager.GetString("ScheduledBackupStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Send.
         /// </summary>
         public static string SendActionType {
@@ -2496,15 +2550,6 @@ namespace ASC.AuditTrail {
         public static string SSOEnabled {
             get {
                 return ResourceManager.GetString("SSOEnabled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Start backup.
-        /// </summary>
-        public static string StartBackupSetting {
-            get {
-                return ResourceManager.GetString("StartBackupSetting", resourceCulture);
             }
         }
         
@@ -3027,6 +3072,33 @@ namespace ASC.AuditTrail {
         public static string WebhookUpdated {
             get {
                 return ResourceManager.GetString("WebhookUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Plugin deleted: {0}.
+        /// </summary>
+        public static string WebpluginDeleted {
+            get {
+                return ResourceManager.GetString("WebpluginDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Plugin updated: {0}.
+        /// </summary>
+        public static string WebpluginUpdated {
+            get {
+                return ResourceManager.GetString("WebpluginUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Plugin uploaded: {0}.
+        /// </summary>
+        public static string WebpluginUploaded {
+            get {
+                return ResourceManager.GetString("WebpluginUploaded", resourceCulture);
             }
         }
     }

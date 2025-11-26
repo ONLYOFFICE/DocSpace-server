@@ -573,7 +573,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>Conectarea unică activată</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Pornire copiere de rezerva</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">

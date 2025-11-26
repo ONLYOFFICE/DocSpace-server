@@ -785,7 +785,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         var fileIds = await tags.Where(tag => tag.EntryType == FileEntryType.File).Select(tag => (T)Convert.ChangeType(tag.EntryId, typeof(T))).ToArrayAsync();
 
-        var filesAsync = fileDao.GetFilesFilteredAsync(fileIds, filter, subjectGroup, subjectId, searchText, extension, searchInContent);
+        var filesAsync = fileDao.GetFilesFilteredAsync(fileIds, [], filter, subjectGroup, subjectId, searchText, extension, searchInContent);
         var files = fileSecurity.FilterReadAsync(filesAsync.Where(file => file.RootFolderType != FolderType.TRASH));
 
         await foreach (var file in files)

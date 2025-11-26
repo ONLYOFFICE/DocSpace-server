@@ -534,7 +534,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
             ModeWrite = source.ModeWrite,
             Plugins = source.Plugins,
             Recent = await source.GetRecent(fileType, file.Id).ToListAsync(),
-            Templates = await source.GetTemplates(fileType, configuration.Document.Title),
+            Templates = [], // await source.GetTemplates(fileType, configuration.Document.Title),
             User = await source.GetUserAsync()
         };
 

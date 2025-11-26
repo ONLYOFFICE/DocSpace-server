@@ -487,7 +487,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>Authentification unique (SSO) activée</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Sauvegarde est lancée</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">

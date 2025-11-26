@@ -35,5 +35,5 @@ public class SearchQuery
 public class PageContentQuery
 {
     public required string Url { get; init; }
-    public int MaxCharacters { get; init; } = 3000;
+    public int MaxCharacters { get; init; } = 10000;
 }

@@ -439,7 +439,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>Kertakirjautuminen (SSO) otettu käyttöön</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Aloita turvatalletus</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
