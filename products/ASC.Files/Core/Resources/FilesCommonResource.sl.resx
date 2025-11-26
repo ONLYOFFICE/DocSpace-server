@@ -578,7 +578,7 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
     <value>Upravitelj Agenta</value>
   </data>
   <data name="FolderNameForReassignedData" xml:space="preserve">
-    <value>Dokumenti uporabnika{0} {1}</value>
+    <value>Dokumenti uporabnika {0} {1}</value>
   </data>
   <data name="KnowledgeFolder" xml:space="preserve">
     <value>Znanje</value>

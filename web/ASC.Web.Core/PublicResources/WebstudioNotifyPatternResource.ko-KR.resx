@@ -1499,7 +1499,7 @@ $TrulyYours</value>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 포털에 새로운 사용자가 추가되었습니다
 
-"$__AuthorName":"$__AuthorUrl"님이 "${__VirtualRootPath}":"${__VirtualRootPath}"의 포털에 합류했습니다.
+"$__AuthorName":"$__AuthorUrl" 님이 "${__VirtualRootPath}":"${__VirtualRootPath}" 의 포털에 합류했습니다.
 
 
 ^새로운 사용자에 대한 알림을 받고 싶지 않은 경우 "구독 설정":"$RecipientSubscriptionConfigURL" 을 변경하세요.^</value>
@@ -2091,7 +2091,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed" xml:space="preserve">
     <value>$UserName님, 안녕하세요.
 
-DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}"의 백업 프로세스가 실패했습니다. 
+DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" 의 백업 프로세스가 실패했습니다. 
 
 궁금한 점이 있거나 도움이 필요한 경우 언제든지 문의주세요: "${__SupportLink}":"${__SupportLink}"
 
@@ -2100,7 +2100,7 @@ $TrulyYours</value>
   <data name="pattern_backup_failed_tg" xml:space="preserve">
     <value>$UserName님, 안녕하세요.
 
-DocSpace [${__VirtualRootPath}](${__VirtualRootPath})의 백업 프로세스가 실패했습니다. 
+DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) 의 백업 프로세스가 실패했습니다. 
 
 궁금한 점이 있거나 도움이 필요한 경우 언제든지 문의주세요: [${__SupportLink}](${__SupportLink})
 
@@ -2111,7 +2111,7 @@ ${LetterLogoText} 지원팀 드림
   <data name="pattern_saas_agent_invite" xml:space="preserve">
     <value>안녕하세요!
 
-"${__VirtualRootPath}":"${__VirtualRootPath}"의 DocSpace 에이전트에 참여하도록 초대받았습니다. 링크를 클릭하여 초대를 수락하세요:
+"${__VirtualRootPath}":"${__VirtualRootPath}" 의 DocSpace 에이전트에 참여하도록 초대받았습니다. 링크를 클릭하여 초대를 수락하세요:
 
 $OrangeButton
 
@@ -2122,7 +2122,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
     <value>안녕하세요!
 
-$__AuthorName님으로부터 "${__VirtualRootPath}":"${__VirtualRootPath}"의 "$Message":"$InviteLink" 에이전트에 참여하도록 초대받았습니다.
+$__AuthorName님으로부터 "${__VirtualRootPath}":"${__VirtualRootPath}" 의 "$Message":"$InviteLink" 에이전트에 참여하도록 초대받았습니다.
 
 $OrangeButton
 
@@ -2131,7 +2131,7 @@ $TrulyYours</value>
   <data name="pattern_scheduled_backup_failed" xml:space="preserve">
     <value>$UserName님, 안녕하세요.
 
-DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}"의 예정된 백업 프로세스가 실패했습니다.
+DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" 의 예정된 백업 프로세스가 실패했습니다.
 
 다음 설정을 확인하는 것을 권장합니다: "백업":"${__VirtualRootPath}/portal-settings/backup/data-backup" 및 "서비스":"${__VirtualRootPath}/portal-settings/services".
 
