@@ -165,4 +165,7 @@
   <data name="RoomTemplates" xml:space="preserve">
     <value>قوالب</value>
   </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>وكلاء الذكاء الاصطناعي</value>
+  </data>
 </root>

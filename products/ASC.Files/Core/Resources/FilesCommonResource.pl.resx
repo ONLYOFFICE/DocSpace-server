@@ -574,4 +574,16 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="RoleEnum_RoomAdmin" xml:space="preserve">
     <value>Administrator pokoju</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Menedżer asystentów</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Dokumenty użytkownika {0} {1}</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Wiedza</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Pamięć wyników</value>
+  </data>
 </root>

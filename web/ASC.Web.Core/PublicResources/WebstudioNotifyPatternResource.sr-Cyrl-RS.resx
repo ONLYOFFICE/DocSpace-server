@@ -2082,4 +2082,74 @@ $TrulyYours</value>
 ${LetterLogoText} тим за подршку
 [${__SiteLink}](${__SiteLink})</value>
   </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је креирао новог агента: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је обрисao агента: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је преименовао агента: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је добио улогу &lt;b&gt;{1}&lt;/b&gt; у агенту: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је додат агенту: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; је уклоњен из агента: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Придружи се агенту</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Придружите се ${LetterLogoText} DocSpace-у</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Позвани сте у ${LetterLogoText} DocSpace агент</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Резервна копија за ваш DocSpace није успела</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Здраво!
+
+Позвани сте да се придружите DocSpace агенту на "${__VirtualRootPath}":"${__VirtualRootPath}". Прихватите позив кликом на линк:
+
+$OrangeButton
+
+Након клика на позивни линк, молимо вас да поставите нову лозинку за ваш налог.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Здраво!
+
+$__AuthorName вас је позвао да се придружите агенту "$Message":"$InviteLink" на "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Здраво, $UserName,
+
+Процес израде резервне копије за ваш DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" није успео.
+
+Ако имате било каква питања или вам је потребна помоћ, слободно нас контактирајте путем "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Здраво, $UserName,
+
+Процес израде резервне копије за ваш DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) није успео.
+
+Ако имате било каква питања или вам је потребна помоћ, слободно нас контактирајте путем [${__SupportLink}](${__SupportLink})
+
+Срдачан поздрав,
+${LetterLogoText} тим за подршку
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
 </root>

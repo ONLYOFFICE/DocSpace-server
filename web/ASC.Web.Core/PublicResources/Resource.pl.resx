@@ -521,7 +521,7 @@
     <value>Numer telefonu z Twilio (wymagany do autoryzacji SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Podłącz aplikację do logowania się do portalu za pomocą konta Twitter.</value>
+    <value>Podłącz aplikację do logowania się do portalu za pomocą konta X.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Włącz aplikację dla importu kontaktów Yahoo.</value>
@@ -575,7 +575,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Hasło</value>
@@ -860,7 +860,7 @@
     <value>Sekret klienta</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Włącz tę aplikację, aby umożliwić użytkownikom logowanie w {LogoText} za pośrednictwem Twittera i łączenie kont swoich klientów na Twitterze z modułem CRM. {0}Przejdź do portalu Twittera dla programistów i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
+    <value>Włącz tę aplikację, aby umożliwić użytkownikom logowanie w {LogoText} za pośrednictwem X i łączenie kont swoich klientów na X z modułem CRM. {0}Przejdź do portalu X dla programistów i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>Klucz API</value>
@@ -1161,5 +1161,77 @@
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
     <value>Włącz kopie zapasowe w DocSpace. Koszty będą naliczane automatycznie.</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Wektoryzacja</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Narzędzia AI</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokeny</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Limit pamięci asystenta AI został przekroczony</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Nie udało się skonfigurować limitu na asystenta AI. Wprowadzona wartość jest większa niż całkowita pamięć DocSpace.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID klienta</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Sekret klienta</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Włącz aplikację, aby móc logować się w portalu za pośrednictwem konta WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Włącz aplikację, aby móc logować się w portalu za pośrednictwem konta WeChat.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Limit usługi zarządzania dokumentami ({0})</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Nazwisko</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Imię</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Przekroczono limit wtyczek:</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Liczba asystentów AI nie powinna przekraczać {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Narzędzia AI</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Włącz funkcje AI w DocSpace, aby zwiększyć produktywność.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Wyszukiwanie internetowe AI</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Dodaj środki do portfela, aby odblokować wyszukiwanie internetowe AI.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Wystąpił nieoczekiwany błąd. Spróbuj ponownie.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Aplikacja Telegram została podłączona. Od teraz będziesz otrzymywać powiadomienia z DocSpace.</value>
   </data>
 </root>

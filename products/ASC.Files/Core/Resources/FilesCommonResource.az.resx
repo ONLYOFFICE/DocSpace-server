@@ -515,4 +515,16 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="RoleEnum_RoomAdmin" xml:space="preserve">
     <value>Otaq administratoru</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Agent Meneceri</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>{0} {1} istifadəçisinin sənədləri</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Məlumat</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Nəticə Saxlama</value>
+  </data>
 </root>

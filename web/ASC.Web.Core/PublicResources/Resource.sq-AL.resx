@@ -520,7 +520,7 @@
     <value>Numri i telefonit nga Twilio (kërkohet për autorizim SMS)</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
     <value>ID-ja e klientit</value>
@@ -529,10 +529,10 @@
     <value>Sekreti i klientit</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari Twitter.</value>
+    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari X.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen ne {LogoText} duke përdorur Twitter-in e tyre dhe të lidhin llogaritë e tyre në Twitter të klientëve të tyre me modulin CRM. {0}Shkoni te portali i zhvilluesve të Twitter dhe krijoni një aplikacion të ri me integrim {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
+    <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen ne {LogoText} duke përdorur X-in e tyre dhe të lidhin llogaritë e tyre në X të klientëve të tyre me modulin CRM. {0}Shkoni te portali i zhvilluesve të X dhe krijoni një aplikacion të ri me integrim {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>Çelësi API</value>
@@ -1262,5 +1262,35 @@
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
     <value>Ju jeni lidhur me sukses me Telegram për të marrë njoftime nga DocSpace.</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vectorizimi</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Mjetet AI</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokenët</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Kuota e hapësirës së agjentit AI tejkalohet</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Dështoi vendosja e kuotës për agjent AI. Vlera e futur është më e madhe se gjithsej hapësira DocSpace.</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Numri i agjentëve AI nuk duhet të tejkalojë {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Mjetet AI</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Aktivizoni funksionalitetet AI në DocSpace për të rritur produktivitetin.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Kërkimi në internet AI</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Shtoni fonde në portofolin tuaj për të aktivizuar kërkimin në internet AI.</value>
   </data>
 </root>

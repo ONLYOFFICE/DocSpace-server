@@ -1035,4 +1035,76 @@
   <data name="RoomExternalLinkRevoked" xml:space="preserve">
     <value>تم إلغاء الرابط الخارجي: {1}</value>
   </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>تمت إضافة خادم MCP {0} إلى الوكيل</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>تم إنشاء الوكيل</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>تم حذف الوكيل</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>تمت إعادة تسمية الوكيل: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>الوكلاء</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>تم إنشاء مزود الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>تم حذف مزود الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>تم تحديث مزود الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>وكلاء الذكاء الاصطناعي [{0}]. تعيين حصة تخزين مخصصة لوكلاء الذكاء الاصطناعي: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>وكلاء الذكاء الاصطناعي [{0}]. تعيين حصة تخزين افتراضية لوكلاء الذكاء الاصطناعي: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>وكلاء الذكاء الاصطناعي [{0}]. تم تعطيل حصة التخزين لوكلاء الذكاء الاصطناعي</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>تم حذف خادم MCP {0} من الوكيل</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>تم تسجيل الدخول بنجاح عبر حساب التواصل الاجتماعي</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>تعيين حصة تخزين افتراضية لوكلاء الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>تم تعطيل حصة التخزين الافتراضية لوكلاء الذكاء الاصطناعي</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>تم إعادة تعيين إعدادات التحويل المتجهي (Vectorization)</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>تمت إعادة تعيين إعدادات بحث الويب</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>تم إنشاء خادم MCP: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>تم حذف خادم MCP: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>تم تعطيل خادم MCP: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>تم تمكين خادم MCP: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>تم تحديث خادم MCP: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>تم تكوين إعدادات التحويل المتجهي (Vectorization). المزود: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>تم تكوين إعدادات بحث الويب. المحرك: {0}</value>
+  </data>
 </root>

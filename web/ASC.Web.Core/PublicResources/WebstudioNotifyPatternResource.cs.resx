@@ -1956,7 +1956,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
-    <value>Je vyžadována akce: Nelze automaticky obnovit tarif ve vašem dokumentačním prostoru ${LetterLogoText}.</value>
+    <value>Je vyžadována akce: Nelze automaticky obnovit tarif ve vašem dokumentačním prostoru ${LetterLogoText}</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Vyžadovaná akce: Nelze automaticky dobít zůstatek v Peněžence ve vašem DocSpace ${LetterLogoText}</value>
@@ -1996,5 +1996,102 @@ Oznamujeme vám, že automatické dobití zůstatku peněženky DocSpace se nezd
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; vytvořil nového agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; byla přiřazena role &lt;b&gt;{1}&lt;/b&gt; v agentovi: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; přejmenoval agenta: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; smazal agenta: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; byl přidán do agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; byl odstraněn z agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Připojit agenta</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Dobrý den, $UserName,
+
+proces zálohování vašeho DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" selhal.
+
+Máte-li jakékoli dotazy nebo potřebujete pomoc, neváhejte nás kontaktovat prostřednictvím "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Dobrý den, $UserName,
+
+proces zálohování vašeho DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) selhal.
+
+Máte-li jakékoli dotazy nebo potřebujete pomoc, neváhejte nás kontaktovat prostřednictvím [${__SupportLink}](${__SupportLink})
+
+S pozdravem
+Tým podpory ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Dobrý den!
+
+Jste pozváni k připojení se k agentovi DocSpace na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Pozvání přijměte kliknutím na odkaz:
+
+$OrangeButton
+
+Po kliknutí na odkaz v pozvánce si prosím nastavte nové heslo pro svůj účet.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Dobrý den!
+
+$__AuthorName vás pozval, abyste se připojili k agentovi "$Message":"$InviteLink" na "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Zálohování DocSpace se nezdařilo</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Připojit DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Jste pozváni do agenta DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Automatické zálohování DocSpace se nezdařilo</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Dobrý den, $UserName,
+
+Plánovaný proces zálohování vašeho DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" selhal.
+
+Doporučujeme zkontrolovat nastavení "Záloha":"${__VirtualRootPath}/portal-settings/backup/data-backup" a "Služby":"${__VirtualRootPath}/portal-settings/services".
+
+V případě jakýchkoli dotazů nebo potřeby pomoci nás neváhejte kontaktovat prostřednictvím "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Dobrý den, $UserName,
+
+Plánovaný proces zálohování vašeho DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) selhal.
+
+Doporučujeme zkontrolovat nastavení [Záloha](${__VirtualRootPath}/portal-settings/backup/data-backup) a [Služby](${__VirtualRootPath}/portal-settings/services).
+
+V případě jakýchkoli dotazů nebo potřeby pomoci nás neváhejte kontaktovat prostřednictvím [${__SupportLink}](${__SupportLink})
+
+S pozdravem,
+Tým podpory ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
   </data>
 </root>
