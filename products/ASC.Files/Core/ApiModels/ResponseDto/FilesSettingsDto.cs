@@ -80,7 +80,7 @@ public class FilesSettingsDto
     /// The list of extensions of the template files.
     /// </summary>
     public List<string> ExtsWebTemplate { get; set; }
-    
+
     /// <summary>
     /// The list of extensions of the files that must be converted.
     /// </summary>
@@ -327,6 +327,16 @@ public class FilesSettingsDto
     /// Specifies whether the grouping of rooms is enabled or not.
     /// </summary>
     public bool OrganizeRoomsGrouping { get; set; }
+    
+    /// <summary>
+    /// List of extensions available for vectorization
+    /// </summary>
+    public List<string> ExtsFilesVectorized { get; set; }
+    
+    /// <summary>
+    /// The maximum file size for vectorization
+    /// </summary>
+    public long MaxVectorizationFileSize { get; set; }
 }
 
 
@@ -336,6 +346,7 @@ public class FilesSettingsDtoConverter(
     FilesLinkUtility filesLinkUtility,
     FilesSettingsHelper filesSettingsHelper,
     SetupInfo setupInfo,
+    VectorizationGlobalSettings vectorizationGlobalSettings,
     SearchSettingsHelper searchSettingsHelper)
 {
     public async Task<FilesSettingsDto> Get()
@@ -399,6 +410,9 @@ public class FilesSettingsDtoConverter(
             ChunkUploadSize = setupInfo.ChunkUploadSize,
             OpenEditorInSameTab = await filesSettingsHelper.GetOpenEditorInSameTabAsync(),
             OrganizeRoomsGrouping = await filesSettingsHelper.GetOrganizeRoomsGroupingAsync()
+
+            ExtsFilesVectorized = vectorizationGlobalSettings.SupportedFormats.ToList(),
+            MaxVectorizationFileSize = vectorizationGlobalSettings.MaxContentLength
         };
     }
 }

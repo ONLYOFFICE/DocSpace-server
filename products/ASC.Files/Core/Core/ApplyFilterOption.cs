@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.Core;
 
+/// <summary>
+/// The filter options for applying operations to items.
+/// </summary>
 public enum ApplyFilterOption
 {
     [SwaggerEnum("All")]

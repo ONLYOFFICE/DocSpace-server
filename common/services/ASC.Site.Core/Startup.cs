@@ -116,8 +116,6 @@ public class Startup
         services.RegisterFeature();
         services.RegisterQuotaFeature();
 
-        services.AddAutoMapper(BaseStartup.GetAutoMapperProfileAssemblies());
-
         services.AddSingleton(Channel.CreateUnbounded<SocketData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);

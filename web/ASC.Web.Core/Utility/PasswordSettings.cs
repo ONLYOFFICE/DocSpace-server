@@ -37,7 +37,7 @@ public sealed class PasswordSettings : ISettings<PasswordSettings>
     }
 
     private readonly IConfiguration _configuration;
-    
+
 
     /// <summary>Minimum password length</summary>
     /// <type>System.Int32, System</type>
@@ -50,12 +50,12 @@ public sealed class PasswordSettings : ISettings<PasswordSettings>
     /// <summary>Specifies if the password must include the digits or not</summary>
     /// <type>System.Boolean, System</type>
     public bool Digits { get; set; }
-    
+
 
     /// <summary>Specifies if the password must include the special symbols or not</summary>
     /// <type>System.Boolean, System</type>
     public bool SpecSymbols { get; set; }
-    
+
     public PasswordSettings(IConfiguration configuration)
     {
         _configuration = configuration;
@@ -76,7 +76,7 @@ public sealed class PasswordSettings : ISettings<PasswordSettings>
 
         return def;
     }
-    
+
     public DateTime LastModified { get; set; }
 }
 
@@ -104,7 +104,7 @@ public sealed class PasswordSettingsManager(IConfiguration configuration)
             return _printableASCII.Value;
         }
     }
-    
+
 
     /// <summary>Allowed characters for the password in the regex string format</summary>
     /// <type>System.String, System</type>
@@ -164,7 +164,7 @@ public sealed class PasswordSettingsManager(IConfiguration configuration)
 
         return length >= defaultMinLength && length <= MaxLength;
     }
-    
+
     private string GetPasswordRegex(PasswordSettings passwordSettings)
     {
         var pwdBuilder = new StringBuilder("^");

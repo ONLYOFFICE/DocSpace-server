@@ -65,7 +65,7 @@ public class NotifyHelper(ILogger<NotifyHelper> logger, NotifyServiceClient noti
 
     public async Task SendStorageDecryptionErrorAsync(int tenantId)
     {
-       await SendStorageEncryptionNotificationAsync("SendStorageDecryptionErrorAsync", tenantId);
+        await SendStorageEncryptionNotificationAsync("SendStorageDecryptionErrorAsync", tenantId);
     }
 
     private async Task SendStorageEncryptionNotificationAsync(string method, int tenantId)
@@ -80,7 +80,7 @@ public class NotifyHelper(ILogger<NotifyHelper> logger, NotifyServiceClient noti
 
         try
         {
-           await notifyServiceClient.InvokeSendMethodAsync(notifyInvoke);
+            await notifyServiceClient.InvokeSendMethodAsync(notifyInvoke);
         }
         catch (Exception error)
         {

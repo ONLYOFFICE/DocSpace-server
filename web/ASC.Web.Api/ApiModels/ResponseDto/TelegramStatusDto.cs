@@ -24,11 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModels.ResponseDto
+namespace ASC.Web.Api.ApiModels.ResponseDto;
+
+public class TelegramStatusDto
 {
-    public class TelegramStatusDto
-    {
-        public TelegramHelper.RegStatus Status { get; set; }
-        public string Username { get; set; }
-    }
+    [JsonConverter(typeof(JsonStringEnumConverter<RegStatus>))]
+    public required RegStatus Status { get; set; }
+    public string Username { get; set; }
 }

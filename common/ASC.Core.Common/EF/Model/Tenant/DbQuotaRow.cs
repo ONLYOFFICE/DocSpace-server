@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF;
 
-public class DbQuotaRow : BaseEntity, IMapFrom<TenantQuotaRow>
+public class DbQuotaRow : BaseEntity
 {
     public int TenantId { get; set; }
     [MaxLength(255)]

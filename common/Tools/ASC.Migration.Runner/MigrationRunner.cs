@@ -61,7 +61,7 @@ public class MigrationRunner
                 Console.WriteLine("Migration to " + targetMigration);
 
                 var migrator = migrationContext.Database.GetService<IMigrator>();
-                migrator?.Migrate(targetMigration);
+                migrator.Migrate(targetMigration);
             }
         }
     }

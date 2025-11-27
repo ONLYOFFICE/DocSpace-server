@@ -1998,4 +1998,101 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; heeft een nieuwe agent aangemaakt: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; heeft de agent verwijderd: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; heeft de agent hernoemd: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; heeft de rol van &lt;b&gt;{1}&lt;/b&gt; toegewezen gekregen in de agent: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; werd toegevoegd aan de agent: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; werd verwijderd van de agent: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Word agent</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Back-up voor uw DocSpace is mislukt</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Word lid van ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>U bent uitgenodigd voor de ${LetterLogoText} DocSpace agent</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Automatische back-up voor uw DocSpace is mislukt</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Hallo, $UserName,
+
+Het back-up proces voor uw DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" is mislukt.
+
+Als u vragen heeft of hulp nodig heeft, aarzel dan niet om contact met ons op te nemen via "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Hallo, $UserName,
+
+Het back-up proces voor uw DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) is mislukt.
+
+Als u vragen heeft of hulp nodig heeft, aarzel dan niet om contact met ons op te nemen via [${__SupportLink}](${__SupportLink})
+
+Met vriendelijke groet,
+${LetterLogoText} Ondersteuningsteam
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Hallo!
+
+U bent uitgenodigd om deel te nemen aan een DocSpace agent op "${__VirtualRootPath}":"${__VirtualRootPath}". Accepteer de uitnodiging door op de link te klikken:
+
+$OrangeButton
+
+Nadat u op de uitnodigingslink hebt geklikt, stelt u een nieuw wachtwoord in voor uw account.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Hallo!
+
+$__AuthorName heeft u uitgenodigd om lid te worden van de agent "$Message":"$InviteLink" op "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Hallo, $UserName,
+
+Het geplande back-up proces voor uw DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" is mislukt.
+
+We raden aan de instellingen voor "Back-up":"${__VirtualRootPath}/portal-settings/backup/data-backup" en "Services":"${__VirtualRootPath}/portal-settings/services" te controleren.
+
+Als u vragen heeft of hulp nodig heeft, aarzel dan niet om contact met ons op te nemen via "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Hallo, $UserName,
+
+Het geplande back-up proces voor uw DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) is mislukt.
+
+We raden aan de instellingen voor [Back-up](${__VirtualRootPath}/portal-settings/backup/data-backup) en [Services](${__VirtualRootPath}/portal-settings/services) te controleren.
+
+Als u vragen heeft of hulp nodig heeft, aarzel dan niet om contact met ons op te nemen via [${__SupportLink}](${__SupportLink})
+
+Met vriendelijke groet,
+${LetterLogoText} Ondersteuningsteam
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
 </root>

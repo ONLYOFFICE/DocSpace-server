@@ -61,6 +61,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Vectorization.
+        /// </summary>
+        public static string AccountingAIServiceVectorizationDetails {
+            get {
+                return ResourceManager.GetString("AccountingAIServiceVectorizationDetails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Contact.
         /// </summary>
         public static string AccountingCustomerOperationContact {
@@ -124,6 +133,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI tools.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_ai_service {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_ai-service", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Backup.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_backup {
@@ -156,6 +174,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationServiceUnit {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationServiceUnit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tokens.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_ai_service {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_ai-service", resourceCulture);
             }
         }
         
@@ -246,6 +273,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string AdminMessageSent {
             get {
                 return ResourceManager.GetString("AdminMessageSent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI agent space quota exceeded.
+        /// </summary>
+        public static string AiAgentFreeSpaceException {
+            get {
+                return ResourceManager.GetString("AiAgentFreeSpaceException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to set quota per ai agent. The entered value is greater than the total DocSpace storage..
+        /// </summary>
+        public static string AiAgentQuotaGreaterPortalError {
+            get {
+                return ResourceManager.GetString("AiAgentQuotaGreaterPortalError", resourceCulture);
             }
         }
         
@@ -1429,7 +1474,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Twitter.
+        ///   Looks up a localized string similar to X.
         /// </summary>
         public static string ConsumersTwitter {
             get {
@@ -1456,7 +1501,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Twitter account..
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a X account..
         /// </summary>
         public static string ConsumersTwitterDescription {
             get {
@@ -1465,7 +1510,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable this app to allow your users to sign in to {LogoText} using their Twitter and link their customers’ Twitter accounts to the CRM module. {0}Go to Twitter Developers Portal and create a new app {LogoText} integration. Insert the data you received below:.
+        ///   Looks up a localized string similar to Enable this app to allow your users to sign in to {LogoText} using their X and link their customers’ X accounts to the CRM module. {0}Go to X Developers Portal and create a new app {LogoText} integration. Insert the data you received below:.
         /// </summary>
         public static string ConsumersTwitterInstruction {
             get {
@@ -1542,6 +1587,51 @@ namespace ASC.Web.Core.PublicResources {
         public static string ConsumersVkInstruction {
             get {
                 return ResourceManager.GetString("ConsumersVkInstruction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WeChat.
+        /// </summary>
+        public static string ConsumersWeixin {
+            get {
+                return ResourceManager.GetString("ConsumersWeixin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client ID.
+        /// </summary>
+        public static string ConsumersWeixinClientId {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinClientId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client Secret.
+        /// </summary>
+        public static string ConsumersWeixinClientSecret {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinClientSecret", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a WeChat account..
+        /// </summary>
+        public static string ConsumersWeixinDescription {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a WeChat account..
+        /// </summary>
+        public static string ConsumersWeixinInstruction {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinInstruction", resourceCulture);
             }
         }
         
@@ -1749,6 +1839,60 @@ namespace ASC.Web.Core.PublicResources {
         public static string CustomNamingPeopleSchema {
             get {
                 return ResourceManager.GetString("CustomNamingPeopleSchema", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Date.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaDate {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaEmail {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to First name.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaFirstName {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaFirstName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Id.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaId {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Last name.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaLastName {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaLastName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Document Service Quota ({0}).
+        /// </summary>
+        public static string DocumentServerLicenseQuotaReportName {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaReportName", resourceCulture);
             }
         }
         
@@ -3040,6 +3184,33 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The number of AI agents should not exceed {0}.
+        /// </summary>
+        public static string TariffsFeature_aiagent_exception {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aiagent_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI tools.
+        /// </summary>
+        public static string TariffsFeature_aitools_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aitools_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable AI features in your DocSpace to boost productivity..
+        /// </summary>
+        public static string TariffsFeature_aitools_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aitools_wallet_price_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tracking logins &amp; actions.
         /// </summary>
         public static string TariffsFeature_audit {
@@ -3175,7 +3346,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Third-party integrations.
+        ///   Looks up a localized string similar to Pro integrations.
         /// </summary>
         public static string TariffsFeature_thirdparty {
             get {
@@ -3315,6 +3486,42 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_usersQuotaExceeds_exception {
             get {
                 return ResourceManager.GetString("TariffsFeature_usersQuotaExceeds_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI web search.
+        /// </summary>
+        public static string TariffsFeature_websearch_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_websearch_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add funds to your wallet to unlock AI web search..
+        /// </summary>
+        public static string TariffsFeature_websearch_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_websearch_wallet_price_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An unexpected error occurred. Please try again..
+        /// </summary>
+        public static string TelegramOnGenericError {
+            get {
+                return ResourceManager.GetString("TelegramOnGenericError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have been successfully connected Telegram to receive notifications from your DocSpace..
+        /// </summary>
+        public static string TelegramOnSuccessfulLink {
+            get {
+                return ResourceManager.GetString("TelegramOnSuccessfulLink", resourceCulture);
             }
         }
         

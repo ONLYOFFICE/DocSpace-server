@@ -52,7 +52,7 @@ public class SettingsDto
     /// The language.
     /// </summary>
     [SwaggerSchemaCustom(Example = "en-US")]
-    public string Culture { get; set; }
+    public required string Culture { get; set; }
 
     /// <summary>
     /// The UTC offset in the TimeSpan format.
@@ -114,7 +114,7 @@ public class SettingsDto
     /// <summary>
     /// The base domain.
     /// </summary>
-    public string BaseDomain { get; set; }
+    public required string BaseDomain { get; set; }
 
     /// <summary>
     /// The wizard token.
@@ -189,7 +189,7 @@ public class SettingsDto
     /// <summary>
     /// Specifies whether the cookie settings are enabled.
     /// </summary>
-    public bool CookieSettingsEnabled { get; set; }
+    public required bool CookieSettingsEnabled { get; set; }
 
     /// <summary>
     /// Specifies whether the access to the space management is limited or not.
@@ -224,7 +224,7 @@ public class SettingsDto
     /// <summary>
     /// The deep link settings.
     /// </summary>
-    public DeepLinkDto DeepLink { get; set; }
+    public required DeepLinkDto DeepLink { get; set; }
 
     /// <summary>
     /// The form gallery settings.

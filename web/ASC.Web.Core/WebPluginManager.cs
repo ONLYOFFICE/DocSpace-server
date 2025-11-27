@@ -32,6 +32,7 @@ public class WebPlugin
 {
     public string Name { get; set; }
     public string Version { get; set; }
+    public string MinDocSpaceVersion { get; set; }
     public string Description { get; set; }
     public string License { get; set; }
     public string Author { get; set; }
@@ -69,6 +70,7 @@ public class WebPluginManager(
     private const string StorageModuleName = "webplugins";
     private const string ConfigFileName = "config.json";
     private const string PluginFileName = "plugin.js";
+    private const string PluginCssFileName = "plugin.css";
     private const string AssetsFolderName = "assets";
 
     private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
@@ -163,7 +165,9 @@ public class WebPluginManager(
 
             webPlugin.Url = string.Format(urlTemplate, webPlugin.Name) + hash;
 
-            webPlugin = await UpdateWebPluginAsync(tenantId, webPlugin, true, null);
+            var existingSettings = await GetWebPluginSettingsAsync(webPlugin.Name);
+
+            webPlugin = await UpdateWebPluginAsync(tenantId, webPlugin, true, existingSettings);
 
             return webPlugin;
         }
@@ -202,14 +206,14 @@ public class WebPluginManager(
 
         if (system)
         {
-            if (tenantWebPlugins.Any(x => 
+            if (tenantWebPlugins.Any(x =>
                     x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) ||
                     x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 throw new Exception(Resource.ErrorWebPluginExist);
             }
 
-            if (systemWebPlugins.Any(x => 
+            if (systemWebPlugins.Any(x =>
                     x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
                     !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
@@ -373,11 +377,32 @@ public class WebPluginManager(
         return await UpdateWebPluginAsync(tenantId, webPlugin, enabled, settings);
     }
 
+    private async Task<string> GetWebPluginSettingsAsync(string name)
+    {
+        var webPluginSettings = await settingsManager.LoadAsync<WebPluginSettings>();
+
+        var enabledPlugins = webPluginSettings?.EnabledPlugins ?? [];
+
+        if (enabledPlugins.TryGetValue(name, out var webPluginState))
+        {
+            try
+            {
+                return string.IsNullOrEmpty(webPluginState.Settings) ? null : await instanceCrypto.DecryptAsync(webPluginState.Settings);
+            }
+            catch (Exception e)
+            {
+                log.ErrorWithException(e);
+            }
+        }
+
+        return null;
+    }
+
     private async Task<WebPlugin> UpdateWebPluginAsync(int tenantId, WebPlugin webPlugin, bool enabled, string settings)
     {
         var webPluginSettings = await settingsManager.LoadAsync<WebPluginSettings>();
 
-        var enabledPlugins = webPluginSettings?.EnabledPlugins ?? new Dictionary<string, WebPluginState>();
+        var enabledPlugins = webPluginSettings?.EnabledPlugins ?? [];
 
         var encryptedSettings = string.IsNullOrEmpty(settings) ? null : await instanceCrypto.EncryptAsync(settings);
 
@@ -419,7 +444,7 @@ public class WebPluginManager(
             throw new InvalidOperationException(Resource.ErrorWebPluginForbiddenSystem);
         }
 
-        var storage = await GetPluginStorageAsync(tenantId);
+        var storage = await GetPluginStorageAsync(webPlugin.System ? Tenant.DefaultTenant : tenantId);
 
         if (!await storage.IsDirectoryAsync(webPlugin.Name))
         {
@@ -545,6 +570,14 @@ public class WebPluginManager(
             }
 
             await ExtractEntry(zipFile, pluginFile, tempDir);
+
+
+            // extract plugin css file
+            var pluginCssFile = zipFile.GetEntry(PluginCssFileName);
+            if (pluginCssFile != null)
+            {
+                await ExtractEntry(zipFile, pluginCssFile, tempDir);
+            }
 
 
             // extract assets

@@ -29,7 +29,6 @@ global using ASC.Core.Common.EF.Migration;
 global using ASC.Core.Common.EF.Teamlabsite.Context;
 global using ASC.Migrations;
 global using ASC.Migrations.Core;
-global using ASC.Migrations.Core.Utils;
 
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Infrastructure;

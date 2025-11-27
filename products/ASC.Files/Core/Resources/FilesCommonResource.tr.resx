@@ -527,19 +527,19 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
     <value>Dosyayı açın</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Dosya bu odaya yüklenemiyor. Lütfen {0} PDF formunu yüklemeyi deneyin.</value>
+    <value>Dosya bu odaya yüklenemiyor. Lütfen ONLYOFFICE PDF formunu yüklemeyi deneyin.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Doldurulacak bağlantı</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Birden fazla dosyanın Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir {0} PDF formu taşıyın.</value>
+    <value>Birden fazla dosyanın Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir ONLYOFFICE PDF formu taşıyın.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Klasörlerin Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir {0} PDF formu taşıyın.</value>
+    <value>Klasörlerin Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir ONLYOFFICE PDF formu taşıyın.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Dosya bu odaya taşınamıyor. Lütfen {0} PDF formunu taşımayı deneyin.</value>
+    <value>Dosya bu odaya taşınamıyor. Lütfen ONLYOFFICE PDF formunu taşımayı deneyin.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Form numarası</value>
@@ -573,5 +573,17 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   </data>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Misafir</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Ajan Yöneticisi</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Kullanıcı {0} {1} belgeleri</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Bilgi</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Sonuç Depolama</value>
   </data>
 </root>

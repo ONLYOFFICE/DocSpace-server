@@ -749,10 +749,10 @@
     <value>Número de telefone do Twilio (exigido para autorização SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Conecte o aplicativo para entrar no portal usando uma conta do Twitter.</value>
+    <value>Conecte o aplicativo para entrar no portal usando uma conta do X.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Habilite este aplicativo para permitir que seus usuários acessem a {LogoText} usando seu Twitter e vinculem as contas de seus clientes no Twitter ao módulo CRM. {0} Vá para o Portal de Desenvolvedores do Twitter e crie um novo aplicativo de integração {LogoText}. Insira os dados que você recebeu abaixo:</value>
+    <value>Habilite este aplicativo para permitir que seus usuários acessem a {LogoText} usando seu X e vinculem as contas de seus clientes no X ao módulo CRM. {0} Vá para o Portal de Desenvolvedores do X e crie um novo aplicativo de integração {LogoText}. Insira os dados que você recebeu abaixo:</value>
   </data>
   <data name="ConsumersVkDescription" xml:space="preserve">
     <value>Habilite o aplicativo a entrar no portal usando uma conta VK.</value>
@@ -839,7 +839,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Senha</value>
@@ -980,7 +980,7 @@
     <value>Espaço na nuvem para os documentos do seu escritório</value>
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Integrações de terceiros</value>
+    <value>Pro integrações</value>
   </data>
   <data name="ConsumersZoom" xml:space="preserve">
     <value>Zoom</value>
@@ -1161,5 +1161,77 @@
   </data>
   <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
     <value>Recarga de saldo</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID do cliente</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Segredo do cliente</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Habilite o aplicativo para fazer login no portal usando uma conta WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Habilite o aplicativo para fazer login no portal usando uma conta WeChat.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Primeiro nome</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Sobrenome</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Cota de Serviço de Documentos ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>O número de plugins excede o limite</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Ocorreu um erro inesperado. Tente novamente.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Você se conectou com sucesso ao Telegram para receber notificações do seu DocSpace.</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vetorização</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Ferramentas de IA</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Cota de espaço do agente de IA excedida</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a quota por agente de IA. O valor inserido é maior que o armazenamento total do DocSpace.</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>O número de agentes de IA não deve exceder {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Ferramentas de IA</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Ative as funcionalidades de IA no seu DocSpace para impulsionar a produtividade.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Pesquisa web com IA</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Adicione fundos à sua carteira para desbloquear a pesquisa web por IA.</value>
   </data>
 </root>

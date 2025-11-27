@@ -46,7 +46,7 @@ public class SettingsController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("thirdparty")]
     public async Task<bool> ChangeAccessToThirdparty(SettingsRequestDto inDto)
-    {        
+    {
         await filesSettingsHelper.SetEnableThirdParty(inDto.Set);
 
         return await filesSettingsHelper.GetEnableThirdParty();
@@ -75,7 +75,7 @@ public class SettingsController(
     [SwaggerResponse(200, "Archive", typeof(ICompress))]
     [HttpPut("settings/downloadtargz")]
     public async Task<ICompress> ChangeDownloadZipFromBody([FromBody] DisplayRequestDto inDto)
-    {        
+    {
         await filesSettingsHelper.SetDownloadTarGz(inDto.Set);
         return compressToArchive;
     }
@@ -137,7 +137,7 @@ public class SettingsController(
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("settings/templates")]
     public async Task<bool> DisplayTemplates(DisplayRequestDto inDto)
-    {        
+    {
         await filesSettingsHelper.SetTemplatesSection(inDto.Set);
         return await filesSettingsHelper.GetTemplatesSection();
     }
@@ -223,7 +223,7 @@ public class SettingsController(
     {
         return await filesSettingsHelper.SetHideConfirmCancelOperation(inDto.Set);
     }
-    
+
     /// <summary>
     /// Hides the confirmation dialog for saving the file copy in the original format when converting a file.
     /// </summary>
@@ -367,7 +367,7 @@ public class SettingsController(
     [SwaggerResponse(200, "Updated sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)", typeof(List<FileShare>))]
     [HttpPut("settings/dafaultaccessrights")]
     public async Task<List<FileShare>> ChangeDefaultAccessRights(DefaultAccessRightsrequestDto inDto)
-    {        
+    {
         await filesSettingsHelper.SetDefaultSharingAccessRights(inDto.Value);
         return await filesSettingsHelper.GetDefaultSharingAccessRights();
     }
@@ -399,4 +399,5 @@ public class SettingsController(
         await filesSettingsHelper.SetOrganizeRoomsGroupingAsync(inDto.Set);
         return await filesSettingsHelper.GetOrganizeRoomsGroupingAsync();
     }
+}
 }

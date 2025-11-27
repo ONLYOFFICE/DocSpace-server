@@ -64,7 +64,7 @@ public class ConfirmAuthHandler(
         {
             new(ClaimTypes.Role, emailValidationKeyModel.Type.Value.ToStringFast()),AuthConstants.Claim_ScopeGlobalWrite
         };
-        
+
         if (checkKeyResult == EmailValidationKeyProvider.ValidationResult.Ok)
         {
             Guid userId;

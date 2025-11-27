@@ -98,7 +98,7 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
             _tenantId = _tenantId,
             _senderNames = _senderNames,
             _patterns = _patterns,
-            Arguments = [..Arguments],
+            Arguments = [.. Arguments],
             _requaredTags = _requaredTags,
             CurrentSender = CurrentSender,
             CurrentMessage = CurrentMessage

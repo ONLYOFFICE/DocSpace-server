@@ -29,7 +29,7 @@ namespace ASC.Common.Threading.DistributedLock.Abstractions;
 public abstract class LockHandleBase : IDistributedLockHandle
 {
     protected bool _disposed;
-    
+
     public async ValueTask ReleaseAsync()
     {
         await DisposeAsync();

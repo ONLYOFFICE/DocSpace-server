@@ -27,17 +27,17 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// User invitation settings
+/// The request parameters for updating the user invitation settings.
 /// </summary>
 public class TenantUserInvitationSettingsRequestDto
 {
     /// <summary>
-    /// Allow invite new DocSpace members through the Contacts section.
+    /// Specifies whether to allow inviting new DocSpace members through the Contacts section.
     /// </summary>
     public bool AllowInvitingMembers { get; init; }
 
     /// <summary>
-    /// Allow all DocSpace members to invite external guests to rooms.
+    /// Specifies whether to allow all DocSpace members to invite external guests to the rooms.
     /// </summary>
     public bool AllowInvitingGuests { get; init; }
 }

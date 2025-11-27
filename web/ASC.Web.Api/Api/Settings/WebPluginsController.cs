@@ -33,8 +33,9 @@ public class WebPluginsController(
     PermissionContext permissionContext,
     WebPluginManager webPluginManager,
     TenantManager tenantManager,
+    MessageService messageService,
     CspSettingsHelper cspSettingsHelper,
-    IMapper mapper)
+    WebPluginMapper mapper)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
@@ -70,9 +71,11 @@ public class WebPluginsController(
 
         var webPlugin = await webPluginManager.AddWebPluginFromFileAsync(tenant.Id, file, inDto.System);
 
+        messageService.Send(MessageAction.WebpluginUploaded, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
+
         await ChangeCspSettings(webPlugin, webPlugin.Enabled);
 
-        var outDto = mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
+        var outDto = await mapper.ToDtoManual(webPlugin);
 
         return outDto;
     }
@@ -95,7 +98,11 @@ public class WebPluginsController(
 
         var webPlugins = await webPluginManager.GetWebPluginsAsync(tenant.Id);
 
-        var outDto = mapper.Map<List<WebPlugin>, List<WebPluginDto>>(webPlugins);
+        List<WebPluginDto> outDto = [];
+        foreach (var webPlugin in webPlugins)
+        {
+            outDto.Add(await mapper.ToDtoManual(webPlugin));
+        }
 
         if (inDto.Enabled.HasValue)
         {
@@ -122,7 +129,7 @@ public class WebPluginsController(
 
         var webPlugin = await webPluginManager.GetWebPluginByNameAsync(tenant.Id, inDto.Name);
 
-        var outDto = mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
+        var outDto = await mapper.ToDtoManual(webPlugin);
 
         return outDto;
     }
@@ -146,6 +153,8 @@ public class WebPluginsController(
 
         var webPlugin = await webPluginManager.UpdateWebPluginAsync(tenant.Id, inDto.Name, inDto.WebPlugin.Enabled, inDto.WebPlugin.Settings);
 
+        messageService.Send(MessageAction.WebpluginUpdated, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
+
         await ChangeCspSettings(webPlugin, inDto.WebPlugin.Enabled);
     }
 
@@ -167,6 +176,8 @@ public class WebPluginsController(
         var tenant = tenantManager.GetCurrentTenant();
 
         var webPlugin = await webPluginManager.DeleteWebPluginAsync(tenant.Id, inDto.Name);
+
+        messageService.Send(MessageAction.WebpluginDeleted, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
 
         await ChangeCspSettings(webPlugin, false);
     }

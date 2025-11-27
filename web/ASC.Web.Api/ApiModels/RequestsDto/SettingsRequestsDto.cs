@@ -38,7 +38,7 @@ public class OwnerIdSettingsRequestDto
 }
 
 /// <summary>
-/// The request parameters for the version-specific settings configuration.
+/// The request parameters for managing the version-specific settings.
 /// </summary>
 public class SettingsRequestsDto
 {
@@ -98,7 +98,7 @@ public class TenantDevToolsAccessSettingsDto
 }
 
 /// <summary>
-/// The request parameters for managing the promotional banners visibility settings for the current tenant.
+/// The request parameters for managing the visibility settings of the promotional banners for the current tenant.
 /// </summary>
 public class TenantBannerSettingsDto
 {

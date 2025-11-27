@@ -24,125 +24,139 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.TelegramService.Services
+using System.Globalization;
+
+namespace ASC.TelegramService.Services;
+
+[Singleton]
+public partial class CommandExecutionService
 {
-    [Singleton]
-    public partial class CommandExecutionService
+    [GeneratedRegex(@"^\/([^\s]+)\s?(.*)")]
+    private static partial Regex CmdRegex();
+    private readonly Regex _cmdReg = CmdRegex();
+
+    [GeneratedRegex(@"[^""\s]\S*|"".+?""")]
+    private static partial Regex ArgsRegex();
+    private readonly Regex _argsReg = ArgsRegex();
+
+    private readonly Dictionary<string, MethodInfo> _commands = [];
+    private readonly Dictionary<string, Type> _contexts = [];
+    private readonly Dictionary<Type, ParamParser> _parsers = [];
+
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ILogger<CommandExecutionService> _log;
+
+    public CommandExecutionService(ILogger<CommandExecutionService> logger, IServiceScopeFactory scopeFactory)
     {
-        [GeneratedRegex(@"^\/([^\s]+)\s?(.*)")]
-        private static partial Regex CmdRegex();
-        private readonly Regex _cmdReg = CmdRegex();
+        _scopeFactory = scopeFactory;
+        _log = logger;
 
-        [GeneratedRegex(@"[^""\s]\S*|"".+?""")]
-        private static partial Regex ArgsRegex();
-        private readonly Regex _argsReg = ArgsRegex();
+        var assembly = Assembly.GetExecutingAssembly();
 
-        private readonly Dictionary<string, MethodInfo> _commands = [];
-        private readonly Dictionary<string, Type> _contexts = [];
-        private readonly Dictionary<Type, ParamParser> _parsers = [];
-
-        private readonly IServiceScopeFactory _scopeFactory;
-        private readonly ILogger<CommandExecutionService> _log;
-
-        public CommandExecutionService(ILogger<CommandExecutionService> logger, IServiceScopeFactory scopeFactory)
+        foreach (var t in assembly.GetExportedTypes())
         {
-            _scopeFactory = scopeFactory;
-            _log = logger;
-
-            var assembly = Assembly.GetExecutingAssembly();
-
-            foreach (var t in assembly.GetExportedTypes())
+            if (t.IsAbstract)
             {
-                if (t.IsAbstract)
-                {
-                    continue;
-                }
+                continue;
+            }
 
-                if (t.IsSubclassOf(typeof(CommandContext)))
+            if (t.IsSubclassOf(typeof(CommandContext)))
+            {
+                foreach (var method in t.GetRuntimeMethods())
                 {
-                    foreach (var method in t.GetRuntimeMethods())
+                    if (method.IsPublic && Attribute.IsDefined(method, typeof(CommandAttribute)))
                     {
-                        if (method.IsPublic && Attribute.IsDefined(method, typeof(CommandAttribute)))
-                        {
-                            var attr = method.GetCustomAttribute<CommandAttribute>();
-                            _commands.Add(attr.Name, method);
-                            _contexts.Add(attr.Name, t);
-                        }
+                        var attr = method.GetCustomAttribute<CommandAttribute>();
+                        _commands.Add(attr.Name, method);
+                        _contexts.Add(attr.Name, t);
                     }
                 }
+            }
 
-                if (t.IsSubclassOf(typeof(ParamParser)) && Attribute.IsDefined(t, typeof(ParamParserAttribute)))
-                {
-                    _parsers.Add(t.GetCustomAttribute<ParamParserAttribute>().Type, (ParamParser)Activator.CreateInstance(t));
-                }
+            if (t.IsSubclassOf(typeof(ParamParser)) && Attribute.IsDefined(t, typeof(ParamParserAttribute)))
+            {
+                _parsers.Add(t.GetCustomAttribute<ParamParserAttribute>().Type, (ParamParser)Activator.CreateInstance(t));
             }
         }
+    }
 
-        private TelegramCommand ParseCommand(Message msg)
+    private TelegramCommand ParseCommand(Message msg)
+    {
+        var reg = _cmdReg.Match(msg.Text);
+        var args = _argsReg.Matches(reg.Groups[2].Value);
+
+        return new TelegramCommand(msg, reg.Groups[1].Value.ToLowerInvariant(), args.Count > 0 ? [.. args.Select(a => a.Value)] : null);
+    }
+
+    private object[] ParseParams(MethodInfo cmd, string[] args)
+    {
+        var parsedParams = new List<object>();
+
+        var cmdArgs = cmd.GetParameters();
+
+        if (cmdArgs.Length > 0 && args == null || cmdArgs.Length != args.Length)
         {
-            var reg = _cmdReg.Match(msg.Text);
-            var args = _argsReg.Matches(reg.Groups[2].Value);
-
-            return new TelegramCommand(msg, reg.Groups[1].Value.ToLowerInvariant(), args.Count > 0 ? [.. args.Select(a => a.Value)] : null);
+            throw new Exception("Wrong parameters count");
         }
 
-        private object[] ParseParams(MethodInfo cmd, string[] args)
+        for (var i = 0; i < cmdArgs.Length; i++)
         {
-            var parsedParams = new List<object>();
-
-            var cmdArgs = cmd.GetParameters();
-
-            if (cmdArgs.Length > 0 && args == null || cmdArgs.Length != args.Length)
+            var type = cmdArgs[i].ParameterType;
+            var arg = args[i];
+            if (type == typeof(string))
             {
-                throw new Exception("Wrong parameters count");
+                parsedParams.Add(arg);
+                continue;
             }
 
-            for (var i = 0; i < cmdArgs.Length; i++)
+            if (!_parsers.TryGetValue(type, out var value))
             {
-                var type = cmdArgs[i].ParameterType;
-                var arg = args[i];
-                if (type == typeof(string))
-                {
-                    parsedParams.Add(arg);
-                    continue;
-                }
-
-                if (!_parsers.TryGetValue(type, out var value))
-                {
-                    throw new Exception(string.Format("No parser found for type '{0}'", type));
-                }
-
-                parsedParams.Add(value.FromString(arg));
+                throw new Exception(string.Format("No parser found for type '{0}'", type));
             }
 
-            return [.. parsedParams];
+            parsedParams.Add(value.FromString(arg));
         }
 
-        public void HandleCommand(Message msg, ITelegramBotClient client, int tenantId, CancellationToken cancellationToken)
+        return [.. parsedParams];
+    }
+
+    public void HandleCommand(Message msg, ITelegramBotClient client, int tenantId, CancellationToken cancellationToken)
+    {
+        try
         {
-            try
+            var cmd = ParseCommand(msg);
+
+            if (!_commands.TryGetValue(cmd.CommandName, out var command))
             {
-                var cmd = ParseCommand(msg);
-
-                if (!_commands.TryGetValue(cmd.CommandName, out var command))
-                {
-                    throw new Exception($"No handler found for command '{cmd.CommandName}'");
-                }
-
-                var context = (CommandContext)_scopeFactory.CreateScope().ServiceProvider.GetService(_contexts[cmd.CommandName]);
-                var param = ParseParams(command, cmd.Args);
-
-                context.Context = cmd;
-                context.Client = client;
-                context.TenantId = tenantId;
-
-                cancellationToken.ThrowIfCancellationRequested();
-                command.Invoke(context, param);
+                throw new Exception($"No handler found for command '{cmd.CommandName}'");
             }
-            catch (Exception ex)
-            {
-                _log.DebugCouldntHandle(msg.Text, ex);
-            }
+
+            var context = (CommandContext)_scopeFactory.CreateScope().ServiceProvider.GetService(_contexts[cmd.CommandName]);
+            var param = ParseParams(command, cmd.Args);
+
+            context.Context = cmd;
+            context.Client = client;
+            context.TenantId = tenantId;
+            context.TelegramCulture = GetUserCulture(cmd.User.LanguageCode);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            command.Invoke(context, param);
+        }
+        catch (Exception ex)
+        {
+            _log.DebugCouldntHandle(msg.Text, ex);
+        }
+    }
+
+    private CultureInfo GetUserCulture(string langCode)
+    {
+        try
+        {
+            return CultureInfo.GetCultureInfo(langCode);
+        }
+        catch
+        {
+            return null;
         }
     }
 }

@@ -24,22 +24,32 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModels.ResponseDto
+
+namespace ASC.Web.Api.ApiModels.ResponseDto;
+
+/// <summary>
+/// The notification channel settings.
+/// </summary>
+public class NotificationChannelStatusDto
 {
-    public class NotificationChannelStatusDto : IMapFrom<IEnumerable<NotificationChannelStatus>>
-    {
-        public List<NotificationChannelDto> Channels { get; set; } = [];
+    /// <summary>
+    /// The list of notification channels.
+    /// </summary>
+    public List<NotificationChannelDto> Channels { get; set; } = [];
+}
 
-        public void Mapping(Profile profile)
-        {
-            profile.CreateMap<IEnumerable<NotificationChannelStatus>, NotificationChannelStatusDto>()
-                .ConvertUsing<NotificationChannelsConverter>();
-        }
-    }
+/// <summary>
+/// The notification channel information.
+/// </summary>
+public class NotificationChannelDto
+{
+    /// <summary>
+    /// The notification channel name.
+    /// </summary>
+    public required string Name { get; set; }
 
-    public class NotificationChannelDto
-    {
-        public string Name { get; set; }
-        public bool IsEnabled { get; set; }
-    }
+    /// <summary>
+    /// Specifies whether the notification channel is enabled.
+    /// </summary>
+    public required bool IsEnabled { get; set; }
 }

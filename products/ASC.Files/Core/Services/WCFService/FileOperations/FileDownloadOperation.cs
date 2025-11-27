@@ -31,16 +31,16 @@ public record FileDownloadOperationData<T> : FileOperationData<T>
 {
     public FileDownloadOperationData()
     {
-        
+
     }
-    
+
     public FileDownloadOperationData(List<T> folders,
         List<FilesDownloadOperationItem<T>> filesDownload,
-        int tenantId,        
+        int tenantId,
         Guid userId,
         IDictionary<string, string> headers,
         ExternalSessionSnapshot sessionSnapshot,
-        string baseUri =  null,
+        string baseUri = null,
         bool holdResult = true) : base(folders, filesDownload.Select(f => f.Id).ToList(), tenantId, userId, headers, sessionSnapshot, holdResult)
     {
         FilesDownload = filesDownload;
@@ -49,7 +49,7 @@ public record FileDownloadOperationData<T> : FileOperationData<T>
 
     [ProtoMember(7)]
     public IEnumerable<FilesDownloadOperationItem<T>> FilesDownload { get; init; }
-    
+
     [ProtoMember(8)]
     public string BaseUri { get; init; }
 }
@@ -61,22 +61,22 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
 {
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Download;
     public FileDownloadOperation() { }
-    
+
     public FileDownloadOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
-    
+
     public override async Task RunJob(CancellationToken cancellationToken)
     {
         DaoOperation = new FileDownloadOperation<int>(_serviceProvider, Data);
         ThirdPartyOperation = new FileDownloadOperation<string>(_serviceProvider, ThirdPartyData);
-        
+
         await base.RunJob(cancellationToken);
 
-        if(!string.IsNullOrEmpty(DaoOperation.Err) || !string.IsNullOrEmpty(ThirdPartyOperation.Err))
+        if (!string.IsNullOrEmpty(DaoOperation.Err) || !string.IsNullOrEmpty(ThirdPartyOperation.Err))
         {
             await PublishChanges();
             return;
         }
-        
+
         await using var scope = await ThirdPartyOperation.CreateScopeAsync();
         var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
         var instanceCrypto = scope.ServiceProvider.GetRequiredService<InstanceCrypto>();
@@ -96,20 +96,20 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
 
         var thirdPartyOperation = ThirdPartyOperation as FileDownloadOperation<string>;
         var daoOperation = DaoOperation as FileDownloadOperation<int>;
-        
+
         var thirdPartyFileOnly = thirdPartyOperation?.Files.Count == 1 && thirdPartyOperation.Folders.Count == 0;
         var daoFileOnly = daoOperation?.Files.Count == 1 && daoOperation.Folders.Count == 0;
         var compress = !((thirdPartyFileOnly || daoFileOnly) && (thirdPartyFileOnly != daoFileOnly));
 
         string archiveExtension;
-        
+
         if (compress)
-        {           
+        {
             using (var zip = scope.ServiceProvider.GetService<CompressToArchive>())
             {
                 archiveExtension = await zip.GetArchiveExtension();
             }
-            
+
             await thirdPartyOperation.CompressToZipAsync(stream, scope);
             await daoOperation.CompressToZipAsync(stream, scope);
         }
@@ -229,7 +229,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
     private readonly IDictionary<string, StringValues> _headers;
     private ItemNameValueCollection<T> _entriesPathId;
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Download;
-    
+
     public FileDownloadOperation(IServiceProvider serviceProvider, FileDownloadOperationData<T> fileDownloadOperationData)
         : base(serviceProvider, fileDownloadOperationData)
     {
@@ -471,8 +471,8 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                     await compressTo.CreateEntry(newTitle, file.ModifiedOn);
                     try
                     {
-                        await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt, true) ? 
-                            await fileConverter.ExecAsync(file, convertToExt, password) : 
+                        await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt, true) ?
+                            await fileConverter.ExecAsync(file, convertToExt, password) :
                             await fileDao.GetFileStreamAsync(file);
 
                         var t = Task.Run(async () => await compressTo.PutStream(readStream));
@@ -485,7 +485,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
                         await compressTo.CloseEntry();
                     }
-                    catch (Exception ex) when(ex.InnerException is DocumentServiceException { Code: DocumentServiceException.ErrorCode.ConvertPassword })
+                    catch (Exception ex) when (ex.InnerException is DocumentServiceException { Code: DocumentServiceException.ErrorCode.ConvertPassword })
                     {
                         error += $"{entryId}_password:";
 
@@ -525,9 +525,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             Err = error;
             await PublishChanges();
         }
-        
+
     }
-    
+
     internal async Task<string> GetFileAsync(Stream stream, IServiceScope scope)
     {
         if (_entriesPathId == null)
@@ -584,7 +584,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                 await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt, true) ?
                     await fileConverter.ExecAsync(file, convertToExt, password) :
                     await fileDao.GetFileStreamAsync(file);
-                
+
                 await readStream.CopyToAsync(stream);
             }
             catch (Exception ex)
@@ -604,10 +604,10 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         {
             ProcessedFolder(default);
         }
-        
+
 
         await ProgressStep();
-        
+
 
         return newTitle;
     }

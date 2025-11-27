@@ -33,13 +33,13 @@ public class BruteForceLoginManager(
     UserManager userManager,
     IFusionCache hybridCache,
     SetupInfo setupInfo,
-    Recaptcha recaptcha, 
+    Recaptcha recaptcha,
     IDistributedLockProvider distributedLockProvider)
 {
     public async Task<(bool Result, bool ShowRecaptcha)> IncrementAsync(string key, string requestIp, bool throwException, string exceptionMessage = null)
     {
         var blockCacheKey = GetBlockCacheKey(key, requestIp);
-        
+
         if (await GetFromCache<string>(blockCacheKey) != null)
         {
             if (throwException)
@@ -170,7 +170,7 @@ public class BruteForceLoginManager(
         return user;
     }
 
-    private async Task<bool> CheckRecaptchaAsync(RecaptchaType recaptchaType, string recaptchaResponse, string requestIp)
+    public async Task<bool> CheckRecaptchaAsync(RecaptchaType recaptchaType, string recaptchaResponse, string requestIp)
     {
         var recaptchaPassed = false;
 
@@ -186,7 +186,7 @@ public class BruteForceLoginManager(
 
             if (!recaptchaPassed)
             {
-                throw new RecaptchaException();
+                throw new RecaptchaException(Resource.RecaptchaInvalid);
             }
         }
 

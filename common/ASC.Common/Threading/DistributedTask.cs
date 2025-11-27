@@ -34,7 +34,7 @@ public class DistributedTask
 {
     [JsonInclude]
     protected string _exeption = String.Empty;
-    
+
     [JsonIgnore]
     public Func<DistributedTask, Task> Publication { get; set; }
 
@@ -84,7 +84,7 @@ public class DistributedTask
 
         await Publication(this);
     }
-    
+
     public override int GetHashCode()
     {
         return Id.GetHashCode();

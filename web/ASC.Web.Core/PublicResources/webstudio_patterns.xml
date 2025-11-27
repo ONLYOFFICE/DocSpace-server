@@ -27,7 +27,7 @@
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_for_admin_notify|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="for_admin_notify" sender="telegram.sender">
-    <subject resource="|subject_for_admin_notify|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"></subject>
+    <subject />
     <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_for_admin_notify_tg|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   
@@ -63,7 +63,7 @@
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_rooms_activity|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="rooms_activity" sender="telegram.sender">
-    <subject resource="|subject_rooms_activity|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <subject />
     <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_rooms_activity|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
@@ -73,7 +73,7 @@
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_send_whats_new|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="send_whats_new" sender="telegram.sender">
-    <subject resource="|subject_send_whats_new|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <subject />
     <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_send_whats_new|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   
@@ -86,14 +86,34 @@
     <subject />
     <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_backup_created_tg|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
-  
+
+  <!-- backup_failed -->
+  <pattern id="backup_failed" sender="email.sender">
+    <subject resource="|subject_backup_failed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_backup_failed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+  <pattern id="backup_failed" sender="telegram.sender">
+    <subject />
+    <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_backup_failed_tg|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- scheduled_backup_failed -->
+  <pattern id="scheduled_backup_failed" sender="email.sender">
+    <subject resource="|subject_scheduled_backup_failed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_scheduled_backup_failed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+  <pattern id="scheduled_backup_failed" sender="telegram.sender">
+    <subject />
+    <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_scheduled_backup_failed_tg|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
   <!-- restore_started -->
   <pattern id="restore_started" sender="email.sender">
     <subject resource="|subject_restore_started|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_restore_started|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="restore_started" sender="telegram.sender">
-    <subject resource="|subject_restore_started|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <subject />
     <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_restore_started|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
    </pattern>
   
@@ -103,7 +123,7 @@
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_restore_completed_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
   <pattern id="restore_completed_v115" sender="telegram.sender">
-    <subject resource="|subject_restore_completed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <subject />
     <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_restore_completed_v115|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
@@ -559,6 +579,18 @@
   <pattern id="saas_room_invite_existing_user">
     <subject resource="|subject_saas_room_invite_existing_user|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_room_invite_existing_user|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- saas agent invite -->
+  <pattern id="saas_agent_invite">
+    <subject resource="|subject_saas_agent_invite|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_agent_invite|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- saas agent invite existing user -->
+  <pattern id="saas_agent_invite_existing_user">
+    <subject resource="|subject_saas_agent_invite_existing_user|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_agent_invite_existing_user|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- saas docspace invite -->

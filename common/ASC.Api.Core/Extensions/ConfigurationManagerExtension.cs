@@ -61,7 +61,7 @@ public static class ConfigurationManagerExtension
             .AddJsonFile($"zookeeper.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
         var formatsPath = Path.GetFullPath(Path.Combine(path, "document-formats", "onlyoffice-docs-formats.json"));
-        
+
         if (File.Exists(formatsPath))
         {
             var readStream = File.ReadAllText(formatsPath);
@@ -71,13 +71,13 @@ public static class ConfigurationManagerExtension
                 WriteIndented = true,
                 PropertyNameCaseInsensitive = true
             });
-            
+
             using var memoryStream = new MemoryStream();
             JsonSerializer.Serialize(memoryStream, new FileFormatConfigList { FileFormats = formats });
             memoryStream.Position = 0;
             config.AddJsonStream(memoryStream);
         }
-        
+
         return config;
     }
 }

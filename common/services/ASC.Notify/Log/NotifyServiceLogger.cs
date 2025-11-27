@@ -28,14 +28,14 @@ namespace ASC.Notify.Log;
 internal static partial class NotifyServiceLogger
 {
     [LoggerMessage(LogLevel.Information, "Notify Service running.")]
-    public static partial void InformationNotifyServiceRunning(this ILogger logger); 
-    
+    public static partial void InformationNotifyServiceRunning(this ILogger logger);
+
     [LoggerMessage(LogLevel.Information, "Notify Service is stopping.")]
-    public static partial void InformationNotifyServiceStopping(this ILogger logger);  
-    
+    public static partial void InformationNotifyServiceStopping(this ILogger logger);
+
     [LoggerMessage(LogLevel.Error, "SendNotifyMessage")]
-    public static partial void ErrorSendNotifyMessage(this ILogger logger, Exception exception); 
-    
+    public static partial void ErrorSendNotifyMessage(this ILogger logger, Exception exception);
+
     [LoggerMessage(LogLevel.Debug, "Start scheduler {notifyInfo} ({notifyMethodIndo})")]
     public static partial void DebugStartScheduler(this ILogger logger, string notifyInfo, string notifyMethodIndo);
 }

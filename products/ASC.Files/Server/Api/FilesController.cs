@@ -238,7 +238,7 @@ public abstract class FilesController<T>(
     public async IAsyncEnumerable<FileOperationDto> DeleteFile(DeleteRequestDto<T> inDto)
     {
         await fileOperationsManager.Publish([], [inDto.FileId], false, !inDto.File.DeleteAfter, inDto.File.Immediately);
-        
+
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
@@ -261,7 +261,11 @@ public abstract class FilesController<T>(
     {
         var completedFormId = await hybridCache.GetOrDefaultAsync<string>(inDto.FillingSessionId);
 
-        return await filesControllerHelper.GetFillResultAsync((T)Convert.ChangeType(completedFormId, typeof(T)));
+        if (completedFormId != null)
+        {
+            return await filesControllerHelper.GetFillResultAsync((T)Convert.ChangeType(completedFormId, typeof(T)));
+        }
+        throw new ItemNotFoundException();
     }
 
     /// <summary>
@@ -350,7 +354,9 @@ public abstract class FilesController<T>(
     [HttpPut("file/{fileId}/customfilter")]
     public async Task<FileDto<T>> SetCustomFilterTag(FileCustomFilterRequestDto<T> inDto)
     {
-        return await filesControllerHelper.SetCustomFilterTagAsync(inDto.FileId, inDto.Parameters.Enabled);
+        var result = await fileStorageService.SetCustomFilterTagAsync(inDto.FileId, inDto.Parameters.Enabled);
+
+        return await _fileDtoHelper.GetAsync(result);
     }
 
     /// <summary>
@@ -365,7 +371,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [AllowAnonymous]
-    [HttpGet("file/{fileId}/restoreversion")]
+    [HttpPost("file/{fileId}/restoreversion")]
     public IAsyncEnumerable<EditHistoryDto> RestoreFileVersion(RestoreVersionRequestDto<T> inDto)
     {
         return filesControllerHelper.RestoreVersionAsync(inDto.FileId, inDto.Version, inDto.Url);
@@ -448,15 +454,15 @@ public abstract class FilesController<T>(
     public async Task<FileShareDto> CreateFilePrimaryExternalLink(FileLinkRequestDto<T> inDto)
     {
         var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(
-            inDto.Id, 
-            FileEntryType.File, 
-            inDto.File.Access, 
-            expirationDate: inDto.File.ExpirationDate, 
-            requiredAuth: inDto.File.Internal, 
+            inDto.Id,
+            FileEntryType.File,
+            inDto.File.Access,
+            expirationDate: inDto.File.ExpirationDate,
+            requiredAuth: inDto.File.Internal,
             allowUnlimitedDate: true,
-            denyDownload: inDto.File.DenyDownload, 
+            denyDownload: inDto.File.DenyDownload,
             password: inDto.File.Password);
-        
+
         return await fileShareDtoHelper.Get(linkAce);
     }
 
@@ -513,10 +519,10 @@ public abstract class FilesController<T>(
     public async Task<FileShareDto> SetFileExternalLink(FileLinkRequestDto<T> inDto)
     {
         var linkAce = await fileStorageService.SetExternalLinkAsync(
-            inDto.Id, 
-            FileEntryType.File, 
-            inDto.File.LinkId, 
-            inDto.File.Title, 
+            inDto.Id,
+            FileEntryType.File,
+            inDto.File.LinkId,
+            inDto.File.Title,
             inDto.File.Access,
             inDto.File.ExpirationDate,
             inDto.File.Password,
@@ -526,9 +532,9 @@ public abstract class FilesController<T>(
 
         return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
     }
-    
+
     /// <summary>
-    /// Sets order of the file with ID specified in the request.
+    /// Sets the order of the file with the ID specified in the request.
     /// </summary>
     /// <short>
     /// Set file order
@@ -547,7 +553,7 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Sets order of the files.
+    /// Sets the order of the files specified in the request.
     /// </summary>
     /// <short>
     /// Set order of files
@@ -559,12 +565,12 @@ public abstract class FilesController<T>(
     [HttpPut("order")]
     public IAsyncEnumerable<FileEntryDto<T>> SetFilesOrder(OrdersRequestDto<T> inDto)
     {
-        return fileStorageService.SetOrderAsync(inDto.Items).SelectAwait<FileEntry<T>, FileEntryDto<T>>(
-            async e => e.FileEntryType == FileEntryType.Folder ? 
-                await _folderDtoHelper.GetAsync(e as Folder<T>) : 
+        return fileStorageService.SetOrderAsync(inDto.Items).Select<FileEntry<T>, FileEntryDto<T>>(
+            async (e, _) => e.FileEntryType == FileEntryType.Folder ?
+                await _folderDtoHelper.GetAsync(e as Folder<T>) :
                 await _fileDtoHelper.GetAsync(e as File<T>));
     }
-    
+
     /// <summary>
     /// Saves a file with the identifier specified in the request as a PDF document.
     /// </summary>
@@ -585,7 +591,7 @@ public abstract class FilesController<T>(
     /// <short>Save form role mapping</short>
     /// <path>api/2.0/files/file/{fileId}/formrolemapping</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Updated information about form role mappings", typeof(FormRole))]
+    [SwaggerResponse(200, "Updated information about form role mappings")]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPost("file/{fileId}/formrolemapping")]
     public async Task SaveFormRoleMapping(SaveFormRoleMappingDto<T> inDto)
@@ -600,7 +606,7 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/formroles</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Successfully retrieved all roles for the form", typeof(IEnumerable<FormRole>))]
+    [SwaggerResponse(200, "Successfully retrieved all roles for the form", typeof(IEnumerable<FormRoleDto>))]
     [SwaggerResponse(403, "You do not have enough permissions to view the form roles")]
     [HttpGet("file/{fileId}/formroles")]
     public IAsyncEnumerable<FormRoleDto> GetAllFormRoles(FileIdRequestDto<T> inDto)

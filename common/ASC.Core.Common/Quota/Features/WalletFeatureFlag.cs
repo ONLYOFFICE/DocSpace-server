@@ -26,8 +26,4 @@
 
 namespace ASC.Core.Common.Quota.Features;
 
-public class WalletFeatureFlag(TenantQuota tenantQuota) : TenantQuotaFeatureFlag(tenantQuota)
-{
-    public override bool Paid { get => true; }
-
-}
+public class WalletFeatureFlag(TenantQuota tenantQuota, string name) : TenantQuotaFeatureFlag(tenantQuota, name, true);

@@ -34,28 +34,28 @@ public class ConfigurationDto<T>
     /// <summary>
     /// The document configuration.
     /// </summary>
-    public DocumentConfigDto Document { get; set; }
+    public required DocumentConfigDto Document { get; set; }
 
     /// <summary>
     /// The document type.
     /// </summary>
-    public string DocumentType { get; set; }
+    public required string DocumentType { get; set; }
 
     /// <summary>
     /// The editor configuration.
     /// </summary>
-    public EditorConfigurationDto EditorConfig { get; set; }
+    public required EditorConfigurationDto EditorConfig { get; set; }
 
     /// <summary>
     /// The editor type.
     /// </summary>
-    public EditorType EditorType { get; set; }
+    public required EditorType EditorType { get; set; }
 
     /// <summary>
     /// The editor URL.
     /// </summary>
     [Url]
-    public string EditorUrl { get; set; }
+    public required string EditorUrl { get; set; }
 
     /// <summary>
     /// The token of the file configuration.
@@ -70,7 +70,7 @@ public class ConfigurationDto<T>
     /// <summary>
     /// The file parameters.
     /// </summary>
-    public FileDto<T> File { get; set; }
+    public required FileDto<T> File { get; set; }
 
     /// <summary>
     /// The error message.
@@ -152,12 +152,12 @@ public class EditorConfigurationDto
     /// <summary>
     /// The language of the editor configuration.
     /// </summary>
-    public string Lang { get; set; }
+    public required string Lang { get; set; }
 
     /// <summary>
     /// The mode of the editor configuration.
     /// </summary>
-    public string Mode { get; set; }
+    public required string Mode { get; set; }
 
     /// <summary>
     /// Specifies if the mode is write of the editor configuration.
@@ -182,7 +182,7 @@ public class EditorConfigurationDto
     /// <summary>
     /// The user configuration of the editor.
     /// </summary>
-    public UserConfig User { get; set; }
+    public required UserConfig User { get; set; }
 }
 
 /// <summary>
@@ -208,7 +208,7 @@ public class CustomizationConfigDto
     /// <summary>
     /// The feedback configuration of the customization.
     /// </summary>
-    public FeedbackConfig Feedback  { get; set; }
+    public FeedbackConfig Feedback { get; set; }
 
     /// <summary>
     /// Specifies if the customization should be force saved.
@@ -219,7 +219,7 @@ public class CustomizationConfigDto
     /// The go back configuration of the customization.
     /// </summary>
     public GobackConfig Goback { get; set; }
-    
+
     /// <summary>
     /// The review configuration of the customization.
     /// </summary>
@@ -316,7 +316,7 @@ public class AnonymousConfigDto
     /// <summary>
     /// Specifies if the anonymous is a request.
     /// </summary>
-    public bool Request { get; set; }
+    public required bool Request { get; set; }
 }
 
 /// <summary>
@@ -347,12 +347,12 @@ public class CustomerConfigDto
     /// <summary>
     /// The name of the customer configuration.
     /// </summary>
-    public string Name  { get; set; }
+    public string Name { get; set; }
 
     /// <summary>
     /// The site web address of the customer configuration.
     /// </summary>
-    public string Www  { get; set; }
+    public string Www { get; set; }
 }
 
 /// <summary>
@@ -363,7 +363,7 @@ public class DocumentConfigDto
     /// <summary>
     /// The file type of the document.
     /// </summary>
-    public string FileType  { get; set; }
+    public string FileType { get; set; }
 
     /// <summary>
     /// The configuration information of the document.
@@ -445,7 +445,7 @@ public class InfoConfigDto
     /// <summary>
     /// The sharing settings of the file.
     /// </summary>
-    public List<AceShortWrapper> SharingSettings{ get; set; }
+    public List<AceShortWrapper> SharingSettings { get; set; }
 
     /// <summary>
     /// The editor type of the file.
@@ -461,8 +461,8 @@ public class InfoConfigDto
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
 public class ConfigurationConverter<T>(
-    CommonLinkUtility commonLinkUtility, 
-    FilesLinkUtility filesLinkUtility, 
+    CommonLinkUtility commonLinkUtility,
+    FilesLinkUtility filesLinkUtility,
     FileDtoHelper fileDtoHelper,
     EditorConfigurationConverter<T> editorConfigurationConverter,
     DocumentConfigConverter<T> documentConfigConverter,
@@ -470,12 +470,13 @@ public class ConfigurationConverter<T>(
     ExternalShare externalShare)
 {
     public async Task<ConfigurationDto<T>> Convert(Configuration<T> source, File<T> file)
-    {   
+    {
         if (source == null)
         {
             return null;
         }
 
+        var fileDto = await fileDtoHelper.GetAsync(file);
         var result = new ConfigurationDto<T>
         {
             Document = await documentConfigConverter.Convert(source.Document, file),
@@ -483,15 +484,15 @@ public class ConfigurationConverter<T>(
             EditorConfig = await editorConfigurationConverter.Convert(source, file),
             EditorType = source.EditorType,
             EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl),
-            ErrorMessage = source.Error
+            ErrorMessage = source.Error,
+            File = fileDto
         };
-        
+
         result.EditorUrl = FilesLinkUtility.AddQueryString(result.EditorUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, result.Document?.Key }
         });
 
         result.Token = documentServiceHelper.GetSignature(result);
-        result.File = await fileDtoHelper.GetAsync(file);
         result.Type = source.Type;
 
         if (source.EditorType == EditorType.Embedded)
@@ -513,7 +514,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
     public async Task<EditorConfigurationDto> Convert(Configuration<T> configuration, File<T> file)
     {
         var source = configuration.EditorConfig;
-        
+
         if (source == null)
         {
             return null;
@@ -533,7 +534,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
             ModeWrite = source.ModeWrite,
             Plugins = source.Plugins,
             Recent = await source.GetRecent(fileType, file.Id).ToListAsync(),
-            Templates = await source.GetTemplates(fileType, configuration.Document.Title),
+            Templates = [], // await source.GetTemplates(fileType, configuration.Document.Title),
             User = await source.GetUserAsync()
         };
 
@@ -544,15 +545,15 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
 public class CustomizationConfigConverter<T>(
-    LogoConfigConverter<T> configConverter, 
+    LogoConfigConverter<T> configConverter,
     CustomerConfigConverter customerConfigConverter,
     CoreBaseSettings coreBaseSettings,
     AnonymousConfigConverter<T> anonymousConfigConverter)
 {
     public async Task<CustomizationConfigDto> Convert(Configuration<T> configuration, File<T> file)
-    {    
+    {
         var source = configuration.EditorConfig?.Customization;
-        
+
         if (source == null)
         {
             return null;
@@ -583,7 +584,7 @@ public class LogoConfigConverter<T>
     public async Task<LogoConfigDto> Convert(Configuration<T> configuration, File<T> file)
     {
         var source = configuration.EditorConfig?.Customization?.Logo;
-        
+
         if (source == null)
         {
             return null;
@@ -653,15 +654,15 @@ public class CustomerConfigConverter
 
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
-public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter,FileChecker fileChecker)
+public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter, FileChecker fileChecker)
 {
     public async Task<DocumentConfigDto> Convert(DocumentConfig<T> source, File<T> file)
-    {        
+    {
         if (source == null)
         {
             return null;
         }
-        
+
         var result = new DocumentConfigDto
         {
             FileType = source.GetFileType(file),
@@ -695,14 +696,14 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter,F
 public class InfoConfigConverter<T>
 {
     public async Task<InfoConfigDto> Convert(InfoConfig<T> source, File<T> file)
-    {   
+    {
         if (source == null)
         {
             return null;
         }
-        
+
         source.SetFavorite(null);//TODO: add display favorite settings to config
-        
+
         var result = new InfoConfigDto
         {
             Favorite = await source.GetFavorite(file),
@@ -711,7 +712,7 @@ public class InfoConfigConverter<T>
             SharingSettings = await source.GetSharingSettings(file),
             Type = source.Type,
             Uploaded = source.GetUploaded(file)
-        }; 
+        };
 
         return result;
     }

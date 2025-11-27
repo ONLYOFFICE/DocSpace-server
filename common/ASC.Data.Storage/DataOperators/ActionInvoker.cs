@@ -80,7 +80,7 @@ public static class ActionInvoker
         {
             sleepMs = 0;
         }
-        
+
         var countAttempts = 0;
         while (countAttempts++ < maxAttempts)
         {

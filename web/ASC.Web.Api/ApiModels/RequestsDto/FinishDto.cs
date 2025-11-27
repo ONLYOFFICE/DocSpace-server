@@ -34,5 +34,5 @@ public class FinishDto
     /// <summary>
     /// Specifies whether to send a welcome email or not.
     /// </summary>
-    public bool IsSendWelcomeEmail { get; set; }
+    public required bool IsSendWelcomeEmail { get; set; }
 }

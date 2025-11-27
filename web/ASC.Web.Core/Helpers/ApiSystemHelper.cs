@@ -69,8 +69,8 @@ public class ApiSystemHelper
         _skey = machinePseudoKeys.GetMachineConstant();
         _clientFactory = clientFactory;
         _coreBaseSettings = coreBaseSettings;
-        _dynamoDbSettings =  configuration.GetSection("aws:dynamoDB").Get<DynamoDbSettings>();
-        _regionTableName = !string.IsNullOrEmpty(_dynamoDbSettings.TableName) ? _dynamoDbSettings.TableName: "docspace-tenants_region";
+        _dynamoDbSettings = configuration.GetSection("aws:dynamoDB").Get<DynamoDbSettings>();
+        _regionTableName = !string.IsNullOrEmpty(_dynamoDbSettings.TableName) ? _dynamoDbSettings.TableName : "docspace-tenants_region";
     }
 
     public string CreateAuthToken(string pkey)
@@ -114,7 +114,7 @@ public class ApiSystemHelper
     {
         if (String.IsNullOrEmpty(tenantRegion))
         {
-           throw new ArgumentNullException(nameof(tenantRegion));
+            throw new ArgumentNullException(nameof(tenantRegion));
         }
 
         using var awsDynamoDbClient = GetDynamoDBClient();
@@ -124,12 +124,12 @@ public class ApiSystemHelper
             TableName = _regionTableName,
             Item = new Dictionary<string, AttributeValue>
             {
-                { TenantDomainKey, new AttributeValue 
+                { TenantDomainKey, new AttributeValue
                     {
                         S = tenantDomain
                     }
                 },
-                { TenantRegionKey, new AttributeValue 
+                { TenantRegionKey, new AttributeValue
                     {
                         S = tenantRegion
                     }
@@ -214,7 +214,7 @@ public class ApiSystemHelper
 
         if (getItemResponse.Item.TryGetValue(TenantRegionKey, out var region))
         {
-            if(_regions.TryGetValue(region.S, out var value))
+            if (_regions.TryGetValue(region.S, out var value))
             {
                 return value;
             }
@@ -279,12 +279,12 @@ public class ApiSystemHelper
     }
 
     #endregion
-    
+
     private AmazonDynamoDBClient GetDynamoDBClient()
     {
         return new AmazonDynamoDBClient(_dynamoDbSettings.AccessKeyId, _dynamoDbSettings.SecretAccessKey, RegionEndpoint.GetBySystemName(_dynamoDbSettings.Region));
     }
-    
+
     private async Task<string> SendToApiAsync(string absoluteApiUrl, string apiPath, string httpMethod, Guid userId, string data = null)
     {
         if (!Uri.TryCreate(absoluteApiUrl, UriKind.Absolute, out _))

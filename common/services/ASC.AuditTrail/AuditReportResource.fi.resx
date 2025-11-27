@@ -94,6 +94,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Väriteema muutettu</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Yhteystiedot</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Evästeen asetukset päivitetty</value>
   </data>
@@ -250,9 +253,6 @@
   <data name="FollowActionType" xml:space="preserve">
     <value>Seuraa</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Yleiset</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Tervetuloa sivun asetukset päivitetty</value>
   </data>
@@ -261,9 +261,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Ryhmät. Poistettu: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Ryhmät</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Ryhmät. Päivitetty: {0}</value>
@@ -338,7 +335,7 @@
     <value>Kirjautuminen onnistui</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Kirjautuminen sosiaalisella tilillä onnistui</value>
+    <value>Kirjautuminen sosiaalisella tilillä onnistui: {0}</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Onnistunut yhteys API:n kautta</value>
@@ -421,9 +418,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Tuoteluettelo päivitetty</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Tuotteet</value>
-  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Lähetä</value>
   </data>
@@ -436,13 +430,16 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Istunto aloitettu</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Asetukset</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Kertakirjautuminen (SSO) poistettu käytöstä</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>Kertakirjautuminen (SSO) otettu käyttöön</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Aloita turvatalletus</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
@@ -534,9 +531,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Käyttäjät [{0}]. Salasanan muutosohjeet lähetetty</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Käyttäjät</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Käyttäjät [{0}]. Aktivointiohjeet lähetetty</value>
@@ -796,9 +790,6 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Kutsut on jälleen lähetetty: {0}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Asiakasohjelman {0} aktivointi muutettu</value>
   </data>
@@ -936,5 +927,125 @@
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Asiakkaan lompakkoa käyttävien palveluiden asetukset päivitetty</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Kirjautuminen sosiaalisella tilillä onnistui</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Agentille lisätty MCP-palvelin {0}</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agentti luotu</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agentti poistettu</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agentti nimetty uudelleen: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agentit</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Tekoälytarjoaja luotu: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Tekoälytarjoaja poistettu: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Tekoälytarjoaja päivitetty: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Tekoälyagentit [{0}]. Aseta mukautettu tallennuskiintiö tekoälyagenteille: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Tekoälyagentit [{0}]. Aseta oletus tallennuskiintiö tekoälyagenteille: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Tekoälyagentit [{0}]. Tallennuskiintiö tekoälyagenteille poistettu käytöstä</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Agentilta poistettu MCP-palvelin {0}</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Tiedostot [{0}]. Ulkoinen linkki luotu: {1}.  Rooli: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Tiedostot [{0}]. Ulkoinen linkki poistettu: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Tiedostot [{0}]. Ulkoinen linkki päivitetty: {1}.  Rooli: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Tiedosto merkitty Suosikiksi: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Tiedosto poistettu Suosikeista: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Tiedosto poistettu “Kanssani jaetuista”: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Tiedostot [{0}]. Pääsy päivitetty {1}:lle. Rooli: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Kansio Ladattu: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Kansiot [{0}]. Ulkoinen linkki luotu: {1}.Rooli: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Kansiot [{0}]. Ulkoinen linkki poistettu: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Kansiot [{0}]. Ulkoinen linkki päivitetty: {1}.Rooli: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Kansio poistettu “Kanssani jaetuista”: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Kansiot [{0}]. Pääsy päivitetty {1}:lle. Rooli: {2}</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Onnistunut sisäänkirjautuminen OAuth 2.0:n kautta</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Onnistunut kirjautuminen käyttäjätunnuksen ja salasanan kautta</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Aseta oletus tallennuskiintiö tekoälyagenteille: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Tekoälyagenttien oletus tallennuskiintiö otettu pois käytöstä</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Vektorisaatioasetukset on nollattu</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Verkkohakuasetukset on nollattu</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Ulkoinen linkki peruutettu: {1}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP-palvelin luotu: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP-palvelin poistettu: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP-palvelin otettu pois käytöstä: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP-palvelin otettu käyttöön: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP-palvelin päivitetty: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Vektorisaatioasetukset on määritetty. Tarjoaja: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Verkkohakuasetukset on määritetty. Moottori: {0}</value>
   </data>
 </root>

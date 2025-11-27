@@ -74,8 +74,8 @@ public class OwnerController(
             throw new SecurityException("Collaborator can not be an owner");
         }
 
-        if (!owner.Id.Equals(authContext.CurrentAccount.ID) || 
-            Guid.Empty.Equals(newOwner.Id) || 
+        if (!owner.Id.Equals(authContext.CurrentAccount.ID) ||
+            Guid.Empty.Equals(newOwner.Id) ||
             newOwner.Status != EmployeeStatus.Active)
         {
             return new OwnerChangeInstructionsDto { Status = 0, Message = Resource.ErrorAccessDenied };
@@ -129,7 +129,7 @@ public class OwnerController(
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
-        
+
         var newOwnerType = await userManager.GetUserTypeAsync(newOwner);
         if (newOwnerType != EmployeeType.DocSpaceAdmin)
         {

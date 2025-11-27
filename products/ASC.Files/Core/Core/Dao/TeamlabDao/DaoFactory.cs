@@ -50,7 +50,7 @@ public class DaoFactory(IServiceProvider serviceProvider, IProviderDao providerD
 
     public IFolderDao<T> GetCacheFolderDao<T>()
     {
-        return serviceProvider.GetService<ICacheFolderDao<T>>() ?? 
+        return serviceProvider.GetService<ICacheFolderDao<T>>() ??
                serviceProvider.GetService<IFolderDao<T>>();
     }
 

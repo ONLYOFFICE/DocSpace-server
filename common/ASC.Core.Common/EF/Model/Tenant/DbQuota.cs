@@ -24,31 +24,34 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core.Common.EF;
 
-public class DbQuota : BaseEntity, IMapFrom<TenantQuota>
+public class DbQuota : BaseEntity
 {
     public int TenantId { get; set; }
+
     [MaxLength(128)]
     public string Name { get; set; }
+
     [MaxLength(128)]
     public string Description { get; set; }
     public string Features { get; set; }
     public decimal Price { get; set; }
+
     [MaxLength(128)]
     public string ProductId { get; set; }
+
+    [MaxLength(128)]
+    public string ServiceName { get; set; }
     public bool Visible { get; set; }
     public bool Wallet { get; set; }
     public override object[] GetKeys()
     {
         return [TenantId];
     }
-
-    public void Mapping(Profile profile)
+    public string GetPaymentId()
     {
-        profile.CreateMap<TenantQuota, DbQuota>();
+        return Wallet && !string.IsNullOrEmpty(ServiceName) ? ServiceName : ProductId;
     }
 }
 public static class DbQuotaExtension
@@ -178,15 +181,16 @@ public static class DbQuotaExtension
                     Name = "backup",
                     Description = null,
                     Features = "backup",
-                    Price = 12,
+                    Price = 10,
                     ProductId = "10006",
+                    ServiceName = "backup",
                     Visible = false,
                     Wallet = true
                 }
                 );
         return modelBuilder;
     }
-    
+
     public static void MySqlAddDbQuota(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbQuota>(entity =>
@@ -203,6 +207,12 @@ public static class DbQuotaExtension
 
             entity.Property(e => e.ProductId)
                 .HasColumnName("product_id")
+                .HasColumnType("varchar")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+
+            entity.Property(e => e.ServiceName)
+                .HasColumnName("service_name")
                 .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
@@ -255,6 +265,10 @@ public static class DbQuotaExtension
                 .HasColumnName("product_id")
                 .HasColumnType("varchar(128)");
 
+            entity.Property(e => e.ServiceName)
+                .HasColumnName("service_name")
+                .HasColumnType("varchar(128)");
+
             entity.Property(e => e.Description)
                 .HasColumnName("description")
                 .HasColumnType("varchar(128)");
@@ -282,6 +296,6 @@ public static class DbQuotaExtension
                 .HasColumnType("boolean")
                 .HasDefaultValue(false);
         });
-        
+
     }
 }

@@ -92,7 +92,10 @@ public class LdapUserImporter(
             return users;
         }
 
-        var usersToAdd = await AllDomainUsers.ToAsyncEnumerable().SelectAwait(async ldapObject => await ldapObjectExtension.ToUserInfoAsync(ldapObject, this)).ToListAsync();
+        var usersToAdd = await AllDomainUsers
+            .ToAsyncEnumerable()
+            .Select(async (LdapObject ldapObject, CancellationToken _) => await ldapObjectExtension.ToUserInfoAsync(ldapObject, this))
+            .ToListAsync();
 
         users.AddRange(usersToAdd);
 
@@ -380,7 +383,7 @@ public class LdapUserImporter(
             if (Equals(groupInfo, Constants.LostGroupInfo))
             {
                 logger.DebugTrySyncUserGroupMembershipCreatingPortalGroup(ldapUserGroup.DistinguishedName, ldapUserGroup.Sid);
-                 groupInfo = await UserManager.SaveGroupInfoAsync(ldapObjectExtension.ToGroupInfo(ldapUserGroup, Settings));
+                groupInfo = await UserManager.SaveGroupInfoAsync(ldapObjectExtension.ToGroupInfo(ldapUserGroup, Settings));
 
                 logger.DebugTrySyncUserGroupMembershipAddingUserToGroup(userInfo.UserName, ldapUser.Sid, groupInfo.Name, groupInfo.Sid);
                 await UserManager.AddUserIntoGroupAsync(userInfo.Id, groupInfo.ID);
@@ -731,7 +734,7 @@ public class LdapUserImporter(
 
         var users = await LdapHelper.GetUsers(searchTerm, !string.IsNullOrEmpty(email) ? -1 : 1).ToAsyncEnumerable()
             .Where(user => user != null)
-            .ToLookupAwaitAsync(async lu =>
+            .ToLookupAsync(async (lu, _) =>
             {
                 var ui = Constants.LostUser;
 

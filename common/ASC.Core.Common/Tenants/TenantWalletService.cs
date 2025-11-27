@@ -27,7 +27,7 @@
 namespace ASC.Core.Tenants;
 
 /// <summary>
-/// The wallet service
+/// The wallet service type.
 /// </summary>
 [EnumExtensions]
 public enum TenantWalletService
@@ -36,5 +36,11 @@ public enum TenantWalletService
     Storage = -11,
 
     [SwaggerEnum("Backup")]
-    Backup = -12
+    Backup = -12,
+
+    [SwaggerEnum("AITools")]
+    AITools = -13,
+
+    [SwaggerEnum("WebSearch")]
+    WebSearch = -14,
 }

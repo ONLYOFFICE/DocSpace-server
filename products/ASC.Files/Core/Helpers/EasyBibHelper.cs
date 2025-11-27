@@ -59,9 +59,10 @@ public class EasyBibHelper : Consumer
         RequestHelper requestHelper,
         string name,
         int order,
+        bool paid,
         Dictionary<string, string> props,
         Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, factory, name, order, props, additional)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, factory, name, order, paid, props, additional)
     {
         Logger = logger;
         _requestHelper = requestHelper;

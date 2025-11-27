@@ -34,7 +34,7 @@ public class QuotaHelper(
     IServiceProvider serviceProvider,
     CoreBaseSettings coreBaseSettings,
     SettingsManager settingsManager,
-    UserManager userManager, 
+    UserManager userManager,
     AuthContext authContext)
 {
     public async IAsyncEnumerable<QuotaDto> GetQuotasAsync(bool all = false, bool wallet = false)
@@ -70,7 +70,7 @@ public class QuotaHelper(
     {
         var features = await GetFeatures(quota, employeeType, getUsed, enabledWalletServices).ToListAsync();
 
-        var result =  new QuotaDto
+        var result = new QuotaDto
         {
             Id = quota.TenantId,
             Title = Resource.ResourceManager.GetString($"Tariffs_{quota.Name}"),
@@ -94,13 +94,15 @@ public class QuotaHelper(
         {
             var tenantUserQuotaSettingsTask = settingsManager.LoadAsync<TenantUserQuotaSettings>();
             var tenantRoomQuotaSettingsTask = settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            var tenantAiAgentQuotaSettingsTask = settingsManager.LoadAsync<TenantAiAgentQuotaSettings>();
             var tenantQuotaSettingsTask = settingsManager.LoadAsync<TenantQuotaSettings>();
 
-            await Task.WhenAll(tenantUserQuotaSettingsTask, tenantRoomQuotaSettingsTask, tenantQuotaSettingsTask);
+            await Task.WhenAll(tenantUserQuotaSettingsTask, tenantRoomQuotaSettingsTask, tenantQuotaSettingsTask, tenantAiAgentQuotaSettingsTask);
 
-            result.UsersQuota = await tenantUserQuotaSettingsTask;
-            result.RoomsQuota = await tenantRoomQuotaSettingsTask;
-            result.TenantCustomQuota = await tenantQuotaSettingsTask;
+            result.UsersQuota = tenantUserQuotaSettingsTask.Result;
+            result.RoomsQuota = tenantRoomQuotaSettingsTask.Result;
+            result.AiAgentsQuota = tenantAiAgentQuotaSettingsTask.Result;
+            result.TenantCustomQuota = tenantQuotaSettingsTask.Result;
         }
 
         return result;
@@ -148,8 +150,8 @@ public class QuotaHelper(
 
             object used = null;
             var availableFeature = true;
-            var isUsedAvailable = employeeType != EmployeeType.Guest && 
-                                  (employeeType != EmployeeType.User || 
+            var isUsedAvailable = employeeType != EmployeeType.Guest &&
+                                  (employeeType != EmployeeType.User ||
                                    feature.Name == MaxTotalSizeFeature.MaxTotalSizeFeatureName);
 
             if (feature is TenantQuotaFeatureSize size)

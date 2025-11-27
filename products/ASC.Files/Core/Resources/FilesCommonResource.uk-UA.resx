@@ -527,19 +527,19 @@
     <value>Відкрити файл</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Не можна передати файл до цієї кімнати. Спробуйте передати PDF-форму {0}.</value>
+    <value>Не можна передати файл до цієї кімнати. Спробуйте передати PDF-форму ONLYOFFICE.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Посилання для заповнення</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Переміщення кількох файлів до кімнати заповнення форм не підтримується. Переміщуйте одну PDF-форму {0} за раз.</value>
+    <value>Переміщення кількох файлів до кімнати заповнення форм не підтримується. Переміщуйте одну PDF-форму ONLYOFFICE за раз.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Переміщення папок до кімнати заповнення форм не підтримується. Переміщуйте одну PDF-форму {0} за раз.</value>
+    <value>Переміщення папок до кімнати заповнення форм не підтримується. Переміщуйте одну PDF-форму ONLYOFFICE за раз.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Не можна перемістити файл до цієї кімнати. Спробуйте перемістити PDF-форму {0}.</value>
+    <value>Не можна перемістити файл до цієї кімнати. Спробуйте перемістити PDF-форму ONLYOFFICE.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Номер форми</value>
@@ -573,5 +573,17 @@
   </data>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Гість</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Диспетчер агентів</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Документи користувача {0} {1}</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Знання</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Сховище результатів</value>
   </data>
 </root>

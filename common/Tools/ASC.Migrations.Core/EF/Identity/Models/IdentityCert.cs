@@ -62,18 +62,18 @@ public static class IdentityCertExtension
             entity.Property(e => e.Id)
                 .HasColumnName("id")
                 .HasMaxLength(36);
-            
+
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at");
-            
+
             entity.Property(e => e.PairType)
                 .HasColumnName("pair_type");
-            
+
             entity.Property(e => e.PrivateKey)
                 .HasColumnType("text")
                 .HasColumnName("private_key")
                 .IsRequired();
-            
+
             entity.Property(e => e.PublicKey)
                 .HasColumnType("text")
                 .HasColumnName("public_key")

@@ -359,7 +359,7 @@
     <value>Numero di telefono da Twilio (richiesto per l'autorizzazione SMS)</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
     <value>Client ID</value>
@@ -368,7 +368,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Collega l'applicazione per registrarsi al portale utilizzando l'account Twitter.</value>
+    <value>Collega l'applicazione per registrarsi al portale utilizzando l'account X.</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>
@@ -950,7 +950,7 @@
     <value>Abilita questa app per consentire ai tuoi utenti di chiamare i propri contatti dal modulo CRM utilizzando Twilio. {0}Vai a Twilio Console e incolla i seguenti dati qui sotto:</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} usando il loro Twitter e collegare gli account Twitter dei loro clienti al modulo CRM. {0}Vai su Twitter Developers Portal e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
+    <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} usando il loro X e collegare gli account X dei loro clienti al modulo CRM. {0}Vai su X Developers Portal e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
     <value>Abilita questa app per aggiungere nuovi utenti del portale dal tuo elenco di contatti Yahoo. {0}Vai alla pagina Crea applicazione in Yahoo Developer Network e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
@@ -980,7 +980,7 @@
     <value>Collega il servizio Selectel Cloud Storage per eseguire il backup e archiviare i dati dal tuo portale. {0}Ottieni i dati di accesso per un utente con diritti di lettura/scrittura per i container dove prevedi di archiviare i tuoi backup e incollali di seguito:</value>
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Integrazioni di terze parti</value>
+    <value>Integrazioni Pro</value>
   </data>
   <data name="ConsumersZoom" xml:space="preserve">
     <value>Zoom</value>
@@ -1161,5 +1161,77 @@
   </data>
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
     <value>Abilita i backup per il tuo DocSpace. I costi verranno addebitati automaticamente.</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID client</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Segreto client</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Abilita l’applicazione per accedere al portale usando un account WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Abilita l’applicazione per accedere al portale usando un account WeChat.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Cognome</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Quota servizio documenti ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Il numero di plugin supera il limite</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Si è verificato un errore imprevisto. Riprova.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Hai collegato con successo Telegram per ricevere notifiche dal tuo DocSpace.</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vettorizzazione</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Strumenti AI</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Token</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Spazio disponibile per gli agenti AI superato</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Impossibile impostare la quota per agente AI. Il valore inserito è superiore allo spazio totale di DocSpace.</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Il numero di agenti AI non deve superare {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Strumenti AI</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Attiva le funzioni AI nel tuo DocSpace per aumentare la produttività.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Ricerca web AI</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Aggiungi fondi al tuo wallet per sbloccare la ricerca web AI.</value>
   </data>
 </root>

@@ -24,15 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core.Tenants;
 
 /// <summary>
 /// The current tenant quota.
 /// </summary>
 [DebuggerDisplay("{TenantId} {Name}")]
-public class TenantQuota : IMapFrom<DbQuota>
+public class TenantQuota
 {
     public static readonly TenantQuota Default = new(Tenant.DefaultTenant)
     {
@@ -75,6 +73,11 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// The tenant product ID.
     /// </summary>
     public string ProductId { get; set; }
+
+    /// <summary>
+    /// The service name.
+    /// </summary>
+    public string ServiceName { get; set; }
 
     /// <summary>
     /// Specifies if the tenant quota is visible or not.
@@ -399,6 +402,17 @@ public class TenantQuota : IMapFrom<DbQuota>
         set => _backup.Value = value;
     }
 
+    private readonly CountAIAgentFeature _countAIAgentFeature;
+
+    /// <summary>
+    /// The number of AI agents.
+    /// </summary>
+    public int CountAIAgent
+    {
+        get => _countAIAgentFeature.Value;
+        set => _countAIAgentFeature.Value = value;
+    }
+
     public TenantQuota()
     {
         _featuresList = [];
@@ -409,26 +423,27 @@ public class TenantQuota : IMapFrom<DbQuota>
         _countRoomFeature = new CountRoomFeature(this) { Order = 2 };
         _maxTotalSizeFeature = new MaxTotalSizeFeature(this);
         _maxFileSizeFeature = new MaxFileSizeFeature(this);
-        _nonProfitFeature = new TenantQuotaFeatureFlag(this) { Name = "non-profit", Visible = false };
-        _trialFeature = new TenantQuotaFeatureFlag(this) { Name = "trial", Visible = false };
+        _nonProfitFeature = new TenantQuotaFeatureFlag(this, "non-profit") { Visible = false };
+        _trialFeature = new TenantQuotaFeatureFlag(this, "trial") {  Visible = false };
         _freeFeature = new FreeFeature(this) { Visible = false };
-        _updateFeature = new TenantQuotaFeatureFlag(this) { Name = "update", Standalone = true };
-        _auditFeature = new TenantQuotaFeatureFlag(this) { Name = "audit", Order = 8, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _docsEditionFeature = new TenantQuotaFeatureFlag(this) { Name = "docs", Visible = false };
-        _ldapFeature = new TenantQuotaFeatureFlag(this) { Name = "ldap", Order = 4, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _ssoFeature = new TenantQuotaFeatureFlag(this) { Name = "sso", Order = 5, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _brandingFeature = new TenantQuotaFeatureFlag(this) { Name = "branding", EmployeeType = EmployeeType.DocSpaceAdmin };
-        _customizationFeature = new TenantQuotaFeatureFlag(this) { Name = "customization", Order = 3, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _lifetimeFeature = new TenantQuotaFeatureFlag(this) { Name = "lifetime", Standalone = true };
-        _customFeature = new TenantQuotaFeatureFlag(this) { Name = "custom", Visible = false };
-        _restoreFeature = new TenantQuotaFeatureFlag(this) { Name = "restore", Order = 7, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _oauthFeature = new TenantQuotaFeatureFlag(this) { Name = "oauth" };
-        _contentSearchFeature = new TenantQuotaFeatureFlag(this) { Name = "contentsearch", Visible = false };
-        _thirdPartyFeature = new TenantQuotaFeatureFlag(this) { Name = "thirdparty", Order = 9, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _statisticFeature = new TenantQuotaFeatureFlag(this) { Name = "statistic", Order = 10 };
-        _yearFeature = new TenantQuotaFeatureFlag(this) { Name = "year", EmployeeType = EmployeeType.DocSpaceAdmin };
+        _updateFeature = new TenantQuotaFeatureFlag(this, "update") { Standalone = true };
+        _auditFeature = new TenantQuotaFeatureFlag(this, "audit") { Order = 8, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _docsEditionFeature = new TenantQuotaFeatureFlag(this, "docs") { Visible = false };
+        _ldapFeature = new TenantQuotaFeatureFlag(this, "ldap") { Order = 4, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _ssoFeature = new TenantQuotaFeatureFlag(this, "sso") { Order = 5, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _brandingFeature = new TenantQuotaFeatureFlag(this, "branding") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _customizationFeature = new TenantQuotaFeatureFlag(this, "customization") { Order = 3, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _lifetimeFeature = new TenantQuotaFeatureFlag(this, "lifetime") { Standalone = true };
+        _customFeature = new TenantQuotaFeatureFlag(this, "custom") { Visible = false };
+        _restoreFeature = new TenantQuotaFeatureFlag(this, "restore") { Order = 7, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _oauthFeature = new TenantQuotaFeatureFlag(this, "oauth");
+        _contentSearchFeature = new TenantQuotaFeatureFlag(this, "contentsearch") { Visible = false };
+        _thirdPartyFeature = new TenantQuotaFeatureFlag(this, "thirdparty") { Order = 9, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _statisticFeature = new TenantQuotaFeatureFlag(this, "statistic") { Order = 10 };
+        _yearFeature = new TenantQuotaFeatureFlag(this, "year") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _countFreeBackup = new CountFreeBackupFeature(this) { Order = 6, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _backup = new WalletFeatureFlag(this) { Name = "backup", EmployeeType = EmployeeType.DocSpaceAdmin };
+        _backup = new WalletFeatureFlag(this, "backup") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _countAIAgentFeature = new CountAIAgentFeature(this) { Order = 11 };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -457,7 +472,8 @@ public class TenantQuota : IMapFrom<DbQuota>
             _statisticFeature,
             _yearFeature,
             _countFreeBackup,
-            _backup
+            _backup,
+            _countAIAgentFeature
         };
     }
 
@@ -472,6 +488,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         Name = quota.Name;
         Price = quota.Price;
         ProductId = quota.ProductId;
+        ServiceName = quota.ServiceName;
         Visible = quota.Visible;
         MaxFileSize = quota.MaxFileSize;
         Features = quota.Features;
@@ -607,12 +624,6 @@ public class TenantQuota : IMapFrom<DbQuota>
         return newQuota;
     }
 
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<DbQuota, TenantQuota>()
-            .ForMember(dest => dest.Price, o => o.MapFrom<TenantQuotaPriceResolver>());
-    }
-
     public TenantQuotaFeature<T> GetFeature<T>(string name)
     {
         return TenantQuotaFeatures.OfType<TenantQuotaFeature<T>>().FirstOrDefault(f => string.Equals(f.Name.Split(':')[0], $"{name}", StringComparison.OrdinalIgnoreCase));
@@ -621,6 +632,10 @@ public class TenantQuota : IMapFrom<DbQuota>
     public T GetFeature<T>() where T : TenantQuotaFeature
     {
         return TenantQuotaFeatures.OfType<T>().FirstOrDefault();
+    }
+    public string GetPaymentId()
+    {
+        return Wallet && !string.IsNullOrEmpty(ServiceName) ? ServiceName : ProductId;
     }
 
     internal string GetFeature(string name)
@@ -637,5 +652,44 @@ public class TenantQuota : IMapFrom<DbQuota>
         {
             _featuresList.Add(value is bool ? $"{name}" : $"{name}:{value}");
         }
+    }
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class TenantQuotaMapper(IServiceProvider provider)
+{
+    private partial TenantQuota Map(DbQuota source);
+    public partial List<TenantQuota> Map(List<DbQuota> source);
+    public partial DbQuota Map(TenantQuota source);
+
+    [UserMapping(Default = true)]
+    public TenantQuota MapDbQuotaToTenantQuota(DbQuota quota)
+    {
+        var dto = Map(quota);
+        (dto.Price, dto.PriceCurrencySymbol, dto.PriceISOCurrencySymbol) = Resolve(quota);
+        return dto;
+    }
+
+    private (decimal, string, string) Resolve(DbQuota source)
+    {
+        var tenantManager = provider.GetService<TenantManager>();
+        var regionHelper = provider.GetService<RegionHelper>();
+
+        var productPaymentId = source.GetPaymentId();
+        var priceInfo = tenantManager.GetProductPriceInfo(productPaymentId, source.Wallet);
+
+        if (priceInfo != null)
+        {
+            var currentRegion = regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { productPaymentId, priceInfo } }).Result;
+
+            if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolve))
+            {
+                return (resolve, currentRegion.CurrencySymbol, currentRegion.ISOCurrencySymbol);
+            }
+        }
+
+        var defaultRegion = regionHelper.GetDefaultRegionInfo();
+        return (source.Price, defaultRegion.CurrencySymbol, defaultRegion.ISOCurrencySymbol);
     }
 }

@@ -32,45 +32,51 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class AuthServiceRequestsDto
 {
     /// <summary>
-    /// The name of the authentication service.
+    /// The name of the authorization service.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// The user-friendly display title of the authentication service.
+    /// The user-friendly display title of the authorization service.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// The brief description of the authentication service.
+    /// The brief description of the authorization service.
     /// </summary>
     public string Description { get; set; }
 
     /// <summary>
-    /// The detailed instructions for configuring or using the authentication service.
+    /// The detailed instructions for configuring or using the authorization service.
     /// </summary>
     public string Instruction { get; set; }
 
     /// <summary>
-    /// Specifies whether the authentication service can be configured by the user.
+    /// Specifies whether the authorization service can be configured by the user.
     /// </summary>
     public bool CanSet { get; set; }
 
     /// <summary>
-    /// The collection of authorization keys associated with the authentication service.
+    /// Specifies whether the authorization service is paid or not.
+    /// </summary>
+    public bool Paid { get; set; }
+
+    /// <summary>
+    /// The collection of authorization keys associated with the authorization service.
     /// </summary>
     public List<AuthKey> Props { get; set; }
 
     public static async Task<AuthServiceRequestsDto> From(Consumer consumer, string logoText)
     {
         var authService = await AuthService.From(consumer, logoText);
-        var result = new AuthServiceRequestsDto 
-        { 
-            Name = authService.Name, 
-            Title = authService.Title, 
-            Description = authService.Description, 
+        var result = new AuthServiceRequestsDto
+        {
+            Name = authService.Name,
+            Title = authService.Title,
+            Description = authService.Description,
             Instruction = authService.Instruction,
-            CanSet = authService.CanSet
+            CanSet = authService.CanSet,
+            Paid = authService.Paid
         };
 
         if (consumer.CanSet)

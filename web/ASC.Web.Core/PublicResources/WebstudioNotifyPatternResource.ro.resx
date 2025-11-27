@@ -2057,4 +2057,101 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Copierea de rezervă automată a spațiului DocSpace a eșuat</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Stimate, $UserName,
+
+Copierea de rezervă programată a spațiului DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" a eșuat.
+
+Vă recomandăm să verificați setările pentru "Copiere de rezervă":"${__VirtualRootPath}/portal-settings/backup/data-backup" și "Servicii":"${__VirtualRootPath}/portal-settings/services".
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Stimate, $UserName,
+
+Copierea de rezervă programată a spațiului DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) a eșuat.
+
+Vă recomandăm să verificați setările pentru [Copiere de rezervă](${__VirtualRootPath}/portal-settings/backup/data-backup) și [Servicii](${__VirtualRootPath}/portal-settings/services).
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SupportLink}](${__SupportLink})
+
+Cu stimă,
+${LetterLogoText} Echipă de Asistență
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a creat un agent nou: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a șters agentul: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a redenumit agentul: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; i-a fost atribuit rolul &lt;b&gt;{1}&lt;/b&gt; în agentul: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a fost adăugat la agentul: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a fost eliminat din agentul: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Asociere agent</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Stimate, $UserName,
+
+Copierea de rezervă a spațiului dvs DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" nu a reușit.
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Stimate, $UserName,
+
+Copierea de rezervă a spațiului dvs DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) nu a reușit.
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SupportLink}](${__SupportLink})
+
+Cu stimă,
+${LetterLogoText} Echipă de Asistență
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Bună!
+
+Sunteţi invitat să vă asociaţi la agentul de IA din DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
+
+$OrangeButton
+
+Odată ce faceți clic pe linkul de invitație, setați o nouă parolă pentru contul dvs.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Bună!
+
+$__AuthorName v-a invitat să vă asociați la agentul "$Message":"$InviteLink" la "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Copierea de rezervă a spațiului dvs DocSpace nu a reușit</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Asociați-vă la ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Sunteţi invitat să vă asociaţi la agentul DocSpace ${LetterLogoText}</value>
+  </data>
 </root>

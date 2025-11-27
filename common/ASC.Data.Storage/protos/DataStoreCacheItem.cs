@@ -35,4 +35,3 @@ public record DataStoreCacheItem
     [ProtoMember(2)]
     public string TenantId { get; set; }
 }
-

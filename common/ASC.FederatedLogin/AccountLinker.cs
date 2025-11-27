@@ -61,7 +61,7 @@ public class AccountLinker(
     {
         var tenant = tenantManager.GetCurrentTenantId();
         var cacheKey = CacheKey(tenant);
-        
+
         var profiles = await GetFromCacheAsync(cacheKey, async _ =>
         {
             await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
@@ -69,7 +69,7 @@ public class AccountLinker(
                 .Select(x => new LoginProfile(x.Profile, x.Id))
                 .ToListAsync();
         });
-        
+
         return profiles;
     }
 
@@ -89,7 +89,7 @@ public class AccountLinker(
 
         if (await Queries.ExistAccountAsync(accountLinkContext, tenant, profile.HashId))
         {
-            throw new Exception("ErrorAccountAlreadyUse");
+            throw new ArgumentException("The account is already in use");
         }
         await accountLinkContext.AddOrUpdateAsync(a => a.AccountLinks, accountLink);
         await accountLinkContext.SaveChangesAsync();
@@ -126,9 +126,9 @@ public class AccountLinker(
 
         return await accountLinkContext.AccountLinks.Where(r => objects.Contains(r.Id))
             .Select(r => new { r.Id, r.Profile })
-            .ToDictionaryAsync(k => k.Id, v =>  new LoginProfile(v.Profile));
+            .ToDictionaryAsync(k => k.Id, v => new LoginProfile(v.Profile));
     }
-    
+
     private static string CacheKey(int tenantId) => $"tenant_profiles_{tenantId}";
 
     public async Task RemoveFromCacheAsync(string obj)
@@ -180,11 +180,11 @@ static file class Queries
                 ctx.AccountLinks.Join(ctx.Users, a => a.Id, u => u.Id.ToString(),
                         (accountLink, user) => new { accountLink, user })
                         .Any(q => q.accountLink.UId == hashId && q.user.TenantId == tenant));
-    
+
     public static readonly Func<AccountLinkContext, int, IAsyncEnumerable<AccountLinks>> AccountLinksByTenantAsync =
         EF.CompileAsyncQuery(
             (AccountLinkContext ctx, int tenant) =>
-                ctx.AccountLinks.Join(ctx.Users, a => a.Id, u => u.Id.ToString(), 
+                ctx.AccountLinks.Join(ctx.Users, a => a.Id, u => u.Id.ToString(),
                         (accountLink, user) => new { accountLink, user })
                         .Where(x => x.user.TenantId == tenant)
                         .Select(x => x.accountLink));

@@ -527,19 +527,19 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
     <value>Mở tập tin</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Không thể tải tập tin lên phòng này. Xin hãy thử tải lên biểu mẫu {0} PDF.</value>
+    <value>Không thể tải tập tin lên phòng này. Xin hãy thử tải lên biểu mẫu ONLYOFFICE PDF.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Liên kết để điền</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Không hỗ trợ di chuyển một số tập tin vào phòng Điền Biểu mẫu. Hãy di chuyển từng biểu mẫu {0} một.</value>
+    <value>Không hỗ trợ di chuyển một số tập tin vào phòng Điền Biểu mẫu. Hãy di chuyển từng biểu mẫu ONLYOFFICE một.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Không hỗ trợ di chuyển các thư mục đến phòng Điền Biểu mẫu. Hãy di chuyển từng biểu mẫu {0} PDF một.</value>
+    <value>Không hỗ trợ di chuyển các thư mục đến phòng Điền Biểu mẫu. Hãy di chuyển từng biểu mẫu ONLYOFFICE PDF một.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Không thể di chuyển tập tin đến phòng này. Xin hãy thử di chuyển biểu mẫu {0} PDF.</value>
+    <value>Không thể di chuyển tập tin đến phòng này. Xin hãy thử di chuyển biểu mẫu ONLYOFFICE PDF.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Số của biểu mẫu</value>
@@ -573,5 +573,17 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   </data>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Khách</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Quản lý agent</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Tài liệu của người dùng {0} {1}</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Kiến thức</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Lưu trữ kết quả</value>
   </data>
 </root>

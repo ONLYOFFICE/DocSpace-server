@@ -26,6 +26,7 @@
 
 using ASC.Data.Backup.Core.Quota;
 using ASC.Files.Core.Core;
+using ASC.Web.Files.Utils;
 
 namespace ASC.Data.Backup.BackgroundTasks;
 
@@ -43,11 +44,13 @@ public class Startup : BaseStartup
     {
         var services = builder.Services;
         await base.ConfigureServices(builder);
-        
+
         services.RegisterQueue<BackupProgressItem>(5, 60 * 60 * 24);
         services.RegisterQueue<RestoreProgressItem>(5, 60 * 60 * 24);
         services.RegisterQueue<TransferProgressItem>(5, 60 * 60 * 24);
-        
+        services.RegisterQueue<AsyncTaskData<int>>();
+        services.RegisterQueue<AsyncTaskData<string>>();
+
         services.AddHostedService<BackupListenerService>();
         services.AddHostedService<BackupCleanerTempFileService>();
 
@@ -59,5 +62,7 @@ public class Startup : BaseStartup
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
         services.RegisterFreeBackupQuotaFeature();
+
+        services.AddBackupSchedulerServiceResiliencePipeline();
     }
 }

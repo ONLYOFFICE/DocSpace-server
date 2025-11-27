@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Data.Backup.Core.Quota;
+
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ASC.Web.Api;
@@ -51,13 +53,14 @@ public class Startup : BaseStartup
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddBaseDbContextPool<BackupsContext>();
         services.RegisterQuotaFeature();
+        services.RegisterFreeBackupQuotaFeature();
         services.RegisterQueue<LdapOperationJob>();
         services.RegisterQueue<SmtpJob>();
         services.RegisterQueue<UsersQuotaSyncJob>();
-        
+
         services.AddStartupTask<CspStartupTask>()
                    .TryAddSingleton(services);
-                
+
         services.AddActivePassiveHostedService<NotifySchedulerService>(_configuration, "WebApiNotifySchedulerService");
         services.AddDocumentServiceHttpClient(_configuration);
     }

@@ -68,9 +68,9 @@ public class LdapOperationJob : DistributedTaskProgress
 
     public LdapOperationJob()
     {
-        
+
     }
-    
+
     public LdapOperationJob(LdapUserManager ldapUserManager,
         UserManager userManager,
         TenantManager tenantManager,
@@ -774,7 +774,9 @@ public class LdapOperationJob : DistributedTaskProgress
             return;
         }
 
-        var groupMembersToAdd = await ldapGroupUsers.ToAsyncEnumerable().SelectAwait(async ldapGroupUser => await SearchDbUserBySidAsync(ldapGroupUser.Sid))
+        var groupMembersToAdd = await ldapGroupUsers
+            .ToAsyncEnumerable()
+            .Select(async (UserInfo ldapGroupUser, CancellationToken _) => await SearchDbUserBySidAsync(ldapGroupUser.Sid))
             .Where(userBySid => !Equals(userBySid, Core.Users.Constants.LostUser))
             .ToListAsync();
 
@@ -835,8 +837,11 @@ public class LdapOperationJob : DistributedTaskProgress
 
         var groupMembersToRemove = dbGroupMembers.Where(dbUser => ldapGroupUsers.FirstOrDefault(lu => dbUser.Sid.Equals(lu.Sid)) == null).ToList();
 
-        var groupMembersToAdd = await ldapGroupUsers.ToAsyncEnumerable().Where(q => dbGroupMembers.FirstOrDefault(u => u.Sid.Equals(q.Sid)) == null)
-            .SelectAwait(async q => await SearchDbUserBySidAsync(q.Sid)).Where(q => !Equals(q, Core.Users.Constants.LostUser)).ToListAsync();
+        var groupMembersToAdd = await ldapGroupUsers.ToAsyncEnumerable()
+            .Where(q => dbGroupMembers.FirstOrDefault(u => u.Sid.Equals(q.Sid)) == null)
+            .Select(async (UserInfo q, CancellationToken _) => await SearchDbUserBySidAsync(q.Sid))
+            .Where(q => !Equals(q, Core.Users.Constants.LostUser))
+            .ToListAsync();
 
 
         switch (OperationType)

@@ -45,4 +45,3 @@ public record StorSettings
     [ProtoMember(2)]
     public string Module { get; set; }
 }
-

@@ -34,12 +34,12 @@ public class NewItemsDto<TItem>
     /// <summary>
     /// The date and time when the new item was created.
     /// </summary>
-    public ApiDateTime Date { get; init; }
+    public required ApiDateTime Date { get; init; }
 
     /// <summary>
     /// The list of items.
     /// </summary>
-    public IEnumerable<TItem> Items { get; init; }
+    public required IEnumerable<TItem> Items { get; init; }
 }
 
 /// <summary>
@@ -59,16 +59,19 @@ public class RoomNewItemsDto
 }
 
 [Scope]
-public class RoomNewItemsDtoHelper(FileDtoHelper fileDtoHelper, FolderDtoHelper folderDtoHelper)
+public class RootNewItemsDtoHelper(FileDtoHelper fileDtoHelper, FolderDtoHelper folderDtoHelper)
 {
     private readonly ConcurrentDictionary<string, FileEntryBaseDto> _roomDtoCache = new();
 
-    public async Task<RoomNewItemsDto> GetAsync(FileEntry roomEntry, IEnumerable<FileEntry> entries)
+    public async Task<T> GetAsync<T>(
+        FileEntry rootEntry, 
+        IEnumerable<FileEntry> entries, 
+        Func<FileEntryBaseDto, IEnumerable<FileEntryBaseDto>, T> selector)
     {
-        var roomKey = GetRoomKey(roomEntry);
+        var roomKey = GetRoomKey(rootEntry);
         if (!_roomDtoCache.TryGetValue(roomKey, out var roomDto))
         {
-            roomDto = await GetShortRoomDtoAsync(roomEntry);
+            roomDto = await GetShortRoomDtoAsync(rootEntry);
             _roomDtoCache.TryAdd(roomKey, roomDto);
         }
 
@@ -77,14 +80,10 @@ public class RoomNewItemsDtoHelper(FileDtoHelper fileDtoHelper, FolderDtoHelper 
         {
             files.Add(await GetFileEntryDtoAsync(entry));
         }
-        
-        return new RoomNewItemsDto
-        {
-            Room = roomDto,
-            Items = files
-        };
+
+        return selector(roomDto, files);
     }
-    
+
     private async Task<FileEntryBaseDto> GetFileEntryDtoAsync(FileEntry entry)
     {
         FileEntryBaseDto dto;
@@ -109,7 +108,7 @@ public class RoomNewItemsDtoHelper(FileDtoHelper fileDtoHelper, FolderDtoHelper 
 
         return dto;
     }
-    
+
     private async Task<FileEntryBaseDto> GetShortRoomDtoAsync(FileEntry entry)
     {
         return entry switch

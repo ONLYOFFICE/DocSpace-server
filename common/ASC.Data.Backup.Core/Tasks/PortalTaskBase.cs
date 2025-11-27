@@ -124,7 +124,8 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                     "whitelabel",
                     "customnavigation",
                     "room_logos",
-                    "webplugins"
+                    "webplugins",
+                    "mcp_icons"
                 };
 
         if (!allowedStorageModules.Contains(storageModuleName))
@@ -147,7 +148,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
     protected void SetStepsCount(int value)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value);
-        
+
         _stepsCount = value;
         Logger.DebugCountSteps(+_stepsCount);
     }
@@ -312,7 +313,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                     }
                     catch (Exception ex)
                     {
-                        if (attempt == 5) 
+                        if (attempt == 5)
                         {
                             Logger.ErrorRestore(ex);
                         }

@@ -150,7 +150,11 @@ public class TopUpWalletService(
 
             var metadata = new Dictionary<string, string> { { BillingClient.MetadataDetails, Resource.AutoTopUp } };
 
-            var result = await tariffService.TopUpDepositAsync(data.TenantId, amount, settings.Currency, null, metadata, true);
+            var coreSettings = scope.ServiceProvider.GetRequiredService<CoreSettings>();
+
+            var siteName = tenant.GetTenantDomain(coreSettings);
+
+            var result = await tariffService.TopUpDepositAsync(data.TenantId, amount, settings.Currency, null, siteName, metadata, true);
 
             if (result)
             {

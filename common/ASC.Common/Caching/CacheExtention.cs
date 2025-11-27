@@ -86,8 +86,8 @@ public static class CacheExtention
     public static string GetWebPluginsTag(int tenant)
     {
         return $"webplugin-{tenant}";
-    } 
-    
+    }
+
     public static string GetProviderFileTag(string selector, int id, string fileId)
     {
         return $"provider-file-{selector}-{id}-{fileId}";

@@ -54,5 +54,3 @@ public record IndexAction
     [ProtoMember(2)]
     public long LastIndexed { get; set; }
 }
-
-

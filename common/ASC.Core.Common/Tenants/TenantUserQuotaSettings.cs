@@ -44,6 +44,6 @@ public class TenantUserQuotaSettings : TenantEntityQuotaSettings, ISettings<Tena
     {
         return new TenantUserQuotaSettings();
     }
-    
+
     public DateTime LastModified { get; set; }
 }

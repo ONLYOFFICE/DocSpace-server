@@ -5,7 +5,7 @@
     "version": "7.13.0"
   },
   "generatorName": "my-python",
-  "inputSpec": "./tools/api-docs.json",
+  "inputSpec": "./json/api-docs.json",
   "outputDir": "python-sdk",
   "additionalProperties": {
     "packageName": "docspace_api_sdk",

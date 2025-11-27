@@ -34,7 +34,7 @@ public class ActiveConnectionsDto
     /// <summary>
     /// The login event.
     /// </summary>
-    public int LoginEvent { get; set; }
+    public required int LoginEvent { get; set; }
 
     /// <summary>
     /// The list of active connection items.
@@ -50,22 +50,22 @@ public class ActiveConnectionsItemDto
     /// <summary>
     /// The active connection ID.
     /// </summary>
-    public int Id { get; set; }
+    public required int Id { get; set; }
 
     /// <summary>
     /// The tenant ID.
     /// </summary>
-    public int TenantId { get; set; }
+    public required int TenantId { get; set; }
 
     /// <summary>
     /// The user ID.
     /// </summary>
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 
     /// <summary>
     /// Specifies if the active connection has a mobile phone or not.
     /// </summary>
-    public bool Mobile {  get; set; }
+    public bool Mobile { get; set; }
 
     /// <summary>
     /// The IP address of the active connection.

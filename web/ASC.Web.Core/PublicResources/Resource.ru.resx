@@ -392,7 +392,7 @@
     <value>Номер телефона из Twilio (требуется для SMS-авторизации)</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
     <value>ID клиента</value>
@@ -401,10 +401,10 @@
     <value>Секрет клиента</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи Twitter.</value>
+    <value>Подключите приложение для входа на портал по учетной записи X.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя Twitter, и привязывать Twitter-аккаунты клиентов в модуле CRM. {0}Перейдите на портал для разработчиков Twitter и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
+    <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя X, и привязывать X-аккаунты клиентов в модуле CRM. {0}Перейдите на портал для разработчиков X и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>
@@ -1161,5 +1161,77 @@
   </data>
   <data name="TariffsFeature_free_backup" xml:space="preserve">
     <value>{0} бесплатных резервных копий в месяц</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID клиента</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Секрет клиента</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Подключите приложение для входа на портал по учетной записи WeChat .</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Подключите приложение для входа на портал по учетной записи WeChat .</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Электронная почта</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Имя</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Фамилия</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Квота сервиса документов ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Количество плагинов превышает лимит</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Произошла непредвиденная ошибка. Попробуйте еще раз.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Вы успешно подключились к Telegram для получения уведомлений от вашего DocSpace.</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Векторизация</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>ИИ-инструменты</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Токены</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Квота пространства для ИИ-агентов превышена</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Не удалось установить квоту на одного ИИ-агента. Введенное значение превышает общий объем хранилища DocSpace.</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Количество ИИ-агентов не должно превышать {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>ИИ-инструменты</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Включите функции ИИ в вашем DocSpace для повышения производительности.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Веб-поиск на основе ИИ</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Пополните свой кошелек, чтобы разблокировать веб-поиск на основе ИИ.</value>
   </data>
 </root>

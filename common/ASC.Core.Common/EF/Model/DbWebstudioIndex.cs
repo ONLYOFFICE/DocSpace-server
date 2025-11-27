@@ -86,6 +86,6 @@ public static class DbWebstudioIndexExtension
                 .HasColumnName("last_modified")
                 .HasColumnType("timestamptz");
         });
-        
+
     }
 }

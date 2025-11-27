@@ -190,7 +190,7 @@ public abstract class FoldersController<T>(
     public async IAsyncEnumerable<FileOperationDto> DeleteFolder(DeleteFolder<T> inDto)
     {
         await fileOperationsManager.Publish([inDto.FolderId], [], false, !inDto.Delete.DeleteAfter, inDto.Delete.Immediately);
-        
+
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
@@ -198,7 +198,7 @@ public abstract class FoldersController<T>(
     }
 
     /// <summary>
-    /// Sets the file order in the folder with ID specified in the request.
+    /// Sets the order of a folder with ID specified in the request.
     /// </summary>
     /// <short>
     /// Set folder order
@@ -237,7 +237,7 @@ public abstract class FoldersController<T>(
             formsItemDto = new FormsItemDto(inDto.FormsItemKey, inDto.FormsItemType);
         }
 
-        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.FilterType, inDto.RoomId, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, split, formsItemDto, inDto.Location);
+        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.SharedBy, inDto.FilterType, inDto.RoomId, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, split, formsItemDto, inDto.Location);
         return folder.NotFoundIfNull();
     }
 
@@ -252,10 +252,10 @@ public abstract class FoldersController<T>(
     [AllowAnonymous]
     [HttpGet("folder/{folderId}")]
     public async Task<FolderDto<T>> GetFolderInfo(FolderIdRequestDto<T> inDto)
-    {        
+    {
         var folder = await fileStorageService.GetFolderAsync(inDto.FolderId).NotFoundIfNull("Folder not found");
 
-        return await _folderDtoHelper.GetAsync(folder);
+        return await _folderDtoHelper.GetAsync(folder, contextFolder: folder);
     }
 
     /// <summary>
@@ -360,18 +360,18 @@ public abstract class FoldersController<T>(
     public async Task<FileShareDto> CreateFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
     {
         var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(
-            inDto.Id, 
-            FileEntryType.Folder, 
-            inDto.FolderLink.Access, 
-            expirationDate: inDto.FolderLink.ExpirationDate, 
-            requiredAuth: inDto.FolderLink.Internal, 
+            inDto.Id,
+            FileEntryType.Folder,
+            inDto.FolderLink.Access,
+            expirationDate: inDto.FolderLink.ExpirationDate,
+            requiredAuth: inDto.FolderLink.Internal,
             allowUnlimitedDate: true,
-            denyDownload: inDto.FolderLink.DenyDownload, 
+            denyDownload: inDto.FolderLink.DenyDownload,
             password: inDto.FolderLink.Password);
-        
+
         return await fileShareDtoHelper.Get(linkAce);
     }
-    
+
     /// <summary>
     /// Returns the primary external link by the identifier specified in the request.
     /// </summary>
@@ -389,7 +389,7 @@ public abstract class FoldersController<T>(
 
         return await fileShareDtoHelper.Get(linkAce);
     }
-    
+
     /// <summary>
     /// Sets the folder external link with the ID specified in the request.
     /// </summary>
@@ -416,17 +416,17 @@ public abstract class FoldersController<T>(
         {
             return null;
         }
-        
-        var result =  await fileShareDtoHelper.Get(linkAce);
 
-        if (inDto.FolderLink.LinkId != Guid.Empty && linkAce.Id != inDto.FolderLink.LinkId && result.SharedTo is FileShareLink link)
+        var result = await fileShareDtoHelper.Get(linkAce);
+
+        if (inDto.FolderLink.LinkId != Guid.Empty && linkAce.Id != inDto.FolderLink.LinkId && result.SharedLink != null)
         {
-            link.RequestToken = null;
+            result.SharedLink.RequestToken = null;
         }
-        
+
         return result;
     }
-    
+
     /// <summary>
     /// Returns the links of the folder with the ID specified in the request.
     /// </summary>
@@ -448,30 +448,6 @@ public abstract class FoldersController<T>(
         }
 
         apiContext.SetCount(counter);
-    }
-    
-    /// <summary>
-    /// Returns the access rights of a folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Get the folder access rights</short>
-    /// <path>api/2.0/files/folder/{id}/share</path>
-    /// <collection>list</collection>
-    [Tags("Files / Folders")]
-    [SwaggerResponse(200, "Security information of folder files", typeof(IAsyncEnumerable<FileShareDto>))]
-    [HttpGet("folder/{id}/share")]
-    public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfo(FolderSecurityInfoRequestDto<T> inDto)
-    {
-        var offset = inDto.StartIndex;
-        var count = inDto.Count;
-        var text = inDto.Text;
-
-        var totalCountTask = await fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.Link, text);
-        apiContext.SetCount(Math.Min(totalCountTask - offset, count)).SetTotalCount(totalCountTask);
-
-        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.Link, text, offset, count))
-        {
-            yield return await fileShareDtoHelper.Get(ace);
-        }
     }
 }
 
@@ -498,7 +474,7 @@ public class FoldersControllerCommon(
     [HttpGet("@common")]
     public async Task<FolderContentDto<int>> GetCommonFolder(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderCommonAsync, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderCommonAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
     /// <summary>
@@ -513,7 +489,7 @@ public class FoldersControllerCommon(
     [HttpGet("@favorites")]
     public async Task<FolderContentDto<int>> GetFavoritesFolder(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFavoritesAsync, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFavoritesAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
     /// <summary>
@@ -528,7 +504,7 @@ public class FoldersControllerCommon(
     [HttpGet("@my")]
     public async Task<FolderContentDto<int>> GetMyFolder(GetMyTrashFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderMyAsync, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, true, false, inDto.ApplyFilterOption, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderMyAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, inDto.ApplyFilterOption, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
     /// <summary>
@@ -548,7 +524,7 @@ public class FoldersControllerCommon(
             throw new SecurityException();
         }
 
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderPrivacyAsync, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderPrivacyAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
     /// <summary>
@@ -564,7 +540,7 @@ public class FoldersControllerCommon(
     [HttpGet("@projects")]
     public async Task<FolderContentDto<string>> GetProjectsFolder(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.GetFolderProjectsAsync<string>(), inDto.UserIdOrGroupId, inDto.FilterType, null, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.GetFolderProjectsAsync<string>(), inDto.UserIdOrGroupId, null, inDto.FilterType, null, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
     /// <summary>
@@ -577,9 +553,10 @@ public class FoldersControllerCommon(
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("@recent")]
+    [HttpGet("recent")]
     public async Task<FolderContentDto<int>> GetRecentFolder(GetRecentFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderRecentAsync, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, inDto.Extension);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderRecentAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, inDto.Extension);
     }
 
     /// <summary>
@@ -599,7 +576,7 @@ public class FoldersControllerCommon(
 
         await foreach (var folder in foldersIds)
         {
-            yield return await folderContentDtoHelper.GetAsync(folder, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+            yield return await folderContentDtoHelper.GetAsync(folder, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
         }
     }
 
@@ -616,7 +593,7 @@ public class FoldersControllerCommon(
     [HttpGet("@share")]
     public async Task<FolderContentDto<int>> GetShareFolder(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderShareAsync, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderShareAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
     /// <summary>
@@ -632,7 +609,7 @@ public class FoldersControllerCommon(
     [HttpGet("@templates")]
     public async Task<FolderContentDto<int>> GetTemplatesFolder(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderTemplatesAsync, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderTemplatesAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
     /// <summary>
@@ -647,25 +624,26 @@ public class FoldersControllerCommon(
     [HttpGet("@trash")]
     public async Task<FolderContentDto<int>> GetTrashFolder(GetMyTrashFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(Convert.ToInt32(await globalFolderHelper.FolderTrashAsync), inDto.UserIdOrGroupId, inDto.FilterType, 0, true, true, false, inDto.ApplyFilterOption, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        return await folderContentDtoHelper.GetAsync(Convert.ToInt32(await globalFolderHelper.FolderTrashAsync), inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, inDto.ApplyFilterOption, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
-    
+
     private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
     {
-        var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-        var isOutsider = await userManager.IsOutsiderAsync(user);
+        var isOutsider = await userManager.IsOutsiderAsync(securityContext.CurrentAccount.ID);
 
         if (isOutsider)
         {
             withoutTrash = true;
         }
-        
+
         yield return await globalFolderHelper.FolderFavoritesAsync;
 
         if (await filesSettingsHelper.GetRecentSection())
         {
             yield return await globalFolderHelper.FolderRecentAsync;
         }
+        yield return await globalFolderHelper.FolderShareAsync;
+
         var my = await globalFolderHelper.FolderMyAsync;
         if (my != 0)
         {
@@ -679,5 +657,6 @@ public class FoldersControllerCommon(
 
         yield return await globalFolderHelper.FolderVirtualRoomsAsync;
         yield return await globalFolderHelper.FolderArchiveAsync;
+        yield return await globalFolderHelper.FolderAiAgentsAsync;
     }
 }

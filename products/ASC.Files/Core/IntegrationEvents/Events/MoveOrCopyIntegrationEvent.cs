@@ -35,13 +35,13 @@ public record MoveOrCopyIntegrationEvent : IntegrationEvent
     {
 
     }
-    
+
     [ProtoMember(1)]
-    public string TaskId { get; set;}
-    
+    public string TaskId { get; set; }
+
     [ProtoMember(2)]
     public FileMoveCopyOperationData<int> Data { get; set; }
-    
+
     [ProtoMember(3)]
     public FileMoveCopyOperationData<string> ThirdPartyData { get; set; }
 }

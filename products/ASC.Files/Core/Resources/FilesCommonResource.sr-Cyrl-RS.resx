@@ -527,19 +527,19 @@
     <value>Отвори фајл</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Датотека не може бити померена у ову просторију. Молимо покушајте да померите {0} PDF формулар.</value>
+    <value>Датотека не може бити померена у ову просторију. Молимо покушајте да померите ONLYOFFICE PDF формулар.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Линк за попуњавање</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Померање неколико датотека у просторију за Попуњавање Формулара није подржано. Померајте један по један {0} PDF.</value>
+    <value>Померање неколико датотека у просторију за Попуњавање Формулара није подржано. Померајте један по један ONLYOFFICE PDF.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Померање фолдера у просторију за Попуњавање Формулара није подржано. Померајте један по један {0} PDF.</value>
+    <value>Померање фолдера у просторију за Попуњавање Формулара није подржано. Померајте један по један ONLYOFFICE PDF.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Датотека не може бити померена у ову просторију. Молимо покушајте да померите {0} PDF формулар.</value>
+    <value>Датотека не може бити померена у ову просторију. Молимо покушајте да померите ONLYOFFICE PDF формулар.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Број формулара</value>
@@ -573,5 +573,17 @@
   </data>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Гост</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Документи корисника {0} {1}</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Менaџер агената</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Знање</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Складиштење резултата</value>
   </data>
 </root>

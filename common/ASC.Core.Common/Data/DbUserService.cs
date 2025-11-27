@@ -32,7 +32,6 @@ namespace ASC.Core.Data;
 public class EFUserService(
     IDbContextFactory<UserDbContext> dbContextFactory,
     MachinePseudoKeys machinePseudoKeys,
-    IMapper mapper,
     AuthContext authContext)
     : IUserService
 {
@@ -41,7 +40,7 @@ public class EFUserService(
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         return await GetGroupQuery(userDbContext, tenant)
             .Where(r => r.Id == id)
-            .ProjectTo<Group>(mapper.ConfigurationProvider)
+            .Project()
             .FirstOrDefaultAsync();
     }
 
@@ -49,7 +48,7 @@ public class EFUserService(
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         return await GetGroupQuery(userDbContext, tenant)
-            .ProjectTo<Group>(mapper.ConfigurationProvider)
+            .Project()
             .ToListAsync();
     }
 
@@ -117,7 +116,7 @@ public class EFUserService(
             q = q.Take(count);
         }
 
-        await foreach (var group in q.ProjectTo<Group>(mapper.ConfigurationProvider).ToAsyncEnumerable())
+        await foreach (var group in q.Project().ToAsyncEnumerable())
         {
             yield return group;
         }
@@ -145,7 +144,7 @@ public class EFUserService(
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         var user = await userDbContext.UserByIdAsync(tenant, id);
-        return mapper.Map<UserInfo>(user);
+        return user.Map();
     }
 
     public UserInfo GetUser(int tenant, Guid id)
@@ -153,20 +152,20 @@ public class EFUserService(
         using var userDbContext = dbContextFactory.CreateDbContext();
         return GetUserQuery(userDbContext, tenant)
             .Where(r => r.Id == id)
-            .ProjectTo<UserInfo>(mapper.ConfigurationProvider)
+            .Project()
             .FirstOrDefault();
     }
 
     public async Task<UserInfo> GetUserAsync(int tenant, string email)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-        return mapper.Map<UserInfo>(await userDbContext.UserByEmailAsync(tenant, email));
+        return (await userDbContext.UserByEmailAsync(tenant, email)).Map();
     }
 
     public async Task<UserInfo> GetUserByUserName(int tenant, string userName)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-        return mapper.Map<UserInfo>(await userDbContext.UserByUserNameAsync(tenant, userName));
+        return (await userDbContext.UserByUserNameAsync(tenant, userName)).Map();
     }
 
     public async Task<UserInfo> GetUserByPasswordHashAsync(int tenant, string login, string passwordHash)
@@ -193,9 +192,7 @@ public class EFUserService(
                 q = q.Where(r => r.UserSecurity.TenantId == tenant);
             }
 
-            return await q.Select(r => r.User)
-                .ProjectTo<UserInfo>(mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync();
+            return await q.Select(r => r.User).Project().FirstOrDefaultAsync();
         }
         else
         {
@@ -203,7 +200,7 @@ public class EFUserService(
                 .Where(r => !r.Removed)
                 .Where(r => r.Email == login);
 
-            var users = await q.ProjectTo<UserInfo>(mapper.ConfigurationProvider).ToListAsync();
+            var users = await q.Project().ToListAsync();
             foreach (var user in users)
             {
                 var pwdHash = GetPasswordHash(user.Id, passwordHash);
@@ -228,7 +225,7 @@ public class EFUserService(
             .Where(r => userIds.Contains(r.Id))
             .Where(r => !r.Removed);
 
-        return await q.ProjectTo<UserInfo>(mapper.ConfigurationProvider).ToListAsync();
+        return await q.Project().ToListAsync();
     }
 
     public async Task<UserGroupRef> GetUserGroupRefAsync(int tenant, Guid groupId, UserGroupRefType refType)
@@ -247,14 +244,13 @@ public class EFUserService(
             q = q.Where(r => r.TenantId == tenant);
         }
 
-        return q.Where(r => r.UserGroupId == groupId && r.RefType == refType && !r.Removed)
-            .ProjectTo<UserGroupRef>(mapper.ConfigurationProvider);
+        return q.Where(r => r.UserGroupId == groupId && r.RefType == refType && !r.Removed).Project();
     }
 
     public async Task<IDictionary<string, UserGroupRef>> GetUserGroupRefsAsync(int tenant)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-        return (mapper.Map<List<UserGroup>, IEnumerable<UserGroupRef>>(await userDbContext.GroupsByTenantAsync(tenant).ToListAsync())).ToDictionary(r => r.CreateKey(), r => r);
+        return (await userDbContext.GroupsByTenantAsync(tenant).ToListAsync()).Map().ToDictionary(r => r.CreateKey(), r => r);
     }
 
     public async Task<DateTime> GetUserPasswordStampAsync(int tenant, Guid id)
@@ -278,7 +274,7 @@ public class EFUserService(
     public async Task<IEnumerable<UserInfo>> GetUsersAsync(int tenant)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-        return mapper.Map<List<User>, IEnumerable<UserInfo>>(await userDbContext.UserByTenantAsync(tenant).ToListAsync());
+        return (await userDbContext.UserByTenantAsync(tenant).ToListAsync()).Map();
     }
 
     public async Task<int> GetUsersCountAsync(UserQueryFilter filter)
@@ -308,8 +304,8 @@ public class EFUserService(
         switch (filter.SortType)
         {
             case UserSortType.RegistrationDate:
-                q = filter.SortOrderAsc 
-                    ? q.OrderBy(r => r.CreateDate) 
+                q = filter.SortOrderAsc
+                    ? q.OrderBy(r => r.CreateDate)
                     : q.OrderByDescending(r => r.CreateDate);
                 break;
             case UserSortType.CreatedBy:
@@ -317,17 +313,17 @@ public class EFUserService(
                     var q1 = q.GroupJoin(userDbContext.Users,
                         u1 => new
                         {
-                            Id = u1.CreatedBy, 
+                            Id = u1.CreatedBy,
                             Removed = false
                         },
                         u2 => new
                         {
-                            Id = (Guid?)u2.Id, 
+                            Id = (Guid?)u2.Id,
                             u2.Removed
-                        }, 
+                        },
                         (u, users) => new { u, users })
                         .SelectMany(
-                            x => x.users.DefaultIfEmpty(), 
+                            x => x.users.DefaultIfEmpty(),
                             (x, createdBy) => new { x.u, createdBy });
 
                     if (UserFormatter.GetUserDisplayDefaultOrder() == DisplayUserNameFormat.FirstLast)
@@ -361,7 +357,7 @@ public class EFUserService(
                         u.Group.UserGroupId == Constants.GroupAdmin.ID ? 1 :
                         u.Group.UserGroupId == Constants.GroupUser.ID ? 3 : 4;
 
-                    q = (filter.SortOrderAsc ? q1.OrderBy(orderByUserType).ThenBy(x => x.User.FirstName) 
+                    q = (filter.SortOrderAsc ? q1.OrderBy(orderByUserType).ThenBy(x => x.User.FirstName)
                         : q1.OrderByDescending(orderByUserType)).ThenBy(x => x.User.FirstName).Select(r => r.User);
                     break;
                 }
@@ -380,8 +376,8 @@ public class EFUserService(
                         sum_counter = g.ToList().Sum()
                     });
 
-                    q = filter.SortOrderAsc 
-                        ? q3.OrderBy(r => r.sum_counter).Select(r => r.user) 
+                    q = filter.SortOrderAsc
+                        ? q3.OrderBy(r => r.sum_counter).Select(r => r.user)
                         : q3.OrderByDescending(r => r.sum_counter).Select(r => r.user);
                     break;
                 }
@@ -414,8 +410,8 @@ public class EFUserService(
             case UserSortType.FirstName:
             default:
                 q = filter.SortOrderAsc
-                    ? q.OrderBy(r => r.Status ==  EmployeeStatus.Active ? 0 : r.Status == EmployeeStatus.Pending ? 1 : 2).ThenBy(u => u.Status ==  EmployeeStatus.Pending ? u.Email : u.FirstName)
-                    : q.OrderBy(r => r.Status ==  EmployeeStatus.Active ? 0 : r.Status == EmployeeStatus.Pending ? 1 : 2).ThenByDescending(u => u.Status ==  EmployeeStatus.Pending ? u.Email : u.FirstName);
+                    ? q.OrderBy(r => r.Status == EmployeeStatus.Active ? 0 : r.Status == EmployeeStatus.Pending ? 1 : 2).ThenBy(u => u.Status == EmployeeStatus.Pending ? u.Email : u.FirstName)
+                    : q.OrderBy(r => r.Status == EmployeeStatus.Active ? 0 : r.Status == EmployeeStatus.Pending ? 1 : 2).ThenByDescending(u => u.Status == EmployeeStatus.Pending ? u.Email : u.FirstName);
                 break;
         }
 
@@ -428,7 +424,7 @@ public class EFUserService(
 
         await foreach (var user in q.ToAsyncEnumerable())
         {
-            yield return mapper.Map<User, UserInfo>(user);
+            yield return user.Map();
         }
     }
 
@@ -546,7 +542,7 @@ public class EFUserService(
         group.LastModified = DateTime.UtcNow;
         group.TenantId = tenant;
 
-        var dbGroup = mapper.Map<Group, DbGroup>(group);
+        var dbGroup = group.Map();
 
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         await userDbContext.AddOrUpdateAsync(q => q.Groups, dbGroup);
@@ -595,7 +591,7 @@ public class EFUserService(
             throw new ArgumentException($"Duplicate {nameof(user.Email)}");
         }
 
-        await userDbContext.AddOrUpdateAsync(q => q.Users, mapper.Map<UserInfo, User>(user));
+        await userDbContext.AddOrUpdateAsync(q => q.Users, user.Map());
         await userDbContext.SaveChangesAsync();
 
         return user;
@@ -614,7 +610,7 @@ public class EFUserService(
         if (user != null)
         {
             user.LastModified = userGroupRef.LastModified;
-            await userDbContext.AddOrUpdateAsync(q => q.UserGroups, mapper.Map<UserGroupRef, UserGroup>(userGroupRef));
+            await userDbContext.AddOrUpdateAsync(q => q.UserGroups, userGroupRef.Map());
             await userDbContext.SaveChangesAsync();
         }
 
@@ -695,7 +691,7 @@ public class EFUserService(
         {
             return;
         }
-        
+
         await userDbContext.UserRelations.AddAsync(relation);
         await userDbContext.SaveChangesAsync();
     }
@@ -703,11 +699,11 @@ public class EFUserService(
     public async Task<Dictionary<Guid, UserRelation>> GetUserRelationsAsync(int tenantId, Guid sourceUserId)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-        
+
         var q = userDbContext.UserRelations
             .Where(r => r.TenantId == tenantId && r.SourceUserId == sourceUserId);
-        
-        return await q.ToDictionaryAsync(r => r.TargetUserId, mapper.Map<UserRelation>);
+
+        return await q.ToDictionaryAsync(r => r.TargetUserId, r => r.Map());
     }
 
     public async Task<Dictionary<Guid, UserRelation>> GetUserRelationsByTargetAsync(int tenantId, Guid targetUserId)
@@ -717,7 +713,7 @@ public class EFUserService(
         var q = userDbContext.UserRelations
             .Where(r => r.TenantId == tenantId && r.TargetUserId == targetUserId);
 
-        return await q.ToDictionaryAsync(r => r.TargetUserId, mapper.Map<UserRelation>);
+        return await q.ToDictionaryAsync(r => r.TargetUserId, r => r.Map());
     }
 
     public async Task DeleteUserRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId)
@@ -889,13 +885,13 @@ public class EFUserService(
                         u => new
                         {
                             filter.TenantId,
-                            SourceUserId = authContext.CurrentAccount.ID, 
+                            SourceUserId = authContext.CurrentAccount.ID,
                             TargetUserId = u.Id
                         },
                         ur => new
                         {
                             ur.TenantId,
-                            ur.SourceUserId, 
+                            ur.SourceUserId,
                             ur.TargetUserId
                         },
                         (u, ur) => u);
@@ -907,13 +903,13 @@ public class EFUserService(
                             u => new
                             {
                                 filter.TenantId,
-                                SourceUserId = authContext.CurrentAccount.ID, 
+                                SourceUserId = authContext.CurrentAccount.ID,
                                 TargetUserId = u.Id
                             },
                             ur => new
                             {
                                 ur.TenantId,
-                                ur.SourceUserId, 
+                                ur.SourceUserId,
                                 ur.TargetUserId
                             },
                             (u, ur) => new { u, ur })
@@ -941,7 +937,7 @@ public class EFUserService(
                         .SelectMany(
                             x => x.ug.DefaultIfEmpty(),
                             (x, ug) => new { x.u, x.ur, ug })
-                        .Where(x => 
+                        .Where(x =>
                             x.ug == null ||
                             (x.ur != null && x.ug != null))
                         .Select(x => x.u);
@@ -989,7 +985,7 @@ public class EFUserService(
             return await q.Select(exp).FirstOrDefaultAsync();
         }
 
-        return await q.ProjectTo<UserInfo>(mapper.ConfigurationProvider).FirstOrDefaultAsync();
+        return await q.Project().FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<string>> GetDavUserEmailsAsync(int tenant)

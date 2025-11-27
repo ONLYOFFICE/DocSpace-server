@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Microsoft.OpenApi.Models;
+
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
@@ -88,7 +89,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         else if (schema.Type == "array")
         {
             originalSchemaRef = schema.Items?.Reference?.Id;
-            var schemaArray = schema.Items ?? null;
+            var schemaArray = schema.Items;
             OpenApiSchema arrayResponseProperty;
 
             if (schema.OneOf != null && schema.OneOf.Any(s => s.Items != null))
@@ -128,7 +129,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
             }
             else
             {
-                responseSchemaKey = originalSchemaRef == null ? $"{schema.Items.Type.ToUpper()}ArrayWrapper" 
+                responseSchemaKey = originalSchemaRef == null ? $"{schema.Items.Type.ToUpper()}ArrayWrapper"
                     : originalSchemaRef.Contains("Dto") ? originalSchemaRef.Replace("Dto", "") + "ArrayWrapper" : originalSchemaRef + "ArrayWrapper";
                 arrayResponseProperty = new OpenApiSchema
                 {

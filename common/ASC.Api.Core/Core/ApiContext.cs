@@ -35,7 +35,7 @@ public class ApiContext(IHttpContextAccessor httpContextAccessor) : ICloneable
 
     public ApiContext SetTotalCount(long totalCollectionCount)
     {
-        httpContextAccessor.HttpContext?.Items.TryAdd("TotalCount",  totalCollectionCount);
+        httpContextAccessor.HttpContext?.Items.TryAdd("TotalCount", totalCollectionCount);
 
         return this;
     }

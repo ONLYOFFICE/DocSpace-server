@@ -30,8 +30,8 @@ namespace ASC.Core.Notify;
 public class NotifyServiceClient(IEventBus eventBus) : INotifyService
 {
     public async Task SendNotifyMessageAsync(NotifyMessage m)
-    {       
-        await eventBus.PublishAsync(new NotifySendMessageRequestedIntegrationEvent(Guid.Empty,  m.TenantId)
+    {
+        await eventBus.PublishAsync(new NotifySendMessageRequestedIntegrationEvent(Guid.Empty, m.TenantId)
         {
             NotifyMessage = m
         });

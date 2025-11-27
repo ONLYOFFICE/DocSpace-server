@@ -78,7 +78,7 @@ public static class UserPhotoExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });
     }
-    
+
     public static void PgSqlAddUserPhoto(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserPhoto>(entity =>

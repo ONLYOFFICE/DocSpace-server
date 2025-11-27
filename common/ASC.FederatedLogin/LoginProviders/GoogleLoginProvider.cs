@@ -39,7 +39,7 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
     public const string GoogleUrlFile = "https://www.googleapis.com/drive/v3/files/";
     public const string GoogleUrlFileUpload = "https://www.googleapis.com/upload/drive/v3/files";
     public const string GoogleUrlProfile = "https://people.googleapis.com/v1/people/me";
-    public static readonly ImmutableDictionary<string, string> GoogleAdditionalArgs =  new Dictionary<string, string> { { "access_type", "offline" }, { "prompt", "consent" } }.ToImmutableDictionary();
+    public static readonly ImmutableDictionary<string, string> GoogleAdditionalArgs = new Dictionary<string, string> { { "access_type", "offline" }, { "prompt", "consent" } }.ToImmutableDictionary();
 
     public override string AccessTokenUrl => "https://www.googleapis.com/oauth2/v4/token";
     public override string CodeUrl => "https://accounts.google.com/o/oauth2/v2/auth";
@@ -65,15 +65,15 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
         RequestHelper requestHelper,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         _requestHelper = requestHelper;
     }
 
     protected override OAuth20Token Auth(HttpContext context, out bool redirect, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null)
     {
-        return base.Auth(context, out redirect, (additionalArgs ?? new Dictionary<string, string>()).Union(GoogleAdditionalArgs).DistinctBy(r => r.Key).ToDictionary(r=> r.Key, r=> r.Value), additionalStateArgs);
+        return base.Auth(context, out redirect, (additionalArgs ?? new Dictionary<string, string>()).Union(GoogleAdditionalArgs).DistinctBy(r => r.Key).ToDictionary(r => r.Key, r => r.Value), additionalStateArgs);
     }
 
     public override LoginProfile GetLoginProfile(string accessToken)
@@ -85,7 +85,7 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
 
         return RequestProfile(accessToken);
     }
-    
+
     private LoginProfile RequestProfile(string accessToken)
     {
         var googleProfile = _requestHelper.PerformRequest(GoogleUrlProfile + "?personFields=" + HttpUtility.UrlEncode(ProfileFields), headers: new Dictionary<string, string> { { "Authorization", "Bearer " + accessToken } });

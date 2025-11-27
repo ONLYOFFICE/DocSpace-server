@@ -60,7 +60,7 @@ public static class TagValues
         sb.Append("</table>");
 
         return string.IsNullOrEmpty(tag)
-            ? new TagValue("OrangeButton", sb.ToString()) 
+            ? new TagValue("OrangeButton", sb.ToString())
             : new TagValue(tag, sb.ToString());
     }
 

@@ -24,12 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Core.Notify.Channels
+namespace ASC.Web.Core.Notify.Channels;
+
+[Scope(typeof(INotificationChannel))]
+public class EmailNotificationChannel : INotificationChannel
 {
-    [Scope(typeof(INotificationChannel))]
-    public class EmailNotificationChannel : INotificationChannel
-    {
-        public string Name => ASC.Core.Configuration.Constants.NotifyEMailSenderSysName;
-        public bool IsEnabled => true;
-    }
+    public string Name => ASC.Core.Configuration.Constants.NotifyEMailSenderSysName;
+    public bool IsEnabled => true;
 }

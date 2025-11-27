@@ -77,12 +77,10 @@ public class TfaManager(
 
     public async Task<(bool, string)> ValidateAuthCodeAsync(UserInfo user, string code, bool checkBackup = true, bool isEntryPoint = false)
     {
-        string token = default;
-
         if (!tfaAppAuthSettingsHelper.IsVisibleSettings
             || !(await settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting)
         {
-            return (false, token);
+            return (false, null);
         }
 
         if (user == null || Equals(user, Constants.LostUser))
@@ -122,6 +120,8 @@ public class TfaManager(
 
         Cache.Insert("tfa/" + user.Id, (counter - 1).ToString(CultureInfo.InvariantCulture), DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)));
 
+        string token = null;
+        
         if (!securityContext.IsAuthenticated)
         {
             var action = isEntryPoint ? MessageAction.LoginSuccessViaApiTfa : MessageAction.LoginSuccesViaTfaApp;

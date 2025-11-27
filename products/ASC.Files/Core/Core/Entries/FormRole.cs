@@ -35,7 +35,7 @@ public class FormRole
     /// The room ID.
     /// </summary>
     public int RoomId { get; set; }
-    
+
     /// <summary>
     /// The role name.
     /// </summary>
@@ -70,4 +70,10 @@ public class FormRole
     /// The date and time when the role was submitted.
     /// </summary>
     public DateTime SubmissionDate { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class FormRoleMapper
+{
+    public static partial FormRole Map(this DbFilesFormRoleMapping source);
 }

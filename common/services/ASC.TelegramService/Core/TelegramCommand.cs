@@ -24,14 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.TelegramService.Core
+namespace ASC.TelegramService.Core;
+
+public class TelegramCommand(Message msg, string cmdName, string[] args = null)
 {
-    public class TelegramCommand(Message msg, string cmdName, string[] args = null)
-    {
-        public string CommandName { get; private set; } = cmdName;
-        public string[] Args { get; private set; } = args;
-        public Message Message { get; private set; } = msg;
-        public User User { get { return Message.From; } }
-        public Chat Chat { get { return Message.Chat; } }
-    }
+    public string CommandName { get; private set; } = cmdName;
+    public string[] Args { get; private set; } = args;
+    public Message Message { get; private set; } = msg;
+    public User User { get { return Message.From; } }
+    public Chat Chat { get { return Message.Chat; } }
 }

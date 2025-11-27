@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Threading.HeartBeat.Abstractions;
+using ASC.Common.Threading.HeartBeat.RedisHeartBeat;
+
 using Microsoft.Extensions.Caching.Memory;
 
 using ZiggyCreatures.Caching.Fusion;
@@ -65,11 +68,11 @@ public static class ServiceCollectionExtension
     {
         var cacheBuilder = services
             .AddFusionCache()
-            .WithSystemTextJsonSerializer(new JsonSerializerOptions 
+            .WithSystemTextJsonSerializer(new JsonSerializerOptions
             {
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                WriteIndented = true 
-            })                
+                WriteIndented = true
+            })
             .WithOptions(new FusionCacheOptions
             {
                 DistributedCacheKeyModifierMode = CacheKeyModifierMode.None,
@@ -80,26 +83,26 @@ public static class ServiceCollectionExtension
                     FactoryHardTimeout = TimeSpan.FromSeconds(5)
                 }
             })
-            .WithMemoryCache(new MemoryCache(new MemoryCacheOptions { ExpirationScanFrequency = TimeSpan.FromSeconds(10),  }))
+            .WithMemoryCache(new MemoryCache(new MemoryCacheOptions { ExpirationScanFrequency = TimeSpan.FromSeconds(10), }))
             .WithRegisteredLogger();
-        
+
         if (connection != null)
-        {        
+        {
             //    hack for csp
             services.AddStackExchangeRedisCache(config =>
             {
                 config.ConnectionMultiplexerFactory = () => Task.FromResult(connection);
             });
-            
+
             cacheBuilder.WithBackplane(new RedisBackplane(new RedisBackplaneOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection) }));
         }
         else
-        {            
+        {
             services.AddDistributedMemoryCache();
         }
 
         cacheBuilder.WithRegisteredDistributedCache(false);
-        
+
         return services;
     }
 
@@ -127,16 +130,16 @@ public static class ServiceCollectionExtension
             .WithRegisteredLogger();
 
         if (connection != null)
-        {        
+        {
             cacheBuilder.WithBackplane(new RedisBackplane(new RedisBackplaneOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection) }));
         }
         else
-        {            
+        {
             services.AddDistributedMemoryCache();
         }
-        
+
         cacheBuilder.WithRegisteredDistributedCache(false);
-        
+
         return services;
     }
 
@@ -145,7 +148,7 @@ public static class ServiceCollectionExtension
         var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
 
         if (redisConfiguration != null)
-        {            
+        {
             services.AddSingleton<Medallion.Threading.IDistributedLockProvider>(sp =>
             {
                 var database = sp.GetRequiredService<IRedisClient>().GetDefaultDatabase().Database;
@@ -162,7 +165,7 @@ public static class ServiceCollectionExtension
                     {
                         opt.ExtensionCadence(extendInterval);
                     }
-                    
+
                     if (TimeSpan.TryParse(cfg["core:lock:minValidityTime"], out var minValidityTime))
                     {
                         opt.MinValidityTime(minValidityTime);
@@ -182,7 +185,7 @@ public static class ServiceCollectionExtension
                 var logger = sp.GetRequiredService<ILogger<RedisLockProvider>>();
                 var cfg = sp.GetRequiredService<IConfiguration>();
                 var internalProvider = sp.GetRequiredService<Medallion.Threading.IDistributedLockProvider>();
-                
+
                 return new RedisLockProvider(redisClient, logger, internalProvider, opt =>
                 {
                     if (TimeSpan.TryParse(cfg["core:lock:expiry"], out var expiry))
@@ -229,9 +232,9 @@ public static class ServiceCollectionExtension
                 var internalProvider = sp.GetRequiredService<Medallion.Threading.IDistributedLockProvider>();
                 var logger = sp.GetRequiredService<ILogger<ZooKeeperDistributedLockProvider>>();
                 var cfg = sp.GetRequiredService<IConfiguration>();
-                
-                return TimeSpan.TryParse(cfg["core:lock:minTimeout"], out var minTimeout) 
-                    ? new ZooKeeperDistributedLockProvider(internalProvider, logger, minTimeout) 
+
+                return TimeSpan.TryParse(cfg["core:lock:minTimeout"], out var minTimeout)
+                    ? new ZooKeeperDistributedLockProvider(internalProvider, logger, minTimeout)
                     : new ZooKeeperDistributedLockProvider(internalProvider, logger);
             });
         }
@@ -245,7 +248,7 @@ public static class ServiceCollectionExtension
 
         var rabbitMqConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
         var activeMqConfiguration = configuration.GetSection("ActiveMQ").Get<ActiveMQSettings>();
-        
+
         if (rabbitMqConfiguration != null)
         {
             services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
@@ -350,6 +353,30 @@ public static class ServiceCollectionExtension
         return services;
     }
 
+    public static IServiceCollection AddHeartBeat(this IServiceCollection services, IConfiguration configuration)
+    {
+        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
+        if (redisConfiguration == null)
+        {
+            throw new NotImplementedException("HeartBeat: Provider not found.");
+        }
+        
+        services.AddSingleton<IHeartBeatFactory, RedisHeartBeatFactory>(sp =>
+        {
+            var redisDatabase = sp.GetRequiredService<IRedisClient>().GetDefaultDatabase();
+            
+            return new RedisHeartBeatFactory(redisDatabase);
+        });
+        
+        services.AddSingleton<IHeartBeatMonitor, RedisHeartBeatMonitor>(sp =>
+        {
+            var redisDatabase = sp.GetRequiredService<IRedisClient>().GetDefaultDatabase();
+            
+            return new RedisHeartBeatMonitor(redisDatabase);
+        });
+        
+        return services;
+    }
 
     private static readonly List<string> _registeredActivePassiveHostedService = [];
     private static readonly Lock _locker = new();
@@ -360,7 +387,7 @@ public static class ServiceCollectionExtension
     /// </remarks>
     public static void AddActivePassiveHostedService<T>(
         this IServiceCollection services,
-        IConfiguration configuration, 
+        IConfiguration configuration,
         string workerTypeName = null) where T : ActivePassiveBackgroundService<T>
     {
         var typeName = workerTypeName ?? typeof(T).GetFormattedName();
@@ -383,7 +410,7 @@ public static class ServiceCollectionExtension
             configuration.GetSection("core:hosting").Bind(x);
             x.WorkerTypeName = workerTypeName ?? typeof(T).GetFormattedName();
         });
-        
+
         services.AddHostedService<T>();
     }
 
@@ -405,7 +432,7 @@ public static class ServiceCollectionExtension
     public static async Task<IConnectionMultiplexer> GetRedisConnectionMultiplexerAsync(this IServiceCollection services, IConfiguration configuration, string clientName)
     {
         var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
-        
+
         if (redisConfiguration == null)
         {
             return null;

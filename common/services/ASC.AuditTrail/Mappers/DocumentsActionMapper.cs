@@ -33,7 +33,8 @@ internal class DocumentsActionMapper : IProductActionMapper
         new FilesActionMapper(),
         new FoldersActionMapper(),
         new RoomsActionMapper(),
-        new SettingsActionMapper()
+        new SettingsActionMapper(),
+        new AgentsActionMapper()
     ];
 
     public ProductType Product => ProductType.Documents;
@@ -51,8 +52,7 @@ internal class FilesActionMapper : ILocationActionMapper
             {
                 EntryType.File, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Create, [MessageAction.FileCreated, MessageAction.FileCreatedVersion, MessageAction.FileRestoreVersion, MessageAction.FileConverted
-                        ]
+                    { ActionType.Create, [MessageAction.FileCreated, MessageAction.FileCreatedVersion, MessageAction.FileRestoreVersion, MessageAction.FileConverted, MessageAction.FileExternalLinkCreated]
                     },
                     {
                         ActionType.Update, [
@@ -60,11 +60,11 @@ internal class FilesActionMapper : ILocationActionMapper
                             MessageAction.FileLocked, MessageAction.FileUnlocked, MessageAction.FileOpenedForChange, MessageAction.FileMarkedAsFavorite,
                             MessageAction.FormStartedToFill, MessageAction.FormPartiallyFilled, MessageAction.FormCompletelyFilled, MessageAction.FormStopped,
                             MessageAction.FileRemovedFromFavorite, MessageAction.FileMarkedAsRead, MessageAction.FileReaded, MessageAction.FormSubmit, MessageAction.FormOpenedForFilling,
-                            MessageAction.FileIndexChanged, MessageAction.FolderIndexReordered, MessageAction.FileCustomFilterEnabled, MessageAction.FileCustomFilterDisabled
+                            MessageAction.FileIndexChanged, MessageAction.FolderIndexReordered, MessageAction.FileCustomFilterEnabled, MessageAction.FileCustomFilterDisabled,
+                            MessageAction.FileExternalLinkUpdated
                         ]
                     },
-                    { ActionType.Delete, [MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied, MessageAction.FileVersionRemoved
-                        ]
+                    { ActionType.Delete, [MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied, MessageAction.FileVersionRemoved, MessageAction.FileExternalLinkDeleted]
                     },
                     { ActionType.UpdateAccess, [MessageAction.FileUpdatedAccess, MessageAction.FileUpdatedAccessFor, MessageAction.FileRemovedFromList, MessageAction.FileExternalLinkAccessUpdated
                         ]
@@ -74,7 +74,7 @@ internal class FilesActionMapper : ILocationActionMapper
                     },
                     { ActionType.Send, [MessageAction.FileSendAccessLink, MessageAction.FileChangeOwner] },
                     { ActionType.Upload, [MessageAction.FileUploaded, MessageAction.FileUploadedWithOverwriting]}
-                }, 
+                },
                 new Dictionary<ActionType, MessageAction>
                 {
                     { ActionType.Import, MessageAction.FileImported },
@@ -90,8 +90,8 @@ internal class FilesActionMapper : ILocationActionMapper
             }
         };
 
-        Actions.Add(MessageAction.DocumentSignComplete, new MessageMaps("FilesDocumentSigned", ActionType.Send, ProductType.Documents, Location, EntryType.File));
-        Actions.Add(MessageAction.DocumentSendToSign, new MessageMaps("FilesRequestSign", ActionType.Send, ProductType.Documents, Location, EntryType.File));
+        Actions.Add(MessageAction.DocumentSignComplete, new MessageMaps(nameof(AuditReportResource.FilesDocumentSigned), ActionType.Send, ProductType.Documents, Location, EntryType.File));
+        Actions.Add(MessageAction.DocumentSendToSign, new MessageMaps(nameof(AuditReportResource.FilesRequestSign), ActionType.Send, ProductType.Documents, Location, EntryType.File));
     }
 }
 
@@ -108,10 +108,10 @@ internal class FoldersActionMapper : ILocationActionMapper
             {
                 EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Update, [MessageAction.FolderRenamed, MessageAction.FolderMarkedAsRead, MessageAction.FolderIndexChanged] },
-                    { ActionType.UpdateAccess, [MessageAction.FolderUpdatedAccess, MessageAction.FolderUpdatedAccessFor, MessageAction.FolderRemovedFromList
-                        ]
-                    }
+                    { ActionType.Create, [MessageAction.FolderExternalLinkCreated] },
+                    { ActionType.Update, [MessageAction.FolderRenamed, MessageAction.FolderMarkedAsRead, MessageAction.FolderIndexChanged, MessageAction.FolderExternalLinkUpdated] },
+                    { ActionType.UpdateAccess, [MessageAction.FolderUpdatedAccess, MessageAction.FolderUpdatedAccessFor, MessageAction.FolderRemovedFromList] },
+                    { ActionType.Delete, [MessageAction.FolderExternalLinkDeleted] }
                 },
                 new Dictionary<ActionType, MessageAction>
                 {
@@ -145,7 +145,7 @@ internal class RoomsActionMapper : ILocationActionMapper
             {
                 EntryType.Room, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Create, [MessageAction.RoomCreated] },
+                    { ActionType.Create, [MessageAction.RoomCreated, MessageAction.AgentCreated] },
                     { ActionType.Copy, [MessageAction.RoomCopied] },
                     {
                         ActionType.Update, [
@@ -165,6 +165,7 @@ internal class RoomsActionMapper : ILocationActionMapper
                             MessageAction.RoomExternalLinkCreated,
                             MessageAction.RoomExternalLinkUpdated,
                             MessageAction.RoomExternalLinkDeleted,
+                            MessageAction.RoomExternalLinkRevoked,
                             MessageAction.RoomGroupAdded,
                             MessageAction.RoomUpdateAccessForGroup,
                             MessageAction.RoomGroupRemove,
@@ -186,7 +187,40 @@ internal class RoomsActionMapper : ILocationActionMapper
             {
                 EntryType.Tag, new Dictionary<ActionType, MessageAction>
                 {
-                    { ActionType.Create, MessageAction.TagCreated }, 
+                    { ActionType.Create, MessageAction.TagCreated },
+                    { ActionType.Delete, MessageAction.TagsDeleted }
+                }
+            }
+        };
+    }
+}
+
+internal class AgentsActionMapper : ILocationActionMapper
+{
+    public LocationType Location { get; }
+    public IDictionary<MessageAction, MessageMaps> Actions { get; }
+
+    public AgentsActionMapper()
+    {
+        Location = LocationType.Agents;
+        Actions = new MessageMapsDictionary(ProductType.Documents, Location)
+        {
+            {
+                EntryType.Room, new Dictionary<ActionType, MessageAction[]>
+                {
+                    { ActionType.Create, [MessageAction.AgentCreated] },
+                    { ActionType.Update, [
+                        MessageAction.AgentRenamed, 
+                        MessageAction.AddedServerToAgent, 
+                        MessageAction.DeletedServerFromAgent
+                    ] },
+                    { ActionType.Delete, [MessageAction.AgentDeleted] }
+                }
+            },
+            {
+                EntryType.Tag, new Dictionary<ActionType, MessageAction>
+                {
+                    { ActionType.Create, MessageAction.TagCreated },
                     { ActionType.Delete, MessageAction.TagsDeleted }
                 }
             }

@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Common.Log;
+using ASC.Web.Studio.UserControls.Management;
 
 using Constants = ASC.Core.Configuration.Constants;
 
@@ -56,9 +57,10 @@ public class ThirdpartyController(
     LoginProfileTransport loginProfileTransport,
     EmailValidationKeyModelHelper emailValidationKeyModelHelper,
     UserSocketManager socketManager,
-    UserWebhookManager webhookManager)
+    UserWebhookManager webhookManager,
+    GeolocationHelper geolocationHelper)
     : ApiControllerBase
-    {
+{
 
 
     /// <summary>
@@ -84,7 +86,9 @@ public class ThirdpartyController(
 
         inDto.FromOnly = string.IsNullOrWhiteSpace(inDto.FromOnly) ? string.Empty : inDto.FromOnly.ToLower();
 
-        foreach (var provider in ProviderManager.AuthProviders.Where(provider => string.IsNullOrEmpty(inDto.FromOnly) || inDto.FromOnly == provider || (provider == "google" && inDto.FromOnly == "openid")))
+        var geoInfoKey = (await geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key;
+
+        foreach (var provider in ProviderManager.GetSortedAuthProviders(geoInfoKey).Where(provider => string.IsNullOrEmpty(inDto.FromOnly) || inDto.FromOnly == provider || (provider == "google" && inDto.FromOnly == "openid")))
         {
             if (inDto.InviteView && ProviderManager.InviteExceptProviders.Contains(provider))
             {
@@ -128,7 +132,7 @@ public class ThirdpartyController(
 
         if (!(coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Oauth))
         {
-            throw new Exception("ErrorNotAllowedOption");
+            throw new SecurityException(Resource.ErrorNotAllowedOption);
         }
 
         if (string.IsNullOrEmpty(profile.AuthorizationError))
@@ -285,7 +289,7 @@ public class ThirdpartyController(
         messageService.Send(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(inDto.Provider));
     }
 
-    private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, 
+    private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink,
         bool inviteByEmail, string cultureName, Guid? invitedBy)
     {
         if (SetupInfo.IsSecretEmail(email))
@@ -313,7 +317,7 @@ public class ThirdpartyController(
         user.FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName;
         user.LastName = string.IsNullOrEmpty(lastName) ? UserControlsCommonResource.UnknownLastName : lastName;
         user.Email = email;
-        
+
         if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, cultureName, StringComparison.InvariantCultureIgnoreCase)) != null)
         {
             user.CultureName = cultureName;
@@ -412,13 +416,10 @@ public class ThirdpartyController(
 
     private static string GetMeaningfulProviderName(string providerName)
     {
-        return providerName switch
-        {
-            "google" or "openid" => "Google",
-            "facebook" => "Facebook",
-            "twitter" => "Twitter",
-            "linkedin" => "LinkedIn",
-            _ => "Unknown Provider"
-        };
+        var result = string.IsNullOrEmpty(providerName)
+            ? null
+            : ConsumerExtension.GetResourceString(providerName == "openid" ? "Google" : providerName);
+
+        return result ?? "Unknown Provider";
     }
 }

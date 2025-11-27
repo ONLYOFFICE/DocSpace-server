@@ -135,7 +135,7 @@ public class DeleteVersionBatchRequestDto : FileOperationRequestBaseDto
     /// The file ID to delete.
     /// </summary>
     public required int FileId { get; set; }
-    
+
     /// <summary>
     /// The collection of file versions to be deleted.
     /// </summary>
@@ -173,7 +173,7 @@ public class DeleteRequestDto<T>
     /// The parameters for deleting a file.
     /// </summary>
     [FromBody]
-    public required Delete File {  get; set; }
+    public required Delete File { get; set; }
 }
 
 /// <summary>

@@ -126,7 +126,7 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
             methods = await _service.GetSubscriptionMethodsAsync(GetTenant(), sourceID, actionID, recipientID);
         }
 
-        var m = methods.FirstOrDefault(x => x.Action.Equals(actionID, StringComparison.OrdinalIgnoreCase)) ?? 
+        var m = methods.FirstOrDefault(x => x.Action.Equals(actionID, StringComparison.OrdinalIgnoreCase)) ??
                 methods.FirstOrDefault();
 
         return m != null ? m.Methods : [];

@@ -34,20 +34,6 @@ namespace ASC.Site.Core.Classes
     {
         private static readonly TimeSpan _validInterval = TimeSpan.FromHours(1);
 
-        public async Task<string> Encrypt(string value)
-        {
-            var data = Encoding.UTF8.GetBytes(value);
-            var encrypted = await instanceCrypto.EncryptAsync(data);
-            return WebEncoders.Base64UrlEncode(encrypted);
-        }
-
-        public async Task<string> Decrypt(string value)
-        {
-            var data = WebEncoders.Base64UrlDecode(value);
-            var decrypted = await instanceCrypto.DecryptAsync(data);
-            return decrypted;
-        }
-
         public string GetKey(string value)
         {
             return emailValidationKeyProvider.GetEmailKey(value, Tenant.DefaultTenant);

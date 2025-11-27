@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -469,19 +468,19 @@
     <value>Άνοιγμα αρχείου</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Το αρχείο δεν μπορεί να μεταφορτωθεί σε αυτό το δωμάτιο. Προσπαθήστε να μεταφορτώσετε τη φόρμα PDF του {0}.</value>
+    <value>Το αρχείο δεν μπορεί να μεταφορτωθεί σε αυτό το δωμάτιο. Προσπαθήστε να μεταφορτώσετε τη φόρμα PDF του ONLYOFFICE.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Σύνδεσμος για συμπλήρωση</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Η μετακίνηση πολλών αρχείων στο δωμάτιο Συμπλήρωσης Φορμών δεν υποστηρίζεται. Μετακινήστε μία φόρμα PDF του {0} κάθε φορά.</value>
+    <value>Η μετακίνηση πολλών αρχείων στο δωμάτιο Συμπλήρωσης Φορμών δεν υποστηρίζεται. Μετακινήστε μία φόρμα PDF του ONLYOFFICE κάθε φορά.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Η μετακίνηση φακέλων στο δωμάτιο Συμπλήρωσης Φορμών δεν υποστηρίζεται. Μετακινήστε μία φόρμα PDF του {0} κάθε φορά.</value>
+    <value>Η μετακίνηση φακέλων στο δωμάτιο Συμπλήρωσης Φορμών δεν υποστηρίζεται. Μετακινήστε μία φόρμα PDF του ONLYOFFICE κάθε φορά.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Το αρχείο δεν μπορεί να μετακινηθεί σε αυτό το δωμάτιο. Προσπαθήστε να μετακινήσετε τη φόρμα PDF του {0}.</value>
+    <value>Το αρχείο δεν μπορεί να μετακινηθεί σε αυτό το δωμάτιο. Προσπαθήστε να μετακινήσετε τη φόρμα PDF του ONLYOFFICE.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Αριθμός φόρμας</value>
@@ -515,5 +514,17 @@
   </data>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Επισκέπτης</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Διαχειριστής Εκπροσώπων</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Έγγραφα του χρήστη {0} {1}</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Γνώση</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Αποθήκευση αποτελεσμάτων</value>
   </data>
 </root>

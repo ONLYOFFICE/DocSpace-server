@@ -45,7 +45,7 @@ public partial class MarkDownStyler : IPatternStyler
         }
 
         var lines = message.Body.Split([Environment.NewLine, "\n"], StringSplitOptions.None);
-        foreach(var line in lines)
+        foreach (var line in lines)
         {
             if (string.IsNullOrEmpty(line)) { body += Environment.NewLine; continue; }
             var lineToAdd = _velocityArguments.Replace(line, ArgMatchReplace);
@@ -55,13 +55,13 @@ public partial class MarkDownStyler : IPatternStyler
         body = PlainTextRegex().Replace(body, "");
         body = HtmlLinkReplacer().Replace(body, @"[$2]($1)");
         body = HttpUtility.HtmlDecode(body);
-        body = SymbolReplacer().Replace(body, m => m.Groups[1].Success ? $@"[{LinkSymbolReplacer().Replace(m.Groups[1].Value, @"\$&")}]({m.Groups[2].Value})" : $@"\{m.Value}");
         body = BoldReplacer().Replace(body, "*");
         body = StrikeThroughReplacer().Replace(body, "~");
         body = UnderlineReplacer().Replace(body, "__");
         body = ItalicReplacer().Replace(body, "_");
         body = TagReplacer().Replace(body, "");
         body = MultilineBreaksReplacer().Replace(body, Environment.NewLine);
+        body = SymbolReplacer().Replace(body, m => m.Groups[1].Success ? $@"[{LinkSymbolReplacer().Replace(m.Groups[1].Value, @"\$&")}]({m.Groups[2].Value})" : $@"\{m.Value}");
         message.Body = body;
         return Task.CompletedTask;
     }

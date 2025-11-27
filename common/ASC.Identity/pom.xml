@@ -13,7 +13,7 @@
 
     <groupId>com.asc</groupId>
     <artifactId>identity</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <packaging>pom</packaging>
 
     <profiles>

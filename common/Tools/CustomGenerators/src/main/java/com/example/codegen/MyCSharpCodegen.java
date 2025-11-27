@@ -42,7 +42,6 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
 
     public MyCSharpCodegen() {
         super();
-        this.outputFolder = "generated-code/my-csharp";
         this.templateDir = "templates/csharp";
         this.embeddedTemplateDir = "csharp";
     }
@@ -50,6 +49,8 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
+
+        this.outputFolder = "generated-code/my-csharp";
 
         String baseURL = openAPI.getServers().get(0).getUrl();
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
@@ -168,6 +169,7 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
             TagParts tagParts = tagMap.get(camelize(className));
             operationMap.put("x-folder", tagParts.folderPart);
             operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
+            boolean shouldSupportFields = false;
             if (operationList != null) {
                 for (CodegenOperation op : operationList) { 
                     if (op.operationId != null) {
@@ -184,19 +186,8 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
                             .anyMatch(p -> "count".equals(p.baseName));
 
                         if (allAreQueryParams && hasCountParam) {
-                            CodegenParameter fieldsParam = new CodegenParameter();
-                            fieldsParam.baseName = "fields";
-                            fieldsParam.paramName = "fields";
-                            fieldsParam.dataType = "string";
-                            fieldsParam.description = "Comma-separated list of fields to include in the response";
-                            fieldsParam.required = false;
-                            fieldsParam.isQueryParam = true;
-                            fieldsParam.isPrimitiveType = true;
-                            fieldsParam.isNullable = true;
-                            fieldsParam.collectionFormat = "csv";
-
-                            op.allParams.add(fieldsParam);
-                            op.queryParams.add(fieldsParam);
+                            op.vendorExtensions.put("x-hasFieldsParam", true);
+                            shouldSupportFields = true;
                         }
                     }
 
@@ -223,6 +214,7 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
                     }
                 }
             }
+            operationMap.put("x-supportsFields", shouldSupportFields);
         }
 
         return objs;

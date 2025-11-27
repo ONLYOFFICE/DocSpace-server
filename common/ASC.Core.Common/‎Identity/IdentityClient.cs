@@ -64,7 +64,7 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
 
         var serverRootPath = baseCommonLinkUtility.ServerRootPath;
 
-        if (!isPublic.HasValue) 
+        if (!isPublic.HasValue)
         {
             var tenantDevToolsAccessSettings = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
 

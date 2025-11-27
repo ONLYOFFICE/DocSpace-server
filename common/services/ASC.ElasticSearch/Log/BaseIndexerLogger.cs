@@ -28,17 +28,17 @@ namespace ASC.ElasticSearch.Log;
 internal static partial class BaseIndexerLogger
 {
     [LoggerMessage(LogLevel.Debug, "Index: {indexName}, Count {count}, Max: {max}, Min: {min}")]
-    public static partial void DebugIndex(this ILogger logger, string indexName, int count, int max, int min);  
-    
+    public static partial void DebugIndex(this ILogger logger, string indexName, int count, int max, int min);
+
     [LoggerMessage(LogLevel.Debug, "index completed {indexName}")]
-    public static partial void DebugIndexCompleted(this ILogger logger, string indexName);  
-    
+    public static partial void DebugIndexCompleted(this ILogger logger, string indexName);
+
     [LoggerMessage(LogLevel.Debug, "Delete {indexName}")]
     public static partial void DebugIndexDeleted(this ILogger logger, string indexName);
 
     [LoggerMessage(LogLevel.Error, "CreateIfNotExist")]
-    public static partial void ErrorCreateIfNotExist(this ILogger logger, Exception exception); 
-    
+    public static partial void ErrorCreateIfNotExist(this ILogger logger, Exception exception);
+
     [LoggerMessage(LogLevel.Error, "CheckExist {indexName}")]
-    public static partial void ErrorCheckExist(this ILogger logger, string indexName, Exception exception); 
+    public static partial void ErrorCheckExist(this ILogger logger, string indexName, Exception exception);
 }

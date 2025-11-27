@@ -527,19 +527,19 @@ Highest compatibility with docx, xlsx, pptx.</value>
     <value>Open file</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>The file cannot be uploaded to this room. Please try to upload the {0} PDF form.</value>
+    <value>The file cannot be uploaded to this room. Please try to upload the ONLYOFFICE PDF form.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Link to fill out</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Moving several files to the Form Filling room is not supported. Move one {0} PDF form at a time.</value>
+    <value>Moving several files to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Moving folders to the Form Filling room is not supported. Move one {0} PDF form at a time.</value>
+    <value>Moving folders to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>The file cannot be moved to this room. Please try to move the {0} PDF form.</value>
+    <value>The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Form number</value>
@@ -573,5 +573,18 @@ Highest compatibility with docx, xlsx, pptx.</value>
   </data>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Guest</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Documents of user {0} {1}</value>
+    <comment>{0} - firstname, {1} - lastname</comment>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Result Storage</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Knowledge</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Agent Manager</value>
   </data>
 </root>

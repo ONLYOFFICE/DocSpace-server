@@ -40,4 +40,3 @@ internal static partial class CreateRoomTemplateOperationLogger
     [LoggerMessage(LogLevel.Warning, "CreateRoomTemplateOperation")]
     public static partial void WarningCanNotCopyFolder(this ILogger<CreateRoomTemplateOperation> logger, Exception exception);
 }
-

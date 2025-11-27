@@ -37,7 +37,7 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(D
     public abstract Selector Selector { get; }
     public abstract ProviderFilter ProviderFilter { get; }
     public virtual bool MutableEntityId => false;
-    
+
     internal readonly ProviderInfoHelper ProviderInfoHelper = providerInfoHelper;
 
     public DateTime CreateOn { get; set; }
@@ -54,6 +54,7 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(D
     public FolderType RootFolderType { get; set; }
     public AuthData AuthData { get; set; }
     public string Color { get; set; }
+    public string Cover { get; set; }
     private bool StorageOpened => wrapper.TryGetStorage(ProviderId, out var storage) && storage.IsOpened;
 
     public Task<IThirdPartyStorage<TFile, TFolder, TItem>> StorageAsync
@@ -107,7 +108,7 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(D
 
         return await ProviderInfoHelper.GetFileAsync(storage, ProviderId, fileId, Selector.Id);
     }
-    
+
     public async Task<TFolder> CreateFolderAsync(string title, string folderId, Func<TFolder, string> idSelector)
     {
         var storage = await StorageAsync;
@@ -175,8 +176,8 @@ public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
 
         return file;
     }
-    
-    internal async Task<TFolder> CreateFolderAsync<TFolder>(IThirdPartyFolderStorage<TFolder> storage, int id, string title, string folderId, string selector, 
+
+    internal async Task<TFolder> CreateFolderAsync<TFolder>(IThirdPartyFolderStorage<TFolder> storage, int id, string title, string folderId, string selector,
         Func<TFolder, string> idSelector) where TFolder : class
     {
         var folder = await storage.CreateFolderAsync(title, folderId);
@@ -216,10 +217,10 @@ public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
         {
             key += folder.Value ? "-d" : "-f";
         }
-        
+
         var items = await _cache.GetOrSetAsync<List<TItem>>(key, async (ctx, token) =>
         {
-            List<TItem> items = null;
+            List<TItem> items;
             if (folder != null && storage is IGoogleDriveItemStorage<TItem> googleStorage)
             {
                 items = await googleStorage.GetItemsAsync(folderId, folder);

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Hosting;
+
 namespace ASC.TelegramService.Services;
 
 [Singleton]
@@ -34,17 +36,22 @@ public class TelegramListenerService(
     TelegramHandlerService telegramHandler,
     ICacheNotify<DisableClientProto> cacheDisableClient,
     TenantManager singletonTenantManager,
-    IServiceProvider serviceProvider) : BackgroundService
+    IServiceScopeFactory scopeFactory,
+    IEventBus eventBus) : ActivePassiveBackgroundService<TelegramListenerService>(logger, scopeFactory)
 {
     private CancellationToken _stoppingToken;
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.FromMilliseconds(-1); // Inf
+
+    protected override Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
         _stoppingToken = stoppingToken;
 
         cacheRegisterUser.Subscribe(RegisterUser, CacheNotifyAction.Insert);
         cacheCreateClient.Subscribe(CreateOrUpdateClient, CacheNotifyAction.Insert);
         cacheDisableClient.Subscribe(DisableClient, CacheNotifyAction.Insert);
+        _ = eventBus.SubscribeAsync<NotifySendTelegramMessageRequestedIntegrationEvent, TelegramSendMessageRequestedIntegrationEventHandler>();
 
         stoppingToken.Register(() =>
         {
@@ -53,10 +60,11 @@ public class TelegramListenerService(
             cacheRegisterUser.Unsubscribe(CacheNotifyAction.Insert);
             cacheCreateClient.Unsubscribe(CacheNotifyAction.Insert);
             cacheDisableClient.Unsubscribe(CacheNotifyAction.Insert);
+            eventBus.Unsubscribe<NotifySendTelegramMessageRequestedIntegrationEvent, TelegramSendMessageRequestedIntegrationEventHandler>();
         });
-        
+
         _ = Task.Run(async () => await CreateClientsAsync(), stoppingToken);
-        
+
         return Task.CompletedTask;
     }
 
@@ -81,7 +89,7 @@ public class TelegramListenerService(
 
         foreach (var tenant in tenants)
         {
-            await using var scope = serviceProvider.CreateAsyncScope();
+            await using var scope = _scopeFactory.CreateAsyncScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             tenantManager.SetCurrentTenant(tenant);
             var consumerFactory = scope.ServiceProvider.GetService<ConsumerFactory>();

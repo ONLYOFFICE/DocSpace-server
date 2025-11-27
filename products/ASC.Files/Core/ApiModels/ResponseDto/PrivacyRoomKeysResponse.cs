@@ -34,5 +34,5 @@ public class PrivacyRoomKeysResponse
     /// <summary>
     /// Indicates whether the privacy room keys are set.
     /// </summary>
-    public bool IsSet { get; set; }
+    public required bool IsSet { get; set; }
 }

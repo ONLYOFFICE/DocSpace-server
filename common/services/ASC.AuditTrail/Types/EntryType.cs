@@ -51,5 +51,8 @@ public enum EntryType
     Room = 25,
 
     [SwaggerEnum("Tag")]
-    Tag = 26
+    Tag = 26,
+    
+    [SwaggerEnum("Agent")]
+    Agent = 27,
 }

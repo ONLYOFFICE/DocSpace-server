@@ -527,7 +527,7 @@
     <value>Twilio telefon numarası (SMS yetkilendirme için gereklidir)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Twitter hesabı kullanarak uygulamaya bağlan.</value>
+    <value>X hesabı kullanarak uygulamaya bağlan.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Yahoo kişi aktarımı uygulamasını etkinleştir.</value>
@@ -590,7 +590,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Şifre</value>
@@ -869,7 +869,7 @@
     <value>Müşteri Kimliği</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Kullanıcılarınızın, Twitter'larını kullanarak {LogoText}'te oturum açmalarına ve müşterilerinin Twitter hesaplarını CRM modülüne bağlamalarına izin vermek için bu uygulamayı etkinleştirin. {0}Twitter Developers Portal'a gidin ve yeni bir uygulama {LogoText} entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
+    <value>Kullanıcılarınızın, X'larını kullanarak {LogoText}'te oturum açmalarına ve müşterilerinin X hesaplarını CRM modülüne bağlamalarına izin vermek için bu uygulamayı etkinleştirin. {0}X Developers Portal'a gidin ve yeni bir uygulama {LogoText} entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Anahtarı</value>
@@ -1161,5 +1161,77 @@
   </data>
   <data name="TariffsFeature_backup_wallet" xml:space="preserve">
     <value>Yedekleme</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vektörleştirme</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Yapay zekâ araçları</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Belirteçler</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Yapay zekâ ajanı alan kotası aşıldı</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Yapay zekâ ajanı başına kota ayarlanamadı. Girilen değer, toplam DocSpace depolamasından daha büyük.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>İstemci Kimliği</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>İstemci Gizli Anahtarı</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Uygulamanın WeChat hesabı kullanarak portala giriş yapmasını etkinleştir.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Uygulamanın WeChat hesabı kullanarak portala giriş yapmasını etkinleştir.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Tarih</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-posta</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Ad</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Kimlik</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Soyadı</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Belge Hizmeti Kotası ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Eklenti sayısı sınırı aşıldı</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Yapay zekâ ajanı sayısı {0} değerini aşmamalı</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Yapay zekâ araçları</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Verimliliği artırmak için DocSpace üzerinde yapay zekâ özelliklerini etkinleştirin.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Yapay zekâ web araması</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Cüzdanınıza bakiye ekleyerek yapay zekâ web aramasının kilidini açın.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>DocSpace’inizden bildirim almak için Telegram bağlantınız başarıyla tamamlandı.</value>
   </data>
 </root>

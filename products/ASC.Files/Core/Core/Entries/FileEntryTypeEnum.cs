@@ -30,6 +30,7 @@ namespace ASC.Files.Core;
 /// The file entry type.
 /// </summary>
 [Flags]
+[EnumExtensions]
 public enum FileEntryType
 {
     [SwaggerEnum("Folder")]

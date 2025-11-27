@@ -476,7 +476,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Συνθηματικό</value>
@@ -779,10 +779,10 @@
     <value>Αναγνωριστικό πελάτη</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Ενεργοποιήστε την εφαρμογή για να συνδεθείτε στην πύλη χρησιμοποιώντας έναν λογαριασμό Twitter.</value>
+    <value>Ενεργοποιήστε την εφαρμογή για να συνδεθείτε στην πύλη χρησιμοποιώντας έναν λογαριασμό X.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Ενεργοποιήστε αυτήν την εφαρμογή για να επιτρέψετε στους χρήστες σας να συνδεθούν στο {LogoText} χρησιμοποιώντας το Twitter τους και να συνδέσουν τους λογαριασμούς Twitter των πελατών τους με την ενότητα CRM. {0}Πηγαίνετε στην πύλη προγραμματιστών του Twitter και δημιουργήστε μια νέα ενσωμάτωση εφαρμογής {LogoText}. Εισάγετε τα δεδομένα που λάβατε παρακάτω:</value>
+    <value>Ενεργοποιήστε αυτήν την εφαρμογή για να επιτρέψετε στους χρήστες σας να συνδεθούν στο {LogoText} χρησιμοποιώντας το X τους και να συνδέσουν τους λογαριασμούς X των πελατών τους με την ενότητα CRM. {0}Πηγαίνετε στην πύλη προγραμματιστών του X και δημιουργήστε μια νέα ενσωμάτωση εφαρμογής {LogoText}. Εισάγετε τα δεδομένα που λάβατε παρακάτω:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>Κλειδί API</value>
@@ -1161,5 +1161,77 @@
   </data>
   <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
     <value>Ο αριθμός των δωρεάν αντιγράφων ασφαλείας δεν πρέπει να υπερβαίνει τα {0} εντός ενός μήνα</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Προσθέστε χρήματα στο πορτοφόλι σας για να ξεκλειδώσετε αναζήτηση στο διαδίκτυο AI.</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Έγινε υπέρβαση ορίου χώρου εκπροσώπου AI</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Εργαλεία ΑΙ</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Εργαλεία ΑΙ</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Αναζήτηση AI στο διαδίκτυο</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Παρουσιάστηκε ένα απροσδόκητο σφάλμα. Προσπαθήστε ξανά.</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>Αναγνωριστικό πελάτη</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Μυστικός κωδικός πελάτη</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Ημερομηνία</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Όριο υπηρεσίας εγγράφων ({0})</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Ενεργοποιήστε τις λειτουργίες AI στο DocSpace σας για να αυξήσετε την παραγωγικότητα.</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Ενεργοποιήστε την εφαρμογή για να συνδεθείτε στην πύλη χρησιμοποιώντας έναν λογαριασμό WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Ενεργοποιήστε την εφαρμογή για να συνδεθείτε στην πύλη χρησιμοποιώντας έναν λογαριασμό WeChat.</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Αποτυχία ρύθμισης ορίου ανά εκπρόσωπο AI. Η τιμή που εισήχθη είναι μεγαλύτερη από τον συνολικό χώρο αποθήκευσης DocSpace.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Όνομα</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Αναγνωριστικό</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Επώνυμο</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Ο αριθμός των εκπροσώπων AI δεν πρέπει να υπερβαίνει τα {0}</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Ο αριθμός των προσθηκών υπερβαίνει το όριο</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Διακριτικά</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Διανυσματικοποίηση</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Έχετε συνδεθεί με επιτυχία στο Telegram για να λαμβάνετε ειδοποιήσεις από το DocSpace.</value>
   </data>
 </root>

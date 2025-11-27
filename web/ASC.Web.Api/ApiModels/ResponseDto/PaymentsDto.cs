@@ -32,27 +32,27 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class ReportDto
 {
     /// <summary>
-    /// Collection of operations.
+    /// A collection of operations.
     /// </summary>
     public List<OperationDto> Collection { get; set; }
     /// <summary>
-    /// Offset of the report data.
+    /// The report data offset.
     /// </summary>
     public int Offset { get; set; }
     /// <summary>
-    /// Limit of the report data.
+    /// The report data limit.
     /// </summary>
     public int Limit { get; set; }
     /// <summary>
-    /// Total quantity of operations in the report.
+    /// The total quantity of operations in the report.
     /// </summary>
     public int TotalQuantity { get; set; }
     /// <summary>
-    /// Total number of pages in the report.
+    /// The total number of pages in the report.
     /// </summary>
     public int TotalPage { get; set; }
     /// <summary>
-    /// Current page number of the report.
+    /// The current page number of the report.
     /// </summary>
     public int CurrentPage { get; set; }
 
@@ -82,27 +82,27 @@ public class ReportDto
 public class OperationDto
 {
     /// <summary>
-    /// Date of the operation.
+    /// The date when the operation took place.
     /// </summary>
     public ApiDateTime Date { get; set; }
     /// <summary>
-    /// Service related to the operation.
+    /// The service related to the operation.
     /// </summary>
     public string Service { get; set; }
     /// <summary>
-    /// Brief description of the operation.
+    /// The brief operation description.
     /// </summary>
     public string Description { get; set; }
     /// <summary>
-    /// Brief details of the operation.
+    /// The detailed information about the operation.
     /// </summary>
     public string Details { get; set; }
     /// <summary>
-    /// Unit of the service.
+    /// The service unit.
     /// </summary>
     public string ServiceUnit { get; set; }
     /// <summary>
-    /// Quantity of the service used.
+    /// The quantity of the service used.
     /// </summary>
     public int Quantity { get; set; }
     /// <summary>
@@ -110,19 +110,19 @@ public class OperationDto
     /// </summary>
     public string Currency { get; set; }
     /// <summary>
-    /// Credit amount of the operation.
+    /// The credit amount of the operation.
     /// </summary>
     public decimal Credit { get; set; }
     /// <summary>
-    /// Debit amount of the operation.
+    /// The debit amount of the operation.
     /// </summary>
     public decimal Debit { get; set; }
     /// <summary>
-    /// Original name of the participant.
+    /// The participant original name.
     /// </summary>
     public string ParticipantName { get; set; }
     /// <summary>
-    /// Display name of the participant.
+    /// The participant display name.
     /// </summary>
     public string ParticipantDisplayName { get; set; }
 
@@ -133,7 +133,7 @@ public class OperationDto
         Date = apiDateTimeHelper.Get(operation.Date);
         Service = operation.Service;
         Description = description;
-        Details = operation.Metadata != null && operation.Metadata.TryGetValue(BillingClient.MetadataDetails, out var details) ? details : string.Empty;
+        Details = GetDetails(operation.Metadata);
         ServiceUnit = unitOfMeasurement;
         Quantity = operation.Quantity;
         Currency = operation.Currency;
@@ -161,6 +161,32 @@ public class OperationDto
         return (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}"),
             Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"));
     }
+
+    private static string GetDetails(Dictionary<string, string> metadata)
+    {
+        if (metadata == null)
+        {
+            return string.Empty;
+        }
+        
+        if (metadata.TryGetValue(BillingClient.MetadataDetails, out var details))
+        {
+            return details;
+        }
+
+        if (metadata.TryGetValue("type", out var type))
+        {
+            switch (type)
+            {
+                case "chat":
+                    return metadata.GetValueOrDefault("model");
+                case "embedding":
+                    return Resource.AccountingAIServiceVectorizationDetails;
+            }
+        }
+        
+        return string.Empty;
+    }
 }
 
 /// <summary>
@@ -179,7 +205,7 @@ public class CustomerInfoDto(CustomerInfo customerInfo, EmployeeDto employeeDto)
     public PaymentMethodStatus PaymentMethodStatus { get; private set; } = customerInfo.PaymentMethodStatus;
 
     /// <summary>
-    /// The email address of the customer.
+    /// The customer email address.
     /// </summary>
     public string Email { get; private set; } = customerInfo.Email;
 

@@ -100,6 +100,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Farbschema wurde geändert</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kontakte</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Cookie-Einstellungen sind aktualisiert</value>
   </data>
@@ -268,9 +271,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sphinx Einstellungen aktualisiert</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Allgemeines</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Begrüßungseinstellungen aktualisiert</value>
   </data>
@@ -279,9 +279,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Gruppe gelöscht: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Gruppen</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Gruppe aktualisiert: {0}</value>
@@ -368,7 +365,7 @@
     <value>Erfolgreiche Anmeldung</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Login über Konto im sozialen Netzwerk ist erfolgreich</value>
+    <value>Anmeldung über Social-Media-Konto erfolgreich: {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Erfolgreiche Anmeldung über soziale Anwendung</value>
@@ -466,9 +463,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Produktliste aktualisiert</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Produkte</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Erneut zuweisen</value>
   </data>
@@ -484,13 +478,16 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Sitzung gestartet</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO deaktiviert</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO aktiviert</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Backup starten</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -609,9 +606,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Benutzer [{0}]. Anweisungen zur Änderung des Kennwortes wurden gesendet</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Benutzer</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Benutzer [{0}]. Anweisungen zur Aktivierung wurden gesendet</value>
@@ -799,9 +793,6 @@
   <data name="FolderIndexReordered" xml:space="preserve">
     <value>Ordner: {0}. Indizes neu geordnet</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="RoomDenyDownloadDisabled" xml:space="preserve">
     <value>Raum: {0}. Download-Einschränkung deaktiviert</value>
   </data>
@@ -936,5 +927,125 @@
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Vom Kunden-Wallet aktivierte Serviceeinstellungen aktualisiert</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Erfolgreiche Anmeldung über OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Anmeldung mit Benutzername und Passwort erfolgreich</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Dateien [{0}]. Externer Link erstellt: {1}. Rolle: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Dateien [{0}]. Externer Link gelöscht: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Dateien [{0}]. Externer Link aktualisiert: {1}. Rolle: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Datei als Favorit markiert: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Datei aus Favoriten entfernt: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Datei aus "Für mich freigegeben" entfernt: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Dateien [{0}]. Zugriff aktualisiert für {1}. Rolle: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Ordner heruntergeladen: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Ordner [{0}]. Externer Link erstellt: {1}. Rolle: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Ordner [{0}]. Externer Link gelöscht: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Ordner [{0}]. Externer Link aktualisiert: {1}. Rolle: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Ordner aus "Für mich freigegeben" entfernt: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Ordner [{0}]. Zugriff aktualisiert für {1}. Rolle: {2}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>xterner Link widerrufen: {1}</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Login über Konto im sozialen Netzwerk ist erfolgreich</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>MCP-Server {0} wurde dem Agenten hinzugefügt</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agent erstellt</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agent gelöscht</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agent umbenannt: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agenten</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>KI-Anbieter erstellt: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>KI-Anbieter gelöscht: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>KI-Anbieter aktualisiert: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>KI-Agenten [{0}]. Benutzerdefiniertes Speicherkontingent für KI-Agenten festgelegt: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>KI-Agenten [{0}]. Standard-Speicherkontingent für KI-Agenten festgelegt: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>KI-Agenten [{0}]. Speicherkontingent für KI-Agenten deaktiviert</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>MCP-Server {0} vom Agenten gelöscht</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Standard-Speicherkontingent für KI-Agenten festgelegt: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Standard-Speicherkontingent für KI-Agenten deaktiviert</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Vektorisierungseinstellungen zurückgesetzt</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Websucheinstellungen zurückgesetzt </value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP-Server erstellt: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP-Server gelöscht: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP-Server deaktiviert: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP-Server aktiviert: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP-Server aktualisiert: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Die Vektorisierungseinstellungen sind konfiguriert. Anbieter: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Die Websucheinstellungen sind konfiguriert. Suchmaschine: {0}</value>
   </data>
 </root>

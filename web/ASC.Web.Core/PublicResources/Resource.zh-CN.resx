@@ -620,7 +620,7 @@
     <value>来自Twilio的电话号码（需短信授权）</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>启动应用程序，以使用推特（Twitter）账户登录门户网站。</value>
+    <value>启动应用程序，以使用推特（X）账户登录门户网站。</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>启用雅虎联系人导入的应用程序。</value>
@@ -695,7 +695,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>密码</value>
@@ -884,7 +884,7 @@
     <value>客户端 ID</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>启用此应用以允许用户使用 Twitter 登录 {LogoText} 并在 CRM 模块中链接客户的 Twitter 账户。{0}前往 Twitter 开发者门户并为 {LogoText} 集成创建新应用。请在下方填写获得的信息：</value>
+    <value>启用此应用以允许用户使用 X 登录 {LogoText} 并在 CRM 模块中链接客户的 Twitter 账户。{0}前往 X 开发者门户并为 {LogoText} 集成创建新应用。请在下方填写获得的信息：</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>
@@ -1161,5 +1161,77 @@
   </data>
   <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
     <value>每月免费备份次数不超过{0}次</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>微信</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>客户端 ID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>客户端密钥</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>启用应用程序使用微信帐户登录门户。</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>启用应用程序使用微信帐户登录门户。</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>日期</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>电子邮箱</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>名字</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>姓氏</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>文档服务配额 ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>插件数量超出限制</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>发生意外错误，请重试。</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>您已成功连接 Telegram 并接收来自协作空间的通知。</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>向量化</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>AI 工具</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>AI 智能体空间配额已超出限制</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>设置每个 AI 智能体的配额失败。输入的值大于协作空间总存储空间。</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>AI 智能体数量不应超过{0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>AI 工具</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>在您的协作空间中启用 AI 功能，提升工作效率。</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>AI 联网搜索</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>为您的钱包充值即可解锁 AI 联网搜索。</value>
   </data>
 </root>

@@ -70,7 +70,10 @@ public enum LoginProvider
     Yahoo,
 
     [SwaggerEnum("Yandex")]
-    Yandex
+    Yandex,
+    
+    [SwaggerEnum("Github")]
+    Github,
 }
 
 public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : Consumer, ILoginProvider, new()
@@ -93,20 +96,20 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
     public abstract string ClientSecret { get; }
     public virtual string Scopes => string.Empty;
 
-    protected readonly OAuth20TokenHelper _oAuth20TokenHelper;
+    protected readonly IOAuth20TokenHelper _oAuth20TokenHelper;
 
     protected BaseLoginProvider() { }
 
     protected BaseLoginProvider(
-        OAuth20TokenHelper oAuth20TokenHelper,
+        IOAuth20TokenHelper oAuth20TokenHelper,
         TenantManager tenantManager,
         CoreBaseSettings coreBaseSettings,
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         _oAuth20TokenHelper = oAuth20TokenHelper;
     }

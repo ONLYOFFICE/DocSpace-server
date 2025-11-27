@@ -178,6 +178,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Agent Manager.
+        /// </summary>
+        public static string AgentManager {
+            get {
+                return ResourceManager.GetString("AgentManager", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to To work with the file you must grant access to it.
         /// </summary>
         public static string AppAccessDenied {
@@ -493,7 +502,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Moving several files to the Form Filling room is not supported. Move one {0} PDF form at a time..
+        ///   Looks up a localized string similar to Moving several files to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time..
         /// </summary>
         public static string ErrorMessage_FilesMoveFormFillingError {
             get {
@@ -520,7 +529,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Moving folders to the Form Filling room is not supported. Move one {0} PDF form at a time..
+        ///   Looks up a localized string similar to Moving folders to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time..
         /// </summary>
         public static string ErrorMessage_FolderMoveFormFillingError {
             get {
@@ -610,7 +619,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The file cannot be moved to this room. Please try to move the {0} PDF form..
+        ///   Looks up a localized string similar to The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form..
         /// </summary>
         public static string ErrorMessage_MoveToFormRoom {
             get {
@@ -943,7 +952,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The file cannot be uploaded to this room. Please try to upload the {0} PDF form..
+        ///   Looks up a localized string similar to The file cannot be uploaded to this room. Please try to upload the ONLYOFFICE PDF form..
         /// </summary>
         public static string ErrorMessage_UploadToFormRoom {
             get {
@@ -1006,6 +1015,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Documents of user {0} {1}.
+        /// </summary>
+        public static string FolderNameForReassignedData {
+            get {
+                return ResourceManager.GetString("FolderNameForReassignedData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Form number.
         /// </summary>
         public static string FormNumber {
@@ -1029,6 +1047,15 @@ namespace ASC.Files.Core.Resources {
         public static string IndexTitle {
             get {
                 return ResourceManager.GetString("IndexTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Knowledge.
+        /// </summary>
+        public static string KnowledgeFolder {
+            get {
+                return ResourceManager.GetString("KnowledgeFolder", resourceCulture);
             }
         }
         
@@ -1138,6 +1165,15 @@ namespace ASC.Files.Core.Resources {
         public static string ProductUserOpportunities {
             get {
                 return ResourceManager.GetString("ProductUserOpportunities", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Result Storage.
+        /// </summary>
+        public static string ResultStorageFolder {
+            get {
+                return ResourceManager.GetString("ResultStorageFolder", resourceCulture);
             }
         }
         

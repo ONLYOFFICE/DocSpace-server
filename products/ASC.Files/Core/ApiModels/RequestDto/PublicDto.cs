@@ -34,7 +34,7 @@ public class PublicDto
     /// <summary>
     /// The room template ID.
     /// </summary>
-    [FromRoute(Name="id")]
+    [FromRoute(Name = "id")]
     public required int Id { get; set; }
 }
 

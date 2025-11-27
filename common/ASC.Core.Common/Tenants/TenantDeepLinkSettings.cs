@@ -30,7 +30,7 @@ namespace ASC.Core.Tenants;
 /// The deep link settings.
 /// </summary>
 [Serializable]
-public class TenantDeepLinkSettings: ISettings<TenantDeepLinkSettings>
+public class TenantDeepLinkSettings : ISettings<TenantDeepLinkSettings>
 {
     /// <summary>
     /// The tenant ID.
@@ -50,7 +50,7 @@ public class TenantDeepLinkSettings: ISettings<TenantDeepLinkSettings>
     {
         return new TenantDeepLinkSettings();
     }
-    
+
     public DateTime LastModified { get; set; }
 }
 

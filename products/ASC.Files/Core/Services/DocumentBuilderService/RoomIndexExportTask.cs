@@ -28,18 +28,18 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Transient]
 public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskData>
-{    
+{
     private const string ScriptName = "RoomIndexExport.docbuilder";
-    
+
     public RoomIndexExportTask()
     {
-        
+
     }
-    
+
     public RoomIndexExportTask(IServiceScopeFactory serviceProvider) : base(serviceProvider)
     {
     }
-    
+
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
         var (scriptFilePath, tempFileName, outputFileName) = await GetRoomIndexExportData(serviceProvider, _userId, _data.RoomId);
@@ -65,7 +65,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
         using var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
-        
+
         var fileDao = daoFactory.GetFileDao<int>();
 
         file.ContentLength = stream.Length;
@@ -75,8 +75,8 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
 
         var filesMessageService = serviceProvider.GetService<FilesMessageService>();
 
-        var headers = _data.Headers != null 
-            ? _data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value)) 
+        var headers = _data.Headers != null
+            ? _data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value))
             : [];
 
         var room = await daoFactory.GetFolderDao<int>().GetFolderAsync(_data.RoomId);
@@ -219,7 +219,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
 
         while (true)
         {
-            var (entries, _) = await entryManager.GetEntriesAsync(room, room, from, count, [filterType], false, Guid.Empty, null, null, false, true, new OrderBy(SortedByType.CustomOrder, true));
+            var (entries, _) = await entryManager.GetEntriesAsync(room, room, from, count, [filterType], false, Guid.Empty, Guid.Empty, null, null, false, true, new OrderBy(SortedByType.CustomOrder, true));
             var typedEntries = entries.OfType<FileEntry<T>>().ToList();
 
             if (filterType == FilterType.FoldersOnly)

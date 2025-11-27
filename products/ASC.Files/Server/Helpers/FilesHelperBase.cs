@@ -39,7 +39,7 @@ public abstract class FilesHelperBase(
     IEventBus eventBus,
     TenantManager tenantManager,
     AuthContext authContext)
-    {
+{
     protected readonly FilesSettingsHelper _filesSettingsHelper = filesSettingsHelper;
     protected readonly FileUploader _fileUploader = fileUploader;
     protected readonly FileDtoHelper _fileDtoHelper = fileDtoHelper;

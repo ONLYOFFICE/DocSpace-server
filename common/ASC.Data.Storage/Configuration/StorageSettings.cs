@@ -84,18 +84,18 @@ public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>>
     /// The storage properties.
     /// </summary>
     public Dictionary<string, string> Props { get; set; }
-    
+
     [JsonIgnore]
     public virtual Func<DataStoreConsumer, DataStoreConsumer> Switch => d => d;
     public abstract Guid ID { get; }
-    
+
     internal ICacheNotify<DataStoreCacheItem> Cache { get; set; }
 
     public BaseStorageSettings<T> GetDefault()
     {
         throw new NotImplementedException();
     }
-    
+
     public DateTime LastModified { get; set; }
 }
 

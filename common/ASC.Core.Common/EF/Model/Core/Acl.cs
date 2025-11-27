@@ -28,7 +28,7 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Core.Common.EF;
 
-public class Acl : BaseEntity, IMapFrom<AzRecord>
+public class Acl : BaseEntity
 {
     public int TenantId { get; set; }
     public Guid Subject { get; set; }
@@ -186,6 +186,6 @@ public static class AclExtension
 
             entity.Property(e => e.AceType).HasColumnName("acetype");
         });
-        
+
     }
 }

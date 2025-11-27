@@ -58,7 +58,7 @@ public class EmailValidationKeyModelHelper(
         {
             cType = confirmType;
         }
-        
+
         if (!request.TryGetValue("key", out var key))
         {
             key = httpContextAccessor.HttpContext.Request.Cookies[cookiesManager.GetConfirmCookiesName() + $"_{type}"];
@@ -96,18 +96,18 @@ public class EmailValidationKeyModelHelper(
 
         ValidationResult checkKeyResult;
         UserInfo userInfo;
-        
+
         switch (type)
         {
             case ConfirmType.EmpInvite:
                 checkKeyResult = provider.ValidateEmailKey(email + type + (int)emplType, key, provider.ValidEmailKeyInterval);
                 if (checkKeyResult == ValidationResult.Invalid)
-                {   
+                {
                     checkKeyResult = provider.ValidateEmailKey(email + type + (int)emplType + "trust", key, provider.ValidEmailKeyInterval);
                     if (checkKeyResult == ValidationResult.Ok)
-                    {                        
+                    {
                         var tenant = tenantManager.GetCurrentTenant();
-                        
+
                         if (tenant.TrustedDomainsType == TenantTrustedDomainsType.All)
                         {
                             break;
@@ -118,7 +118,7 @@ public class EmailValidationKeyModelHelper(
                             checkKeyResult = ValidationResult.Invalid;
                             break;
                         }
-                        
+
                         var address = new MailAddress(email);
 
                         var trustedDomain = tenant.TrustedDomains.FirstOrDefault(d => address.Address.EndsWith("@" + d.Replace("*", ""), StringComparison.InvariantCultureIgnoreCase));
@@ -142,7 +142,7 @@ public class EmailValidationKeyModelHelper(
                 }
 
                 var newOwner = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
-                if(Equals(newOwner, Constants.LostUser) || newOwner.Status == EmployeeStatus.Terminated)
+                if (Equals(newOwner, Constants.LostUser) || newOwner.Status == EmployeeStatus.Terminated)
                 {
                     checkKeyResult = ValidationResult.Invalid;
                     break;
@@ -159,7 +159,7 @@ public class EmailValidationKeyModelHelper(
                 break;
             case ConfirmType.PasswordChange:
                 userInfo = await userManager.GetUserByEmailAsync(email);
-                if(Equals(userInfo, Constants.LostUser) || userInfo.Id != uiD || userInfo.Status == EmployeeStatus.Terminated)
+                if (Equals(userInfo, Constants.LostUser) || userInfo.Id != uiD || userInfo.Status == EmployeeStatus.Terminated)
                 {
                     checkKeyResult = ValidationResult.Invalid;
                     break;
@@ -181,11 +181,11 @@ public class EmailValidationKeyModelHelper(
                 }
 
                 checkKeyResult = provider.ValidateEmailKey(email + type + hash, key, provider.ValidEmailKeyInterval);
-                
+
                 if (checkKeyResult is ValidationResult.Ok && userInfo.ActivationStatus is not EmployeeActivationStatus.Activated)
                 {
                     await securityContext.AuthenticateMeWithoutCookieAsync(userInfo.Id);
-                    
+
                     userInfo.ActivationStatus = EmployeeActivationStatus.Activated;
                     await userManager.UpdateUserInfoAsync(userInfo);
                 }
@@ -223,7 +223,7 @@ public class EmailValidationKeyModelHelper(
             case ConfirmType.Auth:
                 var validInterval = DateTime.UtcNow.Add(-provider.ValidAuthKeyInterval);
                 var authLinkActivatedEvent = (await loginEventsRepository.GetByFilterAsync(action: MessageAction.AuthLinkActivated, fromDate: validInterval))
-                    .FirstOrDefault(x=> x.Description.Contains(key));
+                    .FirstOrDefault(x => x.Description.Contains(key));
                 if (authLinkActivatedEvent != null)
                 {
                     return (ValidationResult.Invalid, null);
@@ -235,7 +235,7 @@ public class EmailValidationKeyModelHelper(
                     userInfo = await userManager.GetUserByEmailAsync(email);
                     var portalRenameEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.PortalRenamed, target: MessageTarget.Create(tenantManager.GetCurrentTenantId()).ToString(), limit: 1)).FirstOrDefault();
                     if (portalRenameEvent != null)
-                    {                    
+                    {
                         var portalRenameEventDate = tenantUtil.DateTimeToUtc(portalRenameEvent.Date);
                         if (portalRenameEventDate >= validInterval)
                         {
@@ -270,6 +270,24 @@ public class EmailValidationKeyModelHelper(
                     checkKeyResult = ValidationResult.Invalid;
                     break;
                 }
+
+                var userInfoType = await userManager.GetUserTypeAsync(userInfo);
+                if (userInfoType is not EmployeeType.Guest)
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
+
+                if (uiD.HasValue)
+                {
+                    var user = await userManager.GetUsersAsync(uiD.Value);
+                    if (Equals(user, Constants.LostUser) || user.Status == EmployeeStatus.Terminated)
+                    {
+                        checkKeyResult = ValidationResult.Invalid;
+                        break;
+                    }
+                }
+
                 checkKeyResult = provider.ValidateEmailKey(email + type + uiD + userInfo.Id, key, provider.ValidEmailKeyInterval);
                 break;
 

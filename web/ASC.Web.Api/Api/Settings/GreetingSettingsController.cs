@@ -118,7 +118,7 @@ public class GreetingSettingsController(
         await tenantInfoSettingsHelper.RestoreDefaultTenantNameAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
-        
+
         return tenant.Name == "" ? Resource.PortalName : tenant.Name;
     }
 }

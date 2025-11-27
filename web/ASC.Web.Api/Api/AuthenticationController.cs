@@ -71,8 +71,7 @@ public class AuthenticationController(
     InvitationService invitationService,
     UserSocketManager socketManager,
     LoginProfileTransport loginProfileTransport,
-    AuditEventsRepository auditEventsRepository,
-    IMapper mapper)
+    AuditEventsRepository auditEventsRepository)
     : ControllerBase
 {
     /// <summary>
@@ -241,7 +240,7 @@ public class AuthenticationController(
         if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
             var tfaExpired = await TfaAppUserSettings.TfaExpiredAndResetAsync(settingsManager, auditEventsRepository, user.Id);
-            
+
             if (tfaExpired || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
             {
                 var (urlActivation, keyActivation) = commonLinkUtility.GetConfirmationUrlAndKey(user.Id, ConfirmType.TfaActivation);
@@ -293,7 +292,7 @@ public class AuthenticationController(
 
             var token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session, initiator, description);
 
-            if (!string.IsNullOrEmpty(inDto.Culture))
+            if (!string.IsNullOrEmpty(inDto.Culture) && user.CultureName != inDto.Culture)
             {
                 await userManager.ChangeUserCulture(user, inDto.Culture);
                 messageService.Send(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
@@ -358,7 +357,7 @@ public class AuthenticationController(
     public async Task<string> Logout()
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
-        var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
+        var (loginEventId, _) = cookieStorage.GetLoginEventIdFromCookie(cookie);
         var tenantId = tenantManager.GetCurrentTenantId();
         await dbLoginEventsManager.LogOutEventAsync(tenantId, loginEventId);
         await quotaSocketManager.LogoutSession(securityContext.CurrentAccount.ID, loginEventId);
@@ -423,7 +422,7 @@ public class AuthenticationController(
 
         var result = await invitationService.ConfirmAsync(inDto.Key, email, inDto.EmplType ?? default, inDto.RoomId, inDto.UiD);
 
-        return mapper.Map<Validation, ConfirmDto>(result);
+        return result.Map();
     }
 
     /// <summary>
@@ -491,7 +490,7 @@ public class AuthenticationController(
             Expires = new ApiDateTime(tenantManager, timeZoneConverter, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
         };
     }
-    
+
     private async Task<UserInfoWrapper> GetUserAsync(AuthRequestsDto inDto)
     {
         var wrapper = new UserInfoWrapper();
@@ -557,10 +556,10 @@ public class AuthenticationController(
 
                 if (ldapSettings.EnableLdapAuthentication)
                 {
-                    user = await ldapUserManager.TryGetAndSyncLdapUserInfo(inDto.UserName, inDto.Password);  
+                    user = await ldapUserManager.TryGetAndSyncLdapUserInfo(inDto.UserName, inDto.Password);
                 }
 
-                if(user == null || Equals(user, Constants.LostUser))
+                if (user == null || Equals(user, Constants.LostUser))
                 {
                     user = await userManager.GetUsersByPasswordHashAsync(tenantManager.GetCurrentTenantId(), inDto.UserName, inDto.PasswordHash);
                 }
@@ -576,8 +575,8 @@ public class AuthenticationController(
 
                 action = MessageAction.LoginFailViaApiSocialAccount;
 
-                var thirdPartyProfile = !string.IsNullOrEmpty(inDto.SerializedProfile) ? 
-                    await loginProfileTransport.FromTransport(inDto.SerializedProfile) : 
+                var thirdPartyProfile = !string.IsNullOrEmpty(inDto.SerializedProfile) ?
+                    await loginProfileTransport.FromTransport(inDto.SerializedProfile) :
                     providerManager.GetLoginProfile(inDto.Provider, inDto.AccessToken, inDto.CodeOAuth);
 
                 wrapper.LoginType = LoginType.SocialAccount;
@@ -606,7 +605,7 @@ public class AuthenticationController(
         wrapper.UserInfo = user;
         return wrapper;
     }
-    
+
     private async Task<UserInfo> GetUserByThirdParty(LoginProfile loginProfile)
     {
         try
@@ -628,7 +627,7 @@ public class AuthenticationController(
             {
                 userInfo = await userManager.GetUsersAsync(userId);
             }
-            else if(!string.IsNullOrEmpty(loginProfile.EMail) && !string.IsNullOrEmpty(loginProfile.HashId))
+            else if (!string.IsNullOrEmpty(loginProfile.EMail) && !string.IsNullOrEmpty(loginProfile.HashId))
             {
                 userInfo = await userManager.GetUserByEmailAsync(loginProfile.EMail);
                 if (userInfo.Id != Constants.LostUser.Id)
@@ -677,7 +676,7 @@ public class AuthenticationController(
             throw;
         }
     }
-    
+
     private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
     {
         if (string.IsNullOrEmpty(loginProfile.EMail))
@@ -706,7 +705,7 @@ public class AuthenticationController(
 
         return userInfo;
     }
-    
+
     private UserInfo ProfileToUserInfo(LoginProfile loginProfile)
     {
         if (string.IsNullOrEmpty(loginProfile.EMail))
@@ -739,7 +738,7 @@ public class AuthenticationController(
 
         return userInfo;
     }
-    
+
     private async Task<(bool, Guid)> TryGetUserByHashAsync(string hashId)
     {
         var userId = Guid.Empty;
@@ -749,7 +748,7 @@ public class AuthenticationController(
         }
 
         var linkedProfiles = await accountLinker.GetLinkedObjectsByHashIdAsync(hashId);
-        
+
         foreach (var profileId in linkedProfiles)
         {
             if (Guid.TryParse(profileId, out var tmp) && await userManager.UserExistsAsync(tmp))

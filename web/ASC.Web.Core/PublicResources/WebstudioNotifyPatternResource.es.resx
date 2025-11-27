@@ -1997,4 +1997,101 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Su contraseña se ha cambiado correctamente</value>
   </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Hola, $NombreUsuario,
+
+El proceso de copia de seguridad programado para su DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ha fallado.
+
+Le recomendamos que compruebe los ajustes "Copia de seguridad":"${__VirtualRootPath}/portal-settings/backup/data-backup" y "Servicios":"${__VirtualRootPath}/portal-settings/services".
+
+Si tiene alguna pregunta o necesita ayuda, no dude en ponerse en contacto con nosotros a través de "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Error en la copia de seguridad automática de DocSpace</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Hola, $NombreUsuario,
+
+El proceso de copia de seguridad programado para su DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ha fallado.
+
+Le recomendamos que compruebe los ajustes [Copia de seguridad](${__VirtualRootPath}/portal-settings/backup/data-backup) y [Servicios](${__VirtualRootPath}/portal-settings/services).
+
+Si tiene alguna pregunta o necesita ayuda, no dude en ponerse en contacto con nosotros a través de [${__SupportLink}](${__SupportLink})
+
+Saludos cordiales,
+${LetterLogoText} Equipo de soporte
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha creado un nuevo agente: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha eliminado el agente: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; ha renombrado el agente: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; se le ha asignado el rol de &lt;b&gt;{1}&lt;/b&gt; en el agente: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; se ha añadido al agente: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; se ha eliminado del agente: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Únase a un agente</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Hola, $UserName,
+
+El proceso de copia de seguridad de su DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}" ha fallado.
+
+Si tiene alguna pregunta o necesita ayuda, no dude en ponerse en contacto con nosotros a través de "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Hola, $UserName,
+
+El proceso de copia de seguridad de su DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ha fallado.
+
+Si tiene alguna pregunta o necesita ayuda, no dude en ponerse en contacto con nosotros a través de [${__SupportLink}](${__SupportLink})
+
+Atentamente,
+${LetterLogoText} Equipo de soporte
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>¡Hola!
+
+Se le invita a unirse a un agente de DocSpace en "${__VirtualRootPath}":"${__VirtualRootPath}". Acepte la invitación haciendo clic en el enlace:
+
+$OrangeButton
+
+Después de hacer clic en el enlace de invitación, establezca una nueva contraseña para su cuenta.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>¡Hola!
+
+$__AuthorName le ha invitado a unirse al agente "$Message":"$InviteLink" en "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Ha fallado la copia de seguridad de su DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Únase a ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Está invitado al ${LetterLogoText} agente de DocSpace</value>
+  </data>
 </root>

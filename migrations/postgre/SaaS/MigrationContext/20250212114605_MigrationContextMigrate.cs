@@ -1,7 +1,10 @@
 using System;
+
 using ASC.Files.Core.EF;
 using ASC.Files.Core.Security;
+
 using Microsoft.EntityFrameworkCore.Migrations;
+
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
