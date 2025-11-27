@@ -366,6 +366,10 @@ public class FolderDtoHelper(
             else if (Equals(result.OriginRoomId, await _globalFolderHelper.FolderArchiveAsync))
             {
                 result.OriginRoomTitle = result.OriginTitle;
+            }            
+            else if(result.RootFolderType == FolderType.USER)
+            {
+                result.OriginRoomTitle = FilesUCResource.SharedForMe;
             }
         }
 
