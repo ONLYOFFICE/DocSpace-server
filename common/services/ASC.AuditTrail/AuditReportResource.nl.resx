@@ -338,7 +338,7 @@
     <value>Inloggen Gelukt</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Inloggen via Social Media Gelukt</value>
+    <value>Inloggen via Social Media Gelukt: {0}</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Succesvolle Login via API</value>
@@ -442,7 +442,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO Ingeschakeld</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Start back-up</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
@@ -930,5 +930,122 @@
   </data>
   <data name="LoginSuccessSocialAccount" xml:space="preserve">
     <value>Inloggen via Social Media Gelukt</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>MCP-server {0} toegevoegd aan agent</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agent aangemaakt</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agent verwijderd</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agent hernoemd: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agenten</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>AI- provider aangemaakt: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>AI- provider verwijderd: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>AI- provider bijgewerkt: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI-agenten [{0}]. Aangepaste opslagquota instellen voor AI-agenten: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI-agenten [{0}]. Standaard opslagquota instellen voor AI-agenten : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI-agenten [{0}]. Opslagquota voor AI-agenten uitgeschakeld</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>MCP-server {0} verwijderd uit agent</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Bestanden [{0}]. Externe link aangemaakt: {1}. Rol: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Bestanden [{0}]. Externe link verwijderd: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Bestanden [{0}]. Externe link bijgewerkt: {1}.c Rol: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Bestand Gemarkeerd Als Favoriet: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Bestand Verwijderd Uit Favorieten: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Bestand verwijderd uit ‘Met mij gedeeld’: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Bestanden [{0}]. Toegang bijgewerkt voor {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Map Gedownload: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Mappen [{0}]. Externe link aangemaakt: {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Mappen [{0}]. Externe link verwijderd: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Mappen [{0}]. Externe link bijgewerkt: {1}.c Rol: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Map verwijderd uit ‘Met mij gedeeld’: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Mappen [{0}]. Toegang bijgewerkt voor {1}. Rol: {2}</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Succesvol Inloggen via OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Succesvol inloggen met gebruikersnaam en wachtwoord</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Standaard opslagquota instellen voor AI-agenten: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Standaard opslagquota voor AI-agenten uitgeschakeld</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Vectorisatie-instellingen zijn gereset</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Instellingen voor zoeken op internet zijn opnieuw ingesteld</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Externe link ingetrokken: {1}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP-server aangemaakt: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP-server verwijderd: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP-server uitgeschakeld: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP-server ingeschakeld: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP-server bijgewerkt: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Vectorisatie-instellingen zijn geconfigureerd. Provider: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Instellingen voor zoeken op internet zijn geconfigureerd. Engine: {0}</value>
   </data>
 </root>

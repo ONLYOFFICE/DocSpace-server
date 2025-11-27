@@ -26,23 +26,22 @@
 
 namespace ASC.AI.Core.Chat;
 
+public class AttachmentResult
+{
+    public required FileEntry File { get; init; }
+    public AttachmentMessageContent? AttachmentContent { get; init; }
+    public bool Success { get; init; }
+}
+
 [Scope]
 public class AttachmentHandler(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    ITextExtractor textExtractor)
+    ITextExtractor textExtractor,
+    VectorizationGlobalSettings vectorizationGlobalSettings)
 {
-    private static readonly HashSet<string> _supportedExtensions =
-    [
-        ".txt",
-        ".doc",
-        ".docx",
-        ".pdf",
-        ".xls",
-        ".xlsx"
-    ];
     
-    public async IAsyncEnumerable<AttachmentMessageContent> HandleAsync(IEnumerable<int> filesIds, IEnumerable<string> thirdPartyFilesIds)
+    public async IAsyncEnumerable<AttachmentResult> HandleAsync(IEnumerable<int> filesIds, IEnumerable<string> thirdPartyFilesIds)
     {
         await foreach (var files in HandleAsync(filesIds))
         {
@@ -55,7 +54,7 @@ public class AttachmentHandler(
         }
     }
     
-    private async IAsyncEnumerable<AttachmentMessageContent> HandleAsync<T>(IEnumerable<T> filesIds)
+    private async IAsyncEnumerable<AttachmentResult> HandleAsync<T>(IEnumerable<T> filesIds)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         
@@ -65,9 +64,9 @@ public class AttachmentHandler(
             {
                 continue;
             }
-            
-            var extension = FileUtility.GetFileExtension(file.Title);
-            if (!_supportedExtensions.Contains(extension))
+
+            if (!vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title) ||
+                file.ContentLength > vectorizationGlobalSettings.MaxContentLength)
             {
                 continue;
             }
@@ -76,19 +75,32 @@ public class AttachmentHandler(
             
             await using var memoryStream = new MemoryStream();
             await stream.CopyToAsync(memoryStream);
+            
+            var slice = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
 
-            var content = await textExtractor.ExtractAsync(memoryStream.GetBuffer());
+            var content = await textExtractor.ExtractAsync(slice);
             if (string.IsNullOrEmpty(content))
             {
+                yield return new AttachmentResult
+                {
+                    File = file,
+                    Success = false
+                };
+                
                 continue;
             }
-            
-            yield return new AttachmentMessageContent
+
+            yield return new AttachmentResult
             {
-                Id = JsonSerializer.SerializeToElement(file.Id),
-                Title = file.Title,
-                Extension = extension,
-                Content = content
+                File = file,
+                Success = true,
+                AttachmentContent = new AttachmentMessageContent
+                {
+                    Id = JsonSerializer.SerializeToElement(file.Id),
+                    Title = file.Title,
+                    Extension = FileUtility.GetFileExtension(file.Title),
+                    Content = content
+                }
             };
         }
     }

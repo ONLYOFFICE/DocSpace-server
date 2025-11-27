@@ -302,7 +302,7 @@
     <value>Uspešen vpis</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Uspešen vpis preko socialnega računa</value>
+    <value>Uspešen vpis preko socialnega računa: {0}</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Uspešen vpis preko API</value>
@@ -658,7 +658,7 @@
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Prerazporeditve</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Začni varnostno kopiranje</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -930,5 +930,122 @@
   </data>
   <data name="LoginSuccessSocialAccount" xml:space="preserve">
     <value>Uspešen vpis preko socialnega računa</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Agentu je bil dodan MCP strežnik {0}</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agent ustvarjen</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agent izbrisan</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agent preimenovan: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agenti</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>AI ponudnik ustvarjen: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>AI ponudnik izbrisan: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>AI ponudnik posodobljen: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI agenti [{0}]. Nastavite kvoto shranjevanja po meri za AI agente: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI agenti  [{0}]. Nastavite privzeto kvoto shranjevanja za AI agente : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI agenti  [{0}]. Onemogočite kvoto shranjevanja za AI agente</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Izbrisan MCP strežnik {0} od agenta</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Datoteke [{0}]. Zunanja povezava ustvarjena: {1}. Vloga: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Datoteke [{0}]. Zunanja povezava izbrisana: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Datoteke [{0}]. Zunanja povezava posodobljena: {1}. Vloga: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Datoteka označena kot Priljubljena: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Datoteka odstranjena iz Priljubljenih: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Datoteka odstranjena iz ”Deljeno z mano”: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Datoteke [{0}]. Dostop posodobljen za {1}. Vloga: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Mapa prenesena: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Mape [{0}]. Zunanja povezava ustvarjena: {1}. Vloga: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Mape [{0}]. Zunanja povezava izbrisana: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Mape [{0}]. Zunanja povezava posodobljena: {1}. Vloga: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Mapa odstranjena iz “Deljeno z mano”: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Mape [{0}]. Dostop posodobljen za {1}. Vloga: {2}</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Uspešna prijava z OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Uspešna prijava z uporabniškim imenom in geslom</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Nastavitev privzete kvote shranjevanja za AI agente: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Onemogočena privzeta kvota shranjevanja za AI agente</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Nastavitve vektorizacije so bile ponastavljene</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Nastavitve spletnega iskanja so bile ponastavljene</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Zunanja povezava preklicana: {1}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP strežnik ustvarjen: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP strežnik izbrisan: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP strežnik onemogočen: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP strežnik omogočen: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP strežnik posodobljen: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Nastavitve vektorizacije so konfigurirane. Ponudnik: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Nastavitve spletnega iskanja so konfigurirane. Iskalnik: {0}</value>
   </data>
 </root>

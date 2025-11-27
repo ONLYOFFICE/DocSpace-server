@@ -61,7 +61,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI Agents.
+        ///   Looks up a localized string similar to AI agents.
         /// </summary>
         public static string AiAgents {
             get {

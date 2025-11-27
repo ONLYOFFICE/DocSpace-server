@@ -30,36 +30,48 @@ public class OpenAiHistoryAdapter : HistoryAdapter
 {
     protected override IEnumerable<ChatMessage> AdaptAssistantMessage(Message message)
     {
-        ChatMessage? prevAssistantMessage = null;
+        var assistantMessage = new ChatMessage
+        {
+            Role = ChatRole.Assistant,
+            Contents = new List<AIContent>()
+        };
         
         foreach (var content in message.Contents)
         {
             switch (content)
             {
                 case TextMessageContent textContent:
-                    var msg = new ChatMessage
-                    {
-                        Role = ChatRole.Assistant, 
-                        Contents = [
-                            new TextContent(textContent.Text)
-                        ]
-                    };
-                    prevAssistantMessage = msg;
-                    yield return msg;
+                    assistantMessage.Contents.Add(new TextContent(textContent.Text));
                     break;
-                case ToolCallMessageContent toolCallContent when prevAssistantMessage != null:
-                    prevAssistantMessage.Contents.Add(
-                        new FunctionCallContent(toolCallContent.CallId, toolCallContent.Name, toolCallContent.Arguments)
+                    
+                case ToolCallMessageContent toolCallContent:
+                    assistantMessage.Contents.Add(
+                        new FunctionCallContent(
+                            toolCallContent.CallId, 
+                            toolCallContent.Name, 
+                            toolCallContent.Arguments
+                        )
                     );
-                
-                    yield return new ChatMessage
-                    {
-                        Role = ChatRole.Tool, 
-                        Contents = [
-                            new FunctionResultContent(toolCallContent.CallId, toolCallContent.Result)
-                        ]
-                    };
                     break;
+            }
+        }
+        
+        if (assistantMessage.Contents.Count > 0)
+        {
+            yield return assistantMessage;
+        }
+        
+        foreach (var content in message.Contents)
+        {
+            if (content is ToolCallMessageContent toolCallContent)
+            {
+                yield return new ChatMessage
+                {
+                    Role = ChatRole.Tool,
+                    Contents = [
+                        new FunctionResultContent(toolCallContent.CallId, toolCallContent.Result)
+                    ]
+                };
             }
         }
     }

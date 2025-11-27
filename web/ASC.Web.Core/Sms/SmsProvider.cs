@@ -112,8 +112,8 @@ public abstract class SmsProvider : Consumer
         ILogger<SmsProvider> logger,
         IHttpClientFactory clientFactory,
         ICache memCache,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         MemoryCache = memCache;
         Log = logger;
@@ -178,8 +178,8 @@ public class SmscProvider : SmsProvider, IValidateKeysProvider
         ILogger<SmsProvider> options,
         IHttpClientFactory clientFactory,
         ICache memCache,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, options, clientFactory, memCache, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, options, clientFactory, memCache, name, order, paid, props, additional)
     {
     }
 
@@ -315,8 +315,8 @@ public class ClickatellProvider : SmsProvider
         ILogger<ClickatellProvider> options,
         IHttpClientFactory clientFactory,
         ICache memCache,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, options, clientFactory, memCache, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, options, clientFactory, memCache, name, order, paid, props, additional)
     {
     }
 }
@@ -337,8 +337,8 @@ public class ClickatellUSAProvider : ClickatellProvider
         ILogger<ClickatellUSAProvider> options,
         IHttpClientFactory clientFactory,
         ICache memCache,
-        string name, int order, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, options, clientFactory, memCache, name, order, null, additional)
+        string name, int order, bool paid, Dictionary<string, string> additional = null)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, options, clientFactory, memCache, name, order, paid, null, additional)
     {
     }
 }

@@ -102,7 +102,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
                         excludeSubject, provider, subjectFilter, subjectEntriesIds);
                 })
                 .Where(r => r != null))
-                .SelectAwait(async r => await ResolveParentAsync(r));
+                .Select(async (Folder<string> r, CancellationToken _) => await ResolveParentAsync(r));
         }
 
         result = FilterByProvider(result, provider);
@@ -232,7 +232,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
                         filterType, subjectGroup, subjectID, searchText, searchSubfolders, checkShare, excludeSubject);
                 })
                 .Where(r => r != null))
-                .SelectAwait(async r => await ResolveParentAsync(r));
+                .Select(async (Folder<string> r, CancellationToken _) => await ResolveParentAsync(r));
         }
 
         return result.Distinct();
@@ -408,7 +408,16 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
     public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null)
     {
-        return await RenameFolderAsync(folder, newTitle);
+        var newId = await RenameFolderAsync(folder, newTitle);
+
+        await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
+        {
+            Id = folder.ProviderId,
+            Color = color,
+            Cover = cover
+        });
+
+        return newId;
     }
 
     public Task<string> ChangeFolderTypeAsync(Folder<string> folder, FolderType folderType)

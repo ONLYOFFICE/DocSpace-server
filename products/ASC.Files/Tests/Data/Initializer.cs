@@ -101,6 +101,8 @@ public static class Initializer
             GlobalSettings.Add(new KeyValuePair<string, string?>("elastic:Scheme", "http"));
             GlobalSettings.Add(new KeyValuePair<string, string?>("elastic:Host", openSearchHost));
             GlobalSettings.Add(new KeyValuePair<string, string?>("elastic:Port", openSearchPort));
+            
+            GlobalSettings.Add(new KeyValuePair<string, string?>("core:hosting:singletonMode", "true"));
         }
     }
     

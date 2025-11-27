@@ -288,7 +288,7 @@ public class FileSecurity(
                     FilesSecurityActions.StopFilling,
                     FilesSecurityActions.OpenForm,
                     FilesSecurityActions.Vectorization,
-                    FilesSecurityActions.AscAi
+                    FilesSecurityActions.AskAi
                 }
             },
             {
@@ -379,7 +379,19 @@ public class FileSecurity(
     {
         return await CanCommentAsync(entry, authContext.CurrentAccount.ID);
     }
+    public async Task<bool> CanFillFormAsync<T>(FileEntry<T> entry, Guid userId)
+    {
+        await foreach (var (_, canFill) in CanAsync(WrapSingle(entry), userId, FilesSecurityActions.FillForms))
+        {
+            return canFill;
+        }
 
+        return false;
+    }
+    private async IAsyncEnumerable<FileEntry<T>> WrapSingle<T>(FileEntry<T> entry)
+    {
+        yield return entry;
+    }
     public async Task<bool> CanFillFormsAsync<T>(FileEntry<T> entry, Guid userId)
     {
         return await CanAsync(entry, userId, FilesSecurityActions.FillForms);
@@ -731,7 +743,7 @@ public class FileSecurity(
             case FolderType.VirtualRooms:
                 defaultRecords = null;
 
-                if (entry is not Folder<T> || entry is Folder<T> folder && folder.FolderType != FolderType.VirtualRooms)
+                if (entry is not Folder<T> || entry is Folder<T> f1 && f1.FolderType != FolderType.VirtualRooms)
                 {
                     break;
                 }
@@ -750,7 +762,7 @@ public class FileSecurity(
                     }
                 ];
 
-                if (!shares.Any())
+                if (shares.Count == 0)
                 {
                     foreach (var defaultRecord in defaultRecords)
                     {
@@ -761,36 +773,71 @@ public class FileSecurity(
                 }
 
                 break;
+            case FolderType.AiAgents:
+                defaultRecords = null;
 
+                if (entry is not Folder<T> || entry is Folder<T> f2 && f2.FolderType != FolderType.AiAgents)
+                {
+                    break;
+                }
+
+                defaultRecords =
+                [
+                    new FileShareRecord<T>
+                    {
+                        Level = int.MaxValue,
+                        EntryId = entry.Id,
+                        EntryType = entry.FileEntryType,
+                        Share = FileShare.Read,
+                        Subject = Constants.GroupEveryone.ID,
+                        TenantId = tenantId,
+                        Owner = entry.RootCreateBy
+                    }
+                ];
+
+                if (shares.Count == 0)
+                {
+                    foreach (var defaultRecord in defaultRecords)
+                    {
+                        directAccess.AddRange((await userManager.GetUsersByGroupAsync(defaultRecord.Subject)).Where(x => x.Status == EmployeeStatus.Active).Select(y => y.Id).Distinct());
+                    }
+
+                    return (directAccess, sharedAccess);
+                }
+
+                break;
             default:
                 defaultRecords = null;
                 break;
         }
-
-
-        var defaultAccessUsers = (defaultRecords ?? []).ToAsyncEnumerable().SelectManyAwait(async x => await ToGuidAsync(x)).Distinct();
-
-        await foreach (var userId in defaultAccessUsers)
+        
+        foreach (var r in (defaultRecords ?? []))
         {
-            if (await CheckAccessAsync(userId, action))
+            var users = await ToGuidAsync(r);
+            await foreach (var userId in users)
             {
-                directAccess.Add(userId);
-            }
-        }
-
-        var manyShares = shares.ToAsyncEnumerable().SelectManyAwait(async x => await ToGuidAsync(x)).Distinct();
-
-        await foreach (var userId in manyShares)
-        {
-            if (await CheckAccessAsync(userId, action))
-            {
-                if (sharedAsDirect)
+                if (await CheckAccessAsync(userId, action))
                 {
                     directAccess.Add(userId);
                 }
-                else
+            }
+        }
+
+        foreach (var r in shares)
+        {            
+            var users = await ToGuidAsync(r);
+            await foreach (var userId in users)
+            {
+                if (await CheckAccessAsync(userId, action))
                 {
-                    sharedAccess.Add(userId);
+                    if (sharedAsDirect)
+                    {
+                        directAccess.Add(userId);
+                    }
+                    else
+                    {
+                        sharedAccess.Add(userId);
+                    }
                 }
             }
         }
@@ -887,10 +934,11 @@ public class FileSecurity(
         var isAuthenticated = authContext.IsAuthenticated;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
         var isUser = userType is EmployeeType.User;
-
+        var cachedFileDao = daoFactory.GetCacheFileDao<T>();
+        
         await foreach (var entry in entries)
         {
-            if (entry.Security != null)
+            if (entry.Security != null && entry.SecurityByUsers != null && entry.SecurityByUsers.TryGetValue(userId, out _))
             {
                 yield return entry;
             }
@@ -898,13 +946,16 @@ public class FileSecurity(
             var security = new Dictionary<FilesSecurityActions, bool>();
             var parentFolders = await GetFileParentFolders(entry.ParentId);
 
-
             foreach (var action in Enum.GetValues<FilesSecurityActions>().Where(r => _securityEntries[entry.FileEntryType].Contains(r)))
             {
-                security[action] = await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders);
+                security[action] = await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
             }
 
             entry.Security = security;
+            
+            entry.SecurityByUsers ??= new Dictionary<Guid, IDictionary<FilesSecurityActions, bool>>();
+            
+            entry.SecurityByUsers.TryAdd(userId, security);
 
             yield return entry;
         }
@@ -951,7 +1002,7 @@ public class FileSecurity(
             return false;
         }
 
-        if (entry.Security != null && entry.Security.TryGetValue(action, out var result))
+        if (entry.SecurityByUsers != null && entry.SecurityByUsers.TryGetValue(userId, out var sec) && sec.TryGetValue(action, out var result))
         {
             return result;
         }
@@ -971,8 +1022,9 @@ public class FileSecurity(
 
         var accessSnapshot = entry.Access;
         var parentFolders = await GetFileParentFolders(entry.ParentId);
-
-        var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders);
+        var cachedFileDao = daoFactory.GetCacheFileDao<T>();
+        
+        var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
 
         if (!setEntryAccess)
         {
@@ -985,28 +1037,38 @@ public class FileSecurity(
 
 
     private async IAsyncEnumerable<Tuple<FileEntry<T>, bool>> CanAsync<T>(IAsyncEnumerable<FileEntry<T>> entries, Guid userId, FilesSecurityActions action)
-    { ;
+    { 
         var isOutsider = await userManager.IsOutsiderAsync(userId);
         var userType = await userManager.GetUserTypeAsync(userId);
         var isGuest = userType is EmployeeType.Guest;
         var isAuthenticated = authContext.IsAuthenticated;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
         var isUser = userType is EmployeeType.User;
-
+        var cachedFileDao = daoFactory.GetCacheFileDao<T>();
+        
         await foreach (var entry in entries)
         {
             var parentFolders = await GetFileParentFolders(entry.ParentId);
-            yield return new Tuple<FileEntry<T>, bool>(entry, await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders));
+            yield return new Tuple<FileEntry<T>, bool>(entry, await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao));
         }
     }
 
-    private async Task<bool> FilterEntryAsync<T>(FileEntry<T> e, FilesSecurityActions action, Guid userId, IEnumerable<FileShareRecord<T>> shares, bool isOutsider, bool isGuest,
-        bool isAuthenticated, bool isDocSpaceAdmin, bool isUser, List<Folder<T>> parentFolders)
+    private async Task<bool> FilterEntryAsync<T>(
+        FileEntry<T> e, 
+        FilesSecurityActions action, 
+        Guid userId, 
+        IEnumerable<FileShareRecord<T>> shares, 
+        bool isOutsider, 
+        bool isGuest,
+        bool isAuthenticated, 
+        bool isDocSpaceAdmin, 
+        bool isUser, 
+        List<Folder<T>> parentFolders,
+        IFileDao<T> cacheFileDao)
     {
         var file = e as File<T>;
         var folder = e as Folder<T>;
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
-        var cacheFileDao = daoFactory.GetCacheFileDao<T>();
         
         if (file != null && action == FilesSecurityActions.FillForms && !file.IsForm)
         {
@@ -1066,8 +1128,10 @@ public class FileSecurity(
             return false;
         }
 
-        if (action is FilesSecurityActions.AscAi &&
-            (file == null || !vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title)))
+        if (action is FilesSecurityActions.AskAi &&
+            (file == null || 
+             file.ContentLength > vectorizationGlobalSettings.MaxContentLength || 
+             !vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title)))
         {
             return false;
         }
@@ -1094,7 +1158,8 @@ public class FileSecurity(
                 FilesSecurityActions.Download or 
                 FilesSecurityActions.Delete or 
                 FilesSecurityActions.Vectorization or 
-                FilesSecurityActions.Copy))
+                FilesSecurityActions.Copy or
+                FilesSecurityActions.AskAi))
             {
                 return false;
             }
@@ -1170,7 +1235,7 @@ public class FileSecurity(
             if (folder.FolderType == FolderType.Knowledge)
             {
                 if (action is not (FilesSecurityActions.Read or FilesSecurityActions.MoveTo
-                    or FilesSecurityActions.CopyTo or FilesSecurityActions.Create))
+                    or FilesSecurityActions.CopyTo or FilesSecurityActions.Create or FilesSecurityActions.Download))
                 {
                     return false;
                 }
@@ -1423,11 +1488,6 @@ public class FileSecurity(
                     }
 
                     if (action == FilesSecurityActions.Duplicate && isRoom && !folder.SettingsDenyDownload)
-                    {
-                        return true;
-                    }
-
-                    if (action == FilesSecurityActions.EditAccess && !isRoom)
                     {
                         return true;
                     }
@@ -2205,7 +2265,7 @@ public class FileSecurity(
                         break;
                 }
                 break;
-            case FilesSecurityActions.AscAi:
+            case FilesSecurityActions.AskAi:
                 return e.Access != FileShare.Restrict;
             case FilesSecurityActions.UseChat:
                 switch (e.RootFolderType)
@@ -2271,22 +2331,7 @@ public class FileSecurity(
             ace = shares
                 .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                 .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
-                .FirstOrDefault(r => Equals(r.EntryId, entry.Id) && r.EntryType == FileEntryType.File);
-
-            if (ace == null || entry.RootFolderType == FolderType.VirtualRooms)
-            {
-                // share on parent folders
-                var parentAce = shares.Where(r => Equals(r.EntryId, entry.ParentId) && r.EntryType == FileEntryType.Folder)
-                    .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
-                    .ThenBy(r => r.Level)
-                    .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
-                    .FirstOrDefault();
-
-                if (parentAce != null)
-                {
-                    ace = parentAce;
-                }
-            }
+                .FirstOrDefault();
         }
         else
         {
@@ -2297,6 +2342,21 @@ public class FileSecurity(
                 .FirstOrDefault();
         }
 
+        if (ace == null || entry.RootFolderType == FolderType.VirtualRooms)
+        {
+            // share on parent folders
+            var parentAce = shares.Where(r => (Equals(r.ParentId, entry.Id) || Equals(r.ParentId, entry.ParentId) || Equals(r.EntryId, entry.ParentId)) && r.EntryType == FileEntryType.Folder)
+                .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
+                .ThenBy(r => r.Level)
+                .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
+                .FirstOrDefault();
+
+            if (parentAce != null)
+            {
+                ace = parentAce;
+            }
+        }
+        
         return ace;
     }
 
@@ -2363,8 +2423,13 @@ public class FileSecurity(
         }
 
 
-        var firstTask = GetSharesForMeAsync(recordsInternal, orderedSubjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
-        var secondTask = GetSharesForMeAsync(recordsThirdParty, orderedSubjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+        var firstTask = recordsInternal.Count == 0 ?
+            ValueTask.FromResult(new List<FileEntry>(0)) :
+            GetSharesForMeAsync(recordsInternal, orderedSubjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+        
+        var secondTask = recordsThirdParty.Count == 0 ?
+            ValueTask.FromResult(new List<FileEntry>(0)) :
+            GetSharesForMeAsync(recordsThirdParty, orderedSubjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
 
         foreach (var items in await Task.WhenAll(firstTask.AsTask(), secondTask.AsTask()))
         {
@@ -2702,7 +2767,9 @@ public class FileSecurity(
 
         var fileIds = new Dictionary<T, (FileShare, Guid)>();
         var folderIds = new Dictionary<T, (FileShare, Guid)>();
-
+        
+        var share = await globalFolder.GetFolderShareAsync<T>(daoFactory);
+        
         var recordGroup = records.GroupBy(r => new { r.EntryId, r.EntryType }, (_, group) => new
         {
             firstRecord = group.OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
@@ -2732,9 +2799,8 @@ public class FileSecurity(
 
         if (filterType != FilterType.FoldersOnly)
         {
-            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
-            var share = await globalFolder.GetFolderShareAsync<T>(daoFactory);
-
+            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), folderIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+            
             await foreach (var x in files)
             {
                 if (fileIds.TryGetValue(x.Id, out var tuple))
@@ -2757,8 +2823,6 @@ public class FileSecurity(
                 folders = FilterReadAsync(folders);
             }
 
-            var share = await globalFolder.GetFolderShareAsync<T>(daoFactory);
-
             await foreach (var folder in folders)
             {
                 if (folderIds.TryGetValue(folder.Id, out var access))
@@ -2776,7 +2840,18 @@ public class FileSecurity(
         {
             IAsyncEnumerable<FileEntry<T>> filesInSharedFolders = fileDao.GetFilesAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
             filesInSharedFolders = FilterReadAsync(filesInSharedFolders);
-            entries.AddRange(await filesInSharedFolders.Distinct().ToListAsync());
+            
+            await foreach (var x in filesInSharedFolders)
+            {
+                if (!entries.Any(r => Equals(r.Id, x.Id) && r.FileEntryType == x.FileEntryType) && fileIds.TryGetValue(x.Id, out var tuple))
+                {
+                    x.Access = tuple.Item1;
+                    x.SharedBy = tuple.Item2;
+                    x.FolderIdDisplay = share;
+
+                    entries.Add(x);
+                }
+            }
         }
 
         var data = entries.Where(f =>
@@ -2896,7 +2971,7 @@ public class FileSecurity(
 
         if (filterType != FilterType.FoldersOnly)
         {
-            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), [], filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
             var privateFolder = await globalFolder.GetFolderPrivacyAsync<T>(daoFactory);
 
             await foreach (var x in files)
@@ -3340,6 +3415,11 @@ public class FileSecurity(
                 return 1;
             }
 
+            if (orderedSubjectX.OrderType == orderedSubjectY.OrderType)
+            {
+                return y.EntryType.CompareTo(x.EntryType);
+            }
+            
             return orderedSubjectX.OrderType.CompareTo(orderedSubjectY.OrderType);
         }
     }
@@ -3487,7 +3567,7 @@ public class FileSecurity(
         Vectorization,
         
         [Description("Asc AI")]
-        AscAi,
+        AskAi,
         
         [Description("Use chat")]
         UseChat

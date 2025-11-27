@@ -263,7 +263,7 @@ public class FolderDtoHelper(
 
         if (folder.ShareRecord is { IsLink: true })
         {
-            result.External = true;
+            result.External = Equals(folder.ShareRecord.EntryId, folder.Id);;
             result.PasswordProtected = !string.IsNullOrEmpty(folder.ShareRecord.Options?.Password) &&
                                        folder.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) &&
                                        !canRead;
@@ -280,7 +280,7 @@ public class FolderDtoHelper(
 
             var cachedFolder = _daoFactory.GetCacheFolderDao<T>();
             var parents = await cachedFolder.GetParentFoldersAsync(result.ParentId).ToListAsync();
-            var parent = parents.FirstOrDefault();
+            var parent = parents.LastOrDefault();
             if (!await _fileSecurity.CanReadAsync(parent))
             {
                 result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
@@ -373,9 +373,11 @@ public class FolderDtoHelper(
         {
             switch (contextFolder)
             {
+                case { FolderType: FolderType.Favorites }:
                 case { FolderType: FolderType.Recent }:
                 case { FolderType: FolderType.SHARE }:
                 case { RootFolderType: FolderType.USER } when !Equals(contextFolder.RootCreateBy, authContext.CurrentAccount.ID):
+                case null:
                     result.RootFolderType = FolderType.SHARE;
                     result.RootFolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
                     var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.ParentId);
@@ -386,6 +388,11 @@ public class FolderDtoHelper(
 
                     break;
             }
+        }
+
+        if (folder.FolderType == FolderType.AiRoom)
+        {
+            result.FoldersCount -= 2;
         }
         
         if (aiReadyTask != null)

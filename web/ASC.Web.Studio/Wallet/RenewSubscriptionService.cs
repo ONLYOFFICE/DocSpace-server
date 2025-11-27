@@ -259,8 +259,8 @@ static file class Queries
                     })
                     .Join(
                         ctx.TariffRows,
-                        x => new { TenantId = x.TenantId, MaxTariffId = x.MaxTariffId },
-                        tariffRow => new { TenantId = tariffRow.TenantId, MaxTariffId = tariffRow.TariffId },
+                        x => new { x.TenantId, x.MaxTariffId },
+                        tariffRow => new { tariffRow.TenantId, MaxTariffId = tariffRow.TariffId },
                         (x, tariffRow) => tariffRow
                     )
                     .Where(r => quotas.Contains(r.Quota) && r.DueDate.HasValue && r.DueDate > from && r.DueDate < to)

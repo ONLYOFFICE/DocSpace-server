@@ -263,7 +263,7 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
-    public Task<int> DeleteFilesSecurityAsync(int tenantId, IEnumerable<string> subfolders)
+    public Task<int> DeleteFilesSecurityAsync(int tenantId, IEnumerable<int> subfolders)
     {
         return FolderQueries.DeleteFilesSecurityAsync(this, tenantId, subfolders);
     }
@@ -355,24 +355,24 @@ static file class FolderQueries
                                            orderby t.Level descending
                                            select t.ParentId
                                           ).FirstOrDefault()
-                                    where f.TenantId == r.TenantId
+                                    where f.TenantId == tenantId
                                     select f
                                 ).FirstOrDefault(),
                             Order = (
                                 from f in ctx.FileOrder
                                 where (
                                     from rs in ctx.RoomSettings
-                                    where rs.TenantId == f.TenantId && rs.RoomId ==
+                                    where rs.TenantId == tenantId && rs.RoomId ==
                                         (from t in ctx.Tree
                                          where t.FolderId == r.ParentId
                                          orderby t.Level descending
                                          select t.ParentId
                                         ).Skip(1).FirstOrDefault()
-                                    select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
+                                    select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == tenantId && f.EntryType == FileEntryType.Folder
                                 select f.Order
                             ).FirstOrDefault(),
                             Settings = (from f in ctx.RoomSettings
-                                        where f.TenantId == r.TenantId && f.RoomId == r.Id
+                                        where f.TenantId == tenantId && f.RoomId == r.Id
                                         select f).FirstOrDefault()
                         }
                     ).SingleOrDefault());
@@ -394,30 +394,30 @@ static file class FolderQueries
                                            orderby t.Level descending
                                            select t.ParentId
                                           ).FirstOrDefault()
-                                    where f.TenantId == r.TenantId
+                                    where f.TenantId == tenantId
                                     select f
                                 ).FirstOrDefault(),
                             UserShared = ctx.Security.Where(x =>
-                                    x.TenantId == r.TenantId &&
-                                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder)
+                                    x.TenantId == tenantId &&
+                                    x.InternalEntryId == r.Id && x.EntryType == FileEntryType.Folder)
                                 .Select(s => s.SubjectType).ToList(),
                             ParentShared = ctx.Security.Any(x =>
-                                x.TenantId == r.TenantId &&
+                                x.TenantId == tenantId &&
                                 (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                                  x.EntryType == FileEntryType.Folder &&
-                                ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
-                            Settings = ctx.RoomSettings.Where(x => x.TenantId == r.TenantId && x.RoomId == r.Id).Distinct().FirstOrDefault(),
+                                ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId == x.InternalEntryId)),
+                            Settings = ctx.RoomSettings.Where(x => x.TenantId == tenantId && x.RoomId == r.Id).Distinct().FirstOrDefault(),
                             Order = (
                                 from f in ctx.FileOrder
                                 where (
                                     from rs in ctx.RoomSettings
-                                    where rs.TenantId == f.TenantId && rs.RoomId ==
+                                    where rs.TenantId == tenantId && rs.RoomId ==
                                         (from t in ctx.Tree
                                          where t.FolderId == r.ParentId
                                          orderby t.Level descending
                                          select t.ParentId
                                         ).Skip(1).FirstOrDefault()
-                                    select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
+                                    select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == tenantId && f.EntryType == FileEntryType.Folder
                                 select f.Order
                             ).FirstOrDefault()
                         }
@@ -440,7 +440,7 @@ static file class FolderQueries
                                            orderby t.Level descending
                                            select t.ParentId
                                           ).FirstOrDefault()
-                                    where f.TenantId == r.TenantId
+                                    where f.TenantId == tenantId
                                     select f
                                 ).FirstOrDefault()
                         }
@@ -465,23 +465,23 @@ static file class FolderQueries
                                            orderby t.Level descending
                                            select t.ParentId
                                           ).FirstOrDefault()
-                                    where f.TenantId == r.folder.TenantId
+                                    where f.TenantId == tenantId
                                     select f
                                 ).FirstOrDefault(),
                             Order = (
                                 from f in ctx.FileOrder
                                 where (
                                     from rs in ctx.RoomSettings
-                                    where rs.TenantId == f.TenantId && rs.RoomId ==
+                                    where rs.TenantId == tenantId && rs.RoomId ==
                                         (from t in ctx.Tree
                                          where t.FolderId == r.folder.ParentId
                                          orderby t.Level descending
                                          select t.ParentId
                                         ).Skip(1).FirstOrDefault()
-                                    select rs.Indexing).FirstOrDefault() && f.EntryId == r.folder.Id && f.TenantId == r.folder.TenantId && f.EntryType == FileEntryType.Folder
+                                    select rs.Indexing).FirstOrDefault() && f.EntryId == r.folder.Id && f.TenantId == tenantId && f.EntryType == FileEntryType.Folder
                                 select f.Order
                             ).FirstOrDefault(),
-                            Settings = ctx.RoomSettings.Where(x => x.TenantId == r.folder.TenantId && x.RoomId == r.folder.Id).Distinct().FirstOrDefault()
+                            Settings = ctx.RoomSettings.Where(x => x.TenantId == tenantId && x.RoomId == r.folder.Id).Distinct().FirstOrDefault()
                         }
                     ));
 
@@ -595,12 +595,12 @@ static file class FolderQueries
                     .Where(t => t.Name == id || subfolders.Contains(t.Name))
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, IEnumerable<string>, Task<int>> DeleteFilesSecurityAsync =
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteFilesSecurityAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<string> subfolders) =>
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> subfolders) =>
                 ctx.Security
                     .Where(r => r.TenantId == tenantId)
-                    .Where(r => subfolders.Contains(r.EntryId))
+                    .Where(r => subfolders.Contains(r.InternalEntryId))
                     .Where(r => r.EntryType == FileEntryType.Folder)
                     .ExecuteDelete());
 

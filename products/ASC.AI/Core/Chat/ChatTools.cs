@@ -36,42 +36,42 @@ public class ChatTools(
     AiGateway aiGateway,
     AiAccessibility aiAccessibility)
 {
-    public async Task<ToolHolder> GetAsync(int roomId, UserChatSettings chatSettings, bool knowledgeHasFiles)
+    public async Task<(ToolHolder, string? error)> GetAsync(int roomId, UserChatSettings chatSettings, bool knowledgeHasFiles)
     {
-        var holder = await mcpService.GetToolsAsync(roomId);
+        var (holder, error) = await mcpService.GetToolsAsync(roomId);
 
         if (knowledgeHasFiles && await aiAccessibility.IsVectorizationEnabledAsync())
         {
             var knowledgeFunc = knowledgeSearchTool.Init(roomId);
             var knowledgeWrapper = ToWrapper(roomId, knowledgeFunc);
-            holder.AddTool(knowledgeWrapper);
+            holder.AddTool(SystemToolType.KnowledgeSearch, knowledgeWrapper);
         }
 
         if (!chatSettings.WebSearchEnabled)
         {
-            return holder;
+            return (holder, error);
         }
 
         var config = await GetWebConfigAsync();
         if (config == null)
         {
-            return holder;
+            return (holder, error);
         }
 
         var webTool = webSearchTool.Init(config);
         var webWrapper = ToWrapper(roomId, webTool);
-        holder.AddTool(webWrapper);
+        holder.AddTool(SystemToolType.WebSearch, webWrapper);
 
         if (!config.CrawlingSupported())
         {
-            return holder;
+            return (holder, error);
         }
 
         var crawlTool = webCrawlingTool.Init(config);
         var crawlWrapper = ToWrapper(roomId, crawlTool);
-        holder.AddTool(crawlWrapper);
+        holder.AddTool(SystemToolType.WebCrawling, crawlWrapper);
 
-        return holder;
+        return (holder, error);
     }
 
     private async Task<EngineConfig?> GetWebConfigAsync()

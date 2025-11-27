@@ -546,7 +546,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO միացված է</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Մեկնարկել պահուստավորումը</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -1034,5 +1034,77 @@
   </data>
   <data name="RoomExternalLinkRevoked" xml:space="preserve">
     <value>Արտաքին հղումը չեղարկվել է՝ {1}</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>MCP սերվեր {0}-ն ավելացվել է գործակալին</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Գործակալը ստեղծվել է</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Գործակալը ջնջվել է</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Գործակալը վերանվանվել է՝ {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Գործակալներ</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>ԱԲ պրովայդերը ստեղծվել է՝ {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>ԱԲ պրովայդերը ջնջվել է՝ {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>ԱԲ պրովայդերը թարմացվել է՝ {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>ԱԲ գործակալներ [{0}]: Սահմանեք ԱԲ գործակալների համար նախատեսված պահեստավորման քվոտա՝ {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>ԱԲ գործակալներ [{0}]: Սահմանեք ԱԲ գործակալների համար լռելյայն պահեստավորման քվոտա՝ {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>ԱԲ գործակալներ [{0}]: ԱԲ գործակալների պահեստավորման քվոտան անջատված է</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>MCP սերվեր {0}-ը ջնջվել է գործակալից</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Մուտք սոցիալական հաշվի միջոցով՝ հաջողությամբ՝</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Սահմանել ԱԲ գործակալների համար լռելյայն պահեստավորման քվոտա՝ {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>ԱԲ գործակալների համար լռելյայն պահեստավորման քվոտան անջատված է</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Վեկտորացման կարգավորումները վերակայվել են</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Վեբ որոնման կարգավորումները վերակայվել են</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP սերվերը ստեղծվել է՝ {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP սերվերը ջնջվել է՝ {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP սերվերը անջատվել է՝ {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP սերվերը միացվել է՝ {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP սերվերը թարմացվել է՝ {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Վեկտորացման կարգավորումները կարգավորված են։ Մատակարար՝ {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Վեբ որոնման կարգավորումները կարգավորված են։ Շարժիչ՝ {0}</value>
   </data>
 </root>

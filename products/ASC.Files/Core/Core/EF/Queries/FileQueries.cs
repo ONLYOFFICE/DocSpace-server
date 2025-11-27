@@ -147,8 +147,8 @@ public partial class FilesDbContext
         return FileQueries.PdfTenantFileIdsAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
-    public Task<int> DeleteSecurityAsync(int tenantId, string fileId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<int> DeleteSecurityAsync(int tenantId, int fileId)
     {
         return FileQueries.DeleteSecurityAsync(this, tenantId, fileId);
     }
@@ -379,29 +379,29 @@ static file class FileQueries
                                        orderby t.Level descending
                                        select t.ParentId
                                       ).FirstOrDefault()
-                                where f.TenantId == r.TenantId
+                                where f.TenantId == tenantId
                                 select f
                             ).FirstOrDefault(),
                         UserShared = ctx.Security.Where(x =>
-                                x.TenantId == r.TenantId &&
-                                x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File)
+                                x.TenantId == tenantId &&
+                                x.InternalEntryId == r.Id && x.EntryType == FileEntryType.File)
                             .Select(s => s.SubjectType).ToList(),
                         ParentShared = ctx.Security.Any(x =>
-                            x.TenantId == r.TenantId &&
+                            x.TenantId == tenantId &&
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                             x.EntryType == FileEntryType.Folder &&
-                            ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
+                            ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId == x.InternalEntryId)),
                         Order = (
                             from f in ctx.FileOrder
                             where (
                                 from rs in ctx.RoomSettings
-                                where rs.TenantId == f.TenantId && rs.RoomId ==
+                                where rs.TenantId == tenantId && rs.RoomId ==
                                     (from t in ctx.Tree
                                      where t.FolderId == r.ParentId
                                      orderby t.Level descending
                                      select t.ParentId
                                     ).Skip(1).FirstOrDefault()
-                                select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
+                                select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == tenantId && f.EntryType == FileEntryType.File
                             select f.Order
                         ).FirstOrDefault(),
                         LastOpened = ctx.TagLink
@@ -411,7 +411,7 @@ static file class FileQueries
                             .Select(a => a.CreateOn)
                             .FirstOrDefault(),
                         VectorizationStatus = ctx.FileVectorization
-                            .FirstOrDefault(x => x.TenantId == r.TenantId && x.FileId == r.Id).Status
+                            .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id).Status
                     })
                     .SingleOrDefault());
 
@@ -431,18 +431,18 @@ static file class FileQueries
                                        orderby t.Level descending
                                        select t.ParentId
                                       ).FirstOrDefault()
-                                where f.TenantId == r.TenantId
+                                where f.TenantId == tenantId
                                 select f
                             ).FirstOrDefault(),
                         UserShared = ctx.Security.Where(x =>
-                                x.TenantId == r.TenantId &&
-                                x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File)
+                                x.TenantId == tenantId &&
+                                x.InternalEntryId == r.Id && x.EntryType == FileEntryType.File)
                             .Select(s => s.SubjectType).ToList(),
                         ParentShared = ctx.Security.Any(x =>
-                            x.TenantId == r.TenantId &&
+                            x.TenantId == tenantId &&
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                             x.EntryType == FileEntryType.Folder &&
-                            ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
+                            ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId == x.InternalEntryId)),
                         LastOpened = ctx.TagLink
                             .Where(a => a.EntryId == fileId.ToString() &&
                                         a.CreateBy == userId &&
@@ -470,7 +470,7 @@ static file class FileQueries
                                        orderby t.Level descending
                                        select t.ParentId
                                       ).FirstOrDefault()
-                                where f.TenantId == r.TenantId
+                                where f.TenantId == tenantId
                                 select f
                             ).FirstOrDefault(),
                         LastOpened = ctx.TagLink
@@ -500,7 +500,7 @@ static file class FileQueries
                                        orderby t.Level descending
                                        select t.ParentId
                                       ).FirstOrDefault()
-                                where f.TenantId == r.TenantId
+                                where f.TenantId == tenantId
                                 select f
                             ).FirstOrDefault()
                     })
@@ -545,24 +545,24 @@ static file class FileQueries
                                        orderby t.Level descending
                                        select t.ParentId
                                       ).FirstOrDefault()
-                                where f.TenantId == r.TenantId
+                                where f.TenantId == tenantId
                                 select f
                             ).FirstOrDefault(),
                         Order = (
                             from f in ctx.FileOrder
                             where (
                                 from rs in ctx.RoomSettings
-                                where rs.TenantId == f.TenantId && rs.RoomId ==
+                                where rs.TenantId == tenantId && rs.RoomId ==
                                     (from t in ctx.Tree
                                      where t.FolderId == r.ParentId
                                      orderby t.Level descending
                                      select t.ParentId
                                     ).Skip(1).FirstOrDefault()
-                                select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
+                                select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == tenantId && f.EntryType == FileEntryType.File
                             select f.Order
                         ).FirstOrDefault(),
                         VectorizationStatus = ctx.FileVectorization
-                            .FirstOrDefault(x => x.TenantId == r.TenantId && x.FileId == r.Id).Status
+                            .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id).Status
                     }));
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> FileIdsAsync =
@@ -680,12 +680,12 @@ static file class FileQueries
                     .Where(r => r.Title.EndsWith(".pdf"))
                     .Select(r => r.Id));
 
-    public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteSecurityAsync =
+    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteSecurityAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string fileId) =>
+            (FilesDbContext ctx, int tenantId, int fileId) =>
                 ctx.Security
                     .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.EntryId == fileId)
+                    .Where(r => r.InternalEntryId == fileId)
                     .Where(r => r.EntryType == FileEntryType.File)
                     .ExecuteDelete());
 
@@ -786,7 +786,7 @@ static file class FileQueries
                     {
                         FileId = f.Id,
                         RoomOwnerId = ctx.Folders.FirstOrDefault(f1 =>
-                            f1.TenantId == f.TenantId &&
+                            f1.TenantId == tenantId &&
                             f1.Id == ctx.Tree
                                 .Where(t => t.FolderId == f.ParentId)
                                 .OrderByDescending(t => t.Level)
@@ -814,7 +814,7 @@ static file class FileQueries
                                        orderby t.Level descending
                                        select t.ParentId
                                       ).FirstOrDefault()
-                                where f.TenantId == r.TenantId
+                                where f.TenantId == tenantId
                                 select f
                             ).FirstOrDefault()
                     }));
@@ -865,7 +865,7 @@ static file class FileQueries
                                        orderby t.Level descending
                                        select t.ParentId
                                       ).FirstOrDefault()
-                                where f.TenantId == r.TenantId
+                                where f.TenantId == tenantId
                                 select f
                             ).FirstOrDefault()
                     })
@@ -887,12 +887,11 @@ static file class FileQueries
                                        orderby t.Level descending
                                        select t.ParentId
                                       ).FirstOrDefault()
-                                where f.TenantId == r.TenantId
+                                where f.TenantId == tenantId
                                 select f
                             ).FirstOrDefault()
                     })
-                    .Join(ctx.Security.DefaultIfEmpty(), r => r.File.Id.ToString(), s => s.EntryId,
-                        (f, s) => new DbFileQueryWithSecurity { DbFileQuery = f, Security = s })
+                    .Join(ctx.Security.DefaultIfEmpty(), r => r.File.Id, s => s.InternalEntryId, (f, s) => new DbFileQueryWithSecurity { DbFileQuery = f, Security = s })
                     .Where(r => r.Security.TenantId == tenantId)
                     .Where(r => r.Security.EntryType == FileEntryType.File)
                     .Where(r => r.Security.Share == FileShare.Restrict));

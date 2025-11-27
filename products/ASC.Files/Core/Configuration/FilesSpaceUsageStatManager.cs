@@ -63,13 +63,13 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
 
         return await myFiles.Union(commonFiles)
             .AsAsyncEnumerable()
-            .GroupByAwait(
-            async r => await Task.FromResult(r.CreateBy),
-            async r => await Task.FromResult(r.Size),
-            async (userId, items) =>
+            .GroupBy(
+            async (r, _) => await Task.FromResult(r.CreateBy),
+            async (r, _) => await Task.FromResult(r.Size),
+            async (userId, items, _) =>
             {
                 var user = await userManager.GetUsersAsync(userId);
-                var item = new UsageSpaceStatItem { SpaceUsage = await items.SumAsync() };
+                var item = new UsageSpaceStatItem { SpaceUsage = items.Sum() };
                 if (user.Equals(Constants.LostUser))
                 {
                     item.Name = FilesUCResource.CorporateFiles;

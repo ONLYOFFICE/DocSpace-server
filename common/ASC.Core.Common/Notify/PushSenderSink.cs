@@ -98,7 +98,7 @@ public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager
         var notifyData = new NotifyData
         {
             Email = user.Email,
-            Portal = tenant.GetTenantDomain(coreSettings, true),
+            Portal = tenant.GetTenantDomain(coreSettings),
             OriginalUrl = originalUrl is { Value: not null } ? originalUrl.Value.ToString() : "",
             Folder = new NotifyFolderData
             {

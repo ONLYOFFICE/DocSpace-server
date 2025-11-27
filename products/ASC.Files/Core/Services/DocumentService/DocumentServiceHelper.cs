@@ -308,7 +308,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             ModifyFilter = rightModifyFilter,
             Print = rightToDownload,
             Download = rightToDownload && noWatermark,
-            Copy = rightToDownload && noWatermark,
+            Copy = rightToDownload,
             Protect = authContext.IsAuthenticated,
             Chat = file.Access != FileShare.Read
         };
@@ -387,7 +387,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             runs.Add(new Run(userInfo.DisplayUserName(false, displayUserSettingsHelper)));
             runs.Add(new Run(Environment.NewLine, false));
         }
-        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserEmail))
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserEmail) && !string.IsNullOrWhiteSpace(userInfo.Email))
         {
             runs.Add(new Run(userInfo.Email));
             runs.Add(new Run(Environment.NewLine, false));
@@ -694,7 +694,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var canEdit = await fileSecurity.CanEditAsync(file);
         var canFill = await fileSecurity.CanFillFormsAsync(file);
 
-        FormOpenSetup<T> result = null;
+        FormOpenSetup<T> result;
         if (file.CreateBy == securityContext.CurrentAccount.ID)
         {
             result = new FormOpenSetup<T>

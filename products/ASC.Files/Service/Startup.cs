@@ -98,6 +98,8 @@ public class Startup : BaseWorkerStartup
         services.RegisterQueue<CreateRoomFromTemplateOperation>();
         services.RegisterQueue<EncryptionOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
         services.RegisterQueue<CustomerOperationsReportTask>();
+        services.RegisterQueue<AsyncTaskData<int>>();
+        services.RegisterQueue<AsyncTaskData<string>>();
 
         services.RegisterQuotaFeature();
         services.AddBaseDbContextPool<FilesDbContext>();

@@ -460,14 +460,14 @@ public abstract class VirtualRoomsController<T>(
             await inDto.RoomInvitation.Invitations
                 .Where(r => r.Id != Guid.Empty && r.Access != FileShare.None)
                 .ToAsyncEnumerable()
-                .AnyAwaitAsync(async i => await userManager.IsGuestAsync(i.Id));
+                .AnyAsync(async (i, _) => await userManager.IsGuestAsync(i.Id));
 
         var usersInvited =
             inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email) && i.Access != FileShare.None) ||
             await inDto.RoomInvitation.Invitations
                 .Where(r => r.Id != Guid.Empty && r.Access != FileShare.None)
                 .ToAsyncEnumerable()
-                .AnyAwaitAsync(async i => await userManager.IsUserAsync(i.Id));
+                .AnyAsync(async (i, _) => await userManager.IsUserAsync(i.Id));
 
         if (newGuestsInvited)
         {
@@ -505,7 +505,7 @@ public abstract class VirtualRoomsController<T>(
 
         result.Warning = (await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.RoomInvitation.Notify, inDto.RoomInvitation.Culture)).Select(r => r.Warning).FirstOrDefault();
         result.Members = await _fileStorageService.GetRoomSharedInfoAsync(inDto.Id, inDto.RoomInvitation.Invitations.Select(s => s.Id))
-            .SelectAwait(async a => await fileShareDtoHelper.Get(a))
+            .Select(async (AceWrapper a, CancellationToken _) => await fileShareDtoHelper.Get(a))
             .ToListAsync();
 
         return result;
@@ -836,7 +836,7 @@ public class VirtualRoomsCommonController(
     UserManager userManager,
     IServiceProvider serviceProvider,
     ApiDateTimeHelper apiDateTimeHelper,
-    RoomNewItemsDtoHelper roomNewItemsDtoHelper)
+    RootNewItemsDtoHelper rootNewItemsDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -1087,7 +1087,8 @@ public class VirtualRoomsCommonController(
     [HttpGet("rooms/news")]
     public async Task<List<NewItemsDto<RoomNewItemsDto>>> GetRoomsNewItems()
     {
-        var newItems = await fileStorageService.GetNewRoomFilesAsync();
+        var rootId = await globalFolderHelper.FolderVirtualRoomsAsync;
+        var newItems = await fileStorageService.GetNewRootFilesAsync(rootId);
         var result = new List<NewItemsDto<RoomNewItemsDto>>();
 
         foreach (var (key, value) in newItems)
@@ -1097,7 +1098,12 @@ public class VirtualRoomsCommonController(
 
             foreach (var (k, v) in value)
             {
-                var item = await roomNewItemsDtoHelper.GetAsync(k, v);
+                var item = await rootNewItemsDtoHelper.GetAsync(k, v, (room, roomItems) => 
+                    new RoomNewItemsDto 
+                    { 
+                        Room = room, 
+                        Items = roomItems 
+                    });
                 items.Add(item);
             }
 

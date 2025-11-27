@@ -45,7 +45,8 @@ public record BackupRequestIntegrationEvent : IntegrationEvent
                                   bool dump = false,
                                   string taskId = null,
                                   int billingSessionId = 0,
-                                  DateTime billingSessionExpire = default) : base(createBy, tenantId)
+                                  DateTime billingSessionExpire = default,
+                                  IDictionary<string, string> headers = null) : base(createBy, tenantId)
     {
         StorageType = storageType;
         StorageParams = storageParams;
@@ -57,6 +58,7 @@ public record BackupRequestIntegrationEvent : IntegrationEvent
         TaskId = taskId;
         BillingSessionId = billingSessionId;
         BillingSessionExpire = billingSessionExpire;
+        Headers = headers;
     }
 
     [ProtoMember(1)]
@@ -88,4 +90,7 @@ public record BackupRequestIntegrationEvent : IntegrationEvent
 
     [ProtoMember(11)]
     public DateTime BillingSessionExpire { get; private init; }
+
+    [ProtoMember(12)]
+    public IDictionary<string, string> Headers { get; private init; }
 }

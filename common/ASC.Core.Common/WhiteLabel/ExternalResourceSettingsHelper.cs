@@ -130,7 +130,7 @@ public class ExternalResource(Dictionary<string, CultureSpecificExternalResource
 
         if (result.Entries == null)
         {
-            result.Entries = specificExternalResource?.Entries?.ToDictionary(entry => entry.Key, entry => entry.Value);
+            result.Entries = specificExternalResource.Entries?.ToDictionary(entry => entry.Key, entry => entry.Value);
             return result;
         }
 

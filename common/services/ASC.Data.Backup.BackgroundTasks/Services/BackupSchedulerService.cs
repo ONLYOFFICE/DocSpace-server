@@ -31,6 +31,7 @@ using ASC.Core.Common;
 using ASC.Core.Configuration;
 using ASC.Core.Tenants;
 using ASC.Data.Backup.Core.Quota;
+using ASC.Data.Backup.EF.Model;
 using ASC.Web.Core.PublicResources;
 
 using Polly;
@@ -72,7 +73,7 @@ public sealed class BackupSchedulerService(
 
         var backupsToSchedule = await (await backupRepository.GetBackupSchedulesAsync())
             .ToAsyncEnumerable()
-            .WhereAwait(async schedule => await backupSchedule.IsToBeProcessedAsync(schedule))
+            .Where(async (schedule, _) => await backupSchedule.IsToBeProcessedAsync(schedule))
             .ToListAsync(cancellationToken: stoppingToken);
 
         logger.DebugBackupsSchedule(backupsToSchedule.Count);

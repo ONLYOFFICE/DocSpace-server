@@ -90,7 +90,7 @@ public class WebhookSender(
             var status = 0;
             DateTime? delivery = null;
             var requestDate = webhookPayload.GetShortUtcNow();
-            string responsePayload = null;
+            string responsePayload;
             string responseHeaders = null;
             var requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
             string requestHeaders = null;
@@ -173,7 +173,7 @@ public class WebhookSender(
                     entry.Config.Enabled = false;
                 }
 
-                logger.ErrorWithException(e);
+                logger.WarningWithException(e);
             }
             catch (Exception e)
             {

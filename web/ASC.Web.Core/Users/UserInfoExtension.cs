@@ -37,6 +37,9 @@ public static class StudioUserInfoExtension
     {
         var products = webItemManager.GetItemsAll().Where(i => i is IProduct);
 
-        return await products.ToAsyncEnumerable().WhereAwait(async q => await webItemSecurity.IsProductAdministratorAsync(q.ID, ui.Id)).Select(q => q.ProductClassName).ToListAsync();
+        return await products
+            .ToAsyncEnumerable()
+            .Where(async (q, _) => await webItemSecurity.IsProductAdministratorAsync(q.ID, ui.Id))
+            .Select(q => q.ProductClassName).ToListAsync();
     }
 }

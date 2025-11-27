@@ -189,7 +189,7 @@ public class PaymentController(
 
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Set, currency, true, securityContext.CurrentAccount.ID.ToString(), null);
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Set, currency, true, securityContext.CurrentAccount.ID.ToString());
 
         if (result)
         {

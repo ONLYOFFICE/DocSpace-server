@@ -785,7 +785,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         var fileIds = await tags.Where(tag => tag.EntryType == FileEntryType.File).Select(tag => (T)Convert.ChangeType(tag.EntryId, typeof(T))).ToArrayAsync();
 
-        var filesAsync = fileDao.GetFilesFilteredAsync(fileIds, filter, subjectGroup, subjectId, searchText, extension, searchInContent);
+        var filesAsync = fileDao.GetFilesFilteredAsync(fileIds, [], filter, subjectGroup, subjectId, searchText, extension, searchInContent);
         var files = fileSecurity.FilterReadAsync(filesAsync.Where(file => file.RootFolderType != FolderType.TRASH));
 
         await foreach (var file in files)
@@ -843,7 +843,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (subjectId != Guid.Empty)
         {
-            entries = entries.WhereAwait(async f =>
+            entries = entries.Where(async (f, _) =>
                                     subjectGroup
                                         ? (await userManager.GetUsersByGroupAsync(subjectId)).Any(s => s.Id == f.CreateBy)
                                         : f.CreateBy == subjectId
@@ -1469,7 +1469,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if (file.IsForm && file.IsCompletedForm && fileForceSave != ForcesaveType.None)
             {
-                await fileDao.UpdateCategoryAsync(file.Id, file.Version, (int)FilterType.PdfForm, ForcesaveType.None);
+                await fileDao.UpdateCategoryAsync(file.Id, file.Version, (int)FilterType.PdfForm);
                 return file;
             }
 

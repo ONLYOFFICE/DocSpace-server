@@ -156,4 +156,7 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Сторонний ресурс</value>
   </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Некоторые файлы не были включены в резервную копию. Подробнее см. в разделе {0}</value>
+  </data>
 </root>

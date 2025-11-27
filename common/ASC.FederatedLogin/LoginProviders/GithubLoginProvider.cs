@@ -56,6 +56,7 @@ public class GithubLoginProvider : OauthProvider
         ConsumerFactory consumerFactory,
         string name, 
         int order, 
+        bool paid, 
         Dictionary<string, string> props, 
         Dictionary<string, string> additional = null) 
         : base(tenantManager, 
@@ -66,6 +67,7 @@ public class GithubLoginProvider : OauthProvider
             consumerFactory, 
             name, 
             order, 
+            paid,
             props,
             additional)
     { }

@@ -338,7 +338,7 @@
     <value>Вхід виконано успішно</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Вхід за допомогою соціального аккаунта успішний</value>
+    <value>Вхід за допомогою соціального аккаунта успішний: {0}</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Успішний вхід за допомогою API</value>
@@ -442,7 +442,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO ввімкнено</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Почати резервне копіювання</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
@@ -930,5 +930,122 @@
   </data>
   <data name="LoginSuccessSocialAccount" xml:space="preserve">
     <value>Вхід за допомогою соціального аккаунта успішний</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Сервер MCP {0} додано до агента</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Агента створено</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Агента видалено</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Агента перейменовано: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Агенти</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Постачальника ШІ створено: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Постачальника ШІ видалено: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Постачальника ШІ оновлено: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Агенти ШІ [{0}]. Установлена квота пам'яті для агентів ШІ: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Агенти ШІ [{0}]. Установлена квота пам'яті за замовчуванням для агентів ШІ: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Агенти ШІ [{0}]. Вимкнута квота пам'яті для агентів ШІ</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Сервер MCP {0} видалено з агента</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Файли [{0}]. Зовнішнє посилання створено: {1}. Роль: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Файли [{0}]. Зовнішнє посилання видалено: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Файли [{0}]. Зовнішнє посилання оновлено: {1}. Роль: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Файл позначено як вибраний: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Файл видалено з вибраного: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Файл видалено з розділу «Поділились зі мною»: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Файли [{0}]. Доступ оновлено для {1}. Роль: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Папку завантажено: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Папки [{0}]. Зовнішнє посилання створено: {1}. Роль: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Папки [{0}]. Зовнішнє посилання видалено: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Папки [{0}]. Зовнішнє посилання оновлено: {1}. Роль: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Папку видалено з розділу «Поділились зі мною»: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Папки [{0}]. Доступ оновлено для {1}. Роль: {2}</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Успішний вхід за допомогою OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Успішний вхід за допомогою логіна й пароля</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Установлена квота пам'яті для агентів ШІ: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Вимкнута квота пам'яті за замовчуванням для агентів ШІ</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Параметри векторизації скинуто</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Параметри вебпошуку скинуто</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Зовнішнє посилання скасовано: {1}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>Сервер MCP створено: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>Сервер MCP видалено: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Сервер MCP вимкнено: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Сервер MCP увімкнено: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Сервер MCP оновлено: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Параметри векторизації налаштовано. Постачальник: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Параметри вебпошуку налаштовано. Рушій: {0}</value>
   </data>
 </root>

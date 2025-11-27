@@ -338,7 +338,7 @@
     <value>Sukces logowania</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Zaloguj się za pomocą konta społecznościowego</value>
+    <value>Zaloguj się za pomocą konta społecznościowego: {0}</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Pomyślne logowanie przez interfejs API</value>
@@ -445,7 +445,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>Włączona możliwość SSO</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Uruchom kopię zapasową</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
@@ -930,5 +930,122 @@
   </data>
   <data name="LoginSuccessSocialAccount" xml:space="preserve">
     <value>Zaloguj się za pomocą konta społecznościowego</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Dodano serwer MCP {0} do asystenta</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Utworzono asystenta</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Usunięto asystenta</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Zmieniono nazwę asystenta: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Asystenci</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Utworzono dostawcę AI: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Usunięto dostawcę AI: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Zaktualizowano dostawcę AI: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Asystenci AI [{0}]. Ustaw niestandardowy limit pamięci dla asystentów AI : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Asystenci AI [{0}]. Ustaw domyślny limit pamięci dla asystentów AI: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Asystenci AI [{0}]. Wyłączono limit pamięci dla asystentów AI</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Usunięto serwer MCP {0} z asystenta</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Pliki [{0}]. Utworzony link zewnętrzny: {1}. Rola: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Pliki [{0}]. Usunięty link zewnętrzny: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Pliki [{0}]. Zaktualizowany link zewnętrzny: {1}. Rola: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Plik dodany do ulubionych: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Plik usunięty z ulubionych: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Plik usunięty z „Udostępnionych mi”: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Pliki [{0}]. Zaktualizowano dostęp dla {1}. Rola: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Pobrany katalog: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Katalogi [{0}]. Utworzony link zewnętrzny: {1}. Rola: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Katalogi [{0}]. Usunięty link zewnętrzny: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Katalogi [{0}]. Zaktualizowany link zewnętrzny: {1}. Rola: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Katalog usunięty z „Udostępnionych mi”: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Katalogi [{0}]. Zaktualizowano dostęp dla {1}. Rola: {2}</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Pomyślne logowanie za pośrednictwem OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Pomyślne logowanie za pośrednictwem loginu i hasła</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Ustaw domyślny limit pamięci dla asystentów AI: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Wyłączono limit pamięci dla asystentów AI</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Ustawienia wektoryzacji zostały zresetowane</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Ustawienia wyszukiwania w internecie zostały zresetowane</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Unieważniony link zewnętrzny: {1}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>Utworzony serwer MCP: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>Usunięty serwer MCP: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Wyłączony serwer MCP: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Włączony serwer MCP: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Zaktualizowany serwer MCP: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Ustawienia wektoryzacji są skonfigurowane. Dostawca: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Ustawienia wyszukiwania w internecie są skonfigurowane. Usługa: {0}</value>
   </data>
 </root>

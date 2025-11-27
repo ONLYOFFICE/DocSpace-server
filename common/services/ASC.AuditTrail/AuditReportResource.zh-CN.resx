@@ -460,7 +460,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO已启用</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>开始备份</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
@@ -978,5 +978,74 @@
   </data>
   <data name="LoginSuccessSocialAccount" xml:space="preserve">
     <value>通过社交账户登录成功</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>已将 MCP 服务器 {0} 添加到智能体</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>已创建智能体</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>已删除智能体</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>已重命名智能体：{0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>智能体</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>已创建 AI 提供商：{0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>已删除 AI 提供商：{0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>已更新 AI 提供商：{0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI 智能体 [{0}]。为 AI 智能体设置自定义存储配额：{1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI 智能体 [{0}]。为 AI 智能体设置默认存储配额：{1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI 智能体 [{0}]。已禁用 AI 智能体的存储配额</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>已从智能体中删除 MCP 服务器 {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>为 AI 智能体设置默认存储配额：{0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>已禁用 AI 智能体的默认存储配额</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>已重置向量化设置</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>已重置联网搜索设置</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>已创建 MCP 服务器：{0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>已删除 MCP 服务器：{0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>已禁用 MCP 服务器：{0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>已启用 MCP 服务器：{0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>已更新 MCP 服务器：{0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>已配置向量化设置。提供者：{0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>已配置联网搜索设置。引擎：{0}</value>
   </data>
 </root>

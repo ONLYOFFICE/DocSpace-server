@@ -334,7 +334,7 @@ internal abstract class ThirdPartyProviderDao
         if (withoutTags)
         {
             return rooms.Join(Queries.AllThirdPartyIdMappingsAsync(filesDbContext), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
-                .WhereAwait(async r => !await Queries.AnyTagLinksAsync(filesDbContext, r.HashId))
+                .Where(async (r, _) => !await Queries.AnyTagLinksAsync(filesDbContext, r.HashId))
                 .Select(r => r.folder);
         }
 
@@ -574,9 +574,9 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
 
             await foreach (var oldId in oldIds)
             {
-                var oldHashId = await mapping.MappingIdAsync(oldId);
+                var (oldHashId, _) = await mapping.MappingIdAsync(oldId);
                 var newId = oldId.Replace(oldValue, newValue);
-                var newHashId = await mapping.MappingIdAsync(newId);
+                var (newHashId, _) = await mapping.MappingIdAsync(newId);
 
                 var mappingForDelete = await Queries.ThirdPartyIdMappingsAsync(dbContext, tenantId, oldHashId).ToListAsync();
 

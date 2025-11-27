@@ -245,6 +245,8 @@ public class FileStorageService //: IFileStorageService
 
         Folder<T> parent = null;
         Folder<T> parentRoom = null;
+        
+        ArgumentOutOfRangeException.ThrowIfLessThan(from, 0);
 
         try
         {
@@ -407,7 +409,9 @@ public class FileStorageService //: IFileStorageService
             parent.RootFolderType == FolderType.Privacy ||
             await shareableTask;
 
-        entries = entries.ToAsyncEnumerable().WhereAwait(async x =>
+        entries = await entries
+            .ToAsyncEnumerable()
+            .Where(async (x, _) =>
         {
             if (x.FileEntryType == FileEntryType.Folder)
             {
@@ -420,7 +424,7 @@ public class FileStorageService //: IFileStorageService
             }
 
             return x is File<int> f2 && !await fileConverter.IsConverting(f2);
-        }).ToEnumerable();
+        }).ToListAsync();
 
         if (parentRoom != null)
         {
@@ -644,6 +648,8 @@ public class FileStorageService //: IFileStorageService
                     Cover = cover
                 });
 
+                folder.SettingsCover = cover;
+                folder.SettingsColor = color;
                 folder.FolderType = folderType;
                 folder.RootFolderType = FolderType.VirtualRooms;
                 folder.FolderIdDisplay = IdConverter.Convert<string>(await globalFolderHelper.FolderVirtualRoomsAsync);
@@ -843,6 +849,8 @@ public class FileStorageService //: IFileStorageService
 
     private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool? indexing = false, long? quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool? denyDownload = false, WatermarkRequestDto watermark = null, string color = null, string cover = null, IEnumerable<string> names = null, LogoRequest logo = null, ChatSettings chatSettings = null)
     {
+        title = title?.Trim();
+        
         ArgumentException.ThrowIfNullOrEmpty(title);
         ArgumentNullException.ThrowIfNull(parentId);
 
@@ -903,7 +911,7 @@ public class FileStorageService //: IFileStorageService
             newFolder.ParentId = parent.Id;
             newFolder.FolderType = folderType;
             newFolder.SettingsPrivate = parent.SettingsPrivate ? parent.SettingsPrivate : privacy;
-            newFolder.SettingsColor = roomLogoManager.GetRandomColour();
+            newFolder.SettingsColor = string.IsNullOrEmpty(color) ? roomLogoManager.GetRandomColour() : color;
 
             if (indexing.HasValue)
             {
@@ -1145,7 +1153,11 @@ public class FileStorageService //: IFileStorageService
 
         var folderAccess = folder.Access;
 
-        var titleChanged = !string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) && updateData.Title != null;
+        updateData.Title = updateData.Title?.Trim();
+
+        var titleChanged = !string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) && 
+                                !string.IsNullOrEmpty(updateData.Title);
+        
         var quotaChanged = folder.SettingsQuota != updateData.Quota && updateData.Quota != null;
         var indexingChanged = updateData.Indexing.HasValue && folder.SettingsIndexing != updateData.Indexing;
         var denyDownloadChanged = updateData.DenyDownload.HasValue && folder.SettingsDenyDownload != updateData.DenyDownload;
@@ -2480,14 +2492,14 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async Task<IEnumerable<KeyValuePair<DateTime, IEnumerable<KeyValuePair<FileEntry, IEnumerable<FileEntry>>>>>> GetNewRoomFilesAsync()
+    public async Task<IEnumerable<KeyValuePair<DateTime, IEnumerable<KeyValuePair<FileEntry, IEnumerable<FileEntry>>>>>> GetNewRootFilesAsync(int rootId)
     {
         try
         {
-            var newFiles = await fileMarker.GetRoomGroupedNewItemsAsync();
+            var newFiles = await fileMarker.GetRootGroupedNewItemsAsync(rootId);
             if (newFiles.Count == 0)
             {
-                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync)], []);
+                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(rootId)], []);
             }
 
             return newFiles
@@ -2510,7 +2522,9 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
-            var newFiles = await fileMarker.MarkedItemsAsync(folder).ToListAsync();
+            var newFiles = await fileMarker.MarkedItemsAsync(folder)
+                .Where(x => x.FileEntryType == FileEntryType.File)
+                .ToListAsync();
             if (newFiles.Count == 0)
             {
                 await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(folder.Id)], []);
@@ -2971,7 +2985,6 @@ public class FileStorageService //: IFileStorageService
         else
         {
             checkedFiles.AddRange(filesId);
-            return checkedFiles;
         }
 
         return checkedFiles;
@@ -3424,7 +3437,6 @@ public class FileStorageService //: IFileStorageService
         }
 
         await fileSecurity.RemoveSubjectAsync(userFromId, true);
-        return;
     }
 
     public async Task UpdatePersonalFolderModified(Guid userId, bool checkPermission = false)
@@ -3481,7 +3493,6 @@ public class FileStorageService //: IFileStorageService
             var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{userId}";
             await notifyMyFolder.PublishAsync(new ClearMyFolderItem { Key = cacheKey }, CacheNotifyAction.Remove);
         }
-        return;
     }
 
     private async Task DeleteFilesAsync<T>(IEnumerable<T> fileIds, T folderIdTrash)
@@ -3980,7 +3991,7 @@ public class FileStorageService //: IFileStorageService
                                             await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, pastRecord.Share, true, name);
                                             await notifyClient.SendRoomUpdateAccessForUser(folder, user, ace.Access);
 
-                                            var role = FileShareExtensions.GetAccessString(ace.Access, true);
+                                            var role = FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom);
                                             var url = commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}");
                                             await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.Title, url, role);
                                             break;
@@ -4011,18 +4022,20 @@ public class FileStorageService //: IFileStorageService
                                 var isSystem = await userManager.IsSystemGroup(group.ID);
                                 if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
                                 {
+                                    var isAgent = folder.FolderType == FolderType.AiRoom;
+                                    
                                     switch (eventType)
                                     {
                                         case EventType.Create:
-                                            await filesMessageService.SendAsync(MessageAction.RoomGroupAdded, entry, group.Name, FileShareExtensions.GetAccessString(ace.Access, true), group.ID.ToString(), isSystem.ToString(CultureInfo.InvariantCulture));
+                                            await filesMessageService.SendAsync(MessageAction.RoomGroupAdded, entry, group.Name, FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom), group.ID.ToString(), isSystem.ToString(CultureInfo.InvariantCulture));
                                             break;
                                         case EventType.Remove:
                                             await filesMessageService.SendAsync(MessageAction.RoomGroupRemove, entry, group.Name, group.ID.ToString(), isSystem.ToString(CultureInfo.InvariantCulture));
                                             break;
                                         case EventType.Update:
                                             await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForGroup, entry, group.Name,
-                                                FileShareExtensions.GetAccessString(ace.Access, true), group.ID.ToString(),
-                                                FileShareExtensions.GetAccessString(pastRecord.Share, true), isSystem.ToString(CultureInfo.InvariantCulture));
+                                                FileShareExtensions.GetAccessString(ace.Access, true, isAgent), group.ID.ToString(),
+                                                FileShareExtensions.GetAccessString(pastRecord.Share, true, isAgent), isSystem.ToString(CultureInfo.InvariantCulture));
                                             break;
                                     }
                                 }
@@ -4108,7 +4121,7 @@ public class FileStorageService //: IFileStorageService
         var result = await SetAceLinkAsync(room, SubjectType.InvitationLink, linkId, share, options);
 
         await filesMessageService.SendAsync(_roomMessageActions[SubjectType.InvitationLink][result.EventType], room, result.Ace.Id, result.Ace.FileShareOptions?.Title,
-            FileShareExtensions.GetAccessString(result.Ace.Access, true));
+            FileShareExtensions.GetAccessString(result.Ace.Access, true, room.FolderType == FolderType.AiRoom));
 
         return (await fileSharing.GetPureSharesAsync(room, [result.Ace.Id]).FirstOrDefaultAsync());
     }
@@ -4272,18 +4285,15 @@ public class FileStorageService //: IFileStorageService
             var id = HttpUtility.ParseQueryString(url.Query)[FilesLinkUtility.FileId];
             if (!string.IsNullOrEmpty(id))
             {
-                if (fileId is string)
+                if (int.TryParse(id, out var resultId))
                 {
-                    var dao = daoFactory.GetFileDao<string>();
-                    file = await dao.GetFileAsync(id) as File<T>;
+                    var dao = daoFactory.GetFileDao<int>();
+                    file = await dao.GetFileAsync(resultId) as File<T>;
                 }
                 else
                 {
-                    if (int.TryParse(id, out var resultId))
-                    {
-                        var dao = daoFactory.GetFileDao<int>();
-                        file = await dao.GetFileAsync(resultId) as File<T>;
-                    }
+                    var dao = daoFactory.GetFileDao<string>();
+                    file = await dao.GetFileAsync(id) as File<T>;
                 }
             }
         }
@@ -4357,7 +4367,7 @@ public class FileStorageService //: IFileStorageService
         var result = await users
             .Where(u => u.Status != EmployeeStatus.Terminated)
             .ToAsyncEnumerable()
-            .SelectAwait(async u => await mentionWrapperCreator.CreateMentionWrapperAsync(u))
+            .Select(async (UserInfo u, CancellationToken _) => await mentionWrapperCreator.CreateMentionWrapperAsync(u))
             .OrderBy(u => u.User, UserInfoComparer.Default)
             .ToListAsync();
 
@@ -4884,7 +4894,7 @@ public class FileStorageService //: IFileStorageService
                 }
 
                 var link = invitationService.GetInvitationLink(user.Email, ace.Access, authContext.CurrentAccount.ID, room.Id.ToString());
-                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, await urlShortener.GetShortenLinkAsync(link));
+                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, await urlShortener.GetShortenLinkAsync(link), room.FolderType == FolderType.AiRoom);
                 await filesMessageService.SendAsync(MessageAction.RoomInviteResend, room, user.Email, user.Id.ToString());
             }
 
@@ -4919,7 +4929,7 @@ public class FileStorageService //: IFileStorageService
                 var link = invitationService.GetInvitationLink(user.Email, ace.Access, authContext.CurrentAccount.ID, id.ToString());
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, shortenLink);
+                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, shortenLink, room.FolderType == FolderType.AiRoom);
                 await filesMessageService.SendAsync(MessageAction.RoomInviteResend, room, user.Email, user.Id.ToString());
             }
 
@@ -5000,7 +5010,7 @@ public class FileStorageService //: IFileStorageService
             .Where(user => !user.Id.Equals(authContext.CurrentAccount.ID)
                            && !user.Id.Equals(Constants.LostUser.Id))
             .ToAsyncEnumerable()
-            .SelectAwait(async user => await mentionWrapperCreator.CreateMentionWrapperAsync(user))
+            .Select(async (UserInfo user, CancellationToken _) => await mentionWrapperCreator.CreateMentionWrapperAsync(user))
             .ToListAsync();
 
         users = users
@@ -5238,6 +5248,7 @@ public class FileStorageService //: IFileStorageService
 
         var folder = entry as Folder<T>;
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
+        var isAgent = folder is { FolderType: FolderType.AiRoom };
 
         var actions = folder == null ? _fileMessageActions : isRoom ? _roomMessageActions : _folderMessageActions;
 
@@ -5284,12 +5295,12 @@ public class FileStorageService //: IFileStorageService
             if (isRoom)
             {
                 await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, ace.FileShareOptions?.Title,
-                    FileShareExtensions.GetAccessString(ace.Access, isRoom), ace.Id.ToString());
+                    FileShareExtensions.GetAccessString(ace.Access, isRoom, isAgent), ace.Id.ToString());
             }
             else
             {
                 await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, entry.Title, ace.FileShareOptions?.Title,
-                    FileShareExtensions.GetAccessString(ace.Access, isRoom), ace.Id.ToString());
+                    FileShareExtensions.GetAccessString(ace.Access, isRoom, isAgent), ace.Id.ToString());
             }
         }
         else
@@ -5352,7 +5363,7 @@ public class FileStorageService //: IFileStorageService
 
     private async Task<List<AceWrapper>> GetFullAceWrappersAsync(IEnumerable<FileShareParams> share)
     {
-        var dict = await share.ToAsyncEnumerable().SelectAwait(async s => await fileShareParamsHelper.ToAceObjectAsync(s)).ToDictionaryAsync(k => k.Id, v => v);
+        var dict = await share.ToAsyncEnumerable().Select(async (FileShareParams s, CancellationToken _) => await fileShareParamsHelper.ToAceObjectAsync(s)).ToDictionaryAsync(k => k.Id, v => v);
 
         var admins = await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
         var onlyFilesAdmins = await userManager.GetUsersByGroupAsync(WebItemManager.DocumentsProductID);

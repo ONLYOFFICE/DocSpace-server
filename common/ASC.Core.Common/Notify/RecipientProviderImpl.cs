@@ -145,7 +145,7 @@ public class RecipientProviderImpl(UserManager userManager) : IRecipientProvider
             {
                 //Filtering only missing users and users who activated already
 
-                var filteredAddresses = await recipient.Addresses.ToAsyncEnumerable().WhereAwait(WhereAsync).ToArrayAsync();
+                var filteredAddresses = await recipient.Addresses.ToAsyncEnumerable().Where(WhereAsync).ToArrayAsync();
 
                 return new DirectRecipient(recipient.ID, recipient.Name, filteredAddresses.ToArray(), false);
             }
@@ -154,7 +154,7 @@ public class RecipientProviderImpl(UserManager userManager) : IRecipientProvider
         return recipient;
     }
 
-    private async ValueTask<bool> WhereAsync(string address)
+    private async ValueTask<bool> WhereAsync(string address, CancellationToken cancellationToken)
     {
         var user = await userManager.GetUserByEmailAsync(address);
         return user.Id == Constants.LostUser.Id || (user.IsActive && (user.Status & EmployeeStatus.Default) == user.Status);

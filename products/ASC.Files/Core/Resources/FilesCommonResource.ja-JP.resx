@@ -515,4 +515,7 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>ゲスト</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>エージェントマネージャー</value>
+  </data>
 </root>

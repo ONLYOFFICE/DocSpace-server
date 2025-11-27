@@ -106,4 +106,7 @@
   <data name="RoomTemplates" xml:space="preserve">
     <value>Predloge</value>
   </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>AI agenti</value>
+  </data>
 </root>

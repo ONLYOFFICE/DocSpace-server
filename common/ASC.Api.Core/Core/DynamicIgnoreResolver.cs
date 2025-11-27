@@ -170,5 +170,6 @@ public class ConfigureJsonOptions(IHttpContextAccessor httpContextAccessor) : IC
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
         options.JsonSerializerOptions.Converters.Add(new DynamicIgnoreConverter<SuccessApiResponse>(httpContextAccessor));
+        options.JsonSerializerOptions.Converters.Add(new ApiDateTimeConverter());
     }
 }

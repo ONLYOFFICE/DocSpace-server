@@ -57,7 +57,7 @@ public class OpenSearchTextExtractor(Client client) : ITextExtractor
         }
         
         var simulation = response.Documents.FirstOrDefault();
-        if (simulation == null)
+        if (simulation?.Document == null)
         {
             return null;
         }

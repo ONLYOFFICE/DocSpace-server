@@ -296,8 +296,6 @@ public class RestorePortalTask(DbFactory dbFactory,
                     {
                         return string.Compare(x, y, StringComparison.Ordinal);
                     }
-
-                    return -1;
                 }
 
                 return -1;

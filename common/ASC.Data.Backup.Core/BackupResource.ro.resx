@@ -156,4 +156,7 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Resursă terță parte</value>
   </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Unele fișiere nu au fost incluse în copia de rezervă. Pentru informaţii suplimentare accesați {0}</value>
+  </data>
 </root>

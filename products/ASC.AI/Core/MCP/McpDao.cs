@@ -146,7 +146,7 @@ public class McpDao(
         }
 
         var dbServers = await dbContext.GetServersAsync(tenantId, ids)
-            .SelectAwait(async x => await x.ToMcpServerAsync(crypto, iconStore))
+            .Select(async (DbMcpServerUnit x, CancellationToken _) => await x.ToMcpServerAsync(crypto, iconStore))
             .ToListAsync();
         
         servers.AddRange(dbServers);
@@ -163,7 +163,7 @@ public class McpDao(
         var dbTotalCount = await dbContext.GetActiveServersTotalCountAsync(tenantId);
         
         var dbServers = await dbContext.GetActiveServersAsync(tenantId, offset, count)
-            .SelectAwait(async x => await x.ToMcpServerAsync(crypto, iconStore))
+            .Select(async (DbMcpServerUnit x, CancellationToken _) => await x.ToMcpServerAsync(crypto, iconStore))
             .ToListAsync();
         
         servers.AddRange(dbServers);
@@ -211,7 +211,7 @@ public class McpDao(
         var dbTotalCount = await dbContext.GetServersCountAsync(tenantId);
         
         var dbServers = await dbContext.GetServersAsync(tenantId, offset, count)
-            .SelectAwait(async x => await x.ToMcpServerAsync(crypto, iconStore))
+            .Select(async (DbMcpServerUnit x, CancellationToken _) => await x.ToMcpServerAsync(crypto, iconStore))
             .ToListAsync();
         
         servers.AddRange(dbServers);

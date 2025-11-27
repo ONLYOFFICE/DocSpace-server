@@ -205,12 +205,13 @@ public class HistoryApiHelper(
     private async IAsyncEnumerable<HistoryDto> ToHistoryAsync(IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> events)
     {
         var histories = events
-        .SelectAwait(e => interpreter.ToHistoryAsync(e.Item1, e.Item2)).Where(x => x != null)
-        .GroupByAwait(x => ValueTask.FromResult(x.GetGroupId()),
-            async (_, group) =>
+        .Select(async (Tuple<DbAuditEvent, DbFilesAuditReference> e, CancellationToken _) => await interpreter.ToHistoryAsync(e.Item1, e.Item2))
+        .Where(x => x != null)
+        .GroupBy((x, _) => ValueTask.FromResult(x.GetGroupId()),
+            async (_, group, c) =>
             {
-                var first = await historyDtoHelper.GetAsync(await group.FirstAsync());
-                first.Related = await group.Skip(1).SelectAwait(async x => await historyDtoHelper.GetAsync(x)).ToListAsync();
+                var first = await historyDtoHelper.GetAsync(group.First());
+                first.Related = await group.Skip(1).ToAsyncEnumerable().Select(async (HistoryEntry x, CancellationToken _) => await historyDtoHelper.GetAsync(x)).ToListAsync(cancellationToken: c);
                 return first;
             })
         .OrderByDescending(x => x.Date);

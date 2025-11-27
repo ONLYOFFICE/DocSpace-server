@@ -62,6 +62,7 @@ public partial class SettingsController(
     IDistributedLockProvider distributedLockProvider,
     UsersQuotaSyncOperation usersQuotaSyncOperation,
     CustomQuota customQuota,
+    UserSocketManager userSocketManager,
     QuotaSocketManager quotaSocketManager)
     : BaseSettingsController(fusionCache, webItemManager)
 {
@@ -1033,7 +1034,7 @@ public partial class SettingsController(
             .Where(consumer => consumer.ManagedKeys.Any())
             .OrderBy(services => services.Order)
             .ToAsyncEnumerable()
-            .SelectAwait(async r => await AuthServiceRequestsDto.From(r, logoText))
+            .Select(async (Consumer r, CancellationToken _) => await AuthServiceRequestsDto.From(r, logoText))
             .ToListAsync();
     }
 
@@ -1051,7 +1052,15 @@ public partial class SettingsController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var saveAvailable = coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId())).ThirdParty;
+        var consumer = consumerFactory.GetByKey<Consumer>(inDto.Name);
+
+        if (!consumer.CanSet)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var saveAvailable = !consumer.Paid || coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(tenantId)).ThirdParty;
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.ThirdPartyAuthorization))
             || !saveAvailable)
         {
@@ -1059,7 +1068,6 @@ public partial class SettingsController(
         }
 
         var changed = false;
-        var consumer = consumerFactory.GetByKey<Consumer>(inDto.Name);
 
         var validateKeyProvider = consumer as IValidateKeysProvider;
 
@@ -1094,6 +1102,11 @@ public partial class SettingsController(
         if (changed)
         {
             messageService.Send(MessageAction.AuthorizationKeysSetting);
+
+            if (consumer is TelegramLoginProvider)
+            {
+                await userSocketManager.ConnectTelegram(tenantId, authContext.CurrentAccount.ID);
+            }
         }
 
         return changed;

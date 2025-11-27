@@ -1964,7 +1964,7 @@ $TrulyYours</value>
     <value>Tuleva tilausmaksu ${LetterLogoText} DocSpace -tilistäsi</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Vaadittu toimenpide: ${LetterLogoText} DocSpace -lompakkosi saldon automaattinen täydentäminen ei onnistu.</value>
+    <value>Vaadittu toimenpide: ${LetterLogoText} DocSpace -lompakkosi saldon automaattinen täydentäminen ei onnistu</value>
   </data>
   <data name="subject_renew_subscription_error" xml:space="preserve">
     <value>Tarvittava toimenpide: Palvelusuunnitelmaa ei voi uusia automaattisesti DocSpacessasi ${LetterLogoText}</value>
@@ -1997,5 +1997,100 @@ Pyydämme sinua ystävällisesti tarkistamaan ja päivittämään lompakkosi sal
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; poistettiin agentista: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; määrättiin rooli &lt;b&gt;{1}&lt;/b&gt; agentissa: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; lisättiin agenttiin: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; agentti nimetty uudelleen: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; agentti poistettu: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; uusi agentti luotu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>DocSpacesi varmuuskopiointi epäonnistui</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>DocSpacesi automaattinen varmuuskopiointi epäonnistui</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Sinut on kutsuttu ${LetterLogoText} DocSpace agenttiin</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Liity agenttiin</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Liity ${LetterLogoText} DocSpaceen</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Hei, $UserName,
+
+DocSpacesi  [${__VirtualRootPath}](${__VirtualRootPath}) varmuuskopiointi on epäonnistunut.
+
+Jos sinulla on kysyttävää tai tarvitset apua, älä epäröi ottaa meihin yheyttä [${__SupportLink}](${__SupportLink}) kautta.
+Ystävällisin terveisin,
+${LetterLogoText} Tukitiimi
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Hei, $UserName,
+
+DocSpacesi "${__VirtualRootPath}":"${__VirtualRootPath}" varmuuskopiointi on epäonnistunut.
+
+Jos sinulla on kysyttävää tai tarvitset apua, älä epäröi ottaa meihin yhteyttä "${__SupportLink}":"${__SupportLink}" kautta. 
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Hei!
+
+Sinut on kutsuttu liittymään DocSpace agenttiin "${__VirtualRootPath}":"${__VirtualRootPath}". Hyväksy kutsu klikkaamalla linkkiä:
+
+$OrangeButton
+
+Aseta uusi salasana tilillesi kutsulinkin klikkaamisen jälkeen.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Hei!
+
+$__AuthorName kutsui sinut liittymään agenttiin "$Message":"$InviteLink"  "${__VirtualRootPath}":"${__VirtualRootPath}":ssa.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Hei, $UserName,
+
+DocSpacesi "${__VirtualRootPath}":"${__VirtualRootPath}" ajoitettu varmuuskopiointi on epäonnistunut.
+
+Suosittelemme tarkistamaan asetukset "Varmuuskopio":"${__VirtualRootPath}/portal-settings/backup/data-backup" ja "Palvelut":"${__VirtualRootPath}/portal-settings/services".
+
+Jos sinulla on kysyttävää tai tarvitset apua, älä epäröi ottaa meihin yhteyttä "${__SupportLink}":"${__SupportLink}" kautta.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Hei, $UserName,
+
+DocSpacesi [${__VirtualRootPath}](${__VirtualRootPath}) ajoitettu varmuuskopiointi on epäonnistunut.
+
+Suosittelemme tarkistamaan asetukset [Varmuuskopio](${__VirtualRootPath}/portal-settings/backup/data-backup) ja [Palvelut](${__VirtualRootPath}/portal-settings/services).
+
+Jos sinulla on kysyttävää tai tarvitset apua, älä epäröi ottaa meihin yheyttä [${__SupportLink}](${__SupportLink}) kautta.
+Ystävällisin terveisin,
+${LetterLogoText} Tukitiimi
+[${__SiteLink}](${__SiteLink})</value>
   </data>
 </root>

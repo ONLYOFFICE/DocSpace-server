@@ -56,14 +56,17 @@ public class FolderMoveTests(
             DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolderId),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [],
-            FolderIds = [new(sourceFolder.Id)]
+            FolderIds = [new(sourceFolder.Id)],
+            ReturnSingleOperation =  true
         };
         
         var results = (await _filesOperationsApi.CopyBatchItemsAsync(copyParams, TestContext.Current.CancellationToken)).Response;
         
+        var operationId = results.FirstOrDefault()?.Id;
+        
         if (results.Any(r => !r.Finished))
         {
-            results = await WaitLongOperation();
+            results = await WaitLongOperation(operationId);
         }
         
         // Assert
@@ -100,14 +103,17 @@ public class FolderMoveTests(
             DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetFolder.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [],
-            FolderIds = [new(sourceFolder.Id)]
+            FolderIds = [new(sourceFolder.Id)],
+            ReturnSingleOperation =  true
         };
         
         var results = (await _filesOperationsApi.MoveBatchItemsAsync(moveParams, TestContext.Current.CancellationToken)).Response;
         
+        var operationId = results.FirstOrDefault()?.Id;
+        
         if (results.Any(r => !r.Finished))
         {
-            results = await WaitLongOperation();
+            results = await WaitLongOperation(operationId);
         }
         
         // Assert
@@ -117,5 +123,36 @@ public class FolderMoveTests(
         var movedFolder = (await _foldersApi.GetFolderInfoAsync(sourceFolder.Id, TestContext.Current.CancellationToken)).Response;
         movedFolder.Should().NotBeNull();
         movedFolder.ParentId.Should().Be(targetFolder.Id);
+    }
+    
+    [Fact]
+    public async Task DuplicateFolder_InsideUserFolder_ReturnsValidFolderWithIndex()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        // Create a source file
+        var sourceFolder = await CreateFolderInMy("folder", Initializer.Owner);
+        
+        // Act
+        var results = (await _filesOperationsApi.DuplicateBatchItemsAsync(new DuplicateRequestDto
+        {
+            FolderIds = [new(sourceFolder.Id)],
+            ReturnSingleOperation = true
+        }, TestContext.Current.CancellationToken)).Response;
+        
+        var operationId = results.FirstOrDefault()?.Id;
+        
+        // Assert
+        if (results.Any(r => !r.Finished))
+        {
+            results = await WaitLongOperation(operationId);
+        }
+        
+        // Assert
+        results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
+        var newFolder = results.OfType<FileOperationDto>().FirstOrDefault();
+        newFolder.Should().NotBeNull();
+        newFolder.Folders.Should().Contain(r=> Path.GetFileNameWithoutExtension(r.Title) == Path.GetFileNameWithoutExtension(sourceFolder.Title) + " (1)");
     }
 }

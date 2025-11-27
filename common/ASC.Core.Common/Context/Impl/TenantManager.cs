@@ -387,6 +387,11 @@ public class TenantManager(
     {
         tenantService.ValidateTenantName(name);
     }
+
+    public async Task<bool> IsForbiddenDomainAsync(string domain)
+    {
+        return await tenantService.IsForbiddenDomainAsync(domain);
+    }
 }
 
 public class TenantMiddleware(RequestDelegate next)

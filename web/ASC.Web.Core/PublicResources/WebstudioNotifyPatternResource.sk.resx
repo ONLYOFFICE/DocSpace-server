@@ -1956,4 +1956,143 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; vytvoril nového agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; vymazal agenta: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; premenoval agenta: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; bola pridelená rola &lt;b&gt;{1}&lt;/b&gt; v agentu: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; bol pridaný do agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; bol odstránený z agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Pripojiť sa k agentu</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Dobrý deň, $UserName,
+
+Proces zálohovania vášho DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" zlyhal.
+
+Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať prostredníctvom "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Dobrý deň, $UserName,
+
+Proces zálohovania vášho DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) zlyhal.
+
+Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať prostredníctvom [${__SupportLink}](${__SupportLink})
+
+S pozdravom,
+${LetterLogoText} Tím podpory
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Dobrý deň, $UserName!
+
+Snažíme sa vás informovať, že automatické obnovenie vášho zakúpeného servisného plánu sa nepodarilo dokončiť.
+
+Láskavo vás žiadame, aby ste svoj aktuálny servisný plán obnovili manuálne (alebo zakúpili nový).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Dobrý deň!
+
+Boli ste pozvaní pripojiť sa k agentu DocSpace na "${__VirtualRootPath}":"${__VirtualRootPath}". Prijmite pozvánku kliknutím na odkaz:
+
+$OrangeButton
+
+Po kliknutí na odkaz nastavte nové heslo pre svoj účet.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Dobrý deň!
+
+$__AuthorName vás pozval, aby ste sa pripojili k agentu "$Message":"$InviteLink" na "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Dobrý deň, $UserName!!
+
+Chceme vás informovať, že vaša platba za predplatné bude automaticky strhnutá z vášho účtu o 3 dni.
+
+Aby bola transakcia hladká, prosím, overte, či máte na vašom platobnom spôsobe dostatok financií.
+
+Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte sa obrátiť na náš tím podpory: ${__SupportLink}.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Dobrý deň, $UserName,
+
+Plánovaný process zálohovania vášho DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" zlyhal.
+
+Odporúčame skontrolovať nastavenia "Záloha":"${__VirtualRootPath}/portal-settings/backup/data-backup" a "Služby":"${__VirtualRootPath}/portal-settings/services".
+
+Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať prostredníctvom "${__SupportLink}":"${__SupportLink}"
+ 
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Dobrý deň, $UserName,
+
+Plánovaný process zálohovania vášho DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) zlyhal.
+
+Odporúčame skontrolovať nastavenia [Záloha](${__VirtualRootPath}/portal-settings/backup/data-backup) a [Služby](${__VirtualRootPath}/portal-settings/services).
+
+Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať prostredníctvom [${__SupportLink}](${__SupportLink})
+
+S pozdravom,
+${LetterLogoText} Tím podpory
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Dobrý deň, $UserName!
+
+Kontaktujeme vás, aby sme vás informovali, že automatické dobitie zostatku peňaženky DocSpace bolo neúspešné.
+
+Láskavo vás žiadame, aby ste manuálne skontrolovali a aktualizovali zostatok vo vašej peňaženke.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Nepodarilo sa vytvoriť zálohu pre váš DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Pripojiť sa k ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Boli ste pozvaní do agenta ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Automatické zálohovanie vášho DocSpace zlyhalo</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Vyžaduje sa akcia: Nie je možné automaticky obnoviť servisný plán vo vašom ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Nadchádzajúca platba za predplatné pre váš ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Je potrebná akcia: Nie je možné automaticky dobiť zostatok peňaženky vo vašom ${LetterLogoText} DocSpace</value>
+  </data>
 </root>

@@ -261,7 +261,11 @@ public abstract class FilesController<T>(
     {
         var completedFormId = await hybridCache.GetOrDefaultAsync<string>(inDto.FillingSessionId);
 
-        return await filesControllerHelper.GetFillResultAsync((T)Convert.ChangeType(completedFormId, typeof(T)));
+        if (completedFormId != null)
+        {
+            return await filesControllerHelper.GetFillResultAsync((T)Convert.ChangeType(completedFormId, typeof(T)));
+        }
+        throw new ItemNotFoundException();
     }
 
     /// <summary>
@@ -367,7 +371,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [AllowAnonymous]
-    [HttpGet("file/{fileId}/restoreversion")]
+    [HttpPost("file/{fileId}/restoreversion")]
     public IAsyncEnumerable<EditHistoryDto> RestoreFileVersion(RestoreVersionRequestDto<T> inDto)
     {
         return filesControllerHelper.RestoreVersionAsync(inDto.FileId, inDto.Version, inDto.Url);
@@ -561,8 +565,8 @@ public abstract class FilesController<T>(
     [HttpPut("order")]
     public IAsyncEnumerable<FileEntryDto<T>> SetFilesOrder(OrdersRequestDto<T> inDto)
     {
-        return fileStorageService.SetOrderAsync(inDto.Items).SelectAwait<FileEntry<T>, FileEntryDto<T>>(
-            async e => e.FileEntryType == FileEntryType.Folder ?
+        return fileStorageService.SetOrderAsync(inDto.Items).Select<FileEntry<T>, FileEntryDto<T>>(
+            async (e, _) => e.FileEntryType == FileEntryType.Folder ?
                 await _folderDtoHelper.GetAsync(e as Folder<T>) :
                 await _fileDtoHelper.GetAsync(e as File<T>));
     }

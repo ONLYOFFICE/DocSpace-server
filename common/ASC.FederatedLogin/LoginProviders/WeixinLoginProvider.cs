@@ -51,8 +51,8 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
         RequestHelper requestHelper,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         _requestHelper = requestHelper;
     }
@@ -85,7 +85,7 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
     public override LoginProfile GetLoginProfile(OAuth20Token token)
     {
         return token is WeixinOAuth20Token weixinOAuth20Token
-            ? GetLoginProfile($"{weixinOAuth20Token?.AccessToken}&openid={weixinOAuth20Token?.UnionId}")
+            ? GetLoginProfile($"{weixinOAuth20Token.AccessToken}&openid={weixinOAuth20Token.UnionId}")
             : GetLoginProfile($"{token?.AccessToken}");
     }
 

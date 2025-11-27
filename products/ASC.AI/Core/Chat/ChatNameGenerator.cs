@@ -60,16 +60,15 @@ public class ChatNameGenerator(
     
     private static readonly ChatMessage _systemMessage = new(ChatRole.System, _instruction);
     
-    public async Task<string?> GenerateAsync(ChatExecutionContext context)
+    public async Task<string?> GenerateAsync(string userMessage, ChatClientOptions options)
     {
-        ArgumentNullException.ThrowIfNull(context.UserMessage);
-        ArgumentException.ThrowIfNullOrEmpty(context.RawMessage);
+        ArgumentException.ThrowIfNullOrEmpty(userMessage);
         
         try
         {
-            var client = chatClientFactory.Create(context.ClientOptions);
+            var client = chatClientFactory.Create(options);
 
-            var messages = new List<ChatMessage> { _systemMessage, context.UserMessage };
+            var messages = new List<ChatMessage> { _systemMessage, new(ChatRole.User, userMessage) };
 
             var response = await client.GetResponseAsync(messages);
             var message = response.Messages.First();
@@ -77,9 +76,13 @@ public class ChatNameGenerator(
             var content = message.Contents.First();
             var textContent = content as TextContent;
 
-            return string.IsNullOrEmpty(textContent?.Text) 
-                ? throw new InvalidOperationException() 
-                : ProcessTitle(textContent.Text);
+            if (string.IsNullOrEmpty(textContent?.Text))
+            {
+                throw new InvalidOperationException();
+            }
+            
+            var processedText = TextContentUtils.CutThink(textContent.Text);
+            return ProcessTitle(processedText);
         }
         catch (Exception e)
         {

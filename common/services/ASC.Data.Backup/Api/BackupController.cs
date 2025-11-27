@@ -32,6 +32,7 @@ using ASC.Core.Tenants;
 using ASC.Data.Backup.Core.Quota;
 using ASC.Data.Backup.Services;
 using ASC.Data.Storage;
+using ASC.MessagingSystem;
 using ASC.Web.Core.PublicResources;
 
 using Swashbuckle.AspNetCore.Annotations;
@@ -56,6 +57,7 @@ public class BackupController(
     CoreSettings coreSettings,
     BackupService backupService,
     IDistributedLockProvider distributedLockProvider,
+    IHttpContextAccessor httpContextAccessor,
     CountFreeBackupChecker freeBackupsChecker)
     : ControllerBase
 {
@@ -243,6 +245,9 @@ public class BackupController(
 
             var taskId = await backupService.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
 
+            var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request)
+                .ToDictionary(x => x.Key, x => x.Value.ToString());
+
             await eventBus.PublishAsync(new BackupRequestIntegrationEvent(
                  tenantId: tenantId,
                  storageParams: storageParams,
@@ -252,7 +257,8 @@ public class BackupController(
                  taskId: taskId,
                  serverBaseUri: serverBaseUri,
                  billingSessionId: billingSession?.SessionId ?? 0,
-                 billingSessionExpire: billingSession?.Expire ?? default
+                 billingSessionExpire: billingSession?.Expire ?? default,
+                 headers: headers
             ));
 
             return await backupService.GetBackupProgressAsync(inDto.Dump);
