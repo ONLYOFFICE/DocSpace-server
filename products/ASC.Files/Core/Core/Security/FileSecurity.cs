@@ -2758,8 +2758,16 @@ public class FileSecurity(
         }
     }
 
-    private async IAsyncEnumerable<FileEntry> GetSharesForMeAsync<T>(IEnumerable<FileShareRecord<T>> records, List<OrderedSubject> orderedSubjects, FilterType filterType, bool subjectGroup,
-        Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
+    private async IAsyncEnumerable<FileEntry> GetSharesForMeAsync<T>(
+        IEnumerable<FileShareRecord<T>> records, 
+        List<OrderedSubject> orderedSubjects,
+        FilterType filterType,
+        bool subjectGroup,
+        Guid subjectID, 
+        string searchText = "", 
+        string[] extension = null, 
+        bool searchInContent = false, 
+        bool withSubfolders = false)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
@@ -2795,11 +2803,12 @@ public class FileSecurity(
             }
         }
 
+        var folderToExclude = subjectID == Guid.Empty && string.IsNullOrEmpty(searchText) && filterType == FilterType.None ? folderIds.Keys.ToArray() : [];
         var entries = new List<FileEntry<T>>();
 
         if (filterType != FilterType.FoldersOnly)
         {
-            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), folderIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), folderToExclude, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
             
             await foreach (var x in files)
             {
@@ -2816,9 +2825,9 @@ public class FileSecurity(
 
         if (filterType is FilterType.None or FilterType.FoldersOnly)
         {
-            IAsyncEnumerable<FileEntry<T>> folders = folderDao.GetFoldersAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, withSubfolders && filterType == FilterType.FoldersOnly, false);
+            IAsyncEnumerable<FileEntry<T>> folders = folderDao.GetFoldersAsync(folderIds.Keys, folderToExclude, filterType, subjectGroup, subjectID, searchText, withSubfolders && filterType == FilterType.FoldersOnly, false);
 
-            if (withSubfolders)
+            if (withSubfolders && filterType == FilterType.FoldersOnly)
             {
                 folders = FilterReadAsync(folders);
             }
@@ -2988,7 +2997,7 @@ public class FileSecurity(
 
         if (filterType is FilterType.None or FilterType.FoldersOnly)
         {
-            IAsyncEnumerable<FileEntry<T>> folders = folderDao.GetFoldersAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, withSubfolders, false);
+            IAsyncEnumerable<FileEntry<T>> folders = folderDao.GetFoldersAsync(folderIds.Keys, filterType: filterType, subjectGroup: subjectGroup, subjectID: subjectID, searchText: searchText, searchSubfolders: withSubfolders, checkShare: false);
 
             if (withSubfolders)
             {
