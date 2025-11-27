@@ -804,7 +804,6 @@ internal abstract class SecurityBaseDao<T>(
         IEnumerable<Guid> parentUserIds)
     {
         var q = filesDbContext.Users
-            .AsNoTracking()
             .Where(u => u.TenantId == tenantId && !u.Removed);
 
         if (employeeStatus.HasValue)

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Files.Utils;
+
 namespace ASC.People.Api;
 
 [ConstraintRoute("int")]
@@ -33,9 +35,10 @@ public class AccountsControllerInternal(
     GroupFullDtoHelper groupFullDtoHelper,
     ApiContext apiContext,
     FileSecurity fileSecurity,
+    FileSharing fileSharing,
     AuthContext authContext,
     UserManager userManager)
-    : AccountsController<int>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity, authContext, userManager);
+    : AccountsController<int>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity, fileSharing, authContext, userManager);
 
 public class AccountsControllerThirdParty(
     IDaoFactory daoFactory,
@@ -43,9 +46,10 @@ public class AccountsControllerThirdParty(
     GroupFullDtoHelper groupFullDtoHelper,
     ApiContext apiContext,
     FileSecurity fileSecurity,
+    FileSharing fileSharing,
     AuthContext authContext,
     UserManager userManager)
-    : AccountsController<string>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity, authContext, userManager);
+    : AccountsController<string>(daoFactory, employeeFullDtoHelper, groupFullDtoHelper, apiContext, fileSecurity, fileSharing, authContext, userManager);
 
 [Scope]
 [DefaultRoute]
@@ -57,6 +61,7 @@ public class AccountsController<T>(
     GroupFullDtoHelper groupFullDtoHelper,
     ApiContext apiContext,
     FileSecurity fileSecurity,
+    FileSharing fileSharing,
     AuthContext authContext,
     UserManager userManager) : ControllerBase
 {
@@ -130,13 +135,9 @@ public class AccountsController<T>(
         var text = inDto.Text;
         var separator = inDto.FilterSeparator;
 
+        var securityDao = daoFactory.GetSecurityDao<T>();
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
-        var parentUserIds = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(fileEntry.ParentId).Where(r => r.FolderType != FolderType.VirtualRooms).Select(r => r.CreateBy).Where(r => !r.Equals(fileEntry.CreateBy)).Distinct().ToListAsync();
-
-        if (!parentUserIds.Contains(fileEntry.CreateBy))
-        {
-            parentUserIds.Add(fileEntry.CreateBy);
-        }
+        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r=> r.Id).ToListAsync();
 
         if (string.IsNullOrEmpty(text))
         {
@@ -144,7 +145,6 @@ public class AccountsController<T>(
             yield break;
         }
 
-        var securityDao = daoFactory.GetSecurityDao<T>();
 
         var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false);
         var totalUsers = await securityDao.GetUsersWithSharedCountAsync(fileEntry,
