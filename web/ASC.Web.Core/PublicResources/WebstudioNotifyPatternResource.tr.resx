@@ -1992,4 +1992,101 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; yeni bir ajan oluşturdu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; ajanı sildi: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; ajanı yeniden adlandırdı: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;, adlı ajanda &lt;b&gt;{1}&lt;/b&gt; rolüne atandı: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; ajana eklendi: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; ajandan kaldırıldı: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Ajana katıl</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>DocSpace’iniz için yedekleme başarısız oldu</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace’e katıl</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace ajanına davet edildiniz</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>DocSpace’iniz için otomatik yedekleme başarısız oldu</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Merhaba, $UserName,
+
+DocSpace’iniz "${__VirtualRootPath}":"${__VirtualRootPath}" için yapılan yedekleme işlemi başarısız oldu.
+
+Herhangi bir sorunuz varsa veya yardıma ihtiyaç duyarsanız, lütfen "${__SupportLink}":"${__SupportLink}" adresi üzerinden bizimle iletişime geçmekten çekinmeyin.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Merhaba, $UserName,
+
+DocSpace’iniz [${__VirtualRootPath}](${__VirtualRootPath}) için yapılan yedekleme işlemi başarısız oldu.
+
+Herhangi bir sorunuz varsa veya yardıma ihtiyaç duyarsanız, lütfen [${__SupportLink}](${__SupportLink}) üzerinden bizimle iletişime geçmekten çekinmeyin.
+
+Saygılarımızla,
+${LetterLogoText} Destek Ekibi
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Merhaba!
+
+"${__VirtualRootPath}":"${__VirtualRootPath}" adresindeki bir DocSpace ajanına katılmak için davet edildiniz. Daveti kabul etmek için aşağıdaki bağlantıya tıklayın:
+
+$OrangeButton
+
+Davet bağlantısına tıkladıktan sonra lütfen hesabınız için yeni bir şifre belirleyin.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Merhaba!
+
+$__AuthorName, sizi "${__VirtualRootPath}":"${__VirtualRootPath}" üzerindeki "$Message":"$InviteLink" adlı ajana katılmaya davet etti.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Merhaba, $UserName,
+
+DocSpace’iniz "${__VirtualRootPath}":"${__VirtualRootPath}" için planlanan yapılan yedekleme işlemi başarısız oldu.
+
+"Yedekleme":"${__VirtualRootPath}/portal-settings/backup/data-backup" ve "Hizmetler":"${__VirtualRootPath}/portal-settings/services" ayarlarını kontrol etmenizi öneririz.
+
+Herhangi bir sorunuz varsa veya yardıma ihtiyaç duyarsanız, lütfen "${__SupportLink}":"${__SupportLink}" adresi üzerinden bizimle iletişime geçmekten çekinmeyin.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Merhaba, $UserName,
+
+DocSpace’iniz [${__VirtualRootPath}](${__VirtualRootPath}) için planlanan yapılan yedekleme işlemi başarısız oldu.
+
+[Yedekleme](${__VirtualRootPath}/portal-settings/backup/data-backup) ve [Hizmetler](${__VirtualRootPath}/portal-settings/services) ayarlarını kontrol etmenizi öneririz.
+
+Herhangi bir sorunuz varsa veya yardıma ihtiyaç duyarsanız, lütfen [${__SupportLink}](${__SupportLink}) üzerinden bizimle iletişime geçmekten çekinmeyin.
+
+Saygılarımızla,
+${LetterLogoText} Destek Ekibi
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
 </root>

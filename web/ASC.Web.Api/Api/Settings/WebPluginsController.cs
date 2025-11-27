@@ -33,6 +33,7 @@ public class WebPluginsController(
     PermissionContext permissionContext,
     WebPluginManager webPluginManager,
     TenantManager tenantManager,
+    MessageService messageService,
     CspSettingsHelper cspSettingsHelper,
     WebPluginMapper mapper)
     : BaseSettingsController(fusionCache, webItemManager)
@@ -69,6 +70,8 @@ public class WebPluginsController(
         var tenant = tenantManager.GetCurrentTenant();
 
         var webPlugin = await webPluginManager.AddWebPluginFromFileAsync(tenant.Id, file, inDto.System);
+
+        messageService.Send(MessageAction.WebpluginUploaded, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
 
         await ChangeCspSettings(webPlugin, webPlugin.Enabled);
 
@@ -150,6 +153,8 @@ public class WebPluginsController(
 
         var webPlugin = await webPluginManager.UpdateWebPluginAsync(tenant.Id, inDto.Name, inDto.WebPlugin.Enabled, inDto.WebPlugin.Settings);
 
+        messageService.Send(MessageAction.WebpluginUpdated, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
+
         await ChangeCspSettings(webPlugin, inDto.WebPlugin.Enabled);
     }
 
@@ -171,6 +176,8 @@ public class WebPluginsController(
         var tenant = tenantManager.GetCurrentTenant();
 
         var webPlugin = await webPluginManager.DeleteWebPluginAsync(tenant.Id, inDto.Name);
+
+        messageService.Send(MessageAction.WebpluginDeleted, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
 
         await ChangeCspSettings(webPlugin, false);
     }

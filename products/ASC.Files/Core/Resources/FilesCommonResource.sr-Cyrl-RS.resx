@@ -577,4 +577,13 @@
   <data name="FolderNameForReassignedData" xml:space="preserve">
     <value>Документи корисника {0} {1}</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Менaџер агената</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Знање</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Складиштење резултата</value>
+  </data>
 </root>

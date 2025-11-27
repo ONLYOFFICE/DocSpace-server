@@ -29,6 +29,7 @@ namespace ASC.AI.Core.Chat.Completion;
 public class MessageStartCompletion : ChatCompletion
 {
     public Guid ChatId { get; init; }
+    public string? Error { get; init; }
     
     public override string GetEventName()
     {

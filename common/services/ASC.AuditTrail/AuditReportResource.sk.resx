@@ -341,7 +341,7 @@
     <value>Prihlásenie úspešné</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Prihlásenie prostredníctvom účtu sociálnej siete bolo úspešné</value>
+    <value>Prihlásenie prostredníctvom účtu sociálnej siete bolo úspešné: {0}</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Úspešné prihlásenie cez API</value>
@@ -448,7 +448,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO povolené</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Spustiť zálohovanie</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
@@ -929,6 +929,123 @@
     <value>Synchronizácia LDAP dokončená</value>
   </data>
   <data name="LoginSuccessSocialAccount" xml:space="preserve">
-    <value>Prihlásenie prostredníctvom účtu sociálnej siete bolo úspešné </value>
+    <value>Prihlásenie prostredníctvom účtu sociálnej siete bolo úspešné</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Server MCP {0} bol pridaný do agenta</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agent bol vytvorený</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agent bol odstránený</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agent bol premenovaný: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agenti</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>AI provider bol vytvorený: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>AI provider bol odstránený: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>AI provider bol aktualizovaný: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI agenti [{0}]. Nastavte vlastnú kvótu úložiska pre AI agentov: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI agenti [{0}]. Nastavte predvolenú kvótu úložiska pre AI agentov: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI agenti [{0}]. Kvóta úložiska pre AI agentov vypnutá</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Server MCP {0} odstránený z agenta</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Súbory [{0}]. Bol vytvorený externý odkaz: {1}. Úloha: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Súbory [{0}]. Bol odstránený externý odkaz: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Súbory [{0}].Bol aktualizovaný externý odkaz: {1}. Úloha: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Súbor bol pridaný medzi obľúbené: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Súbor bol odstránený z obľúbených: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Súbor bol odstránený z „Zdieľané so mnou“: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Súbory [{0}]. Prístup bol aktualizovaný pre {1}. Rola: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Priečinok bol stiahnutý: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Priečinky [{0}]. Bol vytvorený externý odkaz: {1}. Rola: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Priečinky [{0}]. Bol odstránený externý odkaz: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Priečinky [{0}]. Bol aktualizovaný externý odkaz: {1}. Úloha: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Priečinok bol odstránený z „Zdieľané so mnou“: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Priečinky [{0}]. Bol aktualizovaný prístup pre {1}. Úloha: {2}</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Úspešné prihlásenie cez OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Úspešné prihlásenie pomocou prihlasovacieho mena a hesla</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Predvolená kvóta úložiska pre AI agentov bola nastavená na: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Predvolená kvóta úložiska pre AI agentov bola deaktivovaná</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Nastavenia vektorizácie boli obnovené</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Nastavenia vyhľadávania na webe boli obnovené</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Externý odkaz bol zrušený: {1}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP server {0} bol vytvorený</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP server {0} bol odstránený</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Server MCP bol vypnutý: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Server MCP bol aktivovaný: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Server MCP bol aktualizovaný: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Nastavenia vektorizácie boli nakonfigurované. Provider: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Nastavenia vyhľadávania na webe boli nakonfigurované. Vyhľadávač: {0}</value>
   </data>
 </root>

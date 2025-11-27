@@ -182,19 +182,25 @@ public class BaseTest(
         return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
     }
     
-    protected async Task<List<FileOperationDto>?> WaitLongOperation()
+    protected async Task<List<FileOperationDto>?> WaitLongOperation(string? operationId = null)
     {
         List<FileOperationDto>? statuses;
 
+        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+            timeoutCts.Token, 
+            TestContext.Current.CancellationToken);
+        
         while (true)
         {
-            statuses = (await _filesOperationsApi.GetOperationStatusesAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+            statuses = (await _filesOperationsApi.GetOperationStatusesAsync(id: operationId, cancellationToken: linkedCts.Token)).Response;
 
-            if (statuses.TrueForAll(r => r.Finished) || TestContext.Current.CancellationToken.IsCancellationRequested)
+            if (statuses.Count > 0 && statuses.TrueForAll(r => r.Finished) || linkedCts.Token.IsCancellationRequested)
             {
                 break;
             }
-            await Task.Delay(100, TestContext.Current.CancellationToken);
+            
+            await Task.Delay(100, linkedCts.Token);
         }
 
         return statuses;

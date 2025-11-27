@@ -515,4 +515,16 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>게스트</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>에이전트 관리자</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>사용자 {0}의 문서 {1}</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>지식</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>결과 저장 공간</value>
+  </data>
 </root>

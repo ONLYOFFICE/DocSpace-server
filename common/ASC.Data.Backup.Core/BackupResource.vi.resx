@@ -156,4 +156,7 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Tài nguyên của bên thứ ba</value>
   </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Một số tập tin không được bao gồm trong bản sao lưu. Để biết thêm chi tiết, xin vui lòng kiểm tra {0}</value>
+  </data>
 </root>

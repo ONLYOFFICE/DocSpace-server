@@ -85,7 +85,9 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.LdapEnabled,MessageAction.LdapDisabled,MessageAction.LdapSync,
                     MessageAction.DocumentServiceLocationSetting, MessageAction.AuthorizationKeysSetting,
                     MessageAction.FullTextSearchSetting, MessageAction.StartTransferSetting,
-                    MessageAction.StartBackupSetting,MessageAction.LicenseKeyUploaded, MessageAction.StartStorageEncryption,
+                    MessageAction.BackupStarted,MessageAction.BackupCompleted,MessageAction.BackupFailed,
+                    MessageAction.ScheduledBackupStarted,MessageAction.ScheduledBackupCompleted,MessageAction.ScheduledBackupFailed,
+                    MessageAction.LicenseKeyUploaded, MessageAction.StartStorageEncryption,
                     MessageAction.StartStorageDecryption, MessageAction.CookieSettingsUpdated,  MessageAction.MailServiceSettingsUpdated,
                     MessageAction.CustomNavigationSettingsUpdated,MessageAction.AuditSettingsUpdated,MessageAction.PrivacyRoomEnable,
                     MessageAction.PrivacyRoomDisable,
@@ -100,7 +102,8 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.AIProviderUpdated,
                     MessageAction.ServerUpdated,
                     MessageAction.ServerEnabled,
-                    MessageAction.ServerDisabled
+                    MessageAction.ServerDisabled,
+                    MessageAction.WebpluginUpdated
                 ]
             },
             {
@@ -130,7 +133,8 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.AIProviderDeleted,
                     MessageAction.ServerDeleted,
                     MessageAction.ResetWebSearchSettings,
-                    MessageAction.ResetVectorizationSettings
+                    MessageAction.ResetVectorizationSettings,
+                    MessageAction.WebpluginDeleted
                 ]
             },
             {
@@ -141,6 +145,11 @@ internal class ProductsActionMapper : ILocationActionMapper
             {
                 ActionType.Download, [
                     MessageAction.LoginHistoryReportDownloaded, MessageAction.AuditTrailReportDownloaded, MessageAction.CustomerOperationsReportDownloaded
+                ]
+            },
+            {
+                ActionType.Upload, [
+                    MessageAction.WebpluginUploaded
                 ]
             }
         }; 

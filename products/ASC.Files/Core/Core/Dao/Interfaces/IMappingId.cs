@@ -28,5 +28,5 @@ namespace ASC.Files.Core;
 
 public interface IMappingId<in T>
 {
-    ValueTask<string> MappingIdAsync(T id, bool saveIfNotExist = false);
+    ValueTask<(string, int)> MappingIdAsync(T id, bool saveIfNotExist = false);
 }

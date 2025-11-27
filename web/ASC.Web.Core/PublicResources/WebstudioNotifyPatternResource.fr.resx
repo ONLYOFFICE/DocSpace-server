@@ -1997,4 +1997,101 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Votre mot de passe a été modifié avec succès</value>
   </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a créé un nouvel agent : &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a reçu le rôle de &lt;b&gt;{1}&lt;/b&gt; dans l'agent : &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a renommé l'agent : &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a supprimé l'agent : &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a été ajouté à l'agent : &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a été retiré de l'agent : &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Rejoindre l'agent</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Bonjour $UserName,
+
+Le processus de sauvegarde de votre DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" a échoué. 
+
+Si vous avez des questions ou besoin d'assistance, n'hésitez pas à nous contacter via "${__SupportLink}":"${__SupportLink}" 
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Bonjour $UserName,
+
+Le processus de sauvegarde de votre DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) a échoué.
+
+Si vous avez des questions ou besoin d'assistance, n'hésitez pas à nous contacter via [${__SupportLink}](${__SupportLink})
+
+Bien à vous, 
+L'équipe support ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Bonjour !
+
+Vous êtes invité à rejoindre un agent DocSpace sur "${__VirtualRootPath}":"${__VirtualRootPath}". Acceptez l'invitation en cliquant sur le lien :
+
+$OrangeButton
+
+Après avoir cliqué sur le lien d'invitation, veuillez définir un nouveau mot de passe pour votre compte.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Bonjour !
+
+$__AuthorName vous a invité à rejoindre l'agent "$Message":"$InviteLink" sur "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Bonjour $UserName,
+
+La sauvegarde planifiée de votre espace de travail DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" a échoué.
+
+Nous vous recommandons de vérifier les paramètres "Sauvegarde":"${__VirtualRootPath}/portal-settings/backup/data-backup" et "Services":"${__VirtualRootPath}/portal-settings/services".
+
+Pour toute question ou assistance, n'hésitez pas à nous contacter via "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Bonjour $UserName,
+
+La sauvegarde planifiée de votre espace de travail DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) a échoué.
+
+Nous vous recommandons de vérifier les paramètres [Sauvegarde](${__VirtualRootPath}/portal-settings/backup/data-backup) et [Services](${__VirtualRootPath}/portal-settings/services).
+
+Pour toute question ou assistance, n'hésitez pas à nous contacter via [${__SupportLink}](${__SupportLink}).
+
+Cordialement,
+L'équipe d'assistance de ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>La sauvegarde de votre DocSpace a échoué</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Rejoindre ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Vous êtes invité à l'agent ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>La sauvegarde automatique de votre DocSpace a échoué</value>
+  </data>
 </root>

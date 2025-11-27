@@ -32,9 +32,11 @@ public class ToolHolder : IAsyncDisposable
     
     private readonly List<McpClient> _clients = [];
     private readonly Dictionary<string, ToolContext> _contexts = [];
+    private readonly HashSet<SystemToolType> _systemTools = [];
 
-    public void AddTool(ToolWrapper toolWrapper)
+    public void AddTool(SystemToolType systemToolType, ToolWrapper toolWrapper)
     {
+        _systemTools.Add(systemToolType);
         Tools.Add(toolWrapper.Tool);
         _contexts.Add(toolWrapper.Tool.Name, toolWrapper.Context);
     }
@@ -77,6 +79,11 @@ public class ToolHolder : IAsyncDisposable
         return !_contexts.TryGetValue(toolName, out var properties) 
             ? throw new ArgumentException($"Tool {toolName} not found") 
             : properties;
+    }
+    
+    public bool ContainsSystemTool(SystemToolType toolType)
+    {
+        return _systemTools.Contains(toolType);
     }
     
     public async ValueTask DisposeAsync()

@@ -1998,4 +1998,61 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; izveidoja jaunu aģentu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; dzēsa aģentu: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; pārdēvēja aģentu: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; tika piešķirta &lt;b&gt;{1}&lt;/b&gt; loma aģentā: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; tika pievienots aģentam: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; tika noņemts no aģenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Pievienoties aģentam</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Neizdevās izveidot DocSpace dublējumkopiju</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Pievienoties ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Jūs esat uzaicināts pievienoties ${LetterLogoText} DocSpace aģentam</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Neizdevās automātiski izveidot DocSpace dublējumkopiju</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Jūsu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ieplānotais dublēšanas process nav izdevies.
+
+Mēs iesakām pārbaudīt iestatījumus "Dublējums":"${__VirtualRootPath}/portal-settings/backup/data-backup" un "Pakalpojumi":"${__VirtualRootPath}/portal-settings/services".
+
+Ja jums ir kādi jautājumi vai nepieciešama palīdzība, lūdzu, sazinieties ar mums, izmantojot "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Jūsu DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ieplānotais dublēšanas process nav izdevies.
+
+Mēs iesakām pārbaudīt iestatījumus [Dublējums](${__VirtualRootPath}/portal-settings/backup/data-backup) un [Pakalpojumi](${__VirtualRootPath}/portal-settings/services).
+
+Ja jums ir kādi jautājumi vai nepieciešama palīdzība, lūdzu, sazinieties ar mums, izmantojot [${__SupportLink}](${__SupportLink})
+
+Ar cieņu,
+${LetterLogoText} atbalsta komanda
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
 </root>

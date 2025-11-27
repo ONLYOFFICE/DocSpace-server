@@ -722,4 +722,39 @@ public class FolderShareTests(
         await Assert.ThrowsAsync<ApiException>(async() => 
             await _sharingApi.SetFileSecurityInfoAsync(file.Id, removeSecurityRequest, TestContext.Current.CancellationToken));
     }
+    
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "77613")]
+    public async Task FolderByLink_RemoveFromList_AddToList_StatusOk()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        var user = await Initializer.InviteContact(EmployeeType.User);
+
+        var folder = await CreateFolderInMy("folder_new_item_1", Initializer.Owner);
+        var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        
+        await _filesClient.Authenticate(user);
+        
+        var firstResult = await _sharingApi.GetExternalShareDataAsync(result.SharedLink.RequestToken, cancellationToken: TestContext.Current.CancellationToken);
+        firstResult.Should().NotBeNull();
+        firstResult.Status.Should().Be(0);
+        
+        var shareFolder = await GetShareFolderIdAsync(user);
+        var sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(shareFolder, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        sharedFolderAsUser1.Should().NotBeNull();
+        sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Read);
+        
+        await _sharingApi.RemoveSecurityInfoAsync(new BaseBatchRequestDto { FolderIds = [new(folder.Id)] }, cancellationToken: TestContext.Current.CancellationToken);
+        sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(shareFolder, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        sharedFolderAsUser1.Folders.Should().BeEmpty();
+        
+        await _sharingApi.GetExternalShareDataAsync(result.SharedLink.RequestToken, cancellationToken: TestContext.Current.CancellationToken);
+        firstResult.Should().NotBeNull();
+        firstResult.Status.Should().Be(0);
+        
+        sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(shareFolder, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        sharedFolderAsUser1.Should().NotBeNull();
+        sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Read);
+    }
 }

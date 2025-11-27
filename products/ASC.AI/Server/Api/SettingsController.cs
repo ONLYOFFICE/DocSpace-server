@@ -33,6 +33,7 @@ namespace ASC.AI.Api;
 public class SettingsController(AiSettingsService aiSettingsService) : ControllerBase
 {
     [HttpPut("config/web-search")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<WebSearchSettingsDto> SetWebSearchSettingsAsync(SetWebSearchConfigRequestDto inDto)
     {
         var settings = await aiSettingsService.SetWebSearchSettingsAsync(
@@ -51,6 +52,7 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
     }
     
     [HttpPut("config/vectorization")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<VectorizationSettingsDto> SetVectorizationSettingsAsync(SetEmbeddingConfigRequestDto inDto)
     {
         var settings = await aiSettingsService.SetVectorizationSettingsAsync(inDto.Body.Type, inDto.Body.Key);

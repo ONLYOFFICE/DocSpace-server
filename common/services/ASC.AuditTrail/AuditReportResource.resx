@@ -540,9 +540,6 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO Enabled</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
-    <value>Start backup</value>
-  </data>
   <data name="StartStorageDecryption" xml:space="preserve">
     <value>Start storage decryption</value>
   </data>
@@ -1060,10 +1057,10 @@
     <value>AI agents [{0}]. Set custom storage quota for AI agents : {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>AI agents  [{0}]. Set default storage quota for AI agents : {1}</value>
+    <value>AI agents [{0}]. Set default storage quota for AI agents : {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>AI agents  [{0}]. Disabled storage quota for AI agents</value>
+    <value>AI agents [{0}]. Disabled storage quota for AI agents</value>
   </data>
   <data name="AIProviderCreated" xml:space="preserve">
     <value>AI provider created: {0}</value>
@@ -1099,12 +1096,39 @@
     <value>Web search settings are configured. Engine: {0}</value>
   </data>
   <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Web search settings have been reset </value>
+    <value>Web search settings have been reset</value>
   </data>
   <data name="SetVectorizationSettings" xml:space="preserve">
     <value>Vectorization settings are configured. Provider: {0}</value>
   </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Vectorization settings have been reset</value>
+  </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Backup completed</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Backup failed</value>
+  </data>
+  <data name="BackupStarted" xml:space="preserve">
+    <value>Backup started</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Scheduled backup completed</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Scheduled backup failed</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Scheduled backup started</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Plugin deleted: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Plugin updated: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Plugin uploaded: {0}</value>
   </data>
 </root>

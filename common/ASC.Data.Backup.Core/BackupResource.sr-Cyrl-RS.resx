@@ -156,4 +156,7 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Ресурс треће стране</value>
   </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Некe датотеке нису укључене у резервну копију. За више детаља проверите {0}</value>
+  </data>
 </root>

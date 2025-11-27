@@ -392,7 +392,7 @@
     <value>Telefonnummer von Twilio (erforderlich für die SMS-Autorisierung)</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
     <value>Client ID</value>
@@ -401,10 +401,10 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Verbinden Sie die Anwendung, um sich ins Portal via Twitter anzumelden.</value>
+    <value>Verbinden Sie die Anwendung, um sich ins Portal via X anzumelden.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Erlauben Sie dieser App, Einloggen bei {LogoText} über Twitter und Import von Twitter-Kontakten ins CRM-Modul zu ermöglichen. {0}Öffnen Sie das Twitter-Portal für Entwickler (Twitter Developer) und erstellen Sie eine neue App für die Integration mit {LogoText}. Fügen Sie die erhaltenen Daten unten ein:</value>
+    <value>Erlauben Sie dieser App, Einloggen bei {LogoText} über X und Import von X-Kontakten ins CRM-Modul zu ermöglichen. {0}Öffnen Sie das Twitter-Portal für Entwickler (X Developer) und erstellen Sie eine neue App für die Integration mit {LogoText}. Fügen Sie die erhaltenen Daten unten ein:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>
@@ -980,7 +980,7 @@
     <value>Startup</value>
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Integrationen von Drittanbietern</value>
+    <value>Pro-Integrationen</value>
   </data>
   <data name="ConsumersZoom" xml:space="preserve">
     <value>Zoom</value>
@@ -1203,5 +1203,35 @@
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
     <value>Sie wurden erfolgreich mit Telegram verbunden, um Benachrichtigungen von Ihrem DocSpace zu erhalten.</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vektorisierung</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>KI-Tools</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Speicherplatzkontingent für KI-Agenten überschritten</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Kontingent konnte pro KI-Agent nicht festgelegt werden. Der eingegebene Wert überschreitet den gesamten DocSpace-Speicherplatz.</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Die Anzahl der KI-Agenten sollte {0} nicht überschreiten</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>KI-Tools</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Aktivieren Sie KI-Funktionen in Ihrem DocSpace, um die Produktivität zu steigern.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>KI-Websuche</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Laden Sie Guthaben in Ihre Wallet auf, um die KI-Websuche freizuschalten.</value>
   </data>
 </root>
