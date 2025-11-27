@@ -197,7 +197,7 @@ internal abstract class BaseTagDao<T>(
         filesDbContext.Tag.Update(existingTag);
         await filesDbContext.SaveChangesAsync();
 
-        return mapper.Map<DbFilesTag, TagInfo>(existingTag);
+        return existingTag.MapToTagInfo();
     }
     public async Task<bool> HasTagLiksAsync(TagInfo tag)
     {
