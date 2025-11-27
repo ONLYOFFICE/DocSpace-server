@@ -491,7 +491,7 @@ module.exports = (io) => {
   }
 
  function connectTelegram({ tenantId, userId } = {}) {
-    var room = `${tenantId}-telegram-${userId}`;
+    var room = `${tenantId}-telegram`;
     filesIO.to(room).emit("s:telegram", userId);
   }
   
