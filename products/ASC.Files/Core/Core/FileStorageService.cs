@@ -767,17 +767,6 @@ public class FileStorageService //: IFileStorageService
 
         List<AceWrapper> aces = null;
 
-        if (privacy)
-        {
-            if (shares == null || !shares.Any())
-            {
-                throw new ArgumentNullException(nameof(shares));
-            }
-
-            aces = await GetFullAceWrappersAsync(shares);
-            await CheckEncryptionKeysAsync(aces);
-        }
-
         var folder = await folderFactory();
         if (folder == null)
         {
@@ -805,11 +794,6 @@ public class FileStorageService //: IFileStorageService
                     await SetExternalLinkAsync(folder, Guid.NewGuid(), FileShare.FillForms, FilesCommonResource.FillOutExternalLinkTitle, primary: true);
                     break;
             }
-        }
-
-        if (privacy)
-        {
-            await SetAcesForPrivateRoomAsync(folder, aces);
         }
 
         await socketManager.CreateFolderAsync(folder);
