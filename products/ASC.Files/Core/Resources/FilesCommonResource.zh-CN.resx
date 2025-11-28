@@ -577,4 +577,7 @@
   <data name="FolderNameForReassignedData" xml:space="preserve">
     <value>用户{1}{0}的文档</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>智能体管理器</value>
+  </data>
 </root>

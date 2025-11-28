@@ -1997,4 +1997,37 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>Użytkownik &lt;b&gt;{0}&lt;/b&gt; utworzył nowego asystenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>Użytkownik &lt;b&gt;{0}&lt;/b&gt; usunął asystenta: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>Użytkownik &lt;b&gt;{0}&lt;/b&gt; zmienił nazwę asystenta: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>Użytkownik &lt;b&gt;{0}&lt;/b&gt; otrzymał w asystencie następującą rolę: &lt;b&gt;{1}&lt;/b&gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>Użytkownik &lt;b&gt;{0}&lt;/b&gt; został dodany do asystenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>Użytkownik &lt;b&gt;{0}&lt;/b&gt; został usunięty z asystenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Dołącz do asystenta</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Nie udało się utworzyć kopii zapasowej DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Dołącz do ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Zaproszono Cię do asystenta DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Nie udało się utworzyć automatycznej kopii zapasowej DocSpace</value>
+  </data>
 </root>

@@ -263,7 +263,7 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
-    public Task<int> DeleteFilesSecurityAsync(int tenantId, IEnumerable<string> subfolders)
+    public Task<int> DeleteFilesSecurityAsync(int tenantId, IEnumerable<int> subfolders)
     {
         return FolderQueries.DeleteFilesSecurityAsync(this, tenantId, subfolders);
     }
@@ -399,13 +399,13 @@ static file class FolderQueries
                                 ).FirstOrDefault(),
                             UserShared = ctx.Security.Where(x =>
                                     x.TenantId == tenantId &&
-                                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder)
+                                    x.InternalEntryId == r.Id && x.EntryType == FileEntryType.Folder)
                                 .Select(s => s.SubjectType).ToList(),
                             ParentShared = ctx.Security.Any(x =>
                                 x.TenantId == tenantId &&
                                 (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                                  x.EntryType == FileEntryType.Folder &&
-                                ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
+                                ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId == x.InternalEntryId)),
                             Settings = ctx.RoomSettings.Where(x => x.TenantId == tenantId && x.RoomId == r.Id).Distinct().FirstOrDefault(),
                             Order = (
                                 from f in ctx.FileOrder
@@ -595,12 +595,12 @@ static file class FolderQueries
                     .Where(t => t.Name == id || subfolders.Contains(t.Name))
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, IEnumerable<string>, Task<int>> DeleteFilesSecurityAsync =
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task<int>> DeleteFilesSecurityAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<string> subfolders) =>
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> subfolders) =>
                 ctx.Security
                     .Where(r => r.TenantId == tenantId)
-                    .Where(r => subfolders.Contains(r.EntryId))
+                    .Where(r => subfolders.Contains(r.InternalEntryId))
                     .Where(r => r.EntryType == FileEntryType.Folder)
                     .ExecuteDelete());
 

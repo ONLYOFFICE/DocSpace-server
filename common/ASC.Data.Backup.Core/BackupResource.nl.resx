@@ -156,4 +156,7 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Bron van derden</value>
   </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Some files were not included in the backup. Raadpleeg {0} voor meer informatie</value>
+  </data>
 </root>

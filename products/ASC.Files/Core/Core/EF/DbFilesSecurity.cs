@@ -29,8 +29,12 @@ namespace ASC.Files.Core.EF;
 public class DbFilesSecurity : BaseEntity, IDbFile
 {
     public int TenantId { get; set; }
+    
     [MaxLength(50)]
     public string EntryId { get; set; }
+    
+    public int InternalEntryId { get; set; }
+    
     public FileEntryType EntryType { get; set; }
     public SubjectType SubjectType { get; set; }
     public Guid Subject { get; set; }
@@ -78,7 +82,10 @@ public static class DbFilesSecurityExtension
 
             entity.HasIndex(e => new { e.TenantId, e.Subject })
                 .HasDatabaseName("tenant_id_subject");
-
+            
+            entity.HasIndex(e => new { e.TenantId, e.InternalEntryId })
+                .HasDatabaseName("tenant_id_internal_entry_id");
+            
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
             entity.Property(e => e.EntryId)
@@ -86,6 +93,9 @@ public static class DbFilesSecurityExtension
                 .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.InternalEntryId)
+                .HasColumnName("internal_entry_id");
 
             entity.Property(e => e.EntryType).HasColumnName("entry_type");
 
@@ -138,7 +148,10 @@ public static class DbFilesSecurityExtension
 
             entity.HasIndex(e => new { e.TenantId, e.Subject })
                 .HasDatabaseName("idx_tenant_id_subject");
-
+            
+            entity.HasIndex(e => new { e.TenantId, e.InternalEntryId })
+                .HasDatabaseName("idx_tenant_id_internal_entry_id");
+            
             // Mapping Entity Properties to PostgreSQL Database Columns
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
@@ -146,6 +159,9 @@ public static class DbFilesSecurityExtension
                 .HasColumnName("entry_id")
                 .HasColumnType("character varying(50)");
 
+            entity.Property(e => e.InternalEntryId)
+                .HasColumnName("internal_entry_id");
+            
             entity.Property(e => e.EntryType).HasColumnName("entry_type");
 
             entity.Property(e => e.Subject)

@@ -632,10 +632,10 @@
     <value>Twilio-dan telefon nömrəsi (SMS icazəsi üçün tələb olunur)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Twitter hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
+    <value>X hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>İstifadəçilərinizə Twitter-dən istifadə edərək {LogoText}-a daxil olmaq və müştərilərinin Twitter hesablarını CRM modulu ilə əlaqələndirmək üçün bu proqramı işə salın. {0}Twitter Developers Portalına keçin və yeni tətbiq {LogoText} inteqrasiyası yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
+    <value>İstifadəçilərinizə X-dən istifadə edərək {LogoText}-a daxil olmaq və müştərilərinin X hesablarını CRM modulu ilə əlaqələndirmək üçün bu proqramı işə salın. {0}X Developers Portalına keçin və yeni tətbiq {LogoText} inteqrasiyası yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
   </data>
   <data name="ConsumersVkDescription" xml:space="preserve">
     <value>VK hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
@@ -890,7 +890,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Parol</value>
@@ -980,7 +980,7 @@
     <value>Portalınızdan məlumatların ehtiyat nüsxəsini çıxarmaq və saxlamaq üçün Selectel Cloud Storage xidmətinə qoşulun. {0}Yedək nüsxələrinizi saxlamağı planlaşdırdığınız konteynerlər üçün Oxumaq/Yazmaq hüququ olan istifadəçi üçün giriş məlumatını əldə edin və aşağıda yerləşdirin:</value>
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Üçüncü tərəf inteqrasiyaları</value>
+    <value>Pro inteqrasiyaları</value>
   </data>
   <data name="ConsumersZoom" xml:space="preserve">
     <value>Zoom</value>
@@ -1161,5 +1161,77 @@
   </data>
   <data name="AccountingCustomerOperationDebit" xml:space="preserve">
     <value>Debet</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vektorlaşdırma</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>AI alətləri</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokenlər</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>AI agentinin yaddaş sahəsi limiti aşıldı</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>AI agenti üçün kvota təyin etmək mümkün olmadı. Daxil edilmiş dəyər ümumi DocSpace yaddaşından böyükdür.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>Müştəri ID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Müştəri Sirri</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>WeChat hesabınızdan istifadə edərək portala daxil olmaq üçün proqramı aktivləşdirin.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>WeChat hesabınızdan istifadə edərək portala daxil olmaq üçün proqramı aktivləşdirin.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Tarix</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-poçt</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Ad</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Soyad</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Sənəd Xidməti Kvotası ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Qoşmaların sayı limiti keçir</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>AI agentlərinin sayı {0}-dan çox olmamalıdır</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>AI alətləri</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Məhsuldarlığı artırmaq üçün DocSpace-də AI xüsusiyyətlərini aktivləşdirin.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>AI veb axtarışı</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>AI veb axtarışını açmaq üçün pul kisənizə vəsait əlavə edin.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Gözlənilməz xəta baş verdi. Lütfən, yenidən cəhd edin.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>DocSpace-dən bildirişlər almaq üçün Telegram-a uğurla qoşuldunuz.</value>
   </data>
 </root>

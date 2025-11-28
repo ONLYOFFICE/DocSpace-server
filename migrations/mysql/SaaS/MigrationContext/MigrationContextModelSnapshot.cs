@@ -3809,6 +3809,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<int>("InternalEntryId")
+                        .HasColumnType("int")
+                        .HasColumnName("internal_entry_id");
+
                     b.Property<string>("Options")
                         .HasColumnType("json")
                         .HasColumnName("options")
@@ -3839,6 +3843,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasIndex("Owner")
                         .HasDatabaseName("owner");
+
+                    b.HasIndex("TenantId", "InternalEntryId")
+                        .HasDatabaseName("tenant_id_internal_entry_id");
 
                     b.HasIndex("TenantId", "Subject")
                         .HasDatabaseName("tenant_id_subject");
