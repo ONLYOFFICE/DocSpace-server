@@ -2047,4 +2047,74 @@ $TrulyYours</value>
 ${LetterLogoText} 支持团队
 [${__SiteLink}](${__SiteLink})</value>
   </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 创建了一个新的智能体：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 删除了智能体：&lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 重命名了智能体：&lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 在智能体中被授予 &lt;b&gt;{1}&lt;/b&gt; 的角色： &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 被添加到智能体：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 从智能体中移除：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>加入智能体</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>您好，$UserName，
+
+您的协作空间 "${__VirtualRootPath}":"${__VirtualRootPath}" 的备份过程失败。
+
+如有任何疑问或需要帮助，请随时通过 "${__SupportLink}":"${__SupportLink}" 联系我们。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>您好，$UserName，
+
+您的协作空间 [${__VirtualRootPath}](${__VirtualRootPath}) 的备份过程失败。
+
+如有任何疑问或需要帮助，请随时通过 [${__SupportLink}](${__SupportLink}) 联系我们。
+
+此致，
+${LetterLogoText} 支持团队
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>您好！
+
+您已受邀加入协作空间智能体 "${__VirtualRootPath}":"${__VirtualRootPath}"。请点击以下链接接受邀请：
+
+$OrangeButton
+
+点击邀请链接后，请为您的帐户设置新密码。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>您好！
+
+$__AuthorName 邀请您加入智能体 "$Message":"$InviteLink"，地址为 "${__VirtualRootPath}":"${__VirtualRootPath}"。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>协作空间备份失败</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>加入 ${LetterLogoText} 协作空间</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>您已受邀加入 ${LetterLogoText} 协作空间智能体</value>
+  </data>
 </root>

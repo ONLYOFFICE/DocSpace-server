@@ -577,4 +577,13 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="FolderNameForReassignedData" xml:space="preserve">
     <value>Dokumenti korisnika {0} {1}</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Menadžer agenata</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Znanje</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Skladištenje rezultata</value>
+  </data>
 </root>

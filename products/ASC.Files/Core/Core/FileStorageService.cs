@@ -245,6 +245,8 @@ public class FileStorageService //: IFileStorageService
 
         Folder<T> parent = null;
         Folder<T> parentRoom = null;
+        
+        ArgumentOutOfRangeException.ThrowIfLessThan(from, 0);
 
         try
         {
@@ -646,6 +648,8 @@ public class FileStorageService //: IFileStorageService
                     Cover = cover
                 });
 
+                folder.SettingsCover = cover;
+                folder.SettingsColor = color;
                 folder.FolderType = folderType;
                 folder.RootFolderType = FolderType.VirtualRooms;
                 folder.FolderIdDisplay = IdConverter.Convert<string>(await globalFolderHelper.FolderVirtualRoomsAsync);
@@ -845,6 +849,8 @@ public class FileStorageService //: IFileStorageService
 
     private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool? indexing = false, long? quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool? denyDownload = false, WatermarkRequestDto watermark = null, string color = null, string cover = null, IEnumerable<string> names = null, LogoRequest logo = null, ChatSettings chatSettings = null)
     {
+        title = title?.Trim();
+        
         ArgumentException.ThrowIfNullOrEmpty(title);
         ArgumentNullException.ThrowIfNull(parentId);
 
@@ -905,7 +911,7 @@ public class FileStorageService //: IFileStorageService
             newFolder.ParentId = parent.Id;
             newFolder.FolderType = folderType;
             newFolder.SettingsPrivate = parent.SettingsPrivate ? parent.SettingsPrivate : privacy;
-            newFolder.SettingsColor = roomLogoManager.GetRandomColour();
+            newFolder.SettingsColor = string.IsNullOrEmpty(color) ? roomLogoManager.GetRandomColour() : color;
 
             if (indexing.HasValue)
             {
@@ -1147,7 +1153,11 @@ public class FileStorageService //: IFileStorageService
 
         var folderAccess = folder.Access;
 
-        var titleChanged = !string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) && updateData.Title != null;
+        updateData.Title = updateData.Title?.Trim();
+
+        var titleChanged = !string.Equals(folder.Title, updateData.Title, StringComparison.Ordinal) && 
+                                !string.IsNullOrEmpty(updateData.Title);
+        
         var quotaChanged = folder.SettingsQuota != updateData.Quota && updateData.Quota != null;
         var indexingChanged = updateData.Indexing.HasValue && folder.SettingsIndexing != updateData.Indexing;
         var denyDownloadChanged = updateData.DenyDownload.HasValue && folder.SettingsDenyDownload != updateData.DenyDownload;
@@ -2482,14 +2492,14 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async Task<IEnumerable<KeyValuePair<DateTime, IEnumerable<KeyValuePair<FileEntry, IEnumerable<FileEntry>>>>>> GetNewRoomFilesAsync()
+    public async Task<IEnumerable<KeyValuePair<DateTime, IEnumerable<KeyValuePair<FileEntry, IEnumerable<FileEntry>>>>>> GetNewRootFilesAsync(int rootId)
     {
         try
         {
-            var newFiles = await fileMarker.GetRoomGroupedNewItemsAsync();
+            var newFiles = await fileMarker.GetRootGroupedNewItemsAsync(rootId);
             if (newFiles.Count == 0)
             {
-                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync)], []);
+                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(rootId)], []);
             }
 
             return newFiles
@@ -2512,7 +2522,9 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
-            var newFiles = await fileMarker.MarkedItemsAsync(folder).ToListAsync();
+            var newFiles = await fileMarker.MarkedItemsAsync(folder)
+                .Where(x => x.FileEntryType == FileEntryType.File)
+                .ToListAsync();
             if (newFiles.Count == 0)
             {
                 await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(folder.Id)], []);

@@ -527,7 +527,7 @@
     <value>Telefoonnummer van Twilio (vereist voor SMS autorisatie)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Verbind de applicatie om in te loggen op het portaal met een Twitter-account.</value>
+    <value>Verbind de applicatie om in te loggen op het portaal met een X-account.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Schakel de applicatie in voor importeren van Yahoo-contacten.</value>
@@ -596,7 +596,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Wachtwoord</value>
@@ -845,7 +845,7 @@
     <value>Klant ID</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Schakel deze app in zodat uw gebruikers zich met hun Twitter kunnen aanmelden bij {LogoText} en de Twitter accounts van hun klanten kunnen koppelen aan de CRM module. {0}Ga naar de Twitter Developers Portal en maak een nieuwe app {LogoText} integration. Vul hieronder de gegevens in die u hebt ontvangen:</value>
+    <value>Schakel deze app in zodat uw gebruikers zich met hun X kunnen aanmelden bij {LogoText} en de X accounts van hun klanten kunnen koppelen aan de CRM module. {0}Ga naar de X Developers Portal en maak een nieuwe app {LogoText} integration. Vul hieronder de gegevens in die u hebt ontvangen:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>
@@ -1106,7 +1106,7 @@
     <value>Klantactiviteitenverslag ({0}-{1})</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
-    <value>De groep kon niet worden gevonden.</value>
+    <value>De groep kon niet worden gevonden</value>
   </data>
   <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
     <value>Extra schijfopslagruimte</value>
@@ -1161,5 +1161,77 @@
   </data>
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Details</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Er is een onverwachte fout opgetreden. Probeer het opnieuw.</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vectorisatie</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>U bent nu succesvol verbonden met Telegram om meldingen van uw DocSpace te ontvangen.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Voeg geld toe aan uw account om AI-webzoekfuncties te gebruiken.</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>De ruimtequota voor AI-agenten is overschreden</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>AI tools</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>AI tools</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>AI-webzoekopdracht</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>Klant ID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Client Geheim</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Document Service Quota ({0})</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Activeer AI-functies in uw DocSpace om de productiviteit te verhogen.</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Activeer dat deze toepassing zich met een WeChat account aanmeldt bij het portaal.</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Fout bij het instellen van quota per AI-agent. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Activeer dat deze toepassing zich met een WeChat account aanmeldt bij het portaal.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Voornaam</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Achternaam</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Het aantal plug-ins overschrijdt de limiet</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Het aantal AI-agenten mag niet hoger zijn dan {0}</value>
   </data>
 </root>

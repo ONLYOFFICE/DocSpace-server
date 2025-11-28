@@ -1263,4 +1263,34 @@
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
     <value>Դուք հաջողությամբ միացել եք Telegram-ին՝ ձեր DocSpace-ից ծանուցումներ ստանալու համար։</value>
   </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Վեկտորացում</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>ԱԲ գործիքներ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Թոքեններ</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>ԱԲ գործակալի տարածքի քվոտան գերազանցվել է</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Չհաջողվեց սահմանել քվոտա յուրաքանչյուր ԱԲ գործակալի համար։ Մուտքագրված արժեքը մեծ է DocSpace-ի ընդհանուր պահեստից։</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>ԱԲ գործակալների թիվը չպետք է գերազանցի {0}-ը</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>ԱԲ գործիքներ</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Միացրեք ԱԲ գործառույթները ձեր DocSpace-ում՝ արտադրողականությունը բարձրացնելու համար։</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>ԱԲ վեբ որոնում</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Ավելացրեք գումար ձեր դրամապանակին՝ ԱԲ վեբ որոնումը բացելու համար։</value>
+  </data>
 </root>

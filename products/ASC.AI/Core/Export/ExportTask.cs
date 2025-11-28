@@ -115,7 +115,7 @@ public abstract partial class ExportTask<T>(IServiceScopeFactory serviceScopeFac
                             continue;
                         }
 
-                        var processedText = CutThink(textContent.Text);
+                        var processedText = TextContentUtils.CutThink(textContent.Text);
 
                         var sourceProcessedText = MdLinksRegex().Replace(processedText, evaluator: match =>
                         {
@@ -190,16 +190,6 @@ public abstract partial class ExportTask<T>(IServiceScopeFactory serviceScopeFac
             Percentage = 100;
             await PublishChanges();
         }
-    }
-
-    private static string CutThink(string content)
-    {
-        var start = content.IndexOf("<think>", StringComparison.Ordinal);
-        var end = content.IndexOf("</think>", StringComparison.Ordinal) + "</think>".Length + 1;
-
-        return start < 0 || end < 0
-            ? content
-            : string.Concat(content.AsSpan(0, start), content.AsSpan(end));
     }
 
     private abstract class ExportFolder

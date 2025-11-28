@@ -35,6 +35,10 @@ public class KnowledgeSearchEngine(
 {
     public async Task<List<KnowledgeSearchResult>> SearchAsync(int roomId, string query)
     {
+        query = query.Trim();
+        
+        ArgumentException.ThrowIfNullOrEmpty(query);
+        
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var generator = await embeddingGeneratorFactory.CreateAsync();

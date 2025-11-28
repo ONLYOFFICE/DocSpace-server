@@ -841,4 +841,43 @@ public class ShareInheritanceTests(
         fileInfo.AvailableShareRights.ExternalLink.Should().HaveCount(3);
         fileInfo.AvailableShareRights.ExternalLink.Should().Contain(nameof(FileShare.Editing), nameof(FileShare.FillForms), nameof(FileShare.None));
     }
+    
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "78776")]
+    public async Task SharedFolder_NewItemsCount_IncreasesAfterSharingFoldersAndAddingFiles()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        var user1 = Initializer.Owner;
+        var user2 = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        var user3 = await Initializer.InviteContact(EmployeeType.User);
+        
+        var folder1 = await CreateFolderInMy("folder_1", user1);
+        
+        var shareInfo1 = new List<FileShareParams>
+        {
+            new() { ShareTo = user2.Id, Access = FileShare.ReadWrite }
+        };
+        
+        var securityRequest1 = new SecurityInfoSimpleRequestDto { Share = shareInfo1 };
+        await _sharingApi.SetFolderSecurityInfoAsync(folder1.Id, securityRequest1, TestContext.Current.CancellationToken);
+
+        // Step 5: Authenticate as user2
+        await _filesClient.Authenticate(user2);
+        
+        var folder2 = await CreateFolder("folder_2", folder1.Id);
+        var shareInfo2 = new List<FileShareParams>
+        {
+            new() { ShareTo = user3.Id, Access = FileShare.ReadWrite }
+        };
+        
+        var securityRequest2 = new SecurityInfoSimpleRequestDto { Share = shareInfo2 };
+        await _sharingApi.SetFolderSecurityInfoAsync(folder2.Id, securityRequest2, TestContext.Current.CancellationToken);
+        
+        var folder3 = await CreateFolder("folder_3", folder2.Id);
+        var info = (await _sharingApi.GetFolderSecurityInfoAsync(folder3.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        
+        info.Should().NotBeNull();
+        info.Should().HaveCount(3);
+    }
 }

@@ -138,7 +138,7 @@ public class FileMarker(
         else
         {
             var additionalSubjects = Array.Empty<Guid>();
-            if (fileEntry.RootFolderType == FolderType.VirtualRooms)
+            if (fileEntry.RootFolderType is FolderType.VirtualRooms or FolderType.AiAgents)
             {
                 var room = parentFolders.Find(f => DocSpaceHelper.IsRoom(f.FolderType));
                 if (room.CreateBy != obj.CurrentAccountId)
@@ -180,7 +180,7 @@ public class FileMarker(
                     .Where(async (u, _) => !await userManager.IsGuestAsync(u))
                     .ToListAsync();
 
-                if (fileEntry.RootFolderType == FolderType.VirtualRooms)
+                if (fileEntry.RootFolderType is FolderType.VirtualRooms or FolderType.AiAgents)
                 {
                     var parents = new List<Folder<T>>();
 
@@ -345,6 +345,25 @@ public class FileMarker(
                                 {
                                     userEntriesData.Add(id, new Data { Entries = [virtualRoomsFolder], RootId = rootId });
                                 }
+                            }
+                        }
+
+                        break;
+                    }
+                case FolderType.AiAgents:
+                    {
+                        var aiAgentFolderId = await globalFolder.GetFolderAiAgentsAsync(daoFactory);
+                        var rootId = aiAgentFolderId.ToString();
+
+                        foreach (var id in userIDs)
+                        {
+                            if (userEntriesData.TryGetValue(id, out var data))
+                            {
+                                data.RootId = rootId;
+                            }
+                            else
+                            {
+                                userEntriesData.Add(id, new Data { RootId = rootId });
                             }
                         }
 
@@ -601,6 +620,9 @@ public class FileMarker(
                 case FolderType.VirtualRooms:
                     cacheFolderId = rootFolderId = await globalFolder.GetFolderVirtualRoomsAsync(daoFactory);
                     break;
+                case FolderType.AiAgents:
+                    cacheFolderId = rootFolderId = await globalFolder.GetFolderAiAgentsAsync(daoFactory);
+                    break;
                 case FolderType.BUNCH:
                     cacheFolderId = rootFolderId = await globalFolder.GetFolderProjectsAsync(daoFactory);
                     break;
@@ -724,12 +746,11 @@ public class FileMarker(
         return 0;
     }
 
-    public async Task<Dictionary<DateTime, Dictionary<FileEntry, List<FileEntry>>>> GetRoomGroupedNewItemsAsync()
+    public async Task<Dictionary<DateTime, Dictionary<FileEntry, List<FileEntry>>>> GetRootGroupedNewItemsAsync(int rootId)
     {
-        var roomsId = await globalFolder.GetFolderVirtualRoomsAsync(daoFactory, false);
-        var roomsRoot = await daoFactory.GetFolderDao<int>().GetFolderAsync(roomsId);
+        var root = await daoFactory.GetFolderDao<int>().GetFolderAsync(rootId);
 
-        var (entryTagsProvider, entryTagsInternal) = await GetMarkedEntriesAsync(roomsRoot);
+        var (entryTagsProvider, entryTagsInternal) = await GetMarkedEntriesAsync(root);
         if (entryTagsProvider.Count == 0 && entryTagsInternal.Count == 0)
         {
             return [];
@@ -869,7 +890,8 @@ public class FileMarker(
         if (Equals(folder.Id, await globalFolder.GetFolderMyAsync(daoFactory)) ||
             Equals(folder.Id, await globalFolder.GetFolderCommonAsync(daoFactory)) ||
             Equals(folder.Id, await globalFolder.GetFolderShareAsync(daoFactory)) ||
-            Equals(folder.Id, await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)))
+            Equals(folder.Id, await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)) ||
+            Equals(folder.Id, await globalFolder.GetFolderAiAgentsAsync(daoFactory)))
         {
             var folderTags = tags.Where(tag => tag.EntryType == FileEntryType.Folder && tag.EntryId is string);
 
@@ -1067,7 +1089,7 @@ public class FileMarker(
             }
         }
 
-        if (parent.FolderType == FolderType.VirtualRooms)
+        if (parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents)
         {
             var disabledRooms = await roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUserAsync();
             totalTags = totalTags.Where(e => !disabledRooms.Contains(e.EntryId.ToString())).ToList();
@@ -1089,14 +1111,18 @@ public class FileMarker(
             ((IFolder)parent).NewForMe = parentFolderTag.Count;
         }
 
-        if (parent.FolderType != FolderType.VirtualRooms && parent.RootFolderType == FolderType.VirtualRooms && parent.ProviderEntry)
+        if (parent.FolderType != FolderType.VirtualRooms && 
+            parent.RootFolderType == FolderType.VirtualRooms && 
+            parent.FolderType != FolderType.AiAgents &&
+            parent.RootFolderType != FolderType.AiAgents &&
+            parent.ProviderEntry)
         {
             countSubNew = parentFolderTag.Count;
         }
 
         if (parentFolderTag.Count != countSubNew)
         {
-            if (parent.FolderType == FolderType.VirtualRooms)
+            if (parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents)
             {
                 parentFolderTag.Count = countSubNew;
                 if (parentFolderTag.Id == -1)
@@ -1145,6 +1171,10 @@ public class FileMarker(
                     else if (rootFolder.RootFolderType == FolderType.VirtualRooms)
                     {
                         rootFolderId = IdConverter.Convert<T>(await globalFolder.GetFolderVirtualRoomsAsync(daoFactory));
+                    }
+                    else if (rootFolder.RootFolderType == FolderType.AiAgents)
+                    {
+                        rootFolderId = IdConverter.Convert<T>(await globalFolder.GetFolderAiAgentsAsync(daoFactory));
                     }
 
                     if (!Equals(rootFolderId, default(T)))

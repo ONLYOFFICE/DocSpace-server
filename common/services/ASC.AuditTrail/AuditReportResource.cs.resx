@@ -341,7 +341,7 @@
     <value>Přihlášení úspěšné</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Přihlášení přes účet sociální sítě bylo úspěšné</value>
+    <value>Přihlášení přes účet sociální sítě bylo úspěšné: {0}</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Úspěšné přihlášení skrz API</value>
@@ -448,7 +448,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO povoleno</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Spustit zálohu</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
@@ -930,5 +930,122 @@
   </data>
   <data name="LoginSuccessSocialAccount" xml:space="preserve">
     <value>Přihlášení přes účet sociální sítě bylo úspěšné</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Přidán server MCP {0} k agentovi</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agent vytvořen</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agent přejmenován: {0}</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agent smazán</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agenti</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Vytvořen poskytovatel AI: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Aktualizován poskytovatel AI: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Smazán poskytovatel AI: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Agenti AI [{0}]. Nastavte vlastní kvótu úložiště pro agenty AI: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI agenti  [{0}]. Zakázána kvóta úložiště pro AI agenty</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Agenti AI  [{0}]. Nastavte výchozí kvótu úložiště pro agenty AI: {1}</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Smazán MCP server {0} z agenta</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Soubory [{0}]. Vytvořen externí odkaz: {1}. Role: {2}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Soubory [{0}]. Aktualizován externí odkaz: {1}. Role: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Soubory [{0}]. Smazán externí odkaz: {1}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Soubor označen jako oblíbený: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Soubor odstraněn z oblíbených: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Soubor odstraněn ze „Sdíleno se mnou“: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Soubory [{0}]. Aktualizován přístup pro {1}. Role: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Složka stažena: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Složky [{0}]. Vytvořen externí odkaz: {1}. Role: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Složky [{0}]. Externí odkaz odstraněn: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Složky [{0}]. Externí odkaz aktualizován: {1}. Role: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Složka odstraněna ze složky „Sdílené se mnou“: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Složky [{0}]. Přístup aktualizován pro {1}. Role: {2}</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Úspěšné přihlášení přes OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Úspěšné přihlášení pomocí přihlašovacího jména a hesla</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Nastavit výchozí úložnou kvótu pro agenty AI: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Výchozí úložná kvóta pro agenty AI byla deaktivována</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Nastavení vektorizace bylo resetováno</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Nastavení webového vyhledávání bylo resetováno</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Externí odkaz byl zrušen: {1}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>Server MCP byl vytvořen: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Server MCP byl aktualizován: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Server MCP byl aktivován: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Server MCP byl deaktivován: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>Server MCP byl odstraněn: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Nastavení vektorizace je nakonfigurováno. Poskytovatel: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Nastavení vyhledávání na webu je nakonfigurováno. Engine: {0}</value>
   </data>
 </root>

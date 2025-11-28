@@ -27,6 +27,7 @@
 using ASC.AI.Core.Export;
 using ASC.Common.Threading;
 using ASC.Files.Core.Vectorization;
+using ASC.Web.Files.Utils;
 
 namespace ASC.AI.Service;
 
@@ -60,5 +61,7 @@ public class Startup : BaseWorkerStartup
 
         services.RegisterQueue<MessageExportTask>();
         services.RegisterQueue<ChatExportTask>();
+        services.RegisterQueue<AsyncTaskData<int>>();
+        services.RegisterQueue<AsyncTaskData<string>>();
     }
 }

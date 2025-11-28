@@ -33,6 +33,7 @@ public enum ProviderType
     TogetherAi = 2,
     OpenAiCompatible = 3,
     Anthropic = 4,
+    OpenRouter = 5
 }
 
 public class DbAiProvider : BaseEntity

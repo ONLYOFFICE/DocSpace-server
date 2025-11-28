@@ -474,7 +474,7 @@ public partial class McpService(
         return await GetToolsAsync(connection);
     }
     
-    public async Task<ToolHolder> GetToolsAsync(int roomId)
+    public async Task<(ToolHolder holder, string? error)> GetToolsAsync(int roomId)
     {
         await ThrowIfNotAccessUseMcpAsync(roomId);
         
@@ -486,19 +486,23 @@ public partial class McpService(
         var tasks = await connections.Select(ConnectAsync).ToListAsync();
         
         var holder = new ToolHolder();
+        var unavailableServers = new List<string>();
         
         var result = await Task.WhenAll(tasks);
         foreach (var item in result)
         {
-            if (item == null)
+            if (item.Client == null || item.Tools == null)
             {
+                unavailableServers.Add(item.ServerName);
                 continue;
             }
     
             holder.AddMcpTool(item.Client, item.Tools);
         }
         
-        return holder;
+        return unavailableServers.Count > 0 
+            ? (holder, string.Format(ErrorMessages.UnavailableServers, string.Join(", ", unavailableServers))) 
+            : (holder, string.Empty);
     }
 
     public async Task ProvideMcpToolPermissionAsync(string callId, ToolExecutionDecision decision)
@@ -610,7 +614,7 @@ public partial class McpService(
         }
     }
     
-    private async Task<McpContainer?> ConnectAsync(McpServerConnection connection)
+    private async Task<McpContainer> ConnectAsync(McpServerConnection connection)
     {
         var transport = await clientTransportFactory.CreateAsync(connection);
         
@@ -651,19 +655,20 @@ public partial class McpService(
                 wrappers.Add(wrapper);
             }
             
-            return new McpContainer(mcpClient, wrappers);
+            return new McpContainer(connection.Name, mcpClient, wrappers);
         }
         catch (Exception e)
         {
             logger.ErrorWithException(e);
-            return null;
+            return new McpContainer(connection.Name, null, null);
         }
     }
     
-    private class McpContainer(McpClient client, IEnumerable<ToolWrapper> tools)
+    private class McpContainer(string serverName, McpClient? client, IEnumerable<ToolWrapper>? tools)
     {
-        public McpClient Client { get; } = client;
-        public IEnumerable<ToolWrapper> Tools { get; } = tools;
+        public string ServerName { get; } = serverName;
+        public McpClient? Client { get; } = client;
+        public IEnumerable<ToolWrapper>? Tools { get; } = tools;
     }
 
     private string GetLockKey(int tenantId)

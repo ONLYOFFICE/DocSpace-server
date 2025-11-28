@@ -341,7 +341,7 @@
     <value>Đăng nhập thành công</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Đăng nhập qua Tài khoản Xã hội thành công</value>
+    <value>Đăng nhập qua Tài khoản Xã hội thành công: {0}</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Đăng nhập thành công qua API</value>
@@ -448,7 +448,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>Đã bật SSO</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Bắt đầu sao lưu</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
@@ -930,5 +930,122 @@
   </data>
   <data name="LoginSuccessSocialAccount" xml:space="preserve">
     <value>Đăng nhập qua Tài khoản Xã hội thành công</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Đã thêm máy chủ MCP {0} vào agent</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agent đã được tạo</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agent đã được xóa</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agent đã được đổi tên: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Các Agent</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Nhà cung cấp AI đã được tạo: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Nhà cung cấp AI đã bị xóa: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Nhà cung cấp AI đã được cập nhật: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI agent [{0}]. Đặt hạn mức lưu trữ tùy chỉnh cho AI agent: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI agent  [{0}]. Đặt hạn mức lưu trữ mặc định cho AI agent: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI agent  [{0}]. Hạn mức lưu trữ bị vô hiệu hóa cho AI agent</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Đã xóa máy chủ MCP {0} khỏi agent</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Tập tin [{0}]. Đã tạo liên kết bên ngoài: {1}. Vai trò: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Tập tin [{0}]. Đã xóa liên kết bên ngoài: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Tập tin [{0}]. Đã cập nhật liên kết bên ngoài: {1}. Vai trò: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Tập tin đã được đánh dấu được Yêu thích: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Tập tin đã bị xóa khỏi Yêu thích: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Tập tin đã bị xóa khỏi "Đã chia sẻ với tôi": {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Tập tin [{0}]. Đã cập nhật quyền truy cập cho {1}. Vai trò: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Đã tải xuống thư mục: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Thư mục [{0}]. Đã tạo liên kết bên ngoài: {1}. Vai trò: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Thư mục [{0}]. Đã xóa liên kết bên ngoài: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Thư mục [{0}]. Đã cập nhật liên kết bên ngoài: {1}. Vai trò: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Đã xóa thư mục khỏi "Đã chia sẻ với tôi": {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Thư mục [{0}]. Đã cập nhật quyền truy cập cho {1}. Vai trò: {2}</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Đăng nhập thành công qua OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Đăng nhập thành công thông qua đăng nhập và mật khẩu</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Đặt hạn mức lưu trữ mặc định cho AI agent: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Hạn mức mặc định bị vô hiệu hóa cho AI agent</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Cài đặt véc-tơ hóa đã được đặt lại</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Cài đặt tìm kiếm trên web đã được đặt lại</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Đã thu hồi liên kết bên ngoài: {1}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>Đã tạo máy chủ MCP: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>Đã xóa máy chủ MCP: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Đã vô hiệu hóa máy chủ MCP: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Đã bật máy chủ MCP: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Đã cập nhật máy chủ MCP: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Cài đặt véc-tơ hóa được định cấu hình. Nhà cung cấp: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Cài đặt tìm kiếm trên web đã được định cấu hình. Cỗ máy: {0}</value>
   </data>
 </root>

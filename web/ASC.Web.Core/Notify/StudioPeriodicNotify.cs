@@ -343,6 +343,11 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                         if (nowDate >= startDateToRemoveUnusedPortals && nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
                         {
+                            if (await tenantManager.IsForbiddenDomainAsync(tenant.Alias))
+                            {
+                                continue;
+                            }
+
                             var tenantDomain = tenant.GetTenantDomain(coreSettings);
 
                             _log.InformationStartRemovingUnusedFreeTenant(tenant.Id, tenantDomain);
@@ -437,6 +442,11 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     }
                     else if (tariff.State == TariffState.NotPaid && dueDateIsNotMax && dueDate.AddMonths(6).AddDays(7) <= nowDate)
                     {
+                        if (await tenantManager.IsForbiddenDomainAsync(tenant.Alias))
+                        {
+                            continue;
+                        }
+
                         var tenantDomain = tenant.GetTenantDomain(coreSettings);
 
                         _log.InformationStartRemovingUnusedPaidTenant(tenant.Id, tenantDomain);

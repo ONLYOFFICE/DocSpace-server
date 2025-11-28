@@ -42,6 +42,8 @@ public class AuthService
 
     public int? Order { get { return Consumer.Order; } }
 
+    public bool Paid { get { return Consumer.Paid; } }
+
     public List<AuthKey> Props { get; private set; }
 
     public static async Task<AuthService> From(Consumer consumer, string logoText)

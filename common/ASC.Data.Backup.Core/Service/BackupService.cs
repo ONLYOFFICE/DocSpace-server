@@ -43,7 +43,6 @@ public class BackupService(
         ITariffService tariffService,
         TenantManager tenantManager,
         SettingsManager settingsManager,
-        MessageService messageService,
         CoreBaseSettings coreBaseSettings,
         AuthContext authContext,
         PermissionContext permissionContext,
@@ -55,7 +54,7 @@ public class BackupService(
     private const string BackupFileName = "backup";
     private const int BackupCustomerSessionDuration = 86400; // 60 * 60 * 24;
 
-    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null, int billingSessionId = 0, DateTime billingSessionExpire = default)
+    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null, int billingSessionId = 0, DateTime billingSessionExpire = default, IDictionary<string, string> headers = null)
     {
         await DemandPermissionsBackupAsync();
 
@@ -71,7 +70,8 @@ public class BackupService(
             StorageType = storageType,
             StorageParams = storageParams,
             Dump = dump,
-            ServerBaseUri = serverBaseUri
+            ServerBaseUri = serverBaseUri,
+            Headers = headers
         };
 
         switch (storageType)
@@ -89,8 +89,6 @@ public class BackupService(
                 backupRequest.StorageBasePath = storageParams["filePath"];
                 break;
         }
-
-        messageService.Send(MessageAction.StartBackupSetting);
 
         var progress = await backupWorker.StartBackupAsync(backupRequest, enqueueTask, taskId, billingSessionId, billingSessionExpire);
         if (!string.IsNullOrEmpty(progress.Error))
@@ -554,16 +552,13 @@ public class BackupService(
 
         var result = await tariffService.CompleteCustomerSessionAsync(tenantId, serviceName, sessionId, 1, customerParticipantName, metadata);
 
-        if (result)
-        {
-            messageService.Send(MessageAction.CustomerOperationPerformed);
-        }
-
         return result;
     }
 
     public async Task<int> GetBackupsCountAsync(int tenantId, bool paid, DateTime from, DateTime to)
     {
+        await DemandPermissionsBackupAsync();
+
         return await backupRepository.GetBackupsCountAsync(tenantId, paid, from, to);
     }
 

@@ -574,4 +574,16 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Khách</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Quản lý agent</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Tài liệu của người dùng {0} {1}</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Kiến thức</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Lưu trữ kết quả</value>
+  </data>
 </root>

@@ -156,4 +156,7 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>第三方资源</value>
   </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>某些文件未包含在备份中。详情请查看 {0}</value>
+  </data>
 </root>

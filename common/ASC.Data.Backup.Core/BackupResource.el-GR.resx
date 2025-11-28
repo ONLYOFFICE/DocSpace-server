@@ -97,4 +97,7 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Πόρος τρίτου μέρους</value>
   </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Ορισμένα αρχεία δεν συμπεριλήφθηκαν στο αντίγραφο ασφαλείας. Για περισσότερες λεπτομέρειες, δείτε {0}</value>
+  </data>
 </root>

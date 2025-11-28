@@ -487,7 +487,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>Accesso singolo (SSO) attivato</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Backup avviato</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -978,5 +978,74 @@
   </data>
   <data name="LoginSuccessSocialAccount" xml:space="preserve">
     <value>Accesso via account sociale riuscito</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Server MCP {0} aggiunto all’agente</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agente creato</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agente eliminato</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agente rinominato: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agenti</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Provider AI creato: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Provider AI eliminato: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Provider AI aggiornato: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Agenti AI [{0}]. Imposta quota di archiviazione personalizzata per agenti AI: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Agenti AI [{0}]. Imposta quota di archiviazione predefinita per agenti AI: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Agenti AI [{0}]. Quota di archiviazione disabilitata</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Server MCP {0} eliminato dall’agente</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Imposta quota di archiviazione predefinita per agenti AI: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Quota di archiviazione predefinita disabilitata</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Impostazioni di vettorizzazione reimpostate</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Impostazioni ricerca web reimpostate</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP server creato: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP server eliminato: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP server disattivato: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP server attivato: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP server aggiornato: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Impostazioni di vettorizzazione configurate. Provider: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Impostazioni di ricerca web configurate. Motore: {0}</value>
   </data>
 </root>

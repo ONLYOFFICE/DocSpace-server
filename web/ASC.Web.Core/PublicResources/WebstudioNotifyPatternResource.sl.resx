@@ -2031,7 +2031,7 @@ $TrulyYours</value>
     <value>Prihajajoče plačilo naročnine za vaš ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
-    <value>Zahtevano dejanje: Stanja v denarnici ${LetterLogoText} v vašem DocSpace ni mogoče samodejno napolniti.</value>
+    <value>Zahtevano dejanje: Stanja v denarnici ${LetterLogoText} v vašem DocSpace ni mogoče samodejno napolniti</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Vaše geslo je bilo uspešno spremenjeno</value>
@@ -2056,5 +2056,102 @@ Brskalnik: *$Browser*
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Varnostno kopiranje vašega DocSpace ni uspelo</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Pridružite se ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Povabljeni ste k ${LetterLogoText} DocSpace agentu</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Samodejno varnostno kopiranje za vaš DocSpace ni uspelo</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; ustvarjen nov agent: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; izbrisan agent: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; preimenovan agent: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; je bila dodeljena vloga &lt;b&gt;{1}&lt;/b&gt; v agentu: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; je bil dodan agentu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; je bil odstranjen iz agenta &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Pridružitev agentu</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Pozdravljeni, $UserName,
+
+Postopek varnostnega kopiranja za vaš DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ni uspelo.
+
+Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte preko "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Pozdravljeni, $UserName,
+
+Postopek varnostnega kopiranja za vaš DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ni uspelo.
+
+Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte preko [${__SupportLink}](${__SupportLink})
+
+A spoštovanjem,
+${LetterLogoText} Ekipa za podporo
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Pozdravljeni!
+
+Povabljeni ste, da se pridružite DocSpace agentu na "${__VirtualRootPath}":"${__VirtualRootPath}". Sprejmite povabilo s klikom na povezavo:
+
+$OrangeButton
+
+Po kliku na povezavo s povabilom nastavite novo geslo za svoj račun.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Pozdravljeni!
+
+$__AuthorName vas je povabil, da se pridružite agentu "$Message":"$InviteLink" na "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Pozdravljeni, $UserName,
+ 
+Načrtovani postopek varnostnega kopiranja za vaš DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ni uspelo.
+
+Priporočamo, da preverite nastavitve "Varnostna kopija":"${__VirtualRootPath}/portal-settings/backup/data-backup" in "Storitve":"${__VirtualRootPath}/portal-settings/services".
+
+Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte preko "${__SupportLink}":"${__SupportLink}"
+ 
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Pozdravljeni, $UserName,
+
+Načrtovani postopek varnostnega kopiranja za vaš DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ni uspelo.
+
+Priporočamo, da preverite nastavitve [Varnostna kopija](${__VirtualRootPath}/portal-settings/backup/data-backup) in [Storitve](${__VirtualRootPath}/portal-settings/services).
+
+Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte preko [${__SupportLink}](${__SupportLink})
+ 
+A spoštovanjem,
+${LetterLogoText} Ekipa za podporo
+[${__SiteLink}](${__SiteLink})</value>
   </data>
 </root>

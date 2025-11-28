@@ -310,7 +310,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>Το SSO Ενεργοποιήθηκε</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Εκκίνηση δημιουργίας αντιγράφων ασφαλείας</value>
   </data>
   <data name="TimeZoneSettingsUpdated" xml:space="preserve">
@@ -572,7 +572,7 @@
     <value>Λήψη αναφοράς ιστορικού σύνδεσης</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Η σύνδεση μέσω λογαριασμού κοινωνικού δικτύου έγινε με επιτυχία</value>
+    <value>Η σύνδεση μέσω λογαριασμού κοινωνικού δικτύου έγινε με επιτυχία: {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Επιτυχής σύνδεση μέσω εφαρμογής κοινωνικού δικτύου</value>
@@ -927,5 +927,125 @@
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
     <value>Οι ρυθμίσεις υπηρεσιών με δυνατότητα πορτοφολιού πελάτη ενημερώθηκαν</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Προστέθηκε διακομιστής MCP {0} στον εκπρόσωπο</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Δημιουργήθηκε εκπρόσωπος</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Διαγράφηκε εκπρόσωπος</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Εκπρόσωπος που μετονομάστηκε: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Εκπρόσωποι</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Πάροχος AI που δημιουργήθηκε: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Πάροχος AI που διαγράφηκε: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Πάροχος AI που ενημερώθηκε: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Εκπρόσωποι AI [{0}]. Ορίστε προσαρμοσμένο όριο αποθήκευσης για εκπροσώπους AI: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Εκπρόσωποι AI [{0}]. Απενεργοποιημένο όριο αποθήκευσης για εκπροσώπους ΑΙ</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Εκπρόσωποι AI [{0}]. Ορίστε προεπιλεγμένο όριο αποθήκευσης για εκπροσώπους AI: {1}</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Διαγραφή διακομιστή MCP {0} από εκπρόσωπο</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Αρχεία [{0}]. Εξωτερικός σύνδεσμος που δημιουργήθηκε: {1}. Ρόλος: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Αρχεία [{0}]. Εξωτερικός σύνδεσμος που διαγράφηκε: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Αρχεία [{0}]. Εξωτερικός σύνδεσμος που ενημερώθηκε: {1}. Ρόλος: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Αρχείο που έχει επισημανθεί ως αγαπημένο: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Αρχείο που έχει αφαιρεθεί από τα αγαπημένα: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Αρχείο που έχει αφαιρεθεί από τα «Κοινόχρηστα με εμένα»: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Αρχεία [{0}]. Η πρόσβαση για {1} ενημερώθηκε. Ρόλος: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Φάκελος που λήφθηκε: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Φάκελοι [{0}]. Εξωτερικός σύνδεσμος που δημιουργήθηκε: {1}. Ρόλος: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Φάκελοι [{0}]. Εξωτερικός σύνδεσμος που διαγράφηκε: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Φάκελοι [{0}]. Εξωτερικός σύνδεσμος που ενημερώθηκε: {1}. Ρόλος: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Φάκελος που αφαιρέθηκε από τα «Κοινόχρηστα με εμένα»: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Φάκελοι [{0}]. Η πρόσβαση για {1} ενημερώθηκε. Ρόλος: {2}</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Η σύνδεση μέσω λογαριασμού κοινωνικού δικτύου έγινε με επιτυχία</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Επιτυχής σύνδεση μέσω OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Επιτυχής σύνδεση μέσω ονόματος χρήστη και κωδικού πρόσβασης</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Ορισμός προεπιλεγμένου ορίου αποθήκευσης για εκπροσώπους AI: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Απενεργοποίηση προεπιλεγμένου ορίου αποθήκευσης για εκπροσώπους ΑΙ</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Έχει γίνει επαναφορά ρυθμίσεων διανυσματικοποίησης</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Έχει γίνει επαναφορά ρυθμίσεων αναζήτησης στο διαδίκτυο</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Εξωτερικός σύνδεσμος που ανακλήθηκε: {1}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>Διακομιστής MCP που δημιουργήθηκε: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>Διακομιστής MCP που διαγράφηκε: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Διακομιστής MCP που απενεργοποιήθηκε: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Διακομιστής MCP που ενεργοποιήθηκε: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Διακομιστής MCP που ενημερώθηκε: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Οι ρυθμίσεις διανυσματικοποίησης έχουν διαμορφωθεί. Πάροχος: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Οι ρυθμίσεις αναζήτησης στο διαδίκτυο έχουν διαμορφωθεί. Μηχανή: {0}</value>
   </data>
 </root>

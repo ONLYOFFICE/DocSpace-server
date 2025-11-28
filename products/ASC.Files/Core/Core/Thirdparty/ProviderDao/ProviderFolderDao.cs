@@ -211,7 +211,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         }
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(IEnumerable<string> folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(IEnumerable<string> folderIds, IEnumerable<string> excludeParentIds  = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
     {
         var result = AsyncEnumerable.Empty<Folder<string>>();
 
@@ -229,7 +229,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
                     var folderDao = selectorLocal.GetFolderDao(matchedId.FirstOrDefault());
 
                     return folderDao.GetFoldersAsync(matchedId.Select(selectorLocal.ConvertId).ToList(),
-                        filterType, subjectGroup, subjectID, searchText, searchSubfolders, checkShare, excludeSubject);
+                        filterType: filterType, subjectGroup: subjectGroup, subjectID: subjectID, searchText: searchText, searchSubfolders: searchSubfolders, checkShare: checkShare, excludeSubject: excludeSubject);
                 })
                 .Where(r => r != null))
                 .Select(async (Folder<string> r, CancellationToken _) => await ResolveParentAsync(r));
@@ -408,7 +408,16 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
     public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null)
     {
-        return await RenameFolderAsync(folder, newTitle);
+        var newId = await RenameFolderAsync(folder, newTitle);
+
+        await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
+        {
+            Id = folder.ProviderId,
+            Color = color,
+            Cover = cover
+        });
+
+        return newId;
     }
 
     public Task<string> ChangeFolderTypeAsync(Folder<string> folder, FolderType folderType)
