@@ -2285,48 +2285,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ASC.Core.Common.EF.Model.InvitationLink", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
-                        .HasColumnName("id")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<int>("CurrentUseCount")
-                        .HasColumnType("int(10)")
-                        .HasColumnName("current_use_count");
-
-                    b.Property<int>("EmployeeType")
-                        .HasColumnType("int(10)")
-                        .HasColumnName("employee_type");
-
-                    b.Property<DateTime>("Expiration")
-                        .HasColumnType("datetime")
-                        .HasColumnName("expiration");
-
-                    b.Property<int>("MaxUseCount")
-                        .HasColumnType("int(10)")
-                        .HasColumnName("max_use_count");
-
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int(10)")
-                        .HasColumnName("tenant_id");
-
-                    b.HasKey("Id")
-                        .HasName("PRIMARY");
-
-                    b.HasIndex("TenantId")
-                        .HasDatabaseName("tenant_id");
-
-                    b.ToTable("invitation_link", (string)null);
-
-                    b
-                        .HasAnnotation("MySql:CharSet", "utf8")
-                        .HasAnnotation("Relational:Collation", "utf8_general_ci");
-                });
-
             modelBuilder.Entity("ASC.Core.Common.EF.Model.MobileAppInstall", b =>
                 {
                     b.Property<string>("UserEmail")
@@ -5584,17 +5542,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbWebstudioSettings", b =>
-                {
-                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("ASC.Core.Common.EF.Model.InvitationLink", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
