@@ -56,7 +56,8 @@ public class InvitationLinkCreateRequestDto
     /// <summary>
     /// The maximum number of times the invitation link can be used.
     /// </summary>
-    public int MaxUseCount { get; set; }
+    [Range(1, 1000)]
+    public int? MaxUseCount { get; set; }
 }
 
 /// <summary>
@@ -77,7 +78,8 @@ public class InvitationLinkUpdateRequestDto
     /// <summary>
     /// The maximum number of times the invitation link can be used.
     /// </summary>
-    public int MaxUseCount { get; set; }
+    [Range(1, 1000)]
+    public int? MaxUseCount { get; set; }
 }
 
 /// <summary>

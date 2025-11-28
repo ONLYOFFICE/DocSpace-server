@@ -222,7 +222,7 @@ public class InvitationValidator(
             return (EmailValidationKeyProvider.ValidationResult.Expired, linkId);
         }
 
-        if (link.MaxUseCount > 0 && link.MaxUseCount <= link.CurrentUseCount)
+        if (link.MaxUseCount.HasValue && link.MaxUseCount.Value <= link.CurrentUseCount)
         {
             return (EmailValidationKeyProvider.ValidationResult.QuotaFailed, linkId);
         }

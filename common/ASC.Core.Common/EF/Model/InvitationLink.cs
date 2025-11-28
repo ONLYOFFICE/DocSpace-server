@@ -36,7 +36,7 @@ public class InvitationLink : BaseEntity
 
     public DateTime Expiration { get; set; }
 
-    public int MaxUseCount { get; set; }
+    public int? MaxUseCount { get; set; }
 
     public int CurrentUseCount { get; set; }
 
@@ -96,9 +96,10 @@ public static class InvitationLinkExtension
                 .HasColumnType("datetime");
 
             entity.Property(e => e.MaxUseCount)
-                .IsRequired()
+                .IsRequired(false)
                 .HasColumnName("max_use_count")
-                .HasColumnType("int(10)");
+                .HasColumnType("int(10)")
+                .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.CurrentUseCount)
                 .IsRequired()
@@ -139,9 +140,10 @@ public static class InvitationLinkExtension
                 .HasColumnType("timestamptz");
 
             entity.Property(e => e.MaxUseCount)
-                .IsRequired()
+                .IsRequired(false)
                 .HasColumnName("max_use_count")
-                .HasColumnType("integer");
+                .HasColumnType("integer")
+                .HasDefaultValue(null);
 
             entity.Property(e => e.CurrentUseCount)
                 .IsRequired()

@@ -4106,9 +4106,18 @@ public class FileStorageService //: IFileStorageService
         return users;
     }
 
-    public async Task<AceWrapper> SetInvitationLinkAsync<T>(T roomId, Guid linkId, string title, FileShare share, DateTime expirationDate, int maxUseCount)
+    public async Task<AceWrapper> SetInvitationLinkAsync<T>(T roomId, Guid linkId, string title, FileShare share, DateTime expirationDate, int? maxUseCount)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId)).NotFoundIfNull();
+
+        if (maxUseCount.HasValue)
+        {
+            var link = (await fileSecurity.GetSharesAsync(room, [linkId])).FirstOrDefault();
+            if (link?.Options != null && maxUseCount.Value <= link.Options.CurrentUseCount)
+            {
+                throw new ArgumentException(null, nameof(maxUseCount));
+            }
+        }
 
         var expirationDateUtc = tenantUtil.DateTimeToUtc(expirationDate);
         if (expirationDateUtc != DateTime.MinValue)

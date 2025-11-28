@@ -937,7 +937,7 @@ public class UserManager(
 
     #region InvitationLinks
 
-    public async Task<InvitationLink> CreateInvitationLinkAsync(EmployeeType employeeType, DateTime expiration, int maxUseCount)
+    public async Task<InvitationLink> CreateInvitationLinkAsync(EmployeeType employeeType, DateTime expiration, int? maxUseCount)
     {
         return await userService.CreateInvitationLinkAsync(Tenant.Id, employeeType, expiration, maxUseCount);
     }
@@ -957,7 +957,7 @@ public class UserManager(
         return await userService.GetInvitationLinksAsync(Tenant.Id);
     }
 
-    public async Task UpdateInvitationLinkAsync(Guid id, DateTime expiration, int maxUseCount)
+    public async Task UpdateInvitationLinkAsync(Guid id, DateTime expiration, int? maxUseCount)
     {
         await userService.UpdateInvitationLinkAsync(Tenant.Id, id, expiration, maxUseCount);
     }

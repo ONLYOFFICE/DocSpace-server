@@ -207,6 +207,12 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
+        var existedInvitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
+        if (existedInvitationLink != null)
+        {
+            throw new ArgumentException("link with the same EmployeeType already exists");
+        }
+
         var invitationLink = await userManager.CreateInvitationLinkAsync(inDto.EmployeeType, expiration, inDto.MaxUseCount);
 
         var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
@@ -274,6 +280,11 @@ public class PortalController(
         if (invitationLink == null)
         {
             throw new ItemNotFoundException();
+        }
+
+        if (inDto.MaxUseCount.HasValue && inDto.MaxUseCount.Value <= invitationLink.CurrentUseCount)
+        {
+            throw new ArgumentException(nameof(inDto.MaxUseCount));
         }
 
         if (inDto.Expiration.HasValue && inDto.Expiration.Value < DateTime.UtcNow)

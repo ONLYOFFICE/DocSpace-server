@@ -1028,7 +1028,7 @@ public class EFUserService(
         return userDbContext.Groups.Where(g => g.TenantId == tenant && !g.Removed);
     }
 
-    public async Task<InvitationLink> CreateInvitationLinkAsync(int tenantId, EmployeeType employeeType, DateTime expiration, int maxUseCount)
+    public async Task<InvitationLink> CreateInvitationLinkAsync(int tenantId, EmployeeType employeeType, DateTime expiration, int? maxUseCount)
     {
         var invitationLink = new InvitationLink
         {
@@ -1065,7 +1065,7 @@ public class EFUserService(
         return await userDbContext.GetInvitationLinksAsync(tenantId).ToListAsync();
     }
 
-    public async Task UpdateInvitationLinkAsync(int tenantId, Guid id, DateTime expiration, int maxUseCount)
+    public async Task UpdateInvitationLinkAsync(int tenantId, Guid id, DateTime expiration, int? maxUseCount)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         await userDbContext.UpdateInvitationLinkAsync(tenantId, id, expiration, maxUseCount);

@@ -60,11 +60,11 @@ public interface IUserService
     Task<Dictionary<Guid, UserRelation>> GetUserRelationsByTargetAsync(int tenantId, Guid targetUserId);
     Task DeleteUserRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId);
 
-    Task<InvitationLink> CreateInvitationLinkAsync(int tenantId, EmployeeType employeeType, DateTime expiration, int maxUseCount);
+    Task<InvitationLink> CreateInvitationLinkAsync(int tenantId, EmployeeType employeeType, DateTime expiration, int? maxUseCount);
     Task<InvitationLink> GetInvitationLinkAsync(int tenantId, Guid id);
     Task<InvitationLink> GetInvitationLinkAsync(int tenantId, EmployeeType employeeType);
     Task<List<InvitationLink>> GetInvitationLinksAsync(int tenantId);
-    Task UpdateInvitationLinkAsync(int tenantId, Guid id, DateTime expiration, int maxUseCount);
+    Task UpdateInvitationLinkAsync(int tenantId, Guid id, DateTime expiration, int? maxUseCount);
     Task IncreaseInvitationLinkUsageAsync(int tenantId, Guid id);
     Task DeleteInvitationLinkAsync(int tenantId, Guid id);
 }

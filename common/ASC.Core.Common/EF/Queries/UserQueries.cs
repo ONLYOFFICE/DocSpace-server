@@ -265,7 +265,7 @@ public partial class UserDbContext
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultDateTime, PreCompileQuery.DefaultInt])]
-    public Task<int> UpdateInvitationLinkAsync(int tenantId, Guid id, DateTime expiration, int maxUseCount)
+    public Task<int> UpdateInvitationLinkAsync(int tenantId, Guid id, DateTime expiration, int? maxUseCount)
     {
         return Queries.UpdateInvitationLinkAsync(this, tenantId, id, expiration, maxUseCount);
     }
@@ -568,9 +568,9 @@ static file class Queries
                 ctx.InvitationLinks
                     .Where(r => r.TenantId == tenantId));
 
-    public static readonly Func<UserDbContext, int, Guid, DateTime, int, Task<int>> UpdateInvitationLinkAsync =
+    public static readonly Func<UserDbContext, int, Guid, DateTime, int?, Task<int>> UpdateInvitationLinkAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (UserDbContext ctx, int tenantId, Guid id, DateTime expiration, int maxUseCount) =>
+            (UserDbContext ctx, int tenantId, Guid id, DateTime expiration, int? maxUseCount) =>
                 ctx.InvitationLinks
                     .Where(r => r.TenantId == tenantId && r.Id == id)
                     .ExecuteUpdate(q => q.SetProperty(p => p.Expiration, expiration)

@@ -76,7 +76,7 @@ public class RoomLinkRequest
     /// <summary>
     /// The maximum number of times the invitation link can be used.
     /// </summary>
-    public int MaxUseCount { get; set; }
+    public int? MaxUseCount { get; set; }
 
     /// <summary>
     /// The current number of times the invitation link has been used.
