@@ -37,3 +37,15 @@ public class ProviderIdRequestDto
     [FromRoute(Name = "providerId")]
     public required int ProviderId { get; set; }
 }
+
+/// <summary>
+/// The request parameters for retrieving third-party providers.
+/// </summary>
+public class GetProvidersRequestDto
+{
+    /// <summary>
+    /// Specifies whether WebDAV resources should be excluded from the result..
+    /// </summary>
+    [FromQuery(Name = "excludewebdav")]
+    public bool ExcludeWebDav { get; set; }
+}
