@@ -9,7 +9,7 @@
   "outputDir": "php-sdk",
   "additionalProperties": {
     "packageName": "OnlyOffice/DocSpaceApiSdk",
-    "packageVersion": "4.0.0",
+    "packageVersion": "3.6.0",
     "licenseName": "Apache-2.0",
     "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-php",
     "library": "guzzle",

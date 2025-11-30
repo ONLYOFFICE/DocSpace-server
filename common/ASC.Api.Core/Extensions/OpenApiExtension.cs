@@ -56,7 +56,7 @@ public static class OpenApiExtension
             c.SwaggerDoc("common", new OpenApiInfo
             {
                 Title = "Api",
-                Version = "4.0.0",
+                Version = "3.6.0",
                 Contact = new OpenApiContact
                 {
                     Name = "API Support",
