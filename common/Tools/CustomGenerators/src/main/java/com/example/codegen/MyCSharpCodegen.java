@@ -94,6 +94,10 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
         supportingFiles.add(new SupportingFile(
             "CHANGELOG.mustache", "", "CHANGELOG.md"
         ));
+
+        supportingFiles.add(new SupportingFile(
+            "README_nuget.mustache", "docs", "README_nuget.md"
+        ));
     }
 
     @Override
