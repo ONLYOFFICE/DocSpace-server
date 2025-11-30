@@ -241,14 +241,16 @@ public class ThirdpartyController(
 
                 await webhookManager.PublishAsync(WebhookTrigger.UserCreated, user);
 
-                await studioNotifyService.UserHasJoinAsync();
-
                 if (mustChangePassword)
                 {
                     await studioNotifyService.UserPasswordChangeAsync(user, true);
                 }
 
                 await userHelpTourHelper.SetIsNewUser(true);
+
+                await securityContext.AuthenticateMeWithoutCookieAsync(user.Id);
+
+                await studioNotifyService.UserHasJoinAsync();
             }
             catch (Exception ex)
             {

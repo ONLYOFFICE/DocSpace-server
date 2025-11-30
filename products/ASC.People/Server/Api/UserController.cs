@@ -28,6 +28,7 @@ using System.Globalization;
 
 using ASC.Core.Common.Identity;
 using ASC.MessagingSystem;
+using ASC.Web.Files.Utils;
 
 namespace ASC.People.Api;
 
@@ -2600,24 +2601,27 @@ public class UserController(
 
 [ConstraintRoute("int")]
 public class UserControllerAdditionalInternal(
+    FileSharing fileSharing,
     EmployeeFullDtoHelper employeeFullDtoHelper,
     FileSecurity fileSecurity,
     ApiContext apiContext,
     IDaoFactory daoFactory,
     AuthContext authContext,
     UserManager userManager)
-    : UserControllerAdditional<int>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory, authContext, userManager);
+    : UserControllerAdditional<int>(fileSharing, employeeFullDtoHelper, fileSecurity, apiContext, daoFactory, authContext, userManager);
 
 public class UserControllerAdditionalThirdParty(
+    FileSharing fileSharing,
     EmployeeFullDtoHelper employeeFullDtoHelper,
     FileSecurity fileSecurity,
     ApiContext apiContext,
     IDaoFactory daoFactory,
     AuthContext authContext,
     UserManager userManager)
-    : UserControllerAdditional<string>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory, authContext, userManager);
+    : UserControllerAdditional<string>(fileSharing, employeeFullDtoHelper, fileSecurity, apiContext, daoFactory, authContext, userManager);
 
 public class UserControllerAdditional<T>(
+    FileSharing fileSharing,
     EmployeeFullDtoHelper employeeFullDtoHelper,
     FileSecurity fileSecurity,
     ApiContext apiContext,
@@ -2696,25 +2700,14 @@ public class UserControllerAdditional<T>(
         }
 
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
-        var parentUserIds = await daoFactory.GetCacheFolderDao<T>()
-            .GetParentFoldersAsync(fileEntry.ParentId)
-            .Where(r => r.FolderType != FolderType.VirtualRooms && r.FolderType != FolderType.AiAgents)
-            .Select(r => r.CreateBy)
-            .Where(r => !r.Equals(fileEntry.CreateBy))
-            .Distinct()
-            .ToListAsync();
-
-        if (!parentUserIds.Contains(fileEntry.CreateBy))
-        {
-            parentUserIds.Add(fileEntry.CreateBy);
-        }
+        var securityDao = daoFactory.GetSecurityDao<T>();
+        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r=> r.Id).ToListAsync();
 
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var filterValue = inDto.Text;
         var filterSeparator = inDto.FilterSeparator;
-
-        var securityDao = daoFactory.GetSecurityDao<T>();
+        
 
         var totalUsers = await securityDao.GetUsersWithSharedCountAsync(fileEntry,
             filterValue,

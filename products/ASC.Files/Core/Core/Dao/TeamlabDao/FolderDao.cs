@@ -384,7 +384,8 @@ internal class FolderDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await filesDbContext.ContainsFormsInFolder(tenantId, folder.Id);
     }
-    public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(IEnumerable<int> folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
+    
+    public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(IEnumerable<int> folderIds, IEnumerable<int> excludeParentIds = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -393,7 +394,12 @@ internal class FolderDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q = GetFolderQuery(filesDbContext, r => folderIds.Contains(r.Id));
-
+        
+        if (excludeParentIds != null && excludeParentIds.Any())
+        {
+            q = q.Where(r => !filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && excludeParentIds.Contains(r.ParentId) && t.Level == 0));
+        }
+        
         if (searchSubfolders)
         {
             q = GetFolderQuery(filesDbContext)

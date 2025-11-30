@@ -99,7 +99,7 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
     private static string YandexKey => "yandex";
     private static string DocuSignKey => "docusign";
 
-    public List<ProviderDto> GetAllProviders()
+    public List<ProviderDto> GetAllProviders(bool excludeWebDav)
     {
         var webDavKey = ProviderTypes.WebDav.ToStringFast();
 
@@ -127,6 +127,11 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
         {
             providers.Add(new ProviderDto("OneDrive", ProviderTypes.OneDrive.ToStringFast(), OneDriveLoginProvider.IsEnabled, true, OneDriveLoginProvider.RedirectUri,
                 ClientId: OneDriveLoginProvider.ClientID));
+        }
+
+        if (excludeWebDav)
+        {
+            return providers;
         }
 
         if (ThirdPartyProviders.Contains(KDriveKey))
