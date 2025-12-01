@@ -35,12 +35,19 @@ import com.asc.authorization.application.security.authentication.BasicSignature;
 import com.asc.authorization.data.authorization.entity.AuthorizationEntity;
 import com.asc.authorization.data.authorization.repository.JpaAuthorizationRepository;
 import com.asc.authorization.data.consent.repository.JpaConsentRepository;
+import com.asc.common.messaging.configuration.AuthorizationMessagingConfiguration;
+import com.asc.common.service.transfer.message.RetrieveAuthorizationMessage;
 import com.asc.common.utilities.crypto.EncryptionService;
 import com.asc.common.utilities.crypto.HashingService;
 import jakarta.servlet.http.Cookie;
+import java.util.Optional;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
@@ -69,13 +76,18 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class AuthorizationService
     implements OAuth2AuthorizationService, AuthorizationCleanupService {
   private static final String CLIENT_STATE_COOKIE = "client_state";
+  private static final Pattern regionPattern = Pattern.compile("([a-z_]+):");
+
+  private final RabbitTemplate rpcRabbitTemplate;
 
   private final SecurityConfigurationProperties securityConfigurationProperties;
   private final PlatformTransactionManager transactionManager;
+  private final MessageConverter messageConverter;
 
   private final AuthorizationMapper authorizationMapper;
   private final EncryptionService encryptionService;
   private final HashingService hashingService;
+
   private final JpaConsentRepository jpaConsentRepository;
   private final JpaAuthorizationRepository jpaAuthorizationRepository;
   private final RegisteredClientAccessibilityService registeredClientAccessibilityRepository;
@@ -235,6 +247,28 @@ public class AuthorizationService
     }
   }
 
+  private Optional<AuthorizationEntity> fetchFromRemoteRegion(String hashedToken) {
+    var matcher = regionPattern.matcher(hashedToken);
+    if (!matcher.find()) return Optional.empty();
+
+    var routingKey =
+        AuthorizationMessagingConfiguration.AUTHORIZATION_RPC_ROUTING_KEY_PREFIX + matcher.group(1);
+
+    var message =
+        messageConverter.toMessage(
+            RetrieveAuthorizationMessage.builder().token(hashedToken).build(),
+            new MessageProperties());
+
+    var response =
+        rpcRabbitTemplate.sendAndReceive(
+            AuthorizationMessagingConfiguration.AUTHORIZATION_RPC_EXCHANGE, routingKey, message);
+
+    if (response == null) return Optional.empty();
+
+    var data = messageConverter.fromMessage(response);
+    return data instanceof AuthorizationEntity entity ? Optional.of(entity) : Optional.empty();
+  }
+
   /**
    * Retrieves an OAuth2 authorization by its token.
    *
@@ -242,27 +276,36 @@ public class AuthorizationService
    * @param tokenType the type of the token (e.g., access token, refresh token).
    * @return the OAuth2 authorization, or {@code null} if not found.
    */
-  @Transactional(readOnly = true, timeout = 2)
   public OAuth2Authorization findByToken(String token, OAuth2TokenType tokenType) {
     MDC.put("token", token);
     log.info("Retrieving authorization by token");
 
-    try {
-      var hashedToken =
-          tokenType == null
-                  || tokenType.equals(OAuth2TokenType.ACCESS_TOKEN)
-                  || tokenType.equals(OAuth2TokenType.REFRESH_TOKEN)
-              ? hashingService.hash(token)
-              : token;
+    var hashedToken =
+        tokenType == null
+                || tokenType.equals(OAuth2TokenType.ACCESS_TOKEN)
+                || tokenType.equals(OAuth2TokenType.REFRESH_TOKEN)
+            ? hashingService.hash(token)
+            : token;
 
-      return jpaAuthorizationRepository
-          .findByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(hashedToken)
+    try {
+      var template = new TransactionTemplate(transactionManager);
+      template.setTimeout(2);
+      var currentResult =
+          template.execute(
+              status ->
+                  jpaAuthorizationRepository
+                      .findByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(
+                          hashedToken));
+
+      var result = currentResult.or(() -> fetchFromRemoteRegion(hashedToken));
+
+      return result
           .filter(
               e ->
                   registeredClientAccessibilityRepository.validateClientAccessibility(
                       e.getRegisteredClientId()))
           .map(
-              entity -> {
+              (entity) -> {
                 var accessToken = entity.getAccessTokenValue();
                 var refreshToken = entity.getRefreshTokenValue();
                 if (accessToken != null && !accessToken.isBlank())

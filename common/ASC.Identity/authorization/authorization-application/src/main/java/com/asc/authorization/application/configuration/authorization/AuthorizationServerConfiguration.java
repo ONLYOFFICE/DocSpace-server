@@ -31,6 +31,7 @@ import com.asc.authorization.application.security.filter.BasicSignatureAuthentic
 import com.asc.authorization.application.security.filter.RateLimiterFilter;
 import com.asc.authorization.application.security.oauth.converter.FallbackScopeAuthorizationCodeRequestConverter;
 import com.asc.authorization.application.security.oauth.converter.PersonalAccessTokenAuthenticationConverter;
+import com.asc.authorization.application.security.oauth.generator.PrefixedAuthorizationCodeGenerator;
 import com.asc.authorization.application.security.oauth.provider.PersonalAccessTokenAuthenticationProvider;
 import com.asc.authorization.application.security.oauth.provider.TokenIntrospectionAuthenticationProvider;
 import com.asc.authorization.application.security.provider.SignatureAuthenticationProvider;
@@ -39,16 +40,20 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
@@ -72,6 +77,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @RequiredArgsConstructor
 public class AuthorizationServerConfiguration {
+  @Value("${spring.application.region}")
+  private String region;
+
+  @Autowired private Environment environment;
+
   private static final String CLIENT_SECRET_BASIC = "client_secret_basic";
   private static final String CLIENT_SECRET_POST = "client_secret_post";
 
@@ -207,6 +217,17 @@ public class AuthorizationServerConfiguration {
               e.consentPage(formConfiguration.getConsent());
               e.authorizationRequestConverter(fallbackScopeAuthorizationCodeRequestConverter);
               e.authenticationProvider(codeAuthenticationProvider);
+              e.authenticationProviders(
+                  providers -> {
+                    for (var provider : providers) {
+                      if (provider
+                          instanceof
+                          OAuth2AuthorizationCodeRequestAuthenticationProvider codeProvider) {
+                        codeProvider.setAuthorizationCodeGenerator(
+                            new PrefixedAuthorizationCodeGenerator(environment, region));
+                      }
+                    }
+                  });
               e.authorizationResponseHandler(authenticationSuccessHandler);
               e.errorResponseHandler(authenticationFailureHandler);
             })

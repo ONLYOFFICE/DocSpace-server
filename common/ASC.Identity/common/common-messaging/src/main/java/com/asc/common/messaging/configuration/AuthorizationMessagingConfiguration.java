@@ -32,6 +32,7 @@ import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /**
  * Configuration class for setting up RabbitMQ messaging components related to authorization.
@@ -47,6 +48,9 @@ public class AuthorizationMessagingConfiguration {
   /** The exchange for entry point messages for authorization cleanup. */
   public static final String ENTRY_EXCHANGE = "asc_identity_authorization_cleanup_exchange";
 
+  /** The exchange for clustered authorization RPC calls. */
+  public static final String AUTHORIZATION_RPC_EXCHANGE = "asc_identity_authorization_rpc_exchange";
+
   /** The fanout exchange for distributing messages across regional queues. */
   public static final String FANOUT_EXCHANGE = "asc_identity_authorization_region_exchange";
 
@@ -59,8 +63,27 @@ public class AuthorizationMessagingConfiguration {
   /** The entry queue for processing authorization cleanup messages. */
   public static final String ENTRY_QUEUE = "asc_identity_authorization_cleanup_queue";
 
+  /** The routing key prefix for RPC messages. Region will be appended (e.g., "rpc.eu"). */
+  public static final String AUTHORIZATION_RPC_ROUTING_KEY_PREFIX = "rpc.";
+
   private static final int MAX_QUEUE_SIZE = 15_000;
-  private static final int ENTRY_QUEUE_TTL_MS = 3000;
+  private static final int QUEUE_TTL_MS = 3000;
+
+  @Bean
+  @Profile("saas")
+  public TopicExchange authorizationRpcExchange() {
+    return new TopicExchange(AUTHORIZATION_RPC_EXCHANGE);
+  }
+
+  @Bean
+  @Profile("saas")
+  public Queue authorizationRpcQueue() {
+    return QueueBuilder.durable("asc_identity_authorization_rpc_" + region.toLowerCase() + "_queue")
+        .withArgument("x-message-ttl", QUEUE_TTL_MS)
+        .withArgument("x-max-length", MAX_QUEUE_SIZE)
+        .withArgument("x-overflow", "reject-publish-dlx")
+        .build();
+  }
 
   /**
    * Defines the direct exchange for authorization entry messages.
@@ -82,7 +105,7 @@ public class AuthorizationMessagingConfiguration {
   @Bean
   public Queue authorizationEntryQueue() {
     return QueueBuilder.durable(ENTRY_QUEUE)
-        .withArgument("x-message-ttl", ENTRY_QUEUE_TTL_MS)
+        .withArgument("x-message-ttl", QUEUE_TTL_MS)
         .withArgument("x-dead-letter-exchange", FANOUT_EXCHANGE)
         .withArgument("x-max-length", MAX_QUEUE_SIZE)
         .build();
@@ -133,6 +156,14 @@ public class AuthorizationMessagingConfiguration {
   @Bean
   public Queue authorizationDeadLetterQueue() {
     return QueueBuilder.durable(DEAD_LETTER_QUEUE).build();
+  }
+
+  @Bean
+  @Profile("saas")
+  public Binding authorizationRpcQueueBinding() {
+    return BindingBuilder.bind(authorizationRpcQueue())
+        .to(authorizationRpcExchange())
+        .with(AUTHORIZATION_RPC_ROUTING_KEY_PREFIX + region.toLowerCase());
   }
 
   /**
