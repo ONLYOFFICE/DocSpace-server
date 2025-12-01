@@ -2335,7 +2335,7 @@ public class FileSecurity(
         }
         else
         {
-            ace = shares.Where(r => Equals(r.EntryId, entry.Id) && r.EntryType == FileEntryType.Folder)
+            ace = shares
                 .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                 .ThenBy(r => r.Level)
                 .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
