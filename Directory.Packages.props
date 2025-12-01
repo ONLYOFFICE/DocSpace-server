@@ -50,6 +50,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="1.10.0-beta.1" />
     <PackageVersion Include="RedisRateLimiting" Version="1.2.0" />
     <PackageVersion Include="RedisRateLimiting.AspNetCore" Version="1.2.0" />
+    <PackageVersion Include="Spectre.Console.Cli" Version="0.53.1" />
     <PackageVersion Include="StackExchange.Redis.Extensions.AspNetCore" Version="11.0.0" />
     <PackageVersion Include="StackExchange.Redis.Extensions.Newtonsoft" Version="11.0.0" />
     <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
