@@ -400,4 +400,3 @@ public class SettingsController(
         return await filesSettingsHelper.GetOrganizeRoomsGroupingAsync();
     }
 }
-}

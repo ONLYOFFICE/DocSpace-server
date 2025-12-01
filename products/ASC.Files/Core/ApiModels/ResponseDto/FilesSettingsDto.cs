@@ -409,8 +409,7 @@ public class FilesSettingsDtoConverter(
             MaxUploadThreadCount = setupInfo.MaxUploadThreadCount,
             ChunkUploadSize = setupInfo.ChunkUploadSize,
             OpenEditorInSameTab = await filesSettingsHelper.GetOpenEditorInSameTabAsync(),
-            OrganizeRoomsGrouping = await filesSettingsHelper.GetOrganizeRoomsGroupingAsync()
-
+            OrganizeRoomsGrouping = await filesSettingsHelper.GetOrganizeRoomsGroupingAsync(),
             ExtsFilesVectorized = vectorizationGlobalSettings.SupportedFormats.ToList(),
             MaxVectorizationFileSize = vectorizationGlobalSettings.MaxContentLength
         };

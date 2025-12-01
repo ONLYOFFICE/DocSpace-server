@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.EF;
 
-public class DbFilesRoomGroup : BaseEntity, IMapFrom<RoomGroupRef>
+public class DbFilesRoomGroup : BaseEntity
 {
     public int Id { get; set; }
     public int TenantId { get; set; }

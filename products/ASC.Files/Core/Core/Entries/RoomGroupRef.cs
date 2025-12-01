@@ -26,11 +26,16 @@
 
 namespace ASC.Files.Core.Entries;
 
-public class RoomGroupRef : IMapFrom<DbFilesRoomGroup>
+public class RoomGroupRef
 {
     public int Id { get; init; }
     public int GroupId { get; set; }
     public int? InternalRoomId { get; set; }
     public string ThirdpartyRoomId { get; set; }
 
+}
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class RoomGroupRefMapper
+{
+    public static partial RoomGroupRef MapToRoomGroupRef(this DbFilesRoomGroup source);
 }

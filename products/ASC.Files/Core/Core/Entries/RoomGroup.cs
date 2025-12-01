@@ -26,10 +26,15 @@
 
 namespace ASC.Files.Core.Entries;
 
-public class RoomGroup : IMapFrom<DbFilesGroup>
+public class RoomGroup
 {
     public int Id { get; init; }
     public string Name { get; set; }
     public string Icon { get; set; }
     public Guid UserID { get; set; }
+}
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class RoomGroupMapper
+{
+    public static partial RoomGroup MapToRoomGroup(this DbFilesGroup source);
 }

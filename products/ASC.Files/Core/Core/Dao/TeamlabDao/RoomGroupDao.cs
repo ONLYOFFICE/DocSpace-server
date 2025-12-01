@@ -37,8 +37,7 @@ internal class RoomGroupDao(
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
-    IDistributedLockProvider distributedLockProvider,
-    IMapper mapper)
+    IDistributedLockProvider distributedLockProvider)
     : AbstractDao(dbContextManager,
         userManager,
         tenantManager,
@@ -66,7 +65,7 @@ internal class RoomGroupDao(
         var newGroup = await dbContext.AddOrUpdateAsync(q => q.RoomGroup, entity);
         await dbContext.SaveChangesAsync();
 
-        return mapper.Map<RoomGroup>(newGroup);
+        return newGroup.MapToRoomGroup();
     }
 
     public async Task AddInternalRoomToGroupAsync(int roomId, int groupId)
@@ -107,7 +106,7 @@ internal class RoomGroupDao(
 
         await foreach (var data in roomGroupDbContext.GetRoomsByGroupAsync(tenantId, groupId))
         {
-            yield return mapper.Map<DbFilesRoomGroup, RoomGroupRef>(data);
+            yield return data.MapToRoomGroupRef();
         }
     }
 }
