@@ -1,12 +1,12 @@
 {{>partial_header}}
 
+{{#operations.x-supportsFields}}
+from __future__ import annotations
+{{/operations.x-supportsFields}}
 import warnings
 from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
-{{#operations.x-supportsFields}}
-from __future__ import annotations
-{{/operations.x-supportsFields}}
 
 {{#imports}}
 {{import}}
