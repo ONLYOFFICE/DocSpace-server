@@ -271,7 +271,7 @@ public class EditorConfiguration<T>(
 {
     public PluginsConfig Plugins { get; } = pluginsConfig;
     public CustomizationConfig<T> Customization { get; } = customizationConfig;
-    public EncryptionKeysConfig EncryptionKeys { get; set; }
+    public List<EncryptionKeyDto> EncryptionKeys { get; set; }
 
     public string Lang => UserInfo.GetCulture().Name;
 

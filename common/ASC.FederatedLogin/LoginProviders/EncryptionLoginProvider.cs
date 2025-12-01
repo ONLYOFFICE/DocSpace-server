@@ -46,7 +46,8 @@ public class EncryptionLoginProvider(
             Provider = ProviderConstants.Encryption,
             Name = await instanceCrypto.EncryptAsync(keys)
         };
-
+        
+        await accountLinker.RemoveProviderAsync(userId);
         await accountLinker.AddLinkAsync(userId, loginProfile);
     }
 
@@ -69,33 +70,14 @@ public class EncryptionLoginProvider(
         }
         catch (Exception ex)
         {
-            var message = string.Format("Can not decrypt {0} keys for {1}", ProviderConstants.Encryption, userId.ToString());
-            logger.ErrorWithException(message, ex);
+            logger.ErrorDecrypt(ProviderConstants.Encryption, userId, ex);
             return null;
         }
     }
+}
 
-    public async Task<IDictionary<Guid, string>> GetKeysAsync(IEnumerable<Guid> usrsIds)
-    {
-        var profiles = await accountLinker.GetLinkedProfilesAsync(usrsIds.Select(id => id.ToString()), ProviderConstants.Encryption);
-        var keys = new Dictionary<Guid, string>(profiles.Count);
-
-        foreach (var profilePair in profiles)
-        {
-            var userId = new Guid(profilePair.Key);
-
-            try
-            {
-                var key = await instanceCrypto.DecryptAsync(profilePair.Value.Name);
-                keys.Add(new Guid(profilePair.Key), key);
-            }
-            catch (Exception ex)
-            {
-                var message = string.Format("Can not decrypt {0} keys for {1}", ProviderConstants.Encryption, userId.ToString());
-                logger.ErrorWithException(message, ex);
-            }
-        }
-
-        return keys;
-    }
+internal static partial class EncryptionLoginProviderLogger
+{
+    [LoggerMessage(Level = LogLevel.Error, Message = "Can not decrypt {provider} keys for {userId}")]
+    public static partial void ErrorDecrypt(this ILogger<EncryptionLoginProvider> logger, string provider, Guid userId, Exception exception);
 }

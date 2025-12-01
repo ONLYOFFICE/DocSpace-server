@@ -424,12 +424,17 @@ public sealed class UserManagerWrapper(
         var providerType = ProviderManager.AuthProviders.FirstOrDefault(x => x.Equals(profile.Provider));
         var provider = providerManager.GetLoginProvider(providerType);
 
+        if (!Guid.TryParse(profile.LinkId, out var userId))
+        {
+            userId = Guid.Empty;
+        }
+        
         if (provider is { IsEnabled: true })
         {
-            return Guid.TryParse(profile.LinkId, out var userId) ? (true, userId) : (true, Guid.Empty);
+            return (true, userId);
         }
 
-        await accountLinker.RemoveProviderAsync(profile.LinkId, profile.Provider, profile.HashId);
+        await accountLinker.RemoveProviderAsync(userId, profile.Provider, profile.HashId);
         return (false, Guid.Empty);
     }
 

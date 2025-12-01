@@ -24,12 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Documents;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
-namespace ASC.Files.Log;
-
-internal static partial class PrivacyRoomControllerLogger
+public class EncryptionKeyRequestDto
 {
-    [LoggerMessage(LogLevel.Information, "User {userId} updates address")]
-    public static partial void InformationUpdateAddress(this ILogger<PrivacyRoomControllerCommon> logger, Guid userId);
+    public string Id { get; set; }
+    public EncryptionKeyType Type { get; set; }
+    public DateTime Date { get; set; }
+    public string Version { get; set; }
+    public string PublicKey { get; set; }
+    public string PrivateKey { get; set; }
+    public string Salt { get; set; }
 }

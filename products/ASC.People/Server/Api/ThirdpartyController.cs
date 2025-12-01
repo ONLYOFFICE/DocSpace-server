@@ -284,7 +284,7 @@ public class ThirdpartyController(
     [HttpDelete("unlinkaccount")]
     public async Task UnlinkThirdPartyAccount(UnlinkAccountRequestDto inDto)
     {
-        await accountLinker.RemoveProviderAsync(securityContext.CurrentAccount.ID.ToString(), inDto.Provider);
+        await accountLinker.RemoveProviderAsync(securityContext.CurrentAccount.ID, inDto.Provider);
 
         messageService.Send(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(inDto.Provider));
     }

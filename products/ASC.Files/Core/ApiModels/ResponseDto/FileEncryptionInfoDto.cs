@@ -24,12 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Documents;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-namespace ASC.Files.Log;
-
-internal static partial class PrivacyRoomControllerLogger
+public class FileEncryptionInfoDto
 {
-    [LoggerMessage(LogLevel.Information, "User {userId} updates address")]
-    public static partial void InformationUpdateAddress(this ILogger<PrivacyRoomControllerCommon> logger, Guid userId);
+    public string Keys { get; set; }
+    public bool HaveAccess { get; set; }
 }

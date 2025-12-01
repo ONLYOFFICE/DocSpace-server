@@ -50,11 +50,6 @@ public class AceCollection<T>
     /// A message to send when notifying about the shared file.
     /// </summary>
     public string Message { get; init; }
-
-    /// <summary>
-    /// The information about the advanced settings which allow to share the document with other users.
-    /// </summary>
-    public AceAdvancedSettingsWrapper AdvancedSettings { get; init; }
 }
 
 /// <summary>
@@ -187,20 +182,4 @@ public class AceShortWrapper(string subjectName, string permission, bool isLink)
     /// Specifies whether to change the user icon to the link icon.
     /// </summary>
     public bool isLink { get; init; } = isLink;
-}
-
-/// <summary>
-/// The information about the advanced settings which allow to share the document with other users.
-/// </summary>
-public class AceAdvancedSettingsWrapper
-{
-    /// <summary>
-    /// Specifies whether to allow sharing private room or not.
-    /// </summary>
-    public bool AllowSharingPrivateRoom { get; set; }
-
-    /// <summary>
-    /// Specifies whether to allow creating an invitation link or not.
-    /// </summary>
-    public bool InvitationLink { get; init; }
 }

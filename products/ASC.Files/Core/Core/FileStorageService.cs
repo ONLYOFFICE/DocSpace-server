@@ -100,7 +100,8 @@ public class FileStorageService //: IFileStorageService
     FormRoleDtoHelper formRoleDtoHelper,
     WebhookManager webhookManager,
     FileSharingHelper fileSharingHelper,
-    AiGateway gateway)
+    AiGateway gateway,
+    FileSecurityCommon fileSecurityCommon)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -4649,7 +4650,7 @@ public class FileStorageService //: IFileStorageService
         return showSharingSettings ? await fileSharing.GetSharedInfoShortFileAsync(file) : null;
     }
 
-    public async Task<List<EncryptionKeyPairDto>> GetEncryptionAccessAsync<T>(T fileId)
+    public async Task<List<EncryptionKeyDto>> GetEncryptionAccessAsync<T>(T fileId)
     {
         if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
         {
@@ -4660,7 +4661,67 @@ public class FileStorageService //: IFileStorageService
 
         return [.. fileKeyPair];
     }
+   public async Task<FileEncryptionInfoDto> GetEncryptionInfoAsync<T>(T fileId)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
 
+        if (file == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+        if (!await fileSecurity.CanReadAsync(file))
+        {
+            throw new InvalidOperationException( FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        var share = (await fileSecurity.GetSharesAsync(file)).FirstOrDefault(s => s.EntryType == FileEntryType.File && s.Subject == authContext.CurrentAccount.ID);
+        var keys = await encryptionLoginProvider.GetKeysAsync();
+
+        return new FileEncryptionInfoDto
+        {
+            Keys = keys,
+            HaveAccess = share != null
+        };
+    }
+
+    public async Task<FileEncryptionInfoDto> SetEncryptionInfoAsync<T>(T fileId)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+        if (!await fileSecurity.CanReadAsync(file))
+        {
+            throw new InvalidOperationException( FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        FileShare access;
+
+        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+        {
+            access = FileShare.ReadWrite;
+        }
+        else
+        {
+            access = (await fileSharing.GetSharedInfoAsync(file)).FirstOrDefault(s => s.Id == authContext.CurrentAccount.ID).Access;
+        }
+
+        await fileSecurity.ShareAsync(file.Id, FileEntryType.File, authContext.CurrentAccount.ID, access);
+
+        var fileShare = (await fileSecurity.GetSharesAsync(file)).FirstOrDefault(s => s.EntryType == FileEntryType.File && s.Subject == authContext.CurrentAccount.ID);
+        var keys = await encryptionLoginProvider.GetKeysAsync();
+
+        return new FileEncryptionInfoDto
+        {
+            Keys = keys,
+            HaveAccess = fileShare != null
+        };
+    }
+    
     public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId, FileShare newShare = FileShare.RoomManager)
     {
         var userInfo = await userManager.GetUsersAsync(userId);
@@ -5361,30 +5422,7 @@ public class FileStorageService //: IFileStorageService
 
         return dict.Values.ToList();
     }
-
-    private async Task CheckEncryptionKeysAsync(IEnumerable<AceWrapper> aceWrappers)
-    {
-        var users = aceWrappers.Select(s => s.Id).ToList();
-        var keys = await encryptionLoginProvider.GetKeysAsync(users);
-
-        foreach (var user in users)
-        {
-            if (!keys.ContainsKey(user))
-            {
-                var userInfo = await userManager.GetUsersAsync(user);
-                throw new InvalidOperationException($"The user {userInfo.DisplayUserName(displayUserSettingsHelper)} does not have an encryption key");
-            }
-        }
-    }
-
-    private async Task SetAcesForPrivateRoomAsync<T>(Folder<T> room, List<AceWrapper> aces)
-    {
-        var advancedSettings = new AceAdvancedSettingsWrapper { AllowSharingPrivateRoom = true };
-
-        var aceCollection = new AceCollection<T> { Folders = [room.Id], Files = [], Aces = aces, AdvancedSettings = advancedSettings };
-
-        await SetAceObjectAsync(aceCollection, false);
-    }
+    
 
     private async Task DetermineParentRoomType<T>(FileEntry<T> entry)
     {

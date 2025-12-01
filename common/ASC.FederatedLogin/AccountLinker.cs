@@ -47,14 +47,9 @@ public class AccountLinker(
         return (await GetLinkedProfilesAsync(obj)).Where(profile => profile.Provider.Equals(provider));
     }
 
-    public async Task<IDictionary<string, LoginProfile>> GetLinkedProfilesAsync(IEnumerable<string> objects, string provider)
-    {
-        return (await GetLinkedProfilesAsync(objects)).Where(o => o.Value.Provider.Equals(provider)).ToDictionary(k => k.Key, v => v.Value);
-    }
-
     public async Task<List<LoginProfile>> GetLinkedProfilesAsync(string obj)
     {
-        return await GetFromCacheAsync(obj, GetLinkedProfilesFromDBAsync);
+        return await GetFromCacheAsync(obj, GetLinkedProfilesFromDbAsync);
     }
 
     public async Task<IEnumerable<LoginProfile>> GetLinkedProfilesAsync()
@@ -98,21 +93,24 @@ public class AccountLinker(
         await RemoveFromCacheAsync(CacheKey(tenant));
     }
 
-    public async Task RemoveProviderAsync(string obj, string provider = null, string hashId = null)
+    public async Task RemoveProviderAsync(Guid obj, string provider = null, string hashId = null)
     {
         await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
         var tenant = tenantManager.GetCurrentTenantId();
 
-        var accountLink = await Queries.AccountLinkAsync(accountLinkContext, obj, provider, hashId);
+        var accountLink = await Queries.AccountLinkAsync(accountLinkContext, obj.ToString(), provider, hashId);
 
-        accountLinkContext.AccountLinks.Remove(accountLink);
-        await accountLinkContext.SaveChangesAsync();
+        if (accountLink != null)
+        {
+            accountLinkContext.AccountLinks.Remove(accountLink);
+            await accountLinkContext.SaveChangesAsync();
 
-        await RemoveFromCacheAsync(obj);
-        await RemoveFromCacheAsync(CacheKey(tenant));
+            await RemoveFromCacheAsync(obj.ToString());
+            await RemoveFromCacheAsync(CacheKey(tenant));
+        }
     }
 
-    private async Task<List<LoginProfile>> GetLinkedProfilesFromDBAsync(string obj)
+    private async Task<List<LoginProfile>> GetLinkedProfilesFromDbAsync(string obj)
     {
         await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
         //Retrieve by unique id

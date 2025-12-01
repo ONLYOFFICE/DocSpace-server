@@ -627,6 +627,18 @@ public abstract class FilesController<T>(
     {
         await fileStorageService.ManageFormFilling(inDto.FormId, inDto.Action);
     }
+    
+    [HttpGet("{fileId}/access")]
+    public async Task<FileEncryptionInfoDto> GetEncryptionInfoAsync(T fileId)
+    {
+        return await fileStorageService.GetEncryptionInfoAsync(fileId);
+    }
+
+    [HttpPut("{fileId}/access")]
+    public async Task<FileEncryptionInfoDto> SetEncryptionInfoAsync(T fileId)
+    {
+        return await fileStorageService.SetEncryptionInfoAsync(fileId);
+    }
 }
 
 public class FilesControllerCommon(
