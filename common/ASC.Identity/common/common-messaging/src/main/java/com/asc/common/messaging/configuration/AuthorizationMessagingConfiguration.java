@@ -69,12 +69,35 @@ public class AuthorizationMessagingConfiguration {
   private static final int MAX_QUEUE_SIZE = 15_000;
   private static final int QUEUE_TTL_MS = 3000;
 
+  /**
+   * Defines the topic exchange for authorization RPC messages.
+   *
+   * <p>This exchange is only active in the "saas" profile and enables cross-instance authorization
+   * lookups in a clustered environment.
+   *
+   * @return the {@link TopicExchange} for authorization RPC messages
+   */
   @Bean
   @Profile("saas")
   public TopicExchange authorizationRpcExchange() {
     return new TopicExchange(AUTHORIZATION_RPC_EXCHANGE);
   }
 
+  /**
+   * Defines the region-specific queue for authorization RPC requests.
+   *
+   * <p>This durable queue is configured with:
+   *
+   * <ul>
+   *   <li>TTL of {@value #QUEUE_TTL_MS}ms for message expiration
+   *   <li>Maximum size of {@value #MAX_QUEUE_SIZE} messages
+   *   <li>Overflow policy to reject and route to dead-letter exchange
+   * </ul>
+   *
+   * <p>Only active in the "saas" profile.
+   *
+   * @return the {@link Queue} for authorization RPC requests
+   */
   @Bean
   @Profile("saas")
   public Queue authorizationRpcQueue() {
@@ -158,6 +181,14 @@ public class AuthorizationMessagingConfiguration {
     return QueueBuilder.durable(DEAD_LETTER_QUEUE).build();
   }
 
+  /**
+   * Binds the RPC queue to the RPC exchange with a region-specific routing key.
+   *
+   * <p>Messages are routed using the pattern "rpc.{region}" (e.g., "rpc.eu"). Only active in the
+   * "saas" profile.
+   *
+   * @return the {@link Binding} between the RPC queue and RPC exchange
+   */
   @Bean
   @Profile("saas")
   public Binding authorizationRpcQueueBinding() {
