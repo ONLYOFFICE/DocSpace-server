@@ -26,12 +26,14 @@
 
 namespace ASC.Web.Studio.Core.SMS;
 
-public class StudioSmsNotificationSettings : TfaSettingsBase<StudioSmsNotificationSettings>
+public class StudioSmsNotificationSettings : TfaSettingsBase<StudioSmsNotificationSettings>, ISettings<StudioSmsNotificationSettings>
 {
-    [JsonIgnore]
-    public override Guid ID
+    public static new Guid ID
     {
-        get { return new Guid("{2802df61-af0d-40d4-abc5-a8506a5352ff}"); }
+        get
+        {
+            return new Guid("{2802df61-af0d-40d4-abc5-a8506a5352ff}");
+        }
     }
 
     public override StudioSmsNotificationSettings GetDefault()

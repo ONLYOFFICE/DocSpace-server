@@ -47,8 +47,7 @@ public class TenantInfoSettings : ISettings<TenantInfoSettings>
 
     public DateTime LastModified { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{5116B892-CCDD-4406-98CD-4F18297C0C0A}"); }
     }

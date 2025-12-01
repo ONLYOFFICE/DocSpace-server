@@ -30,8 +30,7 @@ public class StudioTrustedDomainSettings : ISettings<StudioTrustedDomainSettings
 {
     public bool InviteAsUsers { get; init; }
 
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{00A2DB01-BAE3-48aa-BE32-CE768D7C874E}"); }
     }

@@ -38,8 +38,7 @@ public class IPRestrictionsSettings : ISettings<IPRestrictionsSettings>
     /// </summary>
     public bool Enable { get; init; }
 
-    [JsonIgnore]
-    public Guid ID => new("{2EDDDF64-F792-4498-A638-2E3E6EBB13C9}");
+    public static Guid ID => new("{2EDDDF64-F792-4498-A638-2E3E6EBB13C9}");
 
     public IPRestrictionsSettings GetDefault()
     {

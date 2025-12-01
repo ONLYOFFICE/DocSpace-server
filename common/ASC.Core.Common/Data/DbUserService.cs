@@ -822,11 +822,11 @@ public class EFUserService(
         {
             if (filter.QuotaFilter == QuotaFilter.Custom)
             {
-                q = q.Where(r => userDbContext.WebstudioSettings.Any(a => a.TenantId == r.TenantId && a.Id == new UserQuotaSettings().ID && a.UserId == r.Id));
+                q = q.Where(r => userDbContext.WebstudioSettings.Any(a => a.TenantId == r.TenantId && a.Id == UserQuotaSettings.ID && a.UserId == r.Id));
             }
             else if (filter.QuotaFilter == QuotaFilter.Default)
             {
-                q = q.Where(r => !userDbContext.WebstudioSettings.Any(a => a.TenantId == r.TenantId && a.Id == new UserQuotaSettings().ID && a.UserId == r.Id));
+                q = q.Where(r => !userDbContext.WebstudioSettings.Any(a => a.TenantId == r.TenantId && a.Id == UserQuotaSettings.ID && a.UserId == r.Id));
             }
         }
 

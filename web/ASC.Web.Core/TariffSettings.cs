@@ -51,8 +51,7 @@ public class TariffSettings : ISettings<TariffSettings>
 
     public DateTime LastModified { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{07956D46-86F7-433b-A657-226768EF9B0D}"); }
     }

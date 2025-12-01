@@ -32,8 +32,7 @@ public class TenantAccessSettings : ISettings<TenantAccessSettings>
 
     public bool RegisterUsersImmediately { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{0CB4C871-0040-45AB-AE79-4CC292B91EF1}"); }
     }

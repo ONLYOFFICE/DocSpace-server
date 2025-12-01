@@ -37,8 +37,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     /// <summary>
     /// The LDAP settings ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{197149b3-fbc9-44c2-b42a-232f7e729c16}"); }
     }
@@ -473,8 +472,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
 [Scope]
 public class LdapCronSettings : ISettings<LdapCronSettings>
 {
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{58C42C54-56CD-4BEF-A3ED-C60ACCF6E975}"); }
     }
@@ -494,8 +492,7 @@ public class LdapCronSettings : ISettings<LdapCronSettings>
 
 public class LdapCurrentAcccessSettings : ISettings<LdapCurrentAcccessSettings>
 {
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{134B5EAA-F612-4834-AEAB-34C90515EA4E}"); }
     }
@@ -512,8 +509,7 @@ public class LdapCurrentAcccessSettings : ISettings<LdapCurrentAcccessSettings>
 
 public class LdapCurrentUserPhotos : ISettings<LdapCurrentUserPhotos>
 {
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{50AE3C2B-0783-480F-AF30-679D0F0A2D3E}"); }
     }
@@ -530,8 +526,7 @@ public class LdapCurrentUserPhotos : ISettings<LdapCurrentUserPhotos>
 
 public class LdapCurrentDomain : ISettings<LdapCurrentDomain>
 {
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{75A5F745-F697-4418-B38D-0FE0D277E258}"); }
     }

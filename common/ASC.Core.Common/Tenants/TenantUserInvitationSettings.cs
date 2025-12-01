@@ -31,8 +31,7 @@ public class TenantUserInvitationSettings : ISettings<TenantUserInvitationSettin
     public bool AllowInvitingMembers { get; init; }
     public bool AllowInvitingGuests { get; init; }
 
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{FF4F9A9E-0976-478B-8001-18DDE5AF2BD9}"); }
     }

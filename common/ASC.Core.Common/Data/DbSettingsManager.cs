@@ -45,8 +45,7 @@ public class SettingsManager(
     public async Task ClearCacheAsync<T>() where T : class, ISettings<T>
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        var settings = await LoadAsync<T>(tenantId, Guid.Empty);
-        var key = $"{settings.ID}{tenantId}{Guid.Empty}";
+        var key = $"{T.ID}{tenantId}{Guid.Empty}";
 
         await fusionCache.RemoveAsync(key);
     }
@@ -133,7 +132,7 @@ public class SettingsManager(
     internal async Task<T> LoadAsync<T>(int tenantId, Guid userId, DateTime? lastModified = null) where T : class, ISettings<T>
     {
         var def = GetDefault<T>();
-        var key = def.ID.ToString() + tenantId + userId;
+        var key = T.ID.ToString() + tenantId + userId;
 
         var settings = await fusionCache.GetOrSetAsync<T>(key, async (ctx, token) =>
         {
@@ -143,7 +142,7 @@ public class SettingsManager(
             }
 
             await using var context = await dbContextFactory.CreateDbContextAsync(token);
-            var result = await context.WebStudioSettingsAsync(tenantId, def.ID, userId);
+            var result = await context.WebStudioSettingsAsync(tenantId, T.ID, userId);
             var settings = def;
             def.LastModified = DateTime.UtcNow;
 
@@ -169,7 +168,7 @@ public class SettingsManager(
 
         try
         {
-            var key = settings.ID.ToString() + tenantId + userId;
+            var key = T.ID.ToString() + tenantId + userId;
             var data = Serialize(settings);
             var def = GetDefault<T>();
 
@@ -177,7 +176,7 @@ public class SettingsManager(
 
             if (data.SequenceEqual(defaultData))
             {
-                var s = await context.WebStudioSettingsAsync(tenantId, settings.ID, userId);
+                var s = await context.WebStudioSettingsAsync(tenantId, T.ID, userId);
 
                 if (s != null)
                 {
@@ -188,7 +187,7 @@ public class SettingsManager(
             {
                 var s = new DbWebstudioSettings
                 {
-                    Id = settings.ID,
+                    Id = T.ID,
                     UserId = userId,
                     TenantId = tenantId,
                     Data = data,

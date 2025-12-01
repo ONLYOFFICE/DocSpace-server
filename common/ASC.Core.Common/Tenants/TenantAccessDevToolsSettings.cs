@@ -41,8 +41,7 @@ public class TenantDevToolsAccessSettings : ISettings<TenantDevToolsAccessSettin
     /// <summary>
     /// The settings ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{739F1C35-1688-4EEB-B46B-6E413FBCE834}"); }
     }

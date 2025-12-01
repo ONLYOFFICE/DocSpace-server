@@ -31,7 +31,7 @@ public class DbHelper(IDbContextFactory<WebstudioDbContext> activeDirectoryDbCon
 {
     public async Task<List<int>> TenantsAsync()
     {
-        var id = ldapSettings.ID;
+        var id = LdapSettings.ID;
         var enableLdapAuthentication = ldapSettings.EnableLdapAuthentication;
 
         await using var activeDirectoryDbContext = await activeDirectoryDbContextFactory.CreateDbContextAsync();

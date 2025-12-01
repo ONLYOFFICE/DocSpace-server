@@ -36,7 +36,7 @@ public enum EmbeddingProviderType
 
 public class EncryptedVectorizationSettings : ISettings<EncryptedVectorizationSettings>
 {
-    public Guid ID => new("{B8A3D0B7-63B0-408C-8CB8-D0213AB3EF83}");
+    public static Guid ID => new("{B8A3D0B7-63B0-408C-8CB8-D0213AB3EF83}");
     public DateTime LastModified { get; set; }
     public EmbeddingProviderType ProviderType { get; init; }
     public string Key { get; set; }

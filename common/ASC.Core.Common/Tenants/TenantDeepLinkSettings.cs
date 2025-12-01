@@ -35,8 +35,7 @@ public class TenantDeepLinkSettings : ISettings<TenantDeepLinkSettings>
     /// <summary>
     /// The tenant ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{926A6850-7C19-4744-B4AD-813DE3CD55B1}"); }
     }

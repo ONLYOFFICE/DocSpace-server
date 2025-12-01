@@ -38,8 +38,7 @@ public class TenantWalletServiceSettings : ISettings<TenantWalletServiceSettings
     /// </summary>
     public List<TenantWalletService> EnabledServices { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
+    public static Guid ID
     {
         get { return new Guid("{1285F7B0-9927-4911-9DA1-4F5D1F90FE73}"); }
     }
