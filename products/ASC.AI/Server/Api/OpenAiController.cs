@@ -36,7 +36,6 @@ namespace ASC.AI.Api
     [DefaultRoute("openai/{providerId}/v1/{*path}")]
     [ApiController]
     [ControllerName("ai")]
-    [AllowAnonymous]
     [SuppressCustomResponseFilter]
     public class OpenAiController(
         IHttpClientFactory httpClientFactory,
