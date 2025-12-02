@@ -30,7 +30,6 @@ namespace ASC.AuditTrail.Types;
 /// The entry type.
 /// </summary>
 [EnumExtensions]
-[JsonConverter(typeof(JsonStringEnumConverter<EntryType>))]
 public enum EntryType
 {
     [SwaggerEnum("None")]

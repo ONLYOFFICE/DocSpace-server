@@ -26,7 +26,6 @@
 
 global using System.Collections;
 global using System.Text.Json;
-global using System.Text.Json.Serialization;
 
 global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Log;

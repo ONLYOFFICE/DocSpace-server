@@ -26,7 +26,6 @@
 
 namespace ASC.Files.Core.Core;
 
-[JsonConverter(typeof(JsonStringEnumConverter<SubjectFilter>))]
 public enum SubjectFilter
 {
     [SwaggerEnum("Owner")]

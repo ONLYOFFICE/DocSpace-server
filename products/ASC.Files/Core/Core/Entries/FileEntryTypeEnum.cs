@@ -31,7 +31,6 @@ namespace ASC.Files.Core;
 /// </summary>
 [Flags]
 [EnumExtensions]
-[JsonConverter(typeof(JsonStringEnumConverter<FileEntryType>))]
 public enum FileEntryType
 {
     [SwaggerEnum("Folder")]

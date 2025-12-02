@@ -30,7 +30,6 @@ namespace ASC.AuditTrail.Types;
 /// The action type.
 /// </summary>
 [EnumExtensions]
-[JsonConverter(typeof(JsonStringEnumConverter<ActionType>))]
 public enum ActionType
 {
     [SwaggerEnum("None")]

@@ -30,7 +30,6 @@ namespace ASC.AuditTrail.Types;
 /// The module type.
 /// </summary>
 [EnumExtensions]
-[JsonConverter(typeof(JsonStringEnumConverter<LocationType>))]
 public enum LocationType
 {
     [SwaggerEnum("None")]

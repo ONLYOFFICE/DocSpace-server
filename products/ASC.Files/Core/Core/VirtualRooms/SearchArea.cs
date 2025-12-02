@@ -29,7 +29,6 @@ namespace ASC.Files.Core.VirtualRooms;
 /// <summary>
 /// The search area.
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter<SearchArea>))]
 public enum SearchArea
 {
     [SwaggerEnum("Active")]

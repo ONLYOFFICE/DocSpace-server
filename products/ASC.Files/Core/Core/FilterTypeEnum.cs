@@ -29,7 +29,6 @@ namespace ASC.Files.Core;
 /// <summary>
 /// The filter type.
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter<FilterType>))]
 public enum FilterType
 {
     [SwaggerEnum("None")]

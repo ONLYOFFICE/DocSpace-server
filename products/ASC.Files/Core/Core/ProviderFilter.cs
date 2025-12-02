@@ -27,7 +27,6 @@
 namespace ASC.Files.Core;
 
 [EnumExtensions]
-[JsonConverter(typeof(JsonStringEnumConverter<ProviderFilter>))]
 public enum ProviderFilter
 {
     [SwaggerEnum("None")]

@@ -26,7 +26,6 @@
 
 namespace ASC.Files.Core.Core;
 
-[JsonConverter(typeof(JsonStringEnumConverter<StorageFilter>))]
 public enum StorageFilter
 {
     [SwaggerEnum("None")]
