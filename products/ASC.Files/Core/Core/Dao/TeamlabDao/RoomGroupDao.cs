@@ -68,6 +68,29 @@ internal class RoomGroupDao(
         return newGroup.MapToRoomGroup();
     }
 
+    public async Task<RoomGroup> GetGroupInfoAsync(int roomGroupId)
+    {
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var group = await GetGroupQuery(dbContext, tenantId)
+            .Where(r => r.Id == roomGroupId)
+            .FirstOrDefaultAsync();
+
+        return group.MapToRoomGroup();
+    }
+
+    private IQueryable<DbFilesGroup> GetGroupQuery(FilesDbContext dbContext, int tenant)
+    {
+        var q = dbContext.RoomGroup.Where(r => true);
+
+        if (tenant != Tenant.DefaultTenant)
+        {
+            q = q.Where(r => r.TenantId == tenant);
+        }
+
+        return q;
+    }
+
     public async Task AddInternalRoomToGroupAsync(int roomId, int groupId)
     {
         await using (var roomGroupDbContext = await _dbContextFactory.CreateDbContextAsync())

@@ -65,4 +65,23 @@ public class GroupsCpntroller(FolderDtoHelper folderDtoHelper,
 
         return await roomGroupDtoHelper.GetAsync(group);
     }
+
+    [HttpGet("group/{groupId}")]
+    public async Task<RoomGroupDto> GetFolderInfo(GroupIdRequestDto inDto)
+    {
+        var group = await GetGroupInfoAsync(inDto.GroupId).NotFoundIfNull("Group not found");
+
+        return await roomGroupDtoHelper.GetAsync(group);
+    }
+
+    private async Task<RoomGroup> GetGroupInfoAsync(int id)
+    {
+        var group = await fileStorageService.GetGroupInfoAsync(id);
+        if (group == null)
+        {
+            throw new ItemNotFoundException(Resource.ErrorGroupNotFound);
+        }
+
+        return group;
+    }
 }
