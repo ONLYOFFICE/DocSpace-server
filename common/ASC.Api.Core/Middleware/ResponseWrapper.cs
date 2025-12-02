@@ -114,6 +114,12 @@ public class CustomResponseFilterAttribute : ResultFilterAttribute
 {
     public override void OnResultExecuting(ResultExecutingContext context)
     {
+        if (context.HttpContext.Items.ContainsKey(nameof(SuppressCustomResponseFilterAttribute)))
+        {
+            base.OnResultExecuting(context);
+            return;
+        }
+
         if (context.Result is ObjectResult result)
         {
             result.DeclaredType = typeof(SuccessApiResponse);
@@ -125,5 +131,14 @@ public class CustomResponseFilterAttribute : ResultFilterAttribute
         }
 
         base.OnResultExecuting(context);
+    }
+}
+
+public class SuppressCustomResponseFilterAttribute : ActionFilterAttribute
+{
+    public override void OnActionExecuting(ActionExecutingContext context)
+    {
+        context.HttpContext.Items[nameof(SuppressCustomResponseFilterAttribute)] = null;
+        base.OnActionExecuting(context);
     }
 }
