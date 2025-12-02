@@ -29,6 +29,7 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 /// <summary>
 /// The file operation type.
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<FileOperationType>))]
 public enum FileOperationType
 {
     [SwaggerEnum(Description = "Move")]

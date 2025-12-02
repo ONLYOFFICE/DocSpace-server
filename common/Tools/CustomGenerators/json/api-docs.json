@@ -2304,7 +2304,7 @@
             "OpenId": []
           }
         ],
-        "description": "Starts generating a customer operations report as an xlsx file and saves it in Documents."
+        "description": "Starts generating a customer operations report as an \"xlsx\" file and saves it in Documents."
       },
       "get": {
         "tags": [
@@ -5592,7 +5592,7 @@
             }
           }
         },
-        "description": "Returns a list of all the available portal languages in the format of a two-letter or four-letter language code (e.g. de, en-US, etc.)."
+        "description": "Returns a list of all the available portal languages in the format of a two-letter or four-letter language code (e.g. \"de\", \"en-US\", etc.)."
       }
     },
     "/api/2.0/settings/timezones": {
@@ -7557,7 +7557,7 @@
             "OpenId": []
           }
         ],
-        "description": "Displays the contact form on the Sign In page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace."
+        "description": "Displays the contact form on the \"Sign In\" page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace."
       }
     },
     "/api/2.0/settings/sendadmmail": {
@@ -13478,7 +13478,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
+              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
             }
           }
         ],
@@ -15299,7 +15299,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "9079"
             }
           }
         ],
@@ -16764,30 +16764,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "enum": [
-                  0,
-                  1,
-                  2,
-                  3,
-                  4
-                ],
-                "type": "integer",
-                "example": 0,
-                "x-enum-varnames": [
-                  "All",
-                  "RoomAdmin",
-                  "Guest",
-                  "DocSpaceAdmin",
-                  "User"
-                ],
-                "x-enum-descriptions": [
-                  "All",
-                  "Room admin",
-                  "Guest",
-                  "DocSpace admin",
-                  "User"
-                ],
-                "description": "[0 - All, 1 - Room admin, 2 - Guest, 3 - DocSpace admin, 4 - User]"
+                "$ref": "#/components/schemas/EmployeeType"
               }
             }
           },
@@ -17179,30 +17156,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "enum": [
-                  0,
-                  1,
-                  2,
-                  3,
-                  4
-                ],
-                "type": "integer",
-                "example": 0,
-                "x-enum-varnames": [
-                  "All",
-                  "RoomAdmin",
-                  "Guest",
-                  "DocSpaceAdmin",
-                  "User"
-                ],
-                "x-enum-descriptions": [
-                  "All",
-                  "Room admin",
-                  "Guest",
-                  "DocSpace admin",
-                  "User"
-                ],
-                "description": "[0 - All, 1 - Room admin, 2 - Guest, 3 - DocSpace admin, 4 - User]"
+                "$ref": "#/components/schemas/EmployeeType"
               }
             }
           },
@@ -22036,8 +21990,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Create a file in the My documents section",
-        "description": "Creates a new file in the My documents section with the title specified in the request.\n\n **Note**: If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.",
+        "summary": "Create a file in the \"My documents\" section",
+        "description": "Creates a new file in the \"My documents\" section with the title specified in the request.\n\n **Note**: If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.",
         "operationId": "createFileInMyDocuments",
         "requestBody": {
           "content": {
@@ -22099,7 +22053,7 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Create an HTML file in the My documents section",
+        "summary": "Create an HTML file in the \"My documents\" section",
         "operationId": "createHtmlFileInMyDocuments",
         "requestBody": {
           "content": {
@@ -22157,7 +22111,7 @@
             "OpenId": []
           }
         ],
-        "description": "Creates an HTML (.html) file in the My documents section with the title and contents specified in the request."
+        "description": "Creates an HTML (.html) file in the \"My documents\" section with the title and contents specified in the request."
       }
     },
     "/api/2.0/files/@my/text": {
@@ -22165,7 +22119,7 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Create a text file in the My documents section",
+        "summary": "Create a text file in the \"My documents\" section",
         "operationId": "createTextFileInMyDocuments",
         "requestBody": {
           "content": {
@@ -22220,7 +22174,7 @@
             "OpenId": []
           }
         ],
-        "description": "Creates a text (.txt) file in the My documents section with the title and contents specified in the request."
+        "description": "Creates a text (.txt) file in the \"My documents\" section with the title and contents specified in the request."
       }
     },
     "/api/2.0/files/thumbnails": {
@@ -22308,7 +22262,7 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Add a file to the Recent section",
+        "summary": "Add a file to the \"Recent\" section",
         "operationId": "addFileToRecent",
         "parameters": [
           {
@@ -22367,7 +22321,7 @@
             "OpenId": []
           }
         ],
-        "description": "Adds a file with the ID specified in the request to the Recent section."
+        "description": "Adds a file with the ID specified in the request to the \"Recent\" section."
       }
     },
     "/api/2.0/files/favorites/{fileId}": {
@@ -22642,13 +22596,13 @@
             "OpenId": []
           }
         ],
-        "description": "Removes files with the IDs specified in the request from the Recent section."
+        "description": "Removes files with the IDs specified in the request from the \"Recent\" section."
       },
       "get": {
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Get the Recent section",
+        "summary": "Get the \"Recent\" section",
         "operationId": "getFolderRecent",
         "parameters": [
           {
@@ -22697,7 +22651,7 @@
           {
             "name": "extension",
             "in": "query",
-            "description": "Specifies whether to search for a specific file extension in the Recent folder.",
+            "description": "Specifies whether to search for a specific file extension in the \"Recent\" folder.",
             "style": "deepObject",
             "schema": {
               "type": "array",
@@ -22758,7 +22712,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The Recent section contents",
+            "description": "The \"Recent\" section contents",
             "content": {
               "application/json": {
                 "schema": {
@@ -22806,7 +22760,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the detailed list of files located in the Recent section."
+        "description": "Returns the detailed list of files located in the \"Recent\" section."
       }
     },
     "/api/2.0/files/file/{fileId}/edit_session": {
@@ -24187,7 +24141,7 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Get the Favorites section",
+        "summary": "Get the \"Favorites\" section",
         "operationId": "getFavoritesFolder",
         "parameters": [
           {
@@ -24259,7 +24213,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The Favorites section contents",
+            "description": "The \"Favorites\" section contents",
             "content": {
               "application/json": {
                 "schema": {
@@ -24307,7 +24261,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the detailed list of files and folders located in the Favorites section."
+        "description": "Returns the detailed list of files and folders located in the \"Favorites\" section."
       }
     },
     "/api/2.0/files/@my": {
@@ -24315,7 +24269,7 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Get the My documents section",
+        "summary": "Get the \"My documents\" section",
         "operationId": "getMyFolder",
         "parameters": [
           {
@@ -24395,7 +24349,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The My documents section contents",
+            "description": "The \"My documents\" section contents",
             "content": {
               "application/json": {
                 "schema": {
@@ -24443,7 +24397,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the detailed list of files and folders located in the My documents section."
+        "description": "Returns the detailed list of files and folders located in the \"My documents\" section."
       }
     },
     "/api/2.0/files/@privacy": {
@@ -24451,7 +24405,7 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Get the Private Room section",
+        "summary": "Get the \"Private Room\" section",
         "operationId": "getPrivacyFolder",
         "parameters": [
           {
@@ -24523,7 +24477,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The Private Room section contents",
+            "description": "The \"Private Room\" section contents",
             "content": {
               "application/json": {
                 "schema": {
@@ -24571,7 +24525,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the detailed list of files and folders located in the Private Room section."
+        "description": "Returns the detailed list of files and folders located in the \"Private Room\" section."
       }
     },
     "/api/2.0/files/@recent": {
@@ -24579,7 +24533,7 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Get the Recent section",
+        "summary": "Get the \"Recent\" section",
         "operationId": "getRecentFolder",
         "parameters": [
           {
@@ -24628,7 +24582,7 @@
           {
             "name": "extension",
             "in": "query",
-            "description": "Specifies whether to search for a specific file extension in the Recent folder.",
+            "description": "Specifies whether to search for a specific file extension in the \"Recent\" folder.",
             "style": "deepObject",
             "schema": {
               "type": "array",
@@ -24689,7 +24643,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The Recent section contents",
+            "description": "The \"Recent\" section contents",
             "content": {
               "application/json": {
                 "schema": {
@@ -24737,7 +24691,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the detailed list of files located in the Recent section."
+        "description": "Returns the detailed list of files located in the \"Recent\" section."
       }
     },
     "/api/2.0/files/@root": {
@@ -24769,7 +24723,7 @@
           {
             "name": "withoutTrash",
             "in": "query",
-            "description": "Specifies whether to return the Trash section or not.",
+            "description": "Specifies whether to return the \"Trash\" section or not.",
             "schema": {
               "type": "boolean",
               "example": true
@@ -24882,7 +24836,7 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Get the Trash section",
+        "summary": "Get the \"Trash\" section",
         "operationId": "getTrashFolder",
         "parameters": [
           {
@@ -24962,7 +24916,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The Trash section contents",
+            "description": "The \"Trash\" section contents",
             "content": {
               "application/json": {
                 "schema": {
@@ -25010,7 +24964,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the detailed list of files and folders located in the Trash section."
+        "description": "Returns the detailed list of files and folders located in the \"Trash\" section."
       }
     },
     "/api/2.0/files/{folderId}/upload/check": {
@@ -25357,7 +25311,7 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Insert a file to the My documents section",
+        "summary": "Insert a file to the \"My documents\" section",
         "operationId": "insertFileToMyFromBody",
         "requestBody": {
           "content": {
@@ -25514,7 +25468,7 @@
             "OpenId": []
           }
         ],
-        "description": "Inserts a file specified in the request to the My documents section by single file uploading."
+        "description": "Inserts a file specified in the request to the \"My documents\" section by single file uploading."
       }
     },
     "/api/2.0/files/@my/upload": {
@@ -25522,8 +25476,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Upload a file to the My documents section",
-        "description": "Uploads a file specified in the request to the My documents section by single file uploading or standart multipart/form-data method.\n\n **Note**:  You can upload files in two different ways:\r\n <ol>\r\n<li>Using single file upload. You should set the Content-Type and Content-Disposition headers to specify a file name and content type, and send the file to the request body.</li>\r\n<li>Using standart multipart/form-data method.</li>\r\n</ol>",
+        "summary": "Upload a file to the \"My documents\" section",
+        "description": "Uploads a file specified in the request to the \"My documents\" section by single file uploading or standart multipart/form-data method.\n\n **Note**:  You can upload files in two different ways:\r\n <ol>\r\n<li>Using single file upload. You should set the Content-Type and Content-Disposition headers to specify a file name and content type, and send the file to the request body.</li>\r\n<li>Using standart multipart/form-data method.</li>\r\n</ol>",
         "operationId": "uploadFileToMy",
         "parameters": [
           {
@@ -26050,7 +26004,7 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Empty the Trash folder",
+        "summary": "Empty the \"Trash\" folder",
         "operationId": "emptyTrash",
         "parameters": [
           {
@@ -26107,7 +26061,7 @@
             "OpenId": []
           }
         ],
-        "description": "Deletes all the files and folders from the Trash folder."
+        "description": "Deletes all the files and folders from the \"Trash\" folder."
       }
     },
     "/api/2.0/files/fileops": {
@@ -27284,7 +27238,7 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Display the Recent folder",
+        "summary": "Display the \"Recent\" folder",
         "operationId": "displayRecent",
         "requestBody": {
           "content": {
@@ -27342,7 +27296,7 @@
             "OpenId": []
           }
         ],
-        "description": "Displays the Recent folder."
+        "description": "Displays the \"Recent\" folder."
       }
     },
     "/api/2.0/files/settings/external": {
@@ -27552,7 +27506,7 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Get the Documents information",
+        "summary": "Get the \"Documents\" information",
         "operationId": "getFilesModule",
         "responses": {
           "200": {
@@ -27598,7 +27552,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the information about the Documents module."
+        "description": "Returns the information about the \"Documents\" module."
       }
     },
     "/api/2.0/files/hideconfirmcanceloperation": {
@@ -27795,7 +27749,7 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Check the Private Room availability",
+        "summary": "Check the \"Private Room\" availability",
         "operationId": "isAvailablePrivacyRoomSettings",
         "responses": {
           "200": {
@@ -27841,7 +27795,7 @@
             "OpenId": []
           }
         ],
-        "description": "Checks if the Private Room settings are available or not."
+        "description": "Checks if the \"Private Room\" settings are available or not."
       }
     },
     "/api/2.0/files/storeforcesave": {
@@ -28279,51 +28233,7 @@
               "schema": {
                 "type": "array",
                 "items": {
-                  "enum": [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6,
-                    7,
-                    8,
-                    9,
-                    10,
-                    11
-                  ],
-                  "type": "integer",
-                  "example": 0,
-                  "x-enum-varnames": [
-                    "None",
-                    "ReadWrite",
-                    "Read",
-                    "Restrict",
-                    "Varies",
-                    "Review",
-                    "Comment",
-                    "FillForms",
-                    "CustomFilter",
-                    "RoomManager",
-                    "Editing",
-                    "ContentCreator"
-                  ],
-                  "x-enum-descriptions": [
-                    "None",
-                    "Read and write",
-                    "Read",
-                    "Restrict",
-                    "Varies",
-                    "Review",
-                    "Comment",
-                    "Fill forms",
-                    "Custom filter",
-                    "Room manager",
-                    "Editing",
-                    "Content creator"
-                  ],
-                  "description": "Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)."
+                  "$ref": "#/components/schemas/FileShare"
                 },
                 "description": "Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)."
               }
@@ -29656,7 +29566,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns a list of the third-party services connected to the Common section."
+        "description": "Returns a list of the third-party services connected to the \"Common\" section."
       }
     },
     "/api/2.0/files/thirdparty/backup": {
@@ -30139,7 +30049,7 @@
             "OpenId": []
           }
         ],
-        "description": "Creates a room in the Rooms section."
+        "description": "Creates a room in the \"Rooms\" section."
       },
       "get": {
         "tags": [
@@ -30287,7 +30197,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns the contents of the Rooms section",
+            "description": "Returns the contents of the \"Rooms\" section",
             "content": {
               "application/json": {
                 "schema": {
@@ -30332,7 +30242,7 @@
             "OpenId": []
           }
         ],
-        "description": "Returns the contents of the Rooms section by the parameters specified in the request."
+        "description": "Returns the contents of the \"Rooms\" section by the parameters specified in the request."
       }
     },
     "/api/2.0/files/rooms/fromtemplate": {
@@ -30395,7 +30305,7 @@
             "OpenId": []
           }
         ],
-        "description": "Creates a room in the Rooms section based on the template."
+        "description": "Creates a room in the \"Rooms\" section based on the template."
       }
     },
     "/api/2.0/files/rooms/fromtemplate/status": {
@@ -30713,7 +30623,7 @@
             "OpenId": []
           }
         ],
-        "description": "Moves a room with the ID specified in the request to the Archive section."
+        "description": "Moves a room with the ID specified in the request to the \"Archive\" section."
       }
     },
     "/api/2.0/files/rooms/{id}/unarchive": {
@@ -30790,7 +30700,7 @@
             "OpenId": []
           }
         ],
-        "description": "Moves a room with the ID specified in the request from the Archive section to the Rooms section."
+        "description": "Moves a room with the ID specified in the request from the \"Archive\" section to the \"Rooms\" section."
       }
     },
     "/api/2.0/files/rooms/{id}/share": {
@@ -32051,7 +31961,7 @@
             "OpenId": []
           }
         ],
-        "description": "Creates a room in the Rooms section stored in a third-party storage."
+        "description": "Creates a room in the \"Rooms\" section stored in a third-party storage."
       }
     },
     "/api/2.0/files/tags": {
@@ -34856,32 +34766,7 @@
   "components": {
     "schemas": {
       "ActionType": {
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12,
-          13,
-          14,
-          15,
-          16,
-          17,
-          18,
-          19
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "None",
           "Create",
           "Update",
@@ -34903,29 +34788,7 @@
           "Unfollow",
           "Logout"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Create",
-          "Update",
-          "Delete",
-          "Link",
-          "Unlink",
-          "Attach",
-          "Detach",
-          "Send",
-          "Import",
-          "Export",
-          "Update access",
-          "Download",
-          "Upload",
-          "Copy",
-          "Move",
-          "Reassigns",
-          "Follow",
-          "Unfollow",
-          "Logout"
-        ],
-        "description": "[0 - None, 1 - Create, 2 - Update, 3 - Delete, 4 - Link, 5 - Unlink, 6 - Attach, 7 - Detach, 8 - Send, 9 - Import, 10 - Export, 11 - Update access, 12 - Download, 13 - Upload, 14 - Copy, 15 - Move, 16 - Reassigns, 17 - Follow, 18 - Unfollow, 19 - Logout]"
+        "type": "string"
       },
       "ActiveConnectionsDto": {
         "required": [
@@ -35074,7 +34937,7 @@
           },
           "feedbackAndSupportEnabled": {
             "type": "boolean",
-            "description": "Specifies if the Feedback & Support link is available or not.",
+            "description": "Specifies if the \"Feedback & Support\" link is available or not.",
             "example": true
           },
           "userForumEnabled": {
@@ -35125,7 +34988,7 @@
           },
           "feedbackAndSupportEnabled": {
             "type": "boolean",
-            "description": "Specifies if the Feedback & Support link is available or not.",
+            "description": "Specifies if the \"Feedback & Support\" link is available or not.",
             "example": true
           },
           "userForumEnabled": {
@@ -35439,7 +35302,7 @@
             "type": "string",
             "description": "The password in plain text for user authentication.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "vmOKUjgauQ"
           },
           "passwordHash": {
             "type": "string",
@@ -36207,7 +36070,7 @@
             "type": "string",
             "description": "The confirmation title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "monitor_intelligent_frozen_mouse_fork"
           },
           "email": {
             "type": "string",
@@ -36225,8 +36088,6 @@
         "description": "The confirmation parameters."
       },
       "ConfirmType": {
-        "description": "[EmpInvite - Emp invite, LinkInvite - Link invite, PortalSuspend - Portal suspend, PortalContinue - Portal continue, PortalRemove - Portal remove, DnsChange - Dns change, PortalOwnerChange - Portal owner change, Activation - Activation, EmailChange - Email change, EmailActivation - Email activation, PasswordChange - Password change, ProfileRemove - Profile remove, PhoneActivation - Phone activation, PhoneAuth - Phone auth, Auth - Auth, TfaActivation - Tfa activation, TfaAuth - Tfa auth, Wizard - Wizard, GuestShareLink - Guest share link]",
-        "x-enum-type": "string",
         "enum": [
           "EmpInvite",
           "LinkInvite",
@@ -36249,7 +36110,7 @@
           "GuestShareLink"
         ],
         "type": "string",
-        "example": "EmpInvite"
+        "description": "The confirmation email type."
       },
       "ConfirmWrapper": {
         "type": "object",
@@ -37063,52 +36924,23 @@
         "description": "The deep link parameters."
       },
       "DeepLinkHandlingMode": {
-        "description": "[0 - Provide choice, 1 - Web, 2 - App]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "ProvideChoice",
           "Web",
           "App"
         ],
-        "x-enum-descriptions": [
-          "Provide choice",
-          "Web",
-          "App"
-        ]
+        "type": "string",
+        "description": "The deep link handling mode."
       },
       "DistributedTaskStatus": {
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Created",
           "Running",
           "Completed",
           "Canceled",
           "Failted"
         ],
-        "x-enum-descriptions": [
-          "Created",
-          "Running",
-          "Completed",
-          "Canceled",
-          "Failted"
-        ],
-        "description": "[0 - Created, 1 - Running, 2 - Completed, 3 - Canceled, 4 - Failted]"
+        "type": "string"
       },
       "DnsSettingsRequestsDto": {
         "type": "object",
@@ -37363,28 +37195,14 @@
         "description": "The confirmation email parameters."
       },
       "EmployeeActivationStatus": {
-        "description": "[0 - Not activated, 1 - Activated, 2 - Pending, 4 - Auto generated]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          4
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "NotActivated",
           "Activated",
           "Pending",
           "AutoGenerated"
         ],
-        "x-enum-descriptions": [
-          "Not activated",
-          "Activated",
-          "Pending",
-          "Auto generated"
-        ]
+        "type": "string",
+        "description": "The user activation status."
       },
       "EmployeeArrayWrapper": {
         "type": "object",
@@ -37495,35 +37313,17 @@
         "description": "The user parameters."
       },
       "EmployeeStatus": {
-        "description": "[1 - Active, 2 - Terminated, 4 - Pending, 5 - Default, 7 - All]",
-        "x-enum-type": "integer",
         "enum": [
-          1,
-          2,
-          4,
-          5,
-          7
-        ],
-        "type": "integer",
-        "example": 1,
-        "x-enum-varnames": [
           "Active",
           "Terminated",
           "Pending",
           "Default",
           "All"
         ],
-        "x-enum-descriptions": [
-          "Active",
-          "Terminated",
-          "Pending",
-          "Default",
-          "All"
-        ]
+        "type": "string",
+        "description": "The user status."
       },
       "EmployeeType": {
-        "description": "[All - All, RoomAdmin - Room admin, Guest - Guest, DocSpaceAdmin - DocSpace admin, User - User]",
-        "x-enum-type": "string",
         "enum": [
           "All",
           "RoomAdmin",
@@ -37532,31 +37332,16 @@
           "User"
         ],
         "type": "string",
-        "example": "All"
+        "description": "The user type."
       },
       "EncryprtionStatus": {
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Decrypted",
           "EncryptionStarted",
           "Encrypted",
           "DecryptionStarted"
         ],
-        "x-enum-descriptions": [
-          "Decrypted",
-          "Encryption started",
-          "Encrypted",
-          "Decryption started"
-        ],
-        "description": "[0 - Decrypted, 1 - Encryption started, 2 - Encrypted, 3 - Decryption started]"
+        "type": "string"
       },
       "EncryptionSettings": {
         "type": "object",
@@ -37614,20 +37399,7 @@
         }
       },
       "EntryType": {
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          23,
-          24,
-          25,
-          26,
-          27
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "None",
           "File",
           "Folder",
@@ -37637,17 +37409,7 @@
           "Tag",
           "Agent"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "File",
-          "Folder",
-          "User",
-          "Group",
-          "Room",
-          "Tag",
-          "Agent"
-        ],
-        "description": "[0 - None, 1 - File, 2 - Folder, 23 - User, 24 - Group, 25 - Room, 26 - Tag, 27 - Agent]"
+        "type": "string"
       },
       "FeatureUsedDto": {
         "required": [
@@ -38386,20 +38148,7 @@
         "additionalProperties": false
       },
       "LocationType": {
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          27,
-          29,
-          30,
-          31
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "None",
           "Files",
           "Folders",
@@ -38409,17 +38158,7 @@
           "Contacts",
           "Agents"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Files",
-          "Folders",
-          "Documents settings",
-          "Rooms",
-          "Settings",
-          "Contacts",
-          "Agents"
-        ],
-        "description": "[0 - None, 1 - Files, 2 - Folders, 3 - Documents settings, 27 - Rooms, 29 - Settings, 30 - Contacts, 31 - Agents]"
+        "type": "string"
       },
       "LoginEventArrayWrapper": {
         "type": "object",
@@ -38538,26 +38277,7 @@
         "description": "The login event parameters."
       },
       "LoginProvider": {
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12,
-          13
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Facebook",
           "Google",
           "Dropbox",
@@ -38573,23 +38293,7 @@
           "Yandex",
           "Github"
         ],
-        "x-enum-descriptions": [
-          "Facebook",
-          "Google",
-          "Dropbox",
-          "Docusign",
-          "Box",
-          "OneDrive",
-          "GosUslugi",
-          "LinkedIn",
-          "MailRu",
-          "VK",
-          "Wordpress",
-          "Yahoo",
-          "Yandex",
-          "Github"
-        ],
-        "description": "[0 - Facebook, 1 - Google, 2 - Dropbox, 3 - Docusign, 4 - Box, 5 - OneDrive, 6 - GosUslugi, 7 - LinkedIn, 8 - MailRu, 9 - VK, 10 - Wordpress, 11 - Yahoo, 12 - Yandex, 13 - Github]"
+        "type": "string"
       },
       "LoginSettingsDto": {
         "required": [
@@ -38743,325 +38447,7 @@
         "description": "The request parameters for configuring trusted mail domains and visitor invitation settings."
       },
       "MessageAction": {
-        "description": "[1000 - Login success, 1001 - Login success via social account, 1002 - Login fail invalid combination, 1003 - Login fail social account not found, 1004 - Login fail disabled profile, 1005 - Login fail, 1006 - Logout, 1007 - Login success via sms, 1008 - Login fail via sms, 1009 - Login fail ip security, 1010 - Login success via api, 1011 - Login success via social app, 1012 - Login success via api sms, 1013 - Login fail via api, 1014 - Login fail via api sms, 1015 - Login success via SSO, 1016 - Session started, 1017 - Session completed, 1018 - Login fail via SSO, 1019 - Login success via api social account, 1020 - Login fail via api social account, 1021 - Login succes via tfa app, 1022 - Login fail via Tfa app, 1023 - Login fail brute force, 1024 - Login success via api tfa, 1025 - Login fail via api tfa, 1026 - Login fail recaptcha, 1027 - Authorization link activated, 1028 - Login success via OAuth 2.0, 1029 - Login success via login and password, 4000 - User created, 4001 - Guest created, 4002 - User created via invite, 4003 - Guest created via invite, 4004 - User activated, 4005 - Guest activated, 4006 - User updated, 4007 - User updated language, 4008 - User added avatar, 4009 - User deleted avatar, 4010 - User updated avatar thumbnails, 4011 - User linked social account, 4012 - User unlinked social account, 4013 - User sent activation instructions, 4014 - User sent email change instructions, 4015 - User sent password change instructions, 4016 - User sent delete instructions, 4017 - User updated password, 4018 - User deleted, 4019 - Users updated type, 4020 - Users updated status, 4021 - Users sent activation instructions, 4022 - Users deleted, 4023 - Sent invite instructions, 4024 - User imported, 4025 - Guest imported, 4026 - Group created, 4027 - Group updated, 4028 - Group deleted, 4029 - User updated mobile number, 4030 - User data reassigns, 4031 - User data removing, 4032 - User connected tfa app, 4033 - User disconnected tfa app, 4034 - User logout active connections, 4035 - User logout active connection, 4036 - User logout active connections for user, 4037 - Send join invite, 5000 - File created, 5001 - File renamed, 5002 - File updated, 5003 - File created version, 5004 - File deleted version, 5005 - File updated revision comment, 5006 - File locked, 5007 - File unlocked, 5008 - File updated access, 5009 - File downloaded, 5010 - File downloaded as, 5011 - File uploaded, 5012 - File imported, 5013 - File copied, 5014 - File copied with overwriting, 5015 - File moved, 5016 - File moved with overwriting, 5017 - File moved to trash, 5018 - File deleted, 5019 - Folder created, 5020 - Folder renamed, 5021 - Folder updated access, 5022 - Folder copied, 5023 - Folder copied with overwriting, 5024 - Folder moved, 5025 - Folder moved with overwriting, 5026 - Folder moved to trash, 5027 - Folder deleted, 5028 - ThirdParty created, 5029 - ThirdParty updated, 5030 - ThirdParty deleted, 5031 - Documents ThirdParty settings updated, 5032 - Documents overwriting settings updated, 5033 - Documents uploading formats settings updated, 5034 - User file updated, 5035 - File converted, 5036 - File send access link, 5037 - Document service location setting, 5038 - Authorization keys setting, 5039 - Full text search setting, 5040 - Start transfer setting, 5041 - Backup started, 5042 - License key uploaded, 5043 - File change owner, 5044 - File restore version, 5045 - Document send to sign, 5046 - Document sign complete, 5047 - User updated email, 5048 - Documents store forcesave, 5049 - Documents forcesave, 5050 - Start storage encryption, 5051 - Privacy room enable, 5052 - Privacy room disable, 5053 - Start storage decryption, 5054 - File opened for change, 5055 - File marked as favorite, 5056 - File removed from favorite, 5057 - Folder downloaded, 5058 - File removed from list, 5059 - Folder removed from list, 5060 - File external link access updated, 5061 - Trash emptied, 5062 - File revision downloaded, 5063 - File marked as read, 5064 - File readed, 5065 - Folder marked as read, 5066 - Folder updated access for, 5068 - File updated access for, 5069 - Documents external share settings updated, 5070 - Room created, 5071 - Room renamed, 5072 - Room archived, 5073 - Room unarchived, 5074 - Room deleted, 5075 - Room update access for user, 5076 - Tag created, 5077 - Tags deleted, 5078 - Added room tags, 5079 - Deleted room tags, 5080 - Room logo created, 5081 - Room logo deleted, 5082 - Room invitation link updated, 5083 - Documents keep new file name settings updated, 5084 - Room remove user, 5085 - Room create user, 5086 - Room invitation link created, 5087 - Room invitation link deleted, 5088 - Room external link created, 5089 - Room external link updated, 5090 - Room external link deleted, 5091 - File external link created, 5092 - File external link updated, 5093 - File external link deleted, 5094 - Room group added, 5095 - Room update access for group, 5096 - Room group remove, 5097 - Room external link revoked, 5098 - Room external link renamed, 5099 - File uploaded with overwriting, 5100 - Room copied, 5101 - Documents display file extension updated, 5102 - Room color changed, 5103 - Room cover changed, 5104 - Room indexing changed, 5105 - Room deny download changed, 5106 - Room index export saved, 5107 - Folder index changed, 5108 - Folder index reordered, 5109 - Room deny download enabled, 5110 - Room deny download disabled, 5111 - File index changed, 5112 - Room watermark set, 5113 - Room watermark disabled, 5114 - Room index export saved, 5115 - Room indexing disabled, 5116 - Room life time set, 5117 - Room life time disabled, 5118 - Room invite resend, 5119 - File version deleted, 5120 - File custom filter enabled, 5121 - File custom filter disabled, 5122 - Folder external link created, 5123 - Folder external link updated, 5124 - Folder external link deleted, 5125 - Backup completed, 5126 - Backup failed, 5127 - Scheduled backup started, 5128 - Scheduled backup completed, 5129 - Scheduled backup failed, 5150 - Form started to fill, 5151 - Form partially filled, 5152 - Form completely filled, 5153 - Form stopped, 5154 - Agent created, 5155 - Agent renamed, 5156 - Agent deleted, 5157 - MCP server added to agent, 5158 - MCP server deleted from agent, 5501 - Ldap enabled, 5502 - Ldap disabled, 5503 - LDAP synchronization completed, 6000 - Language settings updated, 6001 - Time zone settings updated, 6002 - Dns settings updated, 6003 - Trusted mail domain settings updated, 6004 - Password strength settings updated, 6005 - Two factor authentication settings updated, 6006 - Administrator message settings updated, 6007 - Default start page settings updated, 6008 - Products list updated, 6009 - Administrator added, 6010 - Administrator opened full access, 6011 - Administrator deleted, 6012 - Users opened product access, 6013 - Groups opened product access, 6014 - Product access opened, 6015 - Product access restricted, 6016 - Product added administrator, 6017 - Product deleted administrator, 6018 - Greeting settings updated, 6019 - Team template changed, 6020 - Color theme changed, 6021 - Owner sent change owner instructions, 6022 - Owner updated, 6023 - Owner sent portal deactivation instructions, 6024 - Owner sent portal delete instructions, 6025 - Portal deactivated, 6026 - Portal deleted, 6027 - Login history report downloaded, 6028 - Audit trail report downloaded, 6029 - SSO enabled, 6030 - SSO disabled, 6031 - Portal access settings updated, 6032 - Cookie settings updated, 6033 - Mail service settings updated, 6034 - Custom navigation settings updated, 6035 - Audit settings updated, 6036 - Two factor authentication disabled, 6037 - Two factor authentication enabled by sms, 6038 - Two factor authentication enabled by tfa app, 6039 - Portal renamed, 6040 - Quota per room changed, 6041 - Quota per room disabled, 6042 - Quota per user changed, 6043 - Quota per user disabled, 6044 - Quota per portal changed, 6045 - Quota per portal disabled, 6046 - Form submit, 6047 - Form opened for filling, 6048 - Custom quota per room default, 6049 - Custom quota per room changed, 6050 - Custom quota per room disabled, 6051 - Custom quota per user default, 6052 - Custom quota per user changed, 6053 - Custom quota per user disabled, 6054 - DevTools access settings changed, 6055 - Webhook created, 6056 - Webhook updated, 6057 - Webhook deleted, 6058 - Created api key, 6059 - Update api key, 6060 - Deleted User api key, 6061 - Customer wallet topped up, 6062 - Customer operation performed, 6063 - Customer operations report downloaded, 6064 - Customer wallet top up settings updated, 6065 - Customer subscription updated, 6066 - Promotional banners visibility settings changed, 6067 - Customer wallet services settings updated, 6068 - Quota per AI agent changed, 6069 - Quota per AI agent disabled, 6070 - Custom quota per AI agent default, 6071 - Custom quota per AI agent changed, 6072 - Custom quota per AI agent disabled, 6073 - AI provider created, 6074 - AI provider updated, 6075 - AI provider deleted, 6076 - MCP server created, 6077 - MCP server updated, 6078 - MCP server enabled, 6079 - MCP server disabled, 6080 - MCP server deleted, 6081 - WebSearch settings configured, 6082 - WebSearch settings reset, 6083 - Vectorization settings configured, 6084 - Vectorization settings reset, 6085 - Webplugin uploaded, 6086 - Webplugin updated, 6087 - Webplugin deleted, 7000 - Contact admin mail sent, 7001 - Room invite link used, 7002 - User created and added to room, 7003 - Guest created and added to room, 7004 - Contact sales mail sent, 9901 - Create client, 9902 - Update client, 9903 - Regenerate secret, 9904 - Delete client, 9905 - Change client activation, 9906 - Change client visibility, 9907 - Revoke user client, 9908 - Generate authorization code token, 9909 - Generate personal access token, -1 - None]",
-        "x-enum-type": "integer",
         "enum": [
-          1000,
-          1001,
-          1002,
-          1003,
-          1004,
-          1005,
-          1006,
-          1007,
-          1008,
-          1009,
-          1010,
-          1011,
-          1012,
-          1013,
-          1014,
-          1015,
-          1016,
-          1017,
-          1018,
-          1019,
-          1020,
-          1021,
-          1022,
-          1023,
-          1024,
-          1025,
-          1026,
-          1027,
-          1028,
-          1029,
-          4000,
-          4001,
-          4002,
-          4003,
-          4004,
-          4005,
-          4006,
-          4007,
-          4008,
-          4009,
-          4010,
-          4011,
-          4012,
-          4013,
-          4014,
-          4015,
-          4016,
-          4017,
-          4018,
-          4019,
-          4020,
-          4021,
-          4022,
-          4023,
-          4024,
-          4025,
-          4026,
-          4027,
-          4028,
-          4029,
-          4030,
-          4031,
-          4032,
-          4033,
-          4034,
-          4035,
-          4036,
-          4037,
-          5000,
-          5001,
-          5002,
-          5003,
-          5004,
-          5005,
-          5006,
-          5007,
-          5008,
-          5009,
-          5010,
-          5011,
-          5012,
-          5013,
-          5014,
-          5015,
-          5016,
-          5017,
-          5018,
-          5019,
-          5020,
-          5021,
-          5022,
-          5023,
-          5024,
-          5025,
-          5026,
-          5027,
-          5028,
-          5029,
-          5030,
-          5031,
-          5032,
-          5033,
-          5034,
-          5035,
-          5036,
-          5037,
-          5038,
-          5039,
-          5040,
-          5041,
-          5042,
-          5043,
-          5044,
-          5045,
-          5046,
-          5047,
-          5048,
-          5049,
-          5050,
-          5051,
-          5052,
-          5053,
-          5054,
-          5055,
-          5056,
-          5057,
-          5058,
-          5059,
-          5060,
-          5061,
-          5062,
-          5063,
-          5064,
-          5065,
-          5066,
-          5068,
-          5069,
-          5070,
-          5071,
-          5072,
-          5073,
-          5074,
-          5075,
-          5076,
-          5077,
-          5078,
-          5079,
-          5080,
-          5081,
-          5082,
-          5083,
-          5084,
-          5085,
-          5086,
-          5087,
-          5088,
-          5089,
-          5090,
-          5091,
-          5092,
-          5093,
-          5094,
-          5095,
-          5096,
-          5097,
-          5098,
-          5099,
-          5100,
-          5101,
-          5102,
-          5103,
-          5104,
-          5105,
-          5106,
-          5107,
-          5108,
-          5109,
-          5110,
-          5111,
-          5112,
-          5113,
-          5114,
-          5115,
-          5116,
-          5117,
-          5118,
-          5119,
-          5120,
-          5121,
-          5122,
-          5123,
-          5124,
-          5125,
-          5126,
-          5127,
-          5128,
-          5129,
-          5150,
-          5151,
-          5152,
-          5153,
-          5154,
-          5155,
-          5156,
-          5157,
-          5158,
-          5501,
-          5502,
-          5503,
-          6000,
-          6001,
-          6002,
-          6003,
-          6004,
-          6005,
-          6006,
-          6007,
-          6008,
-          6009,
-          6010,
-          6011,
-          6012,
-          6013,
-          6014,
-          6015,
-          6016,
-          6017,
-          6018,
-          6019,
-          6020,
-          6021,
-          6022,
-          6023,
-          6024,
-          6025,
-          6026,
-          6027,
-          6028,
-          6029,
-          6030,
-          6031,
-          6032,
-          6033,
-          6034,
-          6035,
-          6036,
-          6037,
-          6038,
-          6039,
-          6040,
-          6041,
-          6042,
-          6043,
-          6044,
-          6045,
-          6046,
-          6047,
-          6048,
-          6049,
-          6050,
-          6051,
-          6052,
-          6053,
-          6054,
-          6055,
-          6056,
-          6057,
-          6058,
-          6059,
-          6060,
-          6061,
-          6062,
-          6063,
-          6064,
-          6065,
-          6066,
-          6067,
-          6068,
-          6069,
-          6070,
-          6071,
-          6072,
-          6073,
-          6074,
-          6075,
-          6076,
-          6077,
-          6078,
-          6079,
-          6080,
-          6081,
-          6082,
-          6083,
-          6084,
-          6085,
-          6086,
-          6087,
-          7000,
-          7001,
-          7002,
-          7003,
-          7004,
-          9901,
-          9902,
-          9903,
-          9904,
-          9905,
-          9906,
-          9907,
-          9908,
-          9909,
-          -1
-        ],
-        "type": "integer",
-        "example": 1000,
-        "x-enum-varnames": [
           "LoginSuccess",
           "LoginSuccessViaSocialAccount",
           "LoginFailInvalidCombination",
@@ -39375,320 +38761,8 @@
           "GeneratePersonalAccessToken",
           "None"
         ],
-        "x-enum-descriptions": [
-          "Login success",
-          "Login success via social account",
-          "Login fail invalid combination",
-          "Login fail social account not found",
-          "Login fail disabled profile",
-          "Login fail",
-          "Logout",
-          "Login success via sms",
-          "Login fail via sms",
-          "Login fail ip security",
-          "Login success via api",
-          "Login success via social app",
-          "Login success via api sms",
-          "Login fail via api",
-          "Login fail via api sms",
-          "Login success via SSO",
-          "Session started",
-          "Session completed",
-          "Login fail via SSO",
-          "Login success via api social account",
-          "Login fail via api social account",
-          "Login succes via tfa app",
-          "Login fail via Tfa app",
-          "Login fail brute force",
-          "Login success via api tfa",
-          "Login fail via api tfa",
-          "Login fail recaptcha",
-          "Authorization link activated",
-          "Login success via OAuth 2.0",
-          "Login success via login and password",
-          "User created",
-          "Guest created",
-          "User created via invite",
-          "Guest created via invite",
-          "User activated",
-          "Guest activated",
-          "User updated",
-          "User updated language",
-          "User added avatar",
-          "User deleted avatar",
-          "User updated avatar thumbnails",
-          "User linked social account",
-          "User unlinked social account",
-          "User sent activation instructions",
-          "User sent email change instructions",
-          "User sent password change instructions",
-          "User sent delete instructions",
-          "User updated password",
-          "User deleted",
-          "Users updated type",
-          "Users updated status",
-          "Users sent activation instructions",
-          "Users deleted",
-          "Sent invite instructions",
-          "User imported",
-          "Guest imported",
-          "Group created",
-          "Group updated",
-          "Group deleted",
-          "User updated mobile number",
-          "User data reassigns",
-          "User data removing",
-          "User connected tfa app",
-          "User disconnected tfa app",
-          "User logout active connections",
-          "User logout active connection",
-          "User logout active connections for user",
-          "Send join invite",
-          "File created",
-          "File renamed",
-          "File updated",
-          "File created version",
-          "File deleted version",
-          "File updated revision comment",
-          "File locked",
-          "File unlocked",
-          "File updated access",
-          "File downloaded",
-          "File downloaded as",
-          "File uploaded",
-          "File imported",
-          "File copied",
-          "File copied with overwriting",
-          "File moved",
-          "File moved with overwriting",
-          "File moved to trash",
-          "File deleted",
-          "Folder created",
-          "Folder renamed",
-          "Folder updated access",
-          "Folder copied",
-          "Folder copied with overwriting",
-          "Folder moved",
-          "Folder moved with overwriting",
-          "Folder moved to trash",
-          "Folder deleted",
-          "ThirdParty created",
-          "ThirdParty updated",
-          "ThirdParty deleted",
-          "Documents ThirdParty settings updated",
-          "Documents overwriting settings updated",
-          "Documents uploading formats settings updated",
-          "User file updated",
-          "File converted",
-          "File send access link",
-          "Document service location setting",
-          "Authorization keys setting",
-          "Full text search setting",
-          "Start transfer setting",
-          "Backup started",
-          "License key uploaded",
-          "File change owner",
-          "File restore version",
-          "Document send to sign",
-          "Document sign complete",
-          "User updated email",
-          "Documents store forcesave",
-          "Documents forcesave",
-          "Start storage encryption",
-          "Privacy room enable",
-          "Privacy room disable",
-          "Start storage decryption",
-          "File opened for change",
-          "File marked as favorite",
-          "File removed from favorite",
-          "Folder downloaded",
-          "File removed from list",
-          "Folder removed from list",
-          "File external link access updated",
-          "Trash emptied",
-          "File revision downloaded",
-          "File marked as read",
-          "File readed",
-          "Folder marked as read",
-          "Folder updated access for",
-          "File updated access for",
-          "Documents external share settings updated",
-          "Room created",
-          "Room renamed",
-          "Room archived",
-          "Room unarchived",
-          "Room deleted",
-          "Room update access for user",
-          "Tag created",
-          "Tags deleted",
-          "Added room tags",
-          "Deleted room tags",
-          "Room logo created",
-          "Room logo deleted",
-          "Room invitation link updated",
-          "Documents keep new file name settings updated",
-          "Room remove user",
-          "Room create user",
-          "Room invitation link created",
-          "Room invitation link deleted",
-          "Room external link created",
-          "Room external link updated",
-          "Room external link deleted",
-          "File external link created",
-          "File external link updated",
-          "File external link deleted",
-          "Room group added",
-          "Room update access for group",
-          "Room group remove",
-          "Room external link revoked",
-          "Room external link renamed",
-          "File uploaded with overwriting",
-          "Room copied",
-          "Documents display file extension updated",
-          "Room color changed",
-          "Room cover changed",
-          "Room indexing changed",
-          "Room deny download changed",
-          "Room index export saved",
-          "Folder index changed",
-          "Folder index reordered",
-          "Room deny download enabled",
-          "Room deny download disabled",
-          "File index changed",
-          "Room watermark set",
-          "Room watermark disabled",
-          "Room index export saved",
-          "Room indexing disabled",
-          "Room life time set",
-          "Room life time disabled",
-          "Room invite resend",
-          "File version deleted",
-          "File custom filter enabled",
-          "File custom filter disabled",
-          "Folder external link created",
-          "Folder external link updated",
-          "Folder external link deleted",
-          "Backup completed",
-          "Backup failed",
-          "Scheduled backup started",
-          "Scheduled backup completed",
-          "Scheduled backup failed",
-          "Form started to fill",
-          "Form partially filled",
-          "Form completely filled",
-          "Form stopped",
-          "Agent created",
-          "Agent renamed",
-          "Agent deleted",
-          "MCP server added to agent",
-          "MCP server deleted from agent",
-          "Ldap enabled",
-          "Ldap disabled",
-          "LDAP synchronization completed",
-          "Language settings updated",
-          "Time zone settings updated",
-          "Dns settings updated",
-          "Trusted mail domain settings updated",
-          "Password strength settings updated",
-          "Two factor authentication settings updated",
-          "Administrator message settings updated",
-          "Default start page settings updated",
-          "Products list updated",
-          "Administrator added",
-          "Administrator opened full access",
-          "Administrator deleted",
-          "Users opened product access",
-          "Groups opened product access",
-          "Product access opened",
-          "Product access restricted",
-          "Product added administrator",
-          "Product deleted administrator",
-          "Greeting settings updated",
-          "Team template changed",
-          "Color theme changed",
-          "Owner sent change owner instructions",
-          "Owner updated",
-          "Owner sent portal deactivation instructions",
-          "Owner sent portal delete instructions",
-          "Portal deactivated",
-          "Portal deleted",
-          "Login history report downloaded",
-          "Audit trail report downloaded",
-          "SSO enabled",
-          "SSO disabled",
-          "Portal access settings updated",
-          "Cookie settings updated",
-          "Mail service settings updated",
-          "Custom navigation settings updated",
-          "Audit settings updated",
-          "Two factor authentication disabled",
-          "Two factor authentication enabled by sms",
-          "Two factor authentication enabled by tfa app",
-          "Portal renamed",
-          "Quota per room changed",
-          "Quota per room disabled",
-          "Quota per user changed",
-          "Quota per user disabled",
-          "Quota per portal changed",
-          "Quota per portal disabled",
-          "Form submit",
-          "Form opened for filling",
-          "Custom quota per room default",
-          "Custom quota per room changed",
-          "Custom quota per room disabled",
-          "Custom quota per user default",
-          "Custom quota per user changed",
-          "Custom quota per user disabled",
-          "DevTools access settings changed",
-          "Webhook created",
-          "Webhook updated",
-          "Webhook deleted",
-          "Created api key",
-          "Update api key",
-          "Deleted User api key",
-          "Customer wallet topped up",
-          "Customer operation performed",
-          "Customer operations report downloaded",
-          "Customer wallet top up settings updated",
-          "Customer subscription updated",
-          "Promotional banners visibility settings changed",
-          "Customer wallet services settings updated",
-          "Quota per AI agent changed",
-          "Quota per AI agent disabled",
-          "Custom quota per AI agent default",
-          "Custom quota per AI agent changed",
-          "Custom quota per AI agent disabled",
-          "AI provider created",
-          "AI provider updated",
-          "AI provider deleted",
-          "MCP server created",
-          "MCP server updated",
-          "MCP server enabled",
-          "MCP server disabled",
-          "MCP server deleted",
-          "WebSearch settings configured",
-          "WebSearch settings reset",
-          "Vectorization settings configured",
-          "Vectorization settings reset",
-          "Webplugin uploaded",
-          "Webplugin updated",
-          "Webplugin deleted",
-          "Contact admin mail sent",
-          "Room invite link used",
-          "User created and added to room",
-          "Guest created and added to room",
-          "Contact sales mail sent",
-          "Create client",
-          "Update client",
-          "Regenerate secret",
-          "Delete client",
-          "Change client activation",
-          "Change client visibility",
-          "Revoke user client",
-          "Generate authorization code token",
-          "Generate personal access token",
-          "None"
-        ]
+        "type": "string",
+        "description": "The event action ID."
       },
       "MigratingApiFiles": {
         "type": "object",
@@ -39959,22 +39033,12 @@
         }
       },
       "MobilePhoneActivationStatus": {
-        "description": "[0 - Not activated, 1 - Activated]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "NotActivated",
           "Activated"
         ],
-        "x-enum-descriptions": [
-          "Not activated",
-          "Activated"
-        ]
+        "type": "string",
+        "description": "The user mobile phone activation status."
       },
       "MobileRequestsDto": {
         "type": "object",
@@ -40128,28 +39192,14 @@
         }
       },
       "NotificationType": {
-        "description": "[0 - Badges, 1 - Rooms activity, 2 - Daily feed, 3 - Usefull tips]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Badges",
           "RoomsActivity",
           "DailyFeed",
           "UsefullTips"
         ],
-        "x-enum-descriptions": [
-          "Badges",
-          "Rooms activity",
-          "Daily feed",
-          "Usefull tips"
-        ]
+        "type": "string",
+        "description": "The notification type."
       },
       "ObjectArrayWrapper": {
         "type": "object",
@@ -40575,25 +39625,13 @@
         }
       },
       "PaymentMethodStatus": {
-        "description": "[0 - None, 1 - Set, 2 - Expired]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "None",
           "Set",
           "Expired"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Set",
-          "Expired"
-        ]
+        "type": "string",
+        "description": "The payment method status."
       },
       "PaymentSettingsDto": {
         "required": [
@@ -40815,52 +39853,23 @@
         }
       },
       "ProductQuantityType": {
-        "description": "[0 - Set, 1 - Add, 2 - Sub, 3 - Renew]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Set",
           "Add",
           "Sub",
           "Renew"
         ],
-        "x-enum-descriptions": [
-          "Set",
-          "Add",
-          "Sub",
-          "Renew"
-        ]
+        "type": "string",
+        "description": "The type of action performed on a product's quantity."
       },
       "ProductType": {
-        "x-enum-type": "integer",
         "enum": [
-          2,
-          3,
-          7,
-          8
-        ],
-        "type": "integer",
-        "example": 2,
-        "x-enum-varnames": [
           "Documents",
           "Login",
           "Settings",
           "Contacts"
         ],
-        "x-enum-descriptions": [
-          "Documents",
-          "Login",
-          "Settings",
-          "Contacts"
-        ],
-        "description": "[2 - Documents, 3 - Login, 7 - Settings, 8 - Contacts]"
+        "type": "string"
       },
       "QuantityRequestDto": {
         "type": "object",
@@ -41047,30 +40056,29 @@
             "example": true
           },
           "defaultQuota": {
-            "type": "integer",
-            "example": 1234
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "The default storage quota value applied to new users."
           }
         },
         "additionalProperties": false,
         "description": "The request parameters for managing the user storage quota configurations."
       },
       "QuotaState": {
-        "description": "[0 - Active, 1 - Overdue]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Active",
           "Overdue"
         ],
-        "x-enum-descriptions": [
-          "Active",
-          "Overdue"
-        ]
+        "type": "string",
+        "description": "The quota state."
       },
       "QuotaWrapper": {
         "type": "object",
@@ -41107,28 +40115,14 @@
         }
       },
       "RecaptchaType": {
-        "description": "[0 - Default, 1 - AndroidV2, 2 - iOSV2, 3 - hCaptcha]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Default",
           "AndroidV2",
           "iOSV2",
           "hCaptcha"
         ],
-        "x-enum-descriptions": [
-          "Default",
-          "AndroidV2",
-          "iOSV2",
-          "hCaptcha"
-        ]
+        "type": "string",
+        "description": "The type of CAPTCHA validation used."
       },
       "RegStatus": {
         "enum": [
@@ -41620,7 +40614,7 @@
           },
           "displayAbout": {
             "type": "boolean",
-            "description": "Specifies whether to display the About portal section.",
+            "description": "Specifies whether to display the \"About\" portal section.",
             "example": true
           },
           "domainValidator": {
@@ -42580,28 +41574,14 @@
         "description": "The tariff parameters."
       },
       "TariffState": {
-        "description": "[0 - Trial, 1 - Paid, 2 - Delay, 3 - Not paid]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Trial",
           "Paid",
           "Delay",
           "NotPaid"
         ],
-        "x-enum-descriptions": [
-          "Trial",
-          "Paid",
-          "Delay",
-          "Not paid"
-        ]
+        "type": "string",
+        "description": "The tariff state."
       },
       "TariffWrapper": {
         "type": "object",
@@ -43049,7 +42029,7 @@
             "type": "string",
             "description": "The tenant name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "Nat Schroeder"
           },
           "ownerId": {
             "type": "string",
@@ -43152,30 +42132,7 @@
         "description": "The tenant entity quota settings."
       },
       "TenantIndustry": {
-        "description": "[0 - Other, 1 - Accounting, 2 - Advertising marketing PR, 3 - Banking, 4 - Consulting, 5 - Design, 6 - Education, 7 - Environment, 8 - Financial services, 9 - Health care, 10 - IT, 11 - Legal, 12 - Manufacturing, 13 - Public sector, 14 - Publishing, 15 - Retail sales, 16 - Telecommunications]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12,
-          13,
-          14,
-          15,
-          16
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Other",
           "Accounting",
           "AdvertisingMarketingPR",
@@ -43194,25 +42151,8 @@
           "RetailSales",
           "Telecommunications"
         ],
-        "x-enum-descriptions": [
-          "Other",
-          "Accounting",
-          "Advertising marketing PR",
-          "Banking",
-          "Consulting",
-          "Design",
-          "Education",
-          "Environment",
-          "Financial services",
-          "Health care",
-          "IT",
-          "Legal",
-          "Manufacturing",
-          "Public sector",
-          "Publishing",
-          "Retail sales",
-          "Telecommunications"
-        ]
+        "type": "string",
+        "description": "The tenant industry."
       },
       "TenantQuota": {
         "type": "object",
@@ -43652,20 +42592,7 @@
         }
       },
       "TenantStatus": {
-        "description": "[0 - Active, 1 - Suspended, 2 - Remove pending, 3 - Transfering, 4 - Restoring, 5 - Migrating, 6 - Encryption]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Active",
           "Suspended",
           "RemovePending",
@@ -43674,36 +42601,17 @@
           "Migrating",
           "Encryption"
         ],
-        "x-enum-descriptions": [
-          "Active",
-          "Suspended",
-          "Remove pending",
-          "Transfering",
-          "Restoring",
-          "Migrating",
-          "Encryption"
-        ]
+        "type": "string",
+        "description": "The tenant status."
       },
       "TenantTrustedDomainsType": {
-        "description": "[0 - None, 1 - Custom, 2 - All]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "None",
           "Custom",
           "All"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Custom",
-          "All"
-        ]
+        "type": "string",
+        "description": "The type of the tenant trusted domains."
       },
       "TenantUserInvitationSettingsDto": {
         "required": [
@@ -43831,28 +42739,14 @@
         }
       },
       "TenantWalletService": {
-        "description": "[-14 - WebSearch, -13 - AITools, -12 - Backup, -11 - Storage]",
-        "x-enum-type": "integer",
         "enum": [
-          -14,
-          -13,
-          -12,
-          -11
-        ],
-        "type": "integer",
-        "example": -14,
-        "x-enum-varnames": [
           "WebSearch",
           "AITools",
           "Backup",
           "Storage"
         ],
-        "x-enum-descriptions": [
-          "WebSearch",
-          "AITools",
-          "Backup",
-          "Storage"
-        ]
+        "type": "string",
+        "description": "The wallet service type."
       },
       "TenantWalletServiceSettings": {
         "type": "object",
@@ -43860,27 +42754,7 @@
           "enabledServices": {
             "type": "array",
             "items": {
-              "enum": [
-                -14,
-                -13,
-                -12,
-                -11
-              ],
-              "type": "integer",
-              "example": -14,
-              "x-enum-varnames": [
-                "WebSearch",
-                "AITools",
-                "Backup",
-                "Storage"
-              ],
-              "x-enum-descriptions": [
-                "WebSearch",
-                "AITools",
-                "Backup",
-                "Storage"
-              ],
-              "description": "The list of the enabled wallet services."
+              "$ref": "#/components/schemas/TenantWalletService"
             },
             "description": "The list of the enabled wallet services.",
             "nullable": true
@@ -44023,7 +42897,7 @@
             "type": "string",
             "description": "The ID of the user for whom the TFA settings are being configured.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
           },
           "trustedIps": {
             "type": "array",
@@ -44065,25 +42939,13 @@
         "description": "The request parameters for configuring the Two-Factor Authentication (TFA) settings."
       },
       "TfaRequestsDtoType": {
-        "description": "[0 - None, 1 - Sms, 2 - App]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "None",
           "Sms",
           "App"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Sms",
-          "App"
-        ]
+        "type": "string",
+        "description": "The two-factor authentication type."
       },
       "TfaSettingsArrayWrapper": {
         "type": "object",
@@ -44658,19 +43520,7 @@
         }
       },
       "ValidationResult": {
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Ok",
           "Invalid",
           "Expired",
@@ -44679,16 +43529,7 @@
           "UserExcluded",
           "QuotaFailed"
         ],
-        "x-enum-descriptions": [
-          "Ok",
-          "Invalid",
-          "Expired",
-          "Tariff limit",
-          "User existed",
-          "User excluded",
-          "Quota failed"
-        ],
-        "description": "[0 - Ok, 1 - Invalid, 2 - Expired, 3 - Tariff limit, 4 - User existed, 5 - User excluded, 6 - Quota failed]"
+        "type": "string"
       },
       "WalletQuantityRequestDto": {
         "type": "object",
@@ -44974,19 +43815,7 @@
         }
       },
       "WebhookGroupStatus": {
-        "description": "[0 - None, 1 - Not sent, 2 - Status2xx, 4 - Status3xx, 8 - Status4xx, 16 - Status5xx]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          4,
-          8,
-          16
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "None",
           "NotSent",
           "Status2xx",
@@ -44994,14 +43823,8 @@
           "Status4xx",
           "Status5xx"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Not sent",
-          "Status2xx",
-          "Status3xx",
-          "Status4xx",
-          "Status5xx"
-        ]
+        "type": "string",
+        "description": "The status of the webhook delivery group."
       },
       "WebhookRetryRequestsDto": {
         "type": "object",
@@ -45023,42 +43846,7 @@
         "description": "The parameters for requesting the webhook delivery retries."
       },
       "WebhookTrigger": {
-        "description": "[0 - *, 1 - user.created, 2 - user.invited, 4 - user.updated, 8 - user.deleted, 16 - group.created, 32 - group.updated, 64 - group.deleted, 128 - file.created, 256 - file.uploaded, 512 - file.updated, 1024 - file.trashed, 2048 - file.deleted, 4096 - file.restored, 8192 - file.copied, 16384 - file.moved, 32768 - folder.created, 65536 - folder.updated, 131072 - folder.trashed, 262144 - folder.deleted, 524288 - folder.restored, 1048576 - folder.copied, 2097152 - folder.moved, 4194304 - room.created, 8388608 - room.updated, 16777216 - room.archived, 33554432 - room.deleted, 67108864 - room.restored, 134217728 - room.copied]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          4,
-          8,
-          16,
-          32,
-          64,
-          128,
-          256,
-          512,
-          1024,
-          2048,
-          4096,
-          8192,
-          16384,
-          32768,
-          65536,
-          131072,
-          262144,
-          524288,
-          1048576,
-          2097152,
-          4194304,
-          8388608,
-          16777216,
-          33554432,
-          67108864,
-          134217728
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "All",
           "UserCreated",
           "UserInvited",
@@ -45089,37 +43877,8 @@
           "RoomRestored",
           "RoomCopied"
         ],
-        "x-enum-descriptions": [
-          "*",
-          "user.created",
-          "user.invited",
-          "user.updated",
-          "user.deleted",
-          "group.created",
-          "group.updated",
-          "group.deleted",
-          "file.created",
-          "file.uploaded",
-          "file.updated",
-          "file.trashed",
-          "file.deleted",
-          "file.restored",
-          "file.copied",
-          "file.moved",
-          "folder.created",
-          "folder.updated",
-          "folder.trashed",
-          "folder.deleted",
-          "folder.restored",
-          "folder.copied",
-          "folder.moved",
-          "room.created",
-          "room.updated",
-          "room.archived",
-          "room.deleted",
-          "room.restored",
-          "room.copied"
-        ]
+        "type": "string",
+        "description": "The webhook trigger type."
       },
       "WebhooksConfigDto": {
         "required": [
@@ -45735,25 +44494,13 @@
         "description": "The account information parameters."
       },
       "AccountLoginType": {
-        "description": "[0 - SSO, 1 - LDAP, 2 - Standart]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "SSO",
           "LDAP",
           "Standart"
         ],
-        "x-enum-descriptions": [
-          "SSO",
-          "LDAP",
-          "Standart"
-        ]
+        "type": "string",
+        "description": "The account login type."
       },
       "ApiKeyResponseArrayWrapper": {
         "type": "object",
@@ -45893,25 +44640,13 @@
         }
       },
       "Area": {
-        "description": "[0 - All, 1 - People, 2 - Guests]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "All",
           "People",
           "Guests"
         ],
-        "x-enum-descriptions": [
-          "All",
-          "People",
-          "Guests"
-        ]
+        "type": "string",
+        "description": "The area of the account entries."
       },
       "Contact": {
         "type": "object",
@@ -46012,15 +44747,13 @@
         "description": "The theme settings request parameters."
       },
       "DarkThemeSettingsType": {
-        "description": "[Base - Base, Dark - Dark, System - System]",
-        "x-enum-type": "string",
         "enum": [
           "Base",
           "Dark",
           "System"
         ],
         "type": "string",
-        "example": "Base"
+        "description": "The theme type."
       },
       "DarkThemeSettingsWrapper": {
         "type": "object",
@@ -46512,7 +45245,7 @@
             "type": "string",
             "description": "The group name.",
             "nullable": true,
-            "example": "Sydney Schroeder"
+            "example": "Winfield Upton"
           },
           "parent": {
             "type": "string",
@@ -46970,43 +45703,21 @@
         }
       },
       "Payments": {
-        "description": "[0 - Paid, 1 - Free]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Paid",
           "Free"
         ],
-        "x-enum-descriptions": [
-          "Paid",
-          "Free"
-        ]
+        "type": "string",
+        "description": "The user payment status."
       },
       "QuotaFilter": {
-        "description": "[0 - All, 1 - Default, 2 - Custom]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "All",
           "Default",
           "Custom"
         ],
-        "x-enum-descriptions": [
-          "All",
-          "Default",
-          "Custom"
-        ]
+        "type": "string",
+        "description": "The quota filter (All - 0, Default - 1, Custom - 2)."
       },
       "SetManagerRequest": {
         "required": [
@@ -47025,22 +45736,12 @@
         "description": "The request for setting a group manager."
       },
       "SexEnum": {
-        "description": "[0 - Female, 1 - Male]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Female",
           "Male"
         ],
-        "x-enum-descriptions": [
-          "Female",
-          "Male"
-        ]
+        "type": "string",
+        "description": "The user sex."
       },
       "SignupAccountRequestDto": {
         "required": [
@@ -47100,22 +45801,12 @@
         "description": "The request parameters for creating a third-party account."
       },
       "SortOrder": {
-        "description": "[0 - Ascending, 1 - Descending]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Ascending",
           "Descending"
         ],
-        "x-enum-descriptions": [
-          "Ascending",
-          "Descending"
-        ]
+        "type": "string",
+        "description": "The order in which the results are sorted."
       },
       "StartReassignRequestDto": {
         "required": [
@@ -47584,8 +46275,17 @@
             ]
           },
           "quota": {
-            "type": "integer",
-            "example": 1234
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "The quota in JSON format."
           }
         },
         "additionalProperties": false,
@@ -47656,7 +46356,7 @@
           },
           "permissions": {
             "type": "string",
-            "description": "The access rights for the user with the name above.\r\nCan be Full Access, Read Only, or Deny Access.",
+            "description": "The access rights for the user with the name above.\r\nCan be \"Full Access\", \"Read Only\", or \"Deny Access\".",
             "nullable": true,
             "example": "some text"
           },
@@ -47751,25 +46451,13 @@
         "description": "The anonymous config parameters."
       },
       "ApplyFilterOption": {
-        "description": "[0 - All, 1 - Files, 2 - Folders]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "All",
           "Files",
           "Folders"
         ],
-        "x-enum-descriptions": [
-          "All",
-          "Files",
-          "Folders"
-        ]
+        "type": "string",
+        "description": "The filter options for applying operations to items."
       },
       "ArchiveRoomRequest": {
         "type": "object",
@@ -47939,9 +46627,16 @@
               "folderIds": {
                 "type": "array",
                 "items": {
-                  "type": "integer",
-                  "example": 1234,
-                  "description": "The list of folder IDs of the base batch request."
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "example": 1234
+                    },
+                    {
+                      "type": "string",
+                      "example": "some text"
+                    }
+                  ]
                 },
                 "description": "The list of folder IDs of the base batch request.",
                 "nullable": true
@@ -47949,9 +46644,16 @@
               "fileIds": {
                 "type": "array",
                 "items": {
-                  "type": "integer",
-                  "example": 1234,
-                  "description": "The list of file IDs of the base batch request."
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "example": 1234
+                    },
+                    {
+                      "type": "string",
+                      "example": "some text"
+                    }
+                  ]
                 },
                 "description": "The list of file IDs of the base batch request.",
                 "nullable": true
@@ -47973,9 +46675,16 @@
               "folderIds": {
                 "type": "array",
                 "items": {
-                  "type": "integer",
-                  "example": 1234,
-                  "description": "The list of folder IDs to be copied/moved."
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "example": 1234
+                    },
+                    {
+                      "type": "string",
+                      "example": "some text"
+                    }
+                  ]
                 },
                 "description": "The list of folder IDs to be copied/moved.",
                 "nullable": true
@@ -47983,16 +46692,32 @@
               "fileIds": {
                 "type": "array",
                 "items": {
-                  "type": "integer",
-                  "example": 1234,
-                  "description": "The list of file IDs to be copied/moved."
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "example": 1234
+                    },
+                    {
+                      "type": "string",
+                      "example": "some text"
+                    }
+                  ]
                 },
                 "description": "The list of file IDs to be copied/moved.",
                 "nullable": true
               },
               "destFolderId": {
-                "type": "integer",
-                "example": 1234
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "example": 1234
+                  },
+                  {
+                    "type": "string",
+                    "example": "some text"
+                  }
+                ],
+                "description": "The destination folder ID."
               },
               "conflictResolveType": {
                 "$ref": "#/components/schemas/FileConflictResolveType"
@@ -48066,9 +46791,16 @@
           "folderIds": {
             "type": "array",
             "items": {
-              "type": "integer",
-              "example": 1234,
-              "description": "The list of folder IDs to change the owner."
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "example": 1234
+                },
+                {
+                  "type": "string",
+                  "example": "some text"
+                }
+              ]
             },
             "description": "The list of folder IDs to change the owner.",
             "nullable": true
@@ -48076,9 +46808,16 @@
           "fileIds": {
             "type": "array",
             "items": {
-              "type": "integer",
-              "example": 1234,
-              "description": "The list of file IDs to change the owner."
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "example": 1234
+                },
+                {
+                  "type": "string",
+                  "example": "some text"
+                }
+              ]
             },
             "description": "The list of file IDs to change the owner.",
             "nullable": true
@@ -48179,25 +46918,13 @@
         "description": "The result of checking whether files can be moved or copied to the specified folder."
       },
       "CheckDestFolderResult": {
-        "description": "[0 - All allowed, 1 - Part allowed, 2 - None allowed]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "AllAllowed",
           "PartAllowed",
           "NoneAllowed"
         ],
-        "x-enum-descriptions": [
-          "All allowed",
-          "Part allowed",
-          "None allowed"
-        ]
+        "type": "string",
+        "description": "The result of the validation operation."
       },
       "CheckDestFolderWrapper": {
         "type": "object",
@@ -48352,22 +47079,12 @@
         "description": "The co-editing configuration parameters."
       },
       "CoEditingConfigMode": {
-        "description": "[0 - Fast, 1 - Strict]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Fast",
           "Strict"
         ],
-        "x-enum-descriptions": [
-          "Fast",
-          "Strict"
-        ]
+        "type": "string",
+        "description": "The co-editing mode (fast or strict)."
       },
       "ConfigurationDtoInteger": {
         "required": [
@@ -48665,8 +47382,17 @@
             "example": "some text"
           },
           "destFolderId": {
-            "type": "integer",
-            "example": 1234
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "The destination folder ID of the copied file."
           },
           "enableExternalExt": {
             "type": "boolean",
@@ -48782,8 +47508,17 @@
             "example": "legacy_1080p_small_wooden_mouse"
           },
           "templateId": {
-            "type": "integer",
-            "example": 1234
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "The template file ID for creation."
           },
           "enableExternalExt": {
             "type": "boolean",
@@ -49216,19 +47951,7 @@
         "description": "The customization config parameters."
       },
       "DateToAutoCleanUp": {
-        "description": "[1 - One week, 2 - Two weeks, 3 - One month, 4 - Thirty days, 5 - Two months, 6 - Three months]",
-        "x-enum-type": "integer",
         "enum": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6
-        ],
-        "type": "integer",
-        "example": 1,
-        "x-enum-varnames": [
           "OneWeek",
           "TwoWeeks",
           "OneMonth",
@@ -49236,14 +47959,8 @@
           "TwoMonths",
           "ThreeMonths"
         ],
-        "x-enum-descriptions": [
-          "One week",
-          "Two weeks",
-          "One month",
-          "Thirty days",
-          "Two months",
-          "Three months"
-        ]
+        "type": "string",
+        "description": "The period when the trash bin will be cleared."
       },
       "Delete": {
         "type": "object",
@@ -49255,7 +47972,7 @@
           },
           "immediately": {
             "type": "boolean",
-            "description": "Specifies whether to move a file to the \\Trash\\ folder or delete it immediately.",
+            "description": "Specifies whether to move a file to the \\\"Trash\\\" folder or delete it immediately.",
             "example": true
           }
         },
@@ -49273,9 +47990,16 @@
               "folderIds": {
                 "type": "array",
                 "items": {
-                  "type": "integer",
-                  "example": 1234,
-                  "description": "The list of folder IDs to be deleted."
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "example": 1234
+                    },
+                    {
+                      "type": "string",
+                      "example": "some text"
+                    }
+                  ]
                 },
                 "description": "The list of folder IDs to be deleted.",
                 "nullable": true
@@ -49283,9 +48007,16 @@
               "fileIds": {
                 "type": "array",
                 "items": {
-                  "type": "integer",
-                  "example": 1234,
-                  "description": "The list of file IDs to be deleted."
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "example": 1234
+                    },
+                    {
+                      "type": "string",
+                      "example": "some text"
+                    }
+                  ]
                 },
                 "description": "The list of file IDs to be deleted.",
                 "nullable": true
@@ -49297,7 +48028,7 @@
               },
               "immediately": {
                 "type": "boolean",
-                "description": "Specifies whether to move a file to the \\Trash\\ folder or delete it immediately.",
+                "description": "Specifies whether to move a file to the \\\"Trash\\\" folder or delete it immediately.",
                 "example": true
               }
             }
@@ -49316,7 +48047,7 @@
           },
           "immediately": {
             "type": "boolean",
-            "description": "Specifies whether to move a folder to the \\Trash\\ folder or delete it immediately.",
+            "description": "Specifies whether to move a folder to the \\\"Trash\\\" folder or delete it immediately.",
             "example": true
           }
         },
@@ -49569,9 +48300,16 @@
               "folderIds": {
                 "type": "array",
                 "items": {
-                  "type": "integer",
-                  "example": 1234,
-                  "description": "The list of folder IDs to be downloaded."
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "example": 1234
+                    },
+                    {
+                      "type": "string",
+                      "example": "some text"
+                    }
+                  ]
                 },
                 "description": "The list of folder IDs to be downloaded.",
                 "nullable": true
@@ -49579,9 +48317,16 @@
               "fileIds": {
                 "type": "array",
                 "items": {
-                  "type": "integer",
-                  "example": 1234,
-                  "description": "The list of file IDs to be downloaded."
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "example": 1234
+                    },
+                    {
+                      "type": "string",
+                      "example": "some text"
+                    }
+                  ]
                 },
                 "description": "The list of file IDs to be downloaded.",
                 "nullable": true
@@ -49608,8 +48353,17 @@
         "type": "object",
         "properties": {
           "key": {
-            "type": "integer",
-            "example": 1234
+            "oneOf": [
+              {
+                "type": "integer",
+                "example": 1234
+              },
+              {
+                "type": "string",
+                "example": "some text"
+              }
+            ],
+            "description": "The unique identifier or reference key for the file to be downloaded."
           },
           "value": {
             "type": "string",
@@ -49669,9 +48423,16 @@
               "folderIds": {
                 "type": "array",
                 "items": {
-                  "type": "integer",
-                  "example": 1234,
-                  "description": "The list of folder IDs."
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "example": 1234
+                    },
+                    {
+                      "type": "string",
+                      "example": "some text"
+                    }
+                  ]
                 },
                 "description": "The list of folder IDs.",
                 "nullable": true
@@ -49679,9 +48440,16 @@
               "fileIds": {
                 "type": "array",
                 "items": {
-                  "type": "integer",
-                  "example": 1234,
-                  "description": "The list of file IDs."
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "example": 1234
+                    },
+                    {
+                      "type": "string",
+                      "example": "some text"
+                    }
+                  ]
                 },
                 "description": "The list of file IDs.",
                 "nullable": true
@@ -50018,25 +48786,13 @@
         "description": "The editor configuration parameters."
       },
       "EditorType": {
-        "description": "[0 - Desktop, 1 - Mobile, 2 - Embedded]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Desktop",
           "Mobile",
           "Embedded"
         ],
-        "x-enum-descriptions": [
-          "Desktop",
-          "Mobile",
-          "Embedded"
-        ]
+        "type": "string",
+        "description": "The editor type."
       },
       "EmailInvitationDto": {
         "type": "object",
@@ -50082,7 +48838,7 @@
           },
           "toolbarDocked": {
             "type": "string",
-            "description": "The place for the embedded viewer toolbar, can be either top or bottom.",
+            "description": "The place for the embedded viewer toolbar, can be either \"top\" or \"bottom\".",
             "nullable": true,
             "readOnly": true,
             "example": "some text"
@@ -50251,30 +49007,28 @@
         "properties": {
           "url": {
             "type": "string",
-            "description": "The absolute URL to the website address which will be opened when clicking the Feedback & Support menu button.",
+            "description": "The absolute URL to the website address which will be opened when clicking the \"Feedback & Support\" menu button.",
             "nullable": true,
             "example": "some text"
           },
           "visible": {
             "type": "boolean",
-            "description": "Shows or hides the Feedback & Support menu button.",
+            "description": "Shows or hides the \"Feedback & Support\" menu button.",
             "readOnly": true,
             "example": true
           }
         },
         "additionalProperties": false,
-        "description": "The settings for the Feedback & Support menu button."
+        "description": "The settings for the \"Feedback & Support\" menu button."
       },
       "FileConflictResolveType": {
-        "description": "[Skip - Skip, Overwrite - Overwrite, Duplicate - Duplicate]",
-        "x-enum-type": "string",
         "enum": [
           "Skip",
           "Overwrite",
           "Duplicate"
         ],
         "type": "string",
-        "example": "Skip"
+        "description": "The overwriting behavior of the file copying or moving."
       },
       "FileDtoInteger": {
         "allOf": [
@@ -51297,22 +50051,12 @@
         }
       },
       "FileEntryType": {
-        "description": "[1 - Folder, 2 - File]",
-        "x-enum-type": "integer",
         "enum": [
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 1,
-        "x-enum-varnames": [
           "Folder",
           "File"
         ],
-        "x-enum-descriptions": [
-          "Folder",
-          "File"
-        ]
+        "type": "string",
+        "description": "The file entry type."
       },
       "FileIntegerArrayWrapper": {
         "type": "object",
@@ -51619,21 +50363,7 @@
         "description": "The base operation request parameters."
       },
       "FileOperationType": {
-        "description": "[0 - Move, 1 - Copy, 2 - Delete, 3 - Download, 4 - MarkAsRead, 5 - Import, 6 - Convert, 7 - Duplicate]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Move",
           "Copy",
           "Delete",
@@ -51643,16 +50373,8 @@
           "Convert",
           "Duplicate"
         ],
-        "x-enum-descriptions": [
-          "Move",
-          "Copy",
-          "Delete",
-          "Download",
-          "MarkAsRead",
-          "Import",
-          "Convert",
-          "Duplicate"
-        ]
+        "type": "string",
+        "description": "The file operation type."
       },
       "FileOperationWrapper": {
         "type": "object",
@@ -51806,25 +50528,7 @@
         }
       },
       "FileShare": {
-        "description": "[0 - None, 1 - Read and write, 2 - Read, 3 - Restrict, 4 - Varies, 5 - Review, 6 - Comment, 7 - Fill forms, 8 - Custom filter, 9 - Room manager, 10 - Editing, 11 - Content creator]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "None",
           "ReadWrite",
           "Read",
@@ -51838,20 +50542,8 @@
           "Editing",
           "ContentCreator"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Read and write",
-          "Read",
-          "Restrict",
-          "Varies",
-          "Review",
-          "Comment",
-          "Fill forms",
-          "Custom filter",
-          "Room manager",
-          "Editing",
-          "Content creator"
-        ]
+        "type": "string",
+        "description": "The access rights type."
       },
       "FileShareArrayWrapper": {
         "type": "object",
@@ -52091,23 +50783,7 @@
         }
       },
       "FileStatus": {
-        "description": "[0 - None, 1 - Is editing, 2 - Is new, 4 - Is converting, 8 - Is original, 16 - Is editing alone, 32 - Is favorite, 64 - Is template, 128 - Is fill form draft, 256 - Is completed form]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          4,
-          8,
-          16,
-          32,
-          64,
-          128,
-          256
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "None",
           "IsEditing",
           "IsNew",
@@ -52119,37 +50795,11 @@
           "IsFillFormDraft",
           "IsCompletedForm"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Is editing",
-          "Is new",
-          "Is converting",
-          "Is original",
-          "Is editing alone",
-          "Is favorite",
-          "Is template",
-          "Is fill form draft",
-          "Is completed form"
-        ]
+        "type": "string",
+        "description": "The file status."
       },
       "FileType": {
-        "description": "[0 - Unknown, 1 - Archive, 2 - Video, 3 - Audio, 4 - Image, 5 - Spreadsheet, 6 - Presentation, 7 - Document, 10 - Pdf, 11 - Diagram]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          10,
-          11
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Unknown",
           "Archive",
           "Video",
@@ -52161,18 +50811,8 @@
           "Pdf",
           "Diagram"
         ],
-        "x-enum-descriptions": [
-          "Unknown",
-          "Archive",
-          "Video",
-          "Audio",
-          "Image",
-          "Spreadsheet",
-          "Presentation",
-          "Document",
-          "Pdf",
-          "Diagram"
-        ]
+        "type": "string",
+        "description": "The file type."
       },
       "FilesSettingsDto": {
         "type": "object",
@@ -52600,17 +51240,17 @@
           },
           "recentSection": {
             "type": "boolean",
-            "description": "Specifies if the Recent section is displayed or not.",
+            "description": "Specifies if the \"Recent\" section is displayed or not.",
             "example": true
           },
           "favoritesSection": {
             "type": "boolean",
-            "description": "Specifies if the Favorites section is displayed or not.",
+            "description": "Specifies if the \"Favorites\" section is displayed or not.",
             "example": true
           },
           "templatesSection": {
             "type": "boolean",
-            "description": "Specifies if the Templates section is displayed or not.",
+            "description": "Specifies if the \"Templates\" section is displayed or not.",
             "example": true
           },
           "downloadTarGz": {
@@ -52629,51 +51269,7 @@
           "defaultSharingAccessRights": {
             "type": "array",
             "items": {
-              "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11
-              ],
-              "type": "integer",
-              "example": 0,
-              "x-enum-varnames": [
-                "None",
-                "ReadWrite",
-                "Read",
-                "Restrict",
-                "Varies",
-                "Review",
-                "Comment",
-                "FillForms",
-                "CustomFilter",
-                "RoomManager",
-                "Editing",
-                "ContentCreator"
-              ],
-              "x-enum-descriptions": [
-                "None",
-                "Read and write",
-                "Read",
-                "Restrict",
-                "Varies",
-                "Review",
-                "Comment",
-                "Fill forms",
-                "Custom filter",
-                "Room manager",
-                "Editing",
-                "Content creator"
-              ],
-              "description": "The default access rights in sharing settings."
+              "$ref": "#/components/schemas/FileShare"
             },
             "description": "The default access rights in sharing settings.",
             "nullable": true
@@ -52897,34 +51493,7 @@
         }
       },
       "FilterType": {
-        "description": "[0 - None, 1 - Files  only, 2 - Folders only, 3 - Documents only, 4 - Presentations only, 5 - Spreadsheets only, 7 - Images only, 8 - By user, 9 - By department, 10 - Archive only, 11 - By extension, 12 - Media only, 13 - Filling forms rooms, 14 - Editing rooms, 17 - Custom rooms, 20 - Public rooms, 22 - Pdf, 23 - Pdf form, 24 - Virtual data rooms, 25 - Diagrams only, 26 - Ai rooms]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12,
-          13,
-          14,
-          17,
-          20,
-          22,
-          23,
-          24,
-          25,
-          26
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "None",
           "FilesOnly",
           "FoldersOnly",
@@ -52947,29 +51516,8 @@
           "DiagramsOnly",
           "AiRooms"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Files  only",
-          "Folders only",
-          "Documents only",
-          "Presentations only",
-          "Spreadsheets only",
-          "Images only",
-          "By user",
-          "By department",
-          "Archive only",
-          "By extension",
-          "Media only",
-          "Filling forms rooms",
-          "Editing rooms",
-          "Custom rooms",
-          "Public rooms",
-          "Pdf",
-          "Pdf form",
-          "Virtual data rooms",
-          "Diagrams only",
-          "Ai rooms"
-        ]
+        "type": "string",
+        "description": "The filter type."
       },
       "FolderContentDtoInteger": {
         "required": [
@@ -53574,41 +52122,7 @@
         }
       },
       "FolderType": {
-        "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          5,
-          6,
-          8,
-          10,
-          11,
-          12,
-          13,
-          14,
-          15,
-          16,
-          19,
-          20,
-          21,
-          22,
-          25,
-          26,
-          27,
-          28,
-          29,
-          30,
-          31,
-          32,
-          33,
-          34
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "DEFAULT",
           "COMMON",
           "BUNCH",
@@ -53638,69 +52152,19 @@
           "ResultStorage",
           "AiAgents"
         ],
-        "x-enum-descriptions": [
-          "Default",
-          "Coomon",
-          "Bunch",
-          "Trash",
-          "User",
-          "Share",
-          "Projects",
-          "Favourites",
-          "Recent",
-          "Templates",
-          "Privacy",
-          "Virtual rooms",
-          "Filling forms room",
-          "Editing room",
-          "Custom room",
-          "Archive",
-          "Thirdparty backup",
-          "Public room",
-          "Ready form folder",
-          "In process form folder",
-          "Form filling folder done",
-          "Form filling folder in progress",
-          "Virtual Data Room",
-          "Room templates folder",
-          "AI Room",
-          "Knowledge",
-          "Result storage",
-          "AI Agents"
-        ]
+        "type": "string",
+        "description": "The folder type."
       },
       "FormFillingManageAction": {
-        "description": "[0 - Stop, 1 - Resume]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Stop",
           "Resume"
         ],
-        "x-enum-descriptions": [
-          "Stop",
-          "Resume"
-        ]
+        "type": "string",
+        "description": "The action to perform on the form."
       },
       "FormFillingStatus": {
-        "description": "[0 - None, 1 - Draft, 2 - You turn, 3 - In progress, 4 - Complete, 5 - Stoped]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "None",
           "Draft",
           "YouTurn",
@@ -53708,14 +52172,8 @@
           "Complete",
           "Stoped"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Draft",
-          "You turn",
-          "In progress",
-          "Complete",
-          "Stoped"
-        ]
+        "type": "string",
+        "description": "The form filling status."
       },
       "FormRole": {
         "type": "object",
@@ -53967,13 +52425,13 @@
         "properties": {
           "url": {
             "type": "string",
-            "description": "The absolute URL to the website address which will be opened when clicking the Open file location menu button.",
+            "description": "The absolute URL to the website address which will be opened when clicking the \"Open file location\" menu button.",
             "nullable": true,
             "example": "some text"
           }
         },
         "additionalProperties": false,
-        "description": "The settings for the Open file location menu button and upper right corner button."
+        "description": "The settings for the \"Open file location\" menu button and upper right corner button."
       },
       "GroupMemberSecurityRequestArrayWrapper": {
         "type": "object",
@@ -54317,32 +52775,21 @@
         }
       },
       "LinkType": {
-        "description": "[0 - Invitation, 1 - External]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Invitation",
           "External"
         ],
-        "x-enum-descriptions": [
-          "Invitation",
-          "External"
-        ]
+        "type": "string",
+        "description": "Defines the types of the sharing links."
       },
       "Location": {
         "enum": [
-          1,
-          2,
-          3
+          "Room",
+          "Documents",
+          "Link"
         ],
-        "type": "integer",
-        "description": "The location context of the request.",
-        "format": "int32"
+        "type": "string",
+        "description": "The location context of the request."
       },
       "LockFileParameters": {
         "type": "object",
@@ -55034,7 +53481,7 @@
           },
           "protect": {
             "type": "boolean",
-            "description": "Defines if the Protection tab on the toolbar and the Protect button in the left menu are displayedor hidden.",
+            "description": "Defines if the \"Protection\" tab on the toolbar and the \"Protect\" button in the left menu are displayedor hidden.",
             "example": true
           },
           "print": {
@@ -55159,22 +53606,7 @@
         "description": "The provider information."
       },
       "ProviderFilter": {
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "None",
           "Box",
           "DropBox",
@@ -55186,19 +53618,7 @@
           "Yandex",
           "Storage"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Box",
-          "DropBox",
-          "GoogleDrive",
-          "kDrive",
-          "OneDrive",
-          "SharePoint",
-          "WebDav",
-          "Yandex",
-          "Storage"
-        ],
-        "description": "[0 - None, 1 - Box, 2 - DropBox, 3 - GoogleDrive, 4 - kDrive, 5 - OneDrive, 6 - SharePoint, 7 - WebDav, 8 - Yandex, 9 - Storage]"
+        "type": "string"
       },
       "RecentConfig": {
         "type": "object",
@@ -55224,7 +53644,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The presence or absence of the documents in the Open Recent... menu option."
+        "description": "The presence or absence of the documents in the \"Open Recent...\" menu option."
       },
       "ReviewConfig": {
         "type": "object",
@@ -55269,25 +53689,13 @@
         "description": "The room data lifetime information."
       },
       "RoomDataLifetimePeriod": {
-        "description": "[0 - Day, 1 - Month, 2 - Year]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Day",
           "Month",
           "Year"
         ],
-        "x-enum-descriptions": [
-          "Day",
-          "Month",
-          "Year"
-        ]
+        "type": "string",
+        "description": "The room data lifetime period."
       },
       "RoomFromTemplateStatusDto": {
         "required": [
@@ -55510,22 +53918,12 @@
         "description": "The room security parameters."
       },
       "RoomSecurityError": {
-        "description": "[0 - None, 1 - Form role blocking deletion]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "None",
           "FormRoleBlockingDeletion"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Form role blocking deletion"
-        ]
+        "type": "string",
+        "description": "The error type."
       },
       "RoomSecurityWrapper": {
         "type": "object",
@@ -55723,19 +54121,7 @@
         }
       },
       "RoomType": {
-        "description": "[1 - Form filling room, 2 - Collaboration room, 5 - Custom room, 6 - Public room, 8 - Virtual data room, 9 - AI Room]",
-        "x-enum-type": "integer",
         "enum": [
-          1,
-          2,
-          5,
-          6,
-          8,
-          9
-        ],
-        "type": "integer",
-        "example": 1,
-        "x-enum-varnames": [
           "FillingFormsRoom",
           "EditingRoom",
           "CustomRoom",
@@ -55743,14 +54129,8 @@
           "VirtualDataRoom",
           "AiRoom"
         ],
-        "x-enum-descriptions": [
-          "Form filling room",
-          "Collaboration room",
-          "Custom room",
-          "Public room",
-          "Virtual data room",
-          "AI Room"
-        ]
+        "type": "string",
+        "description": "The room type."
       },
       "Run": {
         "type": "object",
@@ -55832,21 +54212,7 @@
         "description": "The parameters for saving form role mapping."
       },
       "SearchArea": {
-        "description": "[0 - Active, 1 - Archive, 2 - Any, 3 - Recent by links, 4 - Template, 5 - Knowledge, 6 - Result storage, 7 - AiAgents]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Active",
           "Archive",
           "Any",
@@ -55856,16 +54222,8 @@
           "ResultStorage",
           "AiAgents"
         ],
-        "x-enum-descriptions": [
-          "Active",
-          "Archive",
-          "Any",
-          "Recent by links",
-          "Template",
-          "Knowledge",
-          "Result storage",
-          "AiAgents"
-        ]
+        "type": "string",
+        "description": "The search area."
       },
       "SecurityInfoRequestDto": {
         "type": "object",
@@ -55873,9 +54231,16 @@
           "folderIds": {
             "type": "array",
             "items": {
-              "type": "integer",
-              "example": 1234,
-              "description": "The list of the shared folder IDs."
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "example": 1234
+                },
+                {
+                  "type": "string",
+                  "example": "some text"
+                }
+              ]
             },
             "description": "The list of the shared folder IDs.",
             "nullable": true
@@ -55883,9 +54248,16 @@
           "fileIds": {
             "type": "array",
             "items": {
-              "type": "integer",
-              "example": 1234,
-              "description": "The list of the shared file IDs."
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "example": 1234
+                },
+                {
+                  "type": "string",
+                  "example": "some text"
+                }
+              ]
             },
             "description": "The list of the shared file IDs.",
             "nullable": true
@@ -56014,20 +54386,7 @@
         "description": "The settings request parameters."
       },
       "ShareFilterType": {
-        "description": "[0 - User or group, 1 - Invitation link, 2 - External link, 4 - Additional external link, 8 - Primary external link, 16 - User, 32 - Group]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          4,
-          8,
-          16,
-          32
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "UserOrGroup",
           "InvitationLink",
           "ExternalLink",
@@ -56036,15 +54395,8 @@
           "User",
           "Group"
         ],
-        "x-enum-descriptions": [
-          "User or group",
-          "Invitation link",
-          "External link",
-          "Additional external link",
-          "Primary external link",
-          "User",
-          "Group"
-        ]
+        "type": "string",
+        "description": "The filter type of the access rights."
       },
       "Size": {
         "type": "object",
@@ -56061,26 +54413,7 @@
         "additionalProperties": false
       },
       "SortedByType": {
-        "description": "[0 - Date and time, 1 - AZ, 2 - Size, 3 - Author, 4 - Type, 5 - New, 6 - Date and time creation, 7 - Room type, 8 - Tags, 9 - Room, 10 - Custom order, 11 - Last opened, 12 - Used space]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "DateAndTime",
           "AZ",
           "Size",
@@ -56095,21 +54428,8 @@
           "LastOpened",
           "UsedSpace"
         ],
-        "x-enum-descriptions": [
-          "Date and time",
-          "AZ",
-          "Size",
-          "Author",
-          "Type",
-          "New",
-          "Date and time creation",
-          "Room type",
-          "Tags",
-          "Room",
-          "Custom order",
-          "Last opened",
-          "Used space"
-        ]
+        "type": "string",
+        "description": "The parameters by which the files will be sorted."
       },
       "StartEdit": {
         "type": "object",
@@ -56137,40 +54457,16 @@
         "description": "The parameters of the button that starts filling out the form."
       },
       "StartFillingMode": {
-        "description": "[0 - None, 1 - Share to fill out, 2 - Start filling]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "None",
           "ShareToFillOut",
           "StartFilling"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Share to fill out",
-          "Start filling"
-        ]
+        "type": "string",
+        "description": "The start filling mode."
       },
       "Status": {
-        "description": "[0 - Ok, 1 - Invalid, 2 - Expired, 3 - Required password, 4 - Invalid password, 5 - External access denied]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Ok",
           "Invalid",
           "Expired",
@@ -56178,87 +54474,41 @@
           "InvalidPassword",
           "ExternalAccessDenied"
         ],
-        "x-enum-descriptions": [
-          "Ok",
-          "Invalid",
-          "Expired",
-          "Required password",
-          "Invalid password",
-          "External access denied"
-        ]
+        "type": "string",
+        "description": "The external data status."
       },
       "StorageFilter": {
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "None",
           "Internal",
           "ThirdParty"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Internal",
-          "ThirdParty"
-        ],
-        "description": "[0 - None, 1 - Internal, 2 - ThirdParty]"
+        "type": "string"
       },
       "SubjectFilter": {
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Owner",
           "Member"
         ],
-        "x-enum-descriptions": [
-          "Owner",
-          "Member"
-        ],
-        "description": "[0 - Owner, 1 - Member]"
+        "type": "string"
       },
       "SubjectType": {
-        "description": "[0 - User, 1 - External link, 2 - Group, 3 - Invitation link, 4 - Primary external link]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "User",
           "ExternalLink",
           "Group",
           "InvitationLink",
           "PrimaryExternalLink"
         ],
-        "x-enum-descriptions": [
-          "User",
-          "External link",
-          "Group",
-          "Invitation link",
-          "Primary external link"
-        ]
+        "type": "string",
+        "description": "The subject type of the access right."
       },
       "SubmitForm": {
         "type": "object",
         "properties": {
           "visible": {
             "type": "boolean",
-            "description": "Specifies whether the Complete  & Submit button will be displayed or hidden on the top toolbar.",
+            "description": "Specifies whether the \"Complete  & Submit\" button will be displayed or hidden on the top toolbar.",
             "example": true
           },
           "resultMessage": {
@@ -56269,7 +54519,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The Complete & Submit button settings."
+        "description": "The \"Complete & Submit\" button settings."
       },
       "TemplatesConfig": {
         "type": "object",
@@ -56282,7 +54532,7 @@
           },
           "title": {
             "type": "string",
-            "description": "The template title that will be displayed in the Create New... menu option.",
+            "description": "The template title that will be displayed in the \"Create New...\" menu option.",
             "nullable": true,
             "example": "legacy_1080p_small_wooden_mouse"
           },
@@ -56295,7 +54545,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The presence or absence of the templates in the Create New... menu option."
+        "description": "The presence or absence of the templates in the \"Create New...\" menu option."
       },
       "TemplatesRequestDto": {
         "type": "object",
@@ -56490,31 +54740,15 @@
         "description": "The third-party request parameters."
       },
       "Thumbnail": {
-        "description": "[0 - Waiting, 1 - Created, 2 - Error, 3 - Not required, 4 - Creating]",
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Waiting",
           "Created",
           "Error",
           "NotRequired",
           "Creating"
         ],
-        "x-enum-descriptions": [
-          "Waiting",
-          "Created",
-          "Error",
-          "Not required",
-          "Creating"
-        ]
+        "type": "string",
+        "description": "The file thumbnail status."
       },
       "UpdateComment": {
         "required": [
@@ -56638,9 +54872,16 @@
           "roomIds": {
             "type": "array",
             "items": {
-              "type": "integer",
-              "example": 1234,
-              "description": "The list of room IDs."
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "example": 1234
+                },
+                {
+                  "type": "string",
+                  "example": "some text"
+                }
+              ]
             },
             "description": "The list of room IDs.",
             "nullable": true
@@ -56661,9 +54902,16 @@
           "roomIds": {
             "type": "array",
             "items": {
-              "type": "integer",
-              "example": 1234,
-              "description": "The list of room IDs."
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "example": 1234
+                },
+                {
+                  "type": "string",
+                  "example": "some text"
+                }
+              ]
             },
             "description": "The list of room IDs.",
             "nullable": true
@@ -56858,31 +55106,15 @@
         "format": "int32"
       },
       "WatermarkAdditions": {
-        "description": "[1 - User name, 2 - User email, 4 - User ip adress, 8 - Current date, 16 - Room name]",
-        "x-enum-type": "integer",
         "enum": [
-          1,
-          2,
-          4,
-          8,
-          16
-        ],
-        "type": "integer",
-        "example": 1,
-        "x-enum-varnames": [
           "UserName",
           "UserEmail",
           "UserIpAdress",
           "CurrentDate",
           "RoomName"
         ],
-        "x-enum-descriptions": [
-          "User name",
-          "User email",
-          "User ip adress",
-          "Current date",
-          "Room name"
-        ]
+        "type": "string",
+        "description": "The watermark additions."
       },
       "WatermarkDto": {
         "required": [
@@ -57145,25 +55377,12 @@
         }
       },
       "BackupPeriod": {
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "EveryDay",
           "EveryWeek",
           "EveryMonth"
         ],
-        "x-enum-descriptions": [
-          "Every day",
-          "Every week",
-          "Every month"
-        ],
-        "description": "[0 - Every day, 1 - Every week, 2 - Every month]"
+        "type": "string"
       },
       "BackupProgress": {
         "type": "object",
@@ -57209,25 +55428,12 @@
         "additionalProperties": false
       },
       "BackupProgressEnum": {
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Backup",
           "Restore",
           "Transfer"
         ],
-        "x-enum-descriptions": [
-          "Backup",
-          "Restore",
-          "Transfer"
-        ],
-        "description": "[0 - Backup, 1 - Restore, 2 - Transfer]"
+        "type": "string"
       },
       "BackupProgressWrapper": {
         "type": "object",
@@ -57380,18 +55586,7 @@
         }
       },
       "BackupStorageType": {
-        "x-enum-type": "integer",
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5
-        ],
-        "type": "integer",
-        "example": 0,
-        "x-enum-varnames": [
           "Documents",
           "ThridpartyDocuments",
           "CustomCloud",
@@ -57399,15 +55594,7 @@
           "DataStore",
           "ThirdPartyConsumer"
         ],
-        "x-enum-descriptions": [
-          "Documents",
-          "Thridparty documents",
-          "Custom cloud",
-          "Local",
-          "Data store",
-          "Thirdparty consumer"
-        ],
-        "description": "[0 - Documents, 1 - Thridparty documents, 2 - Custom cloud, 3 - Local, 4 - Data store, 5 - Thirdparty consumer]"
+        "type": "string"
       },
       "Cron": {
         "type": "object",

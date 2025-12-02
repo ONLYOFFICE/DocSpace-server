@@ -30,6 +30,7 @@ namespace ASC.Core.Users;
 /// The user activation status.
 /// </summary>
 [Flags]
+[JsonConverter(typeof(JsonStringEnumConverter<EmployeeActivationStatus>))]
 public enum EmployeeActivationStatus
 {
     [SwaggerEnum("Not activated")]

@@ -27,6 +27,7 @@
 namespace ASC.Files.Core.Vectorization.Settings;
 
 [EnumExtensions]
+[JsonConverter(typeof(JsonStringEnumConverter<EmbeddingProviderType>))]
 public enum EmbeddingProviderType
 {
     None,

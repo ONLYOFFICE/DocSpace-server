@@ -30,6 +30,7 @@ namespace ASC.Files.Core.Security;
 /// The filter type of the access rights.
 /// </summary>
 [Flags]
+[JsonConverter(typeof(JsonStringEnumConverter<ShareFilterType>))]
 public enum ShareFilterType
 {
     [SwaggerEnum("User or group")]

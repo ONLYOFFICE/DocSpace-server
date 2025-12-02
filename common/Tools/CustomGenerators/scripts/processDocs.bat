@@ -11,8 +11,6 @@ cd ..\..\..\..\..\CustomGenerators\scripts
 echo [3/4] Running sortTagGroups.js to sort tag groups...
 call node sortTagGroups.js
 
-echo [4/4] Running removeStringEnum.js to clean up string enums...
-call node removeStringEnum.js
 
 echo Documentation fix scripts completed successfully.
 pause

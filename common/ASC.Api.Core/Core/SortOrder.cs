@@ -29,6 +29,7 @@ namespace ASC.Api.Core.Core;
 /// <summary>
 /// The order in which the results are sorted.
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<SortOrder>))]
 public enum SortOrder
 {
     [SwaggerEnum("Ascending")]

@@ -29,6 +29,7 @@ namespace ASC.Files.Core.Core;
 /// <summary>
 /// The filter options for applying operations to items.
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<ApplyFilterOption>))]
 public enum ApplyFilterOption
 {
     [SwaggerEnum("All")]

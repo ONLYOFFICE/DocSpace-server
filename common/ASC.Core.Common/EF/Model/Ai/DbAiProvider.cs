@@ -26,6 +26,7 @@
 
 namespace ASC.Core.Common.EF.Model.Ai;
 
+[JsonConverter(typeof(JsonStringEnumConverter<ProviderType>))]
 public enum ProviderType
 {
     DocSpaceAi = 0,

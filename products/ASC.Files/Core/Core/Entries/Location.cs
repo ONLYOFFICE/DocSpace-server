@@ -29,6 +29,7 @@ namespace ASC.Files.Core.Core.Entries;
 /// <summary>
 /// The location context of the request.
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<Location>))]
 public enum Location
 {
     Room = 1,

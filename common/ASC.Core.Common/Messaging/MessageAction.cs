@@ -30,6 +30,7 @@ namespace ASC.MessagingSystem.Core;
 /// The event action ID.
 /// </summary>
 [EnumExtensions]
+[JsonConverter(typeof(JsonStringEnumConverter<MessageAction>))]
 public enum MessageAction
 {
     [SwaggerEnum("None")]

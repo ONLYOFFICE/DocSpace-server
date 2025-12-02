@@ -36,6 +36,7 @@ public interface IToolPermissionProvider
     Task<CallData?> ProvidePermissionAsync(string callId, ToolExecutionDecision decision);
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter<ToolExecutionDecision>))]
 public enum ToolExecutionDecision
 {
     Allow,

@@ -203,26 +203,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         else if (checkType.IsEnum)
         {
             var enumDataString = new List<IOpenApiAny>();
-            var enumDescriptionString = new List<string>();
-            var enumDescriptionDataString = new OpenApiArray();
-            var enumVarNames = new OpenApiArray();
-            var enumDataInt = new List<IOpenApiAny>();
-            var enumDescriptionInt = new List<string>();
-            var enumType = "integer";
-
-            var jsonConverterAttr = checkType.GetCustomAttributesData() .FirstOrDefault(a => a.AttributeType == typeof(JsonConverterAttribute));
-            if (jsonConverterAttr != null)
-            {
-                if (jsonConverterAttr.ConstructorArguments.Count > 0 &&
-                    jsonConverterAttr.ConstructorArguments[0].Value is Type converterType &&
-                    converterType.IsGenericType &&
-                    converterType.GetGenericTypeDefinition() == typeof(JsonStringEnumConverter<>))
-                {
-                    enumType = "string";
-                }
-            }
-
-
+            
             foreach (var enumValue in Enum.GetValues(checkType))
             {
                 var value = checkType.GetMember(enumValue.ToString())[0];
@@ -230,43 +211,14 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 if (enumAttribute is { Ignore: false })
                 {
                     enumDataString.Add(new OpenApiString(enumValue.ToString()));
-                    enumVarNames.Add(new OpenApiString(enumValue.ToString()));
-                    enumDescriptionDataString.Add(new OpenApiString(enumAttribute.Description.ToString()));
-                    enumDataInt.Add(new OpenApiInteger(Convert.ToInt32(enumValue)));
-                    enumDescriptionString.Add($"{enumValue} - {enumAttribute.Description}");
-                    enumDescriptionInt.Add($"{Convert.ToInt32(enumValue)} - {enumAttribute.Description}");
                 }
             }
 
             if (enumDataString.Count > 0)
             {
-                result.OneOf = new List<OpenApiSchema>
-                {
-                    new()
-                    {
-                        Enum = enumDataString,
-                        Type = "string",
-                        Description = $"[{string.Join(", ", enumDescriptionString)}]",
-                        Example = enumDataString[0]
-                    },
-                    new()
-                    {
-                        Enum = enumDataInt,
-                        Type = "integer",
-                        Description = $"[{string.Join(", ", enumDescriptionInt)}]",
-                        Example = enumDataInt[0],
-                        Extensions = new Dictionary<string, IOpenApiExtension>
-                        {
-                            ["x-enum-varnames"] = new OpenApiArray(enumVarNames),
-                            ["x-enum-descriptions"] = new OpenApiArray(enumDescriptionDataString)
-                        }
-                    }
-                };
-                result.Enum = null;
-                result.Type = null;
+                result.Enum = enumDataString;
+                result.Type = "string";
                 result.Format = null;
-                result.Extensions = result.Extensions ?? new Dictionary<string, IOpenApiExtension>();
-                result.Extensions["x-enum-type"] = new OpenApiString(enumType);
             }
         }
         else if (checkType == typeof(object))
