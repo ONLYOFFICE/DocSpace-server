@@ -44,7 +44,7 @@ public class RoomGroupDto
     /// <summary>
     /// Group icon
     /// </summary>
-    public string Icon { get; set; }
+    public LogoCover Icon { get; set; }
 
     /// <summary>
     /// The user ID.
@@ -67,7 +67,6 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
         {
             Id = group.Id,
             Name = group.Name,
-            Icon = group.Icon,
             UserId = group.UserID
         };
 
@@ -97,6 +96,17 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
         {
             result.Rooms.AddRange(f);
         }
+
+        LogoCover cover = null;
+        if (!string.IsNullOrEmpty(group.Icon) && (await RoomLogoManager.GetCoversAsync()).TryGetValue(group.Icon, out var fromDict))
+        {
+            cover = new LogoCover
+            {
+                Id = group.Icon,
+                Data = fromDict
+            };
+        }
+        result.Icon = cover;
 
         return result;
 

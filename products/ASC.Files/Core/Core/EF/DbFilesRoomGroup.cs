@@ -80,6 +80,7 @@ public static class DbFilesRoomGroupExtension
                 .HasColumnName("thirdparty_room_id")
                 .HasColumnType("varchar")
                 .HasCharSet("utf8")
+                .HasMaxLength(200)
                 .UseCollation("utf8_general_ci");
 
             entity.HasIndex(e => e.GroupId).HasDatabaseName("idx_group");
