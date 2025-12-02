@@ -199,6 +199,12 @@ public class AuthorizationService
     }
   }
 
+  /**
+   * Removes all OAuth2 authorizations and consents for a given principal and client.
+   *
+   * @param principalId the ID of the principal whose authorizations are to be removed.
+   * @param clientId the ID of the client whose authorizations are to be removed.
+   */
   @Transactional(
       timeout = 2,
       rollbackFor = {Exception.class})
@@ -247,26 +253,47 @@ public class AuthorizationService
     }
   }
 
+  /**
+   * Fetches an authorization entity from a remote region via RPC messaging.
+   *
+   * <p>This method extracts the region identifier from the hashed token and sends an RPC request to
+   * the corresponding remote region to retrieve the authorization entity.
+   *
+   * @param hashedToken the hashed token containing a region prefix.
+   * @return an {@link Optional} containing the {@link AuthorizationEntity} if found, or empty if
+   *     the token has no region prefix or the remote region returns no result.
+   */
   private Optional<AuthorizationEntity> fetchFromRemoteRegion(String hashedToken) {
-    var matcher = regionPattern.matcher(hashedToken);
-    if (!matcher.find()) return Optional.empty();
+    try {
+      MDC.put("token", hashedToken);
+      log.info("Retrieving authorization by hashed token from a remote region");
 
-    var routingKey =
-        AuthorizationMessagingConfiguration.AUTHORIZATION_RPC_ROUTING_KEY_PREFIX + matcher.group(1);
+      var matcher = regionPattern.matcher(hashedToken);
+      if (!matcher.find()) return Optional.empty();
 
-    var message =
-        messageConverter.toMessage(
-            RetrieveAuthorizationMessage.builder().token(hashedToken).build(),
-            new MessageProperties());
+      var routingKey =
+          AuthorizationMessagingConfiguration.AUTHORIZATION_RPC_ROUTING_KEY_PREFIX
+              + matcher.group(1);
 
-    var response =
-        rpcRabbitTemplate.sendAndReceive(
-            AuthorizationMessagingConfiguration.AUTHORIZATION_RPC_EXCHANGE, routingKey, message);
+      var message =
+          messageConverter.toMessage(
+              RetrieveAuthorizationMessage.builder().token(hashedToken).build(),
+              new MessageProperties());
 
-    if (response == null) return Optional.empty();
+      var response =
+          rpcRabbitTemplate.sendAndReceive(
+              AuthorizationMessagingConfiguration.AUTHORIZATION_RPC_EXCHANGE, routingKey, message);
 
-    var data = messageConverter.fromMessage(response);
-    return data instanceof AuthorizationEntity entity ? Optional.of(entity) : Optional.empty();
+      if (response == null) {
+        log.warn("Received an empty response from a remote region");
+        return Optional.empty();
+      }
+
+      var data = messageConverter.fromMessage(response);
+      return data instanceof AuthorizationEntity entity ? Optional.of(entity) : Optional.empty();
+    } finally {
+      MDC.clear();
+    }
   }
 
   /**
