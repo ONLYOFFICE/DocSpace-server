@@ -159,14 +159,7 @@ public class ProductEntryPoint : Product
 
         var result = new List<ActivityInfo>();
 
-        var folderDao = _daoFactory.GetFolderDao<int>();
-        var fileDao = _daoFactory.GetFileDao<int>();
-
-        var sharedFolderId = await _globalFolder.GetFolderShareAsync(_daoFactory);
-        var sharedFolder = await folderDao.GetFolderAsync(sharedFolderId);
-
-        var checkedFiles = new Dictionary<int, bool>();
-        string fileId = null;
+        var filesOutsideRooms = new List<KeyValuePair<int, ActivityInfo>>();
 
         foreach (var e in events)
         {
@@ -177,6 +170,8 @@ public class ProductEntryPoint : Product
                 Date = e.Date,
                 FileTitle = e.Action != (int)MessageAction.UserFileUpdated ? e.Description[0] : e.Description[1]
             };
+
+            string fileId = null;
 
             switch (e.Action)
             {
@@ -234,20 +229,7 @@ public class ProductEntryPoint : Product
 
             if (roomId <= 0 && additionalInfo.ParentType == (int)FolderType.USER && int.TryParse(fileId, out var fileIdInt))
             {
-                if (!checkedFiles.TryGetValue(fileIdInt, out var canRead))
-                {
-                    var entry = await fileDao.GetFileAsync(fileIdInt);
-                    canRead = await _fileSecurity.CanReadAsync(entry, userId);
-                    checkedFiles.Add(fileIdInt, canRead);
-                }
-
-                if (canRead)
-                {
-                    activityInfo.RoomUri = _pathProvider.GetFolderUrl(sharedFolder);
-                    activityInfo.RoomTitle = FilesUCResource.SharedForMe;
-                    result.Add(activityInfo);
-                }
-
+                filesOutsideRooms.Add(new KeyValuePair<int, ActivityInfo>(fileIdInt, activityInfo));
                 continue;
             }
 
@@ -278,6 +260,31 @@ public class ProductEntryPoint : Product
             }
 
             result.Add(activityInfo);
+        }
+
+        if (filesOutsideRooms.Count > 0)
+        {
+            var folderDao = _daoFactory.GetFolderDao<int>();
+            var fileDao = _daoFactory.GetFileDao<int>();
+
+            var sharedFolderId = await _globalFolder.GetFolderShareAsync(_daoFactory);
+            var sharedFolder = await folderDao.GetFolderAsync(sharedFolderId);
+            var sharedFolderUrl = _pathProvider.GetFolderUrl(sharedFolder);
+
+            var fileIds = filesOutsideRooms.Select(kv => kv.Key).Distinct();
+            var filteredFileIds = await _fileSecurity.FilterReadAsync(fileDao.GetFilesAsync(fileIds)).Select(f => f.Id).ToListAsync();
+
+            foreach (var file in filesOutsideRooms)
+            {
+                if (!filteredFileIds.Contains(file.Key))
+                {
+                    continue;
+                }
+
+                file.Value.RoomUri = sharedFolderUrl;
+                file.Value.RoomTitle = FilesUCResource.SharedForMe;
+                result.Add(file.Value);
+            }
         }
 
         return result;
