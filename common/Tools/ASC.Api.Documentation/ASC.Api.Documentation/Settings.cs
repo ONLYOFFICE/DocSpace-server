@@ -36,6 +36,9 @@ public class Settings : CommandSettings
     [CommandOption("--pathToConf")]
     public required string PathToConf { get; set; }
 
+    [CommandOption("--silent")] 
+    public string Silent { get; set; } = "n";
+
     public Dictionary<string, string> Endpoints { get; set; } = new();
     
     public override ValidationResult Validate()
@@ -43,8 +46,11 @@ public class Settings : CommandSettings
         var configuration = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")
             .Build();
+
+        var silent = Silent == "y";
         
-        BaseUrl = AnsiConsole.Ask("Base [green]url[/]:", configuration["baseUrl"]!.TrimEnd('/'));
+        var baseUrlFromConfig = configuration["baseUrl"]!.TrimEnd('/');
+        BaseUrl = silent ? baseUrlFromConfig : AnsiConsole.Ask("Base [link]url[/]:", baseUrlFromConfig);
         
         using var httpClient = new HttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
@@ -53,8 +59,10 @@ public class Settings : CommandSettings
         {
             return ValidationResult.Error("Failed to fetch endpoint: " + BaseUrl);
         }
+
+        var pathFromConf = Path.GetFullPath(Path.Combine([AppContext.BaseDirectory, ..configuration.GetSection("pathToConf").Get<IEnumerable<string>>()!]));
+        PathToConf = silent ? pathFromConf : AnsiConsole.Ask("Base [green]path[/]:", pathFromConf);
         
-        PathToConf = AnsiConsole.Ask("Base [green]path[/]:", Path.GetFullPath(Path.Combine([AppContext.BaseDirectory, ..configuration.GetSection("pathToConf").Get<IEnumerable<string>>()!])));
         if (!Path.Exists(PathToConf))
         {
             return ValidationResult.Error("File not found: " + PathToConf);
