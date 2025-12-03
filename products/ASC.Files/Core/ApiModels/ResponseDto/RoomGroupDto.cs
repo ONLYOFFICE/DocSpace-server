@@ -55,6 +55,11 @@ public class RoomGroupDto
     /// The list of rooms in the group. 
     /// </summary>
     public List<FileEntryBaseDto> Rooms { get; set; }
+
+    /// <summary>
+    /// Total number of rooms in the group.
+    /// </summary>
+    public int TotalRooms { get; set; }
 }
 
 [Scope]
@@ -88,17 +93,22 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
             }
         }
 
-        var internalRooms = GetFoldersAsync(fInt).ToListAsync();
-        var thirdPartyRooms = GetFoldersAsync(fString).ToListAsync();
+        var internalRoomsTask = GetFoldersAsync(fInt).ToListAsync();
+        var thirdPartyRoomsTask = GetFoldersAsync(fString).ToListAsync();
+
+        var internalRooms = await internalRoomsTask;
+        var thirdPartyRooms = await thirdPartyRoomsTask;
+
+        var totalRooms = internalRooms.Count + thirdPartyRooms.Count;
+        result.TotalRooms = totalRooms;
 
         result.Rooms = [];
-        foreach (var f in await Task.WhenAll(internalRooms.AsTask(), thirdPartyRooms.AsTask()))
-        {
-            result.Rooms.AddRange(f);
-        }
+        result.Rooms.AddRange(internalRooms);
+        result.Rooms.AddRange(thirdPartyRooms);
 
         LogoCover cover = null;
-        if (!string.IsNullOrEmpty(group.Icon) && (await RoomLogoManager.GetCoversAsync()).TryGetValue(group.Icon, out var fromDict))
+        if (!string.IsNullOrEmpty(group.Icon) &&
+            (await RoomLogoManager.GetCoversAsync()).TryGetValue(group.Icon, out var fromDict))
         {
             cover = new LogoCover
             {

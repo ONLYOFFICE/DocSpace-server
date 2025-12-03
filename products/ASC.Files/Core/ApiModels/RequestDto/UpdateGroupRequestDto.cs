@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,15 +24,31 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public interface IRoomGroupDao
+/// <summary>
+/// The request parameters for updating a group.
+/// </summary>
+
+public class UpdateGroupRequestDto
 {
-    Task<RoomGroup> SaveRoomGroupAsync(RoomGroup group);
-    Task<RoomGroup> GetGroupInfoAsync(int groupId);
-    Task AddInternalRoomToGroupAsync(int roomId, int groupId);
-    Task AddThirdpartyRoomToGroupAsync(string roomId, int groupId);
-    Task RemoveInternalRoomFromGroupAsync(int roomId, int groupId);
-    Task RemoveThirdpartyRoomFromGroupAsync(string roomId, int groupId);
-    IAsyncEnumerable<RoomGroupRef> GetRoomsByGroupAsync(int groupId);
+    /// <summary>
+    /// The group ID.
+    /// </summary>
+    public required int Id { get; set; }
+
+    /// <summary>
+    /// The list of room IDs to add to the group.
+    /// </summary>
+    public List<JsonElement> RoomsToAdd { get; set; }
+
+    /// <summary>
+    /// The list of room IDs to remove from the group.
+    /// </summary>
+    public List<JsonElement> RoomsToRemove { get; set; }
+
+    /// <summary>
+    /// The group name.
+    /// </summary>
+    public string GroupName { get; set; }
 }

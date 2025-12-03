@@ -5199,11 +5199,26 @@ public class FileStorageService //: IFileStorageService
         await daoFactory.RoomGroupDao.AddThirdpartyRoomToGroupAsync(roomId, groupId);
     }
 
+    public async Task RemoveRoomFromGroupAsync(int roomId, int groupId)
+    {
+        await CheckRoomAvailability(roomId);
+        await daoFactory.RoomGroupDao.RemoveInternalRoomFromGroupAsync(roomId, groupId);
+    }
+
+    public async Task RemoveRoomFromGroupAsync(string roomId, int groupId)
+    {
+        await CheckRoomAvailability(roomId);
+        await daoFactory.RoomGroupDao.RemoveThirdpartyRoomFromGroupAsync(roomId, groupId);
+    }
+
     private async Task CheckRoomAvailability<T>(T roomId)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(roomId);
-
+        if (room == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
         if (!DocSpaceHelper.IsRoom(room.FolderType) || !await fileSecurity.CanReadAsync(room))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);

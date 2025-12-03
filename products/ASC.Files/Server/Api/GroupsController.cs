@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Api;
 
-public class GroupsCpntroller(FolderDtoHelper folderDtoHelper,
+public class GroupsController(FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileStorageService fileStorageService,
     RoomGroupDtoHelper roomGroupDtoHelper,
@@ -67,13 +67,53 @@ public class GroupsCpntroller(FolderDtoHelper folderDtoHelper,
     }
 
     [HttpGet("group/{groupId}")]
-    public async Task<RoomGroupDto> GetFolderInfo(GroupIdRequestDto inDto)
+    public async Task<RoomGroupDto> GetGroupInfo(GroupIdRequestDto inDto)
     {
         var group = await GetGroupInfoAsync(inDto.GroupId).NotFoundIfNull("Group not found");
 
         return await roomGroupDtoHelper.GetAsync(group);
     }
 
+    [HttpPut("group/{groupId}")]
+    public async Task<RoomGroupDto> UpdateGroup(UpdateGroupRequestDto inDto)
+    {
+        var group = await GetGroupInfoAsync(inDto.Id);
+
+        group.Name = inDto.GroupName ?? group.Name;
+        await fileStorageService.SaveRoomGroupAsync(group);
+
+        if (inDto.RoomsToAdd != null)
+        {
+            var (roomIntIds, roomStringIds) = FileOperationsManager.GetIds(inDto.RoomsToAdd);
+            await TransferRoomsToGroupAsync(roomIntIds, roomStringIds, group);
+        }
+
+        if (inDto.RoomsToRemove != null)
+        {
+            var (roomIntIds, roomStringIds) = FileOperationsManager.GetIds(inDto.RoomsToRemove);
+            await RemoveRoomsFromGroupAsync(roomIntIds, roomStringIds, group);
+        }
+
+        // messageService.Send(MessageAction.GroupUpdated, MessageTarget.Create(inDto.Id), group.Name);
+        //await socketManager.UpdateGroupAsync(dto);
+
+        return await roomGroupDtoHelper.GetAsync(group);
+    }
+
+    private async Task TransferRoomsToGroupAsync(List<int> roomIntIds, List<string> roomStringIds, RoomGroup group)
+    {
+        var addIntTasks = roomIntIds.Select(id => fileStorageService.AddRoomToGroupAsync(id, group.Id));
+        var addStringTasks = roomStringIds.Select(id => fileStorageService.AddRoomToGroupAsync(id, group.Id));
+
+        await Task.WhenAll(addIntTasks.Concat(addStringTasks));
+    }
+    private async Task RemoveRoomsFromGroupAsync(List<int> roomIntIds, List<string> roomStringIds, RoomGroup group)
+    {
+        var addIntTasks = roomIntIds.Select(id => fileStorageService.RemoveRoomFromGroupAsync(id, group.Id));
+        var addStringTasks = roomStringIds.Select(id => fileStorageService.RemoveRoomFromGroupAsync(id, group.Id));
+
+        await Task.WhenAll(addIntTasks.Concat(addStringTasks));
+    }
     private async Task<RoomGroup> GetGroupInfoAsync(int id)
     {
         var group = await fileStorageService.GetGroupInfoAsync(id);

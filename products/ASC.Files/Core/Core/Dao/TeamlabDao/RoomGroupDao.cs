@@ -121,6 +121,45 @@ internal class RoomGroupDao(
         }
     }
 
+    public async Task RemoveInternalRoomFromGroupAsync(int roomId, int groupId)
+    {
+        await using (var roomGroupDbContext = await _dbContextFactory.CreateDbContextAsync())
+        {
+            var tenantId = _tenantManager.GetCurrentTenantId();
+
+            var entity = await roomGroupDbContext.RoomGroupRef
+                .FirstOrDefaultAsync(r =>
+                    r.TenantId == tenantId &&
+                    r.InternalRoomId == roomId &&
+                    r.GroupId == groupId);
+
+            if (entity != null)
+            {
+                roomGroupDbContext.RoomGroupRef.Remove(entity);
+                await roomGroupDbContext.SaveChangesAsync();
+            }
+        }
+    }
+    public async Task RemoveThirdpartyRoomFromGroupAsync(string roomId, int groupId)
+    {
+        await using (var roomGroupDbContext = await _dbContextFactory.CreateDbContextAsync())
+        {
+            var tenantId = _tenantManager.GetCurrentTenantId();
+
+            var entity = await roomGroupDbContext.RoomGroupRef
+                .FirstOrDefaultAsync(r =>
+                    r.TenantId == tenantId &&
+                    r.ThirdpartyRoomId == roomId &&
+                    r.GroupId == groupId);
+
+            if (entity != null)
+            {
+                roomGroupDbContext.RoomGroupRef.Remove(entity);
+                await roomGroupDbContext.SaveChangesAsync();
+            }
+        }
+    }
+
     public async IAsyncEnumerable<RoomGroupRef> GetRoomsByGroupAsync(int groupId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
