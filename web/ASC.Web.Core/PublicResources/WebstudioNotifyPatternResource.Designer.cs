@@ -1525,6 +1525,21 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ${LetterLogoText} DocSpace has been deleted.
+        ///
+        ///*Portal:* ${PortalUrl}
+        ///*Owner:* ${UserName} ${UserEmail} 
+        ///*Customer:* ${OwnerName}
+        ///
+        ///Please make sure that automatic billing is turned off. Check the status of automatic billing in the customer Stripe account..
+        /// </summary>
+        public static string pattern_portal_deleted_to_support {
+            get {
+                return ResourceManager.GetString("pattern_portal_deleted_to_support", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1.Change of portal address
         ///
         ///Dear $UserDisplayName,
@@ -2858,6 +2873,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_portal_delete_success_v1 {
             get {
                 return ResourceManager.GetString("subject_portal_delete_success_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ${LetterLogoText} DocSpace has been deleted.
+        /// </summary>
+        public static string subject_portal_deleted_to_support {
+            get {
+                return ResourceManager.GetString("subject_portal_deleted_to_support", resourceCulture);
             }
         }
         
