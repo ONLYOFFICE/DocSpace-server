@@ -5175,16 +5175,16 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<RoomGroup> SaveRoomGroupAsync(RoomGroup roomGroup)
     {
-        var newGroup = await daoFactory.RoomGroupDao.SaveRoomGroupAsync(roomGroup);
+        var group = await daoFactory.RoomGroupDao.SaveRoomGroupAsync(roomGroup);
        // await socketManager.CreateRoomGroupAsync(newGroup);
-        return newGroup;
+        return group;
     }
 
     public async Task<RoomGroup> GetGroupInfoAsync(int roomGroupId)
     {
-        var newGroup = await daoFactory.RoomGroupDao.GetGroupInfoAsync(roomGroupId);
+        var group = await daoFactory.RoomGroupDao.GetGroupInfoAsync(roomGroupId);
 
-        return newGroup;
+        return group;
     }
 
     public async Task AddRoomToGroupAsync(int roomId, int groupId)
@@ -5209,6 +5209,22 @@ public class FileStorageService //: IFileStorageService
     {
         await CheckRoomAvailability(roomId);
         await daoFactory.RoomGroupDao.RemoveThirdpartyRoomFromGroupAsync(roomId, groupId);
+    }
+    public async Task<RoomGroup> ChangeGroupIconAsync(int groupId, string icon)
+    {
+        var group = await daoFactory.RoomGroupDao.GetGroupInfoAsync(groupId);
+        if (icon != null)
+        {
+            var covers = await RoomLogoManager.GetCoversAsync();
+            if (icon != "" && !covers.ContainsKey(icon))
+            {
+                throw new ArgumentException(null, nameof(icon));
+            }
+
+            group.Icon = icon == "" ? null : icon;
+            return await SaveRoomGroupAsync(group);
+        }
+        return group;
     }
 
     private async Task CheckRoomAvailability<T>(T roomId)

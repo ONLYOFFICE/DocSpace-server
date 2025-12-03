@@ -34,6 +34,6 @@ public class GroupIdRequestDto
     /// <summary>
     /// The group unique identifier.
     /// </summary>
-    [FromRoute(Name = "groupId")]
-    public required int GroupId { get; set; }
+    [FromRoute(Name = "id")]
+    public required int Id { get; set; }
 }

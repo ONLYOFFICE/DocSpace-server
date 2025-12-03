@@ -27,38 +27,24 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for updating a group.
+/// The icon request parameters.
 /// </summary>
-
-public class UpdateGroupRequestDto
+public class IconRequestDto
 {
     /// <summary>
-    /// The group ID.
+    /// Group id
     /// </summary>
     [FromRoute(Name = "id")]
     public required int Id { get; set; }
 
-    /// <summary>
-    /// The request for updating a group.
-    /// </summary>
     [FromBody]
-    public required UpdateGroupRequest Update { get; set; }
+    public IconRequest Update { get; set; }
 }
 
-public class UpdateGroupRequest
+public class IconRequest
 {
     /// <summary>
-    /// The list of room IDs to add to the group.
+    /// Group icon
     /// </summary>
-    public List<JsonElement> RoomsToAdd { get; set; }
-
-    /// <summary>
-    /// The list of room IDs to remove from the group.
-    /// </summary>
-    public List<JsonElement> RoomsToRemove { get; set; }
-
-    /// <summary>
-    /// The group name.
-    /// </summary>
-    public string GroupName { get; set; }
+    public string Icon { get; set; }
 }

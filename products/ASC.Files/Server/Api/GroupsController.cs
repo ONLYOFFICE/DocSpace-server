@@ -66,36 +66,44 @@ public class GroupsController(FolderDtoHelper folderDtoHelper,
         return await roomGroupDtoHelper.GetAsync(group);
     }
 
-    [HttpGet("group/{groupId}")]
+    [HttpGet("group/{id:int}")]
     public async Task<RoomGroupDto> GetGroupInfo(GroupIdRequestDto inDto)
     {
-        var group = await GetGroupInfoAsync(inDto.GroupId).NotFoundIfNull("Group not found");
+        var group = await GetGroupInfoAsync(inDto.Id).NotFoundIfNull("Group not found");
 
         return await roomGroupDtoHelper.GetAsync(group);
     }
 
-    [HttpPut("group/{groupId}")]
+    [HttpPut("group/{id:int}")]
     public async Task<RoomGroupDto> UpdateGroup(UpdateGroupRequestDto inDto)
     {
         var group = await GetGroupInfoAsync(inDto.Id);
 
-        group.Name = inDto.GroupName ?? group.Name;
+        group.Name = inDto.Update.GroupName ?? group.Name;
         await fileStorageService.SaveRoomGroupAsync(group);
 
-        if (inDto.RoomsToAdd != null)
+        if (inDto.Update.RoomsToAdd != null)
         {
-            var (roomIntIds, roomStringIds) = FileOperationsManager.GetIds(inDto.RoomsToAdd);
+            var (roomIntIds, roomStringIds) = FileOperationsManager.GetIds(inDto.Update.RoomsToAdd);
             await TransferRoomsToGroupAsync(roomIntIds, roomStringIds, group);
         }
 
-        if (inDto.RoomsToRemove != null)
+        if (inDto.Update.RoomsToRemove != null)
         {
-            var (roomIntIds, roomStringIds) = FileOperationsManager.GetIds(inDto.RoomsToRemove);
+            var (roomIntIds, roomStringIds) = FileOperationsManager.GetIds(inDto.Update.RoomsToRemove);
             await RemoveRoomsFromGroupAsync(roomIntIds, roomStringIds, group);
         }
 
         // messageService.Send(MessageAction.GroupUpdated, MessageTarget.Create(inDto.Id), group.Name);
         //await socketManager.UpdateGroupAsync(dto);
+
+        return await roomGroupDtoHelper.GetAsync(group);
+    }
+
+    [HttpPost("group/{id:int}/icon")]
+    public async Task<RoomGroupDto> ChangeRoomIcon(IconRequestDto inDto)
+    {
+        var group = await fileStorageService.ChangeGroupIconAsync(inDto.Id, inDto.Update.Icon);
 
         return await roomGroupDtoHelper.GetAsync(group);
     }
