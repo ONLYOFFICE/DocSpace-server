@@ -2082,30 +2082,28 @@ public class FileSecurity(
 
                 break;
             case FilesSecurityActions.Copy:
-                switch (e.RootFolderType)
+                if (e.Access == FileShare.Restrict || ace?.Options is { DenyDownload: true })
                 {
+                    return false;
+                }
+                
+                switch (e.RootFolderType)
+                {                        
                     case FolderType.USER:
-                        if (e.Access != FileShare.Restrict && isAuthenticated && !isGuest && ace?.Options is not { DenyDownload: true })
+                        if (isAuthenticated && !isGuest)
                         {
                             return true;
                         }
 
                         break;
+                    
                     default:
-                        if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId)
-                        {
-                            return false;
-                        }
-
                         if (isRoom)
                         {
-                            if (!(isDocSpaceAdmin && (!folder.SettingsDenyDownload || e.Access is not (FileShare.Restrict or FileShare.Read or FileShare.None))))
-                            {
-                                break;
-                            }
+                            return !folder.SettingsDenyDownload;
                         }
 
-                        return true;
+                        return room is not { SettingsDenyDownload: true };
                 }
 
                 break;
