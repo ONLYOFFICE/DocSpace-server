@@ -185,7 +185,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             CancellationToken.ThrowIfCancellationRequested();
 
             var folder = await FolderDao.GetFolderAsync(folderId);
-            var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
+            var isRoom = folder.IsRoom;
 
             var canDelete = await FilesSecurity.CanDeleteAsync(folder);
             checkPermissions = isRoom ? !canDelete : checkPermissions;
@@ -195,7 +195,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             {
                 Err = FilesCommonResource.ErrorMessage_FolderNotFound;
             }
-            else if (!_immediately && DocSpaceHelper.IsRoom(folder.FolderType))
+            else if (!_immediately && folder.IsRoom)
             {
                 Err = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
             }

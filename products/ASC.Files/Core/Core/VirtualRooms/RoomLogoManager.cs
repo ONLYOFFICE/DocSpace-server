@@ -81,7 +81,7 @@ public class RoomLogoManager(
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
 
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+        if (room is not { IsRoom: true })
         {
             throw new ItemNotFoundException();
         }
@@ -357,7 +357,7 @@ public class RoomLogoManager(
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+        if (room is not { IsRoom: true })
         {
             throw new ItemNotFoundException();
         }

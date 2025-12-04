@@ -1093,7 +1093,7 @@ internal class FileDao(
 
         if (toRoomId != -1 && fromRoomId != toRoomId)
         {
-            var toRoom = DocSpaceHelper.IsRoom(toFolder.FolderType) ? toFolder : await folderDao.GetFolderAsync(toRoomId);
+            var toRoom = toFolder.IsRoom ? toFolder : await folderDao.GetFolderAsync(toRoomId);
             TenantEntityQuotaSettings quotaSettings = toRoom.FolderType is FolderType.AiRoom
                    ? await _settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
                    : await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();

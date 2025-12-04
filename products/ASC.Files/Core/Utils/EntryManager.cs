@@ -120,7 +120,7 @@ public class BreadCrumbsManager(
                     : await globalFolderHelper.FolderArchiveAsync;
             }
 
-            breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)).ToList();
+            breadCrumbs = breadCrumbs.SkipWhile(f => f is Folder<T> { IsRoom: false }).ToList();
         }
 
         if (rootId != 0)
@@ -917,8 +917,7 @@ public class EntryManager(IDaoFactory daoFactory,
             {
                 var cmp = 0;
 
-                if (x is IFolder x1 && DocSpaceHelper.IsRoom(x1.FolderType)
-                    && y is IFolder x2 && DocSpaceHelper.IsRoom(x2.FolderType))
+                if (x is IFolder { IsRoom: true } x1 && y is IFolder { IsRoom: true } x2)
                 {
                     cmp = c * Enum.GetName(x1.FolderType).EnumerableComparer(Enum.GetName(x2.FolderType));
                 }
@@ -930,8 +929,7 @@ public class EntryManager(IDaoFactory daoFactory,
             {
                 var cmp = 0;
 
-                if (x is IFolder x1 && DocSpaceHelper.IsRoom(x1.FolderType)
-                    && y is IFolder x2 && DocSpaceHelper.IsRoom(x2.FolderType))
+                if (x is IFolder { IsRoom: true } x1 && y is IFolder { IsRoom: true } x2)
                 {
                     cmp = c * x1.Tags.Count().CompareTo(x2.Tags.Count());
                 }
@@ -949,8 +947,8 @@ public class EntryManager(IDaoFactory daoFactory,
             SortedByType.UsedSpace => (x, y) =>
             {
                 var cmp = 0;
-                if (x is Folder<T> x1 && DocSpaceHelper.IsRoom(x1.FolderType) && !x1.ProviderEntry &&
-                    y is Folder<T> y1 && DocSpaceHelper.IsRoom(y1.FolderType) && !y1.ProviderEntry)
+                if (x is Folder<T> { IsRoom: true, ProviderEntry: false } x1 &&
+                    y is Folder<T> { IsRoom: true, ProviderEntry: false } y1)
                 {
                     cmp = c * x1.Counter.CompareTo(y1.Counter);
                 }
@@ -1021,7 +1019,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (orderBy.SortedBy != SortedByType.New)
         {
-            var rooms = entries.Where(r => r.FileEntryType == FileEntryType.Folder && DocSpaceHelper.IsRoom(((IFolder)r).FolderType));
+            var rooms = entries.Where(r => r.FileEntryType == FileEntryType.Folder && ((IFolder)r).IsRoom);
 
             if (pinOnTop)
             {
@@ -2339,8 +2337,8 @@ public class EntryManager(IDaoFactory daoFactory,
         }
 
         var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
-        var room = parents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
-        var parentFolder = parents.LastOrDefault(f => !DocSpaceHelper.IsRoom(f.FolderType) && f.FolderType != FolderType.VirtualRooms);
+        var room = parents.FirstOrDefault(f => f.IsRoom);
+        var parentFolder = parents.LastOrDefault(f => !f.IsRoom && f.FolderType != FolderType.VirtualRooms);
 
         if (room != null)
         {
@@ -2371,7 +2369,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var fileEntry = (FileEntry<int>)entry;
             var data = originsData.Find(data => data.Entries.Contains(new KeyValuePair<string, FileEntryType>(fileEntry.Id.ToString(), fileEntry.FileEntryType)));
 
-            if (data?.OriginRoom != null && DocSpaceHelper.IsRoom(data.OriginRoom.FolderType))
+            if (data?.OriginRoom != null && data.OriginRoom.FolderType.IsRoom())
             {
                 fileEntry.OriginRoomId = data.OriginRoom.Id;
                 fileEntry.OriginRoomTitle = data.OriginRoom.Title;

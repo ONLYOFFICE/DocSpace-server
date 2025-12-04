@@ -1068,7 +1068,7 @@ public class FileSecurity(
     {
         var file = e as File<T>;
         var folder = e as Folder<T>;
-        var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
+        var isRoom = folder != null && folder.IsRoom;
         
         if (file != null && action == FilesSecurityActions.FillForms && !file.IsForm)
         {
@@ -1080,7 +1080,7 @@ public class FileSecurity(
             return false;
         }
         
-        var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
+        var room = parentFolders.FirstOrDefault(r => r.IsRoom);
 
         if (room is { FolderType: FolderType.VirtualDataRoom })
         {
@@ -1531,7 +1531,7 @@ public class FileSecurity(
                         }
                     }
 
-                    var fileFolder = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
+                    var fileFolder = parentFolders.FirstOrDefault(r => r.IsRoom);
                     if (fileFolder is { FolderType: FolderType.VirtualDataRoom } && !userId.Equals(ASC.Core.Configuration.Constants.Guest.ID))
                     {
                         var (currentStep, myRoles) = await cacheFileDao.GetUserFormRoles(file.Id, userId);
@@ -1622,7 +1622,7 @@ public class FileSecurity(
 
                 if (file != null || folder != null && !isRoom)
                 {
-                    var fileFolder = parentFolders?.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
+                    var fileFolder = parentFolders?.FirstOrDefault(r => r.IsRoom);
 
                     switch (action)
                     {
@@ -2552,13 +2552,13 @@ public class FileSecurity(
         var roomsEntries = storageFilter == StorageFilter.ThirdParty ?
             [] :
             await folderDao.GetRoomsAsync(rootFoldersIds, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries, quotaFilter)
-                .Where(r => withSubfolders || DocSpaceHelper.IsRoom(r.FolderType))
+                .Where(r => withSubfolders || r.IsRoom)
                 .ToListAsync();
 
         var thirdPartyRoomsEntries = storageFilter == StorageFilter.Internal ?
             [] :
             await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries)
-                .Where(r => withSubfolders || DocSpaceHelper.IsRoom(r.FolderType))
+                .Where(r => withSubfolders || r.IsRoom)
                 .Distinct()
                 .ToListAsync();
 
@@ -2577,7 +2577,7 @@ public class FileSecurity(
             }
             else
             {
-                files = await fileDao.GetFilesAsync(roomsEntries.Where(r => DocSpaceHelper.IsRoom(r.FolderType)).Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
+                files = await fileDao.GetFilesAsync(roomsEntries.Where(r => r.IsRoom).Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
                 thirdPartyFiles = await fileThirdPartyDao.GetFilesAsync(thirdPartyRoomsEntries.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
             }
 
@@ -2654,14 +2654,14 @@ public class FileSecurity(
         var rooms = storageFilter == StorageFilter.ThirdParty
             ? []
             : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries, rootFoldersIds)
-                .Where(r => withSubfolders || DocSpaceHelper.IsRoom(r.FolderType))
+                .Where(r => withSubfolders || r.IsRoom)
                 .Where(r => Filter(r, internalRecords))
                 .ToListAsync();
 
         var thirdPartyRooms = storageFilter == StorageFilter.Internal
             ? []
             : await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, thirdPartyRecords.Keys, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries)
-                .Where(r => withSubfolders || DocSpaceHelper.IsRoom(r.FolderType))
+                .Where(r => withSubfolders || r.IsRoom)
                 .Where(r => Filter(r, thirdPartyRecords))
                 .Distinct()
                 .ToListAsync();
@@ -2863,7 +2863,7 @@ public class FileSecurity(
 
         var data = entries.Where(f =>
                 f.RootFolderType is FolderType.USER or FolderType.VirtualRooms &&
-                (f is File<T> || f is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)) &&
+                f is File<T> or Folder<T> { IsRoom: false } &&
                 f.RootCreateBy != authContext.CurrentAccount.ID
         );
 
@@ -3117,7 +3117,7 @@ public class FileSecurity(
 
         if (parentRoomType == null)
         {
-            var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+            var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => f.IsRoom);
 
             if (room != null)
             {
@@ -3181,7 +3181,7 @@ public class FileSecurity(
     public async Task<IDictionary<SubjectType, IEnumerable<FileShare>>> GetAccesses<T>(Folder<T> folder)
     {
         var result = new Dictionary<SubjectType, IEnumerable<FileShare>>();
-        var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
+        var isRoom = folder.IsRoom;
         var room = isRoom ? folder : null;
 
         var parentRoomType = folder.RootFolderType == FolderType.USER ?
@@ -3191,7 +3191,7 @@ public class FileSecurity(
 
         if (parentRoomType == null)
         {
-            room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+            room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => f.IsRoom);
 
             if (room != null)
             {
@@ -3238,7 +3238,7 @@ public class FileSecurity(
 
         var folder = fileEntry as Folder<T>;
         var file = folder == null && fileEntry is File<T> ? fileEntry : null;
-        var room = folder != null && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
+        var room = folder is { IsRoom: true } ? folder : null;
         var parentRoomType = fileEntry.RootFolderType == FolderType.USER ? FolderType.USER : fileEntry.ParentRoomType;
 
         if (room != null)
@@ -3260,7 +3260,7 @@ public class FileSecurity(
 
             if (folderId != null)
             {
-                room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+                room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => f.IsRoom);
                 if (room != null)
                 {
                     parentRoomType = room.FolderType;

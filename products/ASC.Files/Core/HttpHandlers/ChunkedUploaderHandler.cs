@@ -134,7 +134,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                             if (resumedSession.File.Version <= 1)
                             {
                                 var folderDao = daoFactory.GetFolderDao<T>();
-                                var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+                                var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => f.IsRoom);
                                 if (room != null)
                                 {
                                     var data = room.Id is int rId && resumedSession.File.Id is int fId
@@ -199,7 +199,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     {
                         var folderDao = daoFactory.GetFolderDao<T>();
                         var parents = await folderDao.GetParentFoldersAsync(session.FolderId).ToListAsync();
-                        var room = parents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
+                        var room = parents.FirstOrDefault(f => f.IsRoom);
                         if (room != null)
                         {
                             var data = room.Id is int rId && session.File.Id is int fId
