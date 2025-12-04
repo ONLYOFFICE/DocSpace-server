@@ -62,13 +62,7 @@ public class BitlyLoginProvider : Consumer, IValidateKeysProvider
         }
     }
 
-    public bool Enabled
-    {
-        get
-        {
-            return !string.IsNullOrEmpty(BitlyToken);
-        }
-    }
+    public bool Enabled => !string.IsNullOrEmpty(BitlyToken);
 
     public string GetShortenLink(string shareLink)
     {

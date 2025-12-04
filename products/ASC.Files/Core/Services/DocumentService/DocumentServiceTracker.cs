@@ -99,15 +99,10 @@ public class DocumentServiceTracker
 
     public class TrackResponse
     {
-        public int Error
-        {
-            get
-            {
-                return string.IsNullOrEmpty(Message)
-                           ? 0 //error:0 - sended
-                           : 1; //error:1 - some error
-            }
-        }
+        public int Error =>
+            string.IsNullOrEmpty(Message)
+                ? 0 //error:0 - sended
+                : 1; //error:1 - some error
 
         public string Message { get; init; }
 

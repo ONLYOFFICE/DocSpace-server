@@ -48,7 +48,7 @@ public class StudioNotifyService(
     IUrlShortener urlShortener,
     ILoggerProvider option)
 {
-    public static string EMailSenderName { get { return Constants.NotifyEMailSenderSysName; } }
+    public static string EMailSenderName => Constants.NotifyEMailSenderSysName;
 
     private readonly ILogger _log = option.CreateLogger("ASC.Notify");
 

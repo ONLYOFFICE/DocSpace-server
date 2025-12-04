@@ -115,48 +115,18 @@ internal class MessageMapsDictionary() : IDictionary<MessageAction, MessageMaps>
     private readonly LocationType _moduleType;
     private IDictionary<MessageAction, MessageMaps> Actions { get; } = new Dictionary<MessageAction, MessageMaps>();
 
-    public ICollection<MessageAction> Keys
-    {
-        get
-        {
-            return Actions.Keys;
-        }
-    }
+    public ICollection<MessageAction> Keys => Actions.Keys;
 
-    public ICollection<MessageMaps> Values
-    {
-        get
-        {
-            return Actions.Values;
-        }
-    }
+    public ICollection<MessageMaps> Values => Actions.Values;
 
-    public int Count
-    {
-        get
-        {
-            return Actions.Count;
-        }
-    }
+    public int Count => Actions.Count;
 
-    public bool IsReadOnly
-    {
-        get
-        {
-            return Actions.IsReadOnly;
-        }
-    }
+    public bool IsReadOnly => Actions.IsReadOnly;
 
     public MessageMaps this[MessageAction key]
     {
-        get
-        {
-            return Actions[key];
-        }
-        set
-        {
-            Actions[key] = value;
-        }
+        get => Actions[key];
+        set => Actions[key] = value;
     }
 
     public MessageMapsDictionary(ProductType productType, LocationType moduleType) : this()

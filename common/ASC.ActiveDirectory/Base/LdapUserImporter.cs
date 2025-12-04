@@ -66,10 +66,7 @@ public class LdapUserImporter(
 
     public List<string> PrimaryGroupIds { get; set; }
 
-    public LdapSettings Settings
-    {
-        get { return LdapHelper.Settings; }
-    }
+    public LdapSettings Settings => LdapHelper.Settings;
 
     public LdapHelper LdapHelper { get; private set; } = novellLdapHelper;
     public LdapLocalization Resource { get; private set; }

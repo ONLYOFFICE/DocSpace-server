@@ -274,10 +274,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 
     public DateTime LastModified { get; set; }
 
-    public static Guid ID
-    {
-        get { return new Guid("{05d35540-c80b-4b17-9277-abd9e543bf93}"); }
-    }
+    public static Guid ID => new("{05d35540-c80b-4b17-9277-abd9e543bf93}");
 
     #endregion
 

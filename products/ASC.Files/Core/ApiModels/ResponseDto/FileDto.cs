@@ -195,8 +195,8 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// The file entry type.
     /// </summary>
-    public override FileEntryType FileEntryType { get => FileEntryType.File; }
-    
+    public override FileEntryType FileEntryType => FileEntryType.File;
+
     /// <summary>
     /// The vectorization status of the file.
     /// </summary>

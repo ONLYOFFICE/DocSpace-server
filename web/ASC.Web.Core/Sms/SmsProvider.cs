@@ -29,11 +29,11 @@ namespace ASC.Web.Core.Sms;
 [Scope]
 public class SmsProviderManager(ConsumerFactory consumerFactory)
 {
-    public SmscProvider SmscProvider { get => consumerFactory.Get<SmscProvider>(); }
-    public ClickatellProvider ClickatellProvider { get => consumerFactory.Get<ClickatellProvider>(); }
-    public TwilioProvider TwilioProvider { get => consumerFactory.Get<TwilioProvider>(); }
-    public ClickatellProvider ClickatellUSAProvider { get => consumerFactory.Get<ClickatellUSAProvider>(); }
-    public TwilioProvider TwilioSaaSProvider { get => consumerFactory.Get<TwilioSaaSProvider>(); }
+    public SmscProvider SmscProvider => consumerFactory.Get<SmscProvider>();
+    public ClickatellProvider ClickatellProvider => consumerFactory.Get<ClickatellProvider>();
+    public TwilioProvider TwilioProvider => consumerFactory.Get<TwilioProvider>();
+    public ClickatellProvider ClickatellUSAProvider => consumerFactory.Get<ClickatellUSAProvider>();
+    public TwilioProvider TwilioSaaSProvider => consumerFactory.Get<TwilioSaaSProvider>();
 
     public bool Enabled()
     {
@@ -183,30 +183,15 @@ public class SmscProvider : SmsProvider, IValidateKeysProvider
     {
     }
 
-    protected override string SendMessageUrlFormat
-    {
-        get { return "https://smsc.ru/sys/send.php?login={key}&psw={secret}&phones={phone}&mes={text}&fmt=3&sender={sender}&charset=utf-8"; }
-    }
+    protected override string SendMessageUrlFormat => "https://smsc.ru/sys/send.php?login={key}&psw={secret}&phones={phone}&mes={text}&fmt=3&sender={sender}&charset=utf-8";
 
-    protected override string GetBalanceUrlFormat
-    {
-        get { return "https://smsc.ru/sys/balance.php?login={key}&psw={secret}"; }
-    }
+    protected override string GetBalanceUrlFormat => "https://smsc.ru/sys/balance.php?login={key}&psw={secret}";
 
-    protected override string Key
-    {
-        get { return this["smsclogin"]; }
-    }
+    protected override string Key => this["smsclogin"];
 
-    protected override string Secret
-    {
-        get { return this["smscpsw"]; }
-    }
+    protected override string Secret => this["smscpsw"];
 
-    protected override string Sender
-    {
-        get { return this["smscsender"]; }
-    }
+    protected override string Sender => this["smscsender"];
 
     public override bool Enable()
     {
@@ -281,20 +266,11 @@ public class SmscProvider : SmsProvider, IValidateKeysProvider
 
 public class ClickatellProvider : SmsProvider
 {
-    protected override string SendMessageUrlFormat
-    {
-        get { return "https://platform.clickatell.com/messages/http/send?apiKey={secret}&to={phone}&content={text}&from={sender}"; }
-    }
+    protected override string SendMessageUrlFormat => "https://platform.clickatell.com/messages/http/send?apiKey={secret}&to={phone}&content={text}&from={sender}";
 
-    protected override string Secret
-    {
-        get { return this["clickatellapiKey"]; }
-    }
+    protected override string Secret => this["clickatellapiKey"];
 
-    protected override string Sender
-    {
-        get { return this["clickatellSender"]; }
-    }
+    protected override string Sender => this["clickatellSender"];
 
     public override bool Enable()
     {
@@ -348,30 +324,21 @@ public class TwilioProvider : SmsProvider, IValidateKeysProvider
 {
     protected override string Key
     {
-        get { return this["twilioKeySid"]; }
+        get => this["twilioKeySid"];
         set { }
     }
 
     protected override string Secret
     {
-        get { return this["twilioKeySecret"]; }
+        get => this["twilioKeySecret"];
         set { }
     }
 
-    protected string AccountSid
-    {
-        get { return this["twilioAccountSid"]; }
-    }
+    protected string AccountSid => this["twilioAccountSid"];
 
-    protected string AuthToken
-    {
-        get { return this["twilioAuthToken"]; }
-    }
+    protected string AuthToken => this["twilioAuthToken"];
 
-    protected override string Sender
-    {
-        get { return this["twiliosender"]; }
-    }
+    protected override string Sender => this["twiliosender"];
 
     public override bool Enable()
     {

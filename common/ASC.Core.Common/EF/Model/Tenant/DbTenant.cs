@@ -113,7 +113,7 @@ public class DbTenant
     public DateTime StatusChangedHack
     {
         get => StatusChanged ?? DateTime.MinValue;
-        set { StatusChanged = value; }
+        set => StatusChanged = value;
     }
 
     /// <summary>

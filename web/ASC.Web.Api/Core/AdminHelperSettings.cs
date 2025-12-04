@@ -30,10 +30,7 @@ public class AdminHelperSettings : ISettings<AdminHelperSettings>
 {
     public bool Viewed { get; set; }
 
-    public static Guid ID
-    {
-        get { return new Guid("{342CBBF7-FE08-4261-AB38-9C6BA8FA22B9}"); }
-    }
+    public static Guid ID => new("{342CBBF7-FE08-4261-AB38-9C6BA8FA22B9}");
 
     public AdminHelperSettings GetDefault()
     {

@@ -99,8 +99,5 @@ public class PreFormatterState(TextileFormatter f) : FormatterState(f)
         return Regex.IsMatch(input, @"^\s*<code");
     }
 
-    public override Type FallbackFormattingState
-    {
-        get { return null; }
-    }
+    public override Type FallbackFormattingState => null;
 }

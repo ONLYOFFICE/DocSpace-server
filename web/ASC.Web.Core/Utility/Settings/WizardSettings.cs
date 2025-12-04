@@ -39,10 +39,7 @@ public class WizardSettings : ISettings<WizardSettings>
     /// <summary>
     /// The tenant ID.
     /// </summary>
-    public static Guid ID
-    {
-        get { return new Guid("{9A925891-1F92-4ed7-B277-D6F649739F06}"); }
-    }
+    public static Guid ID => new("{9A925891-1F92-4ed7-B277-D6F649739F06}");
 
 
     public WizardSettings GetDefault()

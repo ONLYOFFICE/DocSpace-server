@@ -95,10 +95,7 @@ public class CoEditingConfig
     /// <summary>
     /// The co-editing mode (fast or strict).
     /// </summary>
-    public CoEditingConfigMode Mode
-    {
-        get { return Fast ? CoEditingConfigMode.Fast : CoEditingConfigMode.Strict; }
-    }
+    public CoEditingConfigMode Mode => Fast ? CoEditingConfigMode.Fast : CoEditingConfigMode.Strict;
 }
 
 /// <summary>
@@ -1078,10 +1075,7 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// </summary>
     public string EmbedUrl
     {
-        get
-        {
-            return field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null);
-        }
+        get => field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null);
         set;
     }
 
@@ -1100,10 +1094,7 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// </summary>
     public string ShareUrl
     {
-        get
-        {
-            return field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null);
-        }
+        get => field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null);
         set;
     }
 
@@ -1147,7 +1138,7 @@ public class FeedbackConfig
     /// <summary>
     /// Shows or hides the "Feedback &amp; Support" menu button.
     /// </summary>
-    public bool Visible { get => true; }
+    public bool Visible => true;
 }
 
 /// <summary>
@@ -1217,10 +1208,7 @@ public class LogoConfig(
         return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(logoType));
     }
 
-    public string Url
-    {
-        get => commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetDefault());
-    }
+    public string Url => commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetDefault());
 
     public bool GetVisible(EditorType editorType)
     {
@@ -1248,34 +1236,25 @@ public class PluginsConfig
     /// <summary>
     /// The array of absolute URLs to the plugin configuration files.
     /// </summary>
-    public string[] PluginsData
-    {
-        get
-        {
-            //var plugins = new List<string>();
-
-            //if (_coreBaseSettings.Standalone || !_tenantManager.GetCurrentTenantQuota().Free)
-            //{
-            //    var easyBibHelper = _consumerFactory.Get<EasyBibHelper>();
-            //    if (!string.IsNullOrEmpty(easyBibHelper.AppKey))
-            //    {
-            //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/easybib/config.json"));
-            //    }
-
-            //    var wordpressLoginProvider = _consumerFactory.Get<WordpressLoginProvider>();
-            //    if (!string.IsNullOrEmpty(wordpressLoginProvider.ClientID) &&
-            //        !string.IsNullOrEmpty(wordpressLoginProvider.ClientSecret) &&
-            //        !string.IsNullOrEmpty(wordpressLoginProvider.RedirectUri))
-            //    {
-            //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/wordpress/config.json"));
-            //    }
-            //}
-
-            //return plugins.ToArray();
-
-            return [];
-        }
-    }
+    public string[] PluginsData =>
+        //var plugins = new List<string>();
+        //if (_coreBaseSettings.Standalone || !_tenantManager.GetCurrentTenantQuota().Free)
+        //{
+        //    var easyBibHelper = _consumerFactory.Get<EasyBibHelper>();
+        //    if (!string.IsNullOrEmpty(easyBibHelper.AppKey))
+        //    {
+        //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/easybib/config.json"));
+        //    }
+        //    var wordpressLoginProvider = _consumerFactory.Get<WordpressLoginProvider>();
+        //    if (!string.IsNullOrEmpty(wordpressLoginProvider.ClientID) &&
+        //        !string.IsNullOrEmpty(wordpressLoginProvider.ClientSecret) &&
+        //        !string.IsNullOrEmpty(wordpressLoginProvider.RedirectUri))
+        //    {
+        //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/wordpress/config.json"));
+        //    }
+        //}
+        //return plugins.ToArray();
+        [];
 }
 
 /// <summary>

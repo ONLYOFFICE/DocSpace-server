@@ -646,10 +646,7 @@ public static class DocumentService
         /// <summary>
         /// The command type.
         /// </summary>
-        public string C
-        {
-            get { return Command.ToString().ToLower(CultureInfo.InvariantCulture); }
-        }
+        public string C => Command.ToString().ToLower(CultureInfo.InvariantCulture);
 
         /// <summary>
         /// The command callback.

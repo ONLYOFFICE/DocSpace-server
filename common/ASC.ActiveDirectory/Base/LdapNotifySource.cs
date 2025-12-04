@@ -31,10 +31,7 @@ public class LdapNotifySource(LdapNotifyService ldapNotifyHelper) : INotifySourc
 {
     private Tenant _tenant;
 
-    public string Id
-    {
-        get { return "asc.activedirectory." + _tenant.Id; }
-    }
+    public string Id => "asc.activedirectory." + _tenant.Id;
 
     public void Init(Tenant tenant)
     {

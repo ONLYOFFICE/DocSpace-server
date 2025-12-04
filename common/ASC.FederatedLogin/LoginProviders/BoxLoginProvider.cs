@@ -35,15 +35,10 @@ public class BoxLoginProvider : OauthProvider
     public override string RedirectUri => this["boxRedirectUrl"];
     public override string ClientID => this["boxClientId"];
     public override string ClientSecret => this["boxClientSecret"];
-    public override bool IsEnabled
-    {
-        get
-        {
-            return !string.IsNullOrEmpty(ClientID) &&
-                   !string.IsNullOrEmpty(ClientSecret) &&
-                   !string.IsNullOrEmpty(RedirectUri);
-        }
-    }
+    public override bool IsEnabled =>
+        !string.IsNullOrEmpty(ClientID) &&
+        !string.IsNullOrEmpty(ClientSecret) &&
+        !string.IsNullOrEmpty(RedirectUri);
 
     public BoxLoginProvider() { }
 

@@ -29,25 +29,13 @@ namespace ASC.Core.Billing;
 [Singleton]
 public class TenantExtraConfig(CoreBaseSettings coreBaseSettings, LicenseReaderConfig licenseReaderConfig)
 {
-    public bool Saas
-    {
-        get { return !coreBaseSettings.Standalone; }
-    }
+    public bool Saas => !coreBaseSettings.Standalone;
 
-    public bool Enterprise
-    {
-        get { return coreBaseSettings.Standalone && !string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
-    }
+    public bool Enterprise => coreBaseSettings.Standalone && !string.IsNullOrEmpty(licenseReaderConfig.LicensePath);
 
-    public bool Developer
-    {
-        get { return Enterprise && licenseReaderConfig.LicenseType == LicenseType.Developer; }
-    }
+    public bool Developer => Enterprise && licenseReaderConfig.LicenseType == LicenseType.Developer;
 
-    public bool Opensource
-    {
-        get { return coreBaseSettings.Standalone && string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
-    }
+    public bool Opensource => coreBaseSettings.Standalone && string.IsNullOrEmpty(licenseReaderConfig.LicensePath);
 }
 
 

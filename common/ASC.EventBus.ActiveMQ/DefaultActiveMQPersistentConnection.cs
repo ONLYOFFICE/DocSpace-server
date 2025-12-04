@@ -37,13 +37,7 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
     private IConnection _connection;
     private bool _disposed;
 
-    public bool IsConnected
-    {
-        get
-        {
-            return _connection is { IsStarted: true } && !_disposed;
-        }
-    }
+    public bool IsConnected => _connection is { IsStarted: true } && !_disposed;
 
     public async Task<ISession> CreateSessionAsync()
     {

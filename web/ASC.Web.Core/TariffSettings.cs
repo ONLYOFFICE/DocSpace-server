@@ -51,10 +51,7 @@ public class TariffSettings : ISettings<TariffSettings>
 
     public DateTime LastModified { get; set; }
 
-    public static Guid ID
-    {
-        get { return new Guid("{07956D46-86F7-433b-A657-226768EF9B0D}"); }
-    }
+    public static Guid ID => new("{07956D46-86F7-433b-A657-226768EF9B0D}");
 
     public static async Task<bool> GetHideNotifyAsync(SettingsManager settingsManager)
     {

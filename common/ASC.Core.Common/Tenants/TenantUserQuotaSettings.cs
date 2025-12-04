@@ -35,10 +35,8 @@ public class TenantUserQuotaSettings : TenantEntityQuotaSettings, ISettings<Tena
     /// <summary>
     /// The tenant ID.
     /// </summary>
-    public static Guid ID
-    {
-        get { return new Guid("{5FE28053-BCD4-466B-8A4B-71B612F0D6FC}"); }
-    }
+    public static Guid ID => new("{5FE28053-BCD4-466B-8A4B-71B612F0D6FC}");
+
     public TenantUserQuotaSettings GetDefault()
     {
         return new TenantUserQuotaSettings();

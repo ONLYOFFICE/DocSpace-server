@@ -43,15 +43,9 @@ public class PathProvider(WebImageSupplier webImageSupplier,
         return webImageSupplier.GetAbsoluteWebPath(imgFileName, ProductEntryPoint.ID);
     }
 
-    public string RoomUrlString
-    {
-        get { return "/rooms/shared/{0}/filter?withSubfolders={1}&folder={0}&count=100&page=1&sortby=DateAndTime&sortorder=descending"; }
-    }
-    
-    public string AgentUrlString
-    {
-        get { return "/ai-agents/{0}/chat?folder={0}"; }
-    }
+    public string RoomUrlString => "/rooms/shared/{0}/filter?withSubfolders={1}&folder={0}&count=100&page=1&sortby=DateAndTime&sortorder=descending";
+
+    public string AgentUrlString => "/ai-agents/{0}/chat?folder={0}";
 
     public string GetRoomsUrl(int roomId, bool withSubfolders = true)
     {

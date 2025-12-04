@@ -73,10 +73,7 @@ public class WebPluginSettings : ISettings<WebPluginSettings>
 {
     public Dictionary<string, WebPluginState> EnabledPlugins { get; set; }
 
-    public static Guid ID
-    {
-        get { return new Guid("{B33CB1F2-1FE6-4BD5-83D0-0D9C217490F5}"); }
-    }
+    public static Guid ID => new("{B33CB1F2-1FE6-4BD5-83D0-0D9C217490F5}");
 
     public WebPluginSettings GetDefault()
     {

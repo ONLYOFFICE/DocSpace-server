@@ -34,10 +34,7 @@ public class DarkThemeSettings : ISettings<DarkThemeSettings>
     /// <summary>
     /// The theme settings ID.
     /// </summary>
-    public static Guid ID
-    {
-        get { return new Guid("{38362061-066D-4C57-A23E-8953CF34EFC3}"); }
-    }
+    public static Guid ID => new("{38362061-066D-4C57-A23E-8953CF34EFC3}");
 
     /// <summary>
     /// The theme type.

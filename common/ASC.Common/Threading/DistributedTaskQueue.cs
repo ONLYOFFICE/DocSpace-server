@@ -40,7 +40,7 @@ public class DistributedTaskQueue<T>(
     public static readonly int INSTANCE_ID = Environment.ProcessId;
 
     private string _name;
-    public string LockKey { get => $"{Name}_lock"; }
+    public string LockKey => $"{Name}_lock";
     public int TimeUntilUnregisterInSeconds { get; set; }
 
     public string Name
@@ -51,10 +51,7 @@ public class DistributedTaskQueue<T>(
 
     public int MaxThreadsCount
     {
-        get
-        {
-            return field;
-        }
+        get => field;
 
         set
         {

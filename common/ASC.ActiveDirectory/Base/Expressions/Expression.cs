@@ -43,20 +43,11 @@ public class Expression : ICloneable
     {
     }
 
-    public string Name
-    {
-        get { return _attributeName; }
-    }
+    public string Name => _attributeName;
 
-    public string Value
-    {
-        get { return _attributeValue; }
-    }
+    public string Value => _attributeValue;
 
-    public Op Operation
-    {
-        get { return _op; }
-    }
+    public Op Operation => _op;
 
     /// <summary>
     /// To specify unary operations

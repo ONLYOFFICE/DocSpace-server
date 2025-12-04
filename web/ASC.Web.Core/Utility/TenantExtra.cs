@@ -47,25 +47,13 @@ public class TenantExtra(
             && string.IsNullOrEmpty(setupInfo.AmiMetaUrl);
     }
 
-    public bool Saas
-    {
-        get => tenantExtraConfig.Saas;
-    }
+    public bool Saas => tenantExtraConfig.Saas;
 
-    public bool Enterprise
-    {
-        get => tenantExtraConfig.Enterprise;
-    }
+    public bool Enterprise => tenantExtraConfig.Enterprise;
 
-    public bool Developer
-    {
-        get => tenantExtraConfig.Developer;
-    }
+    public bool Developer => tenantExtraConfig.Developer;
 
-    public bool Opensource
-    {
-        get => tenantExtraConfig.Opensource;
-    }
+    public bool Opensource => tenantExtraConfig.Opensource;
 
     private async Task<bool> EnterprisePaidAsync(bool withRequestToPaymentSystem = true)
     {

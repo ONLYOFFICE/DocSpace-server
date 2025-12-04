@@ -79,11 +79,5 @@ public class NoTextileFormatterState(TextileFormatter f) : FormatterState(f)
         return false;
     }
 
-    public override Type FallbackFormattingState
-    {
-        get
-        {
-            return null;
-        }
-    }
+    public override Type FallbackFormattingState => null;
 }

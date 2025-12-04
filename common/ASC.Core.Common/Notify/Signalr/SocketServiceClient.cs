@@ -47,7 +47,7 @@ public class SocketServiceClient(
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    protected virtual string Hub { get => "default"; }
+    protected virtual string Hub => "default";
 
     public async Task MakeRequest(string method, object data, int? tenantId = null)
     {

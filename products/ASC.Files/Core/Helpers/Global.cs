@@ -917,9 +917,5 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     {
         globalFolder.SetFolderTrashAsync(value);
     }
-    public ValueTask<int> FolderTrashAsync
-    {
-        get => globalFolder.GetFolderTrashAsync(daoFactory);
-    }
-
+    public ValueTask<int> FolderTrashAsync => globalFolder.GetFolderTrashAsync(daoFactory);
 }

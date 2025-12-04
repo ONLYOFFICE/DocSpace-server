@@ -40,10 +40,7 @@ public abstract class ListFormatterState(TextileFormatter formatter) : Formatter
     private string _attsInfo;
     private string _alignInfo;
 
-    protected int NestingDepth
-    {
-        get { return _tag.Length; }
-    }
+    protected int NestingDepth => _tag.Length;
 
     public override string Consume(string input, Match m)
     {

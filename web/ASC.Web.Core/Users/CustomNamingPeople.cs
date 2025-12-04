@@ -28,10 +28,7 @@ namespace ASC.Web.Core.Users;
 
 public class PeopleNamesSettings : ISettings<PeopleNamesSettings>
 {
-    public static Guid ID
-    {
-        get { return new Guid("47F34957-6A70-4236-9681-C8281FB762FA"); }
-    }
+    public static Guid ID => new("47F34957-6A70-4236-9681-C8281FB762FA");
 
     public PeopleNamesItem Item { get; set; }
 
@@ -50,75 +47,69 @@ public class PeopleNamesItem
     private static readonly StringComparison _cmp = StringComparison.InvariantCultureIgnoreCase;
 
 
-    public static string DefaultID
-    {
-        get { return "common"; }
-    }
+    public static string DefaultID => "common";
 
-    public static string CustomID
-    {
-        get { return "custom"; }
-    }
+    public static string CustomID => "custom";
 
     public string Id { get; set; }
 
     public string SchemaName
     {
-        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
         set;
     }
 
     public string UserCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
         init;
     }
 
     public string UsersCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
         init;
     }
 
     public string GroupCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
         init;
     }
 
     public string GroupsCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
         init;
     }
 
     public string UserPostCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
         init;
     }
 
     public string GroupHeadCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
         init;
     }
 
     public string RegDateCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
         init;
     }
 
     public string GuestCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? field ?? NamingPeopleResource.CommonGuest : GetResourceValue(field); }
+        get => Id.Equals(CustomID, _cmp) ? field ?? NamingPeopleResource.CommonGuest : GetResourceValue(field);
         init;
     }
 
     public string GuestsCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? field ?? NamingPeopleResource.CommonGuests : GetResourceValue(field); }
+        get => Id.Equals(CustomID, _cmp) ? field ?? NamingPeopleResource.CommonGuests : GetResourceValue(field);
         init;
     }
 

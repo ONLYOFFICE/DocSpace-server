@@ -37,15 +37,11 @@ public class DocuSignLoginProvider : Consumer, IOAuthProvider
     public string ClientID => this["docuSignClientId"];
     public string ClientSecret => this["docuSignClientSecret"];
     public string DocuSignHost => "https://" + this["docuSignHost"];
-    public bool IsEnabled
-    {
-        get
-        {
-            return !string.IsNullOrEmpty(ClientID) &&
-                   !string.IsNullOrEmpty(ClientSecret) &&
-                   !string.IsNullOrEmpty(RedirectUri);
-        }
-    }
+    public bool IsEnabled =>
+        !string.IsNullOrEmpty(ClientID) &&
+        !string.IsNullOrEmpty(ClientSecret) &&
+        !string.IsNullOrEmpty(RedirectUri);
+
     private string AuthHeader
     {
         get
