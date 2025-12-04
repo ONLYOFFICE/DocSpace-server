@@ -5144,7 +5144,7 @@ public class FileStorageService //: IFileStorageService
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
                 }
-                var role = await fileDao.GetFormRoles(formId).Where(r => r.Submitted == false).FirstOrDefaultAsync();
+                var role = await fileDao.GetFormRoles(formId).Where(r => !r.Submitted).FirstOrDefaultAsync();
                 properties.FormFilling.FillingStopedDate = DateTime.UtcNow;
                 properties.FormFilling.FormFillingInterruption =
                     new FormFillingInterruption

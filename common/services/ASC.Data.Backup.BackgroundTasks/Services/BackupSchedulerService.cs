@@ -98,7 +98,7 @@ public sealed class BackupSchedulerService(
 
                     var pipeline = resiliencePipelineProvider.GetPipeline<Session>(ResiliencePipelineName);
 
-                    var billingSession = await pipeline.ExecuteAsync(async (_) =>
+                    var billingSession = await pipeline.ExecuteAsync(async _ =>
                     {
                         try
                         {
@@ -180,7 +180,7 @@ public static class BackupSchedulerServiceExtension
     {
         services.AddResiliencePipeline<string, Session>(BackupSchedulerService.ResiliencePipelineName, pipelineBuilder =>
         {
-            pipelineBuilder.AddRetry(new RetryStrategyOptions<Session>()
+            pipelineBuilder.AddRetry(new RetryStrategyOptions<Session>
             {
                 MaxRetryAttempts = 3,
                 Delay = TimeSpan.FromSeconds(1),

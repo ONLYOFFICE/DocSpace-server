@@ -447,7 +447,7 @@ public abstract class Migrator(
                     {
                         migrationGroup = new MigrationGroup
                         {
-                            Info = new GroupInfo()
+                            Info = new GroupInfo
                             {
                                 ID = Constants.GroupEveryone.ID,
                                 Name = Constants.GroupEveryone.Name
@@ -458,7 +458,7 @@ public abstract class Migrator(
                     {
                         migrationGroup = new MigrationGroup
                         {
-                            Info = new GroupInfo()
+                            Info = new GroupInfo
                             {
                                 ID = Constants.GroupAdmin.ID,
                                 Name = Constants.GroupAdmin.Name
@@ -476,7 +476,7 @@ public abstract class Migrator(
                     continue;
                 }
 
-                var ace = new AceWrapper()
+                var ace = new AceWrapper
                 {
                     Access = (Files.Core.Security.FileShare)security.Security,
                     Id = migrationUser != null ? migrationUser.Info.Id : migrationGroup.Info.ID

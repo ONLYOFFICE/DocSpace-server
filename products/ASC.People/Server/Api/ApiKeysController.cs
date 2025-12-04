@@ -220,7 +220,7 @@ public class ApiKeysController(
     /// <path>api/2.0/keys/{keyId}</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "Delete a user api key", typeof(bool))]
-    [HttpDelete("{keyId}")]
+    [HttpDelete("{keyId:guid}")]
     public async Task<bool> DeleteApiKey(Guid keyId)
     {
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);

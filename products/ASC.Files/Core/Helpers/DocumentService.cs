@@ -1059,7 +1059,7 @@ public static class DocumentServiceHttpClientExtension
                             .Handle<TimeoutRejectedException>()
                             .HandleResult(response => !response.IsSuccessStatusCode),
 
-            DelayGenerator = (args) =>
+            DelayGenerator = args =>
             {
                 return ValueTask.FromResult<TimeSpan?>(delay[args.AttemptNumber]);
             }
@@ -1092,7 +1092,7 @@ public static class DocumentServiceHttpClientExtension
 
         services.AddResiliencePipeline<string, LicenseValidationResult>(LicenseResiliencePipelineName, pipelineBuilder =>
         {
-            pipelineBuilder.AddRetry(new RetryStrategyOptions<LicenseValidationResult>()
+            pipelineBuilder.AddRetry(new RetryStrategyOptions<LicenseValidationResult>
             {
                 MaxRetryAttempts = 3,
                 Delay = TimeSpan.FromSeconds(1),

@@ -65,7 +65,7 @@ public static class ConfigurationManagerExtension
         if (File.Exists(formatsPath))
         {
             var readStream = File.ReadAllText(formatsPath);
-            var formats = JsonSerializer.Deserialize<List<FileFormatConfig>>(readStream, new JsonSerializerOptions()
+            var formats = JsonSerializer.Deserialize<List<FileFormatConfig>>(readStream, new JsonSerializerOptions
             {
                 AllowTrailingCommas = true,
                 WriteIndented = true,

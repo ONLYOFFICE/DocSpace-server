@@ -80,7 +80,7 @@ public class DocumentServiceLicense(ICache cache,
 
         var errorMsg = string.Empty;
 
-        var response = await pipeline.ExecuteAsync(async (_) =>
+        var response = await pipeline.ExecuteAsync(async _ =>
         {
             var commandResponse = await GetDocumentServiceLicenseAsync(false);
 

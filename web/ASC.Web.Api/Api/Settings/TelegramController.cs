@@ -46,7 +46,7 @@ public class TelegramController(
     public async Task<TelegramStatusDto> CheckTelegram()
     {
         var status = await telegramHelper.GetTelegramUserStatus(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId());
-        return new TelegramStatusDto()
+        return new TelegramStatusDto
         {
             Status = status.Item1,
             Username = status.Item2

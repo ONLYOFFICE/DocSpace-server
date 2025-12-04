@@ -132,7 +132,7 @@ public class TelegramHandlerService(
                 }
             }
 
-            _clients.Add(tenantId, new TenantTgClient()
+            _clients.Add(tenantId, new TenantTgClient
             {
                 Token = token,
                 Client = newClient,

@@ -294,13 +294,13 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                         folder, 
                                         _headers, 
                                         folder.Title);
-                                    await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                 }
                                 else
                                 {
                                     await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, _headers, folder.Title);
-                                    await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                 }
+
+                                await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                             }
 
                             ProcessedFolder(folderId);
@@ -369,13 +369,13 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                             folder, 
                                             _headers, 
                                             folder.Title);
-                                        await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                     }
                                     else
                                     {
                                         await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, _headers, folder.Title);
-                                        await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                     }
+
+                                    await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                 }
                             }
                             else

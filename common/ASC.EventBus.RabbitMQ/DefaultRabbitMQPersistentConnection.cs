@@ -101,7 +101,7 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
             }
         }).Build();
 
-        await pipeline.ExecuteAsync(async (_) =>
+        await pipeline.ExecuteAsync(async _ =>
         {
             _connection = await _connectionFactory.CreateConnectionAsync();
         });

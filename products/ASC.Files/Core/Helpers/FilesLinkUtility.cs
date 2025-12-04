@@ -519,7 +519,7 @@ public class FilesLinkUtility
     private string GetDefaultUrlSetting(FilesUrlKeys key)
     {
         var confKey = $"files:docservice:url:{key.ToStringLowerFast()}";
-        var value = _urlSettings.GetOrAdd(confKey, (c) => _configuration[c]);
+        var value = _urlSettings.GetOrAdd(confKey, c => _configuration[c]);
         if (!string.IsNullOrEmpty(value))
         {
             value = value.TrimEnd('/') + "/";

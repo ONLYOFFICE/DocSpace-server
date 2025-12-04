@@ -122,7 +122,7 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
             }
         }).Build();
 
-        await pipeline.ExecuteAsync(async (_) =>
+        await pipeline.ExecuteAsync(async _ =>
         {
             _connection = await _connectionFactory.CreateConnectionAsync();
             await _connection.StartAsync();

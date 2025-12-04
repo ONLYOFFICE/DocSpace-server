@@ -35,7 +35,7 @@ public class TenantUserInvitationSettings : ISettings<TenantUserInvitationSettin
 
     public TenantUserInvitationSettings GetDefault()
     {
-        return new TenantUserInvitationSettings()
+        return new TenantUserInvitationSettings
         {
             AllowInvitingMembers = true,
             AllowInvitingGuests = true

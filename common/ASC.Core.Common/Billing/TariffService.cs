@@ -1143,7 +1143,7 @@ public class TariffService(
 
         var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingClient.BalanceResiliencePipelineName);
 
-        var updated = await pipeline.ExecuteAsync(async (_) =>
+        var updated = await pipeline.ExecuteAsync(async _ =>
         {
             var newBalance = await GetCustomerBalanceAsync(tenantId, true);
             var newBalanceAmount = newBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
