@@ -322,37 +322,36 @@ public class ChangeRoomOwnerInterpreter : ActionInterpreter
         string target,
         List<string> description)
     {
-        var newOwnerId = Guid.Parse(description[0]);
-        var newOwnerName = description[1];
-
-        var oldOwnerId = Guid.Parse(description[2]);
-        var oldOwnerName = description[3];
-
         var userManager = serviceProvider.GetRequiredService<UserManager>();
         var employeeDtoHelper = serviceProvider.GetRequiredService<EmployeeDtoHelper>();
 
-        async Task<EmployeeDto> GetUserDtoAsync(Guid id, string name)
-        {
-            var user = await userManager.GetUsersAsync(id);
-
-            var isInvalid =
-                user == null ||
-                user.Id == Constants.LostUser.Id ||
-                user.Id == ASC.Core.Configuration.Constants.Guest.ID;
-
-            return isInvalid
-                ? new EmployeeDto { DisplayName = name }
-                : await employeeDtoHelper.GetAsync(user);
-        }
-
-        var ownerDto = await GetUserDtoAsync(newOwnerId, newOwnerName);
-        var oldOwnerDto = await GetUserDtoAsync(oldOwnerId, oldOwnerName);
+        var ownerDto = await GetUserDtoAsync(description[0], description[1], userManager, employeeDtoHelper);
+        var oldOwnerDto = await GetUserDtoAsync(description[2], description[3], userManager, employeeDtoHelper);
 
         return new ChangeRoomOwnerHistoryData
         {
             Owner = ownerDto,
             OldOwner = oldOwnerDto
         };
+    }
+
+    private async Task<EmployeeDto> GetUserDtoAsync(
+        string idStr,
+        string name,
+        UserManager userManager,
+        EmployeeDtoHelper employeeDtoHelper)
+    {
+        var id = Guid.Parse(idStr);
+        var user = await userManager.GetUsersAsync(id);
+
+        var isInvalid =
+            user == null ||
+            user.Id == Constants.LostUser.Id ||
+            user.Id == ASC.Core.Configuration.Constants.Guest.ID;
+
+        return isInvalid
+            ? new EmployeeDto { DisplayName = name }
+            : await employeeDtoHelper.GetAsync(user);
     }
 }
 
