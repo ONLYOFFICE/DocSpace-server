@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using SecurityContext = ASC.Core.SecurityContext;
+
 namespace ASC.AI.Core.Chat.Completion;
 
 public class ChatCompletionGenerator(
@@ -33,7 +35,8 @@ public class ChatCompletionGenerator(
     List<ChatMessage> messages,
     ChatHistory chatHistory,
     ChatNameGenerator chatNameGenerator,
-    ChatExecutionContext context)
+    ChatExecutionContext context,
+    IServiceScopeFactory serviceScopeFactory)
 {
     public async IAsyncEnumerable<ChatCompletion> GenerateCompletionAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -42,8 +45,6 @@ public class ChatCompletionGenerator(
             .GetAsyncEnumerator(cancellationToken);
 
         var started = false;
-        
-        Task? titleUpdateTask = null;
         
         while (true)
         {
@@ -86,18 +87,34 @@ public class ChatCompletionGenerator(
                             context.RawMessage,
                             context.Attachments);
                     
-                        titleUpdateTask = Task.Run(async () =>
-                        {
-                            var title = await chatNameGenerator.GenerateAsync(context);
-                            if (!string.IsNullOrEmpty(title))
-                            {
-                                await chatHistory.UpdateChatTitleAsync(context.TenantId, context.Chat.Id, title);
-                            
-                                context.Chat.Title = title;
-                            
-                                await socketManager.UpdateChatAsync(context.Agent, context.Chat.Id, title, context.User.Id);
-                            }
-                        }, cancellationToken: CancellationToken.None);
+                        _ = Task.Run(async () => 
+                            { 
+                                var tenantId = context.TenantId; 
+                                var chatId = context.Chat.Id;
+                                var userId = context.User.Id;
+                                var userMessage = context.RawMessage;
+                                var options = context.ClientOptions;
+                                var agent = context.Agent;
+                                
+                                await using var scope = serviceScopeFactory.CreateAsyncScope();
+                                var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+                                await tenantManager.SetCurrentTenantAsync(tenantId);
+                                
+                                var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+                                await securityContext.AuthenticateMeWithoutCookieAsync(userId);
+                                
+                                var generator = scope.ServiceProvider.GetRequiredService<ChatNameGenerator>();
+                                var history = scope.ServiceProvider.GetRequiredService<ChatHistory>();
+                                var chatSocketManager = scope.ServiceProvider.GetRequiredService<SocketManager>();
+                                
+                                var title = await generator.GenerateAsync(userMessage, options);
+                                if (!string.IsNullOrEmpty(title))
+                                {
+                                    await history.UpdateChatTitleAsync(tenantId, chatId, title);
+                                    await chatSocketManager.UpdateChatAsync(agent, chatId, title, userId);
+                                }
+                            }, 
+                            cancellationToken: CancellationToken.None);
                     }
                     else
                     {
@@ -171,11 +188,6 @@ public class ChatCompletionGenerator(
         if (messageId > 0)
         {
             await socketManager.CommitMessageAsync(context.Chat.Id, messageId);
-        }
-        
-        if (titleUpdateTask != null)
-        {
-            await titleUpdateTask;
         }
 
         yield return new MessageStopCompletion

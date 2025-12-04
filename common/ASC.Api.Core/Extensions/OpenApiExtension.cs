@@ -56,7 +56,7 @@ public static class OpenApiExtension
             c.SwaggerDoc("common", new OpenApiInfo
             {
                 Title = "Api",
-                Version = "3.5.0",
+                Version = "3.6.0",
                 Contact = new OpenApiContact
                 {
                     Name = "API Support",
@@ -68,6 +68,7 @@ public static class OpenApiExtension
             c.DocumentFilter<LowercaseDocumentFilter>();
             c.SchemaFilter<DerivedSchemaFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
+            c.OperationFilter<SwaggerOperationIdFilter>("api/2.0/files/recent", "getFolderRecent");
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();

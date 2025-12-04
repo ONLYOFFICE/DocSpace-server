@@ -2082,30 +2082,28 @@ public class FileSecurity(
 
                 break;
             case FilesSecurityActions.Copy:
-                switch (e.RootFolderType)
+                if (e.Access == FileShare.Restrict || ace?.Options is { DenyDownload: true })
                 {
+                    return false;
+                }
+                
+                switch (e.RootFolderType)
+                {                        
                     case FolderType.USER:
-                        if (e.Access != FileShare.Restrict && isAuthenticated && !isGuest && ace?.Options is not { DenyDownload: true })
+                        if (isAuthenticated && !isGuest)
                         {
                             return true;
                         }
 
                         break;
+                    
                     default:
-                        if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId)
-                        {
-                            return false;
-                        }
-
                         if (isRoom)
                         {
-                            if (!(isDocSpaceAdmin && (!folder.SettingsDenyDownload || e.Access is not (FileShare.Restrict or FileShare.Read or FileShare.None))))
-                            {
-                                break;
-                            }
+                            return !folder.SettingsDenyDownload;
                         }
 
-                        return true;
+                        return room is not { SettingsDenyDownload: true };
                 }
 
                 break;
@@ -2335,7 +2333,7 @@ public class FileSecurity(
         }
         else
         {
-            ace = shares.Where(r => Equals(r.EntryId, entry.Id) && r.EntryType == FileEntryType.Folder)
+            ace = shares
                 .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                 .ThenBy(r => r.Level)
                 .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
@@ -2758,8 +2756,16 @@ public class FileSecurity(
         }
     }
 
-    private async IAsyncEnumerable<FileEntry> GetSharesForMeAsync<T>(IEnumerable<FileShareRecord<T>> records, List<OrderedSubject> orderedSubjects, FilterType filterType, bool subjectGroup,
-        Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
+    private async IAsyncEnumerable<FileEntry> GetSharesForMeAsync<T>(
+        IEnumerable<FileShareRecord<T>> records, 
+        List<OrderedSubject> orderedSubjects,
+        FilterType filterType,
+        bool subjectGroup,
+        Guid subjectID, 
+        string searchText = "", 
+        string[] extension = null, 
+        bool searchInContent = false, 
+        bool withSubfolders = false)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
@@ -2795,11 +2801,12 @@ public class FileSecurity(
             }
         }
 
+        var folderToExclude = subjectID == Guid.Empty && string.IsNullOrEmpty(searchText) && filterType == FilterType.None ? folderIds.Keys.ToArray() : [];
         var entries = new List<FileEntry<T>>();
 
         if (filterType != FilterType.FoldersOnly)
         {
-            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), folderIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), folderToExclude, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
             
             await foreach (var x in files)
             {
@@ -2816,9 +2823,9 @@ public class FileSecurity(
 
         if (filterType is FilterType.None or FilterType.FoldersOnly)
         {
-            IAsyncEnumerable<FileEntry<T>> folders = folderDao.GetFoldersAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, withSubfolders && filterType == FilterType.FoldersOnly, false);
+            IAsyncEnumerable<FileEntry<T>> folders = folderDao.GetFoldersAsync(folderIds.Keys, folderToExclude, filterType, subjectGroup, subjectID, searchText, withSubfolders && filterType == FilterType.FoldersOnly, false);
 
-            if (withSubfolders)
+            if (withSubfolders && filterType == FilterType.FoldersOnly)
             {
                 folders = FilterReadAsync(folders);
             }
@@ -2988,7 +2995,7 @@ public class FileSecurity(
 
         if (filterType is FilterType.None or FilterType.FoldersOnly)
         {
-            IAsyncEnumerable<FileEntry<T>> folders = folderDao.GetFoldersAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, withSubfolders, false);
+            IAsyncEnumerable<FileEntry<T>> folders = folderDao.GetFoldersAsync(folderIds.Keys, filterType: filterType, subjectGroup: subjectGroup, subjectID: subjectID, searchText: searchText, searchSubfolders: withSubfolders, checkShare: false);
 
             if (withSubfolders)
             {
@@ -3415,6 +3422,11 @@ public class FileSecurity(
                 return 1;
             }
 
+            if (orderedSubjectX.OrderType == orderedSubjectY.OrderType)
+            {
+                return y.EntryType.CompareTo(x.EntryType);
+            }
+            
             return orderedSubjectX.OrderType.CompareTo(orderedSubjectY.OrderType);
         }
     }

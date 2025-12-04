@@ -577,4 +577,13 @@
   <data name="FolderNameForReassignedData" xml:space="preserve">
     <value>مستندات المستخدم {0} {1}</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>مدير الوكلاء</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>معرفة</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>تخزين النتائج</value>
+  </data>
 </root>

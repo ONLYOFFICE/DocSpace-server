@@ -1053,4 +1053,78 @@ public class FileShareTests(
         fileAccessViaFileLink.Security.Edit.Should().BeTrue();
         fileAccessViaFileLink.Access.Should().Be(FileShare.ReadWrite);
     }
+    
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "78852")]
+    public async Task FolderWithShare_FolderWithLink_UsesOwnPermissions()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        
+        var folder = await CreateFolderInMy("folder with link", Initializer.Owner);
+        var subFolder = await CreateFolder("folder with link", folder.Id);
+        
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = user1.Id, Access = FileShare.ReadWrite }]
+        };
+        
+        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken);
+
+        // Create file link with editing access
+        var folderLink = new FolderLinkRequest(access: FileShare.Read);
+
+        var folderLinkResponse = (await _foldersApi.CreateFolderPrimaryExternalLinkAsync(subFolder.Id, folderLink, TestContext.Current.CancellationToken)).Response;
+        var folderSharedTo = folderLinkResponse.SharedLink;
+
+        // Act - Access file through folder link
+        await _filesClient.Authenticate(user1);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, folderSharedTo.RequestToken);
+        var folderAccessViaFileLink = (await _foldersApi.GetFolderInfoAsync(subFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        // Assert
+        // When accessed via file's own link, should have file's permissions (editing)
+        folderAccessViaFileLink.Should().NotBeNull();
+        folderAccessViaFileLink.Security.Rename.Should().BeTrue();
+        folderAccessViaFileLink.Access.Should().Be(FileShare.ReadWrite);
+    }
+    
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "78782")]
+    public async Task FolderWithShare_FileWithShare_UsesOwnPermissions()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        
+        var folder = await CreateFolderInMy("folder with link", Initializer.Owner);
+        var file = await CreateFile("file with link.docx", folder.Id);
+        
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = user1.Id, Access = FileShare.ReadWrite }]
+        };
+        
+        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken);   
+        
+        securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = user1.Id, Access = FileShare.Read }]
+        };
+        
+        await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest, TestContext.Current.CancellationToken);
+        
+        //Act
+        await _filesClient.Authenticate(user1);
+        var fileAccessViaFileLink = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        fileAccessViaFileLink.Should().NotBeNull();
+        fileAccessViaFileLink.Security.Edit.Should().BeFalse();
+        fileAccessViaFileLink.Access.Should().Be(FileShare.Read);
+    }
 }

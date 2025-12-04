@@ -156,4 +156,7 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Shranjevanje pri zunanjem ponudniku</value>
   </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Nekatere datoteke niso bile vključene v varnostno kopijo. Za več podrobnosti preverite {0}</value>
+  </data>
 </root>

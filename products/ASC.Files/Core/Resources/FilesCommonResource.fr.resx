@@ -515,4 +515,16 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="RoleEnum_Guest" xml:space="preserve">
     <value>Invité</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Gestionnaire d'agents</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Documents de l'utilisateur {0} {1}</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Connaissances</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Stockage des résultats</value>
+  </data>
 </root>

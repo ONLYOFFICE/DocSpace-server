@@ -1,0 +1,167 @@
+# {{packageName}}
+
+The ONLYOFFICE DocSpace SDK for PHP is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace API by offering ready-to-use methods and models.
+
+{{#infoUrl}}
+For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}}).
+{{/infoUrl}}
+
+## Installation & Usage
+
+### Requirements
+
+PHP 8.1 and later.
+
+### Composer
+
+To install the bindings via [Composer](https://getcomposer.org/), add the following to `composer.json`:
+
+```json
+{
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "{{repositoryUrl}}"
+    }
+  ],
+  "require": {
+    "{{packageName}}": "*@dev"
+  }
+}
+```
+
+Then run `composer install`
+
+### Manual Installation
+
+Download the files and include `autoload.php`:
+
+```php
+<?php
+require_once('/path/to/{{packageName}}/vendor/autoload.php');
+```
+
+## Getting Started
+
+Please follow the [installation procedure](#installation--usage) and then run the following:
+
+```php
+<?php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}
+{{> php_doc_auth_partial}}
+$apiInstance = new {{invokerPackage}}\Api\{{classname}}(
+    // If you want use custom http client, pass your client which implements `GuzzleHttp\ClientInterface`.
+    // This is optional, `GuzzleHttp\Client` will be used as default.
+    new GuzzleHttp\Client(){{#hasAuthMethods}},
+    $config{{/hasAuthMethods}}
+);
+{{#allParams}}${{paramName}} = {{{example}}}; // {{{dataType}}}{{#description}} | {{{.}}}{{/description}}
+{{/allParams}}
+
+try {
+    {{#returnType}}$result = {{/returnType}}$apiInstance->{{{operationId}}}({{#allParams}}${{paramName}}{{^-last}}, {{/-last}}{{/allParams}});{{#returnType}}
+    print_r($result);{{/returnType}}
+} catch (Exception $e) {
+    echo 'Exception when calling {{classname}}->{{operationId}}: ', $e->getMessage(), PHP_EOL;
+}
+{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}
+```
+
+## Authorization
+{{^authMethods}}Endpoints do not require authorization.{{/authMethods}}
+{{#hasAuthMethods}}Authentication schemes defined for the API:{{/hasAuthMethods}}
+{{#authMethods}}
+### {{{name}}}
+{{#isApiKey}}
+
+- **Type**: API key
+- **API key parameter name**: {{{keyParamName}}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}{{#isKeyInCookie}}Cookie{{/isKeyInCookie}}
+
+{{/isApiKey}}
+{{#isBasic}}
+{{#isBasicBasic}}
+
+- **Type**: HTTP basic authentication
+{{/isBasicBasic}}
+{{#isBasicBearer}}
+
+- **Type**: Bearer authentication{{#bearerFormat}} ({{{.}}}){{/bearerFormat}}
+{{/isBasicBearer}}
+{{#isHttpSignature}}
+
+- **Type**: HTTP signature authentication
+{{/isHttpSignature}}
+{{/isBasic}}
+{{#isOAuth}}
+
+- **Type**: `OAuth`
+- **Flow**: `{{{flow}}}`
+- **Authorization URL**: {{x-authorizationUrl}}
+- **Token Url**: {{x-tokenUrl}}
+- **Scopes**: {{^scopes}}N/A{{/scopes}}
+{{#scopes}}
+    - **{{{scope}}}**: {{{description}}}
+{{/scopes}}
+{{/isOAuth}}
+
+{{#isOpenId}}
+- **Type**: OpenId Connect
+- **OpenId Connect URL**: {{x-openIdConnectUrl}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOpenId}}
+
+{{/authMethods}}
+## API Endpoints
+
+All URIs are relative to *https://your-docspace.onlyoffice.com*
+
+### API Endoints tables:
+
+{{#customApis}}
+<details>
+  <summary>{{folder}}</summary>
+
+  <table>
+    <tbody>
+      <tr>
+        <th>Method</th>
+        <th>HTTP request</th>
+        <th>Description</th>
+      </tr>
+      {{#apis}}<tr>
+        <td colspan="3" style="text-align: center;"><strong>{{x-classname}}</strong></td>
+      </tr>
+      {{#operations.operation}}
+      <tr>
+        <td><a href="{{apiDocPath}}{{classname}}.md#{{operationIdLowerCase}}"><strong>{{operationId}}</strong></a></td>
+        <td><strong>{{httpMethod}}</strong> {{path}}</td>
+        <td>{{summary}}</td>
+      </tr>
+      {{/operations.operation}}
+    {{/apis}}</tbody>
+  </table>
+
+</details>
+{{/customApis}}
+
+## Documentation for Models
+
+<details><summary>Models list</summary>
+
+{{#modelPackage}}
+{{#models}}{{#model}} - [{{{modelPackage}}}.{{{classname}}}]({{modelDocPath}}{{{classname}}}.md)
+{{/model}}{{/models}}
+{{/modelPackage}}
+{{^modelPackage}}
+No model defined in this package
+{{/modelPackage}}
+</details>
+
+## Author
+
+{{#apiInfo}}{{#apis}}{{#-last}}{{infoEmail}}
+{{/-last}}{{/apis}}{{/apiInfo}}

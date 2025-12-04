@@ -151,6 +151,12 @@ public class UserSocketManager(ITariffService tariffService,
         }
     }
 
+    public async Task ConnectTelegram(int tenantId, Guid userId)
+    {
+        _ = await _tenantManager.SetCurrentTenantAsync(tenantId);
+        await MakeRequest("telegram", new { tenantId, userId });
+    }
+
     public async Task UpdateTelegram(int tenantId, Guid userId, string username)
     {
         _ = await _tenantManager.SetCurrentTenantAsync(tenantId);

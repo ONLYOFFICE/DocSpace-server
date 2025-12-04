@@ -32,6 +32,7 @@ import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /**
  * Configuration class for setting up RabbitMQ messaging components related to authorization.
@@ -47,6 +48,9 @@ public class AuthorizationMessagingConfiguration {
   /** The exchange for entry point messages for authorization cleanup. */
   public static final String ENTRY_EXCHANGE = "asc_identity_authorization_cleanup_exchange";
 
+  /** The exchange for clustered authorization RPC calls. */
+  public static final String AUTHORIZATION_RPC_EXCHANGE = "asc_identity_authorization_rpc_exchange";
+
   /** The fanout exchange for distributing messages across regional queues. */
   public static final String FANOUT_EXCHANGE = "asc_identity_authorization_region_exchange";
 
@@ -59,8 +63,50 @@ public class AuthorizationMessagingConfiguration {
   /** The entry queue for processing authorization cleanup messages. */
   public static final String ENTRY_QUEUE = "asc_identity_authorization_cleanup_queue";
 
+  /** The routing key prefix for RPC messages. Region will be appended (e.g., "rpc.eu"). */
+  public static final String AUTHORIZATION_RPC_ROUTING_KEY_PREFIX = "rpc.";
+
   private static final int MAX_QUEUE_SIZE = 15_000;
-  private static final int ENTRY_QUEUE_TTL_MS = 3000;
+  private static final int QUEUE_TTL_MS = 3000;
+
+  /**
+   * Defines the topic exchange for authorization RPC messages.
+   *
+   * <p>This exchange is only active in the "saas" profile and enables cross-instance authorization
+   * lookups in a clustered environment.
+   *
+   * @return the {@link TopicExchange} for authorization RPC messages
+   */
+  @Bean
+  @Profile("saas")
+  public TopicExchange authorizationRpcExchange() {
+    return new TopicExchange(AUTHORIZATION_RPC_EXCHANGE);
+  }
+
+  /**
+   * Defines the region-specific queue for authorization RPC requests.
+   *
+   * <p>This durable queue is configured with:
+   *
+   * <ul>
+   *   <li>TTL of {@value #QUEUE_TTL_MS}ms for message expiration
+   *   <li>Maximum size of {@value #MAX_QUEUE_SIZE} messages
+   *   <li>Overflow policy to reject and route to dead-letter exchange
+   * </ul>
+   *
+   * <p>Only active in the "saas" profile.
+   *
+   * @return the {@link Queue} for authorization RPC requests
+   */
+  @Bean
+  @Profile("saas")
+  public Queue authorizationRpcQueue() {
+    return QueueBuilder.durable("asc_identity_authorization_rpc_" + region.toLowerCase() + "_queue")
+        .withArgument("x-message-ttl", QUEUE_TTL_MS)
+        .withArgument("x-max-length", MAX_QUEUE_SIZE)
+        .withArgument("x-overflow", "reject-publish-dlx")
+        .build();
+  }
 
   /**
    * Defines the direct exchange for authorization entry messages.
@@ -82,7 +128,7 @@ public class AuthorizationMessagingConfiguration {
   @Bean
   public Queue authorizationEntryQueue() {
     return QueueBuilder.durable(ENTRY_QUEUE)
-        .withArgument("x-message-ttl", ENTRY_QUEUE_TTL_MS)
+        .withArgument("x-message-ttl", QUEUE_TTL_MS)
         .withArgument("x-dead-letter-exchange", FANOUT_EXCHANGE)
         .withArgument("x-max-length", MAX_QUEUE_SIZE)
         .build();
@@ -133,6 +179,22 @@ public class AuthorizationMessagingConfiguration {
   @Bean
   public Queue authorizationDeadLetterQueue() {
     return QueueBuilder.durable(DEAD_LETTER_QUEUE).build();
+  }
+
+  /**
+   * Binds the RPC queue to the RPC exchange with a region-specific routing key.
+   *
+   * <p>Messages are routed using the pattern "rpc.{region}" (e.g., "rpc.eu"). Only active in the
+   * "saas" profile.
+   *
+   * @return the {@link Binding} between the RPC queue and RPC exchange
+   */
+  @Bean
+  @Profile("saas")
+  public Binding authorizationRpcQueueBinding() {
+    return BindingBuilder.bind(authorizationRpcQueue())
+        .to(authorizationRpcExchange())
+        .with(AUTHORIZATION_RPC_ROUTING_KEY_PREFIX + region.toLowerCase());
   }
 
   /**
