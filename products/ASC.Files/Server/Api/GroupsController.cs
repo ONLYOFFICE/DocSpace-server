@@ -26,6 +26,7 @@
 
 namespace ASC.Files.Api;
 
+[DefaultRoute("group")]
 public class GroupsController(FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileStorageService fileStorageService,
@@ -41,7 +42,7 @@ public class GroupsController(FolderDtoHelper folderDtoHelper,
     /// Add a new room group
     /// </short>
     /// <path>api/2.0/files/group</path>
-    [HttpPost("group")]
+    [HttpPost("")]
     public async Task<RoomGroupDto> AddGroup(RoomGroupRequestDto inDto)
     {
         var (roomIntIds, roomStringIds) = FileOperationsManager.GetIds(inDto.Rooms);
@@ -63,18 +64,18 @@ public class GroupsController(FolderDtoHelper folderDtoHelper,
 
         await Task.WhenAll(addIntTasks.Concat(addStringTasks));
 
-        return await roomGroupDtoHelper.GetAsync(group);
+        return await roomGroupDtoHelper.GetAsync(group, true);
     }
 
-    [HttpGet("group/{id:int}")]
+    [HttpGet("{id:int}")]
     public async Task<RoomGroupDto> GetGroupInfo(GroupIdRequestDto inDto)
     {
         var group = await GetGroupInfoAsync(inDto.Id).NotFoundIfNull("Group not found");
 
-        return await roomGroupDtoHelper.GetAsync(group);
+        return await roomGroupDtoHelper.GetAsync(group, inDto.IncludeMembers);
     }
 
-    [HttpPut("group/{id:int}")]
+    [HttpPut("{id:int}")]
     public async Task<RoomGroupDto> UpdateGroup(UpdateGroupRequestDto inDto)
     {
         var group = await GetGroupInfoAsync(inDto.Id);
@@ -97,15 +98,24 @@ public class GroupsController(FolderDtoHelper folderDtoHelper,
         // messageService.Send(MessageAction.GroupUpdated, MessageTarget.Create(inDto.Id), group.Name);
         //await socketManager.UpdateGroupAsync(dto);
 
-        return await roomGroupDtoHelper.GetAsync(group);
+        return await roomGroupDtoHelper.GetAsync(group, true);
     }
 
-    [HttpPost("group/{id:int}/icon")]
+    [HttpPost("{id:int}/icon")]
     public async Task<RoomGroupDto> ChangeRoomIcon(IconRequestDto inDto)
     {
         var group = await fileStorageService.ChangeGroupIconAsync(inDto.Id, inDto.Update.Icon);
 
-        return await roomGroupDtoHelper.GetAsync(group);
+        return await roomGroupDtoHelper.GetAsync(group, true);
+    }
+
+    [HttpGet("")]
+    public async IAsyncEnumerable<RoomGroupDto> GetGroups(GroupIdRequestDto inDto)
+    {
+        await foreach (var group in fileStorageService.GetGroupsAsync()) 
+        { 
+            yield return await roomGroupDtoHelper.GetAsync(group, inDto.IncludeMembers); 
+        }
     }
 
     private async Task TransferRoomsToGroupAsync(List<int> roomIntIds, List<string> roomStringIds, RoomGroup group)

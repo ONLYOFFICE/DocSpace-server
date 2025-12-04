@@ -79,6 +79,21 @@ internal class RoomGroupDao(
         return group.MapToRoomGroup();
     }
 
+    public async IAsyncEnumerable<RoomGroup> GetGroupsAsync()
+    {
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        var query = GetGroupQuery(dbContext, tenantId)
+            .Where(r => r.UserId == authContext.CurrentAccount.ID)
+            .AsAsyncEnumerable();
+
+        await foreach (var item in query)
+        {
+            yield return item.MapToRoomGroup();
+        }
+    }
+
     private IQueryable<DbFilesGroup> GetGroupQuery(FilesDbContext dbContext, int tenant)
     {
         var q = dbContext.RoomGroup.Where(r => true);

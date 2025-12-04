@@ -65,7 +65,7 @@ public class RoomGroupDto
 [Scope]
 public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory daoFactory)
 {
-    public async Task<RoomGroupDto> GetAsync(RoomGroup group)
+    public async Task<RoomGroupDto> GetAsync(RoomGroup group, bool includeMembers)
     {
 
         var result = new RoomGroupDto
@@ -102,10 +102,6 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
         var totalRooms = internalRooms.Count + thirdPartyRooms.Count;
         result.TotalRooms = totalRooms;
 
-        result.Rooms = [];
-        result.Rooms.AddRange(internalRooms);
-        result.Rooms.AddRange(thirdPartyRooms);
-
         LogoCover cover = null;
         if (!string.IsNullOrEmpty(group.Icon) &&
             (await RoomLogoManager.GetCoversAsync()).TryGetValue(group.Icon, out var fromDict))
@@ -117,6 +113,15 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
             };
         }
         result.Icon = cover;
+
+        if (!includeMembers)
+        {
+            return result;
+        }
+
+        result.Rooms = [];
+        result.Rooms.AddRange(internalRooms);
+        result.Rooms.AddRange(thirdPartyRooms);
 
         return result;
 

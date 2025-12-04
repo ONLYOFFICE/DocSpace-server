@@ -36,4 +36,7 @@ public class GroupIdRequestDto
     /// </summary>
     [FromRoute(Name = "id")]
     public required int Id { get; set; }
+
+    [FromQuery(Name = "includeMembers")]
+    public bool IncludeMembers { get; set; } = true;
 }

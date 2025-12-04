@@ -5187,6 +5187,10 @@ public class FileStorageService //: IFileStorageService
         return group;
     }
 
+    public IAsyncEnumerable<RoomGroup> GetGroupsAsync()
+    {
+        return daoFactory.RoomGroupDao.GetGroupsAsync();
+    }
     public async Task AddRoomToGroupAsync(int roomId, int groupId)
     {
         await CheckRoomAvailability(roomId);

@@ -29,6 +29,7 @@ namespace ASC.Files.Core;
 public interface IRoomGroupDao
 {
     Task<RoomGroup> SaveRoomGroupAsync(RoomGroup group);
+    IAsyncEnumerable<RoomGroup> GetGroupsAsync();
     Task<RoomGroup> GetGroupInfoAsync(int groupId);
     Task AddInternalRoomToGroupAsync(int roomId, int groupId);
     Task AddThirdpartyRoomToGroupAsync(string roomId, int groupId);
