@@ -32,10 +32,7 @@ public class SpamEmailSettings : ISettings<SpamEmailSettings>
 
     public DateTime MailsSendedDate { get; set; }
 
-    public static Guid ID
-    {
-        get { return new Guid("{A9819A62-60AF-48E3-989C-08259772FA57}"); }
-    }
+    public static Guid ID => new("{A9819A62-60AF-48E3-989C-08259772FA57}");
 
     public SpamEmailSettings GetDefault()
     {
@@ -50,7 +47,7 @@ public class SpamEmailSettings : ISettings<SpamEmailSettings>
 
     public int MailsSended
     {
-        get { return GetCount(); }
+        get => GetCount();
         set
         {
             MailsSendedDate = DateTime.UtcNow.Date;

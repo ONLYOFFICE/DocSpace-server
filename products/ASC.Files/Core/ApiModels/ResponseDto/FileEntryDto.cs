@@ -98,15 +98,13 @@ public abstract class FileEntryBaseDto
     /// </summary>
     public EmployeeDto CreatedBy { get; set; }
 
-    private ApiDateTime _updated;
-
     /// <summary>
     /// The last date and time when the file entry was updated.
     /// </summary>
     public ApiDateTime Updated
     {
-        get => _updated < Created ? Created : _updated;
-        set => _updated = value;
+        get => field < Created ? Created : field;
+        set;
     }
 
     /// <summary>

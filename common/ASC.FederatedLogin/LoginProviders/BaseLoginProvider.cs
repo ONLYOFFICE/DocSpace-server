@@ -73,21 +73,16 @@ public enum LoginProvider
     Yandex,
     
     [SwaggerEnum("Github")]
-    Github,
+    Github
 }
 
 public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : Consumer, ILoginProvider, new()
 {
     public T Instance => ConsumerFactory.Get<T>();
-    public virtual bool IsEnabled
-    {
-        get
-        {
-            return !string.IsNullOrEmpty(ClientID) &&
-                   !string.IsNullOrEmpty(ClientSecret) &&
-                   !string.IsNullOrEmpty(RedirectUri);
-        }
-    }
+    public virtual bool IsEnabled =>
+        !string.IsNullOrEmpty(ClientID) &&
+        !string.IsNullOrEmpty(ClientSecret) &&
+        !string.IsNullOrEmpty(RedirectUri);
 
     public abstract string CodeUrl { get; }
     public abstract string AccessTokenUrl { get; }

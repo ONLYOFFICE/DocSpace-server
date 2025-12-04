@@ -103,10 +103,7 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 
     #region ISettings Members
 
-    public static Guid ID
-    {
-        get { return new Guid("{C3C5A846-01A3-476D-A962-1CFD78C04ADB}"); }
-    }
+    public static Guid ID => new("{C3C5A846-01A3-476D-A962-1CFD78C04ADB}");
 
 
     public CompanyWhiteLabelSettings GetDefault()

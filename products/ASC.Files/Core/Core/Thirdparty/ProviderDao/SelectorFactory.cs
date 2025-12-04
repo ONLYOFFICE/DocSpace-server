@@ -36,7 +36,7 @@ internal class SelectorFactory(IServiceProvider serviceProvider)
     public IDaoSelector GetSelector(string id)
     {
         var selector = Match(id);
-        return selector == string.Empty && int.TryParse(id, out var _) ? null : GetSelectorInternal(selector);
+        return selector == string.Empty && int.TryParse(id, out _) ? null : GetSelectorInternal(selector);
     }
 
     private IDaoSelector GetSelectorInternal(string selector)

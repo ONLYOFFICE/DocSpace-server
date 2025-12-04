@@ -95,10 +95,7 @@ public class CoEditingConfig
     /// <summary>
     /// The co-editing mode (fast or strict).
     /// </summary>
-    public CoEditingConfigMode Mode
-    {
-        get { return Fast ? CoEditingConfigMode.Fast : CoEditingConfigMode.Strict; }
-    }
+    public CoEditingConfigMode Mode => Fast ? CoEditingConfigMode.Fast : CoEditingConfigMode.Strict;
 }
 
 /// <summary>
@@ -200,7 +197,6 @@ public class DocumentConfig<T>(
     TenantManager tenantManager)
 {
     private string _fileUri;
-    private string _key = string.Empty;
     private FileReferenceData _referenceData;
     public string GetFileType(File<T> file) => file.ConvertedExtension.Trim('.');
     public InfoConfig<T> Info { get; } = infoConfig;
@@ -208,9 +204,9 @@ public class DocumentConfig<T>(
 
     public string Key
     {
-        set => _key = value;
-        get => DocumentServiceConnector.GenerateRevisionId(_key);
-    }
+        set;
+        get => DocumentServiceConnector.GenerateRevisionId(field);
+    } = string.Empty;
 
     public PermissionsConfig Permissions { get; set; } = new();
 
@@ -222,7 +218,7 @@ public class DocumentConfig<T>(
         return _referenceData ??= new FileReferenceData
         {
             FileKey = file.Id.ToString(),
-            InstanceId = (tenantManager.GetCurrentTenantId()).ToString()
+            InstanceId = tenantManager.GetCurrentTenantId().ToString()
         };
     }
 
@@ -279,8 +275,7 @@ public class EditorConfiguration<T>(
 
     public bool ModeWrite { get; set; }
 
-    private UserInfo _userInfo;
-    private UserInfo UserInfo => _userInfo ??= userManager.GetUsers(authContext.CurrentAccount.ID);
+    private UserInfo UserInfo => field ??= userManager.GetUsers(authContext.CurrentAccount.ID);
 
     private UserConfig _user;
     public async Task<UserConfig> GetUserAsync()
@@ -1039,7 +1034,7 @@ public class CustomizationConfig<T>(
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
         return new SubmitForm
         {
-            Visible = file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormAsync(file, authContext.CurrentAccount.ID) && (properties is { FormFilling.StartFilling: true } or { FormFilling.CollectFillForm: true }),
+            Visible = file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormAsync(file, authContext.CurrentAccount.ID) && properties is { FormFilling.StartFilling: true } or { FormFilling.CollectFillForm: true },
             ResultMessage = ""
         };
     }
@@ -1075,18 +1070,13 @@ public class CustomizationConfig<T>(
 [Transient]
 public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility)
 {
-    private string _embedUrl;
-    private string _shareUrl;
     /// <summary>
     /// The absolute URL to the document serving as a source file for the document embedded into the web page.
     /// </summary>
     public string EmbedUrl
     {
-        get
-        {
-            return _embedUrl ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null);
-        }
-        set => _embedUrl = value;
+        get => field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null);
+        set;
     }
 
     /// <summary>
@@ -1104,12 +1094,10 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// </summary>
     public string ShareUrl
     {
-        get
-        {
-            return _shareUrl ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null);
-        }
-        set => _shareUrl = value;
+        get => field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null);
+        set;
     }
+
     /// <summary>
     /// The place for the embedded viewer toolbar, can be either "top" or "bottom".
     /// </summary>
@@ -1150,7 +1138,7 @@ public class FeedbackConfig
     /// <summary>
     /// Shows or hides the "Feedback &amp; Support" menu button.
     /// </summary>
-    public bool Visible { get => true; }
+    public bool Visible => true;
 }
 
 /// <summary>
@@ -1220,10 +1208,7 @@ public class LogoConfig(
         return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(logoType));
     }
 
-    public string Url
-    {
-        get => commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetDefault());
-    }
+    public string Url => commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetDefault());
 
     public bool GetVisible(EditorType editorType)
     {
@@ -1251,34 +1236,25 @@ public class PluginsConfig
     /// <summary>
     /// The array of absolute URLs to the plugin configuration files.
     /// </summary>
-    public string[] PluginsData
-    {
-        get
-        {
-            //var plugins = new List<string>();
-
-            //if (_coreBaseSettings.Standalone || !_tenantManager.GetCurrentTenantQuota().Free)
-            //{
-            //    var easyBibHelper = _consumerFactory.Get<EasyBibHelper>();
-            //    if (!string.IsNullOrEmpty(easyBibHelper.AppKey))
-            //    {
-            //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/easybib/config.json"));
-            //    }
-
-            //    var wordpressLoginProvider = _consumerFactory.Get<WordpressLoginProvider>();
-            //    if (!string.IsNullOrEmpty(wordpressLoginProvider.ClientID) &&
-            //        !string.IsNullOrEmpty(wordpressLoginProvider.ClientSecret) &&
-            //        !string.IsNullOrEmpty(wordpressLoginProvider.RedirectUri))
-            //    {
-            //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/wordpress/config.json"));
-            //    }
-            //}
-
-            //return plugins.ToArray();
-
-            return [];
-        }
-    }
+    public string[] PluginsData =>
+        //var plugins = new List<string>();
+        //if (_coreBaseSettings.Standalone || !_tenantManager.GetCurrentTenantQuota().Free)
+        //{
+        //    var easyBibHelper = _consumerFactory.Get<EasyBibHelper>();
+        //    if (!string.IsNullOrEmpty(easyBibHelper.AppKey))
+        //    {
+        //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/easybib/config.json"));
+        //    }
+        //    var wordpressLoginProvider = _consumerFactory.Get<WordpressLoginProvider>();
+        //    if (!string.IsNullOrEmpty(wordpressLoginProvider.ClientID) &&
+        //        !string.IsNullOrEmpty(wordpressLoginProvider.ClientSecret) &&
+        //        !string.IsNullOrEmpty(wordpressLoginProvider.RedirectUri))
+        //    {
+        //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/wordpress/config.json"));
+        //    }
+        //}
+        //return plugins.ToArray();
+        [];
 }
 
 /// <summary>

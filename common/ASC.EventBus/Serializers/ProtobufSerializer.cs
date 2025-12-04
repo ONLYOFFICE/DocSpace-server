@@ -114,7 +114,7 @@ public class ProtobufSerializer : IIntegrationEventSerializer
             var hashedAsInt32 = BitConverter.ToInt32(hashed, 0);
 
             // restriction: https://developers.google.com/protocol-buffers/docs/proto3
-            var fieldNumber = (int)Math.Abs((hashedAsInt32 % (Math.Pow(2, 29) - 1)));
+            var fieldNumber = (int)Math.Abs(hashedAsInt32 % (Math.Pow(2, 29) - 1));
 
             baseType.AddSubType(fieldNumber, protoType);
 

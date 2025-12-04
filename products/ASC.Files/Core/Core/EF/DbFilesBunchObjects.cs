@@ -54,66 +54,69 @@ public static class DbFilesBunchObjectsExtension
 
         return modelBuilder;
     }
-    public static void MySqlAddDbFilesBunchObjects(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbFilesBunchObjects>(entity =>
+        public void MySqlAddDbFilesBunchObjects()
         {
-            entity.HasKey(e => new { e.TenantId, e.RightNode })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbFilesBunchObjects>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.RightNode })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("files_bunch_objects")
-                .HasCharSet("utf8");
+                entity.ToTable("files_bunch_objects")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.LeftNode)
-                .HasDatabaseName("left_node");
+                entity.HasIndex(e => e.LeftNode)
+                    .HasDatabaseName("left_node");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.RightNode)
-                .HasColumnName("right_node")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.RightNode)
+                    .HasColumnName("right_node")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.LeftNode)
-                .IsRequired()
-                .HasColumnName("left_node")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-        });
-    }
+                entity.Property(e => e.LeftNode)
+                    .IsRequired()
+                    .HasColumnName("left_node")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+            });
+        }
 
-    public static void PgSqlAddDbFilesBunchObjects(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbFilesBunchObjects>(entity =>
+        public void PgSqlAddDbFilesBunchObjects()
         {
-            // Define composite primary key
-            entity.HasKey(e => new { e.TenantId, e.RightNode })
-                .HasName("pk_files_bunch_objects");
+            modelBuilder.Entity<DbFilesBunchObjects>(entity =>
+            {
+                // Define composite primary key
+                entity.HasKey(e => new { e.TenantId, e.RightNode })
+                    .HasName("pk_files_bunch_objects");
 
-            // Map to PostgreSQL table
-            entity.ToTable("files_bunch_objects");
+                // Map to PostgreSQL table
+                entity.ToTable("files_bunch_objects");
 
-            // Create an index for LeftNode
-            entity.HasIndex(e => e.LeftNode)
-                .HasDatabaseName("idx_files_bunch_objects_left_node");
+                // Create an index for LeftNode
+                entity.HasIndex(e => e.LeftNode)
+                    .HasDatabaseName("idx_files_bunch_objects_left_node");
 
-            // Map TenantId column
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id");
+                // Map TenantId column
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id");
 
-            // Map RightNode column with PostgreSQL-specific type
-            entity.Property(e => e.RightNode)
-                .HasColumnName("right_node")
-                .HasColumnType("varchar")
-                .IsRequired();
+                // Map RightNode column with PostgreSQL-specific type
+                entity.Property(e => e.RightNode)
+                    .HasColumnName("right_node")
+                    .HasColumnType("varchar")
+                    .IsRequired();
 
-            // Map LeftNode column with PostgreSQL-specific type
-            entity.Property(e => e.LeftNode)
-                .HasColumnName("left_node")
-                .HasColumnType("varchar")
-                .IsRequired();
-        });
+                // Map LeftNode column with PostgreSQL-specific type
+                entity.Property(e => e.LeftNode)
+                    .HasColumnName("left_node")
+                    .HasColumnType("varchar")
+                    .IsRequired();
+            });
+        }
     }
 }

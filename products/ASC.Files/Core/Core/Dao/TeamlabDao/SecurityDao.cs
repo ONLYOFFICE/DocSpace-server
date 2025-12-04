@@ -70,7 +70,7 @@ internal abstract class SecurityBaseDao<T>(
 
         foreach (var record in records)
         {
-            var (mappedId, _) = (await mapping.MappingIdAsync(record.EntryId));
+            var (mappedId, _) = await mapping.MappingIdAsync(record.EntryId);
             var query = await filesDbContext
                 .ForDeleteShareRecordsAsync(record.TenantId, record.EntryType, record.Subject, mappedId)
                 .ToListAsync();

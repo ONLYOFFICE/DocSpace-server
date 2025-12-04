@@ -165,8 +165,8 @@ public class FolderContentDtoHelper(
         result.PathParts = folderItems.FolderPathParts;
         result.StartIndex = startIndex;
         result.Total = folderItems.Total;
-        result.New = (isEnableBadges.Result) ? folderItems.New : 0;
-        result.Current = (FolderDto<T>)(currentTask.Result);
+        result.New = isEnableBadges.Result ? folderItems.New : 0;
+        result.Current = (FolderDto<T>)currentTask.Result;
 
         if (folderItems.ParentRoom is { FolderType: FolderType.AiRoom })
         {

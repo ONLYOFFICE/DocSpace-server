@@ -65,15 +65,10 @@ public class AuthData(string url = null, string login = null, string password = 
     {
         get
         {
-            return _token ??= OAuth20Token.FromJson(RawToken);
+            return field ??= OAuth20Token.FromJson(RawToken);
         }
-        set
-        {
-            _token = value;
-        }
+        set;
     }
-
-    private OAuth20Token _token;
 
     public bool IsEmpty()
     {

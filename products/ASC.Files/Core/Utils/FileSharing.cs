@@ -93,7 +93,7 @@ public class FileSharingAceHelper(
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
         {
-            if ((w.IsLink && entry.CreateBy == w.Id) && (!beforeOwnerChange || w.Access != FileShare.RoomManager && w.Access != FileShare.ContentCreator))
+            if (w.IsLink && entry.CreateBy == w.Id && (!beforeOwnerChange || w.Access != FileShare.RoomManager && w.Access != FileShare.ContentCreator))
             {
                 continue;
             }
@@ -288,8 +288,8 @@ public class FileSharingAceHelper(
                     {
                         var user = await userManager.GetUserByEmailAsync(w.Email);
                         if (await userManager.IsGuestAsync(user)
-                            && !(await userManager.IsUserInGroupAsync(user.Id, currentUser.Id))
-                            && !(await userManager.IsDocSpaceAdminAsync(user)))
+                            && !await userManager.IsUserInGroupAsync(user.Id, currentUser.Id)
+                            && !await userManager.IsDocSpaceAdminAsync(user))
                         {
                             await usersocketManager.AddGuestAsync(user, false);
                         }
@@ -600,7 +600,7 @@ public class FileSharingHelper(
             return true;
         }
 
-        if ((entry.RootFolderType is FolderType.Archive)
+        if (entry.RootFolderType is FolderType.Archive
             && entry is not IFolder { IsRoom: true })
         {
             return false;

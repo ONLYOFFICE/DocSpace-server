@@ -79,14 +79,14 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
             var request = new ChunkedRequestHelper<T>(context.Request);
 
-            if (!(await TryAuthorizeAsync(request)))
+            if (!await TryAuthorizeAsync(request))
             {
                 await WriteError(context, "Not authorized or session with specified upload id already expired");
 
                 return;
             }
 
-            if ((tenantManager.GetCurrentTenant()).Status != TenantStatus.Active)
+            if (tenantManager.GetCurrentTenant().Status != TenantStatus.Active)
             {
                 await WriteError(context, "Can't perform upload for deleted or transferring portals");
 
@@ -432,20 +432,19 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
 
     public bool Encrypted => _request.Query["encrypted"] == "true";
 
-    private int? _chunkNumber;
     public int? ChunkNumber
     {
         get
         {
-            if (!_chunkNumber.HasValue)
+            if (!field.HasValue)
             {
                 var result = int.TryParse(_request.Query["chunkNumber"], out var i);
                 if (result)
                 {
-                    _chunkNumber = i;
+                    field = i;
                 }
             }
-            return _chunkNumber;
+            return field;
         }
     }
 

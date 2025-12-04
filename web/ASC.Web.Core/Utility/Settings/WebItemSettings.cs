@@ -30,10 +30,7 @@ public class WebItemSettings() : ISettings<WebItemSettings>
 {
     private readonly WebItemManager _webItemManager;
 
-    public static Guid ID
-    {
-        get { return new Guid("{C888CF56-585B-4c78-9E64-FE1093649A62}"); }
-    }
+    public static Guid ID => new("{C888CF56-585B-4c78-9E64-FE1093649A62}");
 
     [JsonPropertyName("Settings")]
     public List<WebItemOption> SettingsCollection { get; set; } = [];

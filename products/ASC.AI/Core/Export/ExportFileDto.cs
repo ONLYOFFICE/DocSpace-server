@@ -33,7 +33,7 @@ public class ExportFileDto<T>
     public T? FolderId { get; set; }
     public int Version { get; set; }
     public int VersionGroup { get; set; }
-    public FileEntryType FileEntryType { get => FileEntryType.File; }
+    public FileEntryType FileEntryType => FileEntryType.File;
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]

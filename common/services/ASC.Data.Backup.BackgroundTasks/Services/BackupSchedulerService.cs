@@ -31,7 +31,6 @@ using ASC.Core.Common;
 using ASC.Core.Configuration;
 using ASC.Core.Tenants;
 using ASC.Data.Backup.Core.Quota;
-using ASC.Data.Backup.EF.Model;
 using ASC.Web.Core.PublicResources;
 
 using Polly;

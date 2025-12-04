@@ -126,7 +126,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         _toFillOut = data.ToFillOut;
 
         _headers = data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
-        FileOperationType = (_copy ? FileOperationType.Copy : FileOperationType.Move);
+        FileOperationType = _copy ? FileOperationType.Copy : FileOperationType.Move;
     }
 
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Copy;
@@ -402,7 +402,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             if (!isRoom &&
                 toFolderRoom == null &&
-                (int.TryParse(parentRoomId, out var curRId) && curRId != -1) &&
+                int.TryParse(parentRoomId, out var curRId) && curRId != -1 &&
                 toFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
             {
                 var tenantId = tenantManager.GetCurrentTenantId();
@@ -481,8 +481,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 try
                 {
                     //if destination folder contains folder with same name then merge folders
-                    var conflictFolder = (folder.RootFolderType == FolderType.Privacy || isRoom ||
-                                          (!Equals(folder.ParentId ?? default, toFolderId) && _resolveType == FileConflictResolveType.Duplicate))
+                    var conflictFolder = folder.RootFolderType == FolderType.Privacy || isRoom ||
+                                         (!Equals(folder.ParentId ?? default, toFolderId) && _resolveType == FileConflictResolveType.Duplicate)
                         ? null
                         : await folderDao.GetFolderAsync(folder.Title, toFolderId);
                     Folder<TTo> newFolder;

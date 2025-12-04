@@ -443,7 +443,7 @@ public class FileConverter(
             file,
             password,
             outputType,
-            (tenantManager.GetCurrentTenant()).Id,
+            tenantManager.GetCurrentTenant().Id,
             authContext.CurrentAccount,
             deleteAfter,
             httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),

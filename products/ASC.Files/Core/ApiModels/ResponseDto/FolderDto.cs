@@ -148,8 +148,8 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// The file entry type of the folder.
     /// </summary>
-    public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
-    
+    public override FileEntryType FileEntryType => FileEntryType.Folder;
+
     public ChatSettings ChatSettings { get; set; }
     
     public RoomType? RootRoomType { get; set; }

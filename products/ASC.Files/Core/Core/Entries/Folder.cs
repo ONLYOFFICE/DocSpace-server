@@ -115,7 +115,7 @@ public enum FolderType
     ResultStorage = 33,
 
     [SwaggerEnum(Description = "AI Agents")]
-    AiAgents = 34,
+    AiAgents = 34
 }
 
 /// <summary>

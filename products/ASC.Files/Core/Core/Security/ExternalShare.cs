@@ -443,9 +443,9 @@ public class ExternalSessionSnapshot
 
     public ExternalSessionSnapshot(Guid linkId, Guid sessionId, string passwordKey)
     {
-        this.LinkId = linkId;
-        this.SessionId = sessionId;
-        this.PasswordKey = passwordKey;
+        LinkId = linkId;
+        SessionId = sessionId;
+        PasswordKey = passwordKey;
     }
 
     [ProtoMember(1)]

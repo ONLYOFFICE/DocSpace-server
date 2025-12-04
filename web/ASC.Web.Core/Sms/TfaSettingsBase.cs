@@ -97,10 +97,7 @@ public abstract class TfaSettingsHelperBase<T>(SettingsManager settingsManager,
         return true;
     }
 
-    public bool IsVisibleSettings
-    {
-        get { return SetupInfo.IsVisibleSettings<T>(); }
-    }
+    public bool IsVisibleSettings => SetupInfo.IsVisibleSettings<T>();
 
     public virtual async Task<bool> GetEnable()
     {

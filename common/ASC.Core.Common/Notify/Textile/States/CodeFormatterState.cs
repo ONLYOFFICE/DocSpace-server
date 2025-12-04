@@ -36,11 +36,11 @@ public class CodeFormatterState(TextileFormatter f) : FormatterState(f)
     {
         if (!Regex.IsMatch(input, "</code>"))
         {
-            this.Formatter.ChangeState(this);
+            Formatter.ChangeState(this);
         }
         else
         {
-            this.Formatter.ChangeState(new PassthroughFormatterState(this.Formatter));
+            Formatter.ChangeState(new PassthroughFormatterState(Formatter));
         }
         return input;
     }

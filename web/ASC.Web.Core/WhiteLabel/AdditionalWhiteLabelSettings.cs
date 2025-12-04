@@ -77,14 +77,11 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
     /// </summary>
     public bool LicenseAgreementsEnabled { get; init; }
     
-    public static Guid ID
-    {
-        get { return new Guid("{0108422F-C05D-488E-B271-30C4032494DA}"); }
-    }
+    public static Guid ID => new("{0108422F-C05D-488E-B271-30C4032494DA}");
 
     public AdditionalWhiteLabelSettings(ExternalResourceSettingsHelper externalResourceSettingsHelper)
     {
-        this.ExternalResourceSettingsHelper = externalResourceSettingsHelper;
+        ExternalResourceSettingsHelper = externalResourceSettingsHelper;
     }
 
     public AdditionalWhiteLabelSettings() { }

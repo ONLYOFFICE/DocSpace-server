@@ -195,8 +195,8 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// The file entry type.
     /// </summary>
-    public override FileEntryType FileEntryType { get => FileEntryType.File; }
-    
+    public override FileEntryType FileEntryType => FileEntryType.File;
+
     /// <summary>
     /// The vectorization status of the file.
     /// </summary>
@@ -296,7 +296,8 @@ public class FileDtoHelper(
                 FileSecurity.FilesSecurityActions.CopySharedLink,
                 FileSecurity.FilesSecurityActions.CopyLink,
                 FileSecurity.FilesSecurityActions.FillingStatus,
-                FileSecurity.FilesSecurityActions.Vectorization
+                FileSecurity.FilesSecurityActions.Vectorization,
+                FileSecurity.FilesSecurityActions.Rename
             };
 
             foreach (var action in forbiddenActions)
@@ -306,7 +307,6 @@ public class FileDtoHelper(
 
             result.Locked = false;
             result.CanShare = false;
-            result.ViewAccessibility[Accessibility.CanConvert] = false;
 
             result.Order = "";
 

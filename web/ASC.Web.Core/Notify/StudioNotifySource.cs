@@ -118,6 +118,7 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.SaasAdminStartupWarningAfterYearV1,
 
                 Actions.PortalDeleteSuccessV1,
+                Actions.PortalDeletedToSupport,
 
                 Actions.SaasUserWelcomeV1,
                 Actions.EnterpriseUserWelcomeV1,

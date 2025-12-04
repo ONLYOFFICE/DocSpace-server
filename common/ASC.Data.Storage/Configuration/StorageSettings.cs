@@ -218,7 +218,7 @@ public class StorageSettingsHelper
         }
 
         return _dataStore = await ((IDataStore)_serviceProvider.GetService(handlerType))
-            .ConfigureAsync((_tenantManager.GetCurrentTenantId()).ToString(), null, null, dataStoreConsumer, null);
+            .ConfigureAsync(_tenantManager.GetCurrentTenantId().ToString(), null, null, dataStoreConsumer, null);
     }
 
     internal async Task ClearDataStoreCacheAsync()

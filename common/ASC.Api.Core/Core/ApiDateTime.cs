@@ -176,7 +176,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
     {
         var dateString = date.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffff", CultureInfo.InvariantCulture);
         var offsetString = offset.Ticks == 0
-            ? "Z" : ((offset < TimeSpan.Zero)
+            ? "Z" : (offset < TimeSpan.Zero
             ? "-" : "+") + offset.ToString("hh\\:mm", CultureInfo.InvariantCulture);
 
         return dateString + offsetString;

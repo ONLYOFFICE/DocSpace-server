@@ -50,10 +50,7 @@ public class NovellLdapSearcher(IConfiguration configuration,
 
     private Dictionary<string, string[]> _capabilities;
 
-    public bool IsConnected
-    {
-        get { return _ldapConnection is { Connected: true }; }
-    }
+    public bool IsConnected => _ldapConnection is { Connected: true };
 
     public void Init(string login,
         string password,

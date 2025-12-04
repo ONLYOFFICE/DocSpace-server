@@ -59,10 +59,7 @@ public class ApiProductEntryPoint(FilesSpaceUsageStatManager filesSpaceUsageStat
            commonLinkUtility,
            logger)
 {
-    public override string ApiURL
-    {
-        get => "api/2.0/files/info.json";
-    }
+    public override string ApiURL => "api/2.0/files/info.json";
 
     //SubscriptionManager subscriptionManager
 }

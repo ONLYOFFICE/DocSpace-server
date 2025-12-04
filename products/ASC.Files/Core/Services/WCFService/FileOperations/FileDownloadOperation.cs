@@ -99,7 +99,7 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
 
         var thirdPartyFileOnly = thirdPartyOperation?.Files.Count == 1 && thirdPartyOperation.Folders.Count == 0;
         var daoFileOnly = daoOperation?.Files.Count == 1 && daoOperation.Folders.Count == 0;
-        var compress = !((thirdPartyFileOnly || daoFileOnly) && (thirdPartyFileOnly != daoFileOnly));
+        var compress = !((thirdPartyFileOnly || daoFileOnly) && thirdPartyFileOnly != daoFileOnly);
 
         string archiveExtension;
 
@@ -132,7 +132,7 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
 
             var thirdPartyFolderOnly = thirdPartyOperation?.Folders.Count == 1 && thirdPartyOperation.Files.Count == 0;
             var daoFolderOnly = daoOperation?.Folders.Count == 1 && daoOperation.Files.Count == 0;
-            if ((thirdPartyFolderOnly || daoFolderOnly) && (thirdPartyFolderOnly != daoFolderOnly))
+            if ((thirdPartyFolderOnly || daoFolderOnly) && thirdPartyFolderOnly != daoFolderOnly)
             {
                 fileName = $@"{(thirdPartyFolderOnly ?
                     (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title :
@@ -144,7 +144,7 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
             }
             else
             {
-                fileName = $@"{(tenantManager.GetCurrentTenant()).Alias.ToLower()}-{FileConstant.DownloadTitle}-{DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}{archiveExtension}";
+                fileName = $@"{tenantManager.GetCurrentTenant().Alias.ToLower()}-{FileConstant.DownloadTitle}-{DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}{archiveExtension}";
             }
 
             var store = await globalStore.GetStoreAsync();

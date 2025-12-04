@@ -82,168 +82,171 @@ public static class DbFilesThirdpartyAccountExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbFilesThirdpartyAccount(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbFilesThirdpartyAccount>(entity =>
+        public void MySqlAddDbFilesThirdpartyAccount()
         {
-            entity.ToTable("files_thirdparty_account")
-                .HasCharSet("utf8");
+            modelBuilder.Entity<DbFilesThirdpartyAccount>(entity =>
+            {
+                entity.ToTable("files_thirdparty_account")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.TenantId).HasDatabaseName("tenant_id");
+                entity.HasIndex(e => e.TenantId).HasDatabaseName("tenant_id");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.CreateOn)
-                .HasColumnName("create_on")
-                .HasColumnType("datetime");
+                entity.Property(e => e.CreateOn)
+                    .HasColumnName("create_on")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.Title)
-                .IsRequired()
-                .HasColumnName("customer_title")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasColumnName("customer_title")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.FolderType)
-                .HasColumnName("folder_type")
-                .HasDefaultValueSql("'0'");
-            entity.Property(e => e.RoomType).HasColumnName("room_type");
+                entity.Property(e => e.FolderType)
+                    .HasColumnName("folder_type")
+                    .HasDefaultValueSql("'0'");
+                entity.Property(e => e.RoomType).HasColumnName("room_type");
 
-            entity.Property(e => e.Password)
-                .IsRequired()
-                .HasColumnName("password")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Password)
+                    .IsRequired()
+                    .HasColumnName("password")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Provider)
-                .IsRequired()
-                .HasColumnName("provider")
-                .HasColumnType("varchar")
-                .HasDefaultValueSql("'0'")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Provider)
+                    .IsRequired()
+                    .HasColumnName("provider")
+                    .HasColumnType("varchar")
+                    .HasDefaultValueSql("'0'")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.Token)
-                .HasColumnName("token")
-                .HasColumnType("text")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Token)
+                    .HasColumnName("token")
+                    .HasColumnType("text")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Url)
-                .HasColumnName("url")
-                .HasColumnType("text")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Url)
+                    .HasColumnName("url")
+                    .HasColumnType("text")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.UserId)
-                .IsRequired()
-                .HasColumnName("user_id")
-                .HasColumnType("varchar(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.UserId)
+                    .IsRequired()
+                    .HasColumnName("user_id")
+                    .HasColumnType("varchar(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.UserName)
-                .IsRequired()
-                .HasColumnName("user_name")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.UserName)
+                    .IsRequired()
+                    .HasColumnName("user_name")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.FolderId)
-                .HasColumnName("folder_id")
-                .HasColumnType("text")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.FolderId)
+                    .HasColumnName("folder_id")
+                    .HasColumnType("text")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Private).HasColumnName("private");
+                entity.Property(e => e.Private).HasColumnName("private");
 
-            entity.Property(e => e.HasLogo).HasColumnName("has_logo");
+                entity.Property(e => e.HasLogo).HasColumnName("has_logo");
 
-            entity.Property(e => e.Color)
-                .HasColumnName("color")
-                .HasColumnType("char")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Color)
+                    .HasColumnName("color")
+                    .HasColumnType("char")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
             
-            entity.Property(e => e.Cover)
-                .HasColumnName("cover")
-                .HasColumnType("char")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Cover)
+                    .HasColumnName("cover")
+                    .HasColumnType("char")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.ModifiedOn)
-                .HasColumnName("modified_on")
-                .HasColumnType("datetime")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
-        });
-    }
+                entity.Property(e => e.ModifiedOn)
+                    .HasColumnName("modified_on")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+        }
 
-    public static void PgSqlAddDbFilesThirdpartyAccount(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbFilesThirdpartyAccount>(entity =>
+        public void PgSqlAddDbFilesThirdpartyAccount()
         {
-            entity.ToTable("files_thirdparty_account");
+            modelBuilder.Entity<DbFilesThirdpartyAccount>(entity =>
+            {
+                entity.ToTable("files_thirdparty_account");
 
-            entity.HasIndex(e => e.TenantId).HasDatabaseName("IX_files_thirdparty_account_tenant_id");
+                entity.HasIndex(e => e.TenantId).HasDatabaseName("IX_files_thirdparty_account_tenant_id");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.CreateOn)
-                .HasColumnName("create_on")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.CreateOn)
+                    .HasColumnName("create_on")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.Title)
-                .IsRequired()
-                .HasColumnName("customer_title");
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasColumnName("customer_title");
 
-            entity.Property(e => e.FolderType).HasColumnName("folder_type");
+                entity.Property(e => e.FolderType).HasColumnName("folder_type");
 
-            entity.Property(e => e.RoomType).HasColumnName("room_type");
+                entity.Property(e => e.RoomType).HasColumnName("room_type");
 
-            entity.Property(e => e.Password)
-                .IsRequired()
-                .HasColumnName("password");
+                entity.Property(e => e.Password)
+                    .IsRequired()
+                    .HasColumnName("password");
 
-            entity.Property(e => e.Provider)
-                .IsRequired()
-                .HasColumnName("provider");
+                entity.Property(e => e.Provider)
+                    .IsRequired()
+                    .HasColumnName("provider");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.Token).HasColumnName("token");
+                entity.Property(e => e.Token).HasColumnName("token");
 
-            entity.Property(e => e.Url).HasColumnName("url");
+                entity.Property(e => e.Url).HasColumnName("url");
 
-            entity.Property(e => e.UserId)
-                .IsRequired()
-                .HasColumnName("user_id");
+                entity.Property(e => e.UserId)
+                    .IsRequired()
+                    .HasColumnName("user_id");
 
-            entity.Property(e => e.UserName)
-                .IsRequired()
-                .HasColumnName("user_name");
+                entity.Property(e => e.UserName)
+                    .IsRequired()
+                    .HasColumnName("user_name");
 
-            entity.Property(e => e.FolderId).HasColumnName("folder_id");
+                entity.Property(e => e.FolderId).HasColumnName("folder_id");
 
-            entity.Property(e => e.Private).HasColumnName("private");
+                entity.Property(e => e.Private).HasColumnName("private");
 
-            entity.Property(e => e.HasLogo).HasColumnName("has_logo");
+                entity.Property(e => e.HasLogo).HasColumnName("has_logo");
 
-            entity.Property(e => e.Color)
-                .HasColumnName("color")
-                .HasColumnType("char(6)");
+                entity.Property(e => e.Color)
+                    .HasColumnName("color")
+                    .HasColumnType("char(6)");
             
-            entity.Property(e => e.Cover)
-                .HasColumnName("cover")
-                .HasColumnType("char(6)");
+                entity.Property(e => e.Cover)
+                    .HasColumnName("cover")
+                    .HasColumnType("char(6)");
             
-            entity.Property(e => e.ModifiedOn)
-                .HasColumnName("modified_on")
-                .HasColumnType("timestamptz")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
-        });
+                entity.Property(e => e.ModifiedOn)
+                    .HasColumnName("modified_on")
+                    .HasColumnType("timestamptz")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
 
+        }
     }
 }

@@ -30,10 +30,7 @@ namespace ASC.Web.Core.Utility;
 /// </summary>
 public sealed class PasswordSettings : ISettings<PasswordSettings>
 {
-    public static Guid ID
-    {
-        get { return new Guid("aa93a4d1-012d-4ccd-895a-e094e809c840"); }
-    }
+    public static Guid ID => new("aa93a4d1-012d-4ccd-895a-e094e809c840");
 
     private readonly IConfiguration _configuration;
 
@@ -107,37 +104,19 @@ public sealed class PasswordSettingsManager(IConfiguration configuration)
 
     /// <summary>Allowed characters for the password in the regex string format</summary>
     /// <type>System.String, System</type>
-    public string AllowedCharactersRegexStr
-    {
-        get
-        {
-            return PrintableASCII ? @"[\x21-\x7E]" : @"[0-9a-zA-Z!""#$%&()*+,.:;<>?@^_{}~]"; // excluding SPACE or (SPACE and '-/=[\]`|)
-        }
-    }
+    public string AllowedCharactersRegexStr => PrintableASCII ? @"[\x21-\x7E]" : @"[0-9a-zA-Z!""#$%&()*+,.:;<>?@^_{}~]"; // excluding SPACE or (SPACE and '-/=[\]`|)
 
     /// <summary>Allowed digits for the password in the regex string format</summary>
     /// <type>System.String, System</type>
-    public string DigitsRegexStr
-    {
-        get => @"(?=.*\d)";
-    }
+    public string DigitsRegexStr => @"(?=.*\d)";
 
     /// <summary>Allowed uppercase letters for the password in the regex string format</summary>
     /// <type>System.String, System</type>
-    public string UpperCaseRegexStr
-    {
-        get => @"(?=.*[A-Z])";
-    }
+    public string UpperCaseRegexStr => @"(?=.*[A-Z])";
 
     /// <summary>Allowed special symbols for the password in the regex string format</summary>
     /// <type>System.String, System</type>
-    public string SpecSymbolsRegexStr
-    {
-        get
-        {
-            return PrintableASCII ? @"(?=.*[\x21-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E])" : @"(?=.*[!""#$%&()*+,.:;<>?@^_{}~])";
-        }
-    }
+    public string SpecSymbolsRegexStr => PrintableASCII ? @"(?=.*[\x21-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E])" : @"(?=.*[!""#$%&()*+,.:;<>?@^_{}~])";
 
     public void CheckPassword(string password, PasswordSettings passwordSettings)
     {

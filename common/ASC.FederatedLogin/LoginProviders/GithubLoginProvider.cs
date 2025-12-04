@@ -35,15 +35,10 @@ public class GithubLoginProvider : OauthProvider
     public override string ClientID => this["githubClientId"];
     public override string ClientSecret => this["githubClientSecret"];
 
-    public override bool IsEnabled
-    {
-        get
-        {
-            return !string.IsNullOrEmpty(ClientID) &&
-                   !string.IsNullOrEmpty(ClientSecret) &&
-                   !string.IsNullOrEmpty(RedirectUri);
-        }
-    }
+    public override bool IsEnabled =>
+        !string.IsNullOrEmpty(ClientID) &&
+        !string.IsNullOrEmpty(ClientSecret) &&
+        !string.IsNullOrEmpty(RedirectUri);
 
     public GithubLoginProvider() { }
 

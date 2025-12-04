@@ -28,5 +28,5 @@ namespace ASC.Core.Common.Quota.Custom;
 
 public class TenantCustomQuotaFeature : CustomQuotaFeature
 {
-    public override string Name { get => "tenant_custom_quota"; }
+    public override string Name => "tenant_custom_quota";
 }

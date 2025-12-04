@@ -83,8 +83,8 @@ public class SwaggerOperationIdFilter : IOperationFilter
     }
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        if (context.ApiDescription.RelativePath.Equals(_route, System.StringComparison.OrdinalIgnoreCase) &&
-            context.ApiDescription.HttpMethod.Equals("GET", System.StringComparison.OrdinalIgnoreCase))
+        if (context.ApiDescription.RelativePath.Equals(_route, StringComparison.OrdinalIgnoreCase) &&
+            context.ApiDescription.HttpMethod.Equals("GET", StringComparison.OrdinalIgnoreCase))
         {
             operation.OperationId = _newOperationId;
         }

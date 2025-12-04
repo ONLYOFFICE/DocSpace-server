@@ -457,7 +457,7 @@ public class FilesMessageService(
             case MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser when userid != Guid.Empty:
                 desc.UserIds = [userid];
                 break;
-            case MessageAction.RoomUpdateAccessForUser when (userRole != FileShare.None) && userid != Guid.Empty:
+            case MessageAction.RoomUpdateAccessForUser when userRole != FileShare.None && userid != Guid.Empty:
                 desc.UserIds = [userid];
                 desc.UserRole = (int)userRole;
                 break;
