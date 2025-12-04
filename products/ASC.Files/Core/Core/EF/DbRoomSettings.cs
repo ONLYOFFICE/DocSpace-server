@@ -65,122 +65,125 @@ public static class DbRoomSettingsExtension
         return modelBuilder;
     }
 
-    private static void MySqlAddDbRoomSettings(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbRoomSettings>(entity =>
+        private void MySqlAddDbRoomSettings()
         {
-            entity.ToTable("files_room_settings")
-                .HasCharSet("utf8");
+            modelBuilder.Entity<DbRoomSettings>(entity =>
+            {
+                entity.ToTable("files_room_settings")
+                    .HasCharSet("utf8");
 
-            entity.HasKey(e => new { e.TenantId, e.RoomId })
-                .HasName("primary");
+                entity.HasKey(e => new { e.TenantId, e.RoomId })
+                    .HasName("primary");
 
-            entity.Property(e => e.RoomId).HasColumnName("room_id");
+                entity.Property(e => e.RoomId).HasColumnName("room_id");
 
-            entity.Property(e => e.Private)
-                .HasColumnName("private")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.Private)
+                    .HasColumnName("private")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.HasLogo).HasColumnName("has_logo").HasDefaultValueSql("0");
+                entity.Property(e => e.HasLogo).HasColumnName("has_logo").HasDefaultValueSql("0");
 
-            entity.Property(e => e.Indexing).HasColumnName("indexing").HasDefaultValueSql("0");
+                entity.Property(e => e.Indexing).HasColumnName("indexing").HasDefaultValueSql("0");
 
-            entity.Property(e => e.Watermark)
-                .HasColumnName("watermark")
-                .HasColumnType("json")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Watermark)
+                    .HasColumnName("watermark")
+                    .HasColumnType("json")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Color)
-                .HasColumnName("color")
-                .HasColumnType("char")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Color)
+                    .HasColumnName("color")
+                    .HasColumnType("char")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Cover)
-                .HasColumnName("cover")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Cover)
+                    .HasColumnName("cover")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.Quota)
-                .HasColumnName("quota")
-                .HasDefaultValueSql("'-2'");
+                entity.Property(e => e.Quota)
+                    .HasColumnName("quota")
+                    .HasDefaultValueSql("'-2'");
 
-            entity.Property(e => e.Lifetime)
-                .HasColumnName("lifetime")
-                .HasColumnType("json")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Lifetime)
+                    .HasColumnName("lifetime")
+                    .HasColumnType("json")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.DenyDownload).HasColumnName("deny_download").HasDefaultValueSql("0");
+                entity.Property(e => e.DenyDownload).HasColumnName("deny_download").HasDefaultValueSql("0");
             
-            entity.Property(e => e.ChatProviderId)
-                .HasColumnName("chat_provider_id");
+                entity.Property(e => e.ChatProviderId)
+                    .HasColumnName("chat_provider_id");
             
-            entity.HasIndex(e => e.ChatProviderId)
-                .HasDatabaseName("IX_chat_provider_id");
+                entity.HasIndex(e => e.ChatProviderId)
+                    .HasDatabaseName("IX_chat_provider_id");
             
-            entity.Property(e => e.ChatParameters)
-                .HasColumnName("chat_settings")
-                .HasColumnType("json")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-        });
-    }
+                entity.Property(e => e.ChatParameters)
+                    .HasColumnName("chat_settings")
+                    .HasColumnType("json")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+            });
+        }
 
-    private static void PgSqlAddDbRoomSettings(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbRoomSettings>(entity =>
+        private void PgSqlAddDbRoomSettings()
         {
-            entity.ToTable("files_room_settings");
+            modelBuilder.Entity<DbRoomSettings>(entity =>
+            {
+                entity.ToTable("files_room_settings");
 
-            entity.HasKey(e => new { e.TenantId, e.RoomId })
-                .HasName("pk_files_room_settings");
+                entity.HasKey(e => new { e.TenantId, e.RoomId })
+                    .HasName("pk_files_room_settings");
 
-            entity.Property(e => e.RoomId)
-                .HasColumnName("room_id");
+                entity.Property(e => e.RoomId)
+                    .HasColumnName("room_id");
 
-            entity.Property(e => e.Private)
-                .HasColumnName("private")
-                .HasDefaultValueSql("false");
+                entity.Property(e => e.Private)
+                    .HasColumnName("private")
+                    .HasDefaultValueSql("false");
 
-            entity.Property(e => e.HasLogo)
-                .HasColumnName("has_logo")
-                .HasDefaultValueSql("false");
+                entity.Property(e => e.HasLogo)
+                    .HasColumnName("has_logo")
+                    .HasDefaultValueSql("false");
 
-            entity.Property(e => e.Indexing)
-                .HasColumnName("indexing")
-                .HasDefaultValueSql("false");
+                entity.Property(e => e.Indexing)
+                    .HasColumnName("indexing")
+                    .HasDefaultValueSql("false");
 
-            entity.Property(e => e.Watermark)
-                .HasColumnName("watermark")
-                .HasColumnType("jsonb");
+                entity.Property(e => e.Watermark)
+                    .HasColumnName("watermark")
+                    .HasColumnType("jsonb");
 
-            entity.Property(e => e.Color)
-                .HasColumnName("color")
-                .HasColumnType("char(6)");
+                entity.Property(e => e.Color)
+                    .HasColumnName("color")
+                    .HasColumnType("char(6)");
 
-            entity.Property(e => e.Cover)
-                .HasColumnName("cover")
-                .HasColumnType("varchar(50)");
+                entity.Property(e => e.Cover)
+                    .HasColumnName("cover")
+                    .HasColumnType("varchar(50)");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id");
 
-            entity.Property(e => e.Quota)
-                .HasColumnName("quota")
-                .HasDefaultValueSql("-2");
+                entity.Property(e => e.Quota)
+                    .HasColumnName("quota")
+                    .HasDefaultValueSql("-2");
 
-            entity.Property(e => e.Lifetime)
-                .HasColumnName("lifetime")
-                .HasColumnType("jsonb");
+                entity.Property(e => e.Lifetime)
+                    .HasColumnName("lifetime")
+                    .HasColumnType("jsonb");
 
-            entity.Property(e => e.DenyDownload)
-                .HasColumnName("deny_download")
-                .HasDefaultValueSql("false");
-        });
+                entity.Property(e => e.DenyDownload)
+                    .HasColumnName("deny_download")
+                    .HasDefaultValueSql("false");
+            });
+        }
     }
 }

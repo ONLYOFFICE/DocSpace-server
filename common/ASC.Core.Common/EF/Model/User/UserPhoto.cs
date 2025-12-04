@@ -51,58 +51,61 @@ public static class UserPhotoExtension
 
         return modelBuilder;
     }
-    public static void MySqlAddUserPhoto(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<UserPhoto>(entity =>
+        public void MySqlAddUserPhoto()
         {
-            entity.HasKey(e => e.UserId)
-                .HasName("PRIMARY");
+            modelBuilder.Entity<UserPhoto>(entity =>
+            {
+                entity.HasKey(e => e.UserId)
+                    .HasName("PRIMARY");
 
-            entity.ToTable("core_userphoto")
-                .HasCharSet("utf8");
+                entity.ToTable("core_userphoto")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant");
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("tenant");
 
-            entity.Property(e => e.UserId)
-                .HasColumnName("userid")
-                .HasColumnType("varchar(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.UserId)
+                    .HasColumnName("userid")
+                    .HasColumnType("varchar(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Photo)
-                .IsRequired()
-                .HasColumnName("photo")
-                .HasColumnType("mediumblob");
+                entity.Property(e => e.Photo)
+                    .IsRequired()
+                    .HasColumnName("photo")
+                    .HasColumnType("mediumblob");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
-        });
-    }
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
+            });
+        }
 
-    public static void PgSqlAddUserPhoto(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<UserPhoto>(entity =>
+        public void PgSqlAddUserPhoto()
         {
-            entity.HasKey(e => e.UserId)
-                .HasName("pk_userphoto"); // Define the primary key with a descriptive name
+            modelBuilder.Entity<UserPhoto>(entity =>
+            {
+                entity.HasKey(e => e.UserId)
+                    .HasName("pk_userphoto"); // Define the primary key with a descriptive name
 
-            entity.ToTable("core_userphoto");
+                entity.ToTable("core_userphoto");
 
-            entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("idx_userphoto_tenant");
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("idx_userphoto_tenant");
 
-            entity.Property(e => e.UserId)
-                .HasColumnName("userid")
-                .HasColumnType("uuid"); // Using UUID for the UserId (PostgreSQL-specific)
+                entity.Property(e => e.UserId)
+                    .HasColumnName("userid")
+                    .HasColumnType("uuid"); // Using UUID for the UserId (PostgreSQL-specific)
 
-            entity.Property(e => e.Photo)
-                .IsRequired()
-                .HasColumnName("photo")
-                .HasColumnType("bytea"); // Use 'bytea' for binary data in PostgreSQL
+                entity.Property(e => e.Photo)
+                    .IsRequired()
+                    .HasColumnName("photo")
+                    .HasColumnType("bytea"); // Use 'bytea' for binary data in PostgreSQL
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant")
-                .HasColumnType("integer");
-        });
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant")
+                    .HasColumnType("integer");
+            });
+        }
     }
 }

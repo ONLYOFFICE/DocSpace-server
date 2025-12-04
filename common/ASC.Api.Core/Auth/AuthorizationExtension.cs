@@ -83,29 +83,32 @@ public static class AuthorizationExtension
         return string.Join(",", scopes);
     }
 
-    public static IServiceCollection AddJwtBearerAuthentication(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.AddSingleton<IAuthorizationHandler, ScopesAuthorizationHandler>();
-        services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
+        public IServiceCollection AddJwtBearerAuthentication()
+        {
+            services.AddSingleton<IAuthorizationHandler, ScopesAuthorizationHandler>();
+            services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
 
-        services.AddAuthentication()
+            services.AddAuthentication()
                 .AddScheme<AuthenticationSchemeOptions, JwtBearerAuthHandler>(JwtBearerDefaults.AuthenticationScheme, _ => { });
 
-        return services;
+            return services;
 
-    }
+        }
 
-    public static IServiceCollection AddApiKeyBearerAuthentication(this IServiceCollection services)
-    {
-        services.AddSingleton<IAuthorizationHandler, ScopesAuthorizationHandler>();
-        services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
+        public IServiceCollection AddApiKeyBearerAuthentication()
+        {
+            services.AddSingleton<IAuthorizationHandler, ScopesAuthorizationHandler>();
+            services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
 
-        services.AddAuthentication()
-            .AddScheme<AuthenticationSchemeOptions, ApiKeyBearerAuthHandler>(ApiKeyBearerDefaults.AuthenticationScheme,
-                _ => { });
+            services.AddAuthentication()
+                .AddScheme<AuthenticationSchemeOptions, ApiKeyBearerAuthHandler>(ApiKeyBearerDefaults.AuthenticationScheme,
+                    _ => { });
 
-        return services;
+            return services;
 
+        }
     }
 
     public static TBuilder WithRequirementAuthorization<TBuilder>(this TBuilder builder) where TBuilder : IEndpointConventionBuilder

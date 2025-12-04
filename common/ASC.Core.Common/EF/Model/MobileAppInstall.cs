@@ -46,72 +46,75 @@ public static class MobileAppInstallExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddMobileAppInstall(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<MobileAppInstall>(entity =>
+        public void MySqlAddMobileAppInstall()
         {
-            entity.HasKey(e => new { e.UserEmail, e.AppType })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<MobileAppInstall>(entity =>
+            {
+                entity.HasKey(e => new { e.UserEmail, e.AppType })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("mobile_app_install")
-                .HasCharSet("utf8");
+                entity.ToTable("mobile_app_install")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.UserEmail)
-                .HasColumnName("user_email")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.UserEmail)
+                    .HasColumnName("user_email")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.AppType)
-                .HasColumnName("app_type");
+                entity.Property(e => e.AppType)
+                    .HasColumnName("app_type");
 
-            entity.Property(e => e.LastSign)
-                .HasColumnName("last_sign")
-                .IsRequired(false)
-                .HasColumnType("datetime")
-                .HasDefaultValueSql("NULL");
+                entity.Property(e => e.LastSign)
+                    .HasColumnName("last_sign")
+                    .IsRequired(false)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("NULL");
 
-            entity.Property(e => e.RegisteredOn)
-                .HasColumnName("registered_on")
-                .HasColumnType("datetime");
-        });
-    }
+                entity.Property(e => e.RegisteredOn)
+                    .HasColumnName("registered_on")
+                    .HasColumnType("datetime");
+            });
+        }
 
-    public static void PgSqlAddMobileAppInstall(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<MobileAppInstall>(entity =>
+        public void PgSqlAddMobileAppInstall()
         {
-            // Define the composite primary key for PostgreSQL
-            entity.HasKey(e => new { e.UserEmail, e.AppType })
-                .HasName("pk_mobile_app_install");
+            modelBuilder.Entity<MobileAppInstall>(entity =>
+            {
+                // Define the composite primary key for PostgreSQL
+                entity.HasKey(e => new { e.UserEmail, e.AppType })
+                    .HasName("pk_mobile_app_install");
 
-            // Map the table name in PostgreSQL
-            entity.ToTable("mobile_app_install");
+                // Map the table name in PostgreSQL
+                entity.ToTable("mobile_app_install");
 
-            // Configure the UserEmail property
-            entity.Property(e => e.UserEmail)
-                .HasColumnName("user_email")
-                .HasColumnType("varchar") // Use varchar for strings
-                .HasMaxLength(255) // Respect the MaxLength attribute
-                .IsRequired(); // Ensure it is not null
+                // Configure the UserEmail property
+                entity.Property(e => e.UserEmail)
+                    .HasColumnName("user_email")
+                    .HasColumnType("varchar") // Use varchar for strings
+                    .HasMaxLength(255) // Respect the MaxLength attribute
+                    .IsRequired(); // Ensure it is not null
 
-            // Configure the AppType property
-            entity.Property(e => e.AppType)
-                .HasColumnName("app_type")
-                .IsRequired(); // Ensure it is not null
+                // Configure the AppType property
+                entity.Property(e => e.AppType)
+                    .HasColumnName("app_type")
+                    .IsRequired(); // Ensure it is not null
 
-            // Configure the RegisteredOn property
-            entity.Property(e => e.RegisteredOn)
-                .HasColumnName("registered_on")
-                .HasColumnType("timestamptz") // Use timestamp for date-time in PostgreSQL
-                .IsRequired(); // Ensure it is not null
+                // Configure the RegisteredOn property
+                entity.Property(e => e.RegisteredOn)
+                    .HasColumnName("registered_on")
+                    .HasColumnType("timestamptz") // Use timestamp for date-time in PostgreSQL
+                    .IsRequired(); // Ensure it is not null
 
-            // Configure the LastSign property
-            entity.Property(e => e.LastSign)
-                .HasColumnName("last_sign")
-                .HasColumnType("timestamptz") // Optional date-time column
-                .IsRequired(false) // Not required (nullable)
-                .HasDefaultValue(null); // Default value is NULL
-        });
+                // Configure the LastSign property
+                entity.Property(e => e.LastSign)
+                    .HasColumnName("last_sign")
+                    .HasColumnType("timestamptz") // Optional date-time column
+                    .IsRequired(false) // Not required (nullable)
+                    .HasDefaultValue(null); // Default value is NULL
+            });
+        }
     }
 }

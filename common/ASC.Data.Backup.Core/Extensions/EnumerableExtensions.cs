@@ -42,59 +42,61 @@ public class TreeNode<TEntry>()
 
 public static class EnumerableExtensions
 {
-    public static IEnumerable<TreeNode<TEntry>> ToTree<TEntry, TKey>(this IEnumerable<TEntry> elements,
-                                                                     Func<TEntry, TKey> keySelector,
-                                                                     Func<TEntry, TKey> parentKeySelector)
+    extension<TEntry>(IEnumerable<TEntry> elements)
     {
-        ArgumentNullException.ThrowIfNull(elements);
-        ArgumentNullException.ThrowIfNull(keySelector);
-        ArgumentNullException.ThrowIfNull(parentKeySelector);
-
-        var dic = elements.ToDictionary(keySelector, x => new TreeNode<TEntry>(x));
-
-        foreach (var val in dic.Select(r => r.Value))
+        public IEnumerable<TreeNode<TEntry>> ToTree<TKey>(Func<TEntry, TKey> keySelector,
+            Func<TEntry, TKey> parentKeySelector)
         {
-            var parentKey = parentKeySelector(val.Entry);
-            if (parentKey != null && dic.TryGetValue(parentKeySelector(val.Entry), out var parent))
+            ArgumentNullException.ThrowIfNull(elements);
+            ArgumentNullException.ThrowIfNull(keySelector);
+            ArgumentNullException.ThrowIfNull(parentKeySelector);
+
+            var dic = elements.ToDictionary(keySelector, x => new TreeNode<TEntry>(x));
+
+            foreach (var val in dic.Select(r => r.Value))
             {
-                parent.Children.Add(val);
-                val.Parent = parent;
+                var parentKey = parentKeySelector(val.Entry);
+                if (parentKey != null && dic.TryGetValue(parentKeySelector(val.Entry), out var parent))
+                {
+                    parent.Children.Add(val);
+                    val.Parent = parent;
+                }
             }
+
+            return dic.Values.Where(x => x.Parent == null);
         }
 
-        return dic.Values.Where(x => x.Parent == null);
-    }
-
-    public static IEnumerable<IEnumerable<TEntry>> MakeParts<TEntry>(this IEnumerable<TEntry> collection, int partLength)
-    {
-        ArgumentNullException.ThrowIfNull(collection);
-
-        if (partLength <= 0)
+        public IEnumerable<IEnumerable<TEntry>> MakeParts(int partLength)
         {
-            throw new ArgumentOutOfRangeException(nameof(partLength), partLength, "Length must be positive integer");
+            ArgumentNullException.ThrowIfNull(elements);
+
+            if (partLength <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(partLength), partLength, "Length must be positive integer");
+            }
+
+            return MakePartsIterator(elements, partLength);
         }
 
-        return MakePartsIterator(collection, partLength);
-    }
-
-    private static IEnumerable<IEnumerable<TEntry>> MakePartsIterator<TEntry>(this IEnumerable<TEntry> collection, int partLength)
-    {
-        var part = new List<TEntry>(partLength);
-
-        foreach (var entry in collection)
+        private IEnumerable<IEnumerable<TEntry>> MakePartsIterator(int partLength)
         {
-            part.Add(entry);
+            var part = new List<TEntry>(partLength);
 
-            if (part.Count == partLength)
+            foreach (var entry in elements)
+            {
+                part.Add(entry);
+
+                if (part.Count == partLength)
+                {
+                    yield return part.AsEnumerable();
+                    part = new List<TEntry>(partLength);
+                }
+            }
+
+            if (part.Count > 0)
             {
                 yield return part.AsEnumerable();
-                part = new List<TEntry>(partLength);
             }
-        }
-
-        if (part.Count > 0)
-        {
-            yield return part.AsEnumerable();
         }
     }
 }

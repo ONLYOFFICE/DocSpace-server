@@ -192,37 +192,40 @@ public static class OpenApiExtension
         });
     }
 
-    public static IApplicationBuilder UseOpenApi(this IApplicationBuilder app)
+    extension(IApplicationBuilder app)
     {
-        var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
-
-        app.UseSwagger(c =>
+        public IApplicationBuilder UseOpenApi()
         {
-            c.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}";
-        });
+            var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
 
-        return app;
-    }
-
-    public static IApplicationBuilder UseOpenApiUI(this IApplicationBuilder app, Dictionary<string, string> endpoints)
-    {
-        app.UseSwaggerUI(o =>
-        {
-            o.RoutePrefix = "openapi";
-            o.DocumentTitle = "DocSpace API";
-
-            foreach (var (name, route) in endpoints)
+            app.UseSwagger(c =>
             {
-                o.SwaggerEndpoint(route, name);
-            }
-        });
+                c.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}";
+            });
 
-        app.UseEndpoints(endpointRouteBuilder =>
+            return app;
+        }
+
+        public IApplicationBuilder UseOpenApiUI(Dictionary<string, string> endpoints)
         {
-            endpointRouteBuilder.MapSwagger();
-        });
+            app.UseSwaggerUI(o =>
+            {
+                o.RoutePrefix = "openapi";
+                o.DocumentTitle = "DocSpace API";
 
-        return app;
+                foreach (var (name, route) in endpoints)
+                {
+                    o.SwaggerEndpoint(route, name);
+                }
+            });
+
+            app.UseEndpoints(endpointRouteBuilder =>
+            {
+                endpointRouteBuilder.MapSwagger();
+            });
+
+            return app;
+        }
     }
 
     public static string CustomSchemaId(Type type)
