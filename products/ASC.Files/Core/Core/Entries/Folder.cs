@@ -172,6 +172,11 @@ public interface IFolder
     /// The collection of folder tags.
     /// </summary>
     public IEnumerable<Tag> Tags { get; set; }
+
+    /// <summary>
+    /// Indicates whether the folder represents a room.
+    /// </summary>
+    bool IsRoom { get; }
 }
 
 /// <summary>
@@ -304,6 +309,8 @@ public class Folder<T> : FileEntry<T>, IFolder
     /// Specifies if the folder is root or not.
     /// </summary>
     public bool IsRoot => FolderType == RootFolderType;
+
+    public bool IsRoom => this.FolderType.IsRoom();
 }
 
 [Scope]

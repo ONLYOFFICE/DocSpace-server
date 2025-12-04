@@ -381,7 +381,7 @@ internal class SharePointFolderDao(
         {
             newFolderId = (string)await SharePointProviderInfo.RenameFolderAsync(folder.Id, newTitle);
 
-            if (DocSpaceHelper.IsRoom(SharePointProviderInfo.FolderType) && SharePointProviderInfo.FolderId != null)
+            if (SharePointProviderInfo.FolderType.IsRoom() && SharePointProviderInfo.FolderId != null)
             {
                 await DaoSelector.RenameRoomProviderAsync(SharePointProviderInfo, newTitle, newFolderId);
             }

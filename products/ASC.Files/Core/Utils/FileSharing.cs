@@ -77,7 +77,7 @@ public class FileSharingAceHelper(
         var handledAces = new List<ProcessedItem<T>>(aceWrappers.Count);
         var folder = entry as Folder<T>;
         var file = entry as File<T>;
-        var room = folder != null && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
+        var room = folder != null && folder.IsRoom ? folder : null;
 
         var roomUrl = room != null
             ? room.FolderType == FolderType.AiRoom
@@ -206,7 +206,7 @@ public class FileSharingAceHelper(
 
                 if (roomType == null)
                 {
-                    var entryRoom = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folder != null ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+                    var entryRoom = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folder != null ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => f.IsRoom);
                     roomType = entryRoom?.FolderType;
                 }
 
@@ -548,7 +548,7 @@ public class FileSharingAceHelper(
 
             if (entry is Folder<T> folder)
             {
-                if (DocSpaceHelper.IsRoom(folder.FolderType) || currentShareIsNullOrEmpty && tagRecent.Count != 0)
+                if (folder.IsRoom || currentShareIsNullOrEmpty && tagRecent.Count != 0)
                 {
                     defaultShare = FileShare.None;
                 }
@@ -601,7 +601,7 @@ public class FileSharingHelper(
         }
 
         if ((entry.RootFolderType is FolderType.Archive)
-            && (entry is not IFolder folder || !DocSpaceHelper.IsRoom(folder.FolderType)))
+            && entry is not IFolder { IsRoom: true })
         {
             return false;
         }
@@ -690,7 +690,7 @@ public class FileSharing(
             fileSecurity.CanEditExpirationAsync(entry)
         ).ContinueWith(t => (t.Result[0], t.Result[1], t.Result[2]));
 
-        var canAccess = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType)
+        var canAccess = entry is Folder<T> folder && folder.IsRoom
             ? await CheckAccessAsync(entry, filterType)
             : canEditAccess;
 
@@ -1154,7 +1154,7 @@ public class FileSharing(
         w.CanEditAccess = false;
         w.FileShareOptions.Password = await externalShare.GetPasswordAsync(w.FileShareOptions.Password);
         w.SubjectType = record.SubjectType;
-        var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(entry is Folder<T> folder ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+        var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(entry is Folder<T> folder ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => f.IsRoom);
         if (room is { FolderType: FolderType.VirtualDataRoom })
         {
             w.CanEditDenyDownload = !room.SettingsDenyDownload;

@@ -705,7 +705,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             return null;
         }
 
-        if (!DocSpaceHelper.IsRoom(folder.FolderType))
+        if (!folder.IsRoom)
         {
             return folder;
         }

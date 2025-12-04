@@ -197,7 +197,7 @@ public class FileStorageService //: IFileStorageService
 
             if (parent.RootFolderType == FolderType.VirtualRooms)
             {
-                parentRoom = !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
+                parentRoom = !parent.IsRoom && parent.FolderType != FolderType.VirtualRooms ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
             }
             if (!await fileSecurity.CanReadAsync(parent))
             {
@@ -269,7 +269,7 @@ public class FileStorageService //: IFileStorageService
 
             if (parent.RootFolderType == FolderType.VirtualRooms)
             {
-                parentRoom = !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms && !parent.ProviderEntry ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
+                parentRoom = !parent.IsRoom && parent.FolderType != FolderType.VirtualRooms && !parent.ProviderEntry ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
 
                 parent.ParentRoomType = parentRoom.FolderType;
                 parent.ParentRoomCreatedBy = parentRoom.CreateBy;
@@ -277,7 +277,7 @@ public class FileStorageService //: IFileStorageService
 
             if (parent.RootFolderType == FolderType.RoomTemplates)
             {
-                parentRoom = !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.RoomTemplates && !parent.ProviderEntry ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
+                parentRoom = !parent.IsRoom && parent.FolderType != FolderType.RoomTemplates && !parent.ProviderEntry ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
 
                 parent.ParentRoomType = parentRoom.FolderType;
                 parent.ParentRoomCreatedBy = parentRoom.CreateBy;
@@ -398,7 +398,7 @@ public class FileStorageService //: IFileStorageService
 
         if (parentRoom != null && breadCrumbs.Count >= 2)
         {
-            if (breadCrumbs[0] is Folder<T> { FolderType: FolderType.VirtualRooms } && breadCrumbs[1] is Folder<T> second && !DocSpaceHelper.IsRoom(second.FolderType))
+            if (breadCrumbs[0] is Folder<T> { FolderType: FolderType.VirtualRooms } && breadCrumbs[1] is Folder<T> second && !second.IsRoom)
             {
                 breadCrumbs[0] = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>());
             }
@@ -545,7 +545,7 @@ public class FileStorageService //: IFileStorageService
         await socketManager.CreateFolderAsync(folder);
 
         var folderDao = daoFactory.GetFolderDao<T>();
-        var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+        var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => f.IsRoom);
         if (room != null && !DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
         {
             var userIDs = (await fileSecurity.WhoCanReadAsync(room, true)).ToList();
@@ -668,7 +668,7 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<int>();
         var room = await folderDao.GetFolderAsync(roomId);
 
-        if (!DocSpaceHelper.IsRoom(room.FolderType) || room.RootId != await globalFolderHelper.FolderVirtualRoomsAsync || !await fileSecurity.CanEditRoomAsync(room))
+        if (!room.IsRoom || room.RootId != await globalFolderHelper.FolderVirtualRoomsAsync || !await fileSecurity.CanEditRoomAsync(room))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
         }
@@ -714,7 +714,7 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<int>();
         var template = await folderDao.GetFolderAsync(templateId);
 
-        if (!DocSpaceHelper.IsRoom(template.FolderType) || template.RootId != await globalFolderHelper.FolderRoomTemplatesAsync || !await fileSecurity.CanReadAsync(template))
+        if (!template.IsRoom || template.RootId != await globalFolderHelper.FolderRoomTemplatesAsync || !await fileSecurity.CanReadAsync(template))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
         }
@@ -857,7 +857,7 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<T>();
 
         var parent = await folderDao.GetFolderAsync(parentId);
-        var isRoom = DocSpaceHelper.IsRoom(folderType);
+        var isRoom = folderType.IsRoom();
 
         if (parent == null)
         {
@@ -1062,7 +1062,7 @@ public class FileStorageService //: IFileStorageService
 
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(folderId);
-        var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
+        var isRoom = folder.IsRoom;
 
         if (maxTotalSize < quota)
         {
@@ -1135,7 +1135,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
+        var isRoom = folder.IsRoom;
         var canEdit = folder.RootFolderType != FolderType.Archive && await fileSecurity.CanEditRoomAsync(folder);
 
         if (!canEdit)
@@ -1384,7 +1384,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        var canEdit = DocSpaceHelper.IsRoom(folder.FolderType)
+        var canEdit = folder.IsRoom
             ? folder.RootFolderType != FolderType.Archive && await fileSecurity.CanEditRoomAsync(folder)
             : await fileSecurity.CanRenameAsync(folder);
 
@@ -1431,7 +1431,7 @@ public class FileStorageService //: IFileStorageService
             renamedFolder = await folderDao.GetFolderAsync(newFolderId);
             renamedFolder.Access = folderAccess;
 
-            if (DocSpaceHelper.IsRoom(renamedFolder.FolderType))
+            if (renamedFolder.IsRoom)
             {
                 await filesMessageService.SendAsync(
                     folder.FolderType == FolderType.AiRoom ? MessageAction.AgentRenamed : MessageAction.RoomRenamed, 
@@ -1756,7 +1756,7 @@ public class FileStorageService //: IFileStorageService
 
         await webhookManager.PublishAsync(WebhookTrigger.FileCreated, file);
 
-        var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+        var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => f.IsRoom);
 
         if (file.IsForm && room?.FolderType == FolderType.VirtualDataRoom)
         {
@@ -2963,7 +2963,7 @@ public class FileStorageService //: IFileStorageService
 
         var toRoom = await destFolderDao.GetFolderAsync(destFolderId);
 
-        if (!DocSpaceHelper.IsRoom(toRoom.FolderType))
+        if (!toRoom.IsRoom)
         {
             var (roomId, _, _) = await destFolderDao.GetParentRoomInfoFromFileEntryAsync(toRoom);
             toRoom = await destFolderDao.GetFolderAsync(roomId);
@@ -3976,7 +3976,7 @@ public class FileStorageService //: IFileStorageService
 
                                 var name = user.DisplayUserName(false, displayUserSettingsHelper);
 
-                                if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
+                                if (entry is Folder<T> { IsRoom: true } folder)
                                 {
                                     switch (eventType)
                                     {
@@ -4020,7 +4020,7 @@ public class FileStorageService //: IFileStorageService
                             {
                                 var group = await userManager.GetGroupInfoAsync(ace.Id);
                                 var isSystem = await userManager.IsSystemGroup(group.ID);
-                                if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
+                                if (entry is Folder<T> { IsRoom: true } folder)
                                 {
                                     var isAgent = folder.FolderType == FolderType.AiRoom;
                                     
@@ -4449,7 +4449,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (!DocSpaceHelper.IsRoom(room.FolderType))
+        if (!room.IsRoom)
         {
             return room;
         }
@@ -4497,7 +4497,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (!DocSpaceHelper.IsRoom(room.FolderType))
+        if (!room.IsRoom)
         {
             return room;
         }
@@ -4703,7 +4703,7 @@ public class FileStorageService //: IFileStorageService
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
-            var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
+            var isRoom = folder.IsRoom;
 
             if (folder.ProviderEntry && !isRoom)
             {
@@ -5074,7 +5074,7 @@ public class FileStorageService //: IFileStorageService
             {
                 if (!form.ParentId.Equals(currentRoom.Id))
                 {
-                    var parentFolders = await folderDao.GetParentFoldersAsync(form.ParentId).Where(f => !DocSpaceHelper.IsRoom(f.FolderType)).ToListAsync();
+                    var parentFolders = await folderDao.GetParentFoldersAsync(form.ParentId).Where(f => !f.IsRoom).ToListAsync();
                     foreach (var folder in parentFolders)
                     {
                         await socketManager.CreateFolderAsync(folder, formFillers);
@@ -5247,7 +5247,7 @@ public class FileStorageService //: IFileStorageService
         linkId = ace.Id;
 
         var folder = entry as Folder<T>;
-        var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
+        var isRoom = folder is { IsRoom: true };
         var isAgent = folder is { FolderType: FolderType.AiRoom };
 
         var actions = folder == null ? _fileMessageActions : isRoom ? _roomMessageActions : _folderMessageActions;
@@ -5406,7 +5406,7 @@ public class FileStorageService //: IFileStorageService
     {
         if (entry.RootFolderType == FolderType.VirtualRooms && entry.ParentRoomType == null)
         {
-            var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(r => DocSpaceHelper.IsRoom(r.FolderType));
+            var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(r => r.IsRoom);
             if (room != null)
             {
                 entry.ParentRoomType = room.FolderType;

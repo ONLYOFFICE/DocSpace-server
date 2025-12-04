@@ -472,7 +472,7 @@ internal abstract class SecurityBaseDao<T>(
 
             switch (filterType)
             {
-                case ShareFilterType.User when (entry is IFolder folder && DocSpaceHelper.IsRoom(folder.FolderType)):
+                case ShareFilterType.User when entry is IFolder { IsRoom: true }:
                     {
                         var predicate = ShareCompareHelper.GetCompareExpression<SecurityUserRecord>(s => s.Security.Share, entry.RootFolderType);
 

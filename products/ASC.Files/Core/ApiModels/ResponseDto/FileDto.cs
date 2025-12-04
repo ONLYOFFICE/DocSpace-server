@@ -457,7 +457,7 @@ public class FileDtoHelper(
             var currentFolder = currentFolderTask.Result;
 
             Folder<T> currentRoom;
-            if (!DocSpaceHelper.IsRoom(currentFolder.FolderType) && file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates)
+            if (!currentFolder.IsRoom && file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates)
             {
                 currentRoom = await DocSpaceHelper.GetParentRoom(file, folderDao) ?? currentFolder;
             }
@@ -577,7 +577,7 @@ public class FileDtoHelper(
 
         if (file.Order != 0)
         {
-            if (string.IsNullOrEmpty(order) && (contextFolder == null || !DocSpaceHelper.IsRoom(contextFolder.FolderType)))
+            if (string.IsNullOrEmpty(order) && contextFolder is not { IsRoom: true })
             {
                 order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(file.ParentId);
             }
@@ -609,7 +609,7 @@ public class FileDtoHelper(
                     result.RootFolderType = FolderType.SHARE;
                 }
             
-                var room = parents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
+                var room = parents.FirstOrDefault(f => f.IsRoom);
                 if (room != null)
                 {
                     result.OwnedBy = await _employeeWrapperHelper.GetAsync(room.CreateBy);

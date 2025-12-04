@@ -107,7 +107,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 return false;
             }
         }
-        if (DocSpaceHelper.IsRoom(rootFolder.FolderType) && !rootFolder.ProviderEntry)
+        if (rootFolder.IsRoom && !rootFolder.ProviderEntry)
         {
             TenantEntityQuotaSettings quotaSettings = rootFolder.FolderType is FolderType.AiRoom
                    ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
@@ -534,8 +534,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(fileEntry.ParentId);
-        if (DocSpaceHelper.IsRoom(folder.FolderType) ||
-            (folder.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone))
+        if (folder.IsRoom || (folder.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone))
         {
             return folder;
         }
