@@ -826,6 +826,26 @@ public class StudioNotifyService(
                 new TagValue(Tags.OwnerName, owner.DisplayUserName(displayUserSettingsHelper)));
     }
 
+    public async Task SendMsgPaidPortalDeletedToSupportAsync(string tenantDomain, UserInfo owner, CustomerInfo customerInfo)
+    {
+        var email = commonLinkUtility.GetSupportEmail();
+        if (string.IsNullOrEmpty(email))
+        {
+            return;
+        }
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(
+                Actions.PortalDeletedToSupport,
+                await studioNotifyHelper.RecipientFromEmailAsync(email, false),
+                [EMailSenderName],
+                new TagValue(Tags.PortalUrl, tenantDomain),
+                new TagValue(Tags.UserEmail, owner.Email),
+                new TagValue(Tags.UserName, owner.DisplayUserName(displayUserSettingsHelper)),
+                new TagValue(Tags.OwnerName, customerInfo?.Email),
+                new TagValue(CommonTags.Footer, null),
+                TagValues.WithoutUnsubscribe());
+    }
+
     #endregion
 
     public async Task SendMsgConfirmChangeOwnerAsync(UserInfo owner, UserInfo newOwner, string confirmOwnerUpdateUrl)
