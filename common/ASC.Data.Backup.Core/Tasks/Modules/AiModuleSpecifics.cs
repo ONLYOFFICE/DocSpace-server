@@ -70,7 +70,7 @@ public class AiModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
 
     private readonly RelationInfo[] _tableRelations =
     [
-        new("core_user", "id", "ai_chat", "user_id"),
+        new("core_user", "id", "ai_chats", "user_id"),
         new("core_user", "id", "ai_user_chat_settings", "user_id"),
         new("core_user", "id", "ai_mcp_server_settings", "user_id"),
         new("files_folder", "id", "ai_chats", "room_id"),
