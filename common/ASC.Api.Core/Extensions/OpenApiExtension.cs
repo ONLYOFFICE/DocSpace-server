@@ -413,11 +413,8 @@ public static class OpenApiExtension
 
             var schemaId = CustomSchemaId(baseType);
 
-            if (!context.SchemaRepository.Schemas.ContainsKey(schemaId))
-            {
-                context.SchemaRepository.Schemas.Add(schemaId, baseTypeSchema);
-            }
-
+            context.SchemaRepository.Schemas.TryAdd(schemaId, baseTypeSchema);
+            
             var baseSchemaRef = new OpenApiReference
             {
                 Type = ReferenceType.Schema,

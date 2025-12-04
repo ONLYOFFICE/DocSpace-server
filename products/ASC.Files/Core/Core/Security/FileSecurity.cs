@@ -658,7 +658,7 @@ public class FileSecurity(
                     }
                 ];
 
-                if (!shares.Any())
+                if (shares.Count == 0)
                 {
                     var defaultShareRecord = defaultRecords.FirstOrDefault();
 

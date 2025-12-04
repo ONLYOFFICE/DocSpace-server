@@ -445,7 +445,7 @@ public abstract class VirtualRoomsController<T>(
 
         var result = new RoomSecurityDto();
 
-        if (inDto.RoomInvitation.Invitations == null || !inDto.RoomInvitation.Invitations.Any())
+        if (inDto.RoomInvitation.Invitations == null || inDto.RoomInvitation.Invitations.Count == 0)
         {
             return result;
         }
