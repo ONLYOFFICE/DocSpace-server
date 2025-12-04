@@ -136,11 +136,11 @@ public abstract class FormatterState
 
     protected FormatterState CurrentFormatterState
     {
-        get { return this.Formatter.CurrentState; }
+        get { return Formatter.CurrentState; }
     }
 
     protected void ChangeFormatterState(FormatterState formatterState)
     {
-        this.Formatter.ChangeState(formatterState);
+        Formatter.ChangeState(formatterState);
     }
 }

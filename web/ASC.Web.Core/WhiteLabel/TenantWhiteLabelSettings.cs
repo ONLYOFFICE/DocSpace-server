@@ -905,7 +905,7 @@ public class TenantWhiteLabelSettingsHelper(
 
         var logoPath = BuildLogoFileName(type, partnerSettings.GetExt(type, dark), dark);
 
-        return (await partnerStorage.IsFileAsync(logoPath)) ? (await partnerStorage.GetUrlWithHashAsync(string.Empty, logoPath)) : null;
+        return await partnerStorage.IsFileAsync(logoPath) ? await partnerStorage.GetUrlWithHashAsync(string.Empty, logoPath) : null;
     }
 
     private async Task<string> GetCustomRegionalPath(string culture)
@@ -924,7 +924,7 @@ public class TenantWhiteLabelSettingsHelper(
 
         if (string.IsNullOrEmpty(culture))
         {
-            culture = (tenantManager.GetCurrentTenant()).Language;
+            culture = tenantManager.GetCurrentTenant().Language;
         }
 
         return customCultures.Contains(culture, StringComparer.InvariantCultureIgnoreCase) ? $"{culture.ToLower()}/" : string.Empty;

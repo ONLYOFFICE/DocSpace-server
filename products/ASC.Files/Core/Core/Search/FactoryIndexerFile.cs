@@ -39,7 +39,7 @@ public class BaseIndexerFile(Client client,
 {
     protected override async Task<bool> BeforeIndexAsync(DbFile data)
     {
-        if (!(await base.BeforeIndexAsync(data)))
+        if (!await base.BeforeIndexAsync(data))
         {
             return false;
         }

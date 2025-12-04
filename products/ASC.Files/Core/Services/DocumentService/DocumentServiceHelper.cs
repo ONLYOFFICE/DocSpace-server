@@ -267,7 +267,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             if ((editPossible || reviewPossible || fillFormsPossible || commentPossible)
                 && tryCoAuthoring
-                && (await fileTracker.IsEditingAloneAsync(file.Id)))
+                && await fileTracker.IsEditingAloneAsync(file.Id))
             {
                 if (tryEdit)
                 {
@@ -535,7 +535,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(fileEntry.ParentId);
         if (DocSpaceHelper.IsRoom(folder.FolderType) ||
-            (folder.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone))
+            folder.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)
         {
             return folder;
         }

@@ -209,7 +209,7 @@ public class StudioNotifyService(
         string culture = null, 
         bool limitation = false)
     {
-        var cultureInfo = string.IsNullOrEmpty(culture) ? (GetCulture(null)) : new CultureInfo(culture);
+        var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", cultureInfo);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
@@ -271,7 +271,7 @@ public class StudioNotifyService(
 
     public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "", bool limitation = false)
     {
-        var cultureInfo = string.IsNullOrEmpty(culture) ? (GetCulture(null)) : new CultureInfo(culture);
+        var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", cultureInfo);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
@@ -299,7 +299,7 @@ public class StudioNotifyService(
 
     public async Task SendDocSpaceRegistration(string email, string confirmationUrl, string culture = "", bool limitation = false)
     {
-        var cultureInfo = string.IsNullOrEmpty(culture) ? (GetCulture(null)) : new CultureInfo(culture);
+        var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonRegister", cultureInfo);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
@@ -1095,7 +1095,7 @@ public class StudioNotifyService(
 
     public async Task SendTopUpWalletErrorAsync(UserInfo payer, UserInfo owner)
     {
-        var users = (new[] { payer, owner })
+        var users = new[] { payer, owner }
             .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
             .DistinctBy(user => user.Email);
 
@@ -1118,7 +1118,7 @@ public class StudioNotifyService(
 
     public async Task SendRenewSubscriptionErrorAsync(UserInfo payer, UserInfo owner)
     {
-        var users = (new UserInfo[] { payer, owner })
+        var users = new UserInfo[] { payer, owner }
             .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
             .DistinctBy(user => user.Email);
 
@@ -1193,6 +1193,6 @@ public class StudioNotifyService(
             culture = user.GetCulture();
         }
 
-        return culture ?? (tenantManager.GetCurrentTenant(false))?.GetCulture() ?? CultureInfo.CurrentUICulture;
+        return culture ?? tenantManager.GetCurrentTenant(false)?.GetCulture() ?? CultureInfo.CurrentUICulture;
     }
 }

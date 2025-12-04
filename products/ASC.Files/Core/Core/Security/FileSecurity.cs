@@ -146,7 +146,7 @@ public class FileSecurity(
             }.ToFrozenDictionary()
         },
         { FolderType.FillingFormsRoom, new Dictionary<SubjectType, int> { { SubjectType.PrimaryExternalLink, 1 } }.ToFrozenDictionary() },
-        { FolderType.AiRoom, new Dictionary<SubjectType, int> { { SubjectType.ExternalLink, 6 } }.ToFrozenDictionary() },
+        { FolderType.AiRoom, new Dictionary<SubjectType, int> { { SubjectType.ExternalLink, 6 } }.ToFrozenDictionary() }
     }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses =
@@ -663,7 +663,7 @@ public class FileSecurity(
                     var defaultShareRecord = defaultRecords.FirstOrDefault();
 
                     if (defaultShareRecord != null && ((defaultShareRecord.Share == FileShare.Read && action == FilesSecurityActions.Read) ||
-                        (defaultShareRecord.Share == FileShare.ReadWrite)))
+                        defaultShareRecord.Share == FileShare.ReadWrite))
                     {
                         return ((await userManager.GetUsersByGroupAsync(defaultShareRecord.Subject))
                                     .Where(x => x.Status == EmployeeStatus.Active).Select(y => y.Id).Distinct(), sharedAccess);
@@ -811,7 +811,7 @@ public class FileSecurity(
                 break;
         }
         
-        foreach (var r in (defaultRecords ?? []))
+        foreach (var r in defaultRecords ?? [])
         {
             var users = await ToGuidAsync(r);
             await foreach (var userId in users)
@@ -1462,7 +1462,7 @@ public class FileSecurity(
                 break;
             case FolderType.VirtualRooms:
             case FolderType.AiAgents:
-                if (isDocSpaceAdmin && (folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge)))
+                if (isDocSpaceAdmin && folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge))
                 {
                     if (action == FilesSecurityActions.Download)
                     {
@@ -1509,16 +1509,16 @@ public class FileSecurity(
                     }
                 }
 
-                if (file != null && (action is
-                    FilesSecurityActions.FillForms or
-                    FilesSecurityActions.Edit or
-                    FilesSecurityActions.StartFilling or
-                    FilesSecurityActions.FillingStatus or
-                    FilesSecurityActions.ResetFilling or
-                    FilesSecurityActions.StopFilling or
-                    FilesSecurityActions.SubmitToFormGallery or
-                    FilesSecurityActions.CopyLink or
-                    FilesSecurityActions.OpenForm)
+                if (file != null && action is
+                                     FilesSecurityActions.FillForms or
+                                     FilesSecurityActions.Edit or
+                                     FilesSecurityActions.StartFilling or
+                                     FilesSecurityActions.FillingStatus or
+                                     FilesSecurityActions.ResetFilling or
+                                     FilesSecurityActions.StopFilling or
+                                     FilesSecurityActions.SubmitToFormGallery or
+                                     FilesSecurityActions.CopyLink or
+                                     FilesSecurityActions.OpenForm
                     && await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
                 {
 
@@ -1544,22 +1544,22 @@ public class FileSecurity(
                         var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
                         var formShareRecord = await GetCurrentShareAsync(file, userId, isDocSpaceAdmin, shares);
 
-                        var hasFullAccessToForm = userHasFullAccess || (shareRecord is { Share: FileShare.ContentCreator or FileShare.RoomManager });
+                        var hasFullAccessToForm = userHasFullAccess || shareRecord is { Share: FileShare.ContentCreator or FileShare.RoomManager };
 
                         var isFillingStoped = formFilling?.FillingStopedDate != null && !DateTime.MinValue.Equals(formFilling?.FillingStopedDate);
                         return action switch
                         {
                             FilesSecurityActions.ResetFilling =>
-                                (userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || (shareRecord is { Share: FileShare.ContentCreator }) && file.CreateBy.Equals(userId)) && formFilling?.StartFilling == true && isFillingStoped,
+                                (userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || shareRecord is { Share: FileShare.ContentCreator } && file.CreateBy.Equals(userId)) && formFilling?.StartFilling == true && isFillingStoped,
 
                             FilesSecurityActions.StopFilling =>
-                                (userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || (shareRecord is { Share: FileShare.ContentCreator }) && file.CreateBy.Equals(userId)) && formFilling?.StartFilling == true && !isFillingStoped && currentStep > 0,
+                                (userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || shareRecord is { Share: FileShare.ContentCreator } && file.CreateBy.Equals(userId)) && formFilling?.StartFilling == true && !isFillingStoped && currentStep > 0,
 
                             FilesSecurityActions.StartFilling =>
                                 hasFullAccessToForm && (formFilling == null || formFilling?.StartFilling == false || formFilling?.StartFilling == null),
 
                             FilesSecurityActions.FillForms =>
-                                (!isFillingStoped && myRoles.Count != 0 && (role != null && role.Sequence == currentStep)) || (formShareRecord is { Share: FileShare.FillForms } && myRoles.Count == 0),
+                                (!isFillingStoped && myRoles.Count != 0 && role != null && role.Sequence == currentStep) || (formShareRecord is { Share: FileShare.FillForms } && myRoles.Count == 0),
 
                             FilesSecurityActions.Edit =>
                                 (currentStep == -1 && (hasFullAccessToForm || e.Access is FileShare.Editing)) || formShareRecord is { Share: FileShare.Editing },
@@ -1657,7 +1657,7 @@ public class FileSecurity(
                     return false;
                 }
 
-                if (isDocSpaceAdmin && (folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge)))
+                if (isDocSpaceAdmin && folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge))
                 {
                     if (action == FilesSecurityActions.Download)
                     {

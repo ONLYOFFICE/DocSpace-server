@@ -54,5 +54,5 @@ public enum LocationType
     Contacts = 30,
     
     [SwaggerEnum("Agents")]
-    Agents = 31,
+    Agents = 31
 }

@@ -590,7 +590,7 @@ public static class AccountingHttpClientExtension
                     ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
                         .Handle<HttpRequestException>()
                         .Handle<TaskCanceledException>()
-                        .HandleResult(response => !response.IsSuccessStatusCode),
+                        .HandleResult(response => !response.IsSuccessStatusCode)
                 });
             });
 

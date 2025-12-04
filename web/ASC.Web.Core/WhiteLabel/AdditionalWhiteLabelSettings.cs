@@ -84,7 +84,7 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
 
     public AdditionalWhiteLabelSettings(ExternalResourceSettingsHelper externalResourceSettingsHelper)
     {
-        this.ExternalResourceSettingsHelper = externalResourceSettingsHelper;
+        ExternalResourceSettingsHelper = externalResourceSettingsHelper;
     }
 
     public AdditionalWhiteLabelSettings() { }

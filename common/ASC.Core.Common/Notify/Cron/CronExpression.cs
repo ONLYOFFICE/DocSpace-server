@@ -279,7 +279,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             return i;
         }
         var c = s[i];
-        if (c is >= 'A' and <= 'Z' && (!s.Equals("L")) && (!s.Equals("LW")))
+        if (c is >= 'A' and <= 'Z' && !s.Equals("L") && !s.Equals("LW"))
         {
             var sub = s.Substring(i, 3);
             int sval;
@@ -365,7 +365,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
         if (c == '?')
         {
             i++;
-            if ((i + 1) < s.Length
+            if (i + 1 < s.Length
                 && s[i] != ' ' && s[i + 1] != '\t')
             {
                 throw new FormatException("Illegal character after '?': "
@@ -391,7 +391,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
         }
         if (c is '*' or '/')
         {
-            if (c == '*' && (i + 1) >= s.Length)
+            if (c == '*' && i + 1 >= s.Length)
             {
                 AddToSet(AllSpecInt, -1, incr, type);
 
@@ -399,7 +399,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             }
 
             if (c == '/'
-                && ((i + 1) >= s.Length || s[i + 1] == ' ' || s[i + 1] == '\t'))
+                && (i + 1 >= s.Length || s[i + 1] == ' ' || s[i + 1] == '\t'))
             {
                 throw new FormatException("'/' must be followed by an integer.");
             }
@@ -428,25 +428,25 @@ public class CronExpression : ICloneable, IDeserializationCallback
                         string.Format(CultureInfo.InvariantCulture, "Increment > 60 : {0}", incr));
                 }
 
-                if (incr > 23 && (type == Hour))
+                if (incr > 23 && type == Hour)
                 {
                     throw new FormatException(
                         string.Format(CultureInfo.InvariantCulture, "Increment > 24 : {0}", incr));
                 }
 
-                if (incr > 31 && (type == DayOfMonth))
+                if (incr > 31 && type == DayOfMonth)
                 {
                     throw new FormatException(
                         string.Format(CultureInfo.InvariantCulture, "Increment > 31 : {0}", incr));
                 }
 
-                if (incr > 7 && (type == DayOfWeek))
+                if (incr > 7 && type == DayOfWeek)
                 {
                     throw new FormatException(
                         string.Format(CultureInfo.InvariantCulture, "Increment > 7 : {0}", incr));
                 }
 
-                if (incr > 12 && (type == Month))
+                if (incr > 12 && type == Month)
                 {
                     throw new FormatException(string.Format(CultureInfo.InvariantCulture, "Increment > 12 : {0}",
                         incr));
@@ -629,7 +629,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
                 end = v1;
                 i = vs.Pos;
             }
-            if (i < s.Length && (s[i] == '/'))
+            if (i < s.Length && s[i] == '/')
             {
                 i++;
                 c = s[i];
@@ -791,7 +791,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
         var data = GetSet(type);
         if (type is Second or Minute)
         {
-            if ((val < 0 || val > 59 || end > 59) && (val != AllSpecInt))
+            if ((val < 0 || val > 59 || end > 59) && val != AllSpecInt)
             {
                 throw new FormatException(
                     "Minute and Second values must be between 0 and 59");
@@ -799,7 +799,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
         }
         else if (type == Hour)
         {
-            if ((val < 0 || val > 23 || end > 23) && (val != AllSpecInt))
+            if ((val < 0 || val > 23 || end > 23) && val != AllSpecInt)
             {
                 throw new FormatException(
                     "Hour values must be between 0 and 23");
@@ -807,8 +807,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
         }
         else if (type == DayOfMonth)
         {
-            if ((val < 1 || val > 31 || end > 31) && (val != AllSpecInt)
-                && (val != NoSpecInt))
+            if ((val < 1 || val > 31 || end > 31) && val != AllSpecInt
+                && val != NoSpecInt)
             {
                 throw new FormatException(
                     "Day of month values must be between 1 and 31");
@@ -816,7 +816,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
         }
         else if (type == Month)
         {
-            if ((val < 1 || val > 12 || end > 12) && (val != AllSpecInt))
+            if ((val < 1 || val > 12 || end > 12) && val != AllSpecInt)
             {
                 throw new FormatException(
                     "Month values must be between 1 and 12");
@@ -824,8 +824,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
         }
         else if (type == DayOfWeek)
         {
-            if ((val == 0 || val > 7 || end > 7) && (val != AllSpecInt)
-                && (val != NoSpecInt))
+            if ((val == 0 || val > 7 || end > 7) && val != AllSpecInt
+                && val != NoSpecInt)
             {
                 throw new FormatException(
                     "Day-of-Week values must be between 1 and 7");
@@ -1194,7 +1194,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
     private DateTime ProcessDayOfWeek(DateTime d, int day, int mon)
     {
         var dow = (int)_daysOfWeek.First();
-        var cDow = ((int)d.DayOfWeek) == 7 ? 1 : (int)d.DayOfWeek + 1;
+        var cDow = (int)d.DayOfWeek == 7 ? 1 : (int)d.DayOfWeek + 1;
         var daysToAdd = cDow < dow ? dow - cDow : dow + (7 - cDow);
         var lDay = GetLastDayOfMonth(mon, d.Year);
 

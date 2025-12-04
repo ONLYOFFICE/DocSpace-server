@@ -41,7 +41,7 @@ public static class AuthorizationExtension
         { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people", [ "accounts:write" ] },
         { "GET api/[0-9].[0-9]/group", [ "accounts:read" ] },
         { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/group", [ "accounts:write" ] },
-        { "(GET|POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/keys(/.*)?", [ "*" ] },
+        { "(GET|POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/keys(/.*)?", [ "*" ] }
     };
 
     private static string GetAuthorizePolicy(string routePattern, string httpMethod)

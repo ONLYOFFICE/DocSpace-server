@@ -210,7 +210,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;
                 await fileMarker.RemoveMarkAsNewForAllAsync(folder);
 
-                if (folder.ProviderEntry && ((folder.Id.Equals(folder.RootId) || isRoom)))
+                if (folder.ProviderEntry && (folder.Id.Equals(folder.RootId) || isRoom))
                 {
                     if (ProviderDao != null)
                     {
@@ -491,11 +491,11 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         if (file.RootFolderType == FolderType.Archive)
                         {
                             var archiveId = await folderDao.GetFolderIDArchive(false);
-                            await folderDao.ChangeTreeFolderSizeAsync(archiveId, (-1) * file.ContentLength);
+                            await folderDao.ChangeTreeFolderSizeAsync(archiveId, -1 * file.ContentLength);
                         }
                         else if (file.RootFolderType == FolderType.TRASH)
                         {
-                            await folderDao.ChangeTreeFolderSizeAsync(_trashId, (-1) * file.ContentLength);
+                            await folderDao.ChangeTreeFolderSizeAsync(_trashId, -1 * file.ContentLength);
                         }
 
                         if (hasHeaders)

@@ -36,11 +36,11 @@ public class PreFormatterState(TextileFormatter f) : FormatterState(f)
     {
         if (!Regex.IsMatch(input, "</pre>"))
         {
-            this.Formatter.ChangeState(this);
+            Formatter.ChangeState(this);
         }
         else
         {
-            this.Formatter.ChangeState(new PassthroughFormatterState(this.Formatter));
+            Formatter.ChangeState(new PassthroughFormatterState(Formatter));
         }
         return input;
     }

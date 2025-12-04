@@ -83,7 +83,7 @@ public static class ServiceCollectionExtension
                     FactoryHardTimeout = TimeSpan.FromSeconds(5)
                 }
             })
-            .WithMemoryCache(new MemoryCache(new MemoryCacheOptions { ExpirationScanFrequency = TimeSpan.FromSeconds(10), }))
+            .WithMemoryCache(new MemoryCache(new MemoryCacheOptions { ExpirationScanFrequency = TimeSpan.FromSeconds(10) }))
             .WithRegisteredLogger();
 
         if (connection != null)

@@ -442,7 +442,7 @@ public class RoomLogoManager(
     private async Task RemoveTempAsync(IDataStore store, string fileName)
     {
         var index = fileName.LastIndexOf('.');
-        var fileNameWithoutExt = (index != -1) ? fileName[..index] : fileName;
+        var fileNameWithoutExt = index != -1 ? fileName[..index] : fileName;
 
         try
         {
@@ -558,7 +558,7 @@ public class RoomLogoManager(
     private async Task<byte[]> GetTempAsync(IDataStore store, string fileName)
     {
         var index = fileName.LastIndexOf('.');
-        var fileNameWithoutExt = (index != -1) ? fileName[..index] : fileName;
+        var fileNameWithoutExt = index != -1 ? fileName[..index] : fileName;
 
         var fileNameParts = fileNameWithoutExt.Split(LogosPathSplitter);
 

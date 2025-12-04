@@ -82,7 +82,7 @@ public class TariffService(
     private int PaymentDelay => PaymentConfiguration.Delay;
     private bool TrialEnabled => PaymentConfiguration.TrialEnabled;
 
-    private PaymentConfiguration PaymentConfiguration => field ??= (configuration.GetSection("core:payment").Get<PaymentConfiguration>() ?? new PaymentConfiguration());
+    private PaymentConfiguration PaymentConfiguration => field ??= configuration.GetSection("core:payment").Get<PaymentConfiguration>() ?? new PaymentConfiguration();
 
     public async Task<Tariff> GetTariffAsync(int tenantId, bool withRequestToPaymentSystem = true, bool refresh = false)
     {
@@ -601,7 +601,7 @@ public class TariffService(
 
                         foreach (var productId in productIds)
                         {
-                            if (!int.TryParse(productId, out var _))
+                            if (!int.TryParse(productId, out _))
                             {
                                 accountingServices.Add(productId);
                             }
@@ -726,7 +726,7 @@ public class TariffService(
 
                 if (efTariff.Id == 0)
                 {
-                    efTariff.Id = (-tenant);
+                    efTariff.Id = -tenant;
                     tariffInfo.Id = efTariff.Id;
                 }
 

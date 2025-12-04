@@ -216,7 +216,7 @@ public static class DbTenantExtension
                 Name = "Web Office",
                 CreationDateTime = new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317),
                 OwnerId = Guid.Parse("66faa6e4-f133-11ea-b126-00ffeec8b4ef"),
-                LastModified = new DateTime(2022, 7, 8, 0, 0, 0, DateTimeKind.Utc),
+                LastModified = new DateTime(2022, 7, 8, 0, 0, 0, DateTimeKind.Utc)
             }
             )
             .HasData(

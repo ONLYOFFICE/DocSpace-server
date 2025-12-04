@@ -163,7 +163,7 @@ public abstract class EditorController<T>(
                 _ => new FormOpenSetup<T>
                 {
                     CanEdit = !inDto.Fill,
-                    CanFill = inDto.Fill,
+                    CanFill = inDto.Fill
                 }
             };
 

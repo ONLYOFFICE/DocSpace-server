@@ -68,7 +68,7 @@ public class BreadCrumbsManager(
     {
         var folderDao = daoFactory.GetFolderDao<T>();
 
-        var breadcrumbs = (await GetBreadCrumbsAsync(folderId, folderDao));
+        var breadcrumbs = await GetBreadCrumbsAsync(folderId, folderDao);
 
         var result = breadcrumbs.Skip(2).Select(r => r.Order.ToString()).ToList();
 
@@ -799,7 +799,7 @@ public class EntryManager(IDaoFactory daoFactory,
     {
         if ((parent.Id.Equals(await globalFolderHelper.FolderMyAsync) || parent.Id.Equals(await globalFolderHelper.FolderCommonAsync))
             && thirdPartyConfiguration.SupportInclusion(daoFactory)
-            && (await filesSettingsHelper.GetEnableThirdParty()))
+            && await filesSettingsHelper.GetEnableThirdParty())
         {
             var providerDao = daoFactory.ProviderDao;
             if (providerDao == null)

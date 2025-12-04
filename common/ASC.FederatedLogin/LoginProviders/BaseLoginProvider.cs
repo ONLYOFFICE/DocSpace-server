@@ -73,7 +73,7 @@ public enum LoginProvider
     Yandex,
     
     [SwaggerEnum("Github")]
-    Github,
+    Github
 }
 
 public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : Consumer, ILoginProvider, new()

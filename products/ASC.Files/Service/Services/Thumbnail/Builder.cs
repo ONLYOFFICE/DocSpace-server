@@ -431,8 +431,8 @@ public class Builder<T>(
 
     private IMagickImage GetImageThumbnail(MagickImage sourceBitmap, uint thumbnailWidth, uint thumbnailHeight)
     {
-        if ((sourceBitmap.Width > sourceBitmap.Height && thumbnailWidth < thumbnailHeight ||
-             sourceBitmap.Width < sourceBitmap.Height && thumbnailWidth > thumbnailHeight))
+        if (sourceBitmap.Width > sourceBitmap.Height && thumbnailWidth < thumbnailHeight ||
+            sourceBitmap.Width < sourceBitmap.Height && thumbnailWidth > thumbnailHeight)
         {
             (thumbnailHeight, thumbnailWidth) = (thumbnailWidth, thumbnailHeight);
         }

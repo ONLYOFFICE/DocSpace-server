@@ -428,7 +428,7 @@ public static class OpenApiExtension
             {
                 Type = "object",
                 Properties = new Dictionary<string, OpenApiSchema>(),
-                Required = new HashSet<string>(),
+                Required = new HashSet<string>()
             };
 
             foreach (var prop in originalProperties)

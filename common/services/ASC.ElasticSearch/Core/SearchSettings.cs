@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace ASC.ElasticSearch.Core;
 

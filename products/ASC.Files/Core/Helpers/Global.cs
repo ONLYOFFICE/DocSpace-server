@@ -680,7 +680,7 @@ public class GlobalFolder(
             return id;
         }
 
-        var cacheKey = $"trash/{(tenantManager.GetCurrentTenant()).Id}/{authContext.CurrentAccount.ID}";
+        var cacheKey = $"trash/{tenantManager.GetCurrentTenant().Id}/{authContext.CurrentAccount.ID}";
         if (!TrashFolderCache.TryGetValue(cacheKey, out var trashFolderId))
         {
             id = authContext.IsAuthenticated ? await daoFactory.GetFolderDao<int>().GetFolderIDTrashAsync(true) : 0;
@@ -744,7 +744,7 @@ public class GlobalFolder(
             await securityContext.AuthenticateMeWithoutCookieAsync(userId);
 
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
-            var culture = my ? (await userManager.GetUsersAsync(userId)).GetCulture() : (tenantManager.GetCurrentTenant()).GetCulture();
+            var culture = my ? (await userManager.GetUsersAsync(userId)).GetCulture() : tenantManager.GetCurrentTenant().GetCulture();
 
             var globalStore = scope.ServiceProvider.GetRequiredService<GlobalStore>();
             var storeTemplate = await globalStore.GetStoreTemplateAsync();

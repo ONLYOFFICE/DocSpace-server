@@ -120,7 +120,7 @@ public class CoreSettings(
 
         var subdomain = baseHost.Remove(baseHost.IndexOf('.') + 1);
 
-        return hostedRegion.StartsWith(subdomain) ? hostedRegion : (subdomain + hostedRegion.TrimStart('.'));
+        return hostedRegion.StartsWith(subdomain) ? hostedRegion : subdomain + hostedRegion.TrimStart('.');
     }
 
     public async Task SaveSettingAsync(string key, string value, int tenant = Tenant.DefaultTenant)

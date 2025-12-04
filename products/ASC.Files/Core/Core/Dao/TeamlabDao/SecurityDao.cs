@@ -70,7 +70,7 @@ internal abstract class SecurityBaseDao<T>(
 
         foreach (var record in records)
         {
-            var (mappedId, _) = (await mapping.MappingIdAsync(record.EntryId));
+            var (mappedId, _) = await mapping.MappingIdAsync(record.EntryId);
             var query = await filesDbContext
                 .ForDeleteShareRecordsAsync(record.TenantId, record.EntryType, record.Subject, mappedId)
                 .ToListAsync();
@@ -472,7 +472,7 @@ internal abstract class SecurityBaseDao<T>(
 
             switch (filterType)
             {
-                case ShareFilterType.User when (entry is IFolder folder && DocSpaceHelper.IsRoom(folder.FolderType)):
+                case ShareFilterType.User when entry is IFolder folder && DocSpaceHelper.IsRoom(folder.FolderType):
                     {
                         var predicate = ShareCompareHelper.GetCompareExpression<SecurityUserRecord>(s => s.Security.Share, entry.RootFolderType);
 

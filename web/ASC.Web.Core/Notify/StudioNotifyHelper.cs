@@ -56,7 +56,7 @@ public class StudioNotifyHelper(
             {
                 if (toguests)
                 {
-                    return (await userManager.GetUsersAsync());
+                    return await userManager.GetUsersAsync();
                 }
 
                 return await userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.RoomAdmin);

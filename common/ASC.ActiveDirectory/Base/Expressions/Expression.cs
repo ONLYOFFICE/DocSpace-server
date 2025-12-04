@@ -122,7 +122,7 @@ public class Expression : ICloneable
         var expressionString = "({0}{1}{2}{3})";
         expressionString = string.Format(expressionString,
             //positive or negative
-            (((int)_op & 0x010000) == 0x010000 || _negative) ? "!" : "", _attributeName, sop,
+            ((int)_op & 0x010000) == 0x010000 || _negative ? "!" : "", _attributeName, sop,
             EscapeLdapSearchFilter(_attributeValue));
 
         return expressionString;

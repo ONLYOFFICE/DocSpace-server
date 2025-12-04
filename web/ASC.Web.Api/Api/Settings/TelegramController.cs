@@ -49,7 +49,7 @@ public class TelegramController(
         return new TelegramStatusDto()
         {
             Status = status.Item1,
-            Username = status.Item2,
+            Username = status.Item2
         };
     }
 

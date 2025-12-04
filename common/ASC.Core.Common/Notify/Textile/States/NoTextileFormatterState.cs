@@ -33,7 +33,7 @@ public class NoTextileFormatterState(TextileFormatter f) : FormatterState(f)
 
     public override string Consume(string input, Match m)
     {
-        this.Formatter.ChangeState(this);
+        Formatter.ChangeState(this);
         return string.Empty;
     }
 

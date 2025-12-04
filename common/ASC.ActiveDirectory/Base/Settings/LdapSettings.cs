@@ -179,33 +179,33 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     public override int GetHashCode()
     {
         var hash = 3;
-        hash = (hash * 2) + EnableLdapAuthentication.GetHashCode();
-        hash = (hash * 2) + StartTls.GetHashCode();
-        hash = (hash * 2) + Ssl.GetHashCode();
-        hash = (hash * 2) + SendWelcomeEmail.GetHashCode();
-        hash = (hash * 2) + DisableEmailVerification.GetHashCode();
-        hash = (hash * 2) + Server.GetHashCode();
-        hash = (hash * 2) + UserDN.GetHashCode();
-        hash = (hash * 2) + PortNumber.GetHashCode();
-        hash = (hash * 2) + UserFilter.GetHashCode();
-        hash = (hash * 2) + LoginAttribute.GetHashCode();
-        hash = (hash * 2) + GroupMembership.GetHashCode();
-        hash = (hash * 2) + GroupDN.GetHashCode();
-        hash = (hash * 2) + GroupNameAttribute.GetHashCode();
-        hash = (hash * 2) + GroupFilter.GetHashCode();
-        hash = (hash * 2) + UserAttribute.GetHashCode();
-        hash = (hash * 2) + GroupAttribute.GetHashCode();
-        hash = (hash * 2) + Authentication.GetHashCode();
-        hash = (hash * 2) + Login.GetHashCode();
+        hash = hash * 2 + EnableLdapAuthentication.GetHashCode();
+        hash = hash * 2 + StartTls.GetHashCode();
+        hash = hash * 2 + Ssl.GetHashCode();
+        hash = hash * 2 + SendWelcomeEmail.GetHashCode();
+        hash = hash * 2 + DisableEmailVerification.GetHashCode();
+        hash = hash * 2 + Server.GetHashCode();
+        hash = hash * 2 + UserDN.GetHashCode();
+        hash = hash * 2 + PortNumber.GetHashCode();
+        hash = hash * 2 + UserFilter.GetHashCode();
+        hash = hash * 2 + LoginAttribute.GetHashCode();
+        hash = hash * 2 + GroupMembership.GetHashCode();
+        hash = hash * 2 + GroupDN.GetHashCode();
+        hash = hash * 2 + GroupNameAttribute.GetHashCode();
+        hash = hash * 2 + GroupFilter.GetHashCode();
+        hash = hash * 2 + UserAttribute.GetHashCode();
+        hash = hash * 2 + GroupAttribute.GetHashCode();
+        hash = hash * 2 + Authentication.GetHashCode();
+        hash = hash * 2 + Login.GetHashCode();
 
         foreach (var pair in LdapMapping)
         {
-            hash = (hash * 2) + pair.Value.GetHashCode();
+            hash = hash * 2 + pair.Value.GetHashCode();
         }
 
         foreach (var pair in AccessRights)
         {
-            hash = (hash * 2) + pair.Value.GetHashCode();
+            hash = hash * 2 + pair.Value.GetHashCode();
         }
 
         return hash;

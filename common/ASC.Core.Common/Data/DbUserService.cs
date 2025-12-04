@@ -206,7 +206,7 @@ public class EFUserService(
                 var pwdHash = GetPasswordHash(user.Id, passwordHash);
 
                 var any = await userDbContext.UserSecurity
-                    .AnyAsync(r => r.UserId == user.Id && (r.PwdHash == pwdHash));
+                    .AnyAsync(r => r.UserId == user.Id && r.PwdHash == pwdHash);
 
                 if (any)
                 {
@@ -344,12 +344,12 @@ public class EFUserService(
                 }
             case UserSortType.Type:
                 {
-                    var q1 = (from user in q
-                              join userGroup in userDbContext.UserGroups.Where(g =>
-                                  !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupGuest.ID ||
-                                                 g.UserGroupId == Constants.GroupUser.ID)) on user.Id equals userGroup.Userid into joinedGroup
-                              from @group in joinedGroup.DefaultIfEmpty()
-                              select new UserWithGroup { User = user, Group = @group });
+                    var q1 = from user in q
+                        join userGroup in userDbContext.UserGroups.Where(g =>
+                            !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupGuest.ID ||
+                                           g.UserGroupId == Constants.GroupUser.ID)) on user.Id equals userGroup.Userid into joinedGroup
+                        from @group in joinedGroup.DefaultIfEmpty()
+                        select new UserWithGroup { User = user, Group = @group };
 
                     Expression<Func<UserWithGroup, int>> orderByUserType = u =>
                         u.User.Id == filter.OwnerId ? 0 :
@@ -398,7 +398,7 @@ public class EFUserService(
                     break;
                 }
             case UserSortType.Email:
-                q = (filter.SortOrderAsc ? q.OrderBy(u => u.Email) : q.OrderByDescending(u => u.Email));
+                q = filter.SortOrderAsc ? q.OrderBy(u => u.Email) : q.OrderByDescending(u => u.Email);
                 break;
             case UserSortType.LastName:
                 q = filter.SortOrderAsc

@@ -136,7 +136,7 @@ public class MessageSettingsController(
     public async Task<string> SendAdminMail(AdminMessageSettingsRequestsDto inDto)
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
-        var enableAdmMess = studioAdminMessageSettings.Enable || (await tenantExtra.IsNotPaidAsync());
+        var enableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync();
 
         if (!enableAdmMess)
         {

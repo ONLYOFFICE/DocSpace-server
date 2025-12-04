@@ -133,12 +133,12 @@ public class ExternalLinkHelper(
             }
             else
             {
-                result.Shared = (entry switch
+                result.Shared = entry switch
                 {
                     FileEntry<int> entryInt => await IsSharedAsync(entryInt, userId, isDocSpaceAdmin),
                     FileEntry<string> entryString => await IsSharedAsync(entryString, userId, isDocSpaceAdmin),
                     _ => false
-                });
+                };
             }
 
             if (!result.Shared && result.Status == Status.Ok)

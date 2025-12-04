@@ -107,7 +107,7 @@ public class TenantExtra(
 
         var tariff = await GetCurrentTariffAsync(withRequestToPaymentSystem);
 
-        return tariff.State >= TariffState.NotPaid || Enterprise && !(await EnterprisePaidAsync(withRequestToPaymentSystem)) && tariff.LicenseDate == DateTime.MaxValue;
+        return tariff.State >= TariffState.NotPaid || Enterprise && !await EnterprisePaidAsync(withRequestToPaymentSystem) && tariff.LicenseDate == DateTime.MaxValue;
     }
 
     public async Task DemandAccessSpacePermissionAsync()

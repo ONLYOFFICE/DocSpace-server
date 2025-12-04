@@ -52,7 +52,7 @@ public abstract class ListFormatterState(TextileFormatter formatter) : Formatter
         _attsInfo = m.Groups["atts"].Value;
         input = m.Groups["content"].Value;
 
-        this.Formatter.ChangeState(this);
+        Formatter.ChangeState(this);
 
         return input;
     }

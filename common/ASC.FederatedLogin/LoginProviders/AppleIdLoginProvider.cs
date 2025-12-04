@@ -35,7 +35,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
 
     public override string AccessTokenUrl { get { return "https://appleid.apple.com/auth/token"; } }
     public override string RedirectUri { get { return this["appleIdRedirectUrl"]; } }
-    public override string ClientID { get { return (this["appleIdClientIdMobile"] != null && _httpContextAccessor?.HttpContext != null && _httpContextAccessor.HttpContext.Request.MobileApp()) ? this["appleIdClientIdMobile"] : this["appleIdClientId"]; } }
+    public override string ClientID { get { return this["appleIdClientIdMobile"] != null && _httpContextAccessor?.HttpContext != null && _httpContextAccessor.HttpContext.Request.MobileApp() ? this["appleIdClientIdMobile"] : this["appleIdClientId"]; } }
     public override string ClientSecret => GenerateSecret();
     public override string CodeUrl { get { return "https://appleid.apple.com/auth/authorize"; } }
     public override string Scopes { get { return ""; } }

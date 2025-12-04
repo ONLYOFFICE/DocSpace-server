@@ -99,7 +99,7 @@ internal class FileConverterService<T>(
                 {
                     var user = await userManager.GetUsersAsync(converter.Account);
 
-                    var culture = string.IsNullOrEmpty(user.CultureName) ? (tenantManager.GetCurrentTenant()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
+                    var culture = string.IsNullOrEmpty(user.CultureName) ? tenantManager.GetCurrentTenant().GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
 
                     CultureInfo.CurrentCulture = culture;
                     CultureInfo.CurrentUICulture = culture;

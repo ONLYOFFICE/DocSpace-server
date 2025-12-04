@@ -221,7 +221,7 @@ public class DocumentConfig<T>(
         return _referenceData ??= new FileReferenceData
         {
             FileKey = file.Id.ToString(),
-            InstanceId = (tenantManager.GetCurrentTenantId()).ToString()
+            InstanceId = tenantManager.GetCurrentTenantId().ToString()
         };
     }
 
@@ -1037,7 +1037,7 @@ public class CustomizationConfig<T>(
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
         return new SubmitForm
         {
-            Visible = file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormAsync(file, authContext.CurrentAccount.ID) && (properties is { FormFilling.StartFilling: true } or { FormFilling.CollectFillForm: true }),
+            Visible = file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormAsync(file, authContext.CurrentAccount.ID) && properties is { FormFilling.StartFilling: true } or { FormFilling.CollectFillForm: true },
             ResultMessage = ""
         };
     }

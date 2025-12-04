@@ -195,7 +195,7 @@ public class VectorizationTask : DistributedTaskProgress
         finally
         {
             IsCompleted = true;
-            this.Percentage = 100;
+            Percentage = 100;
 
             try
             {
