@@ -26,6 +26,21 @@
 
 namespace ASC.Data.Backup.Tasks.Modules;
 
+public class AiProvidersModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
+{
+    public override ModuleName ModuleName => ModuleName.AiProviders;
+    public override IEnumerable<TableInfo> Tables => _tables;
+    public override IEnumerable<RelationInfo> TableRelations => [];
+
+    private readonly TableInfo[] _tables =
+    [
+        new("ai_providers", "tenant_id", "id")
+        {
+            DateColumns = new Dictionary<string, bool> { { "created_on", false }, { "modified_on", false } }
+        }
+    ];
+}
+
 public class AiModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
 {
     public override ModuleName ModuleName => ModuleName.Ai;
@@ -34,10 +49,6 @@ public class AiModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
 
     private readonly TableInfo[] _tables =
     [
-        new("ai_providers", "tenant_id", "id")
-        {
-            DateColumns = new Dictionary<string, bool> { { "created_on", false }, { "modified_on", false } }
-        },
         new("ai_chats", "tenant_id", "id", IdType.Guid)
         {
             UserIDColumns = ["user_id"],
@@ -48,7 +59,7 @@ public class AiModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
             DateColumns = new Dictionary<string, bool> { { "created_on", false } }
         },
         new("ai_user_chat_settings", "tenant_id"),
-        new("ai_mcp_servers", "tenant_id", "id")
+        new("ai_mcp_servers", "tenant_id", "id", IdType.Guid)
         {
             DateColumns = new Dictionary<string, bool> { { "modified_on", false } }
         },
@@ -62,11 +73,12 @@ public class AiModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
         new("core_user", "id", "ai_chat", "user_id"),
         new("core_user", "id", "ai_user_chat_settings", "user_id"),
         new("core_user", "id", "ai_mcp_server_settings", "user_id"),
-        new("files_folder", "id", "ai_chat", "room_id"),
+        new("files_folder", "id", "ai_chats", "room_id"),
         new("files_folder", "id", "ai_mcp_server_settings", "room_id"),
         new("files_folder", "id", "ai_mcp_room_servers", "room_id"),
         new("files_folder", "id", "ai_user_chat_settings", "room_id"),
-        new("ai_chats", "id", "ai_chats_messages", "chat_id")
+        new("ai_chats", "id", "ai_chats_messages", "chat_id"),
+        new("ai_mcp_servers", "id", "ai_mcp_server_states", "id")
     ];
     
     protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)

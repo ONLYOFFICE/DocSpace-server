@@ -33,6 +33,7 @@ public class ModuleProvider(ILogger<ModuleProvider> logger, Helpers helpers, Cor
     {
         new TenantsModuleSpecifics(coreSettings,helpers),
         new AuditModuleSpecifics(helpers),
+        new AiProvidersModuleSpecifics(helpers),
         new FilesModuleSpecifics(logger,helpers),
         new FilesModuleSpecifics2(helpers),
         new WebStudioModuleSpecifics(helpers),

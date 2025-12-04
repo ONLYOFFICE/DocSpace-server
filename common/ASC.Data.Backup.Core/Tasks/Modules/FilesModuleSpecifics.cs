@@ -80,6 +80,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
 
             new("files_folder", "id", "files_bunch_objects", "left_node"),
             new("files_folder", "id", "files_room_settings", "room_id"),
+            new("ai_providers", "id", "files_room_settings", "chat_provider_id"),
             new("files_folder", "id", "files_file", "folder_id"),
             new("files_folder", "id", "files_folder", "parent_id"),
             new("files_folder", "id", "files_folder_tree", "folder_id"),
