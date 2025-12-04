@@ -359,10 +359,7 @@ public class AuthContext(IHttpContextAccessor httpContextAccessor)
                 CustomSynchronizationContext.CurrentContext.CurrentPrincipal = value;
             }
 
-            if (HttpContextAccessor?.HttpContext != null)
-            {
-                HttpContextAccessor.HttpContext.User = value;
-            }
+            HttpContextAccessor?.HttpContext?.User = value;
         }
     }
 }

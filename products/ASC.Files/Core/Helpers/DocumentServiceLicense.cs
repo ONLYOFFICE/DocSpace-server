@@ -108,8 +108,7 @@ public class DocumentServiceLicense(ICache cache,
                     return new LicenseValidationResult(false, "Server is null");
                 }
 
-                return commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.Success ||
-                    commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.SuccessLimit
+                return commandResponse.Server.ResultType is CommandResponse.ServerInfo.ResultTypes.Success or CommandResponse.ServerInfo.ResultTypes.SuccessLimit
                     ? new LicenseValidationResult(true, null)
                     : new LicenseValidationResult(false, $"ResultType is {commandResponse.Server.ResultType}");
             }

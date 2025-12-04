@@ -71,28 +71,16 @@ public class PathProvider(WebImageSupplier webImageSupplier,
 
         var result = "";
         var urlPathEncode = HttpUtility.UrlPathEncode(folder.Id.ToString());
-        switch (folder.RootFolderType)
+        result = folder.RootFolderType switch
         {
-            case FolderType.USER:
-                result = string.Format($"rooms/personal/filter?folder={urlPathEncode}");
-                break;
-            case FolderType.Recent:
-                result = string.Format($"recent/filter?folder={urlPathEncode}");
-                break;
-            case FolderType.Archive:
-                result = string.Format($"rooms/archived/filter?folder={urlPathEncode}");
-                break;
-            case FolderType.SHARE:
-                result = string.Format($"shared-with-me/filter?folder={urlPathEncode}");
-                break;
-            case FolderType.VirtualRooms:
-            case FolderType.RoomTemplates:
-                result = string.Format($"rooms/shared/{urlPathEncode}/filter?folder={urlPathEncode}");
-                break;
-            case FolderType.AiAgents:
-                result = string.Format($"ai-agents/{urlPathEncode}/filter?folder={urlPathEncode}");
-                break;
-        }
+            FolderType.USER => string.Format($"rooms/personal/filter?folder={urlPathEncode}"),
+            FolderType.Recent => string.Format($"recent/filter?folder={urlPathEncode}"),
+            FolderType.Archive => string.Format($"rooms/archived/filter?folder={urlPathEncode}"),
+            FolderType.SHARE => string.Format($"shared-with-me/filter?folder={urlPathEncode}"),
+            FolderType.VirtualRooms or FolderType.RoomTemplates => string.Format($"rooms/shared/{urlPathEncode}/filter?folder={urlPathEncode}"),
+            FolderType.AiAgents => string.Format($"ai-agents/{urlPathEncode}/filter?folder={urlPathEncode}"),
+            _ => result
+        };
 
         if (!string.IsNullOrEmpty(key))
         {

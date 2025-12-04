@@ -78,10 +78,7 @@ public class VirtualRoomsInternalController(
     public async Task<FolderDto<int>> CreateRoom(CreateRoomRequestDto inDto)
     {
         var lifetime = inDto.Lifetime.Map();
-        if (lifetime != null)
-        {
-            lifetime.StartDate = DateTime.UtcNow;
-        }
+        lifetime?.StartDate = DateTime.UtcNow;
 
         var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, 
             inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover, 

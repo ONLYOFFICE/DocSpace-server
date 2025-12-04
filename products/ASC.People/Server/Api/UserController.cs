@@ -954,7 +954,7 @@ public class UserController(
         var isConfirmLink = _httpContextAccessor.HttpContext!.User.Claims
             .Any(role => role.Type == ClaimTypes.Role &&
                 ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) &&
-                (confirmType == ConfirmType.LinkInvite || confirmType == ConfirmType.GuestShareLink));
+                confirmType is ConfirmType.LinkInvite or ConfirmType.GuestShareLink);
 
         if (user.Id == Constants.LostUser.Id)
         {

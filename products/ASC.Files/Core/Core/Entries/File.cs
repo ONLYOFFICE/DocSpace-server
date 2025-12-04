@@ -139,28 +139,18 @@ public class File<T> : FileEntry<T>
     {
         get
         {
-            switch (FileUtility.GetFileTypeByFileName(Title))
+            return FileUtility.GetFileTypeByFileName(Title) switch
             {
-                case FileType.Image:
-                    return FilterType.ImagesOnly;
-                case FileType.Document:
-                    return FilterType.DocumentsOnly;
-                case FileType.Presentation:
-                    return FilterType.PresentationsOnly;
-                case FileType.Spreadsheet:
-                    return FilterType.SpreadsheetsOnly;
-                case FileType.Archive:
-                    return FilterType.ArchiveOnly;
-                case FileType.Audio:
-                case FileType.Video:
-                    return FilterType.MediaOnly;
-                case FileType.Pdf:
-                    return IsForm ? FilterType.PdfForm : FilterType.Pdf;
-                case FileType.Diagram:
-                    return FilterType.DiagramsOnly;
-            }
-
-            return FilterType.None;
+                FileType.Image => FilterType.ImagesOnly,
+                FileType.Document => FilterType.DocumentsOnly,
+                FileType.Presentation => FilterType.PresentationsOnly,
+                FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
+                FileType.Archive => FilterType.ArchiveOnly,
+                FileType.Audio or FileType.Video => FilterType.MediaOnly,
+                FileType.Pdf => IsForm ? FilterType.PdfForm : FilterType.Pdf,
+                FileType.Diagram => FilterType.DiagramsOnly,
+                _ => FilterType.None
+            };
         }
     }
     /// <summary>

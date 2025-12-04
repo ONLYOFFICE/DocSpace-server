@@ -81,13 +81,9 @@ public class DbFactory(IConfiguration configuration, ConfigurationExtension conf
     public DbCommand CreateLastInsertIdCommand()
     {
         var command = DbProviderFactory.CreateCommand();
-        if (command != null)
-        {
-            command.CommandText =
-                configurationExtension.GetConnectionStrings(DefaultConnectionStringName).ProviderName.Contains("MySql", StringComparison.OrdinalIgnoreCase)
-                    ? "select Last_Insert_Id();"
-                    : "select last_insert_rowid();";
-        }
+        command?.CommandText = configurationExtension.GetConnectionStrings(DefaultConnectionStringName).ProviderName.Contains("MySql", StringComparison.OrdinalIgnoreCase)
+            ? "select Last_Insert_Id();"
+            : "select last_insert_rowid();";
 
         return command;
     }
@@ -95,10 +91,7 @@ public class DbFactory(IConfiguration configuration, ConfigurationExtension conf
     public DbCommand CreateShowColumnsCommand(string tableName)
     {
         var command = DbProviderFactory.CreateCommand();
-        if (command != null)
-        {
-            command.CommandText = "show columns from " + tableName + ";";
-        }
+        command?.CommandText = "show columns from " + tableName + ";";
 
         return command;
     }
