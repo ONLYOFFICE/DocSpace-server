@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -20,11 +20,38 @@
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
 //
-// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
+// All the Product's GUI elements, including illustrations and icon sets, as well as technical
+// writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Documentation;
+package com.asc.common.service.transfer.message;
 
-var app = new CommandApp<SwaggerCommand>();
-app.Run(args);
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
+
+/**
+ * Message object used for retrieving authorization information via messaging (RPC).
+ *
+ * <p>This DTO is used to request authorization details by providing a token. It serves as the
+ * request payload in authorization retrieval messaging operations.
+ */
+@Builder
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class RetrieveAuthorizationMessage {
+  /**
+   * The authorization token used to retrieve authorization information.
+   *
+   * <p>This token is required and serves as the identifier to look up the corresponding
+   * authorization record.
+   */
+  @JsonProperty(value = "token", required = true)
+  private String token;
+}

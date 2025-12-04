@@ -353,16 +353,12 @@ internal abstract class SecurityBaseDao<T>(
             {
                 case ShareFilterType.UserOrGroup:
                     {
-                        var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
-                            (security, user) => new { security, user });
-
-                        var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
-                            (security, group) => new { security, group });
+                        var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id, (security, user) => new { security, user });
+                        var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id, (security, group) => new { security, group });
 
                         if (textSearch)
                         {
-                            userQuery = userQuery.Where(r =>
-                                !r.user.Removed && (r.user.FirstName.ToLower().Contains(text) || r.user.LastName.ToLower().Contains(text) || r.user.Email.ToLower().Contains(text)));
+                            userQuery = userQuery.Where(r => !r.user.Removed && (r.user.FirstName.ToLower().Contains(text) || r.user.LastName.ToLower().Contains(text) || r.user.Email.ToLower().Contains(text)));
                             groupQuery = groupQuery.Where(r => r.group.Name.ToLower().Contains(text));
                         }
 
@@ -1130,27 +1126,31 @@ internal abstract class SecurityBaseDao<T>(
         var (entryId, _) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         var (_, entryParentId) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.ParentId);
         
-        Expression<Func<DbFilesSecurity, bool>> exp = s => s.TenantId == tenantId && s.EntryId == entryId && s.EntryType == entry.FileEntryType;
+        var q = filesDbContext.Security
+            .Where(s => s.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && s.EntryId == entryId && s.EntryType == Microsoft.EntityFrameworkCore.EF.Constant(entry.FileEntryType));
 
         if (filterType is ShareFilterType.User or ShareFilterType.Group or ShareFilterType.UserOrGroup)
-        {
-            exp = exp.Or(s => !filesDbContext.Security.Any(f => f.TenantId == tenantId && f.EntryId == entryId && f.EntryType == entry.FileEntryType && f.Subject == s.Subject) &&
-                              s.TenantId == tenantId &&
-                              s.EntryType == FileEntryType.Folder &&
-                              filesDbContext.Tree.Where(r => 
-                                      r.FolderId == entryParentId &&
-                                      filesDbContext.Folders.Any(f => 
-                                          f.TenantId == tenantId &&
-                                          f.Id == r.ParentId &&
-                                          f.FolderType != FolderType.AiAgents && f.FolderType != FolderType.VirtualRooms && f.FolderType != FolderType.USER) &&
-                                      filesDbContext.Security.Any(b => b.TenantId == tenantId && b.InternalEntryId == r.ParentId && b.EntryType == FileEntryType.Folder))
-                                  .Any(r=> s.InternalEntryId == r.ParentId)
-                              
-            );
+        { 
+            var q1 = filesDbContext.Security
+                .Where(s => s.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && s.EntryId == entryId && s.EntryType == Microsoft.EntityFrameworkCore.EF.Constant(entry.FileEntryType) ||
+                            !filesDbContext.Security.Any(f => f.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && f.EntryId == entryId && f.EntryType == Microsoft.EntityFrameworkCore.EF.Constant(entry.FileEntryType) && f.Subject == s.Subject) &&
+                            s.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) &&
+                            s.EntryType == FileEntryType.Folder &&
+                            filesDbContext.Tree.Where(r =>
+                                    r.FolderId == Microsoft.EntityFrameworkCore.EF.Constant(entryParentId) &&
+                                    filesDbContext.Folders.Any(f =>
+                                        f.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) &&
+                                        f.Id == r.ParentId &&
+                                        f.FolderType != FolderType.AiAgents && f.FolderType != FolderType.VirtualRooms && f.FolderType != FolderType.USER) &&
+                                    filesDbContext.Security.Any(b => b.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && b.InternalEntryId == r.ParentId && b.EntryType == FileEntryType.Folder))
+                                .OrderBy(r => r.Level)
+                                .Select(r => r.ParentId)
+                                .Contains(s.InternalEntryId))
+                .GroupBy(s => s.Subject)
+                .Select(s => s.OrderBy(r=> r.InternalEntryId).LastOrDefault());
+            
+            q = filesDbContext.Security.FromSqlRaw(q1.ToQueryString());
         }
-        
-        var q = filesDbContext.Security
-            .Where(exp);
         
         switch (filterType)
         {
