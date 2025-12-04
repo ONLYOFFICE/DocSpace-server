@@ -42,8 +42,7 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
     protected readonly IServiceProvider _serviceProvider = serviceProvider;
     protected internal string Name { get => _serviceProvider.GetService<IProviderInfo<TFile, TFolder, TItem>>().Selector.Name; }
     protected internal string Id { get => _serviceProvider.GetService<IProviderInfo<TFile, TFolder, TItem>>().Selector.Id; }
-    public Regex Selector => _selector ??= new Regex(@"^" + Id + @"-(?'id'\d+)(-(?'path'.*)){0,1}$", RegexOptions.Singleline | RegexOptions.Compiled);
-    private Regex _selector;
+    public Regex Selector => field ??= new Regex(@"^" + Id + @"-(?'id'\d+)(-(?'path'.*)){0,1}$", RegexOptions.Singleline | RegexOptions.Compiled);
 
     private Dictionary<string, BaseProviderInfo<TFile, TFolder, TItem>> Providers { get; set; } = new();
 

@@ -39,17 +39,16 @@ public class WebItemManager
 {
     private readonly ILogger _log;
 
-    private ConcurrentDictionary<Guid, IWebItem> _items;
     private ConcurrentDictionary<Guid, IWebItem> Items
     {
         get
         {
             if (_lazyItems.IsValueCreated)
             {
-                return _items;
+                return field;
             }
 
-            return _items = _lazyItems.Value;
+            return field = _lazyItems.Value;
         }
     }
     private readonly Lazy<ConcurrentDictionary<Guid, IWebItem>> _lazyItems;

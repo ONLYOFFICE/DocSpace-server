@@ -34,44 +34,38 @@ public class WebPluginConfigSettings
         configuration.GetSetting("plugins", this);
     }
 
-    private int _maxCount;
-    private long _maxSize;
-    private string _extension;
-    private string[] _assetExtensions;
-    private int _assetMaxCount;
-
     public bool Enabled { get; set; }
     public bool Upload { get; set; }
     public bool Delete { get; set; }
 
     public int MaxCount
     {
-        get => _maxCount > 0 ? _maxCount : 10;
-        set => _maxCount = value;
+        get => field > 0 ? field : 10;
+        set;
     }
 
     public long MaxSize
     {
-        get => _maxSize > 0 ? _maxSize : 5L * 1024L * 1024L;
-        set => _maxSize = value;
+        get => field > 0 ? field : 5L * 1024L * 1024L;
+        set;
     }
 
     public string Extension
     {
-        get => _extension ?? ".zip";
-        set => _extension = value;
+        get => field ?? ".zip";
+        set;
     }
 
     public string[] AssetExtensions
     {
-        get => _assetExtensions ?? [];
-        set => _assetExtensions = value;
+        get => field ?? [];
+        set;
     }
 
     public int AssetMaxCount
     {
-        get => _assetMaxCount > 0 ? _assetMaxCount : 10;
-        set => _assetMaxCount = value;
+        get => field > 0 ? field : 10;
+        set;
     }
 }
 

@@ -42,11 +42,9 @@ public class StudioNotifyHelper(
 {
     public string SiteLink => commonLinkUtility.GetSiteLink();
 
-    private ISubscriptionProvider _subscriptionProvider;
-    private ISubscriptionProvider SubscriptionProvider => _subscriptionProvider ??= NotifySource.GetSubscriptionProvider();
+    private ISubscriptionProvider SubscriptionProvider => field ??= NotifySource.GetSubscriptionProvider();
 
-    private IRecipientProvider _recipientsProvider;
-    private IRecipientProvider RecipientsProvider => _recipientsProvider ??= NotifySource.GetRecipientsProvider();
+    private IRecipientProvider RecipientsProvider => field ??= NotifySource.GetRecipientsProvider();
 
     public readonly StudioNotifySource NotifySource = studioNotifySource;
 

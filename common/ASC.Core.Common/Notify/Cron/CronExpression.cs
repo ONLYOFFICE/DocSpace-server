@@ -58,7 +58,6 @@ public class CronExpression : ICloneable, IDeserializationCallback
     [NonSerialized] private bool _nearestWeekday;
     [NonSerialized] private int _nthdayOfWeek;
     [NonSerialized] private TreeSet _seconds;
-    private TimeZoneInfo _timeZone;
     [NonSerialized] private TreeSet _years;
 
     static CronExpression()
@@ -96,10 +95,10 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
     protected virtual TimeZoneInfo TimeZone
     {
-        init { _timeZone = value; }
+        init;
         get
         {
-            return _timeZone ??= TimeZoneInfo.Utc;
+            return field ??= TimeZoneInfo.Utc;
         }
     }
 

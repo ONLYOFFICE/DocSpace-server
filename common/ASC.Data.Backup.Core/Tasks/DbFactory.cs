@@ -45,17 +45,15 @@ public class DbFactory(IConfiguration configuration, ConfigurationExtension conf
     {
         get
         {
-            if (_dbProviderFactory == null)
+            if (field == null)
             {
                 var type = Type.GetType(configuration["DbProviderFactories:mysql:type"], true);
-                _dbProviderFactory = (DbProviderFactory)Activator.CreateInstance(type, true);
+                field = (DbProviderFactory)Activator.CreateInstance(type, true);
             }
 
-            return _dbProviderFactory;
+            return field;
         }
     }
-
-    private DbProviderFactory _dbProviderFactory;
 
     public DbConnection OpenConnection(string path = "default", string connectionString = null, string region = "current")
     {

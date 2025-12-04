@@ -37,8 +37,6 @@ public class Tenant
     public static readonly string HostName = Dns.GetHostName().ToLowerInvariant();
     public const string LocalHost = "localhost";
 
-    private List<string> _domains;
-
     public Tenant()
     {
         Id = DefaultTenant;
@@ -124,16 +122,16 @@ public class Tenant
     {
         get
         {
-            if (_domains.Count == 0 && !string.IsNullOrEmpty(TrustedDomainsRaw))
+            if (field.Count == 0 && !string.IsNullOrEmpty(TrustedDomainsRaw))
             {
-                _domains = TrustedDomainsRaw.Split(['|'],
+                field = TrustedDomainsRaw.Split(['|'],
                     StringSplitOptions.RemoveEmptyEntries).ToList();
             }
 
-            return _domains;
+            return field;
         }
 
-        set => _domains = value;
+        set;
     }
 
     [ProtoMember(20)]

@@ -200,7 +200,6 @@ public class DocumentConfig<T>(
     TenantManager tenantManager)
 {
     private string _fileUri;
-    private string _key = string.Empty;
     private FileReferenceData _referenceData;
     public string GetFileType(File<T> file) => file.ConvertedExtension.Trim('.');
     public InfoConfig<T> Info { get; } = infoConfig;
@@ -208,9 +207,9 @@ public class DocumentConfig<T>(
 
     public string Key
     {
-        set => _key = value;
-        get => DocumentServiceConnector.GenerateRevisionId(_key);
-    }
+        set;
+        get => DocumentServiceConnector.GenerateRevisionId(field);
+    } = string.Empty;
 
     public PermissionsConfig Permissions { get; set; } = new();
 
@@ -279,8 +278,7 @@ public class EditorConfiguration<T>(
 
     public bool ModeWrite { get; set; }
 
-    private UserInfo _userInfo;
-    private UserInfo UserInfo => _userInfo ??= userManager.GetUsers(authContext.CurrentAccount.ID);
+    private UserInfo UserInfo => field ??= userManager.GetUsers(authContext.CurrentAccount.ID);
 
     private UserConfig _user;
     public async Task<UserConfig> GetUserAsync()
@@ -1075,8 +1073,6 @@ public class CustomizationConfig<T>(
 [Transient]
 public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility)
 {
-    private string _embedUrl;
-    private string _shareUrl;
     /// <summary>
     /// The absolute URL to the document serving as a source file for the document embedded into the web page.
     /// </summary>
@@ -1084,9 +1080,9 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     {
         get
         {
-            return _embedUrl ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null);
+            return field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null);
         }
-        set => _embedUrl = value;
+        set;
     }
 
     /// <summary>
@@ -1106,10 +1102,11 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     {
         get
         {
-            return _shareUrl ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null);
+            return field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null);
         }
-        set => _shareUrl = value;
+        set;
     }
+
     /// <summary>
     /// The place for the embedded viewer toolbar, can be either "top" or "bottom".
     /// </summary>

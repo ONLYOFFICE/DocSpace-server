@@ -49,26 +49,6 @@ public class PeopleNamesItem
 {
     private static readonly StringComparison _cmp = StringComparison.InvariantCultureIgnoreCase;
 
-    private string _schemaName;
-
-    private readonly string _userCaption;
-
-    private readonly string _usersCaption;
-
-    private readonly string _groupCaption;
-
-    private readonly string _groupsCaption;
-
-    private readonly string _userPostCaption;
-
-    private readonly string _groupHeadCaption;
-
-    private readonly string _regDateCaption;
-
-    private readonly string _guestCaption;
-
-    private readonly string _guestsCaption;
-
 
     public static string DefaultID
     {
@@ -84,62 +64,62 @@ public class PeopleNamesItem
 
     public string SchemaName
     {
-        get { return Id.Equals(CustomID, _cmp) ? _schemaName ?? string.Empty : GetResourceValue(_schemaName); }
-        set { _schemaName = value; }
+        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        set;
     }
 
     public string UserCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _userCaption ?? string.Empty : GetResourceValue(_userCaption); }
-        init { _userCaption = value; }
+        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        init;
     }
 
     public string UsersCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _usersCaption ?? string.Empty : GetResourceValue(_usersCaption); }
-        init { _usersCaption = value; }
+        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        init;
     }
 
     public string GroupCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _groupCaption ?? string.Empty : GetResourceValue(_groupCaption); }
-        init { _groupCaption = value; }
+        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        init;
     }
 
     public string GroupsCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _groupsCaption ?? string.Empty : GetResourceValue(_groupsCaption); }
-        init { _groupsCaption = value; }
+        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        init;
     }
 
     public string UserPostCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _userPostCaption ?? string.Empty : GetResourceValue(_userPostCaption); }
-        init { _userPostCaption = value; }
+        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        init;
     }
 
     public string GroupHeadCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _groupHeadCaption ?? string.Empty : GetResourceValue(_groupHeadCaption); }
-        init { _groupHeadCaption = value; }
+        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        init;
     }
 
     public string RegDateCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _regDateCaption ?? string.Empty : GetResourceValue(_regDateCaption); }
-        init { _regDateCaption = value; }
+        get { return Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field); }
+        init;
     }
 
     public string GuestCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _guestCaption ?? NamingPeopleResource.CommonGuest : GetResourceValue(_guestCaption); }
-        init { _guestCaption = value; }
+        get { return Id.Equals(CustomID, _cmp) ? field ?? NamingPeopleResource.CommonGuest : GetResourceValue(field); }
+        init;
     }
 
     public string GuestsCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _guestsCaption ?? NamingPeopleResource.CommonGuests : GetResourceValue(_guestsCaption); }
-        init { _guestsCaption = value; }
+        get { return Id.Equals(CustomID, _cmp) ? field ?? NamingPeopleResource.CommonGuests : GetResourceValue(field); }
+        init;
     }
 
     private static string GetResourceValue(string resourceKey)

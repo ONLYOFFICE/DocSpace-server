@@ -347,14 +347,12 @@ public class AuthContext(IHttpContextAccessor httpContextAccessor)
         return Principal.Claims.Any(c => _typesCheck.Contains(c.Value));
     }
 
-    private ClaimsPrincipal _principal;
-
     internal ClaimsPrincipal Principal
     {
-        get => _principal ?? CustomSynchronizationContext.CurrentContext?.CurrentPrincipal as ClaimsPrincipal ?? HttpContextAccessor?.HttpContext?.User;
+        get => field ?? CustomSynchronizationContext.CurrentContext?.CurrentPrincipal as ClaimsPrincipal ?? HttpContextAccessor?.HttpContext?.User;
         set
         {
-            _principal = value;
+            field = value;
 
             if (CustomSynchronizationContext.CurrentContext != null)
             {

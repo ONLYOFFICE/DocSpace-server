@@ -39,7 +39,6 @@ public class DistributedTaskQueue<T>(
     public const string QUEUE_DEFAULT_PREFIX = "asc_distributed_task_queue_v2_";
     public static readonly int INSTANCE_ID = Environment.ProcessId;
 
-    private int _maxThreadsCount = 1;
     private string _name;
     public string LockKey { get => $"{Name}_lock"; }
     public int TimeUntilUnregisterInSeconds { get; set; }
@@ -54,17 +53,17 @@ public class DistributedTaskQueue<T>(
     {
         get
         {
-            return _maxThreadsCount;
+            return field;
         }
 
         set
         {
             if (value > 0)
             {
-                _maxThreadsCount = value;
+                field = value;
             }
         }
-    }
+    } = 1;
 
     public async Task EnqueueTask(T distributedTask)
     {

@@ -170,18 +170,17 @@ public partial class Global(
         }
     }
 
-    private List<string> _imageThumbnailExtension;
     public List<string> ImageThumbnailExtension
     {
         get
         {
-            if (_imageThumbnailExtension != null)
+            if (field != null)
             {
-                return _imageThumbnailExtension;
+                return field;
             }
 
-            _imageThumbnailExtension = configuration.GetSection("files:thumbnail:img-exts").Get<List<string>>() ?? [".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tif", ".tga", ".webp", ".heic"];
-            return _imageThumbnailExtension;
+            field = configuration.GetSection("files:thumbnail:img-exts").Get<List<string>>() ?? [".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tif", ".tga", ".webp", ".heic"];
+            return field;
         }
     }
 

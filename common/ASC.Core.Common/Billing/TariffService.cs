@@ -82,8 +82,7 @@ public class TariffService(
     private int PaymentDelay => PaymentConfiguration.Delay;
     private bool TrialEnabled => PaymentConfiguration.TrialEnabled;
 
-    private PaymentConfiguration _paymentConfiguration;
-    private PaymentConfiguration PaymentConfiguration => _paymentConfiguration ??= (configuration.GetSection("core:payment").Get<PaymentConfiguration>() ?? new PaymentConfiguration());
+    private PaymentConfiguration PaymentConfiguration => field ??= (configuration.GetSection("core:payment").Get<PaymentConfiguration>() ?? new PaymentConfiguration());
 
     public async Task<Tariff> GetTariffAsync(int tenantId, bool withRequestToPaymentSystem = true, bool refresh = false)
     {

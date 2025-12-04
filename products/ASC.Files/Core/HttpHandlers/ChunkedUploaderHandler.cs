@@ -432,20 +432,19 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
 
     public bool Encrypted => _request.Query["encrypted"] == "true";
 
-    private int? _chunkNumber;
     public int? ChunkNumber
     {
         get
         {
-            if (!_chunkNumber.HasValue)
+            if (!field.HasValue)
             {
                 var result = int.TryParse(_request.Query["chunkNumber"], out var i);
                 if (result)
                 {
-                    _chunkNumber = i;
+                    field = i;
                 }
             }
-            return _chunkNumber;
+            return field;
         }
     }
 

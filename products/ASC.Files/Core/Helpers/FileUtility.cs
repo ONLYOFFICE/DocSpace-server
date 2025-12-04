@@ -433,21 +433,19 @@ public class FileUtility(
         return _extsConvertible;
     }
 
-    private List<string> _extsUploadable;
-
     public List<string> ExtsUploadable
     {
         get
         {
-            if (_extsUploadable == null)
+            if (field == null)
             {
-                _extsUploadable = [];
-                _extsUploadable.AddRange(ExtsWebPreviewed);
-                _extsUploadable.AddRange(ExtsWebEdited);
-                _extsUploadable.AddRange(ExtsImagePreviewed);
-                _extsUploadable = _extsUploadable.Distinct().ToList();
+                field = [];
+                field.AddRange(ExtsWebPreviewed);
+                field.AddRange(ExtsWebEdited);
+                field.AddRange(ExtsImagePreviewed);
+                field = field.Distinct().ToList();
             }
-            return _extsUploadable;
+            return field;
         }
     }
 

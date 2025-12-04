@@ -33,20 +33,17 @@ namespace ASC.Core;
 public class CoreBaseSettings(IConfiguration configuration)
 {
     private bool? _standalone;
-    private string _basedomain;
     private bool? _customMode;
-    private string _serverRoot;
-    private List<CultureInfo> _enabledCultures;
 
     /// <summary>
     /// The core base domain.
     /// </summary>
-    public string Basedomain => _basedomain ??= configuration["core:base-domain"] ?? string.Empty;
+    public string Basedomain => field ??= configuration["core:base-domain"] ?? string.Empty;
 
     /// <summary>
     /// The core base server root.
     /// </summary>
-    public string ServerRoot => _serverRoot ??= configuration["core:server-root"] ?? string.Empty;
+    public string ServerRoot => field ??= configuration["core:server-root"] ?? string.Empty;
 
     /// <summary>
     /// Specifies if it is the standalone .
@@ -61,7 +58,7 @@ public class CoreBaseSettings(IConfiguration configuration)
     /// <summary>
     /// Specifies if it is the custom mode.
     /// </summary>
-    public List<CultureInfo> EnabledCultures => _enabledCultures ??= (configuration.GetSection("web:cultures").Get<string[]>() ?? ["en-US"])
+    public List<CultureInfo> EnabledCultures => field ??= (configuration.GetSection("web:cultures").Get<string[]>() ?? ["en-US"])
         .Distinct()
         .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
         .ToList();
