@@ -36,8 +36,7 @@ public enum ModuleName
     WebStudio,
     RoomLogos,
     Identity,
-    Ai,
-    AiProviders
+    Ai
 }
 
 public interface IModuleSpecifics

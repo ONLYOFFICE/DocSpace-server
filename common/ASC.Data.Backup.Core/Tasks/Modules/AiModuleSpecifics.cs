@@ -28,7 +28,7 @@ namespace ASC.Data.Backup.Tasks.Modules;
 
 public class AiProvidersModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers)
 {
-    public override ModuleName ModuleName => ModuleName.AiProviders;
+    public override ModuleName ModuleName => ModuleName.Ai;
     public override IEnumerable<TableInfo> Tables => _tables;
     public override IEnumerable<RelationInfo> TableRelations => [];
 
