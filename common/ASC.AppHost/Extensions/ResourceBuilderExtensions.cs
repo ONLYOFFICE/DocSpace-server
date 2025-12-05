@@ -80,11 +80,14 @@ public static class ResourceBuilderExtensions
                 resourceBuilder.WithHttpHealthCheck("/health");
             }
 
-            resourceBuilder
-                .WithEnvironment("openTelemetry:enable", "true")
-                .WithEnvironment("files:docservice:url:portal", ConnectionStringManager.SubstituteLocalhost("http://localhost"))
-                .WithEnvironment("files:docservice:url:public", "http://localhost/ds-vpath")
-                .WithReference(connectionManager.MySqlResource, "default:connectionString");
+            if (connectionManager.MySqlResource != null)
+            {
+                resourceBuilder
+                    .WithEnvironment("openTelemetry:enable", "true")
+                    .WithEnvironment("files:docservice:url:portal", ConnectionStringManager.SubstituteLocalhost("http://localhost"))
+                    .WithEnvironment("files:docservice:url:public", "http://localhost/ds-vpath")
+                    .WithReference(connectionManager.MySqlResource, "default:connectionString");
+            }
 
             if (isDocker)
             {
