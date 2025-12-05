@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Security;
+
 namespace ASC.Migration.Core.Migrators;
 
 public abstract class Migrator(
@@ -410,6 +412,7 @@ public abstract class Migrator(
             return;
         }
 
+        var fileSecurity = ServiceProvider.GetService<FileSecurity>();
         var orderedSecurity = storage.Securities.OrderBy(s => OrderSecurity(storage, s));
         foreach (var security in orderedSecurity)
         {
@@ -490,7 +493,36 @@ public abstract class Migrator(
                     Message = null
                 };
 
-                await FileStorageService.SetAceObjectAsync(aceCollection, false);
+                try
+                {
+                    await FileStorageService.SetAceObjectAsync(aceCollection, false);
+                }
+                catch (InvalidOperationException)
+                {
+                    if (ace.Access is Files.Core.Security.FileShare.None or Files.Core.Security.FileShare.Restrict)
+                    {
+                        throw;
+                    }
+
+                    var accesses = entryIsFile
+                        ? await fileSecurity.GetAccesses((File<int>)entry)
+                        : await fileSecurity.GetAccesses((Folder<int>)entry);
+
+                    var type = migrationUser != null ? SubjectType.User : SubjectType.Group;
+
+                    if (accesses.TryGetValue(type, out var availableShareRights) &&
+                        !availableShareRights.Contains(ace.Access))
+                    {
+                        ace.Access = availableShareRights
+                            .LastOrDefault(s => s is not (Files.Core.Security.FileShare.None or Files.Core.Security.FileShare.Restrict));
+
+                        await FileStorageService.SetAceObjectAsync(aceCollection, false);
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
             }
             catch (Exception ex)
             {
