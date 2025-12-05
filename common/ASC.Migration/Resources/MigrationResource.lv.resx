@@ -210,4 +210,7 @@
   <data name="СreateRootFolder" xml:space="preserve">
     <value>Izveidot saknes mapi</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Dublējums ir lielāks par kopējo portāla izmēru</value>
+  </data>
 </root>

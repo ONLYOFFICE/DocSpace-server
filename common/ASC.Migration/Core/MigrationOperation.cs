@@ -92,7 +92,8 @@ public class MigrationOperation : DistributedTaskProgress
             }
             CustomSynchronizationContext.CreateContext();
 
-            await _tenantManager.SetCurrentTenantAsync(TenantId);
+            var tenant = await _tenantManager.GetTenantAsync(TenantId);
+            _tenantManager.SetCurrentTenant(tenant);
             await _securityContext.AuthenticateMeWithoutCookieAsync(_userId);
             migrator = _migrationCore.GetMigrator(_migratorName);
             migrator.OnProgressUpdateAsync = Migrator_OnProgressUpdateAsync;
@@ -104,6 +105,21 @@ public class MigrationOperation : DistributedTaskProgress
 
             var folder = await _hybridCache.GetOrDefaultAsync<string>($"migration folder - {TenantId}");
             await migrator.InitAsync(folder, onlyParse ? OperationType.Parse : OperationType.Migration, CancellationToken);
+
+            var tenantQuota = await _tenantManager.GetTenantQuotaAsync(TenantId);
+            var maxTotalSize = tenantQuota?.MaxTotalSize ?? long.MaxValue;
+
+            if (maxTotalSize > 0 && maxTotalSize != long.MaxValue)
+            {
+                var size = Directory
+                    .EnumerateFiles(folder, "*", SearchOption.AllDirectories)
+                    .Sum(file => new FileInfo(file).Length);
+
+                if (size > maxTotalSize)
+                {
+                    throw new Exception(MigrationResource.LargeBackup);
+                }
+            }
 
             await migrator.ParseAsync(onlyParse);
             if (!onlyParse)
