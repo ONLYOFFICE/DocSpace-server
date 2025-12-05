@@ -78,6 +78,23 @@ internal class RoomGroupDao(
 
         return group.MapToRoomGroup();
     }
+    public async Task DeleteGroup(int groupId)
+    {
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        var group = await GetGroupQuery(dbContext, tenantId)
+            .Where(r => r.Id == groupId)
+            .Where(r => r.UserId == authContext.CurrentAccount.ID)
+            .FirstOrDefaultAsync();
+
+        if (group == null)
+        {
+            return;
+        }
+        dbContext.RoomGroup.Remove(group);
+        await dbContext.SaveChangesAsync();
+    }
 
     public async IAsyncEnumerable<RoomGroup> GetGroupsAsync()
     {

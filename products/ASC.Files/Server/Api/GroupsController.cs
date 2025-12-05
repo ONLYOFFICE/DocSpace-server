@@ -118,6 +118,12 @@ public class GroupsController(FolderDtoHelper folderDtoHelper,
         }
     }
 
+    [HttpDelete("{id:int}")]
+    public async Task DeleteGroup(GroupIdRequestDto inDto)
+    {
+        await fileStorageService.DeleteGroup(inDto.Id);
+    }
+
     private async Task TransferRoomsToGroupAsync(List<int> roomIntIds, List<string> roomStringIds, RoomGroup group)
     {
         var addIntTasks = roomIntIds.Select(id => fileStorageService.AddRoomToGroupAsync(id, group.Id));

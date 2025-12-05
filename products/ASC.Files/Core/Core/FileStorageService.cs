@@ -5180,6 +5180,11 @@ public class FileStorageService //: IFileStorageService
         return group;
     }
 
+    public async Task DeleteGroup(int groupId)
+    {
+        await daoFactory.RoomGroupDao.DeleteGroup(groupId);
+    }
+
     public async Task<RoomGroup> GetGroupInfoAsync(int roomGroupId)
     {
         var group = await daoFactory.RoomGroupDao.GetGroupInfoAsync(roomGroupId);
