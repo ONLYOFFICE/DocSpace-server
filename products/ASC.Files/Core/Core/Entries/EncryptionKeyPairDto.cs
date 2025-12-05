@@ -59,6 +59,7 @@ public class EncryptionKeyTypeConverter : JsonConverter<EncryptionKeyType>
 
 public class EncryptionKeyDto
 {
+    public Guid UserId { get; set; }
     public string Id { get; set; }
     public EncryptionKeyType Type { get; set; }
     public DateTime Date { get; set; }
@@ -83,10 +84,6 @@ public class EncryptionKeyPairDtoHelper(
     FileSharing fileSharing,
     IDaoFactory daoFactory)
 {
-    private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
-    {
-        AllowTrailingCommas = true, PropertyNameCaseInsensitive = true
-    };
     
     public async Task<List<EncryptionKeyDto>> SetKeyPairAsync(IEnumerable<EncryptionKeyDto> keyPairs, bool replace)
     {
@@ -96,10 +93,13 @@ public class EncryptionKeyPairDtoHelper(
             throw new SecurityException();
         }
 
-        var currentAddressString = await GetKeyPairAsync() ?? new List<EncryptionKeyDto>();
+        var currentAddressString = await GetKeyPairAsync() ?? [];
 
         foreach (var keyPair in keyPairs)
         {
+            keyPair.UserId = userId;
+            keyPair.Date = DateTime.UtcNow;
+            
             var index = currentAddressString.FindIndex(r=> r.Id == keyPair.Id);
             if (index > -1)
             {
@@ -127,7 +127,7 @@ public class EncryptionKeyPairDtoHelper(
             return null;
         }
 
-        return JsonSerializer.Deserialize<List<EncryptionKeyDto>>(currentAddressString, _jsonSerializerOptions);
+        return JsonSerializer.Deserialize<List<EncryptionKeyDto>>(currentAddressString, JsonSerializerOptions.Web);
     }
 
     public async Task<List<EncryptionKeyDto>> GetKeyPairAsync<T>(T fileId)
@@ -168,7 +168,7 @@ public class EncryptionKeyPairDtoHelper(
                 return null;
             }
 
-            var fileKeyPair = JsonSerializer.Deserialize<List<EncryptionKeyDto>>(fileKeyPairString, _jsonSerializerOptions)
+            var fileKeyPair = JsonSerializer.Deserialize<List<EncryptionKeyDto>>(fileKeyPairString, JsonSerializerOptions.Web)
                 .ToList();
 
             return fileKeyPair;
@@ -195,7 +195,7 @@ public class EncryptionKeyPairDtoHelper(
 
     private async Task<List<EncryptionKeyDto>> Save(List<EncryptionKeyDto> currentSettings)
     {
-        var keyPairString = JsonSerializer.Serialize(currentSettings);
+        var keyPairString = JsonSerializer.Serialize(currentSettings, JsonSerializerOptions.Web);
         await encryptionLoginProvider.SetKeysAsync(authContext.CurrentAccount.ID, keyPairString);
         return currentSettings;
     }

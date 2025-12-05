@@ -42,9 +42,9 @@ public class PrivacyRoomControllerCommon(
     : ControllerBase
 {
     [HttpPost("keys")]
-    public Task<IEnumerable<EncryptionKeyDto>> SetKeysAsync(IEnumerable<EncryptionKeyRequestDto> inDto)
+    public Task<IEnumerable<EncryptionKeyDto>> SetKeysAsync(EncryptionKeyRequestDto inDto)
     {
-        return CreateKeysAsync(inDto, false);
+        return CreateKeysAsync([inDto], false);
     }
     
     [HttpPut("keys")]
