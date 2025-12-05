@@ -1666,7 +1666,7 @@ public class UserController(
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [AllowNotPayment]
     [HttpPut("activationstatus/{activationstatus}")]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "Activation,Everyone")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "Activation,EmailActivation")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserActivationStatus(UpdateMemberActivationStatusRequestDto inDto)
     {
         await securityContext.AuthByClaimAsync();
