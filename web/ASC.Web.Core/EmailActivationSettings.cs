@@ -39,11 +39,7 @@ public class EmailActivationSettings : ISettings<EmailActivationSettings>
     /// <summary>
     /// The tenant ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{85987929-1339-48EB-B06D-B9D097BDACF6}"); }
-    }
+    public static Guid ID => new("{85987929-1339-48EB-B06D-B9D097BDACF6}");
 
     public EmailActivationSettings GetDefault()
     {

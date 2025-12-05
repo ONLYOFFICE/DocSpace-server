@@ -53,5 +53,5 @@ public enum SearchArea
     ResultStorage,
 
     [SwaggerEnum("AiAgents")]
-    AiAgents,
+    AiAgents
 }

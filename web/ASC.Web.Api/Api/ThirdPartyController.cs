@@ -130,10 +130,10 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     {
         url += (url.Contains('#') ? "&" : "#")
                 + (string.IsNullOrEmpty(error)
-                        ? (string.IsNullOrEmpty(code)
-                                ? string.Empty
-                                : "code=" + HttpUtility.UrlEncode(code))
-                        : ("error/" + HttpUtility.UrlEncode(error)));
+                        ? string.IsNullOrEmpty(code)
+                            ? string.Empty
+                            : "code=" + HttpUtility.UrlEncode(code)
+                        : "error/" + HttpUtility.UrlEncode(error));
 
         return url;
     }

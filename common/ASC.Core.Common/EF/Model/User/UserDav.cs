@@ -51,46 +51,49 @@ public static class UserDavExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddUserDav(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<UserDav>(entity =>
+        public void MySqlAddUserDav()
         {
-            entity.HasKey(e => new { e.TenantId, e.UserId })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<UserDav>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.UserId })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("core_userdav");
+                entity.ToTable("core_userdav");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.UserId)
-                .HasColumnName("user_id")
-                .HasColumnType("varchar(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-        });
-    }
+                entity.Property(e => e.UserId)
+                    .HasColumnName("user_id")
+                    .HasColumnType("varchar(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+            });
+        }
 
-    public static void PgSqlAddUserDav(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<UserDav>(entity =>
+        public void PgSqlAddUserDav()
         {
-            // Set the composite key for the UserDav table, consisting of TenantId and UserId.
-            entity.HasKey(e => new { e.TenantId, e.UserId })
-                .HasName("core_userdav_pkey"); // Using a PostgreSQL-compatible name for the primary key constraint
+            modelBuilder.Entity<UserDav>(entity =>
+            {
+                // Set the composite key for the UserDav table, consisting of TenantId and UserId.
+                entity.HasKey(e => new { e.TenantId, e.UserId })
+                    .HasName("core_userdav_pkey"); // Using a PostgreSQL-compatible name for the primary key constraint
 
-            // Define the table name for the UserDav entity.
-            entity.ToTable("core_userdav");
+                // Define the table name for the UserDav entity.
+                entity.ToTable("core_userdav");
 
-            // Configure the TenantId column.
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id")
-                .IsRequired(); // Mark as required to ensure non-null values in PostgreSQL.
+                // Configure the TenantId column.
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id")
+                    .IsRequired(); // Mark as required to ensure non-null values in PostgreSQL.
 
-            // Configure the UserId column.
-            entity.Property(e => e.UserId)
-                .HasColumnName("user_id")
-                .HasColumnType("uuid") // Use the PostgreSQL 'uuid' type.
-                .IsRequired(); // Mark as required to ensure non-null values.
-        });
+                // Configure the UserId column.
+                entity.Property(e => e.UserId)
+                    .HasColumnName("user_id")
+                    .HasColumnType("uuid") // Use the PostgreSQL 'uuid' type.
+                    .IsRequired(); // Mark as required to ensure non-null values.
+            });
+        }
     }
 }

@@ -34,7 +34,7 @@ public class VKLoginProvider : BaseLoginProvider<VKLoginProvider>
     public override string ClientID => this["vkClientId"];
     public override string ClientSecret => this["vkClientSecret"];
     public override string RedirectUri => this["vkRedirectUrl"];
-    public override string Scopes => (new[] { 4194304 }).Sum().ToString();
+    public override string Scopes => new[] { 4194304 }.Sum().ToString();
 
     private readonly RequestHelper _requestHelper;
     private const string VKProfileUrl = "https://api.vk.com/method/users.get?v=5.103";

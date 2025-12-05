@@ -125,10 +125,7 @@ public class AuthHandler(
 
         log.LogInformation("Auth success {SchemeName}", Scheme.Name);
 
-        if (httpContextAccessor?.HttpContext != null)
-        {
-            httpContextAccessor.HttpContext.User = new CustomClaimsPrincipal(new ClaimsIdentity(Scheme.Name), identity);
-        }
+        httpContextAccessor?.HttpContext?.User = new CustomClaimsPrincipal(new ClaimsIdentity(Scheme.Name), identity);
 
         Authenticate();
 
@@ -152,9 +149,6 @@ public class AuthHandler(
         };
 
 
-        if (httpContextAccessor.HttpContext != null)
-        {
-            httpContextAccessor.HttpContext.User = new CustomClaimsPrincipal(new ClaimsIdentity(account, claims), account);
-        }
+        httpContextAccessor.HttpContext?.User = new CustomClaimsPrincipal(new ClaimsIdentity(account, claims), account);
     }
 }

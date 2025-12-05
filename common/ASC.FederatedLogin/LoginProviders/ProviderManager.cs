@@ -48,21 +48,21 @@ public class ProviderManager(ConsumerFactory consumerFactory)
         ProviderConstants.Twitter,
         ProviderConstants.Microsoft,
         ProviderConstants.AppleId,
-        ProviderConstants.Weixin,
+        ProviderConstants.Weixin
     ];
 
     public static readonly List<string> InviteExceptProviders =
     [
         ProviderConstants.Twitter,
         ProviderConstants.AppleId,
-        ProviderConstants.Weixin,
+        ProviderConstants.Weixin
     ];
 
     public static List<string> GetSortedAuthProviders(string geoInfoKey)
     {
         if (geoInfoKey == "CN")
         {
-            var result = new List<string>() { ProviderConstants.Weixin };
+            var result = new List<string> { ProviderConstants.Weixin };
             result.AddRange(AuthProviders.Where(x => x != ProviderConstants.Weixin));
             return result;
         }

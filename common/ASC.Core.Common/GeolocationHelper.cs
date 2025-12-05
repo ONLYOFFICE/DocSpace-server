@@ -60,7 +60,7 @@ public class GeolocationHelper(IDbContextFactory<CustomDbContext> dbContextFacto
                 return [string.Empty, string.Empty];
             }
             var location = await GetIPGeolocationAsync(address);
-            if (string.IsNullOrEmpty(location.Key) || (location.Key == "ZZ"))
+            if (string.IsNullOrEmpty(location.Key) || location.Key == "ZZ")
             {
                 return [string.Empty, string.Empty];
             }

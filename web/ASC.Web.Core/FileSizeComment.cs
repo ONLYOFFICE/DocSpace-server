@@ -29,10 +29,7 @@ namespace ASC.Web.Studio.Core;
 [Scope]
 public class FileSizeComment(SetupInfo setupInfo)
 {
-    public string FileImageSizeExceptionString
-    {
-        get { return GetFileSizeExceptionString(setupInfo.MaxImageUploadSize); }
-    }
+    public string FileImageSizeExceptionString => GetFileSizeExceptionString(setupInfo.MaxImageUploadSize);
 
     public static string GetFileSizeExceptionString(long size)
     {

@@ -31,16 +31,14 @@ namespace ASC.Common.Threading;
 /// </summary>
 public class DistributedTaskProgress : DistributedTask
 {
-    [JsonInclude]
-    private double _percentage;
-
     /// <summary>
     /// The distributed task progress percentage.
     /// </summary>
+    [field: JsonInclude]
     public double Percentage
     {
-        get => Math.Min(100.0, Math.Max(0, _percentage));
-        set => _percentage = value;
+        get => Math.Min(100.0, Math.Max(0, field));
+        set;
     }
 
     /// <summary>

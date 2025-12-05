@@ -606,7 +606,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
     public string MakeId(string path = "")
     {
         path = path.Replace(SpRootFolderId, "");
-        var p = string.IsNullOrEmpty(path) || path == "/" || path == SpRootFolderId ? "" : ("-" + path.Replace('/', '|'));
+        var p = string.IsNullOrEmpty(path) || path == "/" || path == SpRootFolderId ? "" : "-" + path.Replace('/', '|');
 
         return $"{ID}{p}";
     }

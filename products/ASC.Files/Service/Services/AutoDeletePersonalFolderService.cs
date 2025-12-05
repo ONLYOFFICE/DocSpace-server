@@ -93,7 +93,7 @@ public class AutoDeletePersonalFolderService(
                 return;
             }
 
-            if (!(await userManager.IsGuestAsync(tenantUser.UserId)))
+            if (!await userManager.IsGuestAsync(tenantUser.UserId))
             {
                 return;
             }

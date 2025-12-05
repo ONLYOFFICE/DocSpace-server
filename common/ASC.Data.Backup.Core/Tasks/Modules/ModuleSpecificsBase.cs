@@ -32,9 +32,8 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
     public abstract IEnumerable<TableInfo> Tables { get; }
     public abstract IEnumerable<RelationInfo> TableRelations { get; }
     public virtual string ConnectionStringName
-        => _connectionStringName ??= ModuleName.ToString().ToLower();
+        => field ??= ModuleName.ToString().ToLower();
 
-    private string _connectionStringName;
     protected Helpers Helpers => helpers;
 
     public IEnumerable<TableInfo> GetTablesOrdered()

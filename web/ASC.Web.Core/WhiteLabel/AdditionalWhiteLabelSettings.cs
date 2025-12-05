@@ -76,16 +76,12 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
     /// Specifies if the License Agreements link is available or not.
     /// </summary>
     public bool LicenseAgreementsEnabled { get; init; }
-
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{0108422F-C05D-488E-B271-30C4032494DA}"); }
-    }
+    
+    public static Guid ID => new("{0108422F-C05D-488E-B271-30C4032494DA}");
 
     public AdditionalWhiteLabelSettings(ExternalResourceSettingsHelper externalResourceSettingsHelper)
     {
-        this.ExternalResourceSettingsHelper = externalResourceSettingsHelper;
+        ExternalResourceSettingsHelper = externalResourceSettingsHelper;
     }
 
     public AdditionalWhiteLabelSettings() { }

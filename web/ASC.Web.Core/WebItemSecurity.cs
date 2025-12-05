@@ -331,27 +331,15 @@ public class WebItemSecurity(
         public Guid WebItemId { get; }
         private readonly WebItemManager _webItemManager;
 
-        public Type ObjectType
-        {
-            get { return GetType(); }
-        }
+        public Type ObjectType => GetType();
 
-        public object SecurityId
-        {
-            get { return WebItemId.ToString("N"); }
-        }
+        public object SecurityId => WebItemId.ToString("N");
 
         public string FullId => AzObjectIdHelper.GetFullObjectId(this);
 
-        public bool InheritSupported
-        {
-            get { return true; }
-        }
+        public bool InheritSupported => true;
 
-        public bool ObjectRolesSupported
-        {
-            get { return false; }
-        }
+        public bool ObjectRolesSupported => false;
 
         public static WebItemSecurityObject Create(string id, WebItemManager webItemManager)
         {

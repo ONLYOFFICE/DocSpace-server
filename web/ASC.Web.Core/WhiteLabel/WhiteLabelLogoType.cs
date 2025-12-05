@@ -48,7 +48,7 @@ public enum WhiteLabelLogoType
     PdfEditor = 13,
     PdfEditorEmbed = 14,
     DiagramEditor = 15,
-    DiagramEditorEmbed = 16,
+    DiagramEditorEmbed = 16
 }
 
 public static class WhiteLabelLogoTypeHelper
@@ -61,7 +61,7 @@ public static class WhiteLabelLogoTypeHelper
             FileType.Presentation => embed ? WhiteLabelLogoType.PresentationEditorEmbed : WhiteLabelLogoType.PresentationEditor,
             FileType.Pdf => embed ? WhiteLabelLogoType.PdfEditorEmbed : WhiteLabelLogoType.PdfEditor,
             FileType.Diagram => embed ? WhiteLabelLogoType.DiagramEditorEmbed : WhiteLabelLogoType.DiagramEditor,
-            _ => embed ? WhiteLabelLogoType.DocsEditorEmbed : WhiteLabelLogoType.DocsEditor,
+            _ => embed ? WhiteLabelLogoType.DocsEditorEmbed : WhiteLabelLogoType.DocsEditor
         };
     }
 }

@@ -366,9 +366,9 @@ public class FilesMessageService(
 
         var parents = await folderDao.GetParentFoldersAsync(entry.ParentId).ToListAsync();
 
-        var room = entry is Folder<int> folder && DocSpaceHelper.IsRoom(folder.FolderType)
+        var room = entry is Folder<int> { IsRoom: true } folder
             ? folder
-            : parents.FirstOrDefault(x => DocSpaceHelper.IsRoom(x.FolderType));
+            : parents.FirstOrDefault(x => x.IsRoom);
 
         var desc = GetEventDescription(action, oldTitle, userid, userRole, room?.Id ?? -1, room?.Title, room is { FolderType: FolderType.AiRoom }, entry.CreateBy);
 
@@ -457,7 +457,7 @@ public class FilesMessageService(
             case MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser or MessageAction.RoomChangeOwner when userid != Guid.Empty:
                 desc.UserIds = [userid];
                 break;
-            case MessageAction.RoomUpdateAccessForUser when (userRole != FileShare.None) && userid != Guid.Empty:
+            case MessageAction.RoomUpdateAccessForUser when userRole != FileShare.None && userid != Guid.Empty:
                 desc.UserIds = [userid];
                 desc.UserRole = (int)userRole;
                 break;
@@ -487,9 +487,7 @@ public class FilesMessageService(
 
     private static Folder<T> FindRoom<T>(Folder<T> folder, List<Folder<T>> parents)
     {
-        return DocSpaceHelper.IsRoom(folder.FolderType)
-            ? folder
-            : parents.First(x => DocSpaceHelper.IsRoom(x.FolderType));
+        return folder.IsRoom ? folder : parents.First(x => x.IsRoom);
     }
 
     private record FileEntryData(string DescriptionPart, IEnumerable<FilesAuditReference> References);

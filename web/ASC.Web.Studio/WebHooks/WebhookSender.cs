@@ -107,7 +107,7 @@ public class WebhookSender(
 
                 var pipeline = resiliencePipelineProvider.GetPipeline<HttpResponseMessage>(WebhookPipelineName);
 
-                var response = await pipeline.ExecuteAsync(async (context) =>
+                var response = await pipeline.ExecuteAsync(async context =>
                 {
                     var request = new HttpRequestMessage(HttpMethod.Post, entry.Config.Uri);
 

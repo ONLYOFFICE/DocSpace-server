@@ -433,29 +433,27 @@ public class FileUtility(
         return _extsConvertible;
     }
 
-    private List<string> _extsUploadable;
-
     public List<string> ExtsUploadable
     {
         get
         {
-            if (_extsUploadable == null)
+            if (field == null)
             {
-                _extsUploadable = [];
-                _extsUploadable.AddRange(ExtsWebPreviewed);
-                _extsUploadable.AddRange(ExtsWebEdited);
-                _extsUploadable.AddRange(ExtsImagePreviewed);
-                _extsUploadable = _extsUploadable.Distinct().ToList();
+                field = [];
+                field.AddRange(ExtsWebPreviewed);
+                field.AddRange(ExtsWebEdited);
+                field.AddRange(ExtsImagePreviewed);
+                field = field.Distinct().ToList();
             }
-            return _extsUploadable;
+            return field;
         }
     }
 
-    private List<string> ExtsIndexing { get => fileUtilityConfiguration.ExtsIndexing; }
+    private List<string> ExtsIndexing => fileUtilityConfiguration.ExtsIndexing;
 
-    public List<string> ExtsImagePreviewed { get => fileUtilityConfiguration.ExtsImagePreviewed; }
+    public List<string> ExtsImagePreviewed => fileUtilityConfiguration.ExtsImagePreviewed;
 
-    public List<string> ExtsMediaPreviewed { get => fileUtilityConfiguration.ExtsMediaPreviewed; }
+    public List<string> ExtsMediaPreviewed => fileUtilityConfiguration.ExtsMediaPreviewed;
 
     public List<string> ExtsWebPreviewed
     {
@@ -483,7 +481,7 @@ public class FileUtility(
         }
     }
 
-    public List<string> ExtsWebEncrypt { get => fileUtilityConfiguration.ExtsWebEncrypt; }
+    public List<string> ExtsWebEncrypt => fileUtilityConfiguration.ExtsWebEncrypt;
 
     public List<string> ExtsWebReviewed
     {
@@ -537,10 +535,7 @@ public class FileUtility(
         }
     }
 
-    public List<string> ExtsWebTemplate
-    {
-        get => fileUtilityConfiguration.ExtsWebTemplate;
-    }
+    public List<string> ExtsWebTemplate => fileUtilityConfiguration.ExtsWebTemplate;
 
     public List<string> ExtsMustConvert
     {
@@ -652,7 +647,7 @@ public class FileUtility(
 
     public Dictionary<FileType, string> InternalExtension => fileUtilityConfiguration.InternalExtension;
 
-    public string MasterFormExtension { get => fileUtilityConfiguration.MasterFormExtension; }
+    public string MasterFormExtension => fileUtilityConfiguration.MasterFormExtension;
 
     public enum CsvDelimiter
     {

@@ -257,7 +257,7 @@ public class PortalController(
 
         var result = new TariffDto
         {
-            State = source.State,
+            State = source.State
         };
 
         var currentUserType = await userManager.GetUserTypeAsync(securityContext.CurrentAccount.ID);

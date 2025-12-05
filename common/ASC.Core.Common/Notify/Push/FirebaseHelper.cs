@@ -36,8 +36,6 @@ public class FirebaseHelper(AuthContext authContext,
     CacheFirebaseDao cacheFirebaseDao,
     IFusionCache cache)
 {
-    protected readonly UserManager _userManager = userManager;
-
     public async Task SendMessageAsync(NotifyMessage msg)
     {
         var receiver = msg.Reciever;
@@ -55,7 +53,7 @@ public class FirebaseHelper(AuthContext authContext,
 
         if (Equals(userId, Guid.Empty))
         {
-            var user = await _userManager.GetUserByUserNameAsync(receiver);
+            var user = await userManager.GetUserByUserNameAsync(receiver);
             if (user == null)
             {
                 return;
@@ -149,8 +147,7 @@ public class FirebaseHelper(AuthContext authContext,
             }
             catch (FirebaseAdmin.Messaging.FirebaseMessagingException ex)
             {
-                if (ex.MessagingErrorCode == FirebaseAdmin.Messaging.MessagingErrorCode.InvalidArgument ||
-                    ex.MessagingErrorCode == FirebaseAdmin.Messaging.MessagingErrorCode.Unregistered)
+                if (ex.MessagingErrorCode is FirebaseAdmin.Messaging.MessagingErrorCode.InvalidArgument or FirebaseAdmin.Messaging.MessagingErrorCode.Unregistered)
                 {
                     await HandleInvalidTokenAsync(userId, tenantId, message.Token);
                 }

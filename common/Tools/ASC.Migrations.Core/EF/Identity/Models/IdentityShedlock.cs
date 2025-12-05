@@ -23,57 +23,60 @@ public static class IdentityShedlockExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddIdentityShedlock(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<IdentityShedlock>(entity =>
+        public void MySqlAddIdentityShedlock()
         {
-            entity.HasKey(e => e.Name).HasName("PRIMARY");
+            modelBuilder.Entity<IdentityShedlock>(entity =>
+            {
+                entity.HasKey(e => e.Name).HasName("PRIMARY");
 
-            entity.ToTable("identity_shedlock");
+                entity.ToTable("identity_shedlock");
 
-            entity.Property(e => e.Name)
-                .HasMaxLength(64)
-                .HasColumnName("name");
-            entity.Property(e => e.LockUntil)
-                .HasColumnType("timestamp(3)")
-                .HasColumnName("lock_until");
-            entity.Property(e => e.LockedAt)
-                .HasColumnType("timestamp(3)")
-                .HasColumnName("locked_at");
-            entity.Property(e => e.LockedBy)
-                .HasMaxLength(255)
-                .HasColumnName("locked_by")
-                .IsRequired();
-        });
-    }
+                entity.Property(e => e.Name)
+                    .HasMaxLength(64)
+                    .HasColumnName("name");
+                entity.Property(e => e.LockUntil)
+                    .HasColumnType("timestamp(3)")
+                    .HasColumnName("lock_until");
+                entity.Property(e => e.LockedAt)
+                    .HasColumnType("timestamp(3)")
+                    .HasColumnName("locked_at");
+                entity.Property(e => e.LockedBy)
+                    .HasMaxLength(255)
+                    .HasColumnName("locked_by")
+                    .IsRequired();
+            });
+        }
 
-    public static void PgSqlAddIdentityShedlock(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<IdentityShedlock>(entity =>
+        public void PgSqlAddIdentityShedlock()
         {
-            // Setting primary key with "name" column
-            entity.HasKey(e => e.Name).HasName("identity_shedlock_pkey");
+            modelBuilder.Entity<IdentityShedlock>(entity =>
+            {
+                // Setting primary key with "name" column
+                entity.HasKey(e => e.Name).HasName("identity_shedlock_pkey");
 
-            // Mapping this entity to the PostgreSQL table
-            entity.ToTable("identity_shedlock");
+                // Mapping this entity to the PostgreSQL table
+                entity.ToTable("identity_shedlock");
 
-            // Configuring the properties
-            entity.Property(e => e.Name)
-                .HasMaxLength(64) // Restricting the length
-                .HasColumnName("name");
+                // Configuring the properties
+                entity.Property(e => e.Name)
+                    .HasMaxLength(64) // Restricting the length
+                    .HasColumnName("name");
 
-            entity.Property(e => e.LockUntil)
-                .HasColumnType("timestamptz") // PostgreSQL specific timestamp type
-                .HasColumnName("lock_until");
+                entity.Property(e => e.LockUntil)
+                    .HasColumnType("timestamptz") // PostgreSQL specific timestamp type
+                    .HasColumnName("lock_until");
 
-            entity.Property(e => e.LockedAt)
-                .HasColumnType("timestamptz") // PostgreSQL specific timestamp type
-                .HasColumnName("locked_at");
+                entity.Property(e => e.LockedAt)
+                    .HasColumnType("timestamptz") // PostgreSQL specific timestamp type
+                    .HasColumnName("locked_at");
 
-            entity.Property(e => e.LockedBy)
-                .HasMaxLength(255) // Restricting the length
-                .HasColumnName("locked_by")
-                .IsRequired(); // Configuring the column as NOT NULL
-        });
+                entity.Property(e => e.LockedBy)
+                    .HasMaxLength(255) // Restricting the length
+                    .HasColumnName("locked_by")
+                    .IsRequired(); // Configuring the column as NOT NULL
+            });
+        }
     }
 }

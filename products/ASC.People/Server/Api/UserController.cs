@@ -954,7 +954,7 @@ public class UserController(
         var isConfirmLink = _httpContextAccessor.HttpContext!.User.Claims
             .Any(role => role.Type == ClaimTypes.Role &&
                 ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) &&
-                (confirmType == ConfirmType.LinkInvite || confirmType == ConfirmType.GuestShareLink));
+                confirmType is ConfirmType.LinkInvite or ConfirmType.GuestShareLink);
 
         if (user.Id == Constants.LostUser.Id)
         {
@@ -1626,7 +1626,7 @@ public class UserController(
         if (authContext.IsAuthenticated)
         {
             var currentUser = await _userManager.GetUserByEmailAsync(inDto.Email);
-            if (currentUser.Id != authContext.CurrentAccount.ID && !(await _userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)))
+            if (currentUser.Id != authContext.CurrentAccount.ID && !await _userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
             {
                 throw new InvalidOperationException(Resource.ErrorAccessDenied);
             }
@@ -2413,7 +2413,7 @@ public class UserController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
+        var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID) ||
                       await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
 
         var excludeGroups = new List<Guid>();

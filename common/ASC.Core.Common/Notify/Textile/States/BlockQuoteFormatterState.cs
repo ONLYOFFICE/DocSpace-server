@@ -55,8 +55,5 @@ public class BlockQuoteFormatterState(TextileFormatter f) : SimpleBlockFormatter
         return false;
     }
 
-    public override Type FallbackFormattingState
-    {
-        get { return null; }
-    }
+    public override Type FallbackFormattingState => null;
 }

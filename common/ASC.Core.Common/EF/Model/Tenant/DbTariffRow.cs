@@ -55,81 +55,84 @@ public static class DbTariffRowExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbTariffRow(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbTariffRow>(entity =>
+        public void MySqlAddDbTariffRow()
         {
-            entity.ToTable("tenants_tariffrow");
+            modelBuilder.Entity<DbTariffRow>(entity =>
+            {
+                entity.ToTable("tenants_tariffrow");
 
-            entity.HasKey(e => new { e.TenantId, e.TariffId, e.Quota })
-                .HasName("PRIMARY");
+                entity.HasKey(e => new { e.TenantId, e.TariffId, e.Quota })
+                    .HasName("PRIMARY");
 
-            entity.Property(e => e.TariffId)
-                .HasColumnName("tariff_id")
-                .HasColumnType("int");
+                entity.Property(e => e.TariffId)
+                    .HasColumnName("tariff_id")
+                    .HasColumnType("int");
 
-            entity.Property(e => e.Quota)
-                .HasColumnName("quota")
-                .HasColumnType("int");
+                entity.Property(e => e.Quota)
+                    .HasColumnName("quota")
+                    .HasColumnType("int");
 
-            entity.Property(e => e.Quantity)
-                .HasColumnName("quantity")
-                .HasColumnType("int");
+                entity.Property(e => e.Quantity)
+                    .HasColumnName("quantity")
+                    .HasColumnType("int");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant")
-                .HasColumnType("int");
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant")
+                    .HasColumnType("int");
 
-            entity.Property(e => e.DueDate)
-                .HasColumnName("due_date")
-                .HasColumnType("datetime")
-                .IsRequired(false)
-                .HasDefaultValueSql("NULL");
+                entity.Property(e => e.DueDate)
+                    .HasColumnName("due_date")
+                    .HasColumnType("datetime")
+                    .IsRequired(false)
+                    .HasDefaultValueSql("NULL");
 
-            entity.Property(e => e.NextQuantity)
-                .HasColumnName("next_quantity")
-                .HasColumnType("int")
-                .IsRequired(false)
-                .HasDefaultValueSql("NULL");
-        });
-    }
+                entity.Property(e => e.NextQuantity)
+                    .HasColumnName("next_quantity")
+                    .HasColumnType("int")
+                    .IsRequired(false)
+                    .HasDefaultValueSql("NULL");
+            });
+        }
 
-    public static void PgSqlAddDbTariffRow(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbTariffRow>(entity =>
+        public void PgSqlAddDbTariffRow()
         {
-            entity.ToTable("tenants_tariffrow");
+            modelBuilder.Entity<DbTariffRow>(entity =>
+            {
+                entity.ToTable("tenants_tariffrow");
 
-            entity.HasKey(e => new { e.TenantId, e.TariffId, e.Quota })
-                .HasName("tenants_tariffrow_pkey");
+                entity.HasKey(e => new { e.TenantId, e.TariffId, e.Quota })
+                    .HasName("tenants_tariffrow_pkey");
 
-            entity.Property(e => e.TariffId)
-                .HasColumnName("tariff_id")
-                .HasColumnType("integer");
+                entity.Property(e => e.TariffId)
+                    .HasColumnName("tariff_id")
+                    .HasColumnType("integer");
 
-            entity.Property(e => e.Quota)
-                .HasColumnName("quota")
-                .HasColumnType("integer");
+                entity.Property(e => e.Quota)
+                    .HasColumnName("quota")
+                    .HasColumnType("integer");
 
-            entity.Property(e => e.Quantity)
-                .HasColumnName("quantity")
-                .HasColumnType("integer");
+                entity.Property(e => e.Quantity)
+                    .HasColumnName("quantity")
+                    .HasColumnType("integer");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant")
-                .HasColumnType("integer");
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant")
+                    .HasColumnType("integer");
 
-            entity.Property(e => e.DueDate)
-                .HasColumnName("due_date")
-                .HasColumnType("timestamptz")
-                .IsRequired(false)
-                .HasDefaultValue(null);
+                entity.Property(e => e.DueDate)
+                    .HasColumnName("due_date")
+                    .HasColumnType("timestamptz")
+                    .IsRequired(false)
+                    .HasDefaultValue(null);
 
-            entity.Property(e => e.NextQuantity)
-                .HasColumnName("next_quantity")
-                .HasColumnType("integer")
-                .IsRequired(false)
-                .HasDefaultValue(null);
-        });
+                entity.Property(e => e.NextQuantity)
+                    .HasColumnName("next_quantity")
+                    .HasColumnType("integer")
+                    .IsRequired(false)
+                    .HasDefaultValue(null);
+            });
+        }
     }
 }

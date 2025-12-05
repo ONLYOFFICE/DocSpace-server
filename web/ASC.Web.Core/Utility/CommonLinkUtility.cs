@@ -74,10 +74,7 @@ public class CommonLinkUtility(
     public const string AbsoluteAccountsPath = "/accounts/";
     public const string VirtualAccountsPath = "~/accounts/";
 
-    public string Logout
-    {
-        get { return ToAbsolute("~/auth.aspx") + "?t=logout"; }
-    }
+    public string Logout => ToAbsolute("~/auth.aspx") + "?t=logout";
 
     public string GetDefault()
     {

@@ -81,7 +81,7 @@ public class RoomLogoManager(
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
 
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+        if (room is not { IsRoom: true })
         {
             throw new ItemNotFoundException();
         }
@@ -357,7 +357,7 @@ public class RoomLogoManager(
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+        if (room is not { IsRoom: true })
         {
             throw new ItemNotFoundException();
         }
@@ -442,7 +442,7 @@ public class RoomLogoManager(
     private async Task RemoveTempAsync(IDataStore store, string fileName)
     {
         var index = fileName.LastIndexOf('.');
-        var fileNameWithoutExt = (index != -1) ? fileName[..index] : fileName;
+        var fileNameWithoutExt = index != -1 ? fileName[..index] : fileName;
 
         try
         {
@@ -558,7 +558,7 @@ public class RoomLogoManager(
     private async Task<byte[]> GetTempAsync(IDataStore store, string fileName)
     {
         var index = fileName.LastIndexOf('.');
-        var fileNameWithoutExt = (index != -1) ? fileName[..index] : fileName;
+        var fileNameWithoutExt = index != -1 ? fileName[..index] : fileName;
 
         var fileNameParts = fileNameWithoutExt.Split(LogosPathSplitter);
 

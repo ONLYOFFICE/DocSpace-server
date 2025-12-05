@@ -35,73 +35,76 @@ public static class InstanceRegistrationExtension
 
         return modelBuilder;
     }
-    public static void MySqlAddInstanceRegistration(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<InstanceRegistration>(entity =>
-        {
-            entity.ToTable("hosting_instance_registration");
+          public void MySqlAddInstanceRegistration()
+          {
+                modelBuilder.Entity<InstanceRegistration>(entity =>
+                {
+                      entity.ToTable("hosting_instance_registration");
 
-            entity.HasKey(e => e.InstanceRegistrationId)
-                  .HasName("PRIMARY");
+                      entity.HasKey(e => e.InstanceRegistrationId)
+                            .HasName("PRIMARY");
 
-            entity.HasIndex(e => e.WorkerTypeName)
-                  .HasDatabaseName("worker_type_name");
+                      entity.HasIndex(e => e.WorkerTypeName)
+                            .HasDatabaseName("worker_type_name");
 
-            entity.Property(e => e.WorkerTypeName)
-                  .HasColumnName("worker_type_name")
-                  .HasColumnType("varchar")
-                  .HasCharSet("utf8")
-                  .UseCollation("utf8_general_ci")
-                  .IsRequired();
+                      entity.Property(e => e.WorkerTypeName)
+                            .HasColumnName("worker_type_name")
+                            .HasColumnType("varchar")
+                            .HasCharSet("utf8")
+                            .UseCollation("utf8_general_ci")
+                            .IsRequired();
 
-            entity.Property(e => e.IsActive)
-                  .HasColumnName("is_active")
-                  .HasColumnType("tinyint(4)")
-                  .IsRequired();
+                      entity.Property(e => e.IsActive)
+                            .HasColumnName("is_active")
+                            .HasColumnType("tinyint(4)")
+                            .IsRequired();
 
-            entity.Property(e => e.InstanceRegistrationId)
-                  .HasColumnName("instance_registration_id")
-                  .HasColumnType("varchar")
-                  .HasCharSet("utf8")
-                  .UseCollation("utf8_general_ci")
-                  .IsRequired();
+                      entity.Property(e => e.InstanceRegistrationId)
+                            .HasColumnName("instance_registration_id")
+                            .HasColumnType("varchar")
+                            .HasCharSet("utf8")
+                            .UseCollation("utf8_general_ci")
+                            .IsRequired();
 
-            entity.Property(e => e.LastUpdated)
-                  .HasColumnName("last_updated")
-                  .HasColumnType("datetime");
-        });
-    }
+                      entity.Property(e => e.LastUpdated)
+                            .HasColumnName("last_updated")
+                            .HasColumnType("datetime");
+                });
+          }
 
-    public static void PgSqlAddInstanceRegistration(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<InstanceRegistration>(entity =>
-        {
-            entity.ToTable("hosting_instance_registration");
+          public void PgSqlAddInstanceRegistration()
+          {
+                modelBuilder.Entity<InstanceRegistration>(entity =>
+                {
+                      entity.ToTable("hosting_instance_registration");
 
-            entity.HasKey(e => e.InstanceRegistrationId)
-                  .HasName("pk_instance_registration");
+                      entity.HasKey(e => e.InstanceRegistrationId)
+                            .HasName("pk_instance_registration");
 
-            entity.HasIndex(e => e.WorkerTypeName)
-                  .HasDatabaseName("ix_worker_type_name");
+                      entity.HasIndex(e => e.WorkerTypeName)
+                            .HasDatabaseName("ix_worker_type_name");
 
-            entity.Property(e => e.WorkerTypeName)
-                  .HasColumnName("worker_type_name")
-                  .HasColumnType("varchar")
-                  .IsRequired();
+                      entity.Property(e => e.WorkerTypeName)
+                            .HasColumnName("worker_type_name")
+                            .HasColumnType("varchar")
+                            .IsRequired();
 
-            entity.Property(e => e.IsActive)
-                  .HasColumnName("is_active")
-                  .HasColumnType("boolean")
-                  .IsRequired();
+                      entity.Property(e => e.IsActive)
+                            .HasColumnName("is_active")
+                            .HasColumnType("boolean")
+                            .IsRequired();
 
-            entity.Property(e => e.InstanceRegistrationId)
-                  .HasColumnName("instance_registration_id")
-                  .HasColumnType("varchar")
-                  .IsRequired();
+                      entity.Property(e => e.InstanceRegistrationId)
+                            .HasColumnName("instance_registration_id")
+                            .HasColumnType("varchar")
+                            .IsRequired();
 
-            entity.Property(e => e.LastUpdated)
-                  .HasColumnName("last_updated")
-                  .HasColumnType("timestamptz");
-        });
+                      entity.Property(e => e.LastUpdated)
+                            .HasColumnName("last_updated")
+                            .HasColumnType("timestamptz");
+                });
+          }
     }
 }

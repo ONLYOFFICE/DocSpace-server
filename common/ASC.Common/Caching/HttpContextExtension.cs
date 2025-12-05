@@ -28,50 +28,53 @@ namespace ASC.Common.Caching;
 
 public static class HttpContextExtension
 {
-    public static DateTime? GetIfModifiedSince(this HttpContext httpContext)
+    extension(HttpContext httpContext)
     {
-        DateTime? lastModified = null;
-        if (DateTime.TryParse(httpContext.Request.Headers.IfModifiedSince, CultureInfo.InvariantCulture, out var parsedLastModified))
+        public DateTime? GetIfModifiedSince()
         {
-            lastModified = parsedLastModified;
-            lastModified = DateTime.SpecifyKind(lastModified.Value, DateTimeKind.Local);
+            DateTime? lastModified = null;
+            if (DateTime.TryParse(httpContext.Request.Headers.IfModifiedSince, CultureInfo.InvariantCulture, out var parsedLastModified))
+            {
+                lastModified = parsedLastModified;
+                lastModified = DateTime.SpecifyKind(lastModified.Value, DateTimeKind.Local);
+            }
+            return lastModified;
         }
-        return lastModified;
-    }
 
-    public static bool TryGetFromCache(this HttpContext httpContext, DateTime lastModified)
-    {
-        if (lastModified != DateTime.MinValue)
+        public bool TryGetFromCache(DateTime lastModified)
         {
-            var lastModifiedStr = lastModified.ToString(CultureInfo.InvariantCulture);
-            if (lastModifiedStr == httpContext.Request.Headers.IfModifiedSince)
+            if (lastModified != DateTime.MinValue)
+            {
+                var lastModifiedStr = lastModified.ToString(CultureInfo.InvariantCulture);
+                if (lastModifiedStr == httpContext.Request.Headers.IfModifiedSince)
+                {
+                    httpContext.Response.StatusCode = 304;
+                    return true;
+                }
+
+                httpContext.Response.Headers.LastModified = lastModifiedStr;
+                httpContext.Response.Headers.CacheControl = "private, no-cache";
+            }
+
+            return false;
+        }
+
+        public bool TryGetFromCache(string etag)
+        {
+            var etagFromRequest = httpContext.Request.Headers.IfNoneMatch;
+
+            etag = "W/" + etag;
+            if (etag == etagFromRequest)
             {
                 httpContext.Response.StatusCode = 304;
                 return true;
             }
 
-            httpContext.Response.Headers.LastModified = lastModifiedStr;
+            httpContext.Response.Headers.ETag = etag;
             httpContext.Response.Headers.CacheControl = "private, no-cache";
+
+            return false;
         }
-
-        return false;
-    }
-
-    public static bool TryGetFromCache(this HttpContext httpContext, string etag)
-    {
-        var etagFromRequest = httpContext.Request.Headers.IfNoneMatch;
-
-        etag = "W/" + etag;
-        if (etag == etagFromRequest)
-        {
-            httpContext.Response.StatusCode = 304;
-            return true;
-        }
-
-        httpContext.Response.Headers.ETag = etag;
-        httpContext.Response.Headers.CacheControl = "private, no-cache";
-
-        return false;
     }
 
     public static async Task<string> CalculateEtagAsync(IEnumerable<string> data)

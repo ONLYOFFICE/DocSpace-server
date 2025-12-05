@@ -307,7 +307,7 @@ public class EmailValidationKeyModelHelper(
 
         async Task<bool> CheckOwnerRights(string email)
         {
-            var ownerId = (tenantManager.GetCurrentTenant()).OwnerId;
+            var ownerId = tenantManager.GetCurrentTenant().OwnerId;
             var user = await userManager.GetUserByEmailAsync(email);
             return ownerId.Equals(user.Id);
         }

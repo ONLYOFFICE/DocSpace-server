@@ -297,23 +297,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
         }
     }
 
-    private record FolderIndex
-    {
-        public FolderIndex(int ChildFoldersCount, string Order)
-        {
-            this.ChildFoldersCount = ChildFoldersCount;
-            this.Order = Order;
-        }
-
-        public int ChildFoldersCount { get; init; }
-        public string Order { get; init; }
-
-        public void Deconstruct(out int ChildFoldersCount, out string Order)
-        {
-            ChildFoldersCount = this.ChildFoldersCount;
-            Order = this.Order;
-        }
-    }
+    private record FolderIndex(int ChildFoldersCount, string Order);
 }
 
 public record RoomIndexExportTaskData(int RoomId, IDictionary<string, string> Headers);
