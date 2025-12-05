@@ -62,7 +62,7 @@ public class PrivacyRoomControllerCommon(
     /// <httpMethod>GET</httpMethod>
     /// <visible>false</visible>
     [HttpGet("keys/filter")]
-    public async Task<EncryptionKeyDto> GetKeysAsync(string id, EncryptionKeyType? type, string version, string publicKey, string privateKey)
+    public async Task<EncryptionKeyDto> GetKeysAsync(string id, EncryptionKeyType? type, string version, string publicKey, string privateKeyEnc)
     {
         await Demand();
 
@@ -110,9 +110,9 @@ public class PrivacyRoomControllerCommon(
                 result = true;
             }
             
-            if (!string.IsNullOrEmpty(privateKey))
+            if (!string.IsNullOrEmpty(privateKeyEnc))
             {
-                if (!r.PrivateKey.Equals(privateKey, StringComparison.OrdinalIgnoreCase))
+                if (!r.PrivateKeyEnc.Equals(privateKeyEnc, StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }

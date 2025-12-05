@@ -33,6 +33,6 @@ public class EncryptionKeyRequestDto
     public DateTime Date { get; set; }
     public string Version { get; set; }
     public string PublicKey { get; set; }
-    public string PrivateKey { get; set; }
+    public string PrivateKeyEnc { get; set; }
     public string Salt { get; set; }
 }
