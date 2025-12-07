@@ -38,59 +38,22 @@ var connectionManager = new ConnectionStringManager(builder)
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
 var isDocker = String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
-var projectConfigurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
-
-if (isDocker)
-{
-    projectConfigurator.AddProjectDocker<ASC_Files>(Constants.FilesPort);
-    projectConfigurator.AddProjectDocker<ASC_People>(Constants.PeoplePort);
-    projectConfigurator.AddProjectDocker<ASC_Web_Api>(Constants.WebApiPort);
-    projectConfigurator.AddProjectDocker<ASC_ApiSystem>(Constants.ApiSystemPort);
-    projectConfigurator.AddProjectDocker<ASC_ClearEvents>(Constants.ClearEventsPort);
-    projectConfigurator.AddProjectDocker<ASC_Data_Backup>(Constants.BackupPort);
-    projectConfigurator.AddProjectDocker<ASC_Data_Backup_BackgroundTasks>(Constants.BackupBackgroundTasksPort);
-    projectConfigurator.AddProjectDocker<ASC_Notify>(0, false);
-    projectConfigurator.AddProjectDocker<ASC_Files_Service>(Constants.FilesServicePort);
-    projectConfigurator.AddProjectDocker<ASC_Studio_Notify>(Constants.StudioNotifyPort);
-    projectConfigurator.AddProjectDocker<ASC_Web_Studio>(Constants.WebstudioPort);
-    projectConfigurator.AddProjectDocker<ASC_AI>(Constants.AiPort);
-
-    projectConfigurator.AddSocketIoDocker();
-    projectConfigurator.AddSsoAuthDocker();
-    projectConfigurator.AddWebDavDocker();
-}
-else
-{
-    projectConfigurator.AddProjectWithDefaultConfiguration<ASC_Files>();
-    projectConfigurator.AddProjectWithDefaultConfiguration<ASC_People>();
-    projectConfigurator.AddProjectWithDefaultConfiguration<ASC_Web_Api>();
-    projectConfigurator.AddProjectWithDefaultConfiguration<ASC_ApiSystem>();
-    projectConfigurator.AddProjectWithDefaultConfiguration<ASC_ClearEvents>();
-    projectConfigurator.AddProjectWithDefaultConfiguration<ASC_Data_Backup>();
-    projectConfigurator.AddProjectWithDefaultConfiguration<ASC_Data_Backup_BackgroundTasks>();
-    projectConfigurator.AddProjectWithDefaultConfiguration<ASC_Notify>(false);
-    projectConfigurator.AddProjectWithDefaultConfiguration<ASC_Files_Service>();
-    projectConfigurator.AddProjectWithDefaultConfiguration<ASC_Studio_Notify>();
-    projectConfigurator.AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
-    projectConfigurator.AddProjectWithDefaultConfiguration<ASC_AI>();
-
-    builder.AddNpmApp(Constants.SocketIoContainer, "../ASC.Socket.IO/", "start:build")
-        .WithEnvironment("Redis:Hosts:0:Host", () => connectionManager.RedisHost ?? string.Empty)
-        .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.RedisPort ?? string.Empty)
-        .WithHttpEndpoint(targetPort: Constants.SocketIoPort)
-        .WithHttpHealthCheck("/health")
-        .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
-
-    builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build")
-        .WithHttpEndpoint(targetPort: Constants.SsoAuthPort)
-        .WithHttpHealthCheck("/health")
-        .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
-
-    builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build")
-        .WithHttpEndpoint(targetPort: Constants.WebDavPort)
-        .WithHttpHealthCheck("/health")
-        .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
-}
+_ = new ProjectConfigurator(builder, connectionManager, basePath, isDocker)
+    .AddProject<ASC_Files>(Constants.FilesPort)
+    .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
+    .AddProject<ASC_People>(Constants.PeoplePort)
+    .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+    .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
+    .AddProject<ASC_ClearEvents>(Constants.ClearEventsPort)
+    .AddProject<ASC_Data_Backup>(Constants.BackupPort)
+    .AddProject<ASC_Data_Backup_BackgroundTasks>(Constants.BackupBackgroundTasksPort)
+    .AddProject<ASC_Notify>(0, false)
+    .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort)
+    .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
+    .AddProject<ASC_AI>(Constants.AiPort)
+    .AddSocketIO()
+    .AddSsoAuth()
+    .AddWebDav();
 
 var ascIdentityRegistration = "asc-identity-registration";
 var ascIdentityAuthorization = "asc-identity-authorization";

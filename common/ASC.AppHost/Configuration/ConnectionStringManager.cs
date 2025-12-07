@@ -32,6 +32,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
 {
     public MySqlConnectionStringBuilder? MySqlConnectionStringBuilder { get; private set; }
     public Uri? RabbitMqUri { get; private set; }
+    
+    //TODO:create record
     public string? RedisHost { get; private set; }
     public string? RedisPort { get; private set; }
     public string? RedisPassword { get; private set; }
@@ -126,6 +128,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
     {
         EditorResource = builder
             .AddContainer(Constants.EditorsContainer, "onlyoffice/documentserver", "latest")
+            //TODO:get from config or set for the rest projects
             .WithEnvironment("JWT_ENABLED", "true")
             .WithEnvironment("JWT_SECRET", "secret")
             .WithEnvironment("JWT_HEADER", "AuthorizationJwt");

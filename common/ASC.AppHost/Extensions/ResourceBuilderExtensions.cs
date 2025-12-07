@@ -80,12 +80,14 @@ public static class ResourceBuilderExtensions
                 resourceBuilder.WithHttpHealthCheck("/health");
             }
 
+            resourceBuilder
+                .WithEnvironment("openTelemetry:enable", "true")
+                .WithEnvironment("files:docservice:url:portal", ConnectionStringManager.SubstituteLocalhost("http://localhost"))
+                .WithEnvironment("files:docservice:url:public", "http://localhost/ds-vpath");
+                
             if (connectionManager.MySqlResource != null)
             {
                 resourceBuilder
-                    .WithEnvironment("openTelemetry:enable", "true")
-                    .WithEnvironment("files:docservice:url:portal", ConnectionStringManager.SubstituteLocalhost("http://localhost"))
-                    .WithEnvironment("files:docservice:url:public", "http://localhost/ds-vpath")
                     .WithReference(connectionManager.MySqlResource, "default:connectionString");
             }
 
@@ -95,8 +97,7 @@ public static class ResourceBuilderExtensions
             }
 
             resourceBuilder
-                .WithEnvironment("RabbitMQ:Hostname", () => connectionManager.RabbitMqUri != null ? 
-                    isDocker ? $"{ConnectionStringManager.SubstituteLocalhost(connectionManager.RabbitMqUri.Host)}" : connectionManager.RabbitMqUri.Host : "")
+                .WithEnvironment("RabbitMQ:Hostname", () => connectionManager.RabbitMqUri != null ? isDocker ? $"{ConnectionStringManager.SubstituteLocalhost(connectionManager.RabbitMqUri.Host)}" : connectionManager.RabbitMqUri.Host : "")
                 .WithEnvironment("RabbitMQ:Port", () => connectionManager.RabbitMqUri != null ? $"{connectionManager.RabbitMqUri.Port}" : "")
                 .WithEnvironment("RabbitMQ:UserName", () => connectionManager.RabbitMqUri != null ? $"{connectionManager.RabbitMqUri.UserInfo.Split(':')[0]}" : "")
                 .WithEnvironment("RabbitMQ:Password", () => connectionManager.RabbitMqUri != null ? $"{connectionManager.RabbitMqUri.UserInfo.Split(':')[1]}" : "")

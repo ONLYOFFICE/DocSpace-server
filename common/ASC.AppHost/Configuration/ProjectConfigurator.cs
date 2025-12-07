@@ -38,7 +38,21 @@ public class ProjectConfigurator(
     string basePath,
     bool isDocker)
 {
-    public void AddProjectWithDefaultConfiguration<TProject>(bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
+    public ProjectConfigurator AddProject<TProject>(int projectPort, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
+    {
+        if (isDocker)
+        {
+            AddProjectDocker<TProject>(projectPort, includeHealthCheck);
+        }
+        else
+        {
+            AddProjectWithDefaultConfiguration<TProject>(includeHealthCheck);
+        }
+
+        return this;
+    }
+
+    private void AddProjectWithDefaultConfiguration<TProject>(bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
     {
         var project = builder
             .AddProject<TProject>(ResourceBuilderExtensions.GetProjectName<TProject>())
@@ -52,12 +66,12 @@ public class ProjectConfigurator(
         {
             project.WithEnvironment("core:hosting:singletonMode", true.ToString());
         }
-
+        
         project.AddBaseConfig(connectionManager, isDocker, includeHealthCheck);
         connectionManager.AddWaitFor(project);
     }
 
-    public void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
+    private void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
     {
         var projectMetadata = new TProject();
         var projectBasePath = Path.GetDirectoryName(projectMetadata.ProjectPath) ?? basePath;
@@ -77,7 +91,7 @@ public class ProjectConfigurator(
             .WithBindMount(projectBasePath, "/app")
             .WithEnvironment("log:name", $"/{name.ToLower()["asc-".Length..].Replace('_', '.')}")
             .WithEnvironment("$STORAGE_ROOT", "/data")
-            .WithEnvironment("web:hub:internal", $"http://{Constants.SocketIoContainer}:{Constants.SocketIoPort.ToString()}")
+            .WithEnvironment("web:hub:internal", new UriBuilder(Uri.UriSchemeHttp, Constants.SocketIoContainer, Constants.SocketIoPort).ToString())
             .WithEnvironment("core:hosting:singletonMode", true.ToString())
             .WithEnvironment("pathToConf", "/buildtools/config/")
             .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
@@ -96,63 +110,118 @@ public class ProjectConfigurator(
         resourceBuilder.AddBaseConfig(connectionManager, isDocker, includeHealthCheck);
         connectionManager.AddWaitFor(resourceBuilder);
 
-        resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES", "true");
-        resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES", "true");
-        resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY", "in_memory");
+        var otlEnvs = new Dictionary<string, string>
+        {
+            {"OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES", "true" },
+            {"OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES", "true"},
+            {"OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY", "in_memory"}
+        };
 
         if (resourceBuilder.ApplicationBuilder.ExecutionContext.IsRunMode && resourceBuilder.ApplicationBuilder.Environment.IsDevelopment())
         {
-            resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_ASPNETCORE_DISABLE_URL_QUERY_REDACTION", "true");
-            resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_HTTPCLIENT_DISABLE_URL_QUERY_REDACTION", "true");
+            otlEnvs.Add("OTEL_DOTNET_EXPERIMENTAL_ASPNETCORE_DISABLE_URL_QUERY_REDACTION", "true");
+            otlEnvs.Add("OTEL_DOTNET_EXPERIMENTAL_HTTPCLIENT_DISABLE_URL_QUERY_REDACTION", "true");
         }
 
+        foreach (var env in otlEnvs)
+        {
+            resourceBuilder.WithEnvironment(env.Key, env.Value);
+        }
+        
         resourceBuilder.WithOtlpExporter();
     }
 
-    public IResourceBuilder<ContainerResource> AddSocketIoDocker()
+    public ProjectConfigurator AddSocketIO()
     {
-        var resourceBuilder = builder
-            .AddDockerfile(Constants.SocketIoContainer, "../ASC.Socket.IO/")
-            .WithImageTag("dev")
-            .WithEnvironment("log:name", "socketIO")
-            .WithEnvironment("API_HOST", $"http://{Constants.OpenRestyContainer}:{Constants.RestyPort.ToString()}")
-            .WithEnvironment("Redis:Hosts:0:Host", () => ConnectionStringManager.SubstituteLocalhost(connectionManager.RedisHost) ?? string.Empty)
-            .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.RedisPort ?? string.Empty)
-            .WithHttpEndpoint(Constants.SocketIoPort, Constants.SocketIoPort, isProxied: false)
-            .WithHttpHealthCheck("/health")
-            .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+        var name = Constants.SocketIoContainer;
+        var path = "../ASC.Socket.IO/";
+        var port = Constants.SsoAuthPort;
+        
+        if (isDocker)
+        {
+            var resourceBuilder = builder
+                .AddDockerfile(name, path)
+                .WithImageTag("dev")
+                .WithEnvironment("log:name", "socketIO")
+                .WithEnvironment("API_HOST", new UriBuilder(Uri.UriSchemeHttp, Constants.OpenRestyContainer, Constants.RestyPort).ToString())
+                .WithEnvironment("Redis:Hosts:0:Host", () => ConnectionStringManager.SubstituteLocalhost(connectionManager.RedisHost) ?? string.Empty)
+                .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.RedisPort ?? string.Empty)
+                .WithHttpEndpoint(port, port, isProxied: false)
+                .WithHttpHealthCheck("/health")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
-        resourceBuilder.AddBaseBind(basePath);
-        return resourceBuilder;
+            resourceBuilder.AddBaseBind(basePath);
+        }
+        else
+        {
+            builder.AddNpmApp(name, path, "start:build")
+                .WithEnvironment("Redis:Hosts:0:Host", () => connectionManager.RedisHost ?? string.Empty)
+                .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.RedisPort ?? string.Empty)
+                .WithHttpEndpoint(targetPort: port)
+                .WithHttpHealthCheck("/health")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+        }
+
+        return this;
     }
 
-    public IResourceBuilder<ContainerResource> AddSsoAuthDocker()
+    public ProjectConfigurator AddSsoAuth()
     {
-        var resourceBuilder = builder
-            .AddDockerfile("asc-ssoAuth", "../ASC.SSoAuth/")
-            .WithImageTag("dev")
-            .WithEnvironment("log:name", "ssoAuth")
-            .WithEnvironment("API_HOST", $"http://{Constants.OpenRestyContainer}:{Constants.RestyPort.ToString()}")
-            .WithEnvironment("app:appsettings", "/buildtools/config")
-            .WithHttpEndpoint(Constants.SsoAuthPort, Constants.SsoAuthPort, isProxied: false)
-            .WithHttpHealthCheck("/health")
-            .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+        var name = "asc-ssoAuth";
+        var path = "../ASC.SSoAuth/";
+        var port = Constants.SsoAuthPort;
+        
+        if (isDocker)
+        {
+            var resourceBuilder = builder
+                .AddDockerfile(name, path)
+                .WithImageTag("dev")
+                .WithEnvironment("log:name", "ssoAuth")
+                .WithEnvironment("API_HOST",  new UriBuilder(Uri.UriSchemeHttp, Constants.OpenRestyContainer, Constants.RestyPort).ToString())
+                .WithEnvironment("app:appsettings", "/buildtools/config")
+                .WithHttpEndpoint(port, port, isProxied: false)
+                .WithHttpHealthCheck("/health")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
-        resourceBuilder.AddBaseBind(basePath);
-        return resourceBuilder;
+            resourceBuilder.AddBaseBind(basePath);
+        }
+        else
+        {
+            builder.AddNpmApp(name, path, "start:build")
+                .WithHttpEndpoint(targetPort: port)
+                .WithHttpHealthCheck("/health")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+        }
+
+        return this;
     }
 
-    public IResourceBuilder<ContainerResource> AddWebDavDocker()
+    public ProjectConfigurator AddWebDav()
     {
-        var resourceBuilder = builder
-            .AddDockerfile("asc-webDav", "../ASC.WebDav/")
-            .WithImageTag("dev")
-            .WithEnvironment("log:name", "webDav")
-            .WithHttpEndpoint(Constants.WebDavPort, Constants.WebDavPort, isProxied: false)
-            .WithHttpHealthCheck("/health")
-            .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+        var name = "asc-webDav";
+        var path = "../ASC.WebDav/";
+        var port = Constants.WebDavPort;
+        
+        if (isDocker)
+        {
+            var resourceBuilder = builder
+                .AddDockerfile(name, path)
+                .WithImageTag("dev")
+                .WithEnvironment("log:name", "webDav")
+                .WithHttpEndpoint(port, port, isProxied: false)
+                .WithHttpHealthCheck("/health")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
-        resourceBuilder.AddBaseBind(basePath);
-        return resourceBuilder;
+            resourceBuilder.AddBaseBind(basePath);
+        }
+        else
+        {
+            builder.AddNpmApp(name, path, "start:build")
+                .WithHttpEndpoint(targetPort: port)
+                .WithHttpHealthCheck("/health")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+        }
+
+        return this;
     }
 }
