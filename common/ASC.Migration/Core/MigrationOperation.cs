@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Extensions;
+using System.Globalization;
 
 namespace ASC.Migration.Core;
 
@@ -92,11 +93,14 @@ public class MigrationOperation : DistributedTaskProgress
             }
             CustomSynchronizationContext.CreateContext();
 
-            var tenant = await _tenantManager.GetTenantAsync(TenantId);
-            _tenantManager.SetCurrentTenant(tenant);
+            var tenant = await _tenantManager.SetCurrentTenantAsync(TenantId);
             await _securityContext.AuthenticateMeWithoutCookieAsync(_userId);
             migrator = _migrationCore.GetMigrator(_migratorName);
             migrator.OnProgressUpdateAsync = Migrator_OnProgressUpdateAsync;
+
+            var culture = tenant.GetCulture();
+            CultureInfo.CurrentCulture = culture;
+            CultureInfo.CurrentUICulture = culture;
 
             if (migrator == null)
             {
