@@ -203,7 +203,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
             resourceBuilder.WithEnvironment("Redis:Password", () => RedisPassword ?? string.Empty);
         }
     }
-
+    
     public void AddIdentityEnv(IResourceBuilder<ContainerResource>  resourceBuilder)
     {
         resourceBuilder

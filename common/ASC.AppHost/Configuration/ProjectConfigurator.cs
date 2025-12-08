@@ -223,7 +223,45 @@ public class ProjectConfigurator(
 
         return this;
     }
+    
+    public ProjectConfigurator AddIdentity()
+    {
+        var ascIdentityRegistration = "asc-identity-registration";
+        var ascIdentityAuthorization = "asc-identity-authorization";
 
+        var registrationBuilder = builder
+            .AddDockerfile(ascIdentityRegistration, "../ASC.Identity/")
+            .WithImageTag("dev")
+            .WithEnvironment("log:dir", "/logs")
+            .WithEnvironment("log:name", "identity.registration")
+            .WithEnvironment("SERVER_PORT", Constants.IdentityRegistrationPort.ToString())
+            .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
+            .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Registration")
+            .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", $"static://{ascIdentityAuthorization}:9999")
+            .WithHttpEndpoint(Constants.IdentityRegistrationPort, Constants.IdentityRegistrationPort, isProxied: false)
+            .WithBuildArg("MODULE", "registration/registration-container")
+            .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+        connectionManager.AddIdentityEnv(registrationBuilder);
+
+        var authorizationBuilder = builder
+            .AddDockerfile(ascIdentityAuthorization, "../ASC.Identity/")
+            .WithImageTag("dev")
+            .WithEnvironment("log:dir", "/logs")
+            .WithEnvironment("log:name", "identity.authorization")
+            .WithEnvironment("SERVER_PORT", Constants.IdentityAuthorizationPort.ToString())
+            .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
+            .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Authorization")
+            .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", $"static://{ascIdentityRegistration}:8888")
+            .WithHttpEndpoint(Constants.IdentityAuthorizationPort, Constants.IdentityAuthorizationPort, isProxied: false)
+            .WithBuildArg("MODULE", "authorization/authorization-container")
+            .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+        connectionManager.AddIdentityEnv(authorizationBuilder);
+
+        return this;
+    }
+    
     private void AddBaseBind<T>(IResourceBuilder<T> resourceBuilder) where T : ContainerResource
     {
         resourceBuilder
