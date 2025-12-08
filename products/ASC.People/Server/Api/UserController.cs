@@ -1671,9 +1671,12 @@ public class UserController(
     {
         await securityContext.AuthByClaimAsync();
 
-        var tenant = tenantManager.GetCurrentTenant();
-        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-        var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id);
+        if (inDto?.UpdateMembers?.UserIds == null ||
+            inDto.UpdateMembers.UserIds.Count() > 1 ||
+            !inDto.UpdateMembers.UserIds.Contains(authContext.CurrentAccount.ID))
+        {
+            throw new ArgumentException();
+        }
 
         foreach (var id in inDto.UpdateMembers.UserIds.Where(userId => !_userManager.IsSystemUser(userId)))
         {
@@ -1682,18 +1685,6 @@ public class UserController(
             if (u.Id == Constants.LostUser.Id)
             {
                 continue;
-            }
-
-            if (currentUser.Id != u.Id)
-            {
-                var userType = await _userManager.GetUserTypeAsync(u.Id);
-
-                switch (userType)
-                {
-                    case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
-                    case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
-                        continue;
-                }
             }
 
             u.ActivationStatus = inDto.ActivationStatus;
