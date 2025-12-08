@@ -2453,7 +2453,8 @@ public class FileSecurity(
         ProviderFilter provider,
         SubjectFilter subjectFilter,
         QuotaFilter quotaFilter,
-        StorageFilter storageFilter)
+        StorageFilter storageFilter,
+        int? groupId = null)
     {
         var securityDao = daoFactory.GetSecurityDao<string>();
 
@@ -2511,7 +2512,7 @@ public class FileSecurity(
         if (isAdmin && searchArea != SearchArea.Templates)
         {
             return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
-                subjectFilter, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords);
+                subjectFilter, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId);
         }
 
         return await GetVirtualRoomsForMeAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
@@ -2534,7 +2535,8 @@ public class FileSecurity(
         QuotaFilter quotaFilter,
         StorageFilter storageFilter,
         Dictionary<int, FileShareRecord<int>> internalRecords,
-        Dictionary<string, FileShareRecord<string>> thirdPartyRecords)
+        Dictionary<string, FileShareRecord<string>> thirdPartyRecords,
+        int? groupId)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
@@ -2553,7 +2555,7 @@ public class FileSecurity(
 
         var roomsEntries = storageFilter == StorageFilter.ThirdParty ?
             [] :
-            await folderDao.GetRoomsAsync(rootFoldersIds, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries, quotaFilter)
+            await folderDao.GetRoomsAsync(rootFoldersIds, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries, quotaFilter, groupId)
                 .Where(r => withSubfolders || DocSpaceHelper.IsRoom(r.FolderType))
                 .ToListAsync();
 

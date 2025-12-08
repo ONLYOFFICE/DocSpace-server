@@ -162,7 +162,8 @@ internal class FolderDao(
         ProviderFilter provider,
         SubjectFilter subjectFilter,
         IEnumerable<string> subjectEntriesIds,
-        QuotaFilter quotaFilter = QuotaFilter.All)
+        QuotaFilter quotaFilter = QuotaFilter.All,
+        int? groupId = null)
     {
         if (CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != ProviderFilter.Storage))
         {
@@ -178,7 +179,7 @@ internal class FolderDao(
         var q = GetFolderQuery(filesDbContext, r => parentsIds.Contains(r.ParentId));
 
         q = !withSubfolders ?
-            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectEntriesIds, quotaFilter) :
+            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectEntriesIds, quotaFilter, groupId) :
             BuildRoomsWithSubfoldersQuery(filesDbContext, parentsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectEntriesIds);
 
         if (!string.IsNullOrEmpty(searchText))
@@ -1969,7 +1970,7 @@ internal class FolderDao(
     }
 
     private IQueryable<DbFolder> BuildRoomsQuery(FilesDbContext filesDbContext, IQueryable<DbFolder> query, IEnumerable<FolderType> folderTypes, IEnumerable<string> tags, Guid subjectId, bool searchByTags, bool withoutTags,
-        bool searchByFilter, bool withSubfolders, bool excludeSubject, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter = QuotaFilter.All)
+        bool searchByFilter, bool withSubfolders, bool excludeSubject, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter = QuotaFilter.All, int? groupId = null)
     {
         if (subjectId != Guid.Empty)
         {
@@ -2008,6 +2009,16 @@ internal class FolderDao(
                 .Join(filesDbContext.Tag, r => r.TagId, t => t.Id, (result, tagInfo) => new { result.folder, result.TagId, tagInfo.Name })
                 .Where(r => tags.Contains(r.Name))
                 .Select(r => r.folder).Distinct();
+        }
+        if (groupId.HasValue)
+        {
+            query =
+                query.Join(filesDbContext.RoomGroupRef,
+                        folder => folder.Id,
+                        rg => rg.InternalRoomId,
+                        (folder, rg) => new { folder, rg.GroupId })
+                    .Where(x => x.GroupId == groupId.Value)
+                    .Select(x => x.folder);
         }
 
         return query;
