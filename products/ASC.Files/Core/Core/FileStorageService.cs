@@ -5176,7 +5176,6 @@ public class FileStorageService //: IFileStorageService
     public async Task<RoomGroup> SaveRoomGroupAsync(RoomGroup roomGroup)
     {
         var group = await daoFactory.RoomGroupDao.SaveRoomGroupAsync(roomGroup);
-       // await socketManager.CreateRoomGroupAsync(newGroup);
         return group;
     }
 
@@ -5188,7 +5187,6 @@ public class FileStorageService //: IFileStorageService
     public async Task<RoomGroup> GetGroupInfoAsync(int roomGroupId)
     {
         var group = await daoFactory.RoomGroupDao.GetGroupInfoAsync(roomGroupId);
-
         return group;
     }
 
@@ -5196,6 +5194,11 @@ public class FileStorageService //: IFileStorageService
     {
         return daoFactory.RoomGroupDao.GetGroupsAsync();
     }
+    public async Task<int> GetGroupRoomsCountAsync(int groupId)
+    {
+        return await daoFactory.RoomGroupDao.GetGroupRoomsCountAsync(groupId);
+    }
+
     public async Task AddRoomToGroupAsync(int roomId, int groupId)
     {
         await CheckRoomAvailability(roomId);

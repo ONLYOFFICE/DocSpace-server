@@ -110,6 +110,15 @@ internal class RoomGroupDao(
             yield return item.MapToRoomGroup();
         }
     }
+    public async Task<int> GetGroupRoomsCountAsync(int groupId)
+    {
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        return await dbContext.RoomGroup
+            .Where(r => r.Id == groupId && r.TenantId == tenantId)
+            .CountAsync();
+    }
 
     private IQueryable<DbFilesGroup> GetGroupQuery(FilesDbContext dbContext, int tenant)
     {

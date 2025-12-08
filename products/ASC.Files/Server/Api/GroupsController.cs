@@ -27,7 +27,8 @@
 namespace ASC.Files.Api;
 
 [DefaultRoute("group")]
-public class GroupsController(FolderDtoHelper folderDtoHelper,
+public class GroupsController(
+    FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileStorageService fileStorageService,
     RoomGroupDtoHelper roomGroupDtoHelper,
@@ -38,9 +39,7 @@ public class GroupsController(FolderDtoHelper folderDtoHelper,
     /// <summary>
     /// Creates a new room group with the specified name, icon, and list of rooms.
     /// </summary>
-    /// <short>
-    /// Add a new room group
-    /// </short>
+    /// <short>Add a new room group</short>
     /// <path>api/2.0/files/group</path>
     [HttpPost("")]
     public async Task<RoomGroupDto> AddGroup(RoomGroupRequestDto inDto)
@@ -59,22 +58,28 @@ public class GroupsController(FolderDtoHelper folderDtoHelper,
             Icon = inDto.Icon
         });
 
-        var addIntTasks = roomIntIds.Select(id => fileStorageService.AddRoomToGroupAsync(id, group.Id));
-        var addStringTasks = roomStringIds.Select(id => fileStorageService.AddRoomToGroupAsync(id, group.Id));
-
-        await Task.WhenAll(addIntTasks.Concat(addStringTasks));
+        await AddRoomsToGroupAsync(roomIntIds, roomStringIds, group);
 
         return await roomGroupDtoHelper.GetAsync(group, true);
     }
 
+    /// <summary>
+    /// Returns detailed information about a room group.
+    /// </summary>
+    /// <short>Get room group info</short>
+    /// <path>api/2.0/files/group/{id}</path>
     [HttpGet("{id:int}")]
     public async Task<RoomGroupDto> GetGroupInfo(GroupIdRequestDto inDto)
     {
         var group = await GetGroupInfoAsync(inDto.Id).NotFoundIfNull("Group not found");
-
         return await roomGroupDtoHelper.GetAsync(group, inDto.IncludeMembers);
     }
 
+    /// <summary>
+    /// Updates room group properties and adds or removes rooms.
+    /// </summary>
+    /// <short>Update room group</short>
+    /// <path>api/2.0/files/group/{id}</path>
     [HttpPut("{id:int}")]
     public async Task<RoomGroupDto> UpdateGroup(UpdateGroupRequestDto inDto)
     {
@@ -85,59 +90,81 @@ public class GroupsController(FolderDtoHelper folderDtoHelper,
 
         if (inDto.Update.RoomsToAdd != null)
         {
-            var (roomIntIds, roomStringIds) = FileOperationsManager.GetIds(inDto.Update.RoomsToAdd);
-            await TransferRoomsToGroupAsync(roomIntIds, roomStringIds, group);
+            var (addInt, addString) = FileOperationsManager.GetIds(inDto.Update.RoomsToAdd);
+            await AddRoomsToGroupAsync(addInt, addString, group);
         }
 
         if (inDto.Update.RoomsToRemove != null)
         {
-            var (roomIntIds, roomStringIds) = FileOperationsManager.GetIds(inDto.Update.RoomsToRemove);
-            await RemoveRoomsFromGroupAsync(roomIntIds, roomStringIds, group);
+            var (removeInt, removeString) = FileOperationsManager.GetIds(inDto.Update.RoomsToRemove);
+            await RemoveRoomsFromGroupAsync(removeInt, removeString, group);
         }
-
-        // messageService.Send(MessageAction.GroupUpdated, MessageTarget.Create(inDto.Id), group.Name);
-        //await socketManager.UpdateGroupAsync(dto);
 
         return await roomGroupDtoHelper.GetAsync(group, true);
     }
 
+    /// <summary>
+    /// Changes the icon of an existing room group.
+    /// </summary>
+    /// <short>Change group icon</short>
+    /// <path>api/2.0/files/group/{id}/icon</path>
     [HttpPost("{id:int}/icon")]
     public async Task<RoomGroupDto> ChangeRoomIcon(IconRequestDto inDto)
     {
         var group = await fileStorageService.ChangeGroupIconAsync(inDto.Id, inDto.Update.Icon);
-
         return await roomGroupDtoHelper.GetAsync(group, true);
     }
 
+    /// <summary>
+    /// Returns a list of all room groups for the current user.
+    /// </summary>
+    /// <short>List room groups</short>
+    /// <path>api/2.0/files/group</path>
     [HttpGet("")]
     public async IAsyncEnumerable<RoomGroupDto> GetGroups(GroupIdRequestDto inDto)
     {
-        await foreach (var group in fileStorageService.GetGroupsAsync()) 
-        { 
-            yield return await roomGroupDtoHelper.GetAsync(group, inDto.IncludeMembers); 
+        await foreach (var group in fileStorageService.GetGroupsAsync())
+        {
+            yield return await roomGroupDtoHelper.GetAsync(group, inDto.IncludeMembers);
         }
     }
 
+    /// <summary>
+    /// Deletes the specified room group.
+    /// </summary>
+    /// <short>Delete group</short>
+    /// <path>api/2.0/files/group/{id}</path>
     [HttpDelete("{id:int}")]
     public async Task DeleteGroup(GroupIdRequestDto inDto)
     {
         await fileStorageService.DeleteGroup(inDto.Id);
     }
 
-    private async Task TransferRoomsToGroupAsync(List<int> roomIntIds, List<string> roomStringIds, RoomGroup group)
+    private async Task AddRoomsToGroupAsync(List<int> intIds, List<string> stringIds, RoomGroup group)
     {
-        var addIntTasks = roomIntIds.Select(id => fileStorageService.AddRoomToGroupAsync(id, group.Id));
-        var addStringTasks = roomStringIds.Select(id => fileStorageService.AddRoomToGroupAsync(id, group.Id));
+        var intTasks = intIds.Select(id => fileStorageService.AddRoomToGroupAsync(id, group.Id));
+        var stringTasks = stringIds.Select(id => fileStorageService.AddRoomToGroupAsync(id, group.Id));
 
-        await Task.WhenAll(addIntTasks.Concat(addStringTasks));
+        await Task.WhenAll(intTasks.Concat(stringTasks));
     }
-    private async Task RemoveRoomsFromGroupAsync(List<int> roomIntIds, List<string> roomStringIds, RoomGroup group)
+
+    private async Task RemoveRoomsFromGroupAsync(List<int> intIds, List<string> stringIds, RoomGroup group)
     {
-        var addIntTasks = roomIntIds.Select(id => fileStorageService.RemoveRoomFromGroupAsync(id, group.Id));
-        var addStringTasks = roomStringIds.Select(id => fileStorageService.RemoveRoomFromGroupAsync(id, group.Id));
+        var totalRooms = await fileStorageService.GetGroupRoomsCountAsync(group.Id);
 
-        await Task.WhenAll(addIntTasks.Concat(addStringTasks));
+        var toRemoveCount = intIds.Count + stringIds.Count;
+
+        if (toRemoveCount >= totalRooms)
+        {
+            throw new InvalidOperationException("Cannot remove all rooms from the group. At least one room must remain.");
+        }
+
+        var intTasks = intIds.Select(id => fileStorageService.RemoveRoomFromGroupAsync(id, group.Id));
+        var stringTasks = stringIds.Select(id => fileStorageService.RemoveRoomFromGroupAsync(id, group.Id));
+
+        await Task.WhenAll(intTasks.Concat(stringTasks));
     }
+
     private async Task<RoomGroup> GetGroupInfoAsync(int id)
     {
         var group = await fileStorageService.GetGroupInfoAsync(id);
