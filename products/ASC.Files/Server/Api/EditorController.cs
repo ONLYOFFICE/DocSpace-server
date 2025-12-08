@@ -184,7 +184,7 @@ public abstract class EditorController<T>(
 
         if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(settingsManager) || docParams.LocatedInPrivateRoom)
         {
-            configuration.EditorConfig.EncryptionKeys = await encryptionKeyPairDtoHelper.GetKeyPairAsync();
+            configuration.EditorConfig.EncryptionKeys = (await encryptionKeyPairDtoHelper.GetKeyPairAsync())?.FirstOrDefault();
         }
         if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
         {

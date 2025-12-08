@@ -147,7 +147,7 @@ public class EditorConfigurationDto
     /// <summary>
     /// The encryption keys of the editor configuration.
     /// </summary>
-    public List<EncryptionKeyDto> EncryptionKeys { get; set; }
+    public EncryptionKeyDto EncryptionKeys { get; set; }
 
     /// <summary>
     /// The language of the editor configuration.

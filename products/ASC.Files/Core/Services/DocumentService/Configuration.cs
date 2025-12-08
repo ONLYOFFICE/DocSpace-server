@@ -271,7 +271,7 @@ public class EditorConfiguration<T>(
 {
     public PluginsConfig Plugins { get; } = pluginsConfig;
     public CustomizationConfig<T> Customization { get; } = customizationConfig;
-    public List<EncryptionKeyDto> EncryptionKeys { get; set; }
+    public EncryptionKeyDto EncryptionKeys { get; set; }
 
     public string Lang => UserInfo.GetCulture().Name;
 
@@ -1114,27 +1114,6 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// The place for the embedded viewer toolbar, can be either "top" or "bottom".
     /// </summary>
     public string ToolbarDocked => "top";
-}
-
-/// <summary>
-/// The encryption keys of the editor configuration.
-/// </summary>
-public class EncryptionKeysConfig
-{
-    /// <summary>
-    /// The crypto engine ID of the encryption key.
-    /// </summary>
-    public string CryptoEngineId => "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}";
-
-    /// <summary>
-    /// The private key.
-    /// </summary>
-    public string PrivateKeyEnc { get; set; }
-
-    /// <summary>
-    /// The public key.
-    /// </summary>
-    public string PublicKey { get; set; }
 }
 
 /// <summary>

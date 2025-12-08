@@ -67,6 +67,8 @@ public class EncryptionKeyDto
     public string PublicKey { get; set; }
     public string PrivateKeyEnc { get; set; }
     public string Salt { get; set; }
+    
+    public string CryptoEngineId => "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}";
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
