@@ -49,7 +49,9 @@ public class FileSharingAceHelper(
     IDaoFactory daoFactory,
     ExternalShare externalShare,
     SettingsManager settingsManager,
-    PasswordSettingsManager passwordSettingsManager)
+    PasswordSettingsManager passwordSettingsManager,
+    EncryptionLoginProvider encryptionLoginProvider,
+    DisplayUserSettingsHelper displayUserSettingsHelper)
 {
     private const int MaxInvitationLinks = 1;
 
@@ -231,6 +233,13 @@ public class FileSharingAceHelper(
 
             if (room != null && !w.IsLink && (existedShare == null || (!existedShare.IsLink && existedShare.SubjectType != SubjectType.Group)))
             {
+                
+                if (room.SettingsPrivate && await encryptionLoginProvider.GetKeysAsync(currentUser.Id) == null)
+                {
+                    var userInfo = await userManager.GetUsersAsync(currentUser.Id);
+                    throw new InvalidOperationException($"The user {userInfo.DisplayUserName(displayUserSettingsHelper)} does not have an encryption key");
+                }
+                
                 if (room.FolderType == FolderType.AiRoom &&
                     currentUserType == EmployeeType.Guest &&
                     w.Access is FileShare.RoomManager or FileShare.ContentCreator)
