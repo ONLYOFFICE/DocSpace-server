@@ -36,7 +36,7 @@ public class NotificationControllerHelper(
 
     public IEnumerable<NotificationChannelStatus> GetNotificationChannels()
     {
-        return notificationChannelsHelper.GetNotificationChannels().Select(c => new NotificationChannelStatus() { Name = c.Name, IsEnabled = c.IsEnabled });
+        return notificationChannelsHelper.GetNotificationChannels().Select(c => new NotificationChannelStatus { Name = c.Name, IsEnabled = c.IsEnabled });
     }
 
     public async Task<bool> GetNotificationStatusAsync(NotificationType notificationType)

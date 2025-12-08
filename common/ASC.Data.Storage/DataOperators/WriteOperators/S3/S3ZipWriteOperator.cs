@@ -43,13 +43,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
-    public bool NeedUpload
-    {
-        get
-        {
-            return false;
-        }
-    }
+    public bool NeedUpload => false;
 
     public S3ZipWriteOperator(TempStream tempStream,
         CommonChunkedUploadSession chunkedUploadSession,

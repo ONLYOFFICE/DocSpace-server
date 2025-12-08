@@ -77,8 +77,8 @@ public class LoginEventsRepository(
             query = query.Where(r => r.Event.Action == (int)action);
         }
 
-        var hasFromFilter = (fromDate.HasValue && fromDate.Value != DateTime.MinValue);
-        var hasToFilter = (to.HasValue && to.Value != DateTime.MinValue);
+        var hasFromFilter = fromDate.HasValue && fromDate.Value != DateTime.MinValue;
+        var hasToFilter = to.HasValue && to.Value != DateTime.MinValue;
 
         if (hasFromFilter || hasToFilter)
         {

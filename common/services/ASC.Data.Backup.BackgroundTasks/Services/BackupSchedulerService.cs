@@ -31,7 +31,6 @@ using ASC.Core.Common;
 using ASC.Core.Configuration;
 using ASC.Core.Tenants;
 using ASC.Data.Backup.Core.Quota;
-using ASC.Data.Backup.EF.Model;
 using ASC.Web.Core.PublicResources;
 
 using Polly;
@@ -99,7 +98,7 @@ public sealed class BackupSchedulerService(
 
                     var pipeline = resiliencePipelineProvider.GetPipeline<Session>(ResiliencePipelineName);
 
-                    var billingSession = await pipeline.ExecuteAsync(async (_) =>
+                    var billingSession = await pipeline.ExecuteAsync(async _ =>
                     {
                         try
                         {
@@ -148,10 +147,7 @@ public sealed class BackupSchedulerService(
                     logger.DebugNotPaid(schedule.TenantId);
                 }
             }
-            catch (Exception ex) when (ex is TenantQuotaException
-                || ex is AccountingPaymentRequiredException
-                || ex is AccountingCustomerNotFoundException
-                || ex is BillingException)
+            catch (Exception ex) when (ex is TenantQuotaException or AccountingPaymentRequiredException or AccountingCustomerNotFoundException or BillingException)
             {
                 logger.DebugHaveNotAccess(schedule.TenantId, ex.Message);
 
@@ -181,7 +177,7 @@ public static class BackupSchedulerServiceExtension
     {
         services.AddResiliencePipeline<string, Session>(BackupSchedulerService.ResiliencePipelineName, pipelineBuilder =>
         {
-            pipelineBuilder.AddRetry(new RetryStrategyOptions<Session>()
+            pipelineBuilder.AddRetry(new RetryStrategyOptions<Session>
             {
                 MaxRetryAttempts = 3,
                 Delay = TimeSpan.FromSeconds(1),

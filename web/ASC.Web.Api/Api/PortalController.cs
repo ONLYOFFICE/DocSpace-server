@@ -449,7 +449,7 @@ public class PortalController(
 
         var result = new TariffDto
         {
-            State = source.State,
+            State = source.State
         };
 
         var currentUserType = await userManager.GetUserTypeAsync(securityContext.CurrentAccount.ID);
@@ -733,7 +733,7 @@ public class PortalController(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
     [HttpDelete("deleteportalimmediately")]
-    public async Task DeletePortalImmediately()
+    public async Task<string> DeletePortalImmediately()
     {
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -746,28 +746,7 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var tenantDomain = tenant.GetTenantDomain(coreSettings);
-
-        await client.DeleteTenantClientsAsync();
-        await tenantManager.RemoveTenantAsync(tenant);
-
-        if (!coreBaseSettings.Standalone)
-        {
-            await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
-        }
-
-        try
-        {
-            if (!securityContext.IsAuthenticated)
-            {
-                await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
-            }
-        }
-        finally
-        {
-            await eventBus.PublishAsync(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
-            securityContext.Logout();
-        }
+        return await DeletePortal();
     }
 
     /// <summary>
@@ -881,10 +860,13 @@ public class PortalController(
 
         var tenantDomain = tenant.GetTenantDomain(coreSettings);
 
+        var tariff = await tariffService.GetTariffAsync(tenant.Id);
+        var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
+
         await client.DeleteTenantClientsAsync();
         await tenantManager.RemoveTenantAsync(tenant);
 
-        if (!coreBaseSettings.Standalone)
+        if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
         {
             await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
         }
@@ -898,6 +880,13 @@ public class PortalController(
         messageService.Send(MessageAction.PortalDeleted);
 
         await cspSettingsHelper.UpdateBaseDomain();
+
+        if (!coreBaseSettings.Standalone && !quota.Free && tariff.State >= TariffState.Paid)
+        {
+            var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+            await studioNotifyService.SendMsgPaidPortalDeletedToSupportAsync(tenantDomain, owner, customerInfo);
+        }
+
         await eventBus.PublishAsync(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
 
         return redirectLink;

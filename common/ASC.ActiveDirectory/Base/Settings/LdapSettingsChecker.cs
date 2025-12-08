@@ -31,10 +31,7 @@ public abstract class LdapSettingsChecker(ILogger<LdapSettingsChecker> logger)
 
     public LdapUserImporter LdapImporter { get; private set; }
 
-    public LdapSettings Settings
-    {
-        get { return LdapImporter.Settings; }
-    }
+    public LdapSettings Settings => LdapImporter.Settings;
 
     public void Init(LdapUserImporter importer)
     {

@@ -461,7 +461,7 @@ public class SocketManager(
             .Select(x => x.Id)
             .ToList();
 
-        _admins.Add((_tenantManager.GetCurrentTenant()).OwnerId);
+        _admins.Add(_tenantManager.GetCurrentTenant().OwnerId);
 
         return _admins;
     }

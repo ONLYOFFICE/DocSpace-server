@@ -92,5 +92,5 @@ public enum FilterType
     [EnumMember] DiagramsOnly = 25,
     
     [SwaggerEnum("Ai rooms")]
-    [EnumMember] AiRooms = 26,
+    [EnumMember] AiRooms = 26
 }

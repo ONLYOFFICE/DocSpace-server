@@ -92,8 +92,8 @@ public class File<T> : FileEntry<T>
 
     public FileStatus FileStatus
     {
-        get { return _status; }
-        set { _status = value; }
+        get => _status;
+        set => _status = value;
     }
     /// <summary>
     /// The file version.
@@ -139,28 +139,18 @@ public class File<T> : FileEntry<T>
     {
         get
         {
-            switch (FileUtility.GetFileTypeByFileName(Title))
+            return FileUtility.GetFileTypeByFileName(Title) switch
             {
-                case FileType.Image:
-                    return FilterType.ImagesOnly;
-                case FileType.Document:
-                    return FilterType.DocumentsOnly;
-                case FileType.Presentation:
-                    return FilterType.PresentationsOnly;
-                case FileType.Spreadsheet:
-                    return FilterType.SpreadsheetsOnly;
-                case FileType.Archive:
-                    return FilterType.ArchiveOnly;
-                case FileType.Audio:
-                case FileType.Video:
-                    return FilterType.MediaOnly;
-                case FileType.Pdf:
-                    return this.IsForm ? FilterType.PdfForm : FilterType.Pdf;
-                case FileType.Diagram:
-                    return FilterType.DiagramsOnly;
-            }
-
-            return FilterType.None;
+                FileType.Image => FilterType.ImagesOnly,
+                FileType.Document => FilterType.DocumentsOnly,
+                FileType.Presentation => FilterType.PresentationsOnly,
+                FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
+                FileType.Archive => FilterType.ArchiveOnly,
+                FileType.Audio or FileType.Video => FilterType.MediaOnly,
+                FileType.Pdf => IsForm ? FilterType.PdfForm : FilterType.Pdf,
+                FileType.Diagram => FilterType.DiagramsOnly,
+                _ => FilterType.None
+            };
         }
     }
     /// <summary>
@@ -186,15 +176,10 @@ public class File<T> : FileEntry<T>
     /// The file title.
     /// </summary>
     [JsonIgnore]
-    public override string Title
-    {
-        get
-        {
-            return string.IsNullOrEmpty(ConvertedType)
-                ? PureTitle
-                : FileUtility.ReplaceFileExtension(PureTitle, ServiceProvider.GetService<FileUtility>().GetInternalExtension(PureTitle));
-        }
-    }
+    public override string Title =>
+        string.IsNullOrEmpty(ConvertedType)
+            ? PureTitle
+            : FileUtility.ReplaceFileExtension(PureTitle, ServiceProvider.GetService<FileUtility>().GetInternalExtension(PureTitle));
 
     /// <summary>
     /// The file download URL.
@@ -215,13 +200,7 @@ public class File<T> : FileEntry<T>
     /// <summary>
     /// Specifies if the file is a form or not.
     /// </summary>
-    public bool IsForm
-    {
-        get
-        {
-            return (FilterType)Category == FilterType.PdfForm;
-        }
-    }
+    public bool IsForm => (FilterType)Category == FilterType.PdfForm;
 
     /// <summary>
     /// Specifies if a Custom Filter editing mode is enabled for a file or not.

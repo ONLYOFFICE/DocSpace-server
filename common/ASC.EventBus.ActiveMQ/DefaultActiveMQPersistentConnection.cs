@@ -37,13 +37,7 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
     private IConnection _connection;
     private bool _disposed;
 
-    public bool IsConnected
-    {
-        get
-        {
-            return _connection is { IsStarted: true } && !_disposed;
-        }
-    }
+    public bool IsConnected => _connection is { IsStarted: true } && !_disposed;
 
     public async Task<ISession> CreateSessionAsync()
     {
@@ -128,7 +122,7 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
             }
         }).Build();
 
-        await pipeline.ExecuteAsync(async (_) =>
+        await pipeline.ExecuteAsync(async _ =>
         {
             _connection = await _connectionFactory.CreateConnectionAsync();
             await _connection.StartAsync();

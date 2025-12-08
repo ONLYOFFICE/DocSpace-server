@@ -124,7 +124,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
                     var t = new List<object>();
                     foreach (var field in formFillingRes.FormsData)
                     {
-                        if (field.Type == "picture" || field.Type == "signature")
+                        if (field.Type is "picture" or "signature")
                         {
                             continue;
                         }

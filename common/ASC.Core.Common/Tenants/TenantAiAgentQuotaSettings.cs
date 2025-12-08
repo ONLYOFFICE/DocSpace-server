@@ -32,12 +32,8 @@ namespace ASC.Core.Tenants;
 [Serializable]
 public class TenantAiAgentQuotaSettings : TenantEntityQuotaSettings, ISettings<TenantAiAgentQuotaSettings>
 {
+    public static Guid ID => new("{6D0B226C-EF0F-4765-836E-0A08B55DC06C}");
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{6D0B226C-EF0F-4765-836E-0A08B55DC06C}"); }
-    }
     public TenantAiAgentQuotaSettings GetDefault()
     {
         return new TenantAiAgentQuotaSettings();

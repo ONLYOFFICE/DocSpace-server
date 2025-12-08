@@ -28,92 +28,32 @@ namespace ASC.Core.Common.Notify;
 
 class FirebaseApiKey(IConfiguration configuration)
 {
-    public string Type
-    {
-        get
-        {
-            return "service_account";
-        }
-    }
+    public string Type => "service_account";
 
     [JsonPropertyName("project_id")]
-    public string ProjectId
-    {
-        get
-        {
-            return configuration["firebase-mobile:projectId"] ?? "";
-        }
-    }
+    public string ProjectId => configuration["firebase-mobile:projectId"] ?? "";
 
     [JsonPropertyName("private_key_id")]
-    public string PrivateKeyId
-    {
-        get
-        {
-            return configuration["firebase-mobile:privateKeyId"] ?? "";
-        }
-    }
+    public string PrivateKeyId => configuration["firebase-mobile:privateKeyId"] ?? "";
 
     [JsonPropertyName("private_key")]
-    public string PrivateKey
-    {
-        get
-        {
-            return configuration["firebase-mobile:privateKey"] ?? "";
-        }
-    }
+    public string PrivateKey => configuration["firebase-mobile:privateKey"] ?? "";
 
     [JsonPropertyName("client_email")]
-    public string ClientEmail
-    {
-        get
-        {
-            return configuration["firebase-mobile:clientEmail"] ?? "";
-        }
-    }
+    public string ClientEmail => configuration["firebase-mobile:clientEmail"] ?? "";
 
     [JsonPropertyName("client_id")]
-    public string ClientId
-    {
-        get
-        {
-            return configuration["firebase-mobile:clientId"] ?? "";
-        }
-    }
+    public string ClientId => configuration["firebase-mobile:clientId"] ?? "";
 
     [JsonPropertyName("auth_uri")]
-    public string AuthUri
-    {
-        get
-        {
-            return "https://accounts.google.com/o/oauth2/auth";
-        }
-    }
+    public string AuthUri => "https://accounts.google.com/o/oauth2/auth";
 
     [JsonPropertyName("token_uri")]
-    public string TokenUri
-    {
-        get
-        {
-            return "https://oauth2.googleapis.com/token";
-        }
-    }
+    public string TokenUri => "https://oauth2.googleapis.com/token";
 
     [JsonPropertyName("auth_provider_x509_cert_url")]
-    public string AuthProviderX509CertUrl
-    {
-        get
-        {
-            return "https://www.googleapis.com/oauth2/v1/certs";
-        }
-    }
+    public string AuthProviderX509CertUrl => "https://www.googleapis.com/oauth2/v1/certs";
 
     [JsonPropertyName("client_x509_cert_url")]
-    public string ClientX509CertUrl
-    {
-        get
-        {
-            return configuration["firebase-mobile:x509CertUrl"] ?? "";
-        }
-    }
+    public string ClientX509CertUrl => configuration["firebase-mobile:x509CertUrl"] ?? "";
 }

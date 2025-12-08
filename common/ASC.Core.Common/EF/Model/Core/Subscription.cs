@@ -83,79 +83,83 @@ public static class SubscriptionExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddSubscription(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Subscription>(entity =>
+        public void MySqlAddSubscription()
         {
-            entity.HasKey(e => new { e.TenantId, e.Source, e.Action, e.Recipient, e.Object })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<Subscription>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.Source, e.Action, e.Recipient, e.Object })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("core_subscription")
-                .HasCharSet("utf8");
+                entity.ToTable("core_subscription")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
 
-            entity.Property(e => e.Source)
-                .HasColumnName("source")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Source)
+                    .HasColumnName("source")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Action)
-                .HasColumnName("action")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Action)
+                    .HasColumnName("action")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Recipient)
-                .HasColumnName("recipient")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Recipient)
+                    .HasColumnName("recipient")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Object)
-                .HasColumnName("object")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Object)
+                    .HasColumnName("object")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Unsubscribed)
-                .HasColumnName("unsubscribed")
-                .HasColumnType("tinyint(1)")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.Unsubscribed)
+                    .HasColumnName("unsubscribed")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("'0'");
 
-        });
-    }
-    public static void PgSqlAddSubscription(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Subscription>(entity =>
+            });
+        }
+
+        public void PgSqlAddSubscription()
         {
-            entity.HasKey(e => new { e.TenantId, e.Source, e.Action, e.Recipient, e.Object });
+            modelBuilder.Entity<Subscription>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.Source, e.Action, e.Recipient, e.Object });
 
-            entity.ToTable("core_subscription");
+                entity.ToTable("core_subscription");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
 
-            entity.Property(e => e.Source)
-                .HasColumnName("source")
-                .HasColumnType("varchar");
+                entity.Property(e => e.Source)
+                    .HasColumnName("source")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.Action)
-                .HasColumnName("action")
-                .HasColumnType("varchar");
+                entity.Property(e => e.Action)
+                    .HasColumnName("action")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.Recipient)
-                .HasColumnName("recipient")
-                .HasColumnType("varchar");
+                entity.Property(e => e.Recipient)
+                    .HasColumnName("recipient")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.Object)
-                .HasColumnName("object")
-                .HasColumnType("varchar");
+                entity.Property(e => e.Object)
+                    .HasColumnName("object")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.Unsubscribed)
-                .HasColumnName("unsubscribed")
-                .HasColumnType("boolean")
-                .HasDefaultValue(false);
-        });
+                entity.Property(e => e.Unsubscribed)
+                    .HasColumnName("unsubscribed")
+                    .HasColumnType("boolean")
+                    .HasDefaultValue(false);
+            });
+        }
     }
 }

@@ -94,7 +94,7 @@ public static class McpRoomServerExtensions
                 ServerType = item.SystemServer.Type,
                 ConnectionType = item.SystemServer.ConnectionType,
                 System = true,
-                OauthProvider = item.SystemServer.LoginProviderSelector?.Invoke(consumerFactory),
+                OauthProvider = item.SystemServer.LoginProviderSelector?.Invoke(consumerFactory)
             };
         }
         

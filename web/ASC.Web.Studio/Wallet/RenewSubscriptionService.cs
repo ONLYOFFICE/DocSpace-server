@@ -171,7 +171,7 @@ public class RenewSubscriptionService(
 
                         var walletQuotaSize = walletQuota.GetFeature<long>(feature.Name).Value; // wallet quota size by database
 
-                        if (walletQuotaSize > 0 && usedSize > tenantQuotaSize + (walletQuotaSize * nextQuantity))
+                        if (walletQuotaSize > 0 && usedSize > tenantQuotaSize + walletQuotaSize * nextQuantity)
                         {
                             var oversize = usedSize - tenantQuotaSize;
                             nextQuantity = (int)((oversize + walletQuotaSize - 1) / walletQuotaSize); // round up

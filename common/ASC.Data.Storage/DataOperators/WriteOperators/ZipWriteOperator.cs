@@ -32,13 +32,7 @@ public class ZipWriteOperator : IDataWriteOperator
     private readonly TarOutputStream _tarOutputStream;
     private readonly TempStream _tempStream;
 
-    public bool NeedUpload
-    {
-        get
-        {
-            return true;
-        }
-    }
+    public bool NeedUpload => true;
 
     public string Hash => throw new NotImplementedException();
 

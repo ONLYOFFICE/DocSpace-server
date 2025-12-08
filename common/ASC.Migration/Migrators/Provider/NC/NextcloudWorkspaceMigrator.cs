@@ -365,12 +365,8 @@ public class NextcloudWorkspaceMigrator : Migrator
                            .Select(s => s.Trim('\'')).ToArray();
                 var uid = values[1].Split(':').Last();
                 usersData.TryGetValue(uid, out var user);
-                if (user == null)
-                {
-                    continue;
-                }
 
-                user.Storage.RootKey = values[0];
+                user?.Storage.RootKey = values[0];
             }
         }
         return usersData;
@@ -420,12 +416,8 @@ public class NextcloudWorkspaceMigrator : Migrator
                            .Select(s => s.Trim('\'')).ToArray();
                 var fileId = int.Parse(values[10]);
                 var file = filesAndFolders.FirstOrDefault(ff => ff.FileId == fileId);
-                if (file == null)
-                {
-                    continue;
-                }
 
-                file.Share.Add(new NCShare
+                file?.Share.Add(new NCShare
                 {
                     Id = int.Parse(values[0]),
                     ShareWith = values[2],

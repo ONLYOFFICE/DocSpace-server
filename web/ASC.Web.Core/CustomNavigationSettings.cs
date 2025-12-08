@@ -30,11 +30,7 @@ public class CustomNavigationSettings : ISettings<CustomNavigationSettings>
 {
     public List<CustomNavigationItem> Items { get; init; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{32E02E4C-925D-4391-BAA4-3B5D223A2104}"); }
-    }
+    public static Guid ID => new("{32E02E4C-925D-4391-BAA4-3B5D223A2104}");
 
     public CustomNavigationSettings GetDefault()
     {

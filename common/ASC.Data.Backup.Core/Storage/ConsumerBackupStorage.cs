@@ -37,7 +37,7 @@ public class ConsumerBackupStorage(
     private IDataStore _store;
 
     private bool _isTemporary;
-    private string Domain { get => _isTemporary ? "" : "backup"; }
+    private string Domain => _isTemporary ? "" : "backup";
     private CommonChunkedUploadSessionHolder _sessionHolder;
 
     public async Task InitAsync(IReadOnlyDictionary<string, string> storageParams)

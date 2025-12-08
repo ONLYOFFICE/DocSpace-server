@@ -36,7 +36,7 @@ public class StudioNotifyServiceSender(IServiceScopeFactory serviceProvider,
     WorkContext workContext,
     TenantExtraConfig tenantExtraConfig)
 {
-    private static string EMailSenderName { get { return Constants.NotifyEMailSenderSysName; } }
+    private static string EMailSenderName => Constants.NotifyEMailSenderSysName;
 
     public void RegisterSendMethod()
     {

@@ -126,7 +126,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         _toFillOut = data.ToFillOut;
 
         _headers = data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
-        FileOperationType = (_copy ? FileOperationType.Copy : FileOperationType.Move);
+        FileOperationType = _copy ? FileOperationType.Copy : FileOperationType.Move;
     }
 
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Copy;
@@ -208,7 +208,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         if (0 < Folders.Count)
         {
             var firstFolder = await FolderDao.GetFolderAsync(Folders[0]);
-            isRoom = DocSpaceHelper.IsRoom(firstFolder.FolderType);
+            isRoom = firstFolder.IsRoom;
 
             if (_copy && !await FilesSecurity.CanCopyAsync(firstFolder))
             {
@@ -283,7 +283,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
         foreach (var folder in moveOrCopyFoldersTask)
         {
-            if (toFolder.FolderType != FolderType.Archive && !DocSpaceHelper.IsRoom(folder.FolderType))
+            if (toFolder.FolderType != FolderType.Archive && !folder.IsRoom)
             {
                 needToMark.AddRange(await GetFilesAsync(scope, folder));
             }
@@ -367,7 +367,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 parentRoomId = rId.ToString();
             }
 
-            var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
+            var isRoom = folder.IsRoom;
             var isThirdPartyRoom = isRoom && folder.ProviderEntry;
 
             var canMoveOrCopy = (copy && await FilesSecurity.CanCopyAsync(folder)) || (!copy && await FilesSecurity.CanMoveAsync(folder));
@@ -378,7 +378,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             long roomQuotaLimit = 0;
             long userQuotaLimit = 0;
 
-            var toFolderRoom = toFolderParents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
+            var toFolderRoom = toFolderParents.FirstOrDefault(f => f.IsRoom);
 
             if (!isRoom &&
                 toFolderRoom != null &&
@@ -402,7 +402,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             if (!isRoom &&
                 toFolderRoom == null &&
-                (int.TryParse(parentRoomId, out var curRId) && curRId != -1) &&
+                int.TryParse(parentRoomId, out var curRId) && curRId != -1 &&
                 toFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
             {
                 var tenantId = tenantManager.GetCurrentTenantId();
@@ -481,8 +481,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 try
                 {
                     //if destination folder contains folder with same name then merge folders
-                    var conflictFolder = (folder.RootFolderType == FolderType.Privacy || isRoom ||
-                                          (!Equals(folder.ParentId ?? default, toFolderId) && _resolveType == FileConflictResolveType.Duplicate))
+                    var conflictFolder = folder.RootFolderType == FolderType.Privacy || isRoom ||
+                                         (!Equals(folder.ParentId ?? default, toFolderId) && _resolveType == FileConflictResolveType.Duplicate)
                         ? null
                         : await folderDao.GetFolderAsync(folder.Title, toFolderId);
                     Folder<TTo> newFolder;
@@ -710,7 +710,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                                 await socketManager.DeleteFolder(folder);
 
-                                if (folder.RootFolderType is FolderType.USER or FolderType.Privacy && DocSpaceHelper.IsRoom(toFolder.FolderType))
+                                if (folder.RootFolderType is FolderType.USER or FolderType.Privacy && toFolder.IsRoom)
                                 {
                                     var shares = await fileSecurity.GetPureSharesAsync(folder, ShareFilterType.UserOrGroup, null, null).ToListAsync();
                                     List<Guid> forRemove = [];
@@ -779,7 +779,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                             newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
                                         });
 
-                                        if (folder.RootFolderType is FolderType.USER or FolderType.Privacy && DocSpaceHelper.IsRoom(toFolder.FolderType))
+                                        if (folder.RootFolderType is FolderType.USER or FolderType.Privacy && toFolder.IsRoom)
                                         {
                                             var shares = await fileSecurity.GetPureSharesAsync(folder, ShareFilterType.UserOrGroup, null, null).ToListAsync();
                                             List<Guid> forRemove = [];
@@ -1019,7 +1019,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             {
                                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
 
-                                if (file.RootFolderType is FolderType.USER or FolderType.Privacy && DocSpaceHelper.IsRoom(toFolder.FolderType))
+                                if (file.RootFolderType is FolderType.USER or FolderType.Privacy && toFolder.IsRoom)
                                 {
                                     var shares = await fileSecurity.GetPureSharesAsync(file, ShareFilterType.UserOrGroup, null, null).ToListAsync();
                                     List<Guid> forRemove = [];
@@ -1067,8 +1067,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         !file.ProviderEntry)
                                     {
                                         var fromParents = await cachedFolderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
-                                        var fromRoom = fromParents.FirstOrDefault(x => DocSpaceHelper.IsRoom(x.FolderType));
-                                        var toRoom = toParentFolders.FirstOrDefault(x => DocSpaceHelper.IsRoom(x.FolderType));
+                                        var fromRoom = fromParents.FirstOrDefault(x => x.IsRoom);
+                                        var toRoom = toParentFolders.FirstOrDefault(x => x.IsRoom);
 
                                         if (!fromRoom.Id.Equals((T)Convert.ChangeType(toRoom.Id, typeof(T))))
                                         {
@@ -1313,11 +1313,11 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         }
         else
         {
-            entryParentRoom = await FolderDao.GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(f => f.SettingsPrivate && DocSpaceHelper.IsRoom(f.FolderType));
+            entryParentRoom = await FolderDao.GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(f => f.SettingsPrivate && f.IsRoom);
             _parentRooms.Add(entry.ParentId, entryParentRoom);
         }
 
-        var toFolderParentRoom = toFolderParents.FirstOrDefault(f => f.SettingsPrivate && DocSpaceHelper.IsRoom(f.FolderType));
+        var toFolderParentRoom = toFolderParents.FirstOrDefault(f => f.SettingsPrivate && f.IsRoom);
 
 
         if (entryParentRoom == null)

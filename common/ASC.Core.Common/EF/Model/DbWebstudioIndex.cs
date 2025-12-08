@@ -48,44 +48,48 @@ public static class DbWebstudioIndexExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbWebstudioIndex(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbWebstudioIndex>(entity =>
+        public void MySqlAddDbWebstudioIndex()
         {
-            entity.HasKey(e => e.IndexName)
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbWebstudioIndex>(entity =>
+            {
+                entity.HasKey(e => e.IndexName)
+                    .HasName("PRIMARY");
 
-            entity.ToTable("webstudio_index")
-                .HasCharSet("utf8");
+                entity.ToTable("webstudio_index")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.IndexName)
-                .HasColumnName("index_name")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.IndexName)
+                    .HasColumnName("index_name")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("timestamp");
-        });
-    }
-    public static void PgSqlAddDbWebstudioIndex(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbWebstudioIndex>(entity =>
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("timestamp");
+            });
+        }
+
+        public void PgSqlAddDbWebstudioIndex()
         {
-            entity.HasKey(e => e.IndexName)
-                .HasName("pk_webstudio_index");
+            modelBuilder.Entity<DbWebstudioIndex>(entity =>
+            {
+                entity.HasKey(e => e.IndexName)
+                    .HasName("pk_webstudio_index");
 
-            entity.ToTable("webstudio_index");
+                entity.ToTable("webstudio_index");
 
-            entity.Property(e => e.IndexName)
-                .HasColumnName("index_name")
-                .HasColumnType("varchar(50)");
+                entity.Property(e => e.IndexName)
+                    .HasColumnName("index_name")
+                    .HasColumnType("varchar(50)");
 
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("timestamptz");
-        });
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("timestamptz");
+            });
 
+        }
     }
 }

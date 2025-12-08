@@ -192,7 +192,7 @@ public class AWSSender : SmtpSender, IDisposable
 
     private bool IsRefreshNeeded()
     {
-        return _quota == null || (DateTime.UtcNow - _lastRefresh) > _refreshTimeout;
+        return _quota == null || DateTime.UtcNow - _lastRefresh > _refreshTimeout;
     }
 
     public void Dispose()

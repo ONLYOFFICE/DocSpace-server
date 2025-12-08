@@ -117,27 +117,27 @@ public class S3Storage(TempStream tempStream,
 
                 if (h.StartsWith("Content-Disposition"))
                 {
-                    headersOverrides.ContentDisposition = (h[("Content-Disposition".Length + 1)..]);
+                    headersOverrides.ContentDisposition = h[("Content-Disposition".Length + 1)..];
                 }
                 else if (h.StartsWith("Cache-Control"))
                 {
-                    headersOverrides.CacheControl = (h[("Cache-Control".Length + 1)..]);
+                    headersOverrides.CacheControl = h[("Cache-Control".Length + 1)..];
                 }
                 else if (h.StartsWith("Content-Encoding"))
                 {
-                    headersOverrides.ContentEncoding = (h[("Content-Encoding".Length + 1)..]);
+                    headersOverrides.ContentEncoding = h[("Content-Encoding".Length + 1)..];
                 }
                 else if (h.StartsWith("Content-Language"))
                 {
-                    headersOverrides.ContentLanguage = (h[("Content-Language".Length + 1)..]);
+                    headersOverrides.ContentLanguage = h[("Content-Language".Length + 1)..];
                 }
                 else if (h.StartsWith("Content-Type"))
                 {
-                    headersOverrides.ContentType = (h[("Content-Type".Length + 1)..]);
+                    headersOverrides.ContentType = h[("Content-Type".Length + 1)..];
                 }
                 else if (h.StartsWith("Expires"))
                 {
-                    headersOverrides.Expires = (h[("Expires".Length + 1)..]);
+                    headersOverrides.Expires = h[("Expires".Length + 1)..];
                 }
                 else
                 {
@@ -279,7 +279,7 @@ public class S3Storage(TempStream tempStream,
 
     private bool EnableQuotaCheck(string domain)
     {
-        return (QuotaController != null) && !domain.EndsWith("_temp");
+        return QuotaController != null && !domain.EndsWith("_temp");
     }
 
     public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,

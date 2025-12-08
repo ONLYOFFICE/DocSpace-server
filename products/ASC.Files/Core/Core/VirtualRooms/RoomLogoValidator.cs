@@ -66,6 +66,6 @@ public class RoomLogoValidator(IDaoFactory daoFactory, FileSecurity fileSecurity
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(id);
 
-        return DocSpaceHelper.IsRoom(folder.FolderType) && await fileSecurity.CanReadAsync(folder);
+        return folder.IsRoom && await fileSecurity.CanReadAsync(folder);
     }
 }

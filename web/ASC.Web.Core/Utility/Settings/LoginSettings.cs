@@ -49,7 +49,7 @@ public class LoginSettings : ISettings<LoginSettings>
     /// <summary>
     /// The login ID.
     /// </summary>
-    public Guid ID => new("{588C7E01-8D41-4FCE-9779-D4126E019765}");
+    public static Guid ID => new("{588C7E01-8D41-4FCE-9779-D4126E019765}");
 
     public LoginSettings GetDefault()
     {
@@ -75,9 +75,9 @@ public class LoginSettings : ISettings<LoginSettings>
 
 public class LoginSettingsWrapper(LoginSettings loginSettings)
 {
-    public int AttemptCount { get => loginSettings.AttemptCount; }
+    public int AttemptCount => loginSettings.AttemptCount;
 
-    public TimeSpan BlockTime { get => TimeSpan.FromSeconds(loginSettings.BlockTime); }
+    public TimeSpan BlockTime => TimeSpan.FromSeconds(loginSettings.BlockTime);
 
-    public TimeSpan CheckPeriod { get => TimeSpan.FromSeconds(loginSettings.CheckPeriod); }
+    public TimeSpan CheckPeriod => TimeSpan.FromSeconds(loginSettings.CheckPeriod);
 }

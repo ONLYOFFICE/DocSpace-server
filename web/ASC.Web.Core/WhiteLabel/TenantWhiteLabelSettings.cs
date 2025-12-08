@@ -274,11 +274,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 
     public DateTime LastModified { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{05d35540-c80b-4b17-9277-abd9e543bf93}"); }
-    }
+    public static Guid ID => new("{05d35540-c80b-4b17-9277-abd9e543bf93}");
 
     #endregion
 
@@ -906,7 +902,7 @@ public class TenantWhiteLabelSettingsHelper(
 
         var logoPath = BuildLogoFileName(type, partnerSettings.GetExt(type, dark), dark);
 
-        return (await partnerStorage.IsFileAsync(logoPath)) ? (await partnerStorage.GetUrlWithHashAsync(string.Empty, logoPath)) : null;
+        return await partnerStorage.IsFileAsync(logoPath) ? await partnerStorage.GetUrlWithHashAsync(string.Empty, logoPath) : null;
     }
 
     private async Task<string> GetCustomRegionalPath(string culture)
@@ -925,7 +921,7 @@ public class TenantWhiteLabelSettingsHelper(
 
         if (string.IsNullOrEmpty(culture))
         {
-            culture = (tenantManager.GetCurrentTenant()).Language;
+            culture = tenantManager.GetCurrentTenant().Language;
         }
 
         return customCultures.Contains(culture, StringComparer.InvariantCultureIgnoreCase) ? $"{culture.ToLower()}/" : string.Empty;

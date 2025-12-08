@@ -44,71 +44,74 @@ public static class NotifyInfoExtension
 
         return modelBuilder;
     }
-    public static void MySqlAddNotifyInfo(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<NotifyInfo>(entity =>
+        public void MySqlAddNotifyInfo()
         {
-            entity.HasKey(e => e.NotifyId)
-                .HasName("PRIMARY");
+            modelBuilder.Entity<NotifyInfo>(entity =>
+            {
+                entity.HasKey(e => e.NotifyId)
+                    .HasName("PRIMARY");
 
-            entity.ToTable("notify_info")
-                .HasCharSet("utf8");
+                entity.ToTable("notify_info")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.State)
-                .HasDatabaseName("state");
+                entity.HasIndex(e => e.State)
+                    .HasDatabaseName("state");
 
-            entity.Property(e => e.NotifyId)
-                .HasColumnName("notify_id")
-                .ValueGeneratedNever();
+                entity.Property(e => e.NotifyId)
+                    .HasColumnName("notify_id")
+                    .ValueGeneratedNever();
 
-            entity.Property(e => e.Attempts)
-                .HasColumnName("attempts")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.Attempts)
+                    .HasColumnName("attempts")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.ModifyDate)
-                .HasColumnName("modify_date")
-                .HasColumnType("datetime");
+                entity.Property(e => e.ModifyDate)
+                    .HasColumnName("modify_date")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.Priority)
-                .HasColumnName("priority")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.Priority)
+                    .HasColumnName("priority")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.State)
-                .HasColumnName("state")
-                .HasDefaultValueSql("'0'");
-        });
-    }
+                entity.Property(e => e.State)
+                    .HasColumnName("state")
+                    .HasDefaultValueSql("'0'");
+            });
+        }
 
-    public static void PgSqlAddNotifyInfo(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<NotifyInfo>(entity =>
+        public void PgSqlAddNotifyInfo()
         {
-            entity.HasKey(e => e.NotifyId)
-                .HasName("PK_notify_info"); // PostgreSQL constraint name standard
+            modelBuilder.Entity<NotifyInfo>(entity =>
+            {
+                entity.HasKey(e => e.NotifyId)
+                    .HasName("PK_notify_info"); // PostgreSQL constraint name standard
 
-            entity.ToTable("notify_info"); // Specify the table name
+                entity.ToTable("notify_info"); // Specify the table name
 
-            entity.HasIndex(e => e.State)
-                .HasDatabaseName("IX_notify_info_state"); // Define an index for the "state" column
+                entity.HasIndex(e => e.State)
+                    .HasDatabaseName("IX_notify_info_state"); // Define an index for the "state" column
 
-            entity.Property(e => e.NotifyId)
-                .HasColumnName("notify_id"); // Map NotifyId to "notify_id"
+                entity.Property(e => e.NotifyId)
+                    .HasColumnName("notify_id"); // Map NotifyId to "notify_id"
 
-            entity.Property(e => e.Attempts)
-                .HasColumnName("attempts")
-                .HasDefaultValue(0); // Default value for PostgreSQL
+                entity.Property(e => e.Attempts)
+                    .HasColumnName("attempts")
+                    .HasDefaultValue(0); // Default value for PostgreSQL
 
-            entity.Property(e => e.ModifyDate)
-                .HasColumnName("modify_date")
-                .HasColumnType("timestamptz"); // Typical timestamp configuration for PostgreSQL
+                entity.Property(e => e.ModifyDate)
+                    .HasColumnName("modify_date")
+                    .HasColumnType("timestamptz"); // Typical timestamp configuration for PostgreSQL
 
-            entity.Property(e => e.Priority)
-                .HasColumnName("priority")
-                .HasDefaultValue(0); // Default value for Priority
+                entity.Property(e => e.Priority)
+                    .HasColumnName("priority")
+                    .HasDefaultValue(0); // Default value for Priority
 
-            entity.Property(e => e.State)
-                .HasColumnName("state")
-                .HasDefaultValue(0); // Default value for State
-        });
+                entity.Property(e => e.State)
+                    .HasColumnName("state")
+                    .HasDefaultValue(0); // Default value for State
+            });
+        }
     }
 }

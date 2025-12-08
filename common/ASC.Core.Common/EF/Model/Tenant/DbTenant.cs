@@ -113,7 +113,7 @@ public class DbTenant
     public DateTime StatusChangedHack
     {
         get => StatusChanged ?? DateTime.MinValue;
-        set { StatusChanged = value; }
+        set => StatusChanged = value;
     }
 
     /// <summary>
@@ -216,7 +216,7 @@ public static class DbTenantExtension
                 Name = "Web Office",
                 CreationDateTime = new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317),
                 OwnerId = Guid.Parse("66faa6e4-f133-11ea-b126-00ffeec8b4ef"),
-                LastModified = new DateTime(2022, 7, 8, 0, 0, 0, DateTimeKind.Utc),
+                LastModified = new DateTime(2022, 7, 8, 0, 0, 0, DateTimeKind.Utc)
             }
             )
             .HasData(
@@ -234,233 +234,236 @@ public static class DbTenantExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbTenant(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbTenant>()
-            .HasOne(r => r.Partner)
-            .WithOne(r => r.Tenant)
-            .HasPrincipalKey<DbTenant>(r => new { r.Id });
-
-        modelBuilder.Entity<DbTenant>(entity =>
+        public void MySqlAddDbTenant()
         {
-            entity.ToTable("tenants_tenants")
-                .HasCharSet("utf8");
-
-            entity.HasIndex(e => e.LastModified)
-                .HasDatabaseName("last_modified");
-
-            entity.HasIndex(e => e.MappedDomain)
-                .HasDatabaseName("mappeddomain");
-
-            entity.HasIndex(e => e.Version)
-                .HasDatabaseName("version");
-
-            entity.HasIndex(e => e.Alias)
-                .HasDatabaseName("alias")
-                .IsUnique();
-
-            entity.Property(e => e.Id).HasColumnName("id");
-
-            entity.Property(e => e.Alias)
-                .IsRequired()
-                .HasColumnName("alias")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-
-            entity.Property(e => e.Calls)
-                .HasColumnName("calls")
-                .HasDefaultValueSql("'1'")
-                .HasColumnType("tinyint(1)");
-
-            entity.Property(e => e.CreationDateTime)
-                .HasColumnName("creationdatetime")
-                .HasColumnType("datetime");
-
-            entity.Property(e => e.Industry)
-                .HasColumnName("industry")
-                .IsRequired()
-                .HasDefaultValueSql("'0'");
-
-            entity.Property(e => e.Language)
-                .IsRequired()
-                .HasColumnName("language")
-                .HasColumnType("char")
-                .HasDefaultValueSql("'en-US'")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("timestamp");
-
-            entity.Property(e => e.MappedDomain)
-                .HasColumnName("mappeddomain")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-
-            entity.Property(e => e.Name)
-                .IsRequired()
-                .HasColumnName("name")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-
-            entity.Property(e => e.OwnerId)
-                .HasColumnName("owner_id")
-                .HasColumnType("varchar(38)")
-                .IsRequired(false)
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-
-            entity.Property(e => e.PaymentId)
-                .HasColumnName("payment_id")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-
-            entity.Property(e => e.Status)
-                .HasColumnName("status")
-                .IsRequired()
-                .HasDefaultValueSql("'0'");
-
-            entity.Property(e => e.StatusChanged)
-                .HasColumnName("statuschanged")
-                .HasColumnType("datetime");
-
-            entity.Property(e => e.TimeZone)
-                .HasColumnName("timezone")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-
-            entity.Property(e => e.TrustedDomainsRaw)
-                .HasColumnName("trusteddomains")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-
-            entity.Property(e => e.TrustedDomainsEnabled)
-                .HasColumnName("trusteddomainsenabled")
-                .HasDefaultValueSql("'0'");
-
-            entity.Property(e => e.Version)
-                .HasColumnName("version")
-                .HasDefaultValueSql("'2'");
-
-            entity.Property(e => e.Version_Changed)
-                .HasColumnName("version_changed")
-                .HasColumnType("datetime");
-
-            entity.Ignore(c => c.StatusChangedHack);
-            entity.Ignore(c => c.VersionChanged);
-        });
-    }
-
-    public static void PgSqlAddDbTenant(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbTenant>(entity =>
-        {
-            entity.ToTable("tenants_tenants");
-
-            entity.HasIndex(e => e.LastModified)
-                .HasDatabaseName("IX_tenants_tenants_last_modified");
-
-            entity.HasIndex(e => e.MappedDomain)
-                .HasDatabaseName("mappeddomain");
-
-            entity.HasIndex(e => e.Version)
-                .HasDatabaseName("version");
-
-            entity.HasIndex(e => e.Alias)
-                .HasDatabaseName("alias")
-                .IsUnique();
-
-            entity.Property(e => e.Id).HasColumnName("id");
-
-            entity.Property(e => e.Alias)
-                .IsRequired()
-                .HasColumnName("alias")
-                .HasColumnType("varchar");
-
-            entity.Property(e => e.Calls)
-                .HasColumnName("calls")
-                .HasDefaultValueSql("true")
-                .HasColumnType("boolean");
-
-            entity.Property(e => e.CreationDateTime)
-                .HasColumnName("creationdatetime")
-                .HasColumnType("timestamptz");
-
-            entity.Property(e => e.Industry)
-                .HasColumnName("industry")
-                .IsRequired()
-                .HasDefaultValueSql("0");
-
-            entity.Property(e => e.Language)
-                .IsRequired()
-                .HasColumnName("language")
-                .HasColumnType("char")
-                .HasDefaultValueSql("'en-US'");
-
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("timestamptz");
-
-            entity.Property(e => e.MappedDomain)
-                .HasColumnName("mappeddomain")
-                .HasColumnType("varchar");
-
-            entity.Property(e => e.Name)
-                .IsRequired()
-                .HasColumnName("name")
-                .HasColumnType("varchar");
-
-            entity.Property(e => e.OwnerId)
-                .HasColumnName("owner_id")
-                .HasColumnType("uuid")
-                .IsRequired(false);
-
-            entity.Property(e => e.PaymentId)
-                .HasColumnName("payment_id")
-                .HasColumnType("varchar");
-
-            entity.Property(e => e.Status)
-                .HasColumnName("status")
-                .IsRequired()
-                .HasDefaultValueSql("0");
-
-            entity.Property(e => e.StatusChanged)
-                .HasColumnName("statuschanged")
-                .HasColumnType("timestamptz");
-
-            entity.Property(e => e.TimeZone)
-                .HasColumnName("timezone")
-                .HasColumnType("varchar");
-
-            entity.Property(e => e.TrustedDomainsRaw)
-                .HasColumnName("trusteddomains")
-                .HasColumnType("varchar");
-
-            entity.Property(e => e.TrustedDomainsEnabled)
-                .HasColumnName("trusteddomainsenabled")
-                .HasDefaultValueSql("0");
-
-            entity.Property(e => e.Version)
-                .HasColumnName("version")
-                .HasDefaultValueSql("2");
-
-            entity.Property(e => e.Version_Changed)
-                .HasColumnName("version_changed")
-                .HasColumnType("timestamptz");
-
-            entity.Ignore(c => c.StatusChangedHack);
-            entity.Ignore(c => c.VersionChanged);
-
-            entity.HasOne(r => r.Partner)
+            modelBuilder.Entity<DbTenant>()
+                .HasOne(r => r.Partner)
                 .WithOne(r => r.Tenant)
                 .HasPrincipalKey<DbTenant>(r => new { r.Id });
-        });
+
+            modelBuilder.Entity<DbTenant>(entity =>
+            {
+                entity.ToTable("tenants_tenants")
+                    .HasCharSet("utf8");
+
+                entity.HasIndex(e => e.LastModified)
+                    .HasDatabaseName("last_modified");
+
+                entity.HasIndex(e => e.MappedDomain)
+                    .HasDatabaseName("mappeddomain");
+
+                entity.HasIndex(e => e.Version)
+                    .HasDatabaseName("version");
+
+                entity.HasIndex(e => e.Alias)
+                    .HasDatabaseName("alias")
+                    .IsUnique();
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Alias)
+                    .IsRequired()
+                    .HasColumnName("alias")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+
+                entity.Property(e => e.Calls)
+                    .HasColumnName("calls")
+                    .HasDefaultValueSql("'1'")
+                    .HasColumnType("tinyint(1)");
+
+                entity.Property(e => e.CreationDateTime)
+                    .HasColumnName("creationdatetime")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.Industry)
+                    .HasColumnName("industry")
+                    .IsRequired()
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Language)
+                    .IsRequired()
+                    .HasColumnName("language")
+                    .HasColumnType("char")
+                    .HasDefaultValueSql("'en-US'")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("timestamp");
+
+                entity.Property(e => e.MappedDomain)
+                    .HasColumnName("mappeddomain")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasColumnName("name")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+
+                entity.Property(e => e.OwnerId)
+                    .HasColumnName("owner_id")
+                    .HasColumnType("varchar(38)")
+                    .IsRequired(false)
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+
+                entity.Property(e => e.PaymentId)
+                    .HasColumnName("payment_id")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+
+                entity.Property(e => e.Status)
+                    .HasColumnName("status")
+                    .IsRequired()
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.StatusChanged)
+                    .HasColumnName("statuschanged")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.TimeZone)
+                    .HasColumnName("timezone")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+
+                entity.Property(e => e.TrustedDomainsRaw)
+                    .HasColumnName("trusteddomains")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+
+                entity.Property(e => e.TrustedDomainsEnabled)
+                    .HasColumnName("trusteddomainsenabled")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Version)
+                    .HasColumnName("version")
+                    .HasDefaultValueSql("'2'");
+
+                entity.Property(e => e.Version_Changed)
+                    .HasColumnName("version_changed")
+                    .HasColumnType("datetime");
+
+                entity.Ignore(c => c.StatusChangedHack);
+                entity.Ignore(c => c.VersionChanged);
+            });
+        }
+
+        public void PgSqlAddDbTenant()
+        {
+            modelBuilder.Entity<DbTenant>(entity =>
+            {
+                entity.ToTable("tenants_tenants");
+
+                entity.HasIndex(e => e.LastModified)
+                    .HasDatabaseName("IX_tenants_tenants_last_modified");
+
+                entity.HasIndex(e => e.MappedDomain)
+                    .HasDatabaseName("mappeddomain");
+
+                entity.HasIndex(e => e.Version)
+                    .HasDatabaseName("version");
+
+                entity.HasIndex(e => e.Alias)
+                    .HasDatabaseName("alias")
+                    .IsUnique();
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Alias)
+                    .IsRequired()
+                    .HasColumnName("alias")
+                    .HasColumnType("varchar");
+
+                entity.Property(e => e.Calls)
+                    .HasColumnName("calls")
+                    .HasDefaultValueSql("true")
+                    .HasColumnType("boolean");
+
+                entity.Property(e => e.CreationDateTime)
+                    .HasColumnName("creationdatetime")
+                    .HasColumnType("timestamptz");
+
+                entity.Property(e => e.Industry)
+                    .HasColumnName("industry")
+                    .IsRequired()
+                    .HasDefaultValueSql("0");
+
+                entity.Property(e => e.Language)
+                    .IsRequired()
+                    .HasColumnName("language")
+                    .HasColumnType("char")
+                    .HasDefaultValueSql("'en-US'");
+
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("timestamptz");
+
+                entity.Property(e => e.MappedDomain)
+                    .HasColumnName("mappeddomain")
+                    .HasColumnType("varchar");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasColumnName("name")
+                    .HasColumnType("varchar");
+
+                entity.Property(e => e.OwnerId)
+                    .HasColumnName("owner_id")
+                    .HasColumnType("uuid")
+                    .IsRequired(false);
+
+                entity.Property(e => e.PaymentId)
+                    .HasColumnName("payment_id")
+                    .HasColumnType("varchar");
+
+                entity.Property(e => e.Status)
+                    .HasColumnName("status")
+                    .IsRequired()
+                    .HasDefaultValueSql("0");
+
+                entity.Property(e => e.StatusChanged)
+                    .HasColumnName("statuschanged")
+                    .HasColumnType("timestamptz");
+
+                entity.Property(e => e.TimeZone)
+                    .HasColumnName("timezone")
+                    .HasColumnType("varchar");
+
+                entity.Property(e => e.TrustedDomainsRaw)
+                    .HasColumnName("trusteddomains")
+                    .HasColumnType("varchar");
+
+                entity.Property(e => e.TrustedDomainsEnabled)
+                    .HasColumnName("trusteddomainsenabled")
+                    .HasDefaultValueSql("0");
+
+                entity.Property(e => e.Version)
+                    .HasColumnName("version")
+                    .HasDefaultValueSql("2");
+
+                entity.Property(e => e.Version_Changed)
+                    .HasColumnName("version_changed")
+                    .HasColumnType("timestamptz");
+
+                entity.Ignore(c => c.StatusChangedHack);
+                entity.Ignore(c => c.VersionChanged);
+
+                entity.HasOne(r => r.Partner)
+                    .WithOne(r => r.Tenant)
+                    .HasPrincipalKey<DbTenant>(r => new { r.Id });
+            });
+        }
     }
 }

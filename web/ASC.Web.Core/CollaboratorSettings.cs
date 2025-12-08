@@ -30,11 +30,7 @@ public class CollaboratorSettings : ISettings<CollaboratorSettings>
 {
     public bool FirstVisit { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{73537E08-17F6-4706-BFDA-1414108AA7D2}"); }
-    }
+    public static Guid ID => new("{73537E08-17F6-4706-BFDA-1414108AA7D2}");
 
     public CollaboratorSettings GetDefault()
     {

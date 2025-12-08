@@ -76,7 +76,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class AuthorizationService
     implements OAuth2AuthorizationService, AuthorizationCleanupService {
   private static final String CLIENT_STATE_COOKIE = "client_state";
-  private static final Pattern regionPattern = Pattern.compile("([a-z_]+):");
+  private static final Pattern regionPattern = Pattern.compile("\\[?([a-zA-Z0-9_\\s-]+)\\]?:");
 
   private final RabbitTemplate rpcRabbitTemplate;
 
@@ -273,7 +273,7 @@ public class AuthorizationService
 
       var routingKey =
           AuthorizationMessagingConfiguration.AUTHORIZATION_RPC_ROUTING_KEY_PREFIX
-              + matcher.group(1);
+              + matcher.group(0).replaceAll(":$", "");
 
       var message =
           messageConverter.toMessage(

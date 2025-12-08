@@ -50,11 +50,7 @@ public class CustomColorThemesSettings : ISettings<CustomColorThemesSettings>
 
     public DateTime LastModified { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{FE096AE9-3044-4B92-A94C-46E323F82681}"); }
-    }
+    public static Guid ID => new("{FE096AE9-3044-4B92-A94C-46E323F82681}");
 }
 
 /// <summary>
