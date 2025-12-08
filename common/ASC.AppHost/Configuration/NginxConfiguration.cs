@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Projects;
-
-using ResourceBuilderExtensions = ASC.AppHost.Extensions.ResourceBuilderExtensions;
-
 namespace ASC.AppHost.Configuration;
 
 public static class NginxConfiguration
@@ -73,37 +69,37 @@ public static class NginxConfiguration
             { "management_service_env", $"http://{Constants.HostDockerInternal}:5015" },
             {
                 "people_service_env", isDocker
-                    ? $"http://{ResourceBuilderExtensions.GetProjectName<ASC_People>()}:{Constants.PeoplePort}"
+                    ? $"http://{ProjectConfigurator.GetProjectName<ASC_People>()}:{Constants.PeoplePort}"
                     : $"http://{Constants.HostDockerInternal}:{Constants.PeoplePort}"
             },
             {
                 "files_service_env", isDocker
-                    ? $"http://{ResourceBuilderExtensions.GetProjectName<ASC_Files>()}:{Constants.FilesPort}"
+                    ? $"http://{ProjectConfigurator.GetProjectName<ASC_Files>()}:{Constants.FilesPort}"
                     : $"http://{Constants.HostDockerInternal}:{Constants.FilesPort}"
             },
             {
                 "webapi_service_env", isDocker
-                    ? $"http://{ResourceBuilderExtensions.GetProjectName<ASC_Web_Api>()}:{Constants.WebApiPort}"
+                    ? $"http://{ProjectConfigurator.GetProjectName<ASC_Web_Api>()}:{Constants.WebApiPort}"
                     : $"http://{Constants.HostDockerInternal}:{Constants.WebApiPort}"
             },
             {
                 "api_system_env", isDocker
-                    ? $"http://{ResourceBuilderExtensions.GetProjectName<ASC_ApiSystem>()}:{Constants.ApiSystemPort}"
+                    ? $"http://{ProjectConfigurator.GetProjectName<ASC_ApiSystem>()}:{Constants.ApiSystemPort}"
                     : $"http://{Constants.HostDockerInternal}:{Constants.ApiSystemPort}"
             },
             {
                 "backup_service_env", isDocker
-                    ? $"http://{ResourceBuilderExtensions.GetProjectName<ASC_Data_Backup>()}:{Constants.BackupPort}"
+                    ? $"http://{ProjectConfigurator.GetProjectName<ASC_Data_Backup>()}:{Constants.BackupPort}"
                     : $"http://{Constants.HostDockerInternal}:{Constants.BackupPort}"
             },
             {
                 "webstudio_service_env", isDocker
-                    ? $"http://{ResourceBuilderExtensions.GetProjectName<ASC_Web_Studio>()}:{Constants.WebstudioPort}"
+                    ? $"http://{ProjectConfigurator.GetProjectName<ASC_Web_Studio>()}:{Constants.WebstudioPort}"
                     : $"http://{Constants.HostDockerInternal}:{Constants.WebstudioPort}"
             },
             {
                 "ai_service_env", isDocker
-                    ? $"http://{ResourceBuilderExtensions.GetProjectName<ASC_AI>()}:{Constants.AiPort}"
+                    ? $"http://{ProjectConfigurator.GetProjectName<ASC_AI>()}:{Constants.AiPort}"
                     : $"http://{Constants.HostDockerInternal}:{Constants.AiPort}"
             },
             { "sockjs_node_env", $"http://{Constants.HostDockerInternal}:5001" },

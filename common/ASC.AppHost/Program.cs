@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Projects;
+using Aspire.Hosting.Pipelines;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -51,6 +51,7 @@ _ = new ProjectConfigurator(builder, connectionManager, basePath, isDocker)
     .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort)
     .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
     .AddProject<ASC_AI>(Constants.AiPort)
+    .AddProject<ASC_AI_Service>(Constants.AiServicePort)
     .AddSocketIO()
     .AddSsoAuth()
     .AddWebDav();
@@ -71,7 +72,7 @@ var registrationBuilder = builder
     .WithBuildArg("MODULE", "registration/registration-container")
     .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
-ASC.AppHost.Extensions.ResourceBuilderExtensions.AddIdentityEnv(registrationBuilder, connectionManager);
+connectionManager.AddIdentityEnv(registrationBuilder);
 
 var authorizationBuilder = builder
     .AddDockerfile(ascIdentityAuthorization, "../ASC.Identity/")
@@ -86,14 +87,14 @@ var authorizationBuilder = builder
     .WithBuildArg("MODULE", "authorization/authorization-container")
     .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
-ASC.AppHost.Extensions.ResourceBuilderExtensions.AddIdentityEnv(authorizationBuilder, connectionManager);
+connectionManager.AddIdentityEnv(authorizationBuilder);
 
 var clientBasePath = Path.Combine(basePath, "client");
 var installPackages = builder.AddExecutable("asc-install-packages", "pnpm", clientBasePath, "install");
 var buildPackages = builder.AddExecutable("asc-build-packages", "pnpm", clientBasePath, "build").WaitForCompletion(installPackages);
 var startPackages = builder.AddExecutable("asc-start-packages", "pnpm", clientBasePath, "start").WaitForCompletion(buildPackages);
-installPackages.WithRelationship(buildPackages.Resource, "Parent");
-buildPackages.WithRelationship(startPackages.Resource, "Parent");
+installPackages.WithChildRelationship(buildPackages);
+buildPackages.WithChildRelationship(startPackages);
 
 NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker);
 
