@@ -41,6 +41,7 @@ public static class Constants
     public const int BackupPort = 5012;
     public const int WebstudioPort = 5003;
     public const int AiPort = 5157;
+    public const int AiServicePort = 5154;
     public const int ClearEventsPort = 5027;
     public const int BackupBackgroundTasksPort = 5032;
     public const int FilesServicePort = 5009;

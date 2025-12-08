@@ -24,11 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AppHost.Extensions;
-
 using Microsoft.Extensions.Hosting;
-
-using ResourceBuilderExtensions = ASC.AppHost.Extensions.ResourceBuilderExtensions;
 
 namespace ASC.AppHost.Configuration;
 
@@ -38,6 +34,9 @@ public class ProjectConfigurator(
     string basePath,
     bool isDocker)
 {
+    public static string GetProjectName<TProject>() where TProject : IProjectMetadata, new() =>
+        typeof(TProject).Name.ToLower().Replace('_', '-');
+    
     public ProjectConfigurator AddProject<TProject>(int projectPort, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
     {
         if (isDocker)
@@ -55,7 +54,7 @@ public class ProjectConfigurator(
     private void AddProjectWithDefaultConfiguration<TProject>(bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
     {
         var project = builder
-            .AddProject<TProject>(ResourceBuilderExtensions.GetProjectName<TProject>())
+            .AddProject<TProject>(GetProjectName<TProject>())
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
         if (int.TryParse(builder.Configuration["Replicas"], out var replicas) && replicas > 1)
@@ -67,7 +66,7 @@ public class ProjectConfigurator(
             project.WithEnvironment("core:hosting:singletonMode", true.ToString());
         }
         
-        project.AddBaseConfig(connectionManager, isDocker, includeHealthCheck);
+        connectionManager.AddBaseConfig(project, isDocker, includeHealthCheck);
         connectionManager.AddWaitFor(project);
     }
 
@@ -77,7 +76,7 @@ public class ProjectConfigurator(
         var projectBasePath = Path.GetDirectoryName(projectMetadata.ProjectPath) ?? basePath;
 
         var name = typeof(TProject).Name;
-        var resourceBuilder = builder.AddDockerfile(ResourceBuilderExtensions.GetProjectName<TProject>(), projectBasePath, stage: "base");
+        var resourceBuilder = builder.AddDockerfile(GetProjectName<TProject>(), projectBasePath, stage: "base");
 
         var netVersion = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
         var dllPath = "/app/bin/Debug/";
@@ -97,7 +96,7 @@ public class ProjectConfigurator(
             .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
             .WithEntrypoint("dotnet");
 
-        resourceBuilder.AddBaseBind(basePath);
+        AddBaseBind(resourceBuilder);
 
         if (projectPort != 0)
         {
@@ -107,7 +106,7 @@ public class ProjectConfigurator(
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
         }
 
-        resourceBuilder.AddBaseConfig(connectionManager, isDocker, includeHealthCheck);
+        connectionManager.AddBaseConfig(resourceBuilder, isDocker, includeHealthCheck);
         connectionManager.AddWaitFor(resourceBuilder);
 
         var otlEnvs = new Dictionary<string, string>
@@ -150,7 +149,7 @@ public class ProjectConfigurator(
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
-            resourceBuilder.AddBaseBind(basePath);
+            AddBaseBind(resourceBuilder);
         }
         else
         {
@@ -183,7 +182,7 @@ public class ProjectConfigurator(
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
-            resourceBuilder.AddBaseBind(basePath);
+            AddBaseBind(resourceBuilder);
         }
         else
         {
@@ -212,7 +211,7 @@ public class ProjectConfigurator(
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
-            resourceBuilder.AddBaseBind(basePath);
+            AddBaseBind(resourceBuilder);
         }
         else
         {
@@ -223,5 +222,14 @@ public class ProjectConfigurator(
         }
 
         return this;
+    }
+
+    private void AddBaseBind<T>(IResourceBuilder<T> resourceBuilder) where T : ContainerResource
+    {
+        resourceBuilder
+            .WithBindMount(Path.Combine(basePath, "buildtools"), "/buildtools")
+            .WithBindMount(Path.Combine(basePath, "Data"), "/data")
+            .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
+            .WithEnvironment("log:dir", "/logs");
     }
 }

@@ -30,7 +30,7 @@ namespace ASC.AppHost.Configuration;
 
 public class ConnectionStringManager(IDistributedApplicationBuilder builder)
 {
-    public MySqlConnectionStringBuilder? MySqlConnectionStringBuilder { get; private set; }
+    private MySqlConnectionStringBuilder? MySqlConnectionStringBuilder { get; set; }
     public Uri? RabbitMqUri { get; private set; }
     
     //TODO:create record
@@ -38,7 +38,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
     public string? RedisPort { get; private set; }
     public string? RedisPassword { get; private set; }
 
-    public IResourceBuilder<MySqlDatabaseResource>? MySqlResource { get; private set; }
+    private IResourceBuilder<MySqlDatabaseResource>? MySqlResource { get; set; }
     private IResourceBuilder<RabbitMQServerResource>? RabbitMqResource { get; set; }
     private IResourceBuilder<RedisResource>? RedisResource { get; set; }
     private IResourceBuilder<ExecutableResource>? MigrateResource { get; set; }
@@ -162,6 +162,70 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
         {
             resourceBuilder.WaitFor(EditorResource);
         }
+    }
+
+    public void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool isDocker, bool includeHealthCheck = true) where T : IResourceWithEnvironment, IResourceWithWaitSupport, IResourceWithEndpoints
+    {
+        if (includeHealthCheck)
+        {
+            resourceBuilder.WithHttpHealthCheck("/health");
+        }
+
+        resourceBuilder
+            .WithEnvironment("openTelemetry:enable", "true")
+            .WithEnvironment("files:docservice:url:portal", ConnectionStringManager.SubstituteLocalhost("http://localhost"))
+            .WithEnvironment("files:docservice:url:public", "http://localhost/ds-vpath");
+
+        if (MySqlResource != null)
+        {
+            resourceBuilder
+                .WithReference(MySqlResource, "default:connectionString");
+        }
+
+        if (isDocker)
+        {
+            resourceBuilder.WithEnvironment("files:docservice:url:internal", $"http://{Constants.EditorsContainer}");
+        }
+
+        resourceBuilder
+            .WithEnvironment("RabbitMQ:Hostname", () => RabbitMqUri != null ? isDocker ? $"{SubstituteLocalhost(RabbitMqUri.Host)}" : RabbitMqUri.Host : "")
+            .WithEnvironment("RabbitMQ:Port", () => RabbitMqUri != null ? $"{RabbitMqUri.Port}" : "")
+            .WithEnvironment("RabbitMQ:UserName", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[0]}" : "")
+            .WithEnvironment("RabbitMQ:Password", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[1]}" : "")
+            .WithEnvironment("RabbitMQ:VirtualHost", () => RabbitMqUri != null ? $"{RabbitMqUri.PathAndQuery}" : "");
+
+        resourceBuilder
+            .WithEnvironment("Redis:Hosts:0:Host", () => (isDocker ? SubstituteLocalhost(RedisHost) : RedisHost) ?? string.Empty)
+            .WithEnvironment("Redis:Hosts:0:Port", () => RedisPort ?? string.Empty);
+
+        if (!string.IsNullOrEmpty(RedisPassword))
+        {
+            resourceBuilder.WithEnvironment("Redis:Password", () => RedisPassword ?? string.Empty);
+        }
+    }
+
+    public void AddIdentityEnv(IResourceBuilder<ContainerResource>  resourceBuilder)
+    {
+        resourceBuilder
+            .WithEnvironment("JDBC_URL", () => MySqlConnectionStringBuilder != null ? $"{SubstituteLocalhost(MySqlConnectionStringBuilder.Server)}:{MySqlConnectionStringBuilder.Port}" : string.Empty)
+            .WithEnvironment("JDBC_DATABASE", () => MySqlConnectionStringBuilder?.Database ?? string.Empty)
+            .WithEnvironment("JDBC_USER_NAME", () => MySqlConnectionStringBuilder?.UserID ?? string.Empty)
+            .WithEnvironment("JDBC_PASSWORD", () => MySqlConnectionStringBuilder?.Password ?? string.Empty);
+
+        resourceBuilder
+            .WithEnvironment("RABBIT_HOST", () => RabbitMqUri != null ? $"{SubstituteLocalhost(RabbitMqUri.Host)}" : string.Empty)
+            .WithEnvironment("RABBIT_URI", () => RabbitMqUri != null ? $"{SubstituteLocalhost(RabbitMqUri.ToString())}" : string.Empty);
+
+        resourceBuilder
+            .WithEnvironment("REDIS_HOST", () => SubstituteLocalhost(RedisHost) ?? string.Empty)
+            .WithEnvironment("REDIS_PORT", () => RedisPort ?? string.Empty);
+
+        if (!string.IsNullOrEmpty(RedisPassword))
+        {
+            resourceBuilder.WithEnvironment("REDIS_PASSWORD", () => RedisPassword ?? string.Empty);
+        }
+
+        AddWaitFor(resourceBuilder, includeEditors: false);
     }
     
     public static string? SubstituteLocalhost(string? host) => host?.Replace("localhost", Constants.HostDockerInternal);
