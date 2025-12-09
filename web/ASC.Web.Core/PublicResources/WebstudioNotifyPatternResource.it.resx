@@ -2085,4 +2085,13 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace è stato eliminato.
+
+*Portale:* ${PortalUrl}
+*Proprietario:* ${UserName} ${UserEmail}
+*Cliente:* ${OwnerName}
+
+Assicurati che la fatturazione automatica sia disattivata. Controlla lo stato della fatturazione automatica nell’account Stripe del cliente.</value>
+  </data>
 </root>
