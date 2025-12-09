@@ -30,6 +30,7 @@ package com.asc.authorization.messaging.listener;
 import com.asc.authorization.data.authorization.entity.AuthorizationEntity;
 import com.asc.authorization.data.authorization.repository.JpaAuthorizationRepository;
 import com.asc.common.service.transfer.message.RetrieveAuthorizationMessage;
+import com.asc.common.service.transfer.message.SaveAuthorizationMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -65,8 +66,87 @@ public class AuthorizationMessagingRPCListener {
    */
   @RabbitHandler
   public AuthorizationEntity receiveAuthorizationRetrieval(RetrieveAuthorizationMessage event) {
-    return jpaAuthorizationRepository
-        .findByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(event.getToken())
-        .orElse(null);
+    log.info("Received retrieve authorization request {}", event.getToken());
+
+    var response =
+        jpaAuthorizationRepository
+            .findByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(
+                event.getToken())
+            .orElse(null);
+
+    if (response != null) log.info("Found a valid non-null authorization for {}", event.getToken());
+
+    return response;
+  }
+
+  /**
+   * Handles authorization save RPC requests from remote regions.
+   *
+   * @param event the message containing the authorization data to save
+   * @return {@code true} if the save was successful, {@code false} otherwise
+   */
+  @RabbitHandler
+  public Boolean receiveAuthorizationSave(SaveAuthorizationMessage event) {
+    try {
+      log.info(
+          "Received authorization save request for client: {}, principal: {}",
+          event.getRegisteredClientId(),
+          event.getPrincipalId());
+
+      var result =
+          jpaAuthorizationRepository
+              .findByRegisteredClientIdAndPrincipalIdAndAuthorizationGrantType(
+                  event.getRegisteredClientId(),
+                  event.getPrincipalId(),
+                  event.getAuthorizationGrantType());
+
+      var toPersist =
+          AuthorizationEntity.builder()
+              .registeredClientId(event.getRegisteredClientId())
+              .principalId(event.getPrincipalId())
+              .authorizationGrantType(event.getAuthorizationGrantType())
+              .id(event.getId())
+              .state(event.getState())
+              .attributes(event.getAttributes())
+              .authorizedScopes(event.getAuthorizedScopes())
+              .authorizationCodeValue(event.getAuthorizationCodeValue())
+              .authorizationCodeMetadata(event.getAuthorizationCodeMetadata())
+              .authorizationCodeIssuedAt(event.getAuthorizationCodeIssuedAt())
+              .authorizationCodeExpiresAt(event.getAuthorizationCodeExpiresAt())
+              .accessTokenValue(event.getAccessTokenValue())
+              .accessTokenHash(event.getAccessTokenHash())
+              .accessTokenMetadata(event.getAccessTokenMetadata())
+              .accessTokenType(event.getAccessTokenType())
+              .accessTokenScopes(event.getAccessTokenScopes())
+              .accessTokenIssuedAt(event.getAccessTokenIssuedAt())
+              .accessTokenExpiresAt(event.getAccessTokenExpiresAt())
+              .refreshTokenValue(event.getRefreshTokenValue())
+              .refreshTokenHash(event.getRefreshTokenHash())
+              .refreshTokenMetadata(event.getRefreshTokenMetadata())
+              .refreshTokenIssuedAt(event.getRefreshTokenIssuedAt())
+              .refreshTokenExpiresAt(event.getRefreshTokenExpiresAt())
+              .idTokenValue(event.getIdTokenValue())
+              .idTokenClaims(event.getIdTokenClaims())
+              .idTokenMetadata(event.getIdTokenMetadata())
+              .idTokenIssuedAt(event.getIdTokenIssuedAt())
+              .idTokenExpiresAt(event.getIdTokenExpiresAt())
+              .build();
+
+      if (result.isPresent()) {
+        var entity = result.get();
+        if (event.getTenantId() == null || event.getTenantId() < 1)
+          toPersist.setTenantId(entity.getTenantId());
+        else toPersist.setTenantId(event.getTenantId());
+      } else if (event.getTenantId() != null) {
+        toPersist.setTenantId(event.getTenantId());
+      }
+
+      jpaAuthorizationRepository.save(toPersist);
+      log.info("Authorization saved successfully in remote region");
+      return true;
+    } catch (Exception e) {
+      log.error("Failed to save authorization in remote region", e);
+      return false;
+    }
   }
 }
