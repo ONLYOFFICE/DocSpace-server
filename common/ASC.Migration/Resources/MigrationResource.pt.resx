@@ -210,4 +210,7 @@
   <data name="СreateRootFolder" xml:space="preserve">
     <value>Criar pasta raiz</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>O backup é maior que o tamanho total do portal</value>
+  </data>
 </root>

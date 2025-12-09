@@ -210,4 +210,7 @@
   <data name="CanNotShare" xml:space="preserve">
     <value>Не удалось предоставить права доступа к {0} для {1}</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Размер резервной копии превышает общий размер портала</value>
+  </data>
 </root>
