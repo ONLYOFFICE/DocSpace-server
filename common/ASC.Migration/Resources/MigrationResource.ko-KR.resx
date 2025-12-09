@@ -210,4 +210,7 @@
   <data name="СreateRootFolder" xml:space="preserve">
     <value>루트 폴더 생성</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>백업이 포털의 전체 크기보다 큽니다</value>
+  </data>
 </root>
