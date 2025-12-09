@@ -24,6 +24,7 @@
          Projects can temporarily use VersionOverride metadata on PackageReference
          until the versions are moved here. -->
     <!-- Centralized from ASC.Api.Core -->
+    <PackageVersion Include="Aspire.Hosting.Yarp" Version="13.0.2" />
     <PackageVersion Include="AspNetCore.HealthChecks.Kafka" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.MySql" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />

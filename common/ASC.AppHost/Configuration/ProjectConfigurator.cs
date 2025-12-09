@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Net.Sockets;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 namespace ASC.AppHost.Configuration;
@@ -34,24 +37,61 @@ public class ProjectConfigurator(
     string basePath,
     bool isDocker)
 {
-    public static string GetProjectName<TProject>() where TProject : IProjectMetadata, new() =>
-        typeof(TProject).Name.ToLower().Replace('_', '-');
+    public static string GetProjectName<TProject>() where TProject : IProjectMetadata, new() => typeof(TProject).Name.ToLower().Replace('_', '-');
     
-    public ProjectConfigurator AddProject<TProject>(int projectPort, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
+    public ProjectConfigurator AddProject<TProject>(int projectPort, IYarpConfigurationBuilder? yarpConfigurationBuilder = null, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
     {
+        var endpoints = GetEndpoint<TProject>();
+        
         if (isDocker)
         {
-            AddProjectDocker<TProject>(projectPort, includeHealthCheck);
+            var resourceBuilder = AddProjectDocker<TProject>(projectPort, includeHealthCheck);
+            if (yarpConfigurationBuilder != null && endpoints != null)
+            {
+                foreach (var endpoint in endpoints)
+                {
+                    yarpConfigurationBuilder.AddRoute(endpoint, new EndpointReference(resourceBuilder.Resource, new EndpointAnnotation(ProtocolType.Tcp, transport: "http", uriScheme: "http", port: projectPort, targetPort: projectPort)));   
+                }
+            }
         }
         else
         {
-            AddProjectWithDefaultConfiguration<TProject>(includeHealthCheck);
+            var resourceBuilder = AddProjectWithDefaultConfiguration<TProject>(projectPort, includeHealthCheck);
+            if (yarpConfigurationBuilder != null && endpoints != null)
+            {
+                foreach (var endpoint in endpoints)
+                {
+                    yarpConfigurationBuilder.AddRoute(endpoint, resourceBuilder);
+                }
+            }
         }
-
+        
         return this;
     }
 
-    private void AddProjectWithDefaultConfiguration<TProject>(bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
+    private static IEnumerable<string>? GetEndpoint<TProject>() where TProject : IProjectMetadata, new()
+    {
+        var projectMetadata = new TProject();
+        var projectBasePath = Path.GetDirectoryName(projectMetadata.ProjectPath);
+        
+        if (string.IsNullOrEmpty(projectBasePath) || !Directory.Exists(projectBasePath))
+        {
+            return [];
+        }
+        
+        var appSettingsPath = Path.Combine(projectBasePath, "appsettings.json");
+        if (!Path.Exists(appSettingsPath))
+        {
+            return [];
+        }
+        
+        var configBuilder = new ConfigurationBuilder();
+        configBuilder.AddJsonFile(appSettingsPath, optional: true);
+        var config = configBuilder.Build();
+        return config.GetSection("route").Get<IEnumerable<string>>();
+    }
+
+    private IResourceBuilder<ProjectResource> AddProjectWithDefaultConfiguration<TProject>(int projectPort, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
     {
         var project = builder
             .AddProject<TProject>(GetProjectName<TProject>())
@@ -68,9 +108,11 @@ public class ProjectConfigurator(
         
         connectionManager.AddBaseConfig(project, isDocker, includeHealthCheck);
         connectionManager.AddWaitFor(project);
+
+        return project;
     }
 
-    private void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
+    private IResourceBuilder<ContainerResource> AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
     {
         var projectMetadata = new TProject();
         var projectBasePath = Path.GetDirectoryName(projectMetadata.ProjectPath) ?? basePath;
@@ -128,6 +170,8 @@ public class ProjectConfigurator(
         }
         
         resourceBuilder.WithOtlpExporter();
+        
+        return resourceBuilder;
     }
 
     public ProjectConfigurator AddSocketIO()
