@@ -74,10 +74,22 @@ public class AiProviderDao(
         {
             return null;
         }
-        
-        provider.Key = await crypto.DecryptAsync(provider.Key);
 
-        return provider.Map();
+        var reset = false;
+        try
+        {
+            provider.Key = await crypto.DecryptAsync(provider.Key);
+        }
+        catch
+        {
+            provider.Key = string.Empty;
+            reset = true;
+        }
+
+        var res = provider.Map();
+        res.NeedReset = reset;
+
+        return res;
     }
     
     public async IAsyncEnumerable<AiProvider> GetProvidersAsync(int tenantId, int offset, int limit)
@@ -85,8 +97,21 @@ public class AiProviderDao(
         var dbContext = await dbContextFactory.CreateDbContextAsync();
         await foreach (var provider in dbContext.GetProvidersAsync(tenantId, offset, limit))
         {
-            provider.Key = await crypto.DecryptAsync(provider.Key);
-            yield return provider.Map();
+            var reset = false;
+            try
+            {
+                provider.Key = await crypto.DecryptAsync(provider.Key);
+            }
+            catch
+            {
+                provider.Key = string.Empty;
+                reset = true;
+            }
+
+            var res = provider.Map();
+            res.NeedReset = reset;
+
+            yield return res;
         }
     }
 

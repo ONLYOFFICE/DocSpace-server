@@ -181,6 +181,11 @@ public class AiProviderService(
     
     private async Task<IEnumerable<ModelData>> GetProviderModelsAsync(AiProvider p, Scope? scope)
     {
+        if (p.NeedReset)
+        {
+            return [];
+        }
+
         var client = modelClientFactory.Create(p.Type, p.Url, p.Key);
         try
         {

@@ -65,8 +65,20 @@ public class AiSettingsStore(
             return webSearchSettings;
         }
 
-        var jsonConfig = await instanceCrypto.DecryptAsync(webSearchSettingsRaw.Config);
-        webSearchSettings.Config = JsonSerializer.Deserialize<EngineConfig>(jsonConfig);
+        var jsonConfig = string.Empty;
+        try
+        {
+            jsonConfig = await instanceCrypto.DecryptAsync(webSearchSettingsRaw.Config);
+        }
+        catch
+        {
+            webSearchSettings.NeedReset = true;
+        }
+
+        if (!webSearchSettings.NeedReset)
+        {
+            webSearchSettings.Config = JsonSerializer.Deserialize<EngineConfig>(jsonConfig);
+        }
 
         return webSearchSettings;
     }
@@ -113,11 +125,23 @@ public class AiSettingsStore(
             };
         }
 
-        var key = await instanceCrypto.DecryptAsync(settings.Key);
+        string? key = null;
+        var reset = false;
+
+        try
+        {
+            key = await instanceCrypto.DecryptAsync(settings.Key);
+        }
+        catch
+        {
+            reset = true;
+        }
+
         return new VectorizationSettings
         {
             Type = settings.ProviderType,
-            Key = key
+            Key = key,
+            NeedReset = reset
         };
     }
     

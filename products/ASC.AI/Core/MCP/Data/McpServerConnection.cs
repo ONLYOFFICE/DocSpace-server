@@ -42,6 +42,8 @@ public class McpServerConnection
     public McpServerSettings? Settings { get; set; }
     public bool Connected => ConnectionType is ConnectionType.Direct || Settings?.OauthCredentials != null;
     public Icon? Icon { get; set; }
+
+    public bool NeedReset { get; set; }
 }
 
 public static class McpRoomServerExtensions
@@ -71,8 +73,20 @@ public static class McpRoomServerExtensions
 
             if (item.Server.Headers != null)
             {
-                var headersJson = await crypto.DecryptAsync(item.Server.Headers);
-                serverConnection.Headers = JsonSerializer.Deserialize<Dictionary<string, string>>(headersJson);
+                var headersJson = string.Empty;
+                try
+                {
+                    headersJson = await crypto.DecryptAsync(item.Server.Headers);
+                }
+                catch
+                {
+                    serverConnection.NeedReset = true;
+                }
+
+                if (!serverConnection.NeedReset)
+                {
+                    serverConnection.Headers = JsonSerializer.Deserialize<Dictionary<string, string>>(headersJson);
+                }
             }
 
             if (item.Server.HasIcon)

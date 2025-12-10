@@ -40,6 +40,8 @@ public class McpServer
     public bool HasIcon { get; set; }
     public Icon? Icon { get; set; }
     public DateTime ModifiedOn { get; set; }
+
+    public bool NeedReset { get; set; }
 }
 
 public static class McpServerExtensions
@@ -73,8 +75,20 @@ public static class McpServerExtensions
             return server;
         }
 
-        var headersJson = await crypto.DecryptAsync(dbMcpUnit.Server.Headers);
-        server.Headers = JsonSerializer.Deserialize<Dictionary<string, string>>(headersJson);
+        var headersJson = string.Empty;
+        try
+        {
+            headersJson = await crypto.DecryptAsync(dbMcpUnit.Server.Headers);
+        }
+        catch
+        {
+            server.NeedReset = true;
+        }
+
+        if (!server.NeedReset)
+        {
+            server.Headers = JsonSerializer.Deserialize<Dictionary<string, string>>(headersJson);
+        }
 
         return server;
     }
