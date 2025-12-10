@@ -2086,7 +2086,12 @@ public class FileSecurity(
                 {
                     return false;
                 }
-                
+
+                if (e.Access != FileShare.Read && e.Access != FileShare.None)
+                {
+                    return true;
+                }
+
                 switch (e.RootFolderType)
                 {                        
                     case FolderType.USER:
