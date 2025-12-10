@@ -404,9 +404,7 @@ public class ThirdpartyController(
 
     private string GetEmailAddress(SignupAccountRequestDto inDto, LoginProfile account)
     {
-        var value = GetEmailAddress(inDto);
-
-        return string.IsNullOrEmpty(value) ? account.EMail : value;
+        return string.IsNullOrEmpty(account.EMail) ? GetEmailAddress(inDto) : account.EMail;
     }
 
     private string GetFirstName(SignupAccountRequestDto inDto)

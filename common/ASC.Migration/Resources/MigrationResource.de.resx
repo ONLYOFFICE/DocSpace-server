@@ -210,4 +210,7 @@
   <data name="CanNotShare" xml:space="preserve">
     <value>Eintrag {0} konnte nicht für {1} freigegeben werden</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Backup ist größer als die Gesamtgröße des Portals</value>
+  </data>
 </root>

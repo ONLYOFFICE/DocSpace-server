@@ -210,4 +210,7 @@
   <data name="СreateRootFolder" xml:space="preserve">
     <value>Створити кореневу папку</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Резервна копія перевищує загальний розмір порталу</value>
+  </data>
 </root>

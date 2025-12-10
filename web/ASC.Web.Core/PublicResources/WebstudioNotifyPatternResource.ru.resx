@@ -2095,4 +2095,16 @@ $TrulyYours</value>
   <data name="subject_backup_failed" xml:space="preserve">
     <value>Не удалось выполнить резервное копирование вашего DocSpace</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace удален.
+
+*Портал:* ${PortalUrl}
+*Владелец:* ${UserName} ${UserEmail}
+*Клиент:* ${OwnerName}
+
+Убедитесь, что автоматическое выставление счетов отключено. Проверьте статус автоматического выставления счетов в учетной записи клиента Stripe.</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace был удален</value>
+  </data>
 </root>

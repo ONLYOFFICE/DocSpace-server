@@ -1048,4 +1048,28 @@
   <data name="FolderExternalLinkUpdated" xml:space="preserve">
     <value>Dossiers [{0}]. Lien externe mis à jour : {1}. Rôle : {2}</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Sauvegarde terminée</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Sauvegarde échouée</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Sauvegarde planifiée terminée</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Sauvegarde planifiée échouée</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Sauvegarde planifiée démarrée</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Plugin supprimé : {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Plugin mis à jour : {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Plugin téléchargé : {0}</value>
+  </data>
 </root>

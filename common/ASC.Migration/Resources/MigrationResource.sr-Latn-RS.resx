@@ -210,4 +210,7 @@
   <data name="СreateRootFolder" xml:space="preserve">
     <value>Kreiraj root folder</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Rezervna kopija je veća nego celokupna veličina portala</value>
+  </data>
 </root>

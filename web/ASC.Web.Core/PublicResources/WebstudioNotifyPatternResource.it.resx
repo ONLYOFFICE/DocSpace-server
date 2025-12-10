@@ -2085,4 +2085,25 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace è stato eliminato.
+
+*Portale:* ${PortalUrl}
+*Proprietario:* ${UserName} ${UserEmail}
+*Cliente:* ${OwnerName}
+
+Assicurati che la fatturazione automatica sia disattivata. Controlla lo stato della fatturazione automatica nell’account Stripe del cliente.</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace è stato eliminato</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Unisciti a ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Sei invitato all'agente DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Backup per il tuo DocSpace non riuscito</value>
+  </data>
 </root>

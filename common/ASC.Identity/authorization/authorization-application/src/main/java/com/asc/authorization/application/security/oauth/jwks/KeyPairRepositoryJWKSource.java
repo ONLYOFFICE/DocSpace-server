@@ -33,6 +33,7 @@ import com.asc.authorization.application.security.authentication.TenantAuthority
 import com.asc.authorization.application.security.oauth.service.KeyPairService;
 import com.asc.authorization.data.key.entity.KeyPair;
 import com.asc.common.core.domain.value.KeyPairType;
+import com.asc.common.utilities.RegionUtils;
 import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSelector;
@@ -45,19 +46,19 @@ import java.security.spec.InvalidKeySpecException;
 import java.time.Duration;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.stereotype.Component;
@@ -74,6 +75,10 @@ import org.springframework.stereotype.Component;
 public class KeyPairRepositoryJWKSource
     implements JWKSource<SecurityContext>, OAuth2TokenCustomizer<JwtEncodingContext> {
 
+  @Value("${spring.application.region}")
+  private String region;
+
+  private final Environment environment;
   private final RegisteredClientConfigurationProperties registeredClientConfiguration;
 
   private final KeyPairMapper keyPairMapper;
@@ -95,6 +100,25 @@ public class KeyPairRepositoryJWKSource
         Duration.ofMinutes(registeredClientConfiguration.getAccessTokenMinutesTTL() * 4L);
     deprecationPeriod =
         Duration.ofMinutes(registeredClientConfiguration.getAccessTokenMinutesTTL());
+  }
+
+  /**
+   * Extracts the region from the authorization code in the JWT encoding context.
+   *
+   * @param context the JWT encoding context
+   * @return the region from the authorization code, or the default configured region if not found
+   */
+  private String getRegionFromContext(JwtEncodingContext context) {
+    if (context.getAuthorization() != null) {
+      var authCodeToken = context.getAuthorization().getToken(OAuth2AuthorizationCode.class);
+      if (authCodeToken != null && authCodeToken.getToken() != null) {
+        var extractedRegion =
+            RegionUtils.extractFromPrefix(authCodeToken.getToken().getTokenValue());
+        if (extractedRegion.isPresent()) return extractedRegion.get();
+      }
+    }
+
+    return region != null ? region.toLowerCase() : "";
   }
 
   /**
@@ -148,7 +172,7 @@ public class KeyPairRepositoryJWKSource
   /**
    * Customizes the JWT encoding context with additional claims and header information.
    *
-   * <p>Includes client ID, tenant details, issuer, and audience claims.
+   * <p>Includes client ID, tenant details, region, issuer, and audience claims.
    *
    * @param context the {@link JwtEncodingContext}.
    */
@@ -176,6 +200,13 @@ public class KeyPairRepositoryJWKSource
           .issuer(String.format("%s/oauth2", tenantAuthority.getAuthority()))
           .claim("tid", tenantAuthority.getTenantId())
           .audience(Collections.singletonList(tenantAuthority.getAuthority()));
+
+    var tokenRegion = getRegionFromContext(context);
+    if (tokenRegion != null
+        && !tokenRegion.isBlank()
+        && Arrays.stream(environment.getActiveProfiles())
+            .anyMatch(profile -> profile.equalsIgnoreCase("saas")))
+      context.getClaims().claim("region", tokenRegion);
 
     context
         .getJwsHeader()
