@@ -1048,4 +1048,28 @@
   <data name="SetWebSearchSettings" xml:space="preserve">
     <value>Настройки веб-поиска сконфигурированы. Движок: {0}</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Резервное копирование завершено</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Резервное копирование не удалось</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Запланированное резервное копирование завершено</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Запланированное резервное копирование не удалось</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Запланированное резервное копирование началось</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Плагин удален: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Плагин обновлен: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Плагин загружен: {0}</value>
+  </data>
 </root>

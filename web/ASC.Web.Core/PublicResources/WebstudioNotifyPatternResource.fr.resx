@@ -2094,4 +2094,13 @@ L'équipe d'assistance de ${LetterLogoText}
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
     <value>La sauvegarde automatique de votre DocSpace a échoué</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace a été supprimé.
+
+*Portail :* ${PortalUrl} 
+*Propriétaire :* ${UserName} ${UserEmail}*
+Client :* ${OwnerName}
+
+Veuillez vous assurer que la facturation automatique est désactivée. Vérifiez le statut de la facturation automatique dans le compte Stripe du client.</value>
+  </data>
 </root>

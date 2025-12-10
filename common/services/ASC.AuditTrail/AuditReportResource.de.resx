@@ -1025,7 +1025,7 @@
     <value>Vektorisierungseinstellungen zurückgesetzt</value>
   </data>
   <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Websucheinstellungen zurückgesetzt </value>
+    <value>Websucheinstellungen zurückgesetzt</value>
   </data>
   <data name="ServerCreated" xml:space="preserve">
     <value>MCP-Server erstellt: {0}</value>
@@ -1047,5 +1047,29 @@
   </data>
   <data name="SetWebSearchSettings" xml:space="preserve">
     <value>Die Websucheinstellungen sind konfiguriert. Suchmaschine: {0}</value>
+  </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Backup abgeschlossen</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Backup fehlgeschlagen</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Geplantes Backup abgeschlossen</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Geplantes Backup fehlgeschlagen</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Geplantes Backup gestartet</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Plugin gelöscht: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Plugin aktualisiert: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Plugin hochgeladen: {0}</value>
   </data>
 </root>

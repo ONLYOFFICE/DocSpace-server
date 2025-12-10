@@ -3310,6 +3310,40 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
+    public async Task DowngradeRoomManagerRoleAsync(Guid user)
+    {
+        var securityDao = daoFactory.GetSecurityDao<string>();
+
+        var shareRercords = await securityDao.GetSharesAsync([user])
+            .Where(r => r.EntryType == FileEntryType.Folder && r.Share == FileShare.RoomManager)
+            .ToListAsync();
+
+        foreach (var shareRercord in shareRercords)
+        {
+            if (int.TryParse(shareRercord.EntryId, out var intEntryId))
+            {
+                await SetAccessAsync(intEntryId);
+            }
+            else
+            {
+                await SetAccessAsync(shareRercord.EntryId);
+            }
+        }
+
+        async Task SetAccessAsync<T>(T entryId)
+        {
+            await SetAceObjectAsync(new AceCollection<T>
+            {
+                Files = [],
+                Folders = [entryId],
+                Aces =
+                [
+                    new AceWrapper { Access = FileShare.ContentCreator, Id = user }
+                ]
+            }, false, socket: false, beforeOwnerChange: true);
+        }
+    }
+
     public async Task<int> GetSharedEntriesCountAsync(Guid user)
     {
         var fileDao = daoFactory.GetFileDao<int>();
