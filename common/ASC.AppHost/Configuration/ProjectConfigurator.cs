@@ -134,7 +134,7 @@ public class ProjectConfigurator(
     {
         var name = Constants.SocketIoContainer;
         var path = Path.Combine("..", "ASC.Socket.IO");
-        var port = Constants.SsoAuthPort;
+        var port = Constants.SocketIoPort;
         
         if (isDocker)
         {
