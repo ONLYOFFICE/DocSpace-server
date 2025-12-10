@@ -757,4 +757,40 @@ public class FolderShareTests(
         sharedFolderAsUser1.Should().NotBeNull();
         sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Read);
     }
+    
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "78968")]
+    public async Task FolderWithShare_SubFolderWithShare_FolderUsesParentPermissions()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        
+        var folder = await CreateFolderInMy("folder", Initializer.Owner);
+        var subFolder = await CreateFolder("subfolder", folder.Id);
+        var subSubFolder = await CreateFolder("subsubfolder", subFolder.Id);
+        
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = user1.Id, Access = FileShare.Read }]
+        };
+        
+        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken);   
+        
+        securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = user1.Id, Access = FileShare.ReadWrite }]
+        };
+        
+        await _sharingApi.SetFolderSecurityInfoAsync(subFolder.Id, securityRequest, TestContext.Current.CancellationToken);
+        
+        //Act
+        await _filesClient.Authenticate(user1);
+        var folderUser = (await _foldersApi.GetFolderInfoAsync(subSubFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        folderUser.Should().NotBeNull();
+        folderUser.Access.Should().Be(FileShare.ReadWrite);
+    }
 }
