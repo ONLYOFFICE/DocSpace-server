@@ -157,6 +157,7 @@ internal class RoomsActionMapper : ILocationActionMapper
                             MessageAction.RoomLogoCreated,
                             MessageAction.RoomLogoDeleted,
                             MessageAction.RoomCreateUser,
+                            MessageAction.RoomChangeOwner,
                             MessageAction.RoomUpdateAccessForUser,
                             MessageAction.RoomRemoveUser,
                             MessageAction.RoomInvitationLinkCreated,
