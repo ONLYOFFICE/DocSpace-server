@@ -2086,7 +2086,12 @@ public class FileSecurity(
                 {
                     return false;
                 }
-                
+
+                if (e.Access != FileShare.Read && e.Access != FileShare.None)
+                {
+                    return true;
+                }
+
                 switch (e.RootFolderType)
                 {                        
                     case FolderType.USER:
@@ -2328,6 +2333,7 @@ public class FileSecurity(
         {
             ace = shares
                 .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
+                .ThenBy(r => r.Level)
                 .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                 .FirstOrDefault();
         }

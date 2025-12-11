@@ -1127,4 +1127,41 @@ public class FileShareTests(
         fileAccessViaFileLink.Security.Edit.Should().BeFalse();
         fileAccessViaFileLink.Access.Should().Be(FileShare.Read);
     }
+    
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "78968")]
+    public async Task FolderWithShare_SubFolderWithShare_FileUsesParentPermissions()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        
+        var folder = await CreateFolderInMy("folder", Initializer.Owner);
+        var subFolder = await CreateFolder("subfolder", folder.Id);
+        var file = await CreateFile("file.docx", subFolder.Id);
+        
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = user1.Id, Access = FileShare.Read }]
+        };
+        
+        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken);   
+        
+        securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = user1.Id, Access = FileShare.ReadWrite }]
+        };
+        
+        await _sharingApi.SetFolderSecurityInfoAsync(subFolder.Id, securityRequest, TestContext.Current.CancellationToken);
+        
+        //Act
+        await _filesClient.Authenticate(user1);
+        var fileUser = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        fileUser.Should().NotBeNull();
+        fileUser.Security.Edit.Should().BeTrue();
+        fileUser.Access.Should().Be(FileShare.ReadWrite);
+    }
 }

@@ -87,11 +87,18 @@ public partial class BackupPortalTask(
                     count += files.Count;
                 }
 
-                var completedCount = await DoBackupModule(WriteOperator, modulesToProcess, count);
+                var completedCount = 0;
+
+                async Task SetProgress()
+                {
+                    await SetCurrentStepProgress((int)(++completedCount * 100 / (double)count));
+                }
+
+                await DoBackupModule(WriteOperator, modulesToProcess, SetProgress);
 
                 if (ProcessStorage)
                 {
-                    await DoBackupStorageAsync(WriteOperator, files, completedCount, count);
+                    await DoBackupStorageAsync(WriteOperator, files, SetProgress);
                 }
             }
         }
@@ -159,7 +166,12 @@ public partial class BackupPortalTask(
 
         if (ProcessStorage)
         {
-            await DoBackupStorageAsync(writer, files, completedCount, count, true);
+            await DoBackupStorageAsync(writer, files, SetProgress, true);
+        }
+
+        async Task SetProgress()
+        {
+            await SetCurrentStepProgress((int)(++completedCount * 100 / (double)count));
         }
     }
 
@@ -522,10 +534,8 @@ public partial class BackupPortalTask(
         return await files.ToListAsync();
     }
 
-    private async Task<int> DoBackupModule(IDataWriteOperator writer, List<IModuleSpecifics> modules, int count)
+    private async Task DoBackupModule(IDataWriteOperator writer, List<IModuleSpecifics> modules, Func<Task> progressAction)
     {
-        var tablesProcessed = 0;
-
         var backupCorrection = await GetBackupCorrection(TenantId);
 
         foreach (var module in modules)
@@ -575,12 +585,7 @@ public partial class BackupPortalTask(
                         data.WriteXml(file, XmlWriteMode.WriteSchema);
                         data.Clear();
 
-                        await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, SetProgress);
-                    }
-
-                    async Task SetProgress()
-                    {
-                        await SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)count));
+                        await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, progressAction);
                     }
 
                     logger.DebugEndSavingTable(table.Name);
@@ -589,19 +594,11 @@ public partial class BackupPortalTask(
 
             logger.DebugEndSavingDataForModule(module.ModuleName);
         }
-        return tablesProcessed;
     }
 
-    private async Task DoBackupStorageAsync(IDataWriteOperator writer, List<BackupFileInfo> files, int completedCount, int count, bool dump = false)
+    private async Task DoBackupStorageAsync(IDataWriteOperator writer, List<BackupFileInfo> files, Func<Task> progressAction, bool dump = false)
     {
         logger.DebugBeginBackupStorage();
-
-        var filesProcessed = completedCount;
-
-        async Task SetProgress()
-        {
-            await SetCurrentStepProgress((int)(++filesProcessed * 100 / (double)count));
-        }
 
         await using var tmpFile = tempStream.Create();
         var bytes = "<storage_restore>"u8.ToArray();
@@ -631,7 +628,7 @@ public partial class BackupPortalTask(
 
             try
             {
-                await writer.WriteEntryAsync(path, file.Domain, file.Path, storage, SetProgress);
+                await writer.WriteEntryAsync(path, file.Domain, file.Path, storage, progressAction);
                 await restoreInfoXml.WriteToAsync(tmpFile);
             }
             catch (FileNotFoundException ex)
