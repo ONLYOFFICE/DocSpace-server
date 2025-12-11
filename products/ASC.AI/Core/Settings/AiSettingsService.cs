@@ -76,7 +76,9 @@ public class AiSettingsService(
         }
     
         await aiSettingsStore.SetWebSearchSettingsAsync(settings);
-        
+
+        settings.NeedReset = false;
+
         if (set)
         {
             messageService.Send(MessageAction.SetWebSearchSettings, type.ToStringFast());
@@ -142,7 +144,9 @@ public class AiSettingsService(
         }
 
         await aiSettingsStore.SetVectorizationSettingsAsync(settings);
-        
+
+        settings.NeedReset = false;
+
         if (set)
         {
             messageService.Send(MessageAction.SetVectorizationSettings, type.ToStringFast());
