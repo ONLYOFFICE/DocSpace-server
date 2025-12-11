@@ -321,11 +321,6 @@ public class FileDtoHelper(
             {
                 result.OriginRoomTitle = result.OriginTitle;
             }
-            else if(result.RootFolderType == FolderType.USER)
-            {
-                result.OriginRoomTitle = FilesUCResource.SharedForMe;
-                
-            }
         }
         
         var currentUserId = authContext.CurrentAccount.ID;
@@ -359,6 +354,11 @@ public class FileDtoHelper(
                         result.FolderId = folderShareAsync;
                     }
 
+                    if (contextFolder is {FolderType: FolderType.Recent}  or { FolderType: FolderType.Favorites })
+                    {
+                        result.OriginRoomTitle = FilesUCResource.SharedForMe;
+                    }
+                    
                     break;
             }
         }
