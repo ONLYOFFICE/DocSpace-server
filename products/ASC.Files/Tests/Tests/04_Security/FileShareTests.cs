@@ -24,8 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Users;
 using ASC.Files.Tests.ApiFactories;
 
+using EmployeeType = DocSpace.API.SDK.Model.EmployeeType;
 using SecurityInfoSimpleRequestDto = DocSpace.API.SDK.Model.SecurityInfoSimpleRequestDto;
 
 namespace ASC.Files.Tests.Tests._04_Security;
@@ -1163,5 +1165,41 @@ public class FileShareTests(
         fileUser.Should().NotBeNull();
         fileUser.Security.Edit.Should().BeTrue();
         fileUser.Access.Should().Be(FileShare.ReadWrite);
+    }
+    
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "78985")]
+    public async Task EveryoneShare_FileWithLink_AnonymousAccess_FileUsesParentPermissions()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        
+        var file = await CreateFileInMy("file.docx", Initializer.Owner);
+        
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = Constants.GroupEveryone.ID, Access = FileShare.ReadWrite }]
+        };
+        
+        await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest, TestContext.Current.CancellationToken);   
+        
+        // Create file link with editing access
+        var fileLink = new FileLinkRequest(access: FileShare.Read);
+
+        var fileLinkResponse = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, fileLink, TestContext.Current.CancellationToken)).Response;
+        var fileSharedTo = fileLinkResponse.SharedLink;
+
+        // Act - Access file through file link
+        await _filesClient.Authenticate(null);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, fileSharedTo.RequestToken);
+        var fileAccessViaFileLink = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        // Assert
+        fileAccessViaFileLink.Should().NotBeNull();
+        fileAccessViaFileLink.Security.Edit.Should().BeFalse();
+        fileAccessViaFileLink.Access.Should().Be(FileShare.Read);
     }
 }
