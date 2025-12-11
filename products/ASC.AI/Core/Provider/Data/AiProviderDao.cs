@@ -161,6 +161,7 @@ public class AiProviderDao(
         });
 
         provider.ModifiedOn = now;
+        provider.NeedReset = false;
         return provider;
     }
     
