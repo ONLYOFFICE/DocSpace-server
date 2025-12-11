@@ -171,4 +171,7 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP сервери нису доступни: {0}. Проверите подешавања везе</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Невъзможно е да се обработят файлове: {0}. Файловете може да са повредени или криптирани</value>
+  </data>
 </root>

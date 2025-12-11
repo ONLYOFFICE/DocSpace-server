@@ -1107,4 +1107,28 @@
   <data name="SetWebSearchSettings" xml:space="preserve">
     <value>Подешене су поставке веб претраге. Пр претраживач: {0}</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Архивирането е завършено</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Архивирането е неуспешно</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Планираното архивиране е завършено</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Планираното архивиране е неуспешно</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Планираното архивиране е стартирано</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Плъгинът е изтрит: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Плъгинът е актуализиран: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Плъгинът е качен: {0}</value>
+  </data>
 </root>

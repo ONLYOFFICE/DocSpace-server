@@ -2152,4 +2152,16 @@ $TrulyYours</value>
 ${LetterLogoText} тим за подршку
 [${__SiteLink}](${__SiteLink})</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace је обрисан</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace е изтрит.
+
+*Портал:* ${PortalUrl}
+*Собственик:* ${UserName} ${UserEmail}
+*Купувач:* ${OwnerName}
+
+Моля, уверете се, че автоматичното фактуриране е изключено. Проверете състоянието на автоматичното плащане в Stripe акаунта на клиента.</value>
+  </data>
 </root>
