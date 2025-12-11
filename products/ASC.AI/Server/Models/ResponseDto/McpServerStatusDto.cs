@@ -33,6 +33,7 @@ public class McpServerStatusDto
     public ServerType ServerType { get; init; }
     public bool Connected { get; init; }
     public Icon? Icon { get; init; }
+    public bool NeedReset { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
