@@ -29,9 +29,9 @@ namespace ASC.Web.Files.Core.Entries;
 [EnumExtensions]
 [JsonConverter(typeof(EncryptionKeyTypeConverter))]
 public enum EncryptionKeyType
-{
-    Sign,
-    Crypt
+{    
+    Crypt,
+    Sign
 }
 
 public class EncryptionKeyTypeConverter : JsonConverter<EncryptionKeyType>
@@ -57,26 +57,6 @@ public class EncryptionKeyTypeConverter : JsonConverter<EncryptionKeyType>
     }
 }
 
-public class EncryptionKeyDto
-{
-    public Guid UserId { get; set; }
-    public string Id { get; set; }
-    public EncryptionKeyType Type { get; set; }
-    public DateTime Date { get; set; }
-    public string Version { get; set; }
-    public string PublicKey { get; set; }
-    public string PrivateKeyEnc { get; set; }
-    public string Salt { get; set; }
-    
-    public string CryptoEngineId => "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}";
-}
-
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class EncryptionKeyMapper
-{
-    public static partial EncryptionKeyDto Map(this EncryptionKeyRequestDto source);
-}
-
 [Scope]
 public class EncryptionKeyPairDtoHelper(
     UserManager userManager,
@@ -100,7 +80,6 @@ public class EncryptionKeyPairDtoHelper(
         foreach (var keyPair in keyPairs)
         {
             keyPair.UserId = userId;
-            keyPair.Date = DateTime.UtcNow;
             
             var index = currentAddressString.FindIndex(r=> r.Id == keyPair.Id);
             if (index > -1)
@@ -182,7 +161,7 @@ public class EncryptionKeyPairDtoHelper(
         return fileKeysPair.ToList();
     }
     
-    public async Task<List<EncryptionKeyDto>> DeleteAsync(string id)
+    public async Task<List<EncryptionKeyDto>> DeleteAsync(Guid id)
     {
         var currentSettings = await GetKeyPairAsync();
         if(currentSettings == null)

@@ -35,34 +35,29 @@ namespace ASC.Api.Documents;
 [ControllerName("privacyroom")]
 public class PrivacyRoomControllerCommon(
     AuthContext authContext,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
-        MessageService messageService)
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
+    MessageService messageService)
     : ControllerBase
 {
+    /// <path>api/2.0/privacyroom/keys</path>
     [HttpPost("keys")]
     public Task<IEnumerable<EncryptionKeyDto>> SetKeysAsync(EncryptionKeyRequestDto inDto)
     {
         return CreateKeysAsync([inDto], false);
     }
     
+    /// <path>api/2.0/privacyroom/keys</path>
     [HttpPut("keys")]
     public Task<IEnumerable<EncryptionKeyDto>> ReplaceKeyAsync(EncryptionKeyRequestDto inDto)
     {
         return CreateKeysAsync([inDto], true);
     }
     
-    /// <summary>
-    /// Returns a key pair for the current user.
-    /// </summary>
-    /// <short>Get encryption keys</short>
-    /// <returns type="ASC.Web.Files.Core.Entries.EncryptionKeyPairDto, ASC.Files.Core">Encryption key pair: private key, public key, user ID</returns>
     /// <path>api/2.0/privacyroom/keys</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
     [HttpGet("keys/filter")]
-    public async Task<EncryptionKeyDto> GetKeysAsync(string id, EncryptionKeyType? type, string version, string publicKey, string privateKeyEnc)
+    public async Task<EncryptionKeyDto> GetKeysAsync(Guid? id, EncryptionKeyType? type, string version, string publicKey, string privateKeyEnc)
     {
         await Demand();
 
@@ -70,9 +65,9 @@ public class PrivacyRoomControllerCommon(
         {
             var result = false;
             
-            if (!string.IsNullOrEmpty(id))
+            if (id.HasValue)
             {
-                if (!r.Id.Equals(id, StringComparison.OrdinalIgnoreCase))
+                if (r.Id != id)
                 {
                     return false;
                 }
@@ -80,25 +75,25 @@ public class PrivacyRoomControllerCommon(
                 result = true;
             }
             
-            if (type.HasValue)
-            {                
-                if (r.Type != type.Value)
-                {
-                    return false;
-                }
-                
-                result = true;
-            }
-            
-            if (!string.IsNullOrEmpty(version))
-            {
-                if (!r.Version.Equals(version, StringComparison.OrdinalIgnoreCase))
-                {
-                    return false;
-                }
-                
-                result = true;
-            }
+            // if (type.HasValue)
+            // {                
+            //     if (r.Type != type.Value)
+            //     {
+            //         return false;
+            //     }
+            //     
+            //     result = true;
+            // }
+            //
+            // if (!string.IsNullOrEmpty(version))
+            // {
+            //     if (!r.Version.Equals(version, StringComparison.OrdinalIgnoreCase))
+            //     {
+            //         return false;
+            //     }
+            //     
+            //     result = true;
+            // }
             
             if (!string.IsNullOrEmpty(publicKey))
             {
@@ -132,22 +127,14 @@ public class PrivacyRoomControllerCommon(
         return await encryptionKeyPairHelper.GetKeyPairAsync();
     }
     
-    [HttpDelete("keys/{id}")]
-    public async Task<IEnumerable<EncryptionKeyDto>> DeleteKeysAsync(string id)
+    [HttpDelete("keys/{id:guid}")]
+    public async Task<IEnumerable<EncryptionKeyDto>> DeleteKeysAsync(Guid id)
     {
         await Demand();
 
         return await encryptionKeyPairHelper.DeleteAsync(id);
     }
     
-    /// <summary>
-    /// Checks if the Private Room settings are enabled or not.
-    /// </summary>
-    /// <short>Check the Private Room settings</short>
-    /// <returns type="System.Boolean, System">Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled</returns>
-    /// <path>api/2.0/privacyroom</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
     [HttpGet]
     public async Task<bool> PrivacyRoomAsync()
     {

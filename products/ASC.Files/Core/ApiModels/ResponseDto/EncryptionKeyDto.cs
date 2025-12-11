@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,12 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-public class EncryptionKeyRequestDto
+public class EncryptionKeyDto
 {
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid UserId { get; set; }
     //public EncryptionKeyType Type { get; set; }
+    public DateTime Date { get; set; } = DateTime.Now;
     //public string Version { get; set; }
     public string PublicKey { get; set; }
     public string PrivateKeyEnc { get; set; }
+    
+    public string CryptoEngineId => "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}";
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class EncryptionKeyMapper
+{
+    public static partial EncryptionKeyDto Map(this EncryptionKeyRequestDto source);
 }
