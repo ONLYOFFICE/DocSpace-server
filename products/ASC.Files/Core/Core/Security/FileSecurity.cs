@@ -3313,7 +3313,10 @@ public class FileSecurity(
             result.Add(new(Constants.GroupAdmin.ID, SubjectOrderType.Group));
         }
 
-        result.Add(new(Constants.GroupEveryone.ID, SubjectOrderType.Group));
+        if (userId != ASC.Core.Configuration.Constants.Guest.ID)
+        {
+            result.Add(new(Constants.GroupEveryone.ID, SubjectOrderType.Group));
+        }
 
         var linkId = await externalShare.GetLinkIdAsync();
         if (linkId != Guid.Empty)
