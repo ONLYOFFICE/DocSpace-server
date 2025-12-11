@@ -133,8 +133,8 @@ public class ProjectConfigurator(
     public ProjectConfigurator AddSocketIO()
     {
         var name = Constants.SocketIoContainer;
-        var path = "../ASC.Socket.IO/";
-        var port = Constants.SsoAuthPort;
+        var path = Path.Combine("..", "ASC.Socket.IO");
+        var port = Constants.SocketIoPort;
         
         if (isDocker)
         {
@@ -167,7 +167,7 @@ public class ProjectConfigurator(
     public ProjectConfigurator AddSsoAuth()
     {
         var name = "asc-ssoAuth";
-        var path = "../ASC.SSoAuth/";
+        var path = Path.Combine("..", "ASC.SSoAuth");
         var port = Constants.SsoAuthPort;
         
         if (isDocker)
@@ -198,7 +198,7 @@ public class ProjectConfigurator(
     public ProjectConfigurator AddWebDav()
     {
         var name = "asc-webDav";
-        var path = "../ASC.WebDav/";
+        var path = Path.Combine("..", "ASC.WebDav");
         var port = Constants.WebDavPort;
         
         if (isDocker)
@@ -223,7 +223,46 @@ public class ProjectConfigurator(
 
         return this;
     }
+    
+    public ProjectConfigurator AddIdentity()
+    {
+        var ascIdentityRegistration = "asc-identity-registration";
+        var ascIdentityAuthorization = "asc-identity-authorization";
+        var path = Path.Combine("..", "ASC.Identity");
+        
+        var registrationBuilder = builder
+            .AddDockerfile(ascIdentityRegistration, path)
+            .WithImageTag("dev")
+            .WithEnvironment("log:dir", "/logs")
+            .WithEnvironment("log:name", "identity.registration")
+            .WithEnvironment("SERVER_PORT", Constants.IdentityRegistrationPort.ToString())
+            .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
+            .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Registration")
+            .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", ascIdentityAuthorization, 9999).ToString())
+            .WithHttpEndpoint(Constants.IdentityRegistrationPort, Constants.IdentityRegistrationPort, isProxied: false)
+            .WithBuildArg("MODULE", "registration/registration-container")
+            .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
+        connectionManager.AddIdentityEnv(registrationBuilder);
+
+        var authorizationBuilder = builder
+            .AddDockerfile(ascIdentityAuthorization, path)
+            .WithImageTag("dev")
+            .WithEnvironment("log:dir", "/logs")
+            .WithEnvironment("log:name", "identity.authorization")
+            .WithEnvironment("SERVER_PORT", Constants.IdentityAuthorizationPort.ToString())
+            .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
+            .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Authorization")
+            .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", ascIdentityRegistration, 8888).ToString())
+            .WithHttpEndpoint(Constants.IdentityAuthorizationPort, Constants.IdentityAuthorizationPort, isProxied: false)
+            .WithBuildArg("MODULE", "authorization/authorization-container")
+            .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+        connectionManager.AddIdentityEnv(authorizationBuilder);
+
+        return this;
+    }
+    
     private void AddBaseBind<T>(IResourceBuilder<T> resourceBuilder) where T : ContainerResource
     {
         resourceBuilder

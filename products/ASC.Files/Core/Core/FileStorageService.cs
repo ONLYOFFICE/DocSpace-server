@@ -3310,6 +3310,40 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
+    public async Task DowngradeRoomManagerRoleAsync(Guid user)
+    {
+        var securityDao = daoFactory.GetSecurityDao<string>();
+
+        var shareRercords = await securityDao.GetSharesAsync([user])
+            .Where(r => r.EntryType == FileEntryType.Folder && r.Share == FileShare.RoomManager)
+            .ToListAsync();
+
+        foreach (var shareRercord in shareRercords)
+        {
+            if (int.TryParse(shareRercord.EntryId, out var intEntryId))
+            {
+                await SetAccessAsync(intEntryId);
+            }
+            else
+            {
+                await SetAccessAsync(shareRercord.EntryId);
+            }
+        }
+
+        async Task SetAccessAsync<T>(T entryId)
+        {
+            await SetAceObjectAsync(new AceCollection<T>
+            {
+                Files = [],
+                Folders = [entryId],
+                Aces =
+                [
+                    new AceWrapper { Access = FileShare.ContentCreator, Id = user }
+                ]
+            }, false, socket: false, beforeOwnerChange: true);
+        }
+    }
+
     public async Task<int> GetSharedEntriesCountAsync(Guid user)
     {
         var fileDao = daoFactory.GetFileDao<int>();
@@ -3981,10 +4015,18 @@ public class FileStorageService //: IFileStorageService
                                     switch (eventType)
                                     {
                                         case EventType.Create:
+                                            if (beforeOwnerChange)
+                                            {
+                                                break;
+                                            }
                                             await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, ace.Access, null, true, name);
                                             await notifyClient.SendInvitedToRoom(folder, user);
                                             break;
                                         case EventType.Remove:
+                                            if (beforeOwnerChange)
+                                            {
+                                                break;
+                                            }
                                             await filesMessageService.SendAsync(MessageAction.RoomRemoveUser, entry, user.Id, name);
                                             break;
                                         case EventType.Update:
@@ -4766,10 +4808,8 @@ public class FileStorageService //: IFileStorageService
 
                     await entryStatusManager.SetIsFavoriteFolderAsync(folder);
                 }
-
-                await filesMessageService.SendAsync(MessageAction.FileChangeOwner, newFolder, [
-                    newFolder.Title, userInfo.DisplayUserName(false, displayUserSettingsHelper)
-                ]);
+                var createByInfo = await userManager.GetUsersAsync(createBy); 
+                await filesMessageService.SendAsync(MessageAction.RoomChangeOwner, newFolder, userInfo.Id.ToString(), userInfo.DisplayUserName(false, displayUserSettingsHelper), createByInfo.Id.ToString(), createByInfo.DisplayUserName(false, displayUserSettingsHelper));
 
                 await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, newFolder);
             }

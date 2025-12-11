@@ -210,4 +210,7 @@
   <data name="СreateRootFolder" xml:space="preserve">
     <value>Hoofdmap aanmaken</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Back-up is groter dan de totale grootte van het portaal</value>
+  </data>
 </root>

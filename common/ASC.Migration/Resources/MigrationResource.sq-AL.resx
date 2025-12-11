@@ -210,4 +210,7 @@
   <data name="СreateRootFolder" xml:space="preserve">
     <value>Krijoni dosje rrënjësore</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Rezervimi është më i madh se madhësia totale e portalit</value>
+  </data>
 </root>

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Aspire.Hosting.Pipelines;
-
 var builder = DistributedApplication.CreateBuilder(args);
 
 var connectionManager = new ConnectionStringManager(builder)
@@ -54,40 +52,10 @@ _ = new ProjectConfigurator(builder, connectionManager, basePath, isDocker)
     .AddProject<ASC_AI_Service>(Constants.AiServicePort)
     .AddSocketIO()
     .AddSsoAuth()
-    .AddWebDav();
+    .AddWebDav()
+    .AddIdentity();
 
-var ascIdentityRegistration = "asc-identity-registration";
-var ascIdentityAuthorization = "asc-identity-authorization";
 
-var registrationBuilder = builder
-    .AddDockerfile(ascIdentityRegistration, "../ASC.Identity/")
-    .WithImageTag("dev")
-    .WithEnvironment("log:dir", "/logs")
-    .WithEnvironment("log:name", "identity.registration")
-    .WithEnvironment("SERVER_PORT", Constants.IdentityRegistrationPort.ToString())
-    .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
-    .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Registration")
-    .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", $"static://{ascIdentityAuthorization}:9999")
-    .WithHttpEndpoint(Constants.IdentityRegistrationPort, Constants.IdentityRegistrationPort, isProxied: false)
-    .WithBuildArg("MODULE", "registration/registration-container")
-    .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
-
-connectionManager.AddIdentityEnv(registrationBuilder);
-
-var authorizationBuilder = builder
-    .AddDockerfile(ascIdentityAuthorization, "../ASC.Identity/")
-    .WithImageTag("dev")
-    .WithEnvironment("log:dir", "/logs")
-    .WithEnvironment("log:name", "identity.authorization")
-    .WithEnvironment("SERVER_PORT", Constants.IdentityAuthorizationPort.ToString())
-    .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
-    .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Authorization")
-    .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", $"static://{ascIdentityRegistration}:8888")
-    .WithHttpEndpoint(Constants.IdentityAuthorizationPort, Constants.IdentityAuthorizationPort, isProxied: false)
-    .WithBuildArg("MODULE", "authorization/authorization-container")
-    .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
-
-connectionManager.AddIdentityEnv(authorizationBuilder);
 
 var clientBasePath = Path.Combine(basePath, "client");
 var installPackages = builder.AddExecutable("asc-install-packages", "pnpm", clientBasePath, "install");

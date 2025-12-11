@@ -210,4 +210,7 @@
   <data name="CreateShareRoom" xml:space="preserve">
     <value>create shared room {0}</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Backup is larger than the total size of the portal</value>
+  </data>
 </root>

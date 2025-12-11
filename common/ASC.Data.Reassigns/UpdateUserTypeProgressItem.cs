@@ -92,6 +92,14 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
             await fileStorageService.ReassignRoomsAsync(User, ToUser);
             await SetPercentageAndCheckCancellationAsync(40, true);
 
+            var currentType = await userManager.GetUserTypeAsync(_userInfo);
+            if (currentType is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin &&
+                _employeeType is EmployeeType.User or EmployeeType.Guest)
+            {
+                await fileStorageService.DowngradeRoomManagerRoleAsync(User);
+                await SetPercentageAndCheckCancellationAsync(45, true);
+            }
+
             if (_employeeType == EmployeeType.Guest)
             {
                 await securityContext.AuthenticateMeWithoutCookieAsync(ToUser);

@@ -210,4 +210,7 @@
   <data name="СreateRootFolder" xml:space="preserve">
     <value>Vytvoriť koreňový priečinok</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Záloha je väčšia ako celková veľkosť portálu</value>
+  </data>
 </root>
