@@ -50,7 +50,7 @@ public static class DbMcpServerSettingsExtensions
             {
                 oauthCredential = await crypto.DecryptAsync(dbMcpServerSettings.OauthCredentials);
             }
-            catch
+            catch (CryptographicException)
             {
                 settings.NeedReset = true;
             }

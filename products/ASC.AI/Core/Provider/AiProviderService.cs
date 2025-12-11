@@ -125,6 +125,18 @@ public class AiProviderService(
         }
     }
 
+    public async Task<bool> NeedResetProvidersAsync()
+    {
+        if (gateway.Configured)
+        {
+            return false;
+        }
+
+        var canDecryptSomeKey = await providerDao.CanDecryptSomeKeyAsync(tenantManager.GetCurrentTenantId());
+
+        return !canDecryptSomeKey;
+    }
+
     public async Task<int> GetProvidersTotalCountAsync()
     {
         if (gateway.Configured)

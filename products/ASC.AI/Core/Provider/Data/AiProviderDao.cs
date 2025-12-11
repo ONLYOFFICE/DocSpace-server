@@ -80,7 +80,7 @@ public class AiProviderDao(
         {
             provider.Key = await crypto.DecryptAsync(provider.Key);
         }
-        catch
+        catch (CryptographicException)
         {
             provider.Key = string.Empty;
             reset = true;
@@ -102,7 +102,7 @@ public class AiProviderDao(
             {
                 provider.Key = await crypto.DecryptAsync(provider.Key);
             }
-            catch
+            catch (CryptographicException)
             {
                 provider.Key = string.Empty;
                 reset = true;
@@ -113,6 +113,28 @@ public class AiProviderDao(
 
             yield return res;
         }
+    }
+
+    public async Task<bool> CanDecryptSomeKeyAsync(int tenantId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var count = 0;
+
+        await foreach (var key in dbContext.GetProviderKeysAsync(tenantId))
+        {
+            try
+            {
+                count++;
+                _ = await crypto.DecryptAsync(key);
+                return true;
+            }
+            catch (CryptographicException)
+            {
+            }
+        }
+
+        return count == 0;
     }
 
     public async Task<int> GetProvidersTotalCountAsync(int tenantId)

@@ -80,7 +80,7 @@ public static class McpServerExtensions
         {
             headersJson = await crypto.DecryptAsync(dbMcpUnit.Server.Headers);
         }
-        catch
+        catch (CryptographicException)
         {
             server.NeedReset = true;
         }

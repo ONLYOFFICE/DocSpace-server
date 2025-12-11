@@ -78,7 +78,7 @@ public static class McpRoomServerExtensions
                 {
                     headersJson = await crypto.DecryptAsync(item.Server.Headers);
                 }
-                catch
+                catch (CryptographicException)
                 {
                     serverConnection.NeedReset = true;
                 }

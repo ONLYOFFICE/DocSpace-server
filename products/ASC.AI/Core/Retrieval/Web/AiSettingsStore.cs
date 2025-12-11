@@ -70,7 +70,7 @@ public class AiSettingsStore(
         {
             jsonConfig = await instanceCrypto.DecryptAsync(webSearchSettingsRaw.Config);
         }
-        catch
+        catch (CryptographicException)
         {
             webSearchSettings.NeedReset = true;
         }
@@ -132,7 +132,7 @@ public class AiSettingsStore(
         {
             key = await instanceCrypto.DecryptAsync(settings.Key);
         }
-        catch
+        catch (CryptographicException)
         {
             reset = true;
         }
