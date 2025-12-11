@@ -171,4 +171,7 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>خوادم MCP غير متوفرة: {0}. التحقق من إعدادات الاتصال</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>لا يمكن معالجة الملفات: {0}. قد تكون الملفات تالفة أو مشفرة</value>
+  </data>
 </root>

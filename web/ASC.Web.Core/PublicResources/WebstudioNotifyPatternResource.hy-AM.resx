@@ -2152,4 +2152,11 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace-ը ջնջվել է։
+
+*Portal:* ${PortalUrl} *Owner:* ${UserName} ${UserEmail} *Customer:* ${OwnerName} 
+
+Խնդրում ենք համոզվել, որ ավտոմատ հաշվառումն անջատված է։ Ստուգեք ավտոմատ հաշվառման կարգավիճակը հաճախորդի Stripe հաշվում։</value>
+  </data>
 </root>

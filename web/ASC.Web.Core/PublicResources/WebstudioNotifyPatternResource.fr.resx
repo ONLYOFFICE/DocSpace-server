@@ -2103,4 +2103,7 @@ Client :* ${OwnerName}
 
 Veuillez vous assurer que la facturation automatique est désactivée. Vérifiez le statut de la facturation automatique dans le compte Stripe du client.</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>DocSpace ${LetterLogoText} a été supprimé</value>
+  </data>
 </root>

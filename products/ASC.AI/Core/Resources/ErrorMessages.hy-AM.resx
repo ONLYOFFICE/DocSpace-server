@@ -171,4 +171,7 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP սերվերները հասանելի չեն՝ {0}: Ստուգեք կապի կարգավորումները</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Հնարավոր չէ մշակել ֆայլերը՝ {0}: Ֆայլերը կարող են վնասված կամ կոդավորված լինել:</value>
+  </data>
 </root>
