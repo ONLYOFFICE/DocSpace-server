@@ -27,10 +27,13 @@
 
 package com.asc.authorization.application.security.oauth.service;
 
+import static com.asc.authorization.application.security.RegionUtils.JWT_REGION_EXTRACTOR;
+
 import com.asc.authorization.application.configuration.properties.SecurityConfigurationProperties;
 import com.asc.authorization.application.exception.authorization.AuthorizationCleanupException;
 import com.asc.authorization.application.exception.authorization.AuthorizationPersistenceException;
 import com.asc.authorization.application.mapper.AuthorizationMapper;
+import com.asc.authorization.application.security.RegionUtils;
 import com.asc.authorization.application.security.authentication.BasicSignature;
 import com.asc.authorization.data.authorization.entity.AuthorizationEntity;
 import com.asc.authorization.data.authorization.repository.JpaAuthorizationRepository;
@@ -38,14 +41,11 @@ import com.asc.authorization.data.consent.repository.JpaConsentRepository;
 import com.asc.common.messaging.configuration.AuthorizationMessagingConfiguration;
 import com.asc.common.service.transfer.message.RetrieveAuthorizationMessage;
 import com.asc.common.service.transfer.message.SaveAuthorizationMessage;
-import com.asc.common.utilities.RegionUtils;
 import com.asc.common.utilities.crypto.EncryptionService;
 import com.asc.common.utilities.crypto.HashingService;
-import com.nimbusds.jwt.SignedJWT;
 import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -86,17 +86,6 @@ public class AuthorizationService
   private String region;
 
   private static final String CLIENT_STATE_COOKIE = "client_state";
-  private static final Function<String, Optional<String>> JWT_REGION_EXTRACTOR =
-      token -> {
-        try {
-          var jwt = SignedJWT.parse(token);
-          var claims = jwt.getJWTClaimsSet();
-          var regionClaim = claims.getStringClaim("region");
-          return Optional.ofNullable(regionClaim).map(String::toLowerCase);
-        } catch (Exception e) {
-          return Optional.empty();
-        }
-      };
 
   private final Environment environment;
 
