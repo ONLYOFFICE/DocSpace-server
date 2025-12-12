@@ -43,21 +43,21 @@ public class PrivacyRoomControllerCommon(
 {
     /// <path>api/2.0/privacyroom/keys</path>
     [HttpPost("keys")]
-    public Task<IEnumerable<EncryptionKeyDto>> SetKeysAsync(EncryptionKeyRequestDto inDto)
+    public Task<IEnumerable<EncryptionKeyDto>> SetKeys(EncryptionKeyRequestDto inDto)
     {
         return CreateKeysAsync([inDto], false);
     }
     
     /// <path>api/2.0/privacyroom/keys</path>
     [HttpPut("keys")]
-    public Task<IEnumerable<EncryptionKeyDto>> ReplaceKeyAsync(EncryptionKeyRequestDto inDto)
+    public Task<IEnumerable<EncryptionKeyDto>> ReplaceKey(EncryptionKeyRequestDto inDto)
     {
         return CreateKeysAsync([inDto], true);
     }
     
     /// <path>api/2.0/privacyroom/keys</path>
     [HttpGet("keys/filter")]
-    public async Task<EncryptionKeyDto> GetKeysAsync(Guid? id, EncryptionKeyType? type, string version, string publicKey, string privateKeyEnc)
+    public async Task<EncryptionKeyDto> GetUserKeysByFilter(Guid? id, EncryptionKeyType? type, string version, string publicKey, string privateKeyEnc)
     {
         await Demand();
 
@@ -120,7 +120,7 @@ public class PrivacyRoomControllerCommon(
     }
     
     [HttpGet("keys")]
-    public async Task<IEnumerable<EncryptionKeyDto>> GetKeysAsync()
+    public async Task<IEnumerable<EncryptionKeyDto>> GetUserKeys()
     {
         await Demand();
 
@@ -128,7 +128,7 @@ public class PrivacyRoomControllerCommon(
     }
     
     [HttpDelete("keys/{id:guid}")]
-    public async Task<IEnumerable<EncryptionKeyDto>> DeleteKeysAsync(Guid id)
+    public async Task<IEnumerable<EncryptionKeyDto>> DeleteKeys(Guid id)
     {
         await Demand();
 
@@ -136,7 +136,7 @@ public class PrivacyRoomControllerCommon(
     }
     
     [HttpGet]
-    public async Task<bool> PrivacyRoomAsync()
+    public async Task<bool> GetPrivacyRoomSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -144,7 +144,7 @@ public class PrivacyRoomControllerCommon(
     }
     
     [HttpPut]
-    public async Task<bool> SetPrivacyRoomAsync(PrivacyRoomEnableRequestDto inDto)
+    public async Task<bool> SetPrivacyRoomSettings(PrivacyRoomEnableRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
