@@ -231,7 +231,7 @@ public class SsoHandlerService
                 else
                 {
                     var authKey = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.Id, MessageAction.LoginSuccessViaSSO);
-                    context.Response.Redirect(_commonLinkUtility.GetDefault(), false);
+                    context.Response.Redirect(_commonLinkUtility.GetDefault() + "?token=" + HttpUtility.UrlEncode(authKey), false);
                 }
 
             }
