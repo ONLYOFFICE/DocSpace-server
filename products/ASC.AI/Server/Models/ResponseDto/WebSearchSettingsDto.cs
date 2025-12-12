@@ -30,6 +30,8 @@ public class WebSearchSettingsDto
 {
     public bool Enabled { get; init; }
     public EngineType Type { get; init; }
+
+    public bool NeedReset { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

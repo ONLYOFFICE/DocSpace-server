@@ -74,10 +74,22 @@ public class AiProviderDao(
         {
             return null;
         }
-        
-        provider.Key = await crypto.DecryptAsync(provider.Key);
 
-        return provider.Map();
+        var reset = false;
+        try
+        {
+            provider.Key = await crypto.DecryptAsync(provider.Key);
+        }
+        catch (CryptographicException)
+        {
+            provider.Key = string.Empty;
+            reset = true;
+        }
+
+        var res = provider.Map();
+        res.NeedReset = reset;
+
+        return res;
     }
     
     public async IAsyncEnumerable<AiProvider> GetProvidersAsync(int tenantId, int offset, int limit)
@@ -85,9 +97,44 @@ public class AiProviderDao(
         var dbContext = await dbContextFactory.CreateDbContextAsync();
         await foreach (var provider in dbContext.GetProvidersAsync(tenantId, offset, limit))
         {
-            provider.Key = await crypto.DecryptAsync(provider.Key);
-            yield return provider.Map();
+            var reset = false;
+            try
+            {
+                provider.Key = await crypto.DecryptAsync(provider.Key);
+            }
+            catch (CryptographicException)
+            {
+                provider.Key = string.Empty;
+                reset = true;
+            }
+
+            var res = provider.Map();
+            res.NeedReset = reset;
+
+            yield return res;
         }
+    }
+
+    public async Task<bool> CanDecryptSomeKeyAsync(int tenantId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var count = 0;
+
+        await foreach (var key in dbContext.GetProviderKeysAsync(tenantId))
+        {
+            try
+            {
+                count++;
+                _ = await crypto.DecryptAsync(key);
+                return true;
+            }
+            catch (CryptographicException)
+            {
+            }
+        }
+
+        return count == 0;
     }
 
     public async Task<int> GetProvidersTotalCountAsync(int tenantId)
@@ -114,6 +161,7 @@ public class AiProviderDao(
         });
 
         provider.ModifiedOn = now;
+        provider.NeedReset = false;
         return provider;
     }
     

@@ -133,7 +133,7 @@ public class AuthorizationServerConfiguration {
     http.securityMatcher(endpointsMatcher)
         .authorizeHttpRequests(
             authorize -> {
-              authorize.requestMatchers("oauth2/introspect").permitAll();
+              authorize.requestMatchers("/oauth2/introspect").permitAll();
               authorize.anyRequest().authenticated();
             })
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))

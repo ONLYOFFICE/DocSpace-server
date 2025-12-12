@@ -36,6 +36,8 @@ public class McpServerDto
     public IDictionary<string, string>? Headers { get; init; }
     public bool Enabled { get; init; }
     public Icon? Icon { get; init; }
+
+    public bool NeedReset { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

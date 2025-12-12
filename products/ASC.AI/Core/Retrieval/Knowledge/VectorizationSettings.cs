@@ -30,4 +30,6 @@ public class VectorizationSettings
 {
     public EmbeddingProviderType Type { get; set; }
     public string? Key { get; set; }
+
+    public bool NeedReset {  get; set; }
 }

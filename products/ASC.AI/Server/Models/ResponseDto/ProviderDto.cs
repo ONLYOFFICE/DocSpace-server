@@ -34,6 +34,8 @@ public class ProviderDto
     public string? Url { get; init; }
     public required ApiDateTime CreatedOn { get; init; }
     public required ApiDateTime ModifiedOn { get; init; }
+
+    public bool NeedReset { get; init; }
 }
 
 [Scope]
