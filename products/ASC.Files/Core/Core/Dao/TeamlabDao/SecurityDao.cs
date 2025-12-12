@@ -70,7 +70,7 @@ internal abstract class SecurityBaseDao<T>(
 
         foreach (var record in records)
         {
-            var (mappedId, _) = (await mapping.MappingIdAsync(record.EntryId));
+            var (mappedId, _) = await mapping.MappingIdAsync(record.EntryId);
             var query = await filesDbContext
                 .ForDeleteShareRecordsAsync(record.TenantId, record.EntryType, record.Subject, mappedId)
                 .ToListAsync();
@@ -353,16 +353,12 @@ internal abstract class SecurityBaseDao<T>(
             {
                 case ShareFilterType.UserOrGroup:
                     {
-                        var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
-                            (security, user) => new { security, user });
-
-                        var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id,
-                            (security, group) => new { security, group });
+                        var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id, (security, user) => new { security, user });
+                        var groupQuery = q.Join(filesDbContext.Groups, s => s.Subject, g => g.Id, (security, group) => new { security, group });
 
                         if (textSearch)
                         {
-                            userQuery = userQuery.Where(r =>
-                                !r.user.Removed && (r.user.FirstName.ToLower().Contains(text) || r.user.LastName.ToLower().Contains(text) || r.user.Email.ToLower().Contains(text)));
+                            userQuery = userQuery.Where(r => !r.user.Removed && (r.user.FirstName.ToLower().Contains(text) || r.user.LastName.ToLower().Contains(text) || r.user.Email.ToLower().Contains(text)));
                             groupQuery = groupQuery.Where(r => r.group.Name.ToLower().Contains(text));
                         }
 
@@ -476,7 +472,7 @@ internal abstract class SecurityBaseDao<T>(
 
             switch (filterType)
             {
-                case ShareFilterType.User when (entry is IFolder folder && DocSpaceHelper.IsRoom(folder.FolderType)):
+                case ShareFilterType.User when entry is IFolder { IsRoom: true }:
                     {
                         var predicate = ShareCompareHelper.GetCompareExpression<SecurityUserRecord>(s => s.Security.Share, entry.RootFolderType);
 
@@ -617,7 +613,7 @@ internal abstract class SecurityBaseDao<T>(
         }
     }
 
-    public async IAsyncEnumerable<GroupInfoWithShared> GetGroupsWithSharedAsync(FileEntry<T> entry, string text, bool excludeShared, int offset, int count)
+    public async IAsyncEnumerable<GroupInfoWithShared> GetGroupsWithSharedAsync(FileEntry<T> entry, string text, bool excludeShared, int offset, int count, IEnumerable<Guid> parentUserIds)
     {
         if (entry == null || count == 0)
         {
@@ -640,7 +636,7 @@ internal abstract class SecurityBaseDao<T>(
             await filesDbContext.Groups.AddAsync(everyoneGroup);
             await filesDbContext.SaveChangesAsync();
 
-            var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext);
+            var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext, parentUserIds);
 
             if (offset > 0)
             {
@@ -665,7 +661,7 @@ internal abstract class SecurityBaseDao<T>(
         }
     }
 
-    public async Task<int> GetGroupsWithSharedCountAsync(FileEntry<T> entry, string text, bool excludeShared)
+    public async Task<int> GetGroupsWithSharedCountAsync(FileEntry<T> entry, string text, bool excludeShared, IEnumerable<Guid> parentUserIds)
     {
         if (entry == null)
         {
@@ -691,7 +687,7 @@ internal abstract class SecurityBaseDao<T>(
 
             var (mappedId, _) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
 
-            var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext);
+            var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext,  parentUserIds);
 
             count = await q.CountAsync();
         });
@@ -712,7 +708,7 @@ internal abstract class SecurityBaseDao<T>(
         return everyoneGroup;
     }
 
-    private IQueryable<GroupWithShared> GetGroupsWithSharedQuery(int tenantId, string entryId, string text, FileEntry entry, bool excludeShared, FilesDbContext filesDbContext)
+    private IQueryable<GroupWithShared> GetGroupsWithSharedQuery(int tenantId, string entryId, string text, FileEntry entry, bool excludeShared, FilesDbContext filesDbContext, IEnumerable<Guid> parentUserIds)
     {
         var q = filesDbContext.Groups.Where(g => g.TenantId == tenantId && !g.Removed);
 
@@ -723,16 +719,16 @@ internal abstract class SecurityBaseDao<T>(
             q = q.Where(g => g.Name.ToLower().Contains(text));
         }
 
-        var q1 = excludeShared
-            ? q.Where(g => !filesDbContext.Security.Any(s => s.TenantId == tenantId && s.EntryType == entry.FileEntryType && s.EntryId == entryId && s.Subject == g.Id))
+        var q1 = excludeShared ? 
+            q.Where(g => !filesDbContext.Security.Any(s => s.TenantId == tenantId && s.EntryType == entry.FileEntryType && s.EntryId == entryId && s.Subject == g.Id) && !parentUserIds.Contains(g.Id))
                 .OrderBy(g => g.Name)
-                .Select(g => new GroupWithShared { Group = g, Shared = false })
-            : from @group in q
+                .Select(g => new GroupWithShared { Group = g, Shared = false }) : 
+            from @group in q
               join security in filesDbContext.Security.Where(s => s.TenantId == tenantId && s.EntryId == entryId && s.EntryType == entry.FileEntryType)
                   on @group.Id equals security.Subject into joinedSet
               from s in joinedSet.DefaultIfEmpty()
               orderby @group.Name
-              select new GroupWithShared { Group = @group, Shared = s != null };
+              select new GroupWithShared { Group = @group, Shared = s != null || parentUserIds.Contains(@group.Id) };
 
         return q1;
     }
@@ -1130,55 +1126,44 @@ internal abstract class SecurityBaseDao<T>(
         var (entryId, _) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         var (_, entryParentId) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.ParentId);
         
-        Expression<Func<DbFilesSecurity, bool>> exp = s => s.TenantId == tenantId && s.EntryId == entryId && s.EntryType == entry.FileEntryType;
+        var q = filesDbContext.Security
+            .Where(s => s.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && s.EntryId == entryId && s.EntryType == Microsoft.EntityFrameworkCore.EF.Constant(entry.FileEntryType));
 
         if (filterType is ShareFilterType.User or ShareFilterType.Group or ShareFilterType.UserOrGroup)
-        {
-            exp = exp.Or(s => !filesDbContext.Security.Any(f => f.TenantId == tenantId && f.EntryId == entryId && f.EntryType == entry.FileEntryType && f.Subject == s.Subject) &&
-                              s.TenantId == tenantId &&
-                              s.EntryType == FileEntryType.Folder &&
-                              filesDbContext.Tree.Where(r => 
-                                      r.FolderId == entryParentId &&
-                                      filesDbContext.Folders.Any(f => 
-                                          f.TenantId == tenantId &&
-                                          f.Id == r.ParentId &&
-                                          f.FolderType != FolderType.AiAgents && f.FolderType != FolderType.VirtualRooms && f.FolderType != FolderType.USER) &&
-                                      filesDbContext.Security.Any(b => b.TenantId == tenantId && b.InternalEntryId == r.ParentId && b.EntryType == FileEntryType.Folder))
-                                  .Any(r=> s.InternalEntryId == r.ParentId)
-                              
-            );
+        { 
+            var q1 = filesDbContext.Security
+                .Where(s => s.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && s.EntryId == entryId && s.EntryType == Microsoft.EntityFrameworkCore.EF.Constant(entry.FileEntryType) ||
+                            !filesDbContext.Security.Any(f => f.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && f.EntryId == entryId && f.EntryType == Microsoft.EntityFrameworkCore.EF.Constant(entry.FileEntryType) && f.Subject == s.Subject) &&
+                            s.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) &&
+                            s.EntryType == FileEntryType.Folder &&
+                            filesDbContext.Tree.Where(r =>
+                                    r.FolderId == Microsoft.EntityFrameworkCore.EF.Constant(entryParentId) &&
+                                    filesDbContext.Folders.Any(f =>
+                                        f.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) &&
+                                        f.Id == r.ParentId &&
+                                        f.FolderType != FolderType.AiAgents && f.FolderType != FolderType.VirtualRooms && f.FolderType != FolderType.USER) &&
+                                    filesDbContext.Security.Any(b => b.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && b.InternalEntryId == r.ParentId && b.EntryType == FileEntryType.Folder))
+                                .OrderBy(r => r.Level)
+                                .Select(r => r.ParentId)
+                                .Contains(s.InternalEntryId))
+                .GroupBy(s => s.Subject)
+                .Select(s => s.OrderBy(r=> r.InternalEntryId).LastOrDefault());
+            
+            q = filesDbContext.Security.FromSqlRaw(q1.ToQueryString());
         }
-        
-        var q = filesDbContext.Security
-            .Where(exp);
-        
-        switch (filterType)
+
+        q = filterType switch
         {
-            case ShareFilterType.UserOrGroup:
-                q = q.Where(s => s.SubjectType == SubjectType.User || s.SubjectType == SubjectType.Group);
-                break;
-            case ShareFilterType.InvitationLink:
-                q = q.Where(s => s.SubjectType == SubjectType.InvitationLink);
-                break;
-            case ShareFilterType.ExternalLink:
-                q = q.Where(s => s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink);
-                break;
-            case ShareFilterType.AdditionalExternalLink:
-                q = q.Where(s => s.SubjectType == SubjectType.ExternalLink);
-                break;
-            case ShareFilterType.PrimaryExternalLink:
-                q = q.Where(s => s.SubjectType == SubjectType.PrimaryExternalLink);
-                break;
-            case ShareFilterType.Link:
-                q = q.Where(s => s.SubjectType == SubjectType.InvitationLink || s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink);
-                break;
-            case ShareFilterType.Group:
-                q = q.Where(s => s.SubjectType == SubjectType.Group);
-                break;
-            case ShareFilterType.User:
-                q = q.Where(s => s.SubjectType == SubjectType.User);
-                break;
-        }
+            ShareFilterType.UserOrGroup => q.Where(s => s.SubjectType == SubjectType.User || s.SubjectType == SubjectType.Group),
+            ShareFilterType.InvitationLink => q.Where(s => s.SubjectType == SubjectType.InvitationLink),
+            ShareFilterType.ExternalLink => q.Where(s => s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink),
+            ShareFilterType.AdditionalExternalLink => q.Where(s => s.SubjectType == SubjectType.ExternalLink),
+            ShareFilterType.PrimaryExternalLink => q.Where(s => s.SubjectType == SubjectType.PrimaryExternalLink),
+            ShareFilterType.Link => q.Where(s => s.SubjectType == SubjectType.InvitationLink || s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink),
+            ShareFilterType.Group => q.Where(s => s.SubjectType == SubjectType.Group),
+            ShareFilterType.User => q.Where(s => s.SubjectType == SubjectType.User),
+            _ => q
+        };
 
         return q;
     }

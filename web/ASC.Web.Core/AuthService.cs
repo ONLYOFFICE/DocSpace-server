@@ -30,7 +30,7 @@ public class AuthService
 {
     public Consumer Consumer { get; set; }
 
-    public string Name { get { return Consumer.Name; } }
+    public string Name => Consumer.Name;
 
     public string Title { get; private set; }
 
@@ -38,11 +38,11 @@ public class AuthService
 
     public string Instruction { get; private set; }
 
-    public bool CanSet { get { return Consumer.CanSet; } }
+    public bool CanSet => Consumer.CanSet;
 
-    public int? Order { get { return Consumer.Order; } }
+    public int? Order => Consumer.Order;
 
-    public bool Paid { get { return Consumer.Paid; } }
+    public bool Paid => Consumer.Paid;
 
     public List<AuthKey> Props { get; private set; }
 

@@ -153,7 +153,7 @@ public class DiscDataStore(
     }
     private bool EnableQuotaCheck(string domain)
     {
-        return (QuotaController != null) && !domain.EndsWith("_temp");
+        return QuotaController != null && !domain.EndsWith("_temp");
     }
 
     public override async Task<Uri> SaveAsync(string domain, string path, Stream stream)
@@ -552,7 +552,7 @@ public class DiscDataStore(
         foreach (var entry in entries)
         {
             var finfo = new FileInfo(entry);
-            if ((DateTime.UtcNow - finfo.CreationTimeUtc) > oldThreshold)
+            if (DateTime.UtcNow - finfo.CreationTimeUtc > oldThreshold)
             {
                 var size = await _crypt.GetFileSizeAsync(entry);
                 File.Delete(entry);

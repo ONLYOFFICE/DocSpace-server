@@ -89,7 +89,7 @@ public class EncryptionOperation : DistributedTaskProgress
         _modules = storageFactoryConfig.GetModuleList(exceptDisabledMigration: true);
         _useProgressFile = Convert.ToBoolean(configuration["storage:encryption:progressfile"] ?? "true");
 
-        StepCount = (_tenants.Count() * _modules.Count()) + 4; // number of calls to the StepDone method
+        StepCount = _tenants.Count() * _modules.Count() + 4; // number of calls to the StepDone method
 
         try
         {

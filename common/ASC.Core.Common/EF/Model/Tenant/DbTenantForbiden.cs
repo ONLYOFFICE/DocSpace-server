@@ -53,36 +53,40 @@ public static class DbTenantForbidenExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbTenantForbiden(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbTenantForbiden>(entity =>
+        public void MySqlAddDbTenantForbiden()
         {
-            entity.HasKey(e => e.Address)
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbTenantForbiden>(entity =>
+            {
+                entity.HasKey(e => e.Address)
+                    .HasName("PRIMARY");
 
-            entity.ToTable("tenants_forbiden")
-                .HasCharSet("utf8");
+                entity.ToTable("tenants_forbiden")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.Address)
-                .HasColumnName("address")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-        });
-    }
-    public static void PgSqlAddDbTenantForbiden(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbTenantForbiden>(entity =>
+                entity.Property(e => e.Address)
+                    .HasColumnName("address")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+            });
+        }
+
+        public void PgSqlAddDbTenantForbiden()
         {
-            entity.HasKey(e => e.Address)
-                .HasName("PK_tenants_forbiden");
+            modelBuilder.Entity<DbTenantForbiden>(entity =>
+            {
+                entity.HasKey(e => e.Address)
+                    .HasName("PK_tenants_forbiden");
 
-            entity.ToTable("tenants_forbiden");
+                entity.ToTable("tenants_forbiden");
 
-            entity.Property(e => e.Address)
-                .HasColumnName("address")
-                .HasColumnType("varchar")
-                .IsRequired();
-        });
+                entity.Property(e => e.Address)
+                    .HasColumnName("address")
+                    .HasColumnType("varchar")
+                    .IsRequired();
+            });
+        }
     }
 }

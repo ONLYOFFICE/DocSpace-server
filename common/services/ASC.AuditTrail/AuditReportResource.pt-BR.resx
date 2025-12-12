@@ -1048,4 +1048,28 @@
   <data name="SetWebSearchSettings" xml:space="preserve">
     <value>As configurações de pesquisa na web foram configuradas. Motor de busca: {0}</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Backup concluído</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Backup falhou</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Backup agendado concluído</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Backup agendado falhou</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Backup agendado iniciado</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Plugin excluído: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Plugin atualizado: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Plugin carregado: {0}</value>
+  </data>
 </root>

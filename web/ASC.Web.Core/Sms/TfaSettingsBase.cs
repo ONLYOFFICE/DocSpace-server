@@ -28,9 +28,9 @@ namespace ASC.Web.Core.Sms;
 
 public abstract class TfaSettingsBase<T> : ISettings<T> where T : ISettings<T>
 {
+    
     [JsonPropertyName("Enable")]
     public bool EnableSetting { get; set; }
-    public abstract Guid ID { get; }
 
     [JsonPropertyName("TrustedIps")]
     public List<string> TrustedIps { get; set; }
@@ -41,6 +41,8 @@ public abstract class TfaSettingsBase<T> : ISettings<T> where T : ISettings<T>
     [JsonPropertyName("MandatoryGroups")]
     public List<Guid> MandatoryGroups { get; set; }
 
+    public static Guid ID { get; }
+    
     public abstract T GetDefault();
 
     public DateTime LastModified { get; set; }
@@ -95,10 +97,7 @@ public abstract class TfaSettingsHelperBase<T>(SettingsManager settingsManager,
         return true;
     }
 
-    public bool IsVisibleSettings
-    {
-        get { return SetupInfo.IsVisibleSettings<T>(); }
-    }
+    public bool IsVisibleSettings => SetupInfo.IsVisibleSettings<T>();
 
     public virtual async Task<bool> GetEnable()
     {

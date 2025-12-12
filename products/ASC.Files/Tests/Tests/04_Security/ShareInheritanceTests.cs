@@ -880,4 +880,32 @@ public class ShareInheritanceTests(
         info.Should().NotBeNull();
         info.Should().HaveCount(3);
     }
+    
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "78848")]
+    public async Task SharedFolder_ShareSubfolder_SubFileUsesParentsRights()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        var user = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        
+        var folder1 = await CreateFolderInMy("folder_1", Initializer.Owner);
+        var folder2 = await CreateFolder("folder_2", folder1.Id);
+        var file = await CreateFile("file.docx", folder2.Id);
+        
+        var securityRequest1 = new SecurityInfoSimpleRequestDto { Share = [new() { ShareTo = user.Id, Access = FileShare.Read }] };
+        await _sharingApi.SetFolderSecurityInfoAsync(folder1.Id, securityRequest1, TestContext.Current.CancellationToken);
+        
+        securityRequest1 = new SecurityInfoSimpleRequestDto  { Share = [new() { ShareTo = user.Id, Access = FileShare.ReadWrite }] };
+        await _sharingApi.SetFolderSecurityInfoAsync(folder2.Id, securityRequest1, TestContext.Current.CancellationToken);
+
+        // Step 5: Authenticate as user
+        await _filesClient.Authenticate(user);
+        
+        var info = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        
+        info.Should().NotBeNull();
+        info.Should().HaveCount(2);
+        info.Should().Contain(r=> r.SharedToUser.Id == user.Id && r.Access == FileShare.ReadWrite);
+    }
 }

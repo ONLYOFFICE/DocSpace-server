@@ -30,10 +30,7 @@ public static class DataExtensions
 {
     public static DbCommand WithTimeout(this DbCommand command, int timeout)
     {
-        if (command != null)
-        {
-            command.CommandTimeout = timeout;
-        }
+        command?.CommandTimeout = timeout;
 
         return command;
     }

@@ -33,6 +33,7 @@ public class McpServerStatus
     public ServerType ServerType { get; init; }
     public bool Connected { get; set; }
     public Icon? Icon { get; init; }
+    public bool NeedReset { get; init; }
 }
 
 public static class McpServerStatusExtensions
@@ -45,7 +46,8 @@ public static class McpServerStatusExtensions
             Name = connection.Name,
             ServerType = connection.ServerType,
             Connected = connection.Connected,
-            Icon = connection.Icon
+            Icon = connection.Icon,
+            NeedReset = connection.NeedReset
         };
 
         return serverStatus;

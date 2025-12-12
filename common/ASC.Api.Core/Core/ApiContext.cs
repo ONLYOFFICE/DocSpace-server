@@ -55,39 +55,42 @@ public class ApiContext(IHttpContextAccessor httpContextAccessor) : ICloneable
 
 public static class QueryExtension
 {
-    public static string[] GetRequestArray(this IQueryCollection query, string key)
+    extension(IQueryCollection query)
     {
-        if (query != null)
+        public string[] GetRequestArray(string key)
         {
-            var values = query[key + "[]"];
-            if (values.Count > 0)
+            if (query != null)
             {
-                return values;
-            }
-
-            values = query[key];
-            if (values.Count > 0)
-            {
-                if (values.Count == 1) //If it's only one element
+                var values = query[key + "[]"];
+                if (values.Count > 0)
                 {
-                    //Try split
-                    if (!string.IsNullOrEmpty(values[0]))
-                    {
-                        return values[0].Split(',');
-                    }
+                    return values;
                 }
 
-                return values;
+                values = query[key];
+                if (values.Count > 0)
+                {
+                    if (values.Count == 1) //If it's only one element
+                    {
+                        //Try split
+                        if (!string.IsNullOrEmpty(values[0]))
+                        {
+                            return values[0].Split(',');
+                        }
+                    }
+
+                    return values;
+                }
             }
+
+            return null;
         }
 
-        return null;
-    }
+        public string GetRequestValue(string key)
+        {
+            var reqArray = query.GetRequestArray(key);
 
-    public static string GetRequestValue(this IQueryCollection query, string key)
-    {
-        var reqArray = query.GetRequestArray(key);
-
-        return reqArray?.FirstOrDefault();
+            return reqArray?.FirstOrDefault();
+        }
     }
 }

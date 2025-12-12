@@ -36,7 +36,7 @@ public class TelegramDao(IDbContextFactory<TelegramDbContext> dbContextFactory)
             PortalUserId = userId,
             TenantId = tenantId,
             TelegramUserId = telegramId,
-            TelegramUsername = telegramUsername,
+            TelegramUsername = telegramUsername
         };
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();

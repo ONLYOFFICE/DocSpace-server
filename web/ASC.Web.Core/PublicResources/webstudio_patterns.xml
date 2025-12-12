@@ -153,6 +153,12 @@
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_portal_delete_success_v1|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
+  <!-- portal_deleted_to_support -->
+  <pattern id="portal_deleted_to_support" sender="email.sender">
+    <subject resource="|subject_portal_deleted_to_support|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_portal_deleted_to_support|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
   <!-- profile_delete -->
   <pattern id="profile_delete">
     <subject resource="|subject_profile_delete|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />

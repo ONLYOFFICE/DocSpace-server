@@ -54,85 +54,89 @@ public static class AccountLinksExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddAccountLinks(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AccountLinks>(entity =>
+        public void MySqlAddAccountLinks()
         {
-            entity.HasKey(e => new { e.Id, e.UId })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<AccountLinks>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.UId })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("account_links")
-                .HasCharSet("utf8");
+                entity.ToTable("account_links")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.UId)
-                .HasDatabaseName("uid");
+                entity.HasIndex(e => e.UId)
+                    .HasDatabaseName("uid");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.UId)
-                .HasColumnName("uid")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.UId)
+                    .HasColumnName("uid")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Linked)
-                .HasColumnName("linked")
-                .HasColumnType("datetime");
+                entity.Property(e => e.Linked)
+                    .HasColumnName("linked")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.Profile)
-                .IsRequired()
-                .HasColumnName("profile")
-                .HasColumnType("text")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Profile)
+                    .IsRequired()
+                    .HasColumnName("profile")
+                    .HasColumnType("text")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Provider)
-                .HasColumnName("provider")
-                .HasColumnType("char")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-        });
-    }
-    public static void PgSqlAddAccountLinks(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<AccountLinks>(entity =>
+                entity.Property(e => e.Provider)
+                    .HasColumnName("provider")
+                    .HasColumnType("char")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+            });
+        }
+
+        public void PgSqlAddAccountLinks()
         {
-            entity.HasKey(e => new { e.Id, e.UId })
-                .HasName("PK_account_links");
+            modelBuilder.Entity<AccountLinks>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.UId })
+                    .HasName("PK_account_links");
 
-            entity.ToTable("account_links");
+                entity.ToTable("account_links");
 
-            entity.HasIndex(e => e.UId)
-                .HasDatabaseName("ix_account_links_uid");
+                entity.HasIndex(e => e.UId)
+                    .HasDatabaseName("ix_account_links_uid");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasColumnType("varchar")
-                .HasMaxLength(200);
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("varchar")
+                    .HasMaxLength(200);
 
-            entity.Property(e => e.UId)
-                .HasColumnName("uid")
-                .HasColumnType("varchar")
-                .HasMaxLength(200);
+                entity.Property(e => e.UId)
+                    .HasColumnName("uid")
+                    .HasColumnType("varchar")
+                    .HasMaxLength(200);
 
-            entity.Property(e => e.Linked)
-                .HasColumnName("linked")
-                .HasColumnType("timestamp with time zone");
+                entity.Property(e => e.Linked)
+                    .HasColumnName("linked")
+                    .HasColumnType("timestamp with time zone");
 
-            entity.Property(e => e.Profile)
-                .IsRequired()
-                .HasColumnName("profile")
-                .HasColumnType("text");
+                entity.Property(e => e.Profile)
+                    .IsRequired()
+                    .HasColumnName("profile")
+                    .HasColumnType("text");
 
-            entity.Property(e => e.Provider)
-                .HasColumnName("provider")
-                .HasColumnType("char")
-                .HasMaxLength(60);
-        });
+                entity.Property(e => e.Provider)
+                    .HasColumnName("provider")
+                    .HasColumnType("char")
+                    .HasMaxLength(60);
+            });
 
+        }
     }
 }

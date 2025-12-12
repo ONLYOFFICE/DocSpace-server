@@ -30,7 +30,7 @@ public abstract class RadicaleEntity(IConfiguration configuration, InstanceCrypt
 {
     public string Uid { get; set; }
 
-    protected readonly string _defaultRadicaleUrl = (configuration["radicale:path"] != null) ? configuration["radicale:path"] : "http://localhost:5232";
+    protected readonly string _defaultRadicaleUrl = configuration["radicale:path"] != null ? configuration["radicale:path"] : "http://localhost:5232";
     protected const string DefaultAddBookName = "11111111-1111-1111-1111-111111111111";
     protected const string ReadonlyAddBookName = "11111111-1111-1111-1111-111111111111-readonly";
 
@@ -38,19 +38,19 @@ public abstract class RadicaleEntity(IConfiguration configuration, InstanceCrypt
     {
         string requestUrl;
         var currentUserName = url.StartsWith("http") ? email.ToLower() + "@" + new Uri(url).Host : email.ToLower() + "@" + url;
-        var protocolType = (!isCardDav) ? "/caldav/" : "/carddav/";
+        var protocolType = !isCardDav ? "/caldav/" : "/carddav/";
         var serverUrl = isRedirectUrl ? new Uri(url).Scheme + "://" + new Uri(url).Host + protocolType :
             _defaultRadicaleUrl;
         if (isCardDav)
         {
             var addbookId = isReadonly ? ReadonlyAddBookName : DefaultAddBookName;
-            requestUrl = (itemID != "") ? _defaultRadicaleUrl + "/" + HttpUtility.UrlEncode(currentUserName) + "/" + addbookId + "/" + itemID + ".vcf" :
-                (isRedirectUrl) ? serverUrl + HttpUtility.UrlEncode(currentUserName) + "/" + addbookId :
+            requestUrl = itemID != "" ? _defaultRadicaleUrl + "/" + HttpUtility.UrlEncode(currentUserName) + "/" + addbookId + "/" + itemID + ".vcf" :
+                isRedirectUrl ? serverUrl + HttpUtility.UrlEncode(currentUserName) + "/" + addbookId :
                 _defaultRadicaleUrl + "/" + HttpUtility.UrlEncode(currentUserName) + "/" + addbookId;
         }
         else
         {
-            requestUrl = (itemID != "") ? serverUrl + HttpUtility.UrlEncode(currentUserName) + "/" + entityId + (isReadonly ? "-readonly" : "") +
+            requestUrl = itemID != "" ? serverUrl + HttpUtility.UrlEncode(currentUserName) + "/" + entityId + (isReadonly ? "-readonly" : "") +
                                         "/" + HttpUtility.UrlEncode(itemID) + ".ics" :
                                         serverUrl + HttpUtility.UrlEncode(currentUserName) + "/" + entityId + (isReadonly ? "-readonly" : "");
         }

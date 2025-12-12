@@ -383,7 +383,7 @@ public sealed class UserManagerWrapper(
 
             var @event = await auditEventsRepository.GetByFilterAsync(action: MessageAction.SendJoinInvite, target: userInfo.Email);
             var createBy = @event.LastOrDefault()?.UserId;
-            var link = commonLinkUtility.GetInvitationLink(userInfo.Email, type, createBy ?? (tenantManager.GetCurrentTenant()).OwnerId, userInfo.GetCulture()?.Name);
+            var link = commonLinkUtility.GetInvitationLink(userInfo.Email, type, createBy ?? tenantManager.GetCurrentTenant().OwnerId, userInfo.GetCulture()?.Name);
             var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
             await studioNotifyService.SendDocSpaceRegistration(userInfo.Email, shortenLink);

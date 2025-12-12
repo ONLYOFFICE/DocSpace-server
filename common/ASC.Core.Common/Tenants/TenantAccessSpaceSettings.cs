@@ -32,11 +32,7 @@ public class TenantAccessSpaceSettings : ISettings<TenantAccessSpaceSettings>
 {
     public bool LimitedAccessSpace { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{880585C4-52CD-4AE2-8DA4-3B8E2772753B}"); }
-    }
+    public static Guid ID => new("{880585C4-52CD-4AE2-8DA4-3B8E2772753B}");
 
     public TenantAccessSpaceSettings GetDefault()
     {

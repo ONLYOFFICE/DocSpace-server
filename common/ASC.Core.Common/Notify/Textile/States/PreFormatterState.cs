@@ -36,11 +36,11 @@ public class PreFormatterState(TextileFormatter f) : FormatterState(f)
     {
         if (!Regex.IsMatch(input, "</pre>"))
         {
-            this.Formatter.ChangeState(this);
+            Formatter.ChangeState(this);
         }
         else
         {
-            this.Formatter.ChangeState(new PassthroughFormatterState(this.Formatter));
+            Formatter.ChangeState(new PassthroughFormatterState(Formatter));
         }
         return input;
     }
@@ -99,8 +99,5 @@ public class PreFormatterState(TextileFormatter f) : FormatterState(f)
         return Regex.IsMatch(input, @"^\s*<code");
     }
 
-    public override Type FallbackFormattingState
-    {
-        get { return null; }
-    }
+    public override Type FallbackFormattingState => null;
 }

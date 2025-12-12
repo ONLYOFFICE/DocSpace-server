@@ -218,6 +218,7 @@ public abstract partial class ExportTask<T>(IServiceScopeFactory serviceScopeFac
     {
         public Folder<TFolder>? Folder { get; private set; }
         public File<TFolder>? Result { get; private set; }
+        public string? Error { get; private set; }
 
         public override async Task GetFolder()
         {
@@ -247,12 +248,19 @@ public abstract partial class ExportTask<T>(IServiceScopeFactory serviceScopeFac
 
         public override async Task SaveFile(FileConverter fileConverter, string fileUri, string fileType, string title, bool updateIfExists)
         {
-            Result = await fileConverter.SaveConvertedFileAsync(Folder, fileUri, fileType, title, updateIfExists);
+            try
+            {
+                Result = await fileConverter.SaveConvertedFileAsync(Folder, fileUri, fileType, title, updateIfExists);
+            }
+            catch (Exception ex)
+            {
+                Error = ex.Message;
+            }
         }
 
         public override async Task NotifySocket(ChatSocketClient chatSocketClient, Guid chatId)
         {
-            await chatSocketClient.ExportCompleted(chatId, Result);
+            await chatSocketClient.ExportCompleted(chatId, Result, Error);
         }
     }
 

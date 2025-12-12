@@ -112,7 +112,7 @@ public class MessageFactory(
                 Action = action,
                 Active = true,
                 Initiator = initiator,
-                Description = description?.Select(s => s ?? "").ToArray(),
+                Description = description?.Select(s => s ?? "").ToArray()
             };
 
             if (request != null)

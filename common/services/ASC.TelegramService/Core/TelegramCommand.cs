@@ -31,6 +31,6 @@ public class TelegramCommand(Message msg, string cmdName, string[] args = null)
     public string CommandName { get; private set; } = cmdName;
     public string[] Args { get; private set; } = args;
     public Message Message { get; private set; } = msg;
-    public User User { get { return Message.From; } }
-    public Chat Chat { get { return Message.Chat; } }
+    public User User => Message.From;
+    public Chat Chat => Message.Chat;
 }

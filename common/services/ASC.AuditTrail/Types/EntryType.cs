@@ -54,5 +54,5 @@ public enum EntryType
     Tag = 26,
     
     [SwaggerEnum("Agent")]
-    Agent = 27,
+    Agent = 27
 }

@@ -84,13 +84,13 @@ internal static class OpenSearchVectorMapper
     
     private static bool IsVectorPropertyTypeValid(Type type)
     {
-        return (type == typeof(ReadOnlyMemory<float>)) ||
-               (type == typeof(ReadOnlyMemory<float>?)) ||
-               (type == typeof(IEnumerable<float>)) ||
-               (type == typeof(IReadOnlyCollection<float>)) ||
-               (type == typeof(ICollection<float>)) ||
-               (type == typeof(IReadOnlyList<float>)) ||
-               (type == typeof(IList<float>)) ||
-               (type == typeof(float[]));
+        return type == typeof(ReadOnlyMemory<float>) ||
+               type == typeof(ReadOnlyMemory<float>?) ||
+               type == typeof(IEnumerable<float>) ||
+               type == typeof(IReadOnlyCollection<float>) ||
+               type == typeof(ICollection<float>) ||
+               type == typeof(IReadOnlyList<float>) ||
+               type == typeof(IList<float>) ||
+               type == typeof(float[]);
     }
 }

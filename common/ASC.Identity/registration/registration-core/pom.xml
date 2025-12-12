@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.asc</groupId>
         <artifactId>registration</artifactId>
-        <version>1.0.2</version>
+        <version>1.0.3</version>
     </parent>
 
     <artifactId>registration-core</artifactId>

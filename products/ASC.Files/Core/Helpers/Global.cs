@@ -170,18 +170,17 @@ public partial class Global(
         }
     }
 
-    private List<string> _imageThumbnailExtension;
     public List<string> ImageThumbnailExtension
     {
         get
         {
-            if (_imageThumbnailExtension != null)
+            if (field != null)
             {
-                return _imageThumbnailExtension;
+                return field;
             }
 
-            _imageThumbnailExtension = configuration.GetSection("files:thumbnail:img-exts").Get<List<string>>() ?? [".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tif", ".tga", ".webp", ".heic"];
-            return _imageThumbnailExtension;
+            field = configuration.GetSection("files:thumbnail:img-exts").Get<List<string>>() ?? [".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tif", ".tga", ".webp", ".heic"];
+            return field;
         }
     }
 
@@ -681,7 +680,7 @@ public class GlobalFolder(
             return id;
         }
 
-        var cacheKey = $"trash/{(tenantManager.GetCurrentTenant()).Id}/{authContext.CurrentAccount.ID}";
+        var cacheKey = $"trash/{tenantManager.GetCurrentTenant().Id}/{authContext.CurrentAccount.ID}";
         if (!TrashFolderCache.TryGetValue(cacheKey, out var trashFolderId))
         {
             id = authContext.IsAuthenticated ? await daoFactory.GetFolderDao<int>().GetFolderIDTrashAsync(true) : 0;
@@ -745,7 +744,7 @@ public class GlobalFolder(
             await securityContext.AuthenticateMeWithoutCookieAsync(userId);
 
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
-            var culture = my ? (await userManager.GetUsersAsync(userId)).GetCulture() : (tenantManager.GetCurrentTenant()).GetCulture();
+            var culture = my ? (await userManager.GetUsersAsync(userId)).GetCulture() : tenantManager.GetCurrentTenant().GetCulture();
 
             var globalStore = scope.ServiceProvider.GetRequiredService<GlobalStore>();
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
@@ -918,9 +917,5 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     {
         globalFolder.SetFolderTrashAsync(value);
     }
-    public ValueTask<int> FolderTrashAsync
-    {
-        get => globalFolder.GetFolderTrashAsync(daoFactory);
-    }
-
+    public ValueTask<int> FolderTrashAsync => globalFolder.GetFolderTrashAsync(daoFactory);
 }

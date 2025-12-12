@@ -28,8 +28,7 @@ namespace ASC.Web.Core.Users;
 
 public class DisplayUserSettings : ISettings<DisplayUserSettings>
 {
-    [JsonIgnore]
-    public Guid ID => new("2EF59652-E1A7-4814-BF71-FEB990149428");
+    public static Guid ID => new("2EF59652-E1A7-4814-BF71-FEB990149428");
 
     public bool IsDisableGettingStarted { get; set; }
 

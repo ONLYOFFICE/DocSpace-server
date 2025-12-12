@@ -2682,4 +2682,16 @@ $TrulyYours</value>
   <data name="ButtonJoinAgent" xml:space="preserve">
     <value>Join agent</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace has been deleted.
+
+*Portal:* ${PortalUrl}
+*Owner:* ${UserName} ${UserEmail} 
+*Customer:* ${OwnerName}
+
+Please make sure that automatic billing is turned off. Check the status of automatic billing in the customer Stripe account.</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace has been deleted</value>
+  </data>
 </root>

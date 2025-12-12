@@ -29,7 +29,6 @@ namespace ASC.Core.Tenants;
 [Scope]
 public class TenantUtil(TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
 {
-    private TimeZoneInfo _timeZoneInfo;
     private string _timeZoneName;
 
     public TimeZoneInfo TimeZoneInfo
@@ -37,12 +36,12 @@ public class TenantUtil(TenantManager tenantManager, TimeZoneConverter timeZoneC
         get
         {
             var tenantTimeZone = tenantManager.GetCurrentTenant().TimeZone;
-            if (_timeZoneInfo == null || _timeZoneName != tenantTimeZone)
+            if (field == null || _timeZoneName != tenantTimeZone)
             {
                 _timeZoneName = tenantTimeZone;
-                _timeZoneInfo = timeZoneConverter.GetTimeZone(tenantTimeZone);
+                field = timeZoneConverter.GetTimeZone(tenantTimeZone);
             }
-            return _timeZoneInfo;
+            return field;
         }
     }
 

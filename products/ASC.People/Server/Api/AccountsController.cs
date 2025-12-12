@@ -146,7 +146,7 @@ public class AccountsController<T>(
         }
 
 
-        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false);
+        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false, parentUserIds);
         var totalUsers = await securityDao.GetUsersWithSharedCountAsync(fileEntry,
             text,
             inDto.EmployeeStatus,
@@ -167,7 +167,7 @@ public class AccountsController<T>(
 
         var groupsCount = 0;
 
-        await foreach (var item in securityDao.GetGroupsWithSharedAsync(fileEntry, text, inDto.ExcludeShared ?? false, offset, count))
+        await foreach (var item in securityDao.GetGroupsWithSharedAsync(fileEntry, text, inDto.ExcludeShared ?? false, offset, count, parentUserIds))
         {
             groupsCount++;
             yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);

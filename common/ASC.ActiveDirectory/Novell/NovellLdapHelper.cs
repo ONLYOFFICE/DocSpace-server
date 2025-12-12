@@ -44,10 +44,7 @@ public class NovellLdapHelper(IServiceProvider serviceProvider, ILogger<LdapHelp
         base.Init(settings);
     }
 
-    public override bool IsConnected
-    {
-        get { return novellLdapSearcher.IsConnected; }
-    }
+    public override bool IsConnected => novellLdapSearcher.IsConnected;
 
     public override void Connect()
     {

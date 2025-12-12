@@ -36,11 +36,10 @@ public class ThumbnailSettings
 
     #region worker settings
 
-    private string _serverRoot;
     public string ServerRoot
     {
-        get => _serverRoot ?? "http://localhost/";
-        set => _serverRoot = value;
+        get => field ?? "http://localhost/";
+        set;
     }
 
     #endregion
@@ -48,41 +47,37 @@ public class ThumbnailSettings
 
     #region data privider settings
 
-    private string _connectionStringName;
     public string ConnectionStringName
     {
-        get => _connectionStringName ?? "default";
-        set => _connectionStringName = value;
+        get => field ?? "default";
+        set;
     }
 
-    private string _formats;
     public string Formats
     {
-        get => _formats ?? ".dps|.dpt|.fodp|.odp|.otp|.pot|.potm|.potx|.pps|.ppsm|.ppsx|.ppt|.pptm|.pptx|.sxi|.csv|.et|.ett|.fods|.ods|.ots|.sxc|.xls|.xlsb|.xlsm|.xlsx|.xlt|.xltm|.xltx|.xml|.djvu|.doc|.docm|.docx|.docxf|.oform|.dot|.dotm|.dotx|.epub|.fb2|.fodt|.htm|.html|.mht|.mhtml|.odt|.ott|.oxps|.pdf|.rtf|.stw|.sxw|.txt|.wps|.wpt|.xml|.xps";
-        set => _formats = value;
+        get => field ?? ".dps|.dpt|.fodp|.odp|.otp|.pot|.potm|.potx|.pps|.ppsm|.ppsx|.ppt|.pptm|.pptx|.sxi|.csv|.et|.ett|.fods|.ods|.ots|.sxc|.xls|.xlsb|.xlsm|.xlsx|.xlt|.xltm|.xltx|.xml|.djvu|.doc|.docm|.docx|.docxf|.oform|.dot|.dotm|.dotx|.epub|.fb2|.fodt|.htm|.html|.mht|.mhtml|.odt|.ott|.oxps|.pdf|.rtf|.stw|.sxw|.txt|.wps|.wpt|.xml|.xps";
+        set;
     }
 
-    private string[] _formatsArray;
     public string[] FormatsArray
     {
         get
         {
-            if (_formatsArray != null)
+            if (field != null)
             {
-                return _formatsArray;
+                return field;
             }
 
-            _formatsArray = (Formats ?? "").Split(['|', ','], StringSplitOptions.RemoveEmptyEntries);
+            field = (Formats ?? "").Split(['|', ','], StringSplitOptions.RemoveEmptyEntries);
 
-            return _formatsArray;
+            return field;
         }
     }
 
-    private int _sqlMaxResults;
     public int SqlMaxResults
     {
-        get => _sqlMaxResults != 0 ? _sqlMaxResults : 1000;
-        set => _sqlMaxResults = value;
+        get => field != 0 ? field : 1000;
+        set;
     }
 
     #endregion
@@ -90,40 +85,35 @@ public class ThumbnailSettings
 
     #region thumbnails generator settings
 
-    private int _maxDegreeOfParallelism;
     public int MaxDegreeOfParallelism
     {
-        get => _maxDegreeOfParallelism != 0 ? _maxDegreeOfParallelism : 1;
-        set => _maxDegreeOfParallelism = value;
+        get => field != 0 ? field : 1;
+        set;
     }
 
-    private long? _maxImageFileSize;
     public long? MaxImageFileSize
     {
-        get => _maxImageFileSize ?? 30L * 1024L * 1024L;
-        set => _maxImageFileSize = value;
+        get => field ?? 30L * 1024L * 1024L;
+        set;
     }
 
-    private long? _maxVideoFileSize;
     public long? MaxVideoFileSize
     {
-        get => _maxVideoFileSize ?? 1000L * 1024L * 1024L;
-        set => _maxVideoFileSize = value;
+        get => field ?? 1000L * 1024L * 1024L;
+        set;
     }
 
 
-    private int? _attemptsLimit;
     public int? AttemptsLimit
     {
-        get => _attemptsLimit ?? 3;
-        set => _attemptsLimit = value;
+        get => field ?? 3;
+        set;
     }
 
-    private int _attemptWaitInterval;
     public int AttemptWaitInterval
     {
-        get => _attemptWaitInterval != 0 ? _attemptWaitInterval : 1000;
-        set => _attemptWaitInterval = value;
+        get => field != 0 ? field : 1000;
+        set;
     }
 
     public IEnumerable<ThumbnailSize> Sizes { get; set; }

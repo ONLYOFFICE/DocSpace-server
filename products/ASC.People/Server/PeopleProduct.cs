@@ -41,7 +41,7 @@ public class PeopleProduct : Product
     public override string HelpURL => string.Concat(ProductPath, "help.aspx");
     public override string ProductClassName => "people";
     public override string ApiURL => "api/2.0/people/info.json";
-    public override bool IsPrimary { get => false; }
+    public override bool IsPrimary => false;
 
     public override void Init()
     {

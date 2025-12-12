@@ -187,7 +187,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
         var user = userManager.GetUsers(activityInfo.UserId);
 
-        var date = activityInfo.Data.ConvertNumerals("t");
+        var date = activityInfo.Date.ConvertNumerals("t");
         var userName = user.DisplayUserName(displayUserSettingsHelper);
         var userRole = activityInfo.UserRole;
         var fileUrl = activityInfo.FileUrl;
@@ -360,7 +360,7 @@ public class ActivityInfo
 {
     public Guid UserId { get; init; }
     public MessageAction Action { get; init; }
-    public DateTime Data { get; init; }
+    public DateTime Date { get; init; }
     public string FileTitle { get; set; }
     public string FileUrl { get; set; }
     public string RoomUri { get; set; }

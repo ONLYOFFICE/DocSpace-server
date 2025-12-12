@@ -286,6 +286,13 @@ public class EmailValidationKeyModelHelper(
                         checkKeyResult = ValidationResult.Invalid;
                         break;
                     }
+
+                    var userType = await userManager.GetUserTypeAsync(user);
+                    if (userType is not (EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin))
+                    {
+                        checkKeyResult = ValidationResult.Invalid;
+                        break;
+                    }
                 }
 
                 checkKeyResult = provider.ValidateEmailKey(email + type + uiD + userInfo.Id, key, provider.ValidEmailKeyInterval);
@@ -300,7 +307,7 @@ public class EmailValidationKeyModelHelper(
 
         async Task<bool> CheckOwnerRights(string email)
         {
-            var ownerId = (tenantManager.GetCurrentTenant()).OwnerId;
+            var ownerId = tenantManager.GetCurrentTenant().OwnerId;
             var user = await userManager.GetUserByEmailAsync(email);
             return ownerId.Equals(user.Id);
         }

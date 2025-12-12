@@ -58,80 +58,84 @@ public static class DbQuotaRowExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbQuotaRow(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbQuotaRow>(entity =>
+        public void MySqlAddDbQuotaRow()
         {
-            entity.HasKey(e => new { e.TenantId, e.UserId, e.Path })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbQuotaRow>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.UserId, e.Path })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("tenants_quotarow")
-                .HasCharSet("utf8");
+                entity.ToTable("tenants_quotarow")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.LastModified)
-                .HasDatabaseName("last_modified");
+                entity.HasIndex(e => e.LastModified)
+                    .HasDatabaseName("last_modified");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
 
-            entity.Property(e => e.Path)
-                .HasColumnName("path")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Path)
+                    .HasColumnName("path")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Counter)
-                .HasColumnName("counter")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.Counter)
+                    .HasColumnName("counter")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("timestamp");
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("timestamp");
 
-            entity.Property(e => e.Tag)
-                .HasColumnName("tag")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Tag)
+                    .HasColumnName("tag")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.UserId)
-                .HasColumnName("user_id")
-                .HasColumnType("char(36)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-        });
-    }
-    public static void PgSqlAddDbQuotaRow(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbQuotaRow>(entity =>
+                entity.Property(e => e.UserId)
+                    .HasColumnName("user_id")
+                    .HasColumnType("char(36)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+            });
+        }
+
+        public void PgSqlAddDbQuotaRow()
         {
-            entity.HasKey(e => new { e.TenantId, e.UserId, e.Path });
+            modelBuilder.Entity<DbQuotaRow>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.UserId, e.Path });
 
-            entity.ToTable("tenants_quotarow");
+                entity.ToTable("tenants_quotarow");
 
-            entity.HasIndex(e => e.LastModified)
-                .HasDatabaseName("last_modified");
+                entity.HasIndex(e => e.LastModified)
+                    .HasDatabaseName("last_modified");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
 
-            entity.Property(e => e.Path)
-                .HasColumnName("path")
-                .HasColumnType("varchar(255)");
+                entity.Property(e => e.Path)
+                    .HasColumnName("path")
+                    .HasColumnType("varchar(255)");
 
-            entity.Property(e => e.Counter)
-                .HasColumnName("counter")
-                .HasDefaultValueSql("0");
+                entity.Property(e => e.Counter)
+                    .HasColumnName("counter")
+                    .HasDefaultValueSql("0");
 
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.Tag)
-                .HasColumnName("tag")
-                .HasColumnType("varchar(1024)");
+                entity.Property(e => e.Tag)
+                    .HasColumnName("tag")
+                    .HasColumnType("varchar(1024)");
 
-            entity.Property(e => e.UserId)
-                .HasColumnName("user_id")
-                .HasColumnType("uuid");
-        });
+                entity.Property(e => e.UserId)
+                    .HasColumnName("user_id")
+                    .HasColumnType("uuid");
+            });
+        }
     }
 }

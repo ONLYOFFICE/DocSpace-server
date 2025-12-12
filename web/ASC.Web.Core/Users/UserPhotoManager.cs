@@ -317,7 +317,7 @@ public class UserPhotoManager
                 (photoUrl, fileName) = await SaveOrUpdatePhotoAsync(userID, data, -1, null, false);
             }
 
-            await _userPhotoManagerCache.AddToCache(userID, SizeExtend.Empty, fileName, (_tenantManager.GetCurrentTenant()).Id);
+            await _userPhotoManagerCache.AddToCache(userID, SizeExtend.Empty, fileName, _tenantManager.GetCurrentTenant().Id);
 
             return photoUrl;
         }
@@ -344,7 +344,7 @@ public class UserPhotoManager
                 //empty photo. cache default
                 var photoUrl = GetDefaultPhotoAbsoluteWebPath(size);
 
-                await _userPhotoManagerCache.AddToCache(userID, size, "default", (_tenantManager.GetCurrentTenant()).Id);
+                await _userPhotoManagerCache.AddToCache(userID, size, "default", _tenantManager.GetCurrentTenant().Id);
 
                 return photoUrl;
             }
@@ -359,7 +359,7 @@ public class UserPhotoManager
 
     private string GetDefaultPhotoAbsoluteWebPath(IMagickGeometry size)
     {
-        return (size) switch
+        return size switch
         {
             _ when size.Width == RetinaFotoSize.Width && size.Height == RetinaFotoSize.Height => _webImageSupplier.GetAbsoluteWebPath(_defaultRetinaAvatar),
             _ when size.Width == MaxFotoSize.Width && size.Height == MaxFotoSize.Height => _webImageSupplier.GetAbsoluteWebPath(_defaultAvatar),
@@ -375,7 +375,7 @@ public class UserPhotoManager
 
     private async Task<string> SearchInCache(Guid userId, IMagickGeometry size)
     {
-        if (!_userPhotoManagerCache.IsCacheLoadedForTenant((_tenantManager.GetCurrentTenant()).Id))
+        if (!_userPhotoManagerCache.IsCacheLoadedForTenant(_tenantManager.GetCurrentTenant().Id))
         {
             await LoadDiskCache();
         }
@@ -700,7 +700,7 @@ public class UserPhotoManager
     public async Task RemoveTempPhotoAsync(string fileName)
     {
         var index = fileName.LastIndexOf('.');
-        var fileNameWithoutExt = (index != -1) ? fileName[..index] : fileName;
+        var fileNameWithoutExt = index != -1 ? fileName[..index] : fileName;
         try
         {
             var store = await GetDataStoreAsync();
@@ -743,7 +743,7 @@ public class UserPhotoManager
             photoUrl = (await store.SaveAsync(fileName, s)).ToString();
         }
 
-        await _userPhotoManagerCache.AddToCache(userID, size, fileName, (_tenantManager.GetCurrentTenant()).Id);
+        await _userPhotoManagerCache.AddToCache(userID, size, fileName, _tenantManager.GetCurrentTenant().Id);
         return photoUrl;
     }
 

@@ -63,75 +63,78 @@ public static class WebstudioSettingsExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddWebstudioSettings(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbWebstudioSettings>(entity =>
+        public void MySqlAddWebstudioSettings()
         {
-            entity.HasKey(e => new { e.TenantId, e.Id, e.UserId })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbWebstudioSettings>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.Id, e.UserId })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("webstudio_settings")
-                .HasCharSet("utf8");
+                entity.ToTable("webstudio_settings")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.Id)
-                .HasDatabaseName("ID");
+                entity.HasIndex(e => e.Id)
+                    .HasDatabaseName("ID");
 
-            entity.Property(e => e.TenantId).HasColumnName("TenantID");
+                entity.Property(e => e.TenantId).HasColumnName("TenantID");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("ID")
-                .HasColumnType("varchar(64)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Id)
+                    .HasColumnName("ID")
+                    .HasColumnType("varchar(64)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.UserId)
-                .HasColumnName("UserID")
-                .HasColumnType("varchar(64)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.UserId)
+                    .HasColumnName("UserID")
+                    .HasColumnType("varchar(64)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Data)
-                .IsRequired()
-                .HasColumnType("mediumtext")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Data)
+                    .IsRequired()
+                    .HasColumnType("mediumtext")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("datetime");
-        });
-    }
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("datetime");
+            });
+        }
 
-    public static void PgSqlAddWebstudioSettings(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbWebstudioSettings>(entity =>
+        public void PgSqlAddWebstudioSettings()
         {
-            entity.HasKey(e => new { e.TenantId, e.Id, e.UserId })
-                .HasName("PK_webstudio_settings");
+            modelBuilder.Entity<DbWebstudioSettings>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.Id, e.UserId })
+                    .HasName("PK_webstudio_settings");
 
-            entity.ToTable("webstudio_settings");
+                entity.ToTable("webstudio_settings");
 
-            entity.HasIndex(e => e.Id)
-                .HasDatabaseName("IX_webstudio_settings_Id");
+                entity.HasIndex(e => e.Id)
+                    .HasDatabaseName("IX_webstudio_settings_Id");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasColumnType("uuid");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.UserId)
-                .HasColumnName("user_id")
-                .HasColumnType("uuid");
+                entity.Property(e => e.UserId)
+                    .HasColumnName("user_id")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.Data)
-                .IsRequired()
-                .HasColumnName("data")
-                .HasColumnType("jsonb");
+                entity.Property(e => e.Data)
+                    .IsRequired()
+                    .HasColumnName("data")
+                    .HasColumnType("jsonb");
 
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("timestamptz");
-        });
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("timestamptz");
+            });
+        }
     }
 }

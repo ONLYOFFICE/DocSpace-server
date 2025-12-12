@@ -35,11 +35,7 @@ public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
     /// <summary>
     /// The tenant ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{62609D95-35D3-4F14-A6BA-2118979E04EA}"); }
-    }
+    public static Guid ID => new("{62609D95-35D3-4F14-A6BA-2118979E04EA}");
 
     /// <summary>
     /// Specifies if the tenant quota is enabled or not.

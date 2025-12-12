@@ -208,6 +208,20 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             var enumVarNames = new OpenApiArray();
             var enumDataInt = new List<IOpenApiAny>();
             var enumDescriptionInt = new List<string>();
+            var enumType = "integer";
+
+            var jsonConverterAttr = checkType.GetCustomAttributesData() .FirstOrDefault(a => a.AttributeType == typeof(JsonConverterAttribute));
+            if (jsonConverterAttr != null)
+            {
+                if (jsonConverterAttr.ConstructorArguments.Count > 0 &&
+                    jsonConverterAttr.ConstructorArguments[0].Value is Type converterType &&
+                    converterType.IsGenericType &&
+                    converterType.GetGenericTypeDefinition() == typeof(JsonStringEnumConverter<>))
+                {
+                    enumType = "string";
+                }
+            }
+
 
             foreach (var enumValue in Enum.GetValues(checkType))
             {
@@ -251,6 +265,8 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 result.Enum = null;
                 result.Type = null;
                 result.Format = null;
+                result.Extensions = result.Extensions ?? new Dictionary<string, IOpenApiExtension>();
+                result.Extensions["x-enum-type"] = new OpenApiString(enumType);
             }
         }
         else if (checkType == typeof(object))

@@ -42,7 +42,7 @@ public static class CommonPhotoManager
 
         var alignWidth = minSide == realWidth;
 
-        var scaleFactor = alignWidth ? (realWidth / (1.0 * width)) : (realHeight / (1.0 * height));
+        var scaleFactor = alignWidth ? realWidth / (1.0 * width) : realHeight / (1.0 * height);
 
         if (scaleFactor < 1)
         {

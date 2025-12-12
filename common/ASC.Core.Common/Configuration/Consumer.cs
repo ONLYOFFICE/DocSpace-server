@@ -166,7 +166,7 @@ public class Consumer() : IDictionary<string, string>
             await SetAsync(providerProp.Key, null);
         }
 
-        await Cache.PublishAsync(new ConsumerCacheItem { Name = this.Name }, CacheNotifyAction.Remove);
+        await Cache.PublishAsync(new ConsumerCacheItem { Name = Name }, CacheNotifyAction.Remove);
     }
 
     public bool Contains(KeyValuePair<string, string> item)

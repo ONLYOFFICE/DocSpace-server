@@ -68,7 +68,7 @@ public class TopUpWalletService(
             await using (var scope = _scopeFactory.CreateAsyncScope())
             {
                 await using var webstudioDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<WebstudioDbContext>>().CreateDbContextAsync(stoppingToken);
-                activeTenants = await Queries.GetTenantWalletSettingsAsync(webstudioDbContext, new TenantWalletSettings().ID).ToListAsync(stoppingToken);
+                activeTenants = await Queries.GetTenantWalletSettingsAsync(webstudioDbContext, TenantWalletSettings.ID).ToListAsync(stoppingToken);
             }
 
             if (activeTenants.Count == 0)

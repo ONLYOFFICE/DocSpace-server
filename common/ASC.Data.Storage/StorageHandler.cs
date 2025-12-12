@@ -61,7 +61,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
         }
 
         if (checkAuth && !authContext.IsAuthenticated && !SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) && !fromPublicRoom
-            || module == "backup" && (!authContext.IsAuthenticated || !(await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))))
+            || module == "backup" && (!authContext.IsAuthenticated || !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             return;

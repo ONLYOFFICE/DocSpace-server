@@ -75,7 +75,7 @@ public class LoginProfile
     public string EMail
     {
         get => GetField(WellKnownFields.Email);
-        internal set { SetField(WellKnownFields.Email, value); }
+        internal set => SetField(WellKnownFields.Email, value);
     }
 
     public string Avatar
