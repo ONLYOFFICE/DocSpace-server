@@ -628,16 +628,18 @@ public abstract class FilesController<T>(
         await fileStorageService.ManageFormFilling(inDto.FormId, inDto.Action);
     }
     
+    /// <path>api/2.0/files/file/{fileId}/access</path>
     [HttpGet("{fileId}/access")]
     public async Task<FileEncryptionInfoDto> GetEncryptionInfoAsync(T fileId)
     {
         return await fileStorageService.GetEncryptionInfoAsync(fileId);
     }
-
+    
+    /// <path>api/2.0/files/file/{fileId}/access</path>
     [HttpPut("{fileId}/access")]
-    public async Task<FileEncryptionInfoDto> SetEncryptionInfoAsync(T fileId)
+    public async Task<FileEncryptionInfoDto> SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
     {
-        return await fileStorageService.SetEncryptionInfoAsync(fileId);
+        return await fileStorageService.SetEncryptionInfoAsync(inDto.FileId, inDto.Keys);
     }
 }
 

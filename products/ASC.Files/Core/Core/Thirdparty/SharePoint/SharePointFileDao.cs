@@ -536,7 +536,12 @@ internal class SharePointFileDao(
     {
         return Task.CompletedTask;
     }
-
+    
+    public Task SetFileKey(string fileId, Guid userId, Guid publicKeyId, string privateKeyEnc)
+    {
+        return Task.CompletedTask;
+    }
+    
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
     {
         if (!long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred))

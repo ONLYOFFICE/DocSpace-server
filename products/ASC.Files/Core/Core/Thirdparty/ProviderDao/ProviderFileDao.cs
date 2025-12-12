@@ -615,7 +615,14 @@ internal class ProviderFileDao(
         var fileDao = selector.GetFileDao(fileId);
         return fileDao.SetVectorizationStatusAsync(selector.ConvertId(fileId), status);
     }
-
+    
+    public Task SetFileKey(string fileId, Guid userId, Guid publicKeyId, string privateKeyEnc)
+    {
+        var selector = _selectorFactory.GetSelector(fileId);
+        var fileDao = selector.GetFileDao(fileId);
+        return fileDao.SetFileKey(selector.ConvertId(fileId), userId, publicKeyId, privateKeyEnc);
+    }
+    
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
     {
         var fileDao = GetFileDao(uploadSession.File);

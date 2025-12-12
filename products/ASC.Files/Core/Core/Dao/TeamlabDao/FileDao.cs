@@ -2005,6 +2005,21 @@ internal class FileDao(
         });
     }
 
+    public async Task SetFileKey(int fileId, Guid userId, Guid publicKeyId, string privateKeyEnc)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await filesDbContext.DbFileKeys.AddOrUpdateAsync(new DbFileKeys
+        {
+            TenantId = tenantId,
+            FileId = fileId,
+            UserId = userId,
+            CreateOn = _tenantUtil.DateTimeNow(),
+            PublicKeyId = publicKeyId,
+            PrivateKeyEnc = privateKeyEnc
+        });
+    }
+    
     public string GetUniqThumbnailPath(File<int> file, uint width, uint height)
     {
         var thumbnailName = GetThumbnailName(width, height);

@@ -4667,7 +4667,8 @@ public class FileStorageService //: IFileStorageService
 
         return [.. fileKeyPair];
     }
-   public async Task<FileEncryptionInfoDto> GetEncryptionInfoAsync<T>(T fileId)
+
+    public async Task<FileEncryptionInfoDto> GetEncryptionInfoAsync<T>(T fileId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
@@ -4691,7 +4692,7 @@ public class FileStorageService //: IFileStorageService
         };
     }
 
-    public async Task<FileEncryptionInfoDto> SetEncryptionInfoAsync<T>(T fileId)
+    public async Task<FileEncryptionInfoDto> SetEncryptionInfoAsync<T>(T fileId, IEnumerable<AccessRequestKeyDto> keys)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
@@ -4705,27 +4706,13 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException( FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        FileShare access;
-
-        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+        foreach (var k in keys)
         {
-            access = FileShare.ReadWrite;
+            await fileDao.SetFileKey(fileId, k.UserId, k.PublicKeyId, k.PrivateKeyEnc);
         }
-        else
-        {
-            access = (await fileSharing.GetSharedInfoAsync(file)).FirstOrDefault(s => s.Id == authContext.CurrentAccount.ID).Access;
-        }
+        
 
-        await fileSecurity.ShareAsync(file.Id, FileEntryType.File, authContext.CurrentAccount.ID, access);
-
-        var fileShare = (await fileSecurity.GetSharesAsync(file)).FirstOrDefault(s => s.EntryType == FileEntryType.File && s.Subject == authContext.CurrentAccount.ID);
-        var keys = await encryptionLoginProvider.GetKeysAsync();
-
-        return new FileEncryptionInfoDto
-        {
-            Keys = keys,
-            HaveAccess = fileShare != null
-        };
+        return await GetEncryptionInfoAsync(fileId);
     }
     
     public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId, FileShare newShare = FileShare.RoomManager)
