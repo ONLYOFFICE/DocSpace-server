@@ -577,14 +577,14 @@ internal abstract class SecurityBaseDao<T>(
                     }
                 case ShareFilterType.ExternalLink:
                     {
-                        var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
+            var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
                         q = q.OrderByDescending(x => x.SubjectType).ThenBy(predicate);
                         break;
                     }
                 default:
                     {
                         var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
-                        q = q.OrderBy(predicate);
+            q = q.OrderBy(predicate);
                         break;
                     }
             }
@@ -599,15 +599,13 @@ internal abstract class SecurityBaseDao<T>(
                 q = q.Take(count);
             }
 
-            var records = q.ToAsyncEnumerable().Select(async (DbFilesSecurity r, CancellationToken _) => await ToFileShareRecordAsync(r));
-
-            await foreach (var r in DeleteExpiredAsync(records, filesDbContext))
+            await foreach (var r in q.ToAsyncEnumerable())
             {
-                result.Add(r);
+                result.Add(await ToFileShareRecordAsync(r));
             }
         });
 
-        foreach (var r in result)
+        await foreach(var r in DeleteExpiredAsync(result.ToAsyncEnumerable(), ctx))
         {
             yield return r;
         }
