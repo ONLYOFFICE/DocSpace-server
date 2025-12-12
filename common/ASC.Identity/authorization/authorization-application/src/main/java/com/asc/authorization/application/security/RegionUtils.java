@@ -25,8 +25,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.common.utilities;
+package com.asc.authorization.application.security;
 
+import com.nimbusds.jwt.SignedJWT;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -38,6 +39,17 @@ import java.util.regex.Pattern;
  * or "region:", with support for custom extraction strategies.
  */
 public final class RegionUtils {
+  public static final Function<String, Optional<String>> JWT_REGION_EXTRACTOR =
+      token -> {
+        try {
+          var jwt = SignedJWT.parse(token);
+          var claims = jwt.getJWTClaimsSet();
+          var regionClaim = claims.getStringClaim("region");
+          return Optional.ofNullable(regionClaim).map(String::toLowerCase);
+        } catch (Exception e) {
+          return Optional.empty();
+        }
+      };
   private static final Pattern REGION_PATTERN = Pattern.compile("\\[?([a-zA-Z0-9_\\s-]+)\\]?:");
 
   private RegionUtils() {}
