@@ -220,6 +220,7 @@ public class SsoHandlerService
                         await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyActivation, true, $"_{ConfirmType.TfaActivation}");
 
                         context.Response.Redirect(urlActivation + "&key=" + HttpUtility.UrlEncode(keyActivation), false);
+                        return;
                     }
 
                     var (urlAuth, keyAuth) = _commonLinkUtility.GetConfirmationUrlAndKey(userInfo.Id, ConfirmType.TfaAuth);
@@ -230,7 +231,7 @@ public class SsoHandlerService
                 else
                 {
                     var authKey = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.Id, MessageAction.LoginSuccessViaSSO);
-                    context.Response.Redirect(_commonLinkUtility.GetDefault() + "?token=" + HttpUtility.UrlEncode(authKey), false);
+                    context.Response.Redirect(_commonLinkUtility.GetDefault(), false);
                 }
 
             }
