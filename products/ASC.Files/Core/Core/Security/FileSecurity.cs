@@ -1790,7 +1790,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access is FileShare.Editing or FileShare.Comment or FileShare.Review or FileShare.CustomFilter)
+                        if (e.Access is FileShare.ReadWrite or FileShare.Editing or FileShare.Comment or FileShare.Review or FileShare.CustomFilter)
                         {
                             return true;
                         }

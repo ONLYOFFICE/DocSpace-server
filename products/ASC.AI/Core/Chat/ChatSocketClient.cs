@@ -48,11 +48,11 @@ public class ChatSocketClient(
         await MakeRequest("commit-chat-message", new { room, messageId });
     }
 
-    public async Task ExportCompleted<T>(Guid chatId, File<T>? resultFile)
+    public async Task ExportCompleted<T>(Guid chatId, File<T>? resultFile, string? error)
     {
         var currentUser = securityContext.CurrentAccount.ID;
         var room = $"{GetRoom(chatId)}-{currentUser}";
-        await MakeRequest("chat-export", new { room, resultFile = resultFile?.MapToDto<T>() });
+        await MakeRequest("chat-export", new { room, resultFile = resultFile?.MapToDto<T>(), error });
     }
 
     private string GetRoom(Guid chatId)
