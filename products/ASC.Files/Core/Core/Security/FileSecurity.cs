@@ -1790,7 +1790,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access is FileShare.Editing or FileShare.Comment or FileShare.Review or FileShare.CustomFilter)
+                        if (e.Access is FileShare.ReadWrite or FileShare.Editing or FileShare.Comment or FileShare.Review or FileShare.CustomFilter)
                         {
                             return true;
                         }
@@ -3313,7 +3313,10 @@ public class FileSecurity(
             result.Add(new(Constants.GroupAdmin.ID, SubjectOrderType.Group));
         }
 
-        result.Add(new(Constants.GroupEveryone.ID, SubjectOrderType.Group));
+        if (userId != ASC.Core.Configuration.Constants.Guest.ID)
+        {
+            result.Add(new(Constants.GroupEveryone.ID, SubjectOrderType.Group));
+        }
 
         var linkId = await externalShare.GetLinkIdAsync();
         if (linkId != Guid.Empty)

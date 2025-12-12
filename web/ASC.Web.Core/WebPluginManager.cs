@@ -47,6 +47,8 @@ public class WebPlugin
     public bool System { get; set; }
     public string Url { get; set; }
     public string Settings { get; set; }
+    public Dictionary<string,string> NameLocale { get; set; }
+    public Dictionary<string,string> DescriptionLocale { get; set; }
 
     public WebPlugin Clone()
     {

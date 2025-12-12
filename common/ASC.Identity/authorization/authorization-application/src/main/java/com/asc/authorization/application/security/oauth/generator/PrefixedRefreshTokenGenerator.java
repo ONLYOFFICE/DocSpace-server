@@ -27,7 +27,7 @@
 
 package com.asc.authorization.application.security.oauth.generator;
 
-import com.asc.common.utilities.RegionUtils;
+import com.asc.authorization.application.security.RegionUtils;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64;

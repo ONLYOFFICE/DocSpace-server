@@ -125,6 +125,18 @@ public class AiProviderService(
         }
     }
 
+    public async Task<bool> NeedResetProvidersAsync()
+    {
+        if (gateway.Configured)
+        {
+            return false;
+        }
+
+        var canDecryptSomeKey = await providerDao.CanDecryptSomeKeyAsync(tenantManager.GetCurrentTenantId());
+
+        return !canDecryptSomeKey;
+    }
+
     public async Task<int> GetProvidersTotalCountAsync()
     {
         if (gateway.Configured)
@@ -181,6 +193,11 @@ public class AiProviderService(
     
     private async Task<IEnumerable<ModelData>> GetProviderModelsAsync(AiProvider p, Scope? scope)
     {
+        if (p.NeedReset)
+        {
+            return [];
+        }
+
         var client = modelClientFactory.Create(p.Type, p.Url, p.Key);
         try
         {
