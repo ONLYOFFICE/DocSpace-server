@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,10 +24,29 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.ResponseDto;
+namespace ASC.Files.Core;
 
-public class FileEncryptionInfoDto
+public class FileKeys
 {
-    public List<EncryptionKeyDto> UserKeys { get; set; }
-    public List<FileKeys> FileKeys { get; set; }
+    public FileKeys() { }
+    
+    public Guid UserId { get; set; }
+    
+    public Guid PublicKeyId { get; set; }
+    
+    public string PrivateKeyEnc { get; set; }
+    
+    public int TenantId { get; set; }
+
+    public int FileId { get; set; }
+    
+    public DateTime CreateOn { get; set; }
+}
+
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class FileKeysMapper
+{
+    public static partial FileKeys Map(this DbFileKeys source);
+    public static partial IQueryable<FileKeys> Project(this IQueryable<DbFileKeys> source);
 }

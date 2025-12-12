@@ -4667,32 +4667,9 @@ public class FileStorageService //: IFileStorageService
 
         return [.. fileKeyPair];
     }
+    
 
-    public async Task<FileEncryptionInfoDto> GetEncryptionInfoAsync<T>(T fileId)
-    {
-        var fileDao = daoFactory.GetFileDao<T>();
-        var file = await fileDao.GetFileAsync(fileId);
-
-        if (file == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-        if (!await fileSecurity.CanReadAsync(file))
-        {
-            throw new InvalidOperationException( FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        var share = (await fileSecurity.GetSharesAsync(file)).FirstOrDefault(s => s.EntryType == FileEntryType.File && s.Subject == authContext.CurrentAccount.ID);
-        var keys = await encryptionLoginProvider.GetKeysAsync();
-
-        return new FileEncryptionInfoDto
-        {
-            Keys = keys,
-            HaveAccess = share != null
-        };
-    }
-
-    public async Task<FileEncryptionInfoDto> SetEncryptionInfoAsync<T>(T fileId, IEnumerable<AccessRequestKeyDto> keys)
+    public async Task SetEncryptionInfoAsync<T>(T fileId, IEnumerable<AccessRequestKeyDto> keys)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
@@ -4710,9 +4687,6 @@ public class FileStorageService //: IFileStorageService
         {
             await fileDao.SetFileKey(fileId, k.UserId, k.PublicKeyId, k.PrivateKeyEnc);
         }
-        
-
-        return await GetEncryptionInfoAsync(fileId);
     }
     
     public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId, FileShare newShare = FileShare.RoomManager)

@@ -440,6 +440,7 @@ public interface IFileDao<T>
     Task SetVectorizationStatusAsync(T fileId, VectorizationStatus status, Func<Task> action = null);
 
     Task SetFileKey(T fileId, Guid userId, Guid publicKeyId, string privateKeyEnc);
+    Task<List<FileKeys>> GetFileKeys(T fileId, Guid userId);
 
     #endregion
 }

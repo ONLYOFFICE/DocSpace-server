@@ -2019,6 +2019,20 @@ internal class FileDao(
             PrivateKeyEnc = privateKeyEnc
         });
     }
+
+    public async Task<List<FileKeys>> GetFileKeys(int fileId, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.DbFileKeys
+            .Where(r =>
+                r.TenantId == tenantId &&
+                r.FileId == fileId &&
+                r.UserId == userId)
+            .Project()
+            .ToListAsync();
+    }
     
     public string GetUniqThumbnailPath(File<int> file, uint width, uint height)
     {

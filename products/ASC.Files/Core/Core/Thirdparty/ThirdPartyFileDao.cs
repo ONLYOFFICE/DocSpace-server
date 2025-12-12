@@ -863,6 +863,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         return Task.CompletedTask;
     }
+    
+    public Task<List<FileKeys>> GetFileKeys(string fileId, Guid userId)
+    {
+        return Task.FromResult<List<FileKeys>>([]);
+    }
 }
 
 static file class Queries

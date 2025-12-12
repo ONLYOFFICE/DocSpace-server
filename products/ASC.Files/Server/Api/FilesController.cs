@@ -37,7 +37,11 @@ public class FilesControllerInternal(
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
     HistoryApiHelper historyApiHelper,
-    IFusionCache hybridCache)
+    IFusionCache hybridCache,
+    IDaoFactory daoFactory, 
+    FileSecurity fileSecurity, 
+    EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
+    AuthContext authContext)
     : FilesController<int>(filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
@@ -46,7 +50,11 @@ public class FilesControllerInternal(
         fileDtoHelper,
         apiContext,
         fileShareDtoHelper,
-        hybridCache)
+        hybridCache,
+        daoFactory,
+        fileSecurity,
+        encryptionKeyPairDtoHelper,
+        authContext)
 {
     /// <summary>
     /// Returns the list of actions performed on the file with the specified identifier.
@@ -76,7 +84,11 @@ public class FilesControllerThirdparty(
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
-    IFusionCache hybridCache)
+    IFusionCache hybridCache,
+    IDaoFactory daoFactory, 
+    FileSecurity fileSecurity, 
+    EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
+    AuthContext authContext)
     : FilesController<string>(filesControllerHelper,
         fileStorageService,
         fileOperationsManager,
@@ -85,18 +97,26 @@ public class FilesControllerThirdparty(
         fileDtoHelper,
         apiContext,
         fileShareDtoHelper,
-        hybridCache);
+        hybridCache,
+        daoFactory,
+        fileSecurity,
+        encryptionKeyPairDtoHelper,
+        authContext);
 
 public abstract class FilesController<T>(
     FilesControllerHelper filesControllerHelper,
-        FileStorageService fileStorageService,
-        FileDeleteOperationsManager fileOperationsManager,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        FileShareDtoHelper fileShareDtoHelper,
-        IFusionCache hybridCache)
+    FileStorageService fileStorageService,
+    FileDeleteOperationsManager fileOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
+    FileShareDtoHelper fileShareDtoHelper,
+    IFusionCache hybridCache,
+    IDaoFactory daoFactory, 
+    FileSecurity fileSecurity, 
+    EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
+    AuthContext authContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -632,14 +652,33 @@ public abstract class FilesController<T>(
     [HttpGet("{fileId}/access")]
     public async Task<FileEncryptionInfoDto> GetEncryptionInfoAsync(T fileId)
     {
-        return await fileStorageService.GetEncryptionInfoAsync(fileId);
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+        if (!await fileSecurity.CanReadAsync(file))
+        {
+            throw new InvalidOperationException( FilesCommonResource.ErrorMessage_SecurityException);
+        }
+        
+        var userKeys = await encryptionKeyPairDtoHelper.GetKeyPairAsync();
+        var fileKeys = await fileDao.GetFileKeys(fileId, authContext.CurrentAccount.ID);
+
+        return new FileEncryptionInfoDto
+        {
+            UserKeys = userKeys,
+            FileKeys = fileKeys
+        };
     }
     
     /// <path>api/2.0/files/file/{fileId}/access</path>
     [HttpPut("{fileId}/access")]
-    public async Task<FileEncryptionInfoDto> SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
+    public async Task SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
     {
-        return await fileStorageService.SetEncryptionInfoAsync(inDto.FileId, inDto.Keys);
+        await fileStorageService.SetEncryptionInfoAsync(inDto.FileId, inDto.Keys);
     }
 }
 

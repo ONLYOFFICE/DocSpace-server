@@ -623,6 +623,13 @@ internal class ProviderFileDao(
         return fileDao.SetFileKey(selector.ConvertId(fileId), userId, publicKeyId, privateKeyEnc);
     }
     
+    public Task<List<FileKeys>> GetFileKeys(string fileId, Guid userId)
+    {
+        var selector = _selectorFactory.GetSelector(fileId);
+        var fileDao = selector.GetFileDao(fileId);
+        return fileDao.GetFileKeys(selector.ConvertId(fileId), userId);
+    }
+    
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
     {
         var fileDao = GetFileDao(uploadSession.File);
