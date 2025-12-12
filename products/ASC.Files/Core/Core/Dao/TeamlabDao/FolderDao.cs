@@ -1207,8 +1207,11 @@ internal class FolderDao(
                 Cover = folder.SettingsCover,
                 Indexing = folder.SettingsIndexing,
                 DenyDownload = folder.SettingsDenyDownload,
+                Watermark = folder.SettingsWatermark.Map(),
                 Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue,
-                Lifetime = folder.SettingsLifetime.Map()
+                Lifetime = folder.SettingsLifetime.Map(),
+                ChatProviderId = folder.SettingsChatProviderId,
+                ChatParameters = folder.SettingsChatParameters
             };
         }
 
