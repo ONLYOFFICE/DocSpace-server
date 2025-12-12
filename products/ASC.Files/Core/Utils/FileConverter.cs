@@ -320,7 +320,7 @@ public class FileConverter(
         return ExecAsync(file, fileUtility.GetInternalExtension(file.Title));
     }
 
-    public async Task<Stream> ExecAsync<T>(File<T> file, string toExtension, string password = null, bool toForm = false)
+    public async Task<Stream> ExecAsync<T>(File<T> file, string toExtension, string password = null, bool toForm = false, ThumbnailData thumbnail = null, SpreadsheetLayout spreadsheetLayout = null)
     {
         Options options = null;
         if (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
@@ -341,7 +341,7 @@ public class FileConverter(
 
         var docKey = await documentServiceHelper.GetDocKeyAsync(file, options?.GetMD5Hash());
 
-        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, null, null, options, false, toForm);
+        var uriTuple = await documentServiceConnector.GetConvertedUriAsync(fileUri, file.ConvertedExtension, toExtension, docKey, password, CultureInfo.CurrentUICulture.Name, thumbnail, spreadsheetLayout, options, false, toForm);
         var convertUri = uriTuple.ConvertedDocumentUri;
         var request = new HttpRequestMessage
         {
