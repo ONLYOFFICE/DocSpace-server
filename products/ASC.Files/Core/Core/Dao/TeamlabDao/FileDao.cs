@@ -2018,6 +2018,7 @@ internal class FileDao(
             PublicKeyId = publicKeyId,
             PrivateKeyEnc = privateKeyEnc
         });
+        await filesDbContext.SaveChangesAsync();
     }
 
     public async Task<List<FileKeys>> GetFileKeys(int fileId, Guid userId)

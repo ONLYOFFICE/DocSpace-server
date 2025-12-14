@@ -419,8 +419,7 @@ public class RoomsApiTests(
 
         // Cleanup - Re-enable "Allow inviting guests" setting
         invitationSettings.AllowInvitingGuests = true;
-        await apiFactory.CommonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, 
-            cancellationToken: TestContext.Current.CancellationToken);
+        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, cancellationToken: TestContext.Current.CancellationToken);
     }
     
     [Fact]
@@ -484,8 +483,7 @@ public class RoomsApiTests(
 
         // Cleanup - Re-enable "Allow inviting guests" setting
         invitationSettings.AllowInvitingGuests = true;
-        await apiFactory.CommonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, 
-            cancellationToken: TestContext.Current.CancellationToken);
+        await _commonSettingsApi.UpdateInvitationSettingsAsync(invitationSettings, cancellationToken: TestContext.Current.CancellationToken);
     }
     
     

@@ -132,6 +132,15 @@ public class PrivacyRoomControllerCommon(
         return await encryptionKeyPairHelper.GetKeyPairAsync();
     }
     
+    /// <path>api/2.0/privacyroom/{roomId}/access</path>
+    [HttpGet("{roomId:int}/access")]
+    public async Task<IEnumerable<EncryptionKeyDto>> GetUserKeysForRoom(int roomId)
+    {
+        await Demand();
+
+        return await encryptionKeyPairHelper.GetKeyPairForRoomAsync(roomId);
+    }
+    
     /// <path>api/2.0/privacyroom/keys</path>
     [HttpDelete("keys/{id:guid}")]
     public async Task<IEnumerable<EncryptionKeyDto>> DeleteKeys(Guid id)

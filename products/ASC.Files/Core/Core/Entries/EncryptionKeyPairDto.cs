@@ -160,6 +160,52 @@ public class EncryptionKeyPairDtoHelper(
 
         return fileKeysPair.ToList();
     }
+
+    public async Task<List<EncryptionKeyDto>> GetKeyPairForRoomAsync<T>(T roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        
+        var room = await folderDao.GetFolderAsync(roomId);
+        if (room == null)
+        {
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (!await fileSecurity.CanReadAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
+        var locatedInPrivateRoom = room.RootFolderType == FolderType.VirtualRooms && DocSpaceHelper.LocatedInPrivateRoomAsync(room);
+
+        if (room.RootFolderType != FolderType.Privacy && !locatedInPrivateRoom)
+        {
+            throw new NotSupportedException();
+        }
+
+        var tmpFiles = await fileSharing.GetSharedInfoAsync(room);
+        var fileShares = tmpFiles.ToList();
+        fileShares = fileShares.Where(share => !share.SubjectGroup).ToList();
+
+        var tasks = fileShares.Select(async share =>
+        {
+            var fileKeyPairString = await encryptionLoginProvider.GetKeysAsync(share.Id);
+            if (string.IsNullOrEmpty(fileKeyPairString))
+            {
+                return null;
+            }
+
+            var fileKeyPair = JsonSerializer.Deserialize<List<EncryptionKeyDto>>(fileKeyPairString, JsonSerializerOptions.Web)
+                .ToList();
+
+            return fileKeyPair;
+        });
+
+        var fileKeysPair = (await Task.WhenAll(tasks))
+            .SelectMany(keyPair => keyPair);
+
+        return fileKeysPair.ToList();
+    }
     
     public async Task<List<EncryptionKeyDto>> DeleteAsync(Guid id)
     {

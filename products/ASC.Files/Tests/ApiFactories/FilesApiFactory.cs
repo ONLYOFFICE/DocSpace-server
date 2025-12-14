@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCFiles;
+using DocSpace.API.SDK.Api.Privacyroom;
 
 namespace ASC.Files.Tests.ApiFactories;
 
@@ -49,6 +50,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     public SettingsApi SettingsApi { get; private set;} = null!;
     public QuotaApi  QuotaApi { get; private set;} = null!;
     public SharingApi  SharingApi { get; private set;} = null!;
+    public PrivacyroomApi  PrivacyroomApi { get; private set;} = null!;
     
     public DocSpace.API.SDK.Api.Settings.QuotaApi  SettingsQuotaApi { get; private set;} = null!;
     
@@ -173,6 +175,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         QuotaApi = new QuotaApi(HttpClient, configuration);
         SharingApi = new SharingApi(HttpClient, configuration);
         SettingsQuotaApi = new DocSpace.API.SDK.Api.Settings.QuotaApi(HttpClient, configuration);
+        PrivacyroomApi = new PrivacyroomApi(HttpClient, configuration);
         
         var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();
         tablesToIgnore.AddRange(_tablesToBackup.Select(r=> new Table(MakeCopyTableName(r))));

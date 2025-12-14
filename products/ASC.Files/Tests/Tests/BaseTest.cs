@@ -28,6 +28,7 @@ using ASC.Files.Tests.ApiFactories;
 
 using DocSpace.API.SDK.Api.Group;
 using DocSpace.API.SDK.Api.People;
+using DocSpace.API.SDK.Api.Privacyroom;
 using DocSpace.API.SDK.Api.Settings;
 
 using QuotaApi = DocSpace.API.SDK.Api.Files.QuotaApi;
@@ -52,6 +53,7 @@ public class BaseTest(
     protected readonly SettingsApi _filesSettingsApi = filesFactory.SettingsApi;
     protected readonly QuotaApi _quotaApi = filesFactory.QuotaApi;
     protected readonly SharingApi _sharingApi = filesFactory.SharingApi;
+    protected readonly PrivacyroomApi _privacyroomApi = filesFactory.PrivacyroomApi;
     
     protected readonly GroupApi _groupApi = peopleFactory.GroupApi;
     protected readonly UserStatusApi _userStatusApi = peopleFactory.UserStatusApi;

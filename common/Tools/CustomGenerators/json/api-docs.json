@@ -13072,7 +13072,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
             }
           },
           {
@@ -16273,7 +16273,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 9079
             }
           },
           {
@@ -19549,7 +19549,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 9079
             }
           }
         ],
@@ -21762,7 +21762,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 9079
             }
           }
         ],
@@ -22404,7 +22404,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           }
         ],
@@ -23256,7 +23256,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           }
         ],
@@ -23332,7 +23332,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           }
         ],
@@ -23599,7 +23599,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           },
           {
@@ -28746,7 +28746,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           },
           {
@@ -30267,6 +30267,69 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EncryptionKeyWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/privacyroom/{roomId}/access": {
+      "get": {
+        "tags": [
+          "privacyroom"
+        ],
+        "operationId": "getUserKeysForRoom",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncryptionKeyArrayWrapper"
                 }
               }
             }
@@ -31853,7 +31916,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 9079
             }
           }
         ],
@@ -32090,7 +32153,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 9079
             }
           }
         ],
@@ -36799,7 +36862,7 @@
             "description": "The email address to confirm the user's identity.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "Sydney14@hotmail.com"
           },
           "first": {
             "type": "boolean",
@@ -37000,7 +37063,7 @@
             "minLength": 0,
             "type": "string",
             "description": "The human-readable name of the webhook configuration.",
-            "example": "Sydney Roberts"
+            "example": "Winfield Upton"
           },
           "uri": {
             "minLength": 1,
@@ -42681,7 +42744,7 @@
             "type": "string",
             "description": "The location.",
             "nullable": true,
-            "example": "41408 Lolita Union, Dericktown, United Kingdom"
+            "example": "001 Schroeder Run, New Tabithaport, Colombia"
           },
           "phone": {
             "type": "string",
@@ -46468,7 +46531,7 @@
             "type": "string",
             "description": "The API key unique identifier.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
           },
           "name": {
             "type": "string",
@@ -48051,7 +48114,7 @@
             "type": "string",
             "description": "The new name for the API key.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "Sydney Schroeder"
           },
           "permissions": {
             "type": "array",
@@ -49495,7 +49558,7 @@
             "type": "string",
             "description": "The folder title to create.",
             "nullable": true,
-            "example": "auxiliary_sports_illinois"
+            "example": "legacy_1080p_small_wooden_mouse"
           }
         },
         "additionalProperties": false,
@@ -52879,7 +52942,7 @@
             "type": "string",
             "description": "The password protection for accessing the shared content.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "vm2v1UjQXp"
           },
           "denyDownload": {
             "type": "boolean",
@@ -56013,7 +56076,7 @@
             "type": "string",
             "description": "The provider name.",
             "nullable": true,
-            "example": "Sydney Roberts"
+            "example": "Winfield Upton"
           },
           "key": {
             "type": "string",
