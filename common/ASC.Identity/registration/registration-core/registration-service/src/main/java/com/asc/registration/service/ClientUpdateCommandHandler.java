@@ -46,9 +46,9 @@ import com.asc.registration.core.domain.value.ClientRedirectInfo;
 import com.asc.registration.service.mapper.ClientDataMapper;
 import com.asc.registration.service.ports.output.repository.ClientCommandRepository;
 import com.asc.registration.service.ports.output.repository.ClientQueryRepository;
+import com.asc.registration.service.ports.output.resilience.RetryExecutor;
 import com.asc.registration.service.transfer.request.update.*;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
-import io.github.resilience4j.retry.annotation.Retry;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,12 +65,17 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ClientUpdateCommandHandler {
+  private static final String OPTIMISTIC_LOCKING_RETRY = "optimisticLockingRetry";
+
   private final AuthorizationMessagePublisher<ClientRemovedEvent> clientMessagePublisher;
-  private final ClientCommandRepository clientCommandRepository;
   private final ClientDataMapper clientDataMapper;
+  private final RetryExecutor retryExecutor;
+
   private final ClientDomainService clientDomainService;
-  private final ClientQueryRepository clientQueryRepository;
   private final EncryptionService encryptionService;
+
+  private final ClientCommandRepository clientCommandRepository;
+  private final ClientQueryRepository clientQueryRepository;
 
   /**
    * Regenerates and encrypts the client secret.
@@ -80,46 +85,33 @@ public class ClientUpdateCommandHandler {
    * @param command the command containing client and tenant information
    * @return the updated client secret response
    */
-  @Retry(name = "optimisticLockingRetry", fallbackMethod = "recoverRegenerateSecret")
   public ClientSecretResponse regenerateSecret(
       Audit audit, Role role, RegenerateTenantClientSecretCommand command) {
-    log.info("Regenerating client secret");
+    return retryExecutor.executeWithRetry(
+        OPTIMISTIC_LOCKING_RETRY,
+        () -> {
+          log.info("Regenerating client secret");
 
-    var client = getClient(audit, role, command.getClientId(), command.getTenantId());
-    var event = clientDomainService.regenerateClientSecret(audit, client);
-    var clientSecret = client.getSecret().value();
-    client.encryptSecret(encryptionService::encrypt);
+          var client = getClient(audit, role, command.getClientId(), command.getTenantId());
+          var event = clientDomainService.regenerateClientSecret(audit, client);
+          var clientSecret = client.getSecret().value();
+          client.encryptSecret(encryptionService::encrypt);
 
-    MDC.put("client_secret", client.getSecret().value());
-    log.debug("Generated a new secret");
-    MDC.remove("client_secret");
+          MDC.put("client_secret", client.getSecret().value());
+          log.debug("Generated a new secret");
+          MDC.remove("client_secret");
 
-    var response =
-        clientDataMapper.toClientSecret(clientCommandRepository.updateClient(event, client));
-    response.setClientSecret(clientSecret);
-    return response;
-  }
-
-  /**
-   * Fallback for secret regeneration on retry exhaustion.
-   *
-   * @param audit the audit details
-   * @param role the role of the requester
-   * @param command the command containing client and tenant information
-   * @param t the triggering exception
-   * @return never returns normally
-   * @throws ClientDomainException thrown due to concurrent access issues
-   * @throws Throwable rethrows the original exception if not optimistic locking
-   */
-  public ClientSecretResponse recoverRegenerateSecret(
-      Audit audit, Role role, RegenerateTenantClientSecretCommand command, Throwable t)
-      throws Throwable {
-    if (t instanceof OptimisticLockingFailureException)
-      throw new ClientDomainException(
-          String.format(
-              "Could not regenerate secret for client %s due to concurrent access",
-              command.getClientId()));
-    throw t;
+          var response =
+              clientDataMapper.toClientSecret(clientCommandRepository.updateClient(event, client));
+          response.setClientSecret(clientSecret);
+          return response;
+        },
+        OptimisticLockingFailureException.class,
+        () ->
+            new ClientDomainException(
+                String.format(
+                    "Could not regenerate secret for client %s due to concurrent access",
+                    command.getClientId())));
   }
 
   /**
@@ -129,45 +121,32 @@ public class ClientUpdateCommandHandler {
    * @param role the role of the requester
    * @param command the command containing client, tenant, and desired visibility status
    */
-  @Retry(name = "optimisticLockingRetry", fallbackMethod = "recoverChangeVisibility")
   public void changeVisibility(
       Audit audit, Role role, ChangeTenantClientVisibilityCommand command) {
-    log.info("Trying to change client visibility");
+    retryExecutor.executeWithRetry(
+        OPTIMISTIC_LOCKING_RETRY,
+        () -> {
+          log.info("Trying to change client visibility");
 
-    var client = getClient(audit, role, command.getClientId(), command.getTenantId());
-    if (command.isPublic()) {
-      log.info("Changing client visibility to public");
-      var event = clientDomainService.makeClientPublic(audit, client);
-      clientCommandRepository.changeVisibilityByTenantIdAndClientId(
-          event, client.getClientTenantInfo().tenantId(), client.getId(), command.isPublic());
-      return;
-    }
-
-    log.info("Changing client visibility to private");
-    var event = clientDomainService.makeClientPrivate(audit, client);
-    clientCommandRepository.changeVisibilityByTenantIdAndClientId(
-        event, client.getClientTenantInfo().tenantId(), client.getId(), command.isPublic());
-  }
-
-  /**
-   * Fallback for visibility change on retry exhaustion.
-   *
-   * @param audit the audit details
-   * @param role the role of the requester
-   * @param command the command with client and tenant details
-   * @param t the triggering exception
-   * @throws ClientDomainException thrown due to concurrent access issues
-   * @throws Throwable rethrows the original exception if not optimistic locking
-   */
-  public void recoverChangeVisibility(
-      Audit audit, Role role, ChangeTenantClientVisibilityCommand command, Throwable t)
-      throws Throwable {
-    if (t instanceof OptimisticLockingFailureException)
-      throw new ClientDomainException(
-          String.format(
-              "Could not change visibility for client %s due to concurrent access",
-              command.getClientId()));
-    throw t;
+          var client = getClient(audit, role, command.getClientId(), command.getTenantId());
+          if (command.isPublic()) {
+            log.info("Changing client visibility to public");
+            var event = clientDomainService.makeClientPublic(audit, client);
+            clientCommandRepository.changeVisibilityByTenantIdAndClientId(
+                event, client.getClientTenantInfo().tenantId(), client.getId(), command.isPublic());
+          } else {
+            log.info("Changing client visibility to private");
+            var event = clientDomainService.makeClientPrivate(audit, client);
+            clientCommandRepository.changeVisibilityByTenantIdAndClientId(
+                event, client.getClientTenantInfo().tenantId(), client.getId(), command.isPublic());
+          }
+        },
+        OptimisticLockingFailureException.class,
+        () ->
+            new ClientDomainException(
+                String.format(
+                    "Could not change visibility for client %s due to concurrent access",
+                    command.getClientId())));
   }
 
   /**
@@ -177,45 +156,38 @@ public class ClientUpdateCommandHandler {
    * @param role the role of the requester
    * @param command the command containing client, tenant, and desired activation status
    */
-  @Retry(name = "optimisticLockingRetry", fallbackMethod = "recoverChangeActivation")
   public void changeActivation(
       Audit audit, Role role, ChangeTenantClientActivationCommand command) {
-    log.info("Trying to change client activation");
+    retryExecutor.executeWithRetry(
+        OPTIMISTIC_LOCKING_RETRY,
+        () -> {
+          log.info("Trying to change client activation");
 
-    var client = getClient(audit, role, command.getClientId(), command.getTenantId());
-    if (command.isEnabled()) {
-      log.info("Changing client activation to enabled");
-      var event = clientDomainService.enableClient(audit, client);
-      clientCommandRepository.changeActivationByTenantIdAndClientId(
-          event, client.getClientTenantInfo().tenantId(), client.getId(), command.isEnabled());
-      return;
-    }
-
-    log.info("Changing client activation to disabled");
-    var event = clientDomainService.disableClient(audit, client);
-    clientCommandRepository.changeActivationByTenantIdAndClientId(
-        event, client.getClientTenantInfo().tenantId(), client.getId(), command.isEnabled());
-  }
-
-  /**
-   * Fallback for activation change on retry exhaustion.
-   *
-   * @param audit the audit details
-   * @param role the role of the requester
-   * @param command the command with client and tenant details
-   * @param t the triggering exception
-   * @throws ClientDomainException thrown due to concurrent access issues
-   * @throws Throwable rethrows the original exception if not optimistic locking
-   */
-  public void recoverChangeActivation(
-      Audit audit, Role role, ChangeTenantClientActivationCommand command, Throwable t)
-      throws Throwable {
-    if (t instanceof OptimisticLockingFailureException)
-      throw new ClientDomainException(
-          String.format(
-              "Could not change activation for client %s due to concurrent access",
-              command.getClientId()));
-    throw t;
+          var client = getClient(audit, role, command.getClientId(), command.getTenantId());
+          if (command.isEnabled()) {
+            log.info("Changing client activation to enabled");
+            var event = clientDomainService.enableClient(audit, client);
+            clientCommandRepository.changeActivationByTenantIdAndClientId(
+                event,
+                client.getClientTenantInfo().tenantId(),
+                client.getId(),
+                command.isEnabled());
+          } else {
+            log.info("Changing client activation to disabled");
+            var event = clientDomainService.disableClient(audit, client);
+            clientCommandRepository.changeActivationByTenantIdAndClientId(
+                event,
+                client.getClientTenantInfo().tenantId(),
+                client.getId(),
+                command.isEnabled());
+          }
+        },
+        OptimisticLockingFailureException.class,
+        () ->
+            new ClientDomainException(
+                String.format(
+                    "Could not change activation for client %s due to concurrent access",
+                    command.getClientId())));
   }
 
   /**
@@ -226,60 +198,49 @@ public class ClientUpdateCommandHandler {
    * @param command the command containing updated client information
    * @return the updated client response
    */
-  @Retry(name = "optimisticLockingRetry", fallbackMethod = "recoverUpdateClient")
   public ClientResponse updateClient(Audit audit, Role role, UpdateTenantClientCommand command) {
-    log.info("Updating client information");
+    return retryExecutor.executeWithRetry(
+        OPTIMISTIC_LOCKING_RETRY,
+        () -> {
+          log.info("Updating client information");
 
-    var client = getClient(audit, role, command.getClientId(), command.getTenantId());
-    clientDomainService.updateClientInfo(
-        audit,
-        client,
-        new ClientInfo(command.getName(), command.getDescription(), command.getLogo()));
+          var client = getClient(audit, role, command.getClientId(), command.getTenantId());
+          clientDomainService.updateClientInfo(
+              audit,
+              client,
+              new ClientInfo(command.getName(), command.getDescription(), command.getLogo()));
 
-    var event =
-        clientDomainService.updateClientRedirectInfo(
-            audit,
-            client,
-            new ClientRedirectInfo(
-                client.getClientRedirectInfo().redirectUris(),
-                command.getAllowedOrigins(),
-                client.getClientRedirectInfo().logoutRedirectUris()));
+          var event =
+              clientDomainService.updateClientRedirectInfo(
+                  audit,
+                  client,
+                  new ClientRedirectInfo(
+                      client.getClientRedirectInfo().redirectUris(),
+                      command.getAllowedOrigins(),
+                      client.getClientRedirectInfo().logoutRedirectUris()));
 
-    if (command.isAllowPkce()) {
-      clientDomainService.addAuthenticationMethod(
-          audit, client, AuthenticationMethod.PKCE_AUTHENTICATION);
-      clientDomainService.addAuthenticationMethod(
-          audit, client, AuthenticationMethod.DEFAULT_AUTHENTICATION);
-    } else {
-      clientDomainService.addAuthenticationMethod(
-          audit, client, AuthenticationMethod.DEFAULT_AUTHENTICATION);
-      clientDomainService.removeAuthenticationMethod(
-          audit, client, AuthenticationMethod.PKCE_AUTHENTICATION);
-    }
+          if (command.isAllowPkce()) {
+            clientDomainService.addAuthenticationMethod(
+                audit, client, AuthenticationMethod.PKCE_AUTHENTICATION);
+            clientDomainService.addAuthenticationMethod(
+                audit, client, AuthenticationMethod.DEFAULT_AUTHENTICATION);
+          } else {
+            clientDomainService.addAuthenticationMethod(
+                audit, client, AuthenticationMethod.DEFAULT_AUTHENTICATION);
+            clientDomainService.removeAuthenticationMethod(
+                audit, client, AuthenticationMethod.PKCE_AUTHENTICATION);
+          }
 
-    if (command.isPublic()) clientDomainService.makeClientPublic(audit, client);
-    else clientDomainService.makeClientPrivate(audit, client);
-    return clientDataMapper.toClientResponse(clientCommandRepository.updateClient(event, client));
-  }
-
-  /**
-   * Fallback for client update on retry exhaustion.
-   *
-   * @param audit the audit details
-   * @param role the role of the requester
-   * @param command the command containing updated client information
-   * @param t the triggering exception
-   * @return never returns normally
-   * @throws ClientDomainException thrown due to concurrent access issues
-   * @throws Throwable rethrows the original exception if not optimistic locking
-   */
-  public ClientResponse recoverUpdateClient(
-      Audit audit, Role role, UpdateTenantClientCommand command, Throwable t) throws Throwable {
-    if (t instanceof OptimisticLockingFailureException)
-      throw new ClientDomainException(
-          String.format(
-              "Could not update client %s due to concurrent access", command.getClientId()));
-    throw t;
+          if (command.isPublic()) clientDomainService.makeClientPublic(audit, client);
+          else clientDomainService.makeClientPrivate(audit, client);
+          return clientDataMapper.toClientResponse(
+              clientCommandRepository.updateClient(event, client));
+        },
+        OptimisticLockingFailureException.class,
+        () ->
+            new ClientDomainException(
+                String.format(
+                    "Could not update client %s due to concurrent access", command.getClientId())));
   }
 
   /**
@@ -290,37 +251,25 @@ public class ClientUpdateCommandHandler {
    * @param command the command containing client and tenant information
    * @return the result of the delete operation, the number of rows affected.
    */
-  @Retry(name = "optimisticLockingRetry", fallbackMethod = "recoverDeleteClient")
   public int deleteClient(Audit audit, Role role, DeleteTenantClientCommand command) {
-    log.info("Trying to remove client");
+    return retryExecutor.executeWithRetry(
+        OPTIMISTIC_LOCKING_RETRY,
+        () -> {
+          log.info("Trying to remove client");
 
-    var client = getClient(audit, role, command.getClientId(), command.getTenantId());
-    var event = clientDomainService.deleteClient(audit, client);
-    // TODO: Move it later to core application service. Now we depend on getClient check
-    clientMessagePublisher.publish(
-        ClientRemovedEvent.builder().clientId(command.getClientId()).build());
-    return clientCommandRepository.deleteByTenantIdAndClientId(
-        event, client.getClientTenantInfo().tenantId(), client.getId());
-  }
-
-  /**
-   * Fallback for client deletion on retry exhaustion.
-   *
-   * @param audit the audit details
-   * @param role the role of the requester
-   * @param command the command containing client and tenant information
-   * @param t the triggering exception
-   * @return always returns 0 after throwing
-   * @throws ClientDomainException thrown due to concurrent access issues
-   * @throws Throwable rethrows the original exception if not optimistic locking
-   */
-  public int recoverDeleteClient(
-      Audit audit, Role role, DeleteTenantClientCommand command, Throwable t) throws Throwable {
-    if (t instanceof OptimisticLockingFailureException)
-      throw new ClientDomainException(
-          String.format(
-              "Could not delete client %s due to concurrent access", command.getClientId()));
-    throw t;
+          var client = getClient(audit, role, command.getClientId(), command.getTenantId());
+          var event = clientDomainService.deleteClient(audit, client);
+          // TODO: Move it later to core application service. Now we depend on getClient check
+          clientMessagePublisher.publish(
+              ClientRemovedEvent.builder().clientId(command.getClientId()).build());
+          return clientCommandRepository.deleteByTenantIdAndClientId(
+              event, client.getClientTenantInfo().tenantId(), client.getId());
+        },
+        OptimisticLockingFailureException.class,
+        () ->
+            new ClientDomainException(
+                String.format(
+                    "Could not delete client %s due to concurrent access", command.getClientId())));
   }
 
   /**
@@ -333,29 +282,20 @@ public class ClientUpdateCommandHandler {
    * @param command the command containing user and tenant information
    * @return the number of clients deleted
    */
-  @Retry(name = "optimisticLockingRetry", fallbackMethod = "recoverDeleteUserClients")
   public int deleteUserClients(DeleteUserClientsCommand command) {
-    log.info("Trying to remove user clients");
-    return clientCommandRepository.deleteAllByTenantIdAndCreatedBy(
-        new TenantId(command.getTenantId()), new UserId(command.getUserId()));
-  }
-
-  /**
-   * Fallback for user clients deletion on retry exhaustion.
-   *
-   * @param command the command containing user and tenant information
-   * @param t the triggering exception
-   * @return always returns 0 after throwing
-   * @throws ClientDomainException thrown due to concurrent access issues
-   * @throws Throwable rethrows the original exception if not optimistic locking
-   */
-  public int recoverDeleteUserClients(DeleteUserClientsCommand command, Throwable t)
-      throws Throwable {
-    if (t instanceof OptimisticLockingFailureException)
-      throw new ClientDomainException(
-          String.format(
-              "Could not delete user %s clients due to concurrent access", command.getUserId()));
-    throw t;
+    return retryExecutor.executeWithRetry(
+        OPTIMISTIC_LOCKING_RETRY,
+        () -> {
+          log.info("Trying to remove user clients");
+          return clientCommandRepository.deleteAllByTenantIdAndCreatedBy(
+              new TenantId(command.getTenantId()), new UserId(command.getUserId()));
+        },
+        OptimisticLockingFailureException.class,
+        () ->
+            new ClientDomainException(
+                String.format(
+                    "Could not delete user %s clients due to concurrent access",
+                    command.getUserId())));
   }
 
   /**
@@ -367,26 +307,18 @@ public class ClientUpdateCommandHandler {
    * @param tenantId the tenant identifier
    * @return the number of clients deleted
    */
-  @Retry(name = "optimisticLockingRetry", fallbackMethod = "recoverDeleteTenantClients")
   public int deleteTenantClients(long tenantId) {
-    log.info("Trying to remove tenant clients");
-    return clientCommandRepository.deleteAllByTenantId(new TenantId(tenantId));
-  }
-
-  /**
-   * Fallback for tenant clients deletion on retry exhaustion.
-   *
-   * @param tenantId the tenant identifier
-   * @param t the triggering exception
-   * @return always returns 0 after throwing
-   * @throws ClientDomainException thrown due to concurrent access issues
-   * @throws Throwable rethrows the original exception if not optimistic locking
-   */
-  public int recoverDeleteTenantClients(long tenantId, Throwable t) throws Throwable {
-    if (t instanceof OptimisticLockingFailureException)
-      throw new ClientDomainException(
-          String.format("Could not delete tenant %d clients due to concurrent access", tenantId));
-    throw t;
+    return retryExecutor.executeWithRetry(
+        OPTIMISTIC_LOCKING_RETRY,
+        () -> {
+          log.info("Trying to remove tenant clients");
+          return clientCommandRepository.deleteAllByTenantId(new TenantId(tenantId));
+        },
+        OptimisticLockingFailureException.class,
+        () ->
+            new ClientDomainException(
+                String.format(
+                    "Could not delete tenant %d clients due to concurrent access", tenantId)));
   }
 
   /**
