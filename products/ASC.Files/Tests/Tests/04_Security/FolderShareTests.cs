@@ -745,7 +745,7 @@ public class FolderShareTests(
         sharedFolderAsUser1.Should().NotBeNull();
         sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Read);
         
-        await _sharingApi.RemoveSecurityInfoAsync(new BaseBatchRequestDto { FolderIds = [new(folder.Id)] }, cancellationToken: TestContext.Current.CancellationToken);
+        await _sharingApi.RemoveSecurityInfoAsync(new BaseBatchRequestDto { FolderIds = [folder.Id] }, cancellationToken: TestContext.Current.CancellationToken);
         sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(shareFolder, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser1.Folders.Should().BeEmpty();
         

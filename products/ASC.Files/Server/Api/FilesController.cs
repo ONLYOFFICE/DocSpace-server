@@ -649,6 +649,8 @@ public abstract class FilesController<T>(
     }
     
     /// <path>api/2.0/files/file/{fileId}/access</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200)]
     [HttpGet("{fileId}/access")]
     public async Task<FileEncryptionInfoDto> GetEncryptionInfoAsync(T fileId)
     {
@@ -675,6 +677,8 @@ public abstract class FilesController<T>(
     }
     
     /// <path>api/2.0/files/file/{fileId}/access</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200)]
     [HttpPut("{fileId}/access")]
     public async Task SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
     {

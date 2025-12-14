@@ -41,7 +41,11 @@ public class PrivacyRoomControllerCommon(
     MessageService messageService)
     : ControllerBase
 {
-    /// <path>api/2.0/privacyroom/keys</path>
+    /// <summary>
+    /// Creates and sets encryption keys for the user.
+    /// </summary>
+    /// <param name="inDto">The request object containing public and private key information.</param>
+    /// <returns>The task result contains a collection of encryption key data transfer objects.</returns>
     [HttpPost("keys")]
     public Task<IEnumerable<EncryptionKeyDto>> SetKeys(EncryptionKeyRequestDto inDto)
     {
@@ -55,7 +59,7 @@ public class PrivacyRoomControllerCommon(
         return CreateKeysAsync([inDto], true);
     }
     
-    /// <path>api/2.0/privacyroom/keys</path>
+    /// <path>api/2.0/privacyroom/keys/filter</path>
     [HttpGet("keys/filter")]
     public async Task<EncryptionKeyDto> GetUserKeysByFilter(Guid? id, EncryptionKeyType? type, string version, string publicKey, string privateKeyEnc)
     {
@@ -119,6 +123,7 @@ public class PrivacyRoomControllerCommon(
         });
     }
     
+    /// <path>api/2.0/privacyroom/keys</path>
     [HttpGet("keys")]
     public async Task<IEnumerable<EncryptionKeyDto>> GetUserKeys()
     {
@@ -127,6 +132,7 @@ public class PrivacyRoomControllerCommon(
         return await encryptionKeyPairHelper.GetKeyPairAsync();
     }
     
+    /// <path>api/2.0/privacyroom/keys</path>
     [HttpDelete("keys/{id:guid}")]
     public async Task<IEnumerable<EncryptionKeyDto>> DeleteKeys(Guid id)
     {

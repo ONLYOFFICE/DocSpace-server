@@ -877,7 +877,7 @@ public class RoomShareTests(
         var user = await Initializer.InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
         await _sharingApi.GetExternalShareDataAsync(primaryLink.SharedLink.RequestToken, cancellationToken: TestContext.Current.CancellationToken);
-        await _sharingApi.RemoveSecurityInfoAsync(new BaseBatchRequestDto { FolderIds = [new(room.Id)] }, cancellationToken: TestContext.Current.CancellationToken);
+        await _sharingApi.RemoveSecurityInfoAsync(new BaseBatchRequestDto { FolderIds = [room.Id] }, cancellationToken: TestContext.Current.CancellationToken);
 
         var response = (await _roomsApi.GetRoomsFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         response.Should().NotBeNull();

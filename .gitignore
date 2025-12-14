@@ -57,3 +57,4 @@ publish/
 common/*/docker-entrypoint.py
 /common/Tools/CustomGenerators/target
 /common/Tools/CustomGenerators/openapitools.json
+/common/Tools/CustomGenerators/generated-code

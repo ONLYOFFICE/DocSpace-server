@@ -47,7 +47,7 @@ public class QuotaTests(
         await _filesClient.Authenticate(Initializer.Owner);
        
         var defaultQuotaLimit = 1073741824; // 1 GB
-        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, defaultQuotaLimit), TestContext.Current.CancellationToken);
         
         // Create a test room
         var roomTitle = "Room for Quota Reset Test " + Guid.NewGuid().ToString()[..8];
@@ -56,7 +56,7 @@ public class QuotaTests(
         // Set up request to reset quota for the room
         var resetRequest = new UpdateRoomsRoomIdsRequestDtoInteger
         {
-            RoomIds = [new(room.Id)]
+            RoomIds = [room.Id]
         };
         
         // Act
@@ -76,7 +76,7 @@ public class QuotaTests(
         await _filesClient.Authenticate(Initializer.Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
-        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, defaultQuotaLimit), TestContext.Current.CancellationToken);
 
         // Create test rooms
         var roomTitle1 = "Room 1 for Multi Quota Reset " + Guid.NewGuid().ToString()[..8];
@@ -88,7 +88,7 @@ public class QuotaTests(
         // Set up request to reset quota for multiple rooms
         var resetRequest = new UpdateRoomsRoomIdsRequestDtoInteger
         {
-            RoomIds = [new(room1.Id), new(room2.Id)]
+            RoomIds = [room1.Id, room2.Id]
         };
         // Act
         var result = (await _quotaApi.ResetRoomQuotaAsync(resetRequest, TestContext.Current.CancellationToken)).Response;
@@ -109,7 +109,7 @@ public class QuotaTests(
         await _filesClient.Authenticate(Initializer.Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
-        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, defaultQuotaLimit), TestContext.Current.CancellationToken);
 
         // Create a test room
         var roomTitle = "Room for Quota Update Test " + Guid.NewGuid().ToString()[..8];
@@ -121,7 +121,7 @@ public class QuotaTests(
         // Set up request to update quota for the room
         var updateRequest = new UpdateRoomsQuotaRequestDtoInteger
         {           
-            RoomIds = [new(room.Id)],
+            RoomIds = [room.Id],
             Quota = quotaLimit
         };
         
@@ -142,7 +142,7 @@ public class QuotaTests(
         await _filesClient.Authenticate(Initializer.Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
-        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, defaultQuotaLimit), TestContext.Current.CancellationToken);
 
         // Create test rooms
         var roomTitle1 = "Room 1 for Multi Quota Update " + Guid.NewGuid().ToString()[..8];
@@ -157,7 +157,7 @@ public class QuotaTests(
         // Set up request to update quota for multiple rooms
         var updateRequest = new UpdateRoomsQuotaRequestDtoInteger
         {           
-            RoomIds = [new(room1.Id), new(room2.Id)],
+            RoomIds = [room1.Id, room2.Id],
             Quota = quotaLimit
         };
         
@@ -180,7 +180,7 @@ public class QuotaTests(
         await _filesClient.Authenticate(Initializer.Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
-        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, defaultQuotaLimit), TestContext.Current.CancellationToken);
 
         // Create a test room
         var roomTitle = "Room for Zero Quota Test " + Guid.NewGuid().ToString()[..8];
@@ -189,7 +189,7 @@ public class QuotaTests(
         // Set up a request with zero quotas (should be the same as reset)
         var updateRequest = new UpdateRoomsQuotaRequestDtoInteger
         {
-            RoomIds = [new(room.Id)],
+            RoomIds = [room.Id],
             Quota = 0
         };
         
@@ -210,7 +210,7 @@ public class QuotaTests(
         await _filesClient.Authenticate(Initializer.Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
-        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, defaultQuotaLimit), TestContext.Current.CancellationToken);
 
         // Create a test room
         var roomTitle = "Room for Quota Lifecycle Test " + Guid.NewGuid().ToString()[..8];
@@ -220,7 +220,7 @@ public class QuotaTests(
         var quotaLimit = 5368709120; // 5 GB
         var updateRequest = new UpdateRoomsQuotaRequestDtoInteger
         {
-            RoomIds = [new(room.Id)],
+            RoomIds = [room.Id],
             Quota = quotaLimit
         };
         
@@ -231,7 +231,7 @@ public class QuotaTests(
         // Step 2: Reset the quota
         var resetRequest = new UpdateRoomsRoomIdsRequestDtoInteger
         {
-            RoomIds = [new(room.Id)]
+            RoomIds = [room.Id]
         };
         
         var resetResult = (await _quotaApi.ResetRoomQuotaAsync(resetRequest, TestContext.Current.CancellationToken)).Response;
@@ -246,7 +246,7 @@ public class QuotaTests(
         await _filesClient.Authenticate(Initializer.Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
-        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, defaultQuotaLimit), TestContext.Current.CancellationToken);
         
         // Create a room
         var roomTitle = "Room for Quota Test " + Guid.NewGuid().ToString()[..8];
@@ -274,7 +274,7 @@ public class QuotaTests(
         await _filesClient.Authenticate(Initializer.Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
-        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, defaultQuotaLimit), TestContext.Current.CancellationToken);
        
         // Set a smaller quota for the room (100 KB)
         var smallQuotaLimit = 102400; // 100 KB
@@ -305,7 +305,7 @@ public class QuotaTests(
         await _filesClient.Authenticate(Initializer.Owner);
         
         var defaultQuotaLimit = 1073741824; // 1 GB
-        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, defaultQuotaLimit), TestContext.Current.CancellationToken);
        
         // Set a smaller quota for the room (1 B)
         var minimalQuotaLimit = 1; // 1 B
