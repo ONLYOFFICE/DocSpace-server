@@ -31,10 +31,11 @@
             <artifactId>registration-domain</artifactId>
         </dependency>
 
-        <!-- Spring Retry Dependency -->
+        <!-- Resilience4j Dependency -->
         <dependency>
-            <groupId>org.springframework.retry</groupId>
-            <artifactId>spring-retry</artifactId>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot3</artifactId>
+            <version>${resilience4j.version}</version>
         </dependency>
 
         <!-- Testing Dependencies -->

@@ -155,8 +155,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(value = HandlerMethodValidationException.class)
   public ResponseEntity<?> handleValidationException(HandlerMethodValidationException e) {
     var errors =
-        e.getAllValidationResults().stream()
-            .flatMap(result -> result.getResolvableErrors().stream())
+        e.getAllErrors().stream()
             .map(MessageSourceResolvable::getDefaultMessage)
             .collect(Collectors.joining(", "));
     return new ResponseEntity<>(

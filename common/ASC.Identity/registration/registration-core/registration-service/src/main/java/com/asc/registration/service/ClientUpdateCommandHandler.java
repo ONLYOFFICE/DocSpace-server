@@ -48,14 +48,12 @@ import com.asc.registration.service.ports.output.repository.ClientCommandReposit
 import com.asc.registration.service.ports.output.repository.ClientQueryRepository;
 import com.asc.registration.service.transfer.request.update.*;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
+import io.github.resilience4j.retry.annotation.Retry;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Recover;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 /**
@@ -82,10 +80,7 @@ public class ClientUpdateCommandHandler {
    * @param command the command containing client and tenant information
    * @return the updated client secret response
    */
-  @Retryable(
-      retryFor = {OptimisticLockingFailureException.class},
-      notRecoverable = {ClientNotFoundException.class},
-      backoff = @Backoff(value = 500, multiplier = 1.65))
+  @Retry(name = "optimisticLockingRetry", fallbackMethod = "recoverRegenerateSecret")
   public ClientSecretResponse regenerateSecret(
       Audit audit, Role role, RegenerateTenantClientSecretCommand command) {
     log.info("Regenerating client secret");
@@ -106,42 +101,25 @@ public class ClientUpdateCommandHandler {
   }
 
   /**
-   * Fallback for secret regeneration on optimistic locking failure.
+   * Fallback for secret regeneration on retry exhaustion.
    *
-   * @param e the optimistic locking exception
    * @param audit the audit details
    * @param role the role of the requester
    * @param command the command containing client and tenant information
+   * @param t the triggering exception
    * @return never returns normally
-   * @throws ClientDomainException always thrown due to concurrent access issues
+   * @throws ClientDomainException thrown due to concurrent access issues
+   * @throws Throwable rethrows the original exception if not optimistic locking
    */
-  @Recover
   public ClientSecretResponse recoverRegenerateSecret(
-      OptimisticLockingFailureException e,
-      Audit audit,
-      Role role,
-      RegenerateTenantClientSecretCommand command) {
-    throw new ClientDomainException(
-        String.format(
-            "Could not regenerate secret for client %s due to concurrent access",
-            command.getClientId()));
-  }
-
-  /**
-   * Generic fallback for secret regeneration failures.
-   *
-   * @param e the triggering exception
-   * @param audit the audit details
-   * @param role the role of the requester
-   * @param command the command containing client and tenant information
-   * @return never returns normally
-   * @throws Exception always rethrows the original exception
-   */
-  @Recover
-  public ClientSecretResponse recoverRegenerateSecret(
-      Exception e, Audit audit, Role role, RegenerateTenantClientSecretCommand command)
-      throws Exception {
-    throw e;
+      Audit audit, Role role, RegenerateTenantClientSecretCommand command, Throwable t)
+      throws Throwable {
+    if (t instanceof OptimisticLockingFailureException)
+      throw new ClientDomainException(
+          String.format(
+              "Could not regenerate secret for client %s due to concurrent access",
+              command.getClientId()));
+    throw t;
   }
 
   /**
@@ -151,10 +129,7 @@ public class ClientUpdateCommandHandler {
    * @param role the role of the requester
    * @param command the command containing client, tenant, and desired visibility status
    */
-  @Retryable(
-      retryFor = {OptimisticLockingFailureException.class},
-      notRecoverable = {ClientNotFoundException.class},
-      backoff = @Backoff(value = 500, multiplier = 1.65))
+  @Retry(name = "optimisticLockingRetry", fallbackMethod = "recoverChangeVisibility")
   public void changeVisibility(
       Audit audit, Role role, ChangeTenantClientVisibilityCommand command) {
     log.info("Trying to change client visibility");
@@ -175,40 +150,24 @@ public class ClientUpdateCommandHandler {
   }
 
   /**
-   * Fallback for visibility change on optimistic locking failure.
+   * Fallback for visibility change on retry exhaustion.
    *
-   * @param e the optimistic locking exception
    * @param audit the audit details
    * @param role the role of the requester
    * @param command the command with client and tenant details
-   * @throws ClientDomainException always thrown due to concurrent access issues
+   * @param t the triggering exception
+   * @throws ClientDomainException thrown due to concurrent access issues
+   * @throws Throwable rethrows the original exception if not optimistic locking
    */
-  @Recover
   public void recoverChangeVisibility(
-      OptimisticLockingFailureException e,
-      Audit audit,
-      Role role,
-      ChangeTenantClientVisibilityCommand command) {
-    throw new ClientDomainException(
-        String.format(
-            "Could not change visibility for client %s due to concurrent access",
-            command.getClientId()));
-  }
-
-  /**
-   * Generic fallback for visibility change failures.
-   *
-   * @param e the triggering exception
-   * @param audit the audit details
-   * @param role the role of the requester
-   * @param command the command with client and tenant details
-   * @throws Exception always rethrows the original exception
-   */
-  @Recover
-  public void recoverChangeVisibility(
-      Exception e, Audit audit, Role role, ChangeTenantClientVisibilityCommand command)
-      throws Exception {
-    throw e;
+      Audit audit, Role role, ChangeTenantClientVisibilityCommand command, Throwable t)
+      throws Throwable {
+    if (t instanceof OptimisticLockingFailureException)
+      throw new ClientDomainException(
+          String.format(
+              "Could not change visibility for client %s due to concurrent access",
+              command.getClientId()));
+    throw t;
   }
 
   /**
@@ -218,10 +177,7 @@ public class ClientUpdateCommandHandler {
    * @param role the role of the requester
    * @param command the command containing client, tenant, and desired activation status
    */
-  @Retryable(
-      retryFor = {OptimisticLockingFailureException.class},
-      notRecoverable = {ClientNotFoundException.class},
-      backoff = @Backoff(value = 500, multiplier = 1.65))
+  @Retry(name = "optimisticLockingRetry", fallbackMethod = "recoverChangeActivation")
   public void changeActivation(
       Audit audit, Role role, ChangeTenantClientActivationCommand command) {
     log.info("Trying to change client activation");
@@ -242,40 +198,24 @@ public class ClientUpdateCommandHandler {
   }
 
   /**
-   * Fallback for activation change on optimistic locking failure.
+   * Fallback for activation change on retry exhaustion.
    *
-   * @param e the optimistic locking exception
    * @param audit the audit details
    * @param role the role of the requester
    * @param command the command with client and tenant details
-   * @throws ClientDomainException always thrown due to concurrent access issues
+   * @param t the triggering exception
+   * @throws ClientDomainException thrown due to concurrent access issues
+   * @throws Throwable rethrows the original exception if not optimistic locking
    */
-  @Recover
   public void recoverChangeActivation(
-      OptimisticLockingFailureException e,
-      Audit audit,
-      Role role,
-      ChangeTenantClientActivationCommand command) {
-    throw new ClientDomainException(
-        String.format(
-            "Could not change activation for client %s due to concurrent access",
-            command.getClientId()));
-  }
-
-  /**
-   * Generic fallback for activation change failures.
-   *
-   * @param e the triggering exception
-   * @param audit the audit details
-   * @param role the role of the requester
-   * @param command the command with client and tenant details
-   * @throws Exception always rethrows the original exception
-   */
-  @Recover
-  public void recoverChangeActivation(
-      Exception e, Audit audit, Role role, ChangeTenantClientActivationCommand command)
-      throws Exception {
-    throw e;
+      Audit audit, Role role, ChangeTenantClientActivationCommand command, Throwable t)
+      throws Throwable {
+    if (t instanceof OptimisticLockingFailureException)
+      throw new ClientDomainException(
+          String.format(
+              "Could not change activation for client %s due to concurrent access",
+              command.getClientId()));
+    throw t;
   }
 
   /**
@@ -286,10 +226,7 @@ public class ClientUpdateCommandHandler {
    * @param command the command containing updated client information
    * @return the updated client response
    */
-  @Retryable(
-      retryFor = {OptimisticLockingFailureException.class},
-      notRecoverable = {ClientNotFoundException.class},
-      backoff = @Backoff(value = 500, multiplier = 1.65))
+  @Retry(name = "optimisticLockingRetry", fallbackMethod = "recoverUpdateClient")
   public ClientResponse updateClient(Audit audit, Role role, UpdateTenantClientCommand command) {
     log.info("Updating client information");
 
@@ -326,40 +263,23 @@ public class ClientUpdateCommandHandler {
   }
 
   /**
-   * Fallback for client update on optimistic locking failure.
+   * Fallback for client update on retry exhaustion.
    *
-   * @param e the optimistic locking exception
    * @param audit the audit details
    * @param role the role of the requester
    * @param command the command containing updated client information
+   * @param t the triggering exception
    * @return never returns normally
-   * @throws ClientDomainException always thrown due to concurrent access issues
+   * @throws ClientDomainException thrown due to concurrent access issues
+   * @throws Throwable rethrows the original exception if not optimistic locking
    */
-  @Recover
   public ClientResponse recoverUpdateClient(
-      OptimisticLockingFailureException e,
-      Audit audit,
-      Role role,
-      UpdateTenantClientCommand command) {
-    throw new ClientDomainException(
-        String.format(
-            "Could not update client %s due to concurrent access", command.getClientId()));
-  }
-
-  /**
-   * Generic fallback for client update failures.
-   *
-   * @param e the triggering exception
-   * @param audit the audit details
-   * @param role the role of the requester
-   * @param command the command containing updated client information
-   * @return never returns normally
-   * @throws Exception always rethrows the original exception
-   */
-  @Recover
-  public ClientResponse recoverUpdateClient(
-      Exception e, Audit audit, Role role, UpdateTenantClientCommand command) throws Exception {
-    throw e;
+      Audit audit, Role role, UpdateTenantClientCommand command, Throwable t) throws Throwable {
+    if (t instanceof OptimisticLockingFailureException)
+      throw new ClientDomainException(
+          String.format(
+              "Could not update client %s due to concurrent access", command.getClientId()));
+    throw t;
   }
 
   /**
@@ -370,10 +290,7 @@ public class ClientUpdateCommandHandler {
    * @param command the command containing client and tenant information
    * @return the result of the delete operation, the number of rows affected.
    */
-  @Retryable(
-      retryFor = {OptimisticLockingFailureException.class},
-      notRecoverable = {ClientNotFoundException.class},
-      backoff = @Backoff(value = 500, multiplier = 1.65))
+  @Retry(name = "optimisticLockingRetry", fallbackMethod = "recoverDeleteClient")
   public int deleteClient(Audit audit, Role role, DeleteTenantClientCommand command) {
     log.info("Trying to remove client");
 
@@ -387,23 +304,23 @@ public class ClientUpdateCommandHandler {
   }
 
   /**
-   * Fallback for client deletion on optimistic locking failure.
+   * Fallback for client deletion on retry exhaustion.
    *
-   * @param e the optimistic locking exception
    * @param audit the audit details
    * @param role the role of the requester
    * @param command the command containing client and tenant information
-   * @throws ClientDomainException always thrown due to concurrent access issues
+   * @param t the triggering exception
+   * @return always returns 0 after throwing
+   * @throws ClientDomainException thrown due to concurrent access issues
+   * @throws Throwable rethrows the original exception if not optimistic locking
    */
-  @Recover
-  public void recoverDeleteClient(
-      OptimisticLockingFailureException e,
-      Audit audit,
-      Role role,
-      DeleteTenantClientCommand command) {
-    throw new ClientDomainException(
-        String.format(
-            "Could not delete client %s due to concurrent access", command.getClientId()));
+  public int recoverDeleteClient(
+      Audit audit, Role role, DeleteTenantClientCommand command, Throwable t) throws Throwable {
+    if (t instanceof OptimisticLockingFailureException)
+      throw new ClientDomainException(
+          String.format(
+              "Could not delete client %s due to concurrent access", command.getClientId()));
+    throw t;
   }
 
   /**
@@ -416,10 +333,7 @@ public class ClientUpdateCommandHandler {
    * @param command the command containing user and tenant information
    * @return the number of clients deleted
    */
-  @Retryable(
-      retryFor = {OptimisticLockingFailureException.class},
-      notRecoverable = {ClientNotFoundException.class},
-      backoff = @Backoff(value = 500, multiplier = 1.65))
+  @Retry(name = "optimisticLockingRetry", fallbackMethod = "recoverDeleteUserClients")
   public int deleteUserClients(DeleteUserClientsCommand command) {
     log.info("Trying to remove user clients");
     return clientCommandRepository.deleteAllByTenantIdAndCreatedBy(
@@ -427,18 +341,21 @@ public class ClientUpdateCommandHandler {
   }
 
   /**
-   * Fallback for user clients deletion on optimistic locking failure.
+   * Fallback for user clients deletion on retry exhaustion.
    *
-   * @param e the optimistic locking exception
    * @param command the command containing user and tenant information
-   * @throws ClientDomainException always thrown due to concurrent access issues
+   * @param t the triggering exception
+   * @return always returns 0 after throwing
+   * @throws ClientDomainException thrown due to concurrent access issues
+   * @throws Throwable rethrows the original exception if not optimistic locking
    */
-  @Recover
-  public void recoverDeleteUserClients(
-      OptimisticLockingFailureException e, DeleteUserClientsCommand command) {
-    throw new ClientDomainException(
-        String.format(
-            "Could not delete user %s clients due to concurrent access", command.getUserId()));
+  public int recoverDeleteUserClients(DeleteUserClientsCommand command, Throwable t)
+      throws Throwable {
+    if (t instanceof OptimisticLockingFailureException)
+      throw new ClientDomainException(
+          String.format(
+              "Could not delete user %s clients due to concurrent access", command.getUserId()));
+    throw t;
   }
 
   /**
@@ -450,41 +367,26 @@ public class ClientUpdateCommandHandler {
    * @param tenantId the tenant identifier
    * @return the number of clients deleted
    */
-  @Retryable(
-      retryFor = {OptimisticLockingFailureException.class},
-      notRecoverable = {ClientNotFoundException.class},
-      backoff = @Backoff(value = 500, multiplier = 1.65))
+  @Retry(name = "optimisticLockingRetry", fallbackMethod = "recoverDeleteTenantClients")
   public int deleteTenantClients(long tenantId) {
     log.info("Trying to remove tenant clients");
     return clientCommandRepository.deleteAllByTenantId(new TenantId(tenantId));
   }
 
   /**
-   * Fallback for tenant clients deletion on optimistic locking failure.
+   * Fallback for tenant clients deletion on retry exhaustion.
    *
-   * @param e the optimistic locking exception
    * @param tenantId the tenant identifier
-   * @throws ClientDomainException always thrown due to concurrent access issues
+   * @param t the triggering exception
+   * @return always returns 0 after throwing
+   * @throws ClientDomainException thrown due to concurrent access issues
+   * @throws Throwable rethrows the original exception if not optimistic locking
    */
-  @Recover
-  public void recoverDeleteTenantClients(OptimisticLockingFailureException e, long tenantId) {
-    throw new ClientDomainException(
-        String.format("Could not delete tenant %d clients due to concurrent access", tenantId));
-  }
-
-  /**
-   * Generic fallback for client deletion failures.
-   *
-   * @param e the triggering exception
-   * @param audit the audit details
-   * @param role the role of the requester
-   * @param command the command containing client and tenant information
-   * @throws Exception always rethrows the original exception
-   */
-  @Recover
-  public void recoverDeleteClient(
-      Exception e, Audit audit, Role role, DeleteTenantClientCommand command) throws Exception {
-    throw e;
+  public int recoverDeleteTenantClients(long tenantId, Throwable t) throws Throwable {
+    if (t instanceof OptimisticLockingFailureException)
+      throw new ClientDomainException(
+          String.format("Could not delete tenant %d clients due to concurrent access", tenantId));
+    throw t;
   }
 
   /**

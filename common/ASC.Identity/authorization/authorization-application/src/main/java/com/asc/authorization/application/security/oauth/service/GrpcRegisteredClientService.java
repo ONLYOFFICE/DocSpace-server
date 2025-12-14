@@ -29,13 +29,12 @@ package com.asc.authorization.application.security.oauth.service;
 
 import com.asc.authorization.application.exception.client.RegisteredClientPermissionException;
 import com.asc.common.application.proto.ClientResponse;
+import io.github.resilience4j.retry.annotation.Retry;
 import io.grpc.Deadline;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -65,11 +64,7 @@ public class GrpcRegisteredClientService {
    * @return the {@link ClientResponse} containing the client information.
    * @throws RegisteredClientPermissionException if the client is not accessible.
    */
-  @Retryable(
-      retryFor = Exception.class,
-      noRetryFor = {RegisteredClientPermissionException.class},
-      maxAttempts = 5,
-      backoff = @Backoff(delay = 100, multiplier = 1.625))
+  @Retry(name = "grpcClientRetry")
   public ClientResponse getClient(String id) {
     log.info("GRPC call to get client: {}", id);
     return registrationService

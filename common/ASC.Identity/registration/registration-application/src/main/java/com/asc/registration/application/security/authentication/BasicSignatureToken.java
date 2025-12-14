@@ -31,6 +31,7 @@ import java.util.Collection;
 import lombok.Getter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.util.Assert;
 
 /** Custom authentication token for ASC application. */
@@ -45,7 +46,7 @@ public class BasicSignatureToken extends AbstractAuthenticationToken {
    * @param credentials the credentials.
    */
   public BasicSignatureToken(String credentials) {
-    super(null);
+    super(AuthorityUtils.NO_AUTHORITIES);
     this.principal = null;
     this.credentials = credentials;
     this.setAuthenticated(false);

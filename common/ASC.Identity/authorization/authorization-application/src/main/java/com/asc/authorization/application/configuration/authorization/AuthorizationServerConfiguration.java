@@ -27,6 +27,7 @@
 
 package com.asc.authorization.application.configuration.authorization;
 
+import com.asc.authorization.application.configuration.properties.SecurityConfigurationProperties;
 import com.asc.authorization.application.security.filter.BasicSignatureAuthenticationFilter;
 import com.asc.authorization.application.security.filter.RateLimiterFilter;
 import com.asc.authorization.application.security.oauth.converter.FallbackScopeAuthorizationCodeRequestConverter;
@@ -35,6 +36,7 @@ import com.asc.authorization.application.security.oauth.generator.PrefixedAuthor
 import com.asc.authorization.application.security.oauth.provider.PersonalAccessTokenAuthenticationProvider;
 import com.asc.authorization.application.security.oauth.provider.TokenIntrospectionAuthenticationProvider;
 import com.asc.authorization.application.security.provider.SignatureAuthenticationProvider;
+import com.asc.authorization.application.security.service.SignatureService;
 import jakarta.servlet.RequestDispatcher;
 import java.util.List;
 import java.util.Map;
@@ -50,20 +52,21 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationConsentAuthenticationProvider;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -95,11 +98,6 @@ public class AuthorizationServerConfiguration {
   private final RateLimiterFilter rateLimiterFilter;
   private final BasicSignatureAuthenticationFilter authenticationFilter;
 
-  private final FallbackScopeAuthorizationCodeRequestConverter
-      fallbackScopeAuthorizationCodeRequestConverter;
-  private final PersonalAccessTokenAuthenticationConverter
-      personalAccessTokenAuthenticationConverter;
-
   private final PersonalAccessTokenAuthenticationProvider personalAccessTokenAuthenticationProvider;
   private final SignatureAuthenticationProvider codeAuthenticationProvider;
   private final TokenIntrospectionAuthenticationProvider tokenIntrospectionAuthenticationProvider;
@@ -119,7 +117,16 @@ public class AuthorizationServerConfiguration {
   @Bean
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @SneakyThrows
-  public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) {
+  public SecurityFilterChain authorizationServerSecurityFilterChain(
+      HttpSecurity http,
+      SecurityConfigurationProperties securityConfigurationProperties,
+      RegisteredClientRepository registeredClientRepository,
+      SignatureService signatureService) {
+    var fallbackScopeAuthorizationCodeRequestConverter =
+        new FallbackScopeAuthorizationCodeRequestConverter(registeredClientRepository);
+    var personalAccessTokenAuthenticationConverter =
+        new PersonalAccessTokenAuthenticationConverter(
+            securityConfigurationProperties, signatureService);
     var prefixedCodeGenerator = new PrefixedAuthorizationCodeGenerator(environment, region);
     var authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
     var endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
@@ -247,7 +254,7 @@ public class AuthorizationServerConfiguration {
                   dispatcher.forward(request, response);
                 },
                 PathPatternRequestMatcher.withDefaults().matcher(formConfiguration.getLogin())));
-    http.addFilterBefore(rateLimiterFilter, ChannelProcessingFilter.class);
+    http.addFilterBefore(rateLimiterFilter, CsrfFilter.class);
     http.addFilterBefore(authenticationFilter, LogoutFilter.class);
 
     http.cors(c -> c.configurationSource(corsConfigurationSource()));

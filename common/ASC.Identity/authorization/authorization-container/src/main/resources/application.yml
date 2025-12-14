@@ -31,6 +31,7 @@ spring:
       - "classpath:application-datasource.yml"
       - "classpath:application-resilience.yml"
       - "classpath:application-rabbitmq.yml"
+      - "classpath:application-service-resilience.yml"
       - "classpath:application-security.yml"
       - "classpath:application-service.yml"
   threads:

@@ -28,7 +28,6 @@
 package com.asc.common.messaging.configuration;
 
 import com.asc.common.service.transfer.message.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,13 +40,11 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.amqp.support.converter.DefaultJackson2JavaTypeMapper;
-import org.springframework.amqp.support.converter.Jackson2JavaTypeMapper;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.amqp.support.converter.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Configuration class for setting up RabbitMQ messaging infrastructure. It includes configuration
@@ -68,15 +65,14 @@ public class RabbitListenerContainerFactoryConfiguration {
   /**
    * Bean for creating and configuring a Jackson2JsonMessageConverter instance.
    *
-   * @param mapper the ObjectMapper to use for JSON conversion
    * @return a configured Jackson2JsonMessageConverter instance
    */
   @Bean
-  public MessageConverter jsonMessageConverter(ObjectMapper mapper) {
+  public MessageConverter jsonMessageConverter() {
     log.info("Building a json message converter");
 
-    var messageConverter = new Jackson2JsonMessageConverter(mapper);
-    var classMapper = new DefaultJackson2JavaTypeMapper();
+    var messageConverter = new JacksonJsonMessageConverter(JsonMapper.builder().build());
+    var classMapper = new DefaultJacksonJavaTypeMapper();
     classMapper.setTrustedPackages("*");
     classMapper.setIdClassMapping(
         Map.of(
@@ -87,7 +83,7 @@ public class RabbitListenerContainerFactoryConfiguration {
             "tenantClientsRemoved", TenantClientsRemovedEvent.class,
             "userClientsRemoved", UserClientsRemovedEvent.class));
     messageConverter.setClassMapper(classMapper);
-    messageConverter.setTypePrecedence(Jackson2JavaTypeMapper.TypePrecedence.TYPE_ID);
+    messageConverter.setTypePrecedence(JacksonJavaTypeMapper.TypePrecedence.TYPE_ID);
     return messageConverter;
   }
 

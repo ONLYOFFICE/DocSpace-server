@@ -24,45 +24,44 @@
 // writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-package com.asc.transfer.entity;
 
-import java.io.Serializable;
-import lombok.*;
+package com.asc.registration.application.configuration;
+
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.module.blackbird.BlackbirdModule;
 
 /**
- * Represents a scope within the client.
+ * Configuration class for customizing JSON serialization and deserialization behavior.
  *
- * <p>This entity encapsulates the details of a scope, including its unique name, associated group,
- * and type. Scopes are used to define and manage access permissions or operational boundaries
- * within the client.
- *
- * <p>All fields are expected to be non-null and unique in the context of their usage.
+ * <p>This configuration applies application-wide Jackson ObjectMapper settings to enhance
+ * performance and adjust deserialization behavior for handling null values in primitives.
  */
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ScopeEntity implements Serializable {
+@Configuration
+public class SerializationConfiguration {
 
   /**
-   * The name of the scope.
+   * Customizes the Jackson ObjectMapper builder with performance optimizations and deserialization
+   * settings.
    *
-   * <p>This field is used as the primary key in the database and must be unique and non-null.
-   */
-  private String name;
-
-  /**
-   * The group to which the scope belongs.
+   * <p>Applies the following customizations:
    *
-   * <p>This field must be unique and non-null.
-   */
-  private String group;
-
-  /**
-   * The type of the scope.
+   * <ul>
+   *   <li>Registers the Blackbird module for improved serialization/deserialization performance
+   *       through bytecode generation
+   *   <li>Disables {@link DeserializationFeature#FAIL_ON_NULL_FOR_PRIMITIVES} to allow null values
+   *       to be deserialized as default primitive values (e.g., null → 0 for int)
+   * </ul>
    *
-   * <p>This field must be unique and non-null.
+   * @return a customizer that configures the Jackson ObjectMapper builder
    */
-  private String type;
+  @Bean
+  JsonMapperBuilderCustomizer jacksonCustomizer() {
+    return builder ->
+        builder
+            .addModule(new BlackbirdModule())
+            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
+  }
 }

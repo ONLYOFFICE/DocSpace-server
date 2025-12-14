@@ -34,7 +34,6 @@ import org.springframework.security.oauth2.server.authorization.authentication.O
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeRequestAuthenticationConverter;
 import org.springframework.security.web.authentication.AuthenticationConverter;
-import org.springframework.stereotype.Component;
 
 /**
  * A custom implementation of {@link AuthenticationConverter} that enhances the standard OAuth2
@@ -53,7 +52,6 @@ import org.springframework.stereotype.Component;
  * @see OAuth2AuthorizationCodeRequestAuthenticationConverter
  * @see OAuth2AuthorizationCodeRequestAuthenticationToken
  */
-@Component
 public class FallbackScopeAuthorizationCodeRequestConverter implements AuthenticationConverter {
   private final RegisteredClientRepository registeredClientRepository;
   private final OAuth2AuthorizationCodeRequestAuthenticationConverter delegate =
