@@ -17,10 +17,6 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Utils\TimeZoneConverter\windowsZones.xml" />
-    <EmbeddedResource Include="Utils\TimeZoneConverter\timeZoneNames.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="ARSoft.Tools.NetStandard.DXSdata" />
     <PackageReference Include="Autofac.Configuration" />
