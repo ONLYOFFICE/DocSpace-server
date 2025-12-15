@@ -39,11 +39,11 @@ public static class FileEncryptionStream
     public static async Task EncryptFileAsync(
         Stream input, 
         Stream output, 
-        string password,
+        byte[] aesKey,
         CancellationToken ct = default)
     {
         var salt = RandomNumberGenerator.GetBytes(SaltSize);
-        var key = DeriveKey(password, salt);
+        var key = DeriveKey(aesKey, salt);
         
         await output.WriteAsync(salt, ct);
 
@@ -71,13 +71,13 @@ public static class FileEncryptionStream
     public static async Task DecryptFileAsync(
         Stream input, 
         Stream output, 
-        string password,
+        byte[] aesKey,
         CancellationToken ct = default)
     {
         var salt = new byte[SaltSize];
         await input.ReadExactlyAsync(salt, ct);
         
-        var key = DeriveKey(password, salt);
+        var key = DeriveKey(aesKey, salt);
         
         var headerBuffer = new byte[4];
         var nonceBuffer = new byte[NonceSize];
@@ -102,9 +102,8 @@ public static class FileEncryptionStream
         }
     }
 
-    private static byte[] DeriveKey(string password, ReadOnlySpan<byte> salt)
+    private static byte[] DeriveKey(byte[] password, ReadOnlySpan<byte> salt)
     {
-        return Rfc2898DeriveBytes.Pbkdf2(
-            password, salt, Iterations, HashAlgorithmName.SHA256, KeySize);
+        return Rfc2898DeriveBytes.Pbkdf2(password, salt, Iterations, HashAlgorithmName.SHA256, KeySize);
     }
 }

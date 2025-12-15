@@ -89,13 +89,13 @@ public class PrivacyRoomTest(
         roomKeys.Should().NotBeNull();
         roomKeys.Should().HaveCount(1);
         
-        var filePasswordForEnrypt = Initializer.FakerMember.Generate().Password;
-        var filePrivateKeyEnc = EncryptFilePassword(userPublicKey, filePasswordForEnrypt);
+        var aesKeyForEncrypt = RandomNumberGenerator.GetBytes(32);
+        var filePrivateKeyEnc = EncryptFilePassword(userPublicKey, aesKeyForEncrypt);
 
         var assembly = Assembly.GetExecutingAssembly();
         await using var stream = assembly.GetManifestResourceStream("ASC.Files.Tests.Data.new.docx")!;
         await using var encryptTempStream = new MemoryStream();
-        await FileEncryptionStream.EncryptFileAsync(stream, encryptTempStream, filePasswordForEnrypt, TestContext.Current.CancellationToken);
+        await FileEncryptionStream.EncryptFileAsync(stream, encryptTempStream, aesKeyForEncrypt, TestContext.Current.CancellationToken);
 
         var uploadSession = (await _filesOperationsApi.CreateUploadSessionAsync(createdRoom.Id, new SessionRequest("new.docx", encryptTempStream.Length), TestContext.Current.CancellationToken)).Response;
         var uploadSessionData = JsonSerializer.Deserialize<SessionData>(((JsonElement)uploadSession).ToString(), JsonSerializerOptions.Web)!;
@@ -121,8 +121,8 @@ public class PrivacyRoomTest(
         result.FileKeys[0].PublicKeyId.Should().Be(userKey.Id);
         result.FileKeys[0].PrivateKeyEnc.Should().Be(filePrivateKeyEnc);
 
-        var filePasswordForDecrypt = DecryptFilePassword(result.FileKeys[0].PrivateKeyEnc, DecryptPrivateEncKey(result.UserKeys[0].PrivateKeyEnc, userPassword));
-        filePasswordForDecrypt.Should().Be(filePasswordForEnrypt);
+        var aesKeyForDecrypt = DecryptFilePassword(result.FileKeys[0].PrivateKeyEnc, DecryptPrivateEncKey(result.UserKeys[0].PrivateKeyEnc, userPassword));
+        aesKeyForDecrypt.Should().BeEquivalentTo(aesKeyForEncrypt);
         
         var configuration = (await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var fileStream = await _filesClient.GetStreamAsync(configuration.ViewUrl, TestContext.Current.CancellationToken);
@@ -132,7 +132,7 @@ public class PrivacyRoomTest(
 
         fileTempStream.Position = 0;
         await using var decryptTempStream = new MemoryStream();
-        await FileEncryptionStream.DecryptFileAsync(fileTempStream, decryptTempStream, filePasswordForEnrypt, TestContext.Current.CancellationToken);
+        await FileEncryptionStream.DecryptFileAsync(fileTempStream, decryptTempStream, aesKeyForEncrypt, TestContext.Current.CancellationToken);
 
         AreStreamsEqual(decryptTempStream, stream).Should().BeTrue();
     }
@@ -160,21 +160,21 @@ public class PrivacyRoomTest(
         return Convert.ToBase64String(rsa.ExportPkcs8PrivateKey());
     }
 
-    private static string EncryptFilePassword(string userPublicKey, string filePassword)
+    private static string EncryptFilePassword(string userPublicKey, byte[] filePassword)
     {
         using var rsaPublic = RSA.Create();
         rsaPublic.ImportSubjectPublicKeyInfo(Convert.FromBase64String(userPublicKey), out _);
-        var encryptedFilePassword = rsaPublic.Encrypt(Encoding.UTF8.GetBytes(filePassword), RSAEncryptionPadding.OaepSHA256);
+        var encryptedFilePassword = rsaPublic.Encrypt(filePassword, RSAEncryptionPadding.OaepSHA256);
         return Convert.ToBase64String(encryptedFilePassword);
     }
 
-    private static string DecryptFilePassword(string encryptedFilePassword, string userPrivateKey)
+    private static byte[] DecryptFilePassword(string encryptedFilePassword, string userPrivateKey)
     {
         using var rsa = RSA.Create();
         var privateKeyBytes = Convert.FromBase64String(userPrivateKey);
         rsa.ImportPkcs8PrivateKey(privateKeyBytes, out _);
         var decryptedBytes = rsa.Decrypt(Convert.FromBase64String(encryptedFilePassword), RSAEncryptionPadding.OaepSHA256);
-        return Encoding.UTF8.GetString(decryptedBytes);
+        return decryptedBytes;
     }
 
     private static bool AreStreamsEqual(Stream stream1, Stream stream2)
