@@ -605,7 +605,7 @@ internal abstract class SecurityBaseDao<T>(
             }
         });
 
-        await foreach(var r in DeleteExpiredAsync(result.ToAsyncEnumerable(), ctx))
+        foreach(var r in result)
         {
             yield return r;
         }
@@ -1165,33 +1165,6 @@ internal abstract class SecurityBaseDao<T>(
 
         return q;
     }
-
-    protected async IAsyncEnumerable<FileShareRecord<T>> DeleteExpiredAsync(IAsyncEnumerable<FileShareRecord<T>> records, FilesDbContext filesDbContext)
-    {
-        var expired = new List<Guid>();
-
-        await foreach (var r in records)
-        {
-            if (r.SubjectType == SubjectType.InvitationLink && r.Options is { IsExpired: true })
-            {
-                expired.Add(r.Subject);
-                continue;
-            }
-
-            yield return r;
-        }
-
-        if (expired.Count <= 0)
-        {
-            yield break;
-        }
-
-        var tenantId = _tenantManager.GetCurrentTenantId();
-
-        await filesDbContext.Security
-            .Where(s => s.TenantId == tenantId && s.SubjectType == SubjectType.InvitationLink && expired.Contains(s.Subject))
-            .ExecuteDeleteAsync();
-    }
 }
 
 [Scope(typeof(ISecurityDao<int>))]
@@ -1275,7 +1248,7 @@ internal class SecurityDao(
             .OrderBy(r => r.Level)
             .ThenByDescending(r => r.Share, new FileShareRecord<int>.ShareComparer(entry.RootFolderType));
 
-        return await DeleteExpiredAsync(records, filesDbContext).ToListAsync();
+        return await records.ToListAsync();
     }
 }
 
