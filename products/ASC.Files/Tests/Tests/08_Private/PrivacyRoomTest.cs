@@ -26,6 +26,9 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
+using System.Net.Http.Json;
+using System.Reflection;
+
 using ASC.Files.Tests.ApiFactories;
 
 namespace ASC.Files.Tests.Tests._08_Privacy;
@@ -71,6 +74,7 @@ public class PrivacyRoomTest(
         await _filesClient.Authenticate(Initializer.Owner);
 
         var (userPublicKey, userPrivateKeyEnc, userPassword) = ExportPublicAndPrivateKeys();
+        
         var userKeys = (await _privacyroomApi.SetKeysAsync(new EncryptionKeyRequestDto(userPublicKey, userPrivateKeyEnc), cancellationToken: TestContext.Current.CancellationToken)).Response;
         var userKey = userKeys[0];
         
@@ -85,24 +89,55 @@ public class PrivacyRoomTest(
         roomKeys.Should().NotBeNull();
         roomKeys.Should().HaveCount(1);
         
-        var (_, filePrivateKeyEnc, filePassword) = ExportPublicAndPrivateKeys(userPublicKey);
-        var file = await CreateFile("file.docx", createdRoom.Id);
-        List<AccessRequestKeyDto> keys = [new(roomKeys[0].UserId, roomKeys[0].Id, filePrivateKeyEnc)];
-        await _filesApi.SetEncryptionInfoAsync(file.Id, keys, cancellationToken: TestContext.Current.CancellationToken);
+        var filePasswordForEnrypt = Initializer.FakerMember.Generate().Password;
+        var filePrivateKeyEnc = EncryptFilePassword(userPublicKey, filePasswordForEnrypt);
+
+        var assembly = Assembly.GetExecutingAssembly();
+        await using var stream = assembly.GetManifestResourceStream("ASC.Files.Tests.Data.new.docx")!;
+        await using var encryptTempStream = new MemoryStream();
+        await FileEncryptionStream.EncryptFileAsync(stream, encryptTempStream, filePasswordForEnrypt, TestContext.Current.CancellationToken);
+
+        var uploadSession = (await _filesOperationsApi.CreateUploadSessionAsync(createdRoom.Id, new SessionRequest("new.docx", encryptTempStream.Length), TestContext.Current.CancellationToken)).Response;
+        var uploadSessionData = JsonSerializer.Deserialize<SessionData>(((JsonElement)uploadSession).ToString(), JsonSerializerOptions.Web)!;
         
-        var result = (await _filesApi.GetEncryptionInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        encryptTempStream.Position = 0;
+        using var formContent = new MultipartFormDataContent();
+        formContent.Add(new StreamContent(encryptTempStream), "file", "new.docx");
+        await _filesClient.PostAsync(uploadSessionData.Data.Location + "&chunkNumber=1&upload=true", formContent, TestContext.Current.CancellationToken);
+        var uploadResponse = await _filesClient.PostAsync(uploadSessionData.Data.Location + "&finalize=true", null, TestContext.Current.CancellationToken);
+        var fileId = (await uploadResponse.Content.ReadFromJsonAsync<FileData>(TestContext.Current.CancellationToken))!.Data.Id;
+        
+        List<AccessRequestKeyDto> keys = [new(roomKeys[0].UserId, roomKeys[0].Id, filePrivateKeyEnc)];
+        await _filesApi.SetEncryptionInfoAsync(fileId, keys, cancellationToken: TestContext.Current.CancellationToken);
+        
+        var result = (await _filesApi.GetEncryptionInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
         result.Should().NotBeNull();
         result.UserKeys.Should().NotBeNullOrEmpty();
         result.UserKeys[0].UserId.Should().Be(userKey.UserId);
         result.UserKeys[0].Id.Should().Be(userKey.Id);
         
-        result.FileKeys[0].FileId.Should().Be(file.Id);
+        result.FileKeys[0].FileId.Should().Be(fileId);
         result.FileKeys[0].UserId.Should().Be(userKey.UserId);
         result.FileKeys[0].PublicKeyId.Should().Be(userKey.Id);
         result.FileKeys[0].PrivateKeyEnc.Should().Be(filePrivateKeyEnc);
-    }
 
-    private static Key ExportPublicAndPrivateKeys(string? password = null)
+        var filePasswordForDecrypt = DecryptFilePassword(result.FileKeys[0].PrivateKeyEnc, DecryptPrivateEncKey(result.UserKeys[0].PrivateKeyEnc, userPassword));
+        filePasswordForDecrypt.Should().Be(filePasswordForEnrypt);
+        
+        var configuration = (await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var fileStream = await _filesClient.GetStreamAsync(configuration.ViewUrl, TestContext.Current.CancellationToken);
+        
+        await using var fileTempStream = new MemoryStream();
+        await fileStream.CopyToAsync(fileTempStream, TestContext.Current.CancellationToken);
+
+        fileTempStream.Position = 0;
+        await using var decryptTempStream = new MemoryStream();
+        await FileEncryptionStream.DecryptFileAsync(fileTempStream, decryptTempStream, filePasswordForEnrypt, TestContext.Current.CancellationToken);
+
+        AreStreamsEqual(decryptTempStream, stream).Should().BeTrue();
+    }
+    
+    private static Key ExportPublicAndPrivateKeys()
     {
         using var rsa = RSA.Create(2048);
         var publicKey = Convert.ToBase64String(rsa.ExportSubjectPublicKeyInfo());
@@ -111,19 +146,54 @@ public class PrivacyRoomTest(
             HashAlgorithmName.SHA256,
             iterationCount: 100000);
         
-        password ??= Initializer.FakerMember.Generate().Password;
+        var password = Initializer.FakerMember.Generate().Password;
         
         var privateKey = Convert.ToBase64String(rsa.ExportEncryptedPkcs8PrivateKey(password, pbeParameters));
         return new Key(publicKey, privateKey, password);
     }
 
     private static string DecryptPrivateEncKey(string encryptedPrivateKey, string password)
-    {        
+    {
         using var rsa = RSA.Create();
         var privateKeyBytes = Convert.FromBase64String(encryptedPrivateKey);
         rsa.ImportEncryptedPkcs8PrivateKey(password, privateKeyBytes, out _);
         return Convert.ToBase64String(rsa.ExportPkcs8PrivateKey());
     }
+
+    private static string EncryptFilePassword(string userPublicKey, string filePassword)
+    {
+        using var rsaPublic = RSA.Create();
+        rsaPublic.ImportSubjectPublicKeyInfo(Convert.FromBase64String(userPublicKey), out _);
+        var encryptedFilePassword = rsaPublic.Encrypt(Encoding.UTF8.GetBytes(filePassword), RSAEncryptionPadding.OaepSHA256);
+        return Convert.ToBase64String(encryptedFilePassword);
+    }
+
+    private static string DecryptFilePassword(string encryptedFilePassword, string userPrivateKey)
+    {
+        using var rsa = RSA.Create();
+        var privateKeyBytes = Convert.FromBase64String(userPrivateKey);
+        rsa.ImportPkcs8PrivateKey(privateKeyBytes, out _);
+        var decryptedBytes = rsa.Decrypt(Convert.FromBase64String(encryptedFilePassword), RSAEncryptionPadding.OaepSHA256);
+        return Encoding.UTF8.GetString(decryptedBytes);
+    }
+
+    private static bool AreStreamsEqual(Stream stream1, Stream stream2)
+    {
+        stream1.Position = 0;
+        stream2.Position = 0;
+
+        using var sha256 = SHA256.Create();
+        var hash1 = sha256.ComputeHash(stream1);
+    
+        stream2.Position = 0;
+        var hash2 = sha256.ComputeHash(stream2);
+
+        return hash1.SequenceEqual(hash2);
+    }
 }
 
 public record Key(string PublicKey, string PrivateKey, string Password);
+public record SessionData(Session Data);
+public record Session(string Location);
+public record FileData(File Data);
+public record File(int Id);
