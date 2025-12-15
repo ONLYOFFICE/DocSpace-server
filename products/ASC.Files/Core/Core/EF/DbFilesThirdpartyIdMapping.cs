@@ -54,59 +54,62 @@ public static class DbFilesThirdpartyIdMappingExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbFilesThirdpartyIdMapping(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbFilesThirdpartyIdMapping>(entity =>
+        public void MySqlAddDbFilesThirdpartyIdMapping()
         {
-            entity.HasKey(e => e.HashId)
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbFilesThirdpartyIdMapping>(entity =>
+            {
+                entity.HasKey(e => e.HashId)
+                    .HasName("PRIMARY");
 
-            entity.ToTable("files_thirdparty_id_mapping")
-                .HasCharSet("utf8");
+                entity.ToTable("files_thirdparty_id_mapping")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => new { e.TenantId, e.HashId })
-                .HasDatabaseName("index_1");
+                entity.HasIndex(e => new { e.TenantId, e.HashId })
+                    .HasDatabaseName("index_1");
 
-            entity.Property(e => e.HashId)
-                .HasColumnName("hash_id")
-                .HasColumnType("char")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.HashId)
+                    .HasColumnName("hash_id")
+                    .HasColumnType("char")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Id)
-                .IsRequired()
-                .HasColumnName("id")
-                .HasColumnType("text")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Id)
+                    .IsRequired()
+                    .HasColumnName("id")
+                    .HasColumnType("text")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
-        });
-    }
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            });
+        }
 
-    public static void PgSqlAddDbFilesThirdpartyIdMapping(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbFilesThirdpartyIdMapping>(entity =>
+        public void PgSqlAddDbFilesThirdpartyIdMapping()
         {
-            entity.HasKey(e => e.HashId)
-                .HasName("files_thirdparty_id_mapping_pkey"); // Define primary key
+            modelBuilder.Entity<DbFilesThirdpartyIdMapping>(entity =>
+            {
+                entity.HasKey(e => e.HashId)
+                    .HasName("files_thirdparty_id_mapping_pkey"); // Define primary key
 
-            entity.ToTable("files_thirdparty_id_mapping"); // Define table name
+                entity.ToTable("files_thirdparty_id_mapping"); // Define table name
 
-            entity.HasIndex(e => new { e.TenantId, e.HashId })
-                .HasDatabaseName("ix_files_thirdparty_id_mapping_tenantid_hashid"); // Define index
+                entity.HasIndex(e => new { e.TenantId, e.HashId })
+                    .HasDatabaseName("ix_files_thirdparty_id_mapping_tenantid_hashid"); // Define index
 
-            entity.Property(e => e.HashId)
-                .HasColumnName("hash_id")
-                .HasColumnType("char(32)"); // Specify length explicitly since PostgreSQL requires it for char
+                entity.Property(e => e.HashId)
+                    .HasColumnName("hash_id")
+                    .HasColumnType("char(32)"); // Specify length explicitly since PostgreSQL requires it for char
 
-            entity.Property(e => e.Id)
-                .IsRequired()
-                .HasColumnName("id")
-                .HasColumnType("text"); // Map to PostgreSQL text type
+                entity.Property(e => e.Id)
+                    .IsRequired()
+                    .HasColumnName("id")
+                    .HasColumnType("text"); // Map to PostgreSQL text type
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id");
-        });
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id");
+            });
+        }
     }
 }

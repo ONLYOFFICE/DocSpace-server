@@ -165,4 +165,7 @@
   <data name="VirtualRooms" xml:space="preserve">
     <value>Dhomat</value>
   </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>Agjentët AI</value>
+  </data>
 </root>

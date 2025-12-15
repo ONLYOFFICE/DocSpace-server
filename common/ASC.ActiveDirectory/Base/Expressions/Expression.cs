@@ -43,20 +43,11 @@ public class Expression : ICloneable
     {
     }
 
-    public string Name
-    {
-        get { return _attributeName; }
-    }
+    public string Name => _attributeName;
 
-    public string Value
-    {
-        get { return _attributeValue; }
-    }
+    public string Value => _attributeValue;
 
-    public Op Operation
-    {
-        get { return _op; }
-    }
+    public Op Operation => _op;
 
     /// <summary>
     /// To specify unary operations
@@ -122,7 +113,7 @@ public class Expression : ICloneable
         var expressionString = "({0}{1}{2}{3})";
         expressionString = string.Format(expressionString,
             //positive or negative
-            (((int)_op & 0x010000) == 0x010000 || _negative) ? "!" : "", _attributeName, sop,
+            ((int)_op & 0x010000) == 0x010000 || _negative ? "!" : "", _attributeName, sop,
             EscapeLdapSearchFilter(_attributeValue));
 
         return expressionString;

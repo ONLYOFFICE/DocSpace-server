@@ -92,7 +92,7 @@ public class NovellLdapEntryExtension(ILoggerProvider optionMonitor)
         //String rid = "";
         for (var i = 2; i <= 7; i++)
         {
-            authority |= ((long)sid[i]) << (8 * (5 - (i - 2)));
+            authority |= (long)sid[i] << (8 * (5 - (i - 2)));
         }
 
         strSid.Append('-');

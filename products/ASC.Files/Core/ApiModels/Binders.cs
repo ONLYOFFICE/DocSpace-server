@@ -30,86 +30,89 @@ namespace ASC.Files.Core.ApiModels;
 
 public static class ModelBindingContextExtension
 {
-    internal static bool GetFirstValue(this ModelBindingContext bindingContext, string modelName, out string? firstValue)
+    extension(ModelBindingContext bindingContext)
     {
-        var valueProviderResult = bindingContext.ValueProvider.GetValue(modelName);
-
-        if (valueProviderResult != ValueProviderResult.None)
+        internal bool GetFirstValue(string modelName, out string? firstValue)
         {
-            bindingContext.ModelState.SetModelValue(modelName, valueProviderResult);
-            bindingContext.ModelState.MarkFieldValid(modelName);
-            firstValue = valueProviderResult.FirstValue;
+            var valueProviderResult = bindingContext.ValueProvider.GetValue(modelName);
 
-            return true;
-        }
-
-        firstValue = null;
-
-        return false;
-    }
-
-    internal static bool GetBoolValue(this ModelBindingContext bindingContext, string modelName, out bool firstValue)
-    {
-        if (GetFirstValue(bindingContext, modelName, out var deleteAfterValue) &&
-            bool.TryParse(deleteAfterValue, out var deleteAfter))
-        {
-            firstValue = deleteAfter;
-
-            return true;
-        }
-
-        firstValue = false;
-
-        return false;
-    }
-
-    internal static List<JsonElement> ParseQuery(this ModelBindingContext bindingContext, string modelName)
-    {
-        var valueProviderResult = bindingContext.ValueProvider.GetValue(modelName);
-
-        if (valueProviderResult != ValueProviderResult.None)
-        {
-            bindingContext.ModelState.SetModelValue(modelName, valueProviderResult);
-
-            return valueProviderResult.Select(ParseQueryParam).ToList();
-        }
-
-        if (modelName.EndsWith("[]", StringComparison.Ordinal))
-        {
-            return [];
-        }
-
-        return ParseQuery(bindingContext, $"{modelName}[]");
-    }
-
-    internal static List<DownloadRequestItemDto> ParseDictionary(this ModelBindingContext bindingContext, string modelName)
-    {
-        var result = new List<DownloadRequestItemDto>();
-
-        for (var i = 0; ; i++)
-        {
-            var keyProviderResult = bindingContext.ValueProvider.GetValue($"{modelName}[{i}][key]");
-            var valueProviderResult = bindingContext.ValueProvider.GetValue($"{modelName}[{i}][value]");
-            var passwordProviderResult = bindingContext.ValueProvider.GetValue($"{modelName}[{i}][password]");
-
-            if (keyProviderResult != ValueProviderResult.None && valueProviderResult != ValueProviderResult.None)
+            if (valueProviderResult != ValueProviderResult.None)
             {
-                bindingContext.ModelState.SetModelValue(modelName, keyProviderResult);
                 bindingContext.ModelState.SetModelValue(modelName, valueProviderResult);
-                bindingContext.ModelState.SetModelValue(modelName, passwordProviderResult);
+                bindingContext.ModelState.MarkFieldValid(modelName);
+                firstValue = valueProviderResult.FirstValue;
 
-                if (!string.IsNullOrEmpty(keyProviderResult.FirstValue) && !string.IsNullOrEmpty(valueProviderResult.FirstValue))
+                return true;
+            }
+
+            firstValue = null;
+
+            return false;
+        }
+
+        internal bool GetBoolValue(string modelName, out bool firstValue)
+        {
+            if (GetFirstValue(bindingContext, modelName, out var deleteAfterValue) &&
+                bool.TryParse(deleteAfterValue, out var deleteAfter))
+            {
+                firstValue = deleteAfter;
+
+                return true;
+            }
+
+            firstValue = false;
+
+            return false;
+        }
+
+        internal List<JsonElement> ParseQuery(string modelName)
+        {
+            var valueProviderResult = bindingContext.ValueProvider.GetValue(modelName);
+
+            if (valueProviderResult != ValueProviderResult.None)
+            {
+                bindingContext.ModelState.SetModelValue(modelName, valueProviderResult);
+
+                return valueProviderResult.Select(ParseQueryParam).ToList();
+            }
+
+            if (modelName.EndsWith("[]", StringComparison.Ordinal))
+            {
+                return [];
+            }
+
+            return ParseQuery(bindingContext, $"{modelName}[]");
+        }
+
+        internal List<DownloadRequestItemDto> ParseDictionary(string modelName)
+        {
+            var result = new List<DownloadRequestItemDto>();
+
+            for (var i = 0; ; i++)
+            {
+                var keyProviderResult = bindingContext.ValueProvider.GetValue($"{modelName}[{i}][key]");
+                var valueProviderResult = bindingContext.ValueProvider.GetValue($"{modelName}[{i}][value]");
+                var passwordProviderResult = bindingContext.ValueProvider.GetValue($"{modelName}[{i}][password]");
+
+                if (keyProviderResult != ValueProviderResult.None && valueProviderResult != ValueProviderResult.None)
                 {
-                    result.Add(new DownloadRequestItemDto { Key = ParseQueryParam(keyProviderResult.FirstValue), Value = valueProviderResult.FirstValue, Password = passwordProviderResult.FirstValue });
+                    bindingContext.ModelState.SetModelValue(modelName, keyProviderResult);
+                    bindingContext.ModelState.SetModelValue(modelName, valueProviderResult);
+                    bindingContext.ModelState.SetModelValue(modelName, passwordProviderResult);
+
+                    if (!string.IsNullOrEmpty(keyProviderResult.FirstValue) && !string.IsNullOrEmpty(valueProviderResult.FirstValue))
+                    {
+                        result.Add(new DownloadRequestItemDto { Key = ParseQueryParam(keyProviderResult.FirstValue), Value = valueProviderResult.FirstValue, Password = passwordProviderResult.FirstValue });
+                    }
+                }
+                else
+                {
+                    break;
                 }
             }
-            else
-            {
-                break;
-            }
-        }
 
-        return result;
+            return result;
+        }
     }
 
     public static JsonElement ParseQueryParam(string? data)

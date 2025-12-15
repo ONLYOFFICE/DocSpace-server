@@ -41,7 +41,7 @@ public class MobileDetector
 
     public MobileDetector(IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ICache cache)
     {
-        this._cache = cache;
+        _cache = cache;
         if (!string.IsNullOrEmpty(configuration["mobile:regex"]))
         {
             _uaMobileRegex = new Regex(configuration["mobile:regex"], RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);

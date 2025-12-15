@@ -979,4 +979,97 @@
   <data name="LoginSuccessSocialAccount" xml:space="preserve">
     <value>Conexión vía cuenta social exitosa</value>
   </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Añadido servidor MCP {0} al agente</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agente creado</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agente eliminado</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agente renombrado: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agentes</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Proveedor de IA creado: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Proveedor de IA eliminado: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Proveedor de IA actualizado: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Agentes de IA [{0}]. Establecer una cuota de almacenamiento personalizada para los agentes de IA : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Agentes de IA [{0}]. Establecer la cuota de almacenamiento predeterminada para los agentes de IA : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Agentes de IA [{0}]. Cuota de almacenamiento desactivada para los agentes de IA</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Eliminado servidor MCP {0} del agente</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Establecer cuota de almacenamiento predeterminada para agentes de IA: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Desactivada la cuota de almacenamiento predeterminada para los agentes de IA</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Se han restablecido los ajustes de vectorización</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Se ha restablecido la configuración de búsqueda web</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>Servidor MCP creado: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>Servidor MCP eliminado: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Servidor MCP desactivado: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Servidor MCP activado: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Servidor MCP actualizado: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Los ajustes de vectorización están configurados. Proveedor: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Los ajustes de búsqueda web están configurados. Motor: {0}</value>
+  </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Copia de seguridad completada</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Copia de seguridad fallida</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Copia de seguridad programada completada</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Copia de seguridad programada fallida</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Copia de seguridad programada iniciada</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Plugin eliminado: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Plugin actualizado: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Plugin cargado: {0}</value>
+  </data>
 </root>

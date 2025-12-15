@@ -1002,7 +1002,7 @@ internal class FileDao(
 
             await context.DeleteTagsAsync(tenantId);
 
-            await context.DeleteSecurityAsync(tenantId, fileId.ToString());
+            await context.DeleteSecurityAsync(tenantId, fileId);
 
             await DeleteCustomOrder(filesDbContext, fileId);
 
@@ -1093,7 +1093,7 @@ internal class FileDao(
 
         if (toRoomId != -1 && fromRoomId != toRoomId)
         {
-            var toRoom = DocSpaceHelper.IsRoom(toFolder.FolderType) ? toFolder : await folderDao.GetFolderAsync(toRoomId);
+            var toRoom = toFolder.IsRoom ? toFolder : await folderDao.GetFolderAsync(toRoomId);
             TenantEntityQuotaSettings quotaSettings = toRoom.FolderType is FolderType.AiRoom
                    ? await _settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
                    : await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
@@ -1218,7 +1218,7 @@ internal class FileDao(
                 }
                 else if (oldParentId == trashId || roomId != -1 || toFolderRoomId != -1)
                 {
-                    if ((toFolderId != archiveId && oldFolder.Id != archiveId) &&
+                    if (toFolderId != archiveId && oldFolder.Id != archiveId &&
                         toFolderRoomId == -1 &&
                         ((oldParentId == trashId && fromRoomTag != null) || roomId != -1))
                     {
@@ -1230,7 +1230,7 @@ internal class FileDao(
                             WebItemManager.DocumentsProductID.ToString(),
                             file.ContentLength, file.GetFileQuotaOwner());
                     }
-                    if ((toFolderId != archiveId && oldFolder.Id != archiveId) &&
+                    if (toFolderId != archiveId && oldFolder.Id != archiveId &&
                         toFolderRoomId != -1 &&
                         ((oldParentId == trashId && fromRoomTag == null) || roomId == -1))
                     {
@@ -1264,11 +1264,10 @@ internal class FileDao(
 
                 if (deleteLinks)
                 {
-                    var id = fileId.ToString();
-                    await filesDbContext.Security.Where(x => x.TenantId == tenantId && x.EntryId == id && x.EntryType == FileEntryType.File).ExecuteDeleteAsync();
-                    await filesDbContext.DeleteTagLinksByTypeAsync(tenantId, id, FileEntryType.File, TagType.RecentByLink);
+                    await filesDbContext.Security.Where(x => x.TenantId == tenantId && x.InternalEntryId == fileId && x.EntryType == FileEntryType.File).ExecuteDeleteAsync();
+                    await filesDbContext.DeleteTagLinksByTypeAsync(tenantId, fileId.ToString(), FileEntryType.File, TagType.RecentByLink);
                     await filesDbContext.DeleteTagsAsync(tenantId);
-                    await filesDbContext.DeleteLinksAsync(tenantId, id, FileEntryType.File);
+                    await filesDbContext.DeleteLinksAsync(tenantId, fileId, FileEntryType.File);
                 }
 
                 if (needDeleteVectors)
@@ -1521,7 +1520,7 @@ internal class FileDao(
     private async Task UpdateUsedFileSpace(IFolderDao<int> folderDao, Folder<int> fromFolder, Folder<int> toFolder, File<int> file)
     {
         await folderDao.ChangeTreeFolderSizeAsync(toFolder.Id, file.ContentLength);
-        await folderDao.ChangeTreeFolderSizeAsync(fromFolder.Id, (-1) * file.ContentLength);
+        await folderDao.ChangeTreeFolderSizeAsync(fromFolder.Id, -1 * file.ContentLength);
     }
     public static bool TryGetFileId(string path, out int fileId)
     {
@@ -2448,13 +2447,13 @@ internal class FileDao(
                     ).FirstOrDefault(),
                 UserShared = filesDbContext.Security.Where(x =>
                     x.TenantId == tenantId &&
-                    x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File)
+                    x.InternalEntryId == r.Id && x.EntryType == FileEntryType.File)
                     .Select(s => s.SubjectType).ToList(),
                 ParentShared = filesDbContext.Security.Any(x =>
                     x.TenantId == tenantId &&
                     (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                     x.EntryType == FileEntryType.Folder &&
-                    filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
+                    filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId == x.InternalEntryId)),
                 Order = (
                     from f in filesDbContext.FileOrder
                     where (
@@ -2559,7 +2558,7 @@ internal class FileDao(
         var currentUserId = _authContext.CurrentAccount.ID;
         var q = GetFileQuery(filesDbContext, r => r.ParentId == parentId && r.CurrentVersion);
 
-        q = q.Where(r => !filesDbContext.Security.Any(x => x.TenantId == tenantId && x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File && x.Share == FileShare.Restrict && x.Subject == currentUserId));
+        q = q.Where(r => !filesDbContext.Security.Any(x => x.TenantId == tenantId && x.InternalEntryId == r.Id && x.EntryType == FileEntryType.File && x.Share == FileShare.Restrict && x.Subject == currentUserId));
 
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
@@ -2820,7 +2819,7 @@ internal class FileDao(
             Security = filesDbContext.Security
                 .FirstOrDefault(s => s.TenantId == tenantId &&
                                      s.EntryType == FileEntryType.File &&
-                                     s.EntryId == x.f.Id.ToString() &&
+                                     s.InternalEntryId == x.f.Id &&
                                      s.Subject.ToString() == x.t.Name),
             OriginRoom = x.t.Type != TagType.RecentByLink ?
                 filesDbContext.Folders
@@ -2837,7 +2836,7 @@ internal class FileDao(
                     .OrderByDescending(t => t.tree.Level)
                     .Select(t => new DbFolder { Id = t.folder.Id, Title = t.folder.Title })
                     .FirstOrDefault() :
-                null,
+                null
         });
 
         if (tagType.Any(r => r is TagType.RecentByLink or TagType.Recent or TagType.Favorite))
@@ -2859,13 +2858,13 @@ internal class FileDao(
                          .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId}, t => new { Id = t.ParentId, ParentId = t.FolderId}, (folder, tree) => new { folder, tree })
                          .Any()),
                 Location.Link => query.Where(x =>
-                    (x.Tag == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)) &&
-                        !filesDbContext.Folders
-                         .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.TRASH)
-                         .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
-                         .Any())),
+                    x.Tag == TagType.RecentByLink && x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow) &&
+                    !filesDbContext.Folders
+                        .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.TRASH)
+                        .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
+                        .Any()),
                 _ => documentsTagType == TagType.Favorite ? query : query.Where(x =>
-                    (x.Tag == TagType.Recent || x.Tag == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow))) &&
+                    (x.Tag == TagType.Recent || x.Tag == TagType.RecentByLink && x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)) &&
                         !filesDbContext.Folders
                         .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.TRASH)
                         .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
@@ -2883,7 +2882,7 @@ internal class FileDao(
         var q = GetFileQuery(filesDbContext, file => file.CurrentVersion)
                 .Join(filesDbContext.Tree, file => file.ParentId, tree => tree.FolderId, (file, tree) => new { file, tree })
                 .Where(r => r.tree.ParentId == parentId)
-                .Join(filesDbContext.Security, r => r.file.Id.ToString(), security => security.EntryId, (r, security) => new { r.file, security })
+                .Join(filesDbContext.Security, r => r.file.Id, security => security.InternalEntryId, (r, security) => new { r.file, security })
                 .Where(r => r.security.TenantId == tenantId
                     && r.security.EntryType == FileEntryType.File
                     && (r.security.SubjectType == SubjectType.ExternalLink

@@ -115,13 +115,8 @@ public class DnsSettings(PermissionContext permissionContext,
         return false;
     }
 
-    protected string TenantBaseDomain
-    {
-        get
-        {
-            return string.IsNullOrEmpty(coreSettings.BaseDomain)
-                       ? string.Empty
-                       : $".{coreSettings.BaseDomain}";
-        }
-    }
+    protected string TenantBaseDomain =>
+        string.IsNullOrEmpty(coreSettings.BaseDomain)
+            ? string.Empty
+            : $".{coreSettings.BaseDomain}";
 }

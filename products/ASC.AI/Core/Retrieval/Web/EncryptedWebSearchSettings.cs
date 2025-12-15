@@ -44,8 +44,7 @@ public abstract class EngineConfig
 
 public class EncryptedWebSearchSettings : ISettings<EncryptedWebSearchSettings>
 {
-    [JsonIgnore]
-    public Guid ID => new("{B2FC4410-5538-46E0-959A-AF1BEEAC9E20}");
+    public static Guid ID => new("{B2FC4410-5538-46E0-959A-AF1BEEAC9E20}");
     public bool Enabled { get; set; }
     public EngineType Type { get; set; }
     public string? Config { get; set; }

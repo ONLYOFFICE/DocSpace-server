@@ -60,8 +60,8 @@ internal class LinkDao<T>(
         await filesDbContext.AddOrUpdateAsync(r => r.FilesLink, new DbFilesLink
         {
             TenantId = tenantId,
-            SourceId = (await mapping.MappingIdAsync(sourceId)),
-            LinkedId = (await mapping.MappingIdAsync(linkedId)),
+            SourceId = (await mapping.MappingIdAsync(sourceId)).Item1,
+            LinkedId = (await mapping.MappingIdAsync(linkedId)).Item1,
             LinkedFor = _authContext.CurrentAccount.ID
         });
 
@@ -75,9 +75,9 @@ internal class LinkDao<T>(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var mappedLinkedId = (await mapping.MappingIdAsync(linkedId));
+        var mappedLinkedId = await mapping.MappingIdAsync(linkedId);
 
-        var fromDb = await filesDbContext.SourceIdAsync(tenantId, mappedLinkedId, _authContext.CurrentAccount.ID);
+        var fromDb = await filesDbContext.SourceIdAsync(tenantId, mappedLinkedId.Item1, _authContext.CurrentAccount.ID);
 
         if (Equals(fromDb, null))
         {
@@ -96,7 +96,7 @@ internal class LinkDao<T>(
 
         var mappedSourceId = await mapping.MappingIdAsync(sourceId);
 
-        var fromDb = await filesDbContext.LinkedIdAsync(tenantId, mappedSourceId, _authContext.CurrentAccount.ID);
+        var fromDb = await filesDbContext.LinkedIdAsync(tenantId, mappedSourceId.Item1, _authContext.CurrentAccount.ID);
 
         if (Equals(fromDb, null))
         {
@@ -132,9 +132,9 @@ internal class LinkDao<T>(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var mappedSourceId = (await mapping.MappingIdAsync(sourceId));
+        var mappedSourceId = await mapping.MappingIdAsync(sourceId);
 
-        var link = await filesDbContext.FileLinkAsync(tenantId, mappedSourceId, _authContext.CurrentAccount.ID);
+        var link = await filesDbContext.FileLinkAsync(tenantId, mappedSourceId.Item1, _authContext.CurrentAccount.ID);
 
         filesDbContext.FilesLink.Remove(link);
 
@@ -148,8 +148,8 @@ internal class LinkDao<T>(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var mappedFileId = (await mapping.MappingIdAsync(fileId));
+        var mappedFileId = await mapping.MappingIdAsync(fileId);
 
-        await filesDbContext.DeleteFileLinks(tenantId, mappedFileId);
+        await filesDbContext.DeleteFileLinks(tenantId, mappedFileId.Item1);
     }
 }

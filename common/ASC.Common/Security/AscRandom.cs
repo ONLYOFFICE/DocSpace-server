@@ -37,7 +37,7 @@ public class AscRandom : Random
     public AscRandom(int seed)
     {
         _seeds = new int[56];
-        var num4 = (seed == int.MinValue) ? int.MaxValue : Math.Abs(seed);
+        var num4 = seed == int.MinValue ? int.MaxValue : Math.Abs(seed);
         var num2 = 161803398 - num4;
         _seeds[^1] = num2;
         var num3 = 1;
@@ -60,7 +60,7 @@ public class AscRandom : Random
         {
             for (var k = 1; k < _seeds.Length; k++)
             {
-                _seeds[k] -= _seeds[1 + ((k + 30) % (_seeds.Length - 1))];
+                _seeds[k] -= _seeds[1 + (k + 30) % (_seeds.Length - 1)];
 
                 if (_seeds[k] < 0)
                 {

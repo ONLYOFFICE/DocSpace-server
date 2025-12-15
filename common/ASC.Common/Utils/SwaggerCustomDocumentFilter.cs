@@ -96,7 +96,7 @@ public class LowercaseDocumentFilter : IDocumentFilter
 
             for (var i = 0; i < segments.Length; i++)
             {
-                if (!segments[i].StartsWith("{") && !segments[i].EndsWith("}"))
+                if (!segments[i].StartsWith('{') && !segments[i].EndsWith("}"))
                 {
                     segments[i] = segments[i].ToLowerInvariant();
                 }

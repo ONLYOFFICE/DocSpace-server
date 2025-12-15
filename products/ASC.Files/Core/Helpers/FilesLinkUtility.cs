@@ -60,10 +60,7 @@ public class FilesLinkUtility
         DefaultLinkLifeTime = !TimeSpan.TryParse(configuration["externalLink:defaultLifetime"], out var defaultLifetime) ? TimeSpan.FromDays(7) : defaultLifetime;
     }
 
-    public string FilesBaseAbsolutePath
-    {
-        get { return _baseCommonLinkUtility.ToAbsolute(FilesBaseVirtualPath); }
-    }
+    public string FilesBaseAbsolutePath => _baseCommonLinkUtility.ToAbsolute(FilesBaseVirtualPath);
 
     public const string FileId = "fileid";
     public const string FolderId = "folderid";
@@ -82,12 +79,9 @@ public class FilesLinkUtility
     public const string ShardKey = "shardkey";
     public const string FillingSessionId = "fillingSessionId";
 
-    public string FileHandlerPath
-    {
-        get { return FilesBaseAbsolutePath + "filehandler.ashx"; }
-    }
+    public string FileHandlerPath => FilesBaseAbsolutePath + "filehandler.ashx";
 
-    
+
     public string GetDocServiceUrl()
     {
         var url = GetUrlSetting(FilesUrlKeys.Public);
@@ -378,10 +372,7 @@ public class FilesLinkUtility
         return true;
     }
 
-    public string FileDownloadUrlString
-    {
-        get { return FileHandlerPath + "?" + Action + "=download&" + FileId + "={0}"; }
-    }
+    public string FileDownloadUrlString => FileHandlerPath + "?" + Action + "=download&" + FileId + "={0}";
 
     public string GetFileDownloadUrl(object fileId)
     {
@@ -395,20 +386,11 @@ public class FilesLinkUtility
                + (string.IsNullOrEmpty(convertToExtension) ? string.Empty : "&" + OutType + "=" + convertToExtension);
     }
 
-    public string FileWebViewerUrlString
-    {
-        get { return $"{FileWebEditorUrlString}&{Action}=view"; }
-    }
+    public string FileWebViewerUrlString => $"{FileWebEditorUrlString}&{Action}=view";
 
-    public string FileWebViewerExternalUrlString
-    {
-        get { return FilesBaseAbsolutePath + EditorPage + "?" + FileUri + "={0}&" + FileTitle + "={1}&" + FolderUrl + "={2}"; }
-    }
+    public string FileWebViewerExternalUrlString => FilesBaseAbsolutePath + EditorPage + "?" + FileUri + "={0}&" + FileTitle + "={1}&" + FolderUrl + "={2}";
 
-    public string FileWebEditorUrlString
-    {
-        get { return $"/{EditorPage}?{FileId}={{0}}"; }
-    }
+    public string FileWebEditorUrlString => $"/{EditorPage}?{FileId}={{0}}";
 
     public string GetFileWebEditorUrl<T>(T fileId, int fileVersion = 0)
     {
@@ -416,10 +398,7 @@ public class FilesLinkUtility
             + (fileVersion > 0 ? "&" + Version + "=" + fileVersion : string.Empty);
     }
 
-    public string FileWebEditorExternalUrlString
-    {
-        get { return FileHandlerPath + "?" + Action + "=create&" + FileUri + "={0}&" + FileTitle + "={1}"; }
-    }
+    public string FileWebEditorExternalUrlString => FileHandlerPath + "?" + Action + "=create&" + FileUri + "={0}&" + FileTitle + "={1}";
 
     public string GetFileWebPreviewUrl(FileUtility fileUtility, string fileTitle, object fileId, int fileVersion = 0, bool external = false)
     {
@@ -441,15 +420,9 @@ public class FilesLinkUtility
         return GetFileDownloadUrl(fileId);
     }
 
-    public string FileRedirectPreviewUrlString
-    {
-        get { return FileHandlerPath + "?" + Action + "=redirect"; }
-    }
+    public string FileRedirectPreviewUrlString => FileHandlerPath + "?" + Action + "=redirect";
 
-    public string FileThumbnailUrlString
-    {
-        get { return FileHandlerPath + "?" + Action + "=thumb&" + FileId + "={0}"; }
-    }
+    public string FileThumbnailUrlString => FileHandlerPath + "?" + Action + "=thumb&" + FileId + "={0}";
 
     public string GetFileThumbnailUrl(object fileId, int fileVersion)
     {
@@ -488,10 +461,7 @@ public class FilesLinkUtility
         return _commonLinkUtility.GetFullAbsolutePath(GetFileUploaderHandlerVirtualPath() + queryString);
     }
 
-    public bool IsLocalFileUploader
-    {
-        get { return !Regex.IsMatch(_filesUploaderUrl, "^http(s)?://\\.*"); }
-    }
+    public bool IsLocalFileUploader => !Regex.IsMatch(_filesUploaderUrl, "^http(s)?://\\.*");
 
     private string GetFileUploaderHandlerVirtualPath()
     {
@@ -549,7 +519,7 @@ public class FilesLinkUtility
     private string GetDefaultUrlSetting(FilesUrlKeys key)
     {
         var confKey = $"files:docservice:url:{key.ToStringLowerFast()}";
-        var value = _urlSettings.GetOrAdd(confKey, (c) => _configuration[c]);
+        var value = _urlSettings.GetOrAdd(confKey, c => _configuration[c]);
         if (!string.IsNullOrEmpty(value))
         {
             value = value.TrimEnd('/') + "/";

@@ -264,7 +264,7 @@ public class BackupController(
             return await backupService.GetBackupProgressAsync(inDto.Dump);
 
         }
-        catch (Exception ex) when (ex is AccountingPaymentRequiredException || ex is AccountingCustomerNotFoundException)
+        catch (Exception ex) when (ex is AccountingPaymentRequiredException or AccountingCustomerNotFoundException)
         {
             throw new BillingException(Resource.ErrorPaymentRequired);
         }

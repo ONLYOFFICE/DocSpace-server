@@ -281,7 +281,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
     {
         var withoutUnsubscribe = message.GetArgument("WithoutUnsubscribe");
 
-        if (withoutUnsubscribe != null && (bool)withoutUnsubscribe.Value)
+        if (withoutUnsubscribe != null && bool.TryParse((string)withoutUnsubscribe.Value, out var val) && val)
         {
             return string.Empty;
         }

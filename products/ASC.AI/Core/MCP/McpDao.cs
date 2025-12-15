@@ -331,6 +331,8 @@ public class McpDao(
             server.Icon = await iconStore.GetAsync(dbServer.TenantId, dbServer.Id, server.ModifiedOn);
         }
 
+        server.NeedReset = false;
+
         return server;
     }
     

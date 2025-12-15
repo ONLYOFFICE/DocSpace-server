@@ -31,13 +31,13 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
 {
     public const string ProfileUrl = "https://api.weixin.qq.com/sns/userinfo";
 
-    public override string CodeUrl { get { return "https://open.weixin.qq.com/connect/qrconnect"; } }
-    public override string AccessTokenUrl { get { return "https://api.weixin.qq.com/sns/oauth2/access_token"; } }
+    public override string CodeUrl => "https://open.weixin.qq.com/connect/qrconnect";
+    public override string AccessTokenUrl => "https://api.weixin.qq.com/sns/oauth2/access_token";
 
-    public override string RedirectUri { get { return this["weixinRedirectUrl"]; } }
-    public override string ClientID { get { return this["weixinClientId"]; } }
-    public override string ClientSecret { get { return this["weixinClientSecret"]; } }
-    public override string Scopes { get { return "snsapi_login"; } }
+    public override string RedirectUri => this["weixinRedirectUrl"];
+    public override string ClientID => this["weixinClientId"];
+    public override string ClientSecret => this["weixinClientSecret"];
+    public override string Scopes => "snsapi_login";
 
     private readonly RequestHelper _requestHelper;
 

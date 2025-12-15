@@ -54,8 +54,7 @@ public class TenantCookieSettings : ISettings<TenantCookieSettings>
         };
     }
 
-    [JsonIgnore]
-    public Guid ID => new("{16FB8E67-E96D-4B22-B217-C80F25C5DE1B}");
+    public static Guid ID => new("{16FB8E67-E96D-4B22-B217-C80F25C5DE1B}");
 }
 
 [Singleton]

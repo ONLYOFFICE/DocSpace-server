@@ -87,7 +87,7 @@ public class TelegramHelper(
 
     private async Task<bool> IsAwaitingRegistration(Guid userId, int tenantId)
     {
-        return (await GetCurrentToken(userId, tenantId)) != null;
+        return await GetCurrentToken(userId, tenantId) != null;
     }
 
     private async Task<string> GetCurrentToken(Guid userId, int tenantId)
@@ -140,7 +140,7 @@ public class TelegramHelper(
             return new TelegramBotClient(token);
         }
 
-        var httpClient = new HttpClient(new HttpClientHandler() {
+        var httpClient = new HttpClient(new HttpClientHandler {
             UseProxy = true,
             Proxy = new WebProxy(proxy)
         });

@@ -147,8 +147,8 @@ public partial class FilesDbContext
         return FileQueries.PdfTenantFileIdsAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
-    public Task<int> DeleteSecurityAsync(int tenantId, string fileId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<int> DeleteSecurityAsync(int tenantId, int fileId)
     {
         return FileQueries.DeleteSecurityAsync(this, tenantId, fileId);
     }
@@ -384,13 +384,13 @@ static file class FileQueries
                             ).FirstOrDefault(),
                         UserShared = ctx.Security.Where(x =>
                                 x.TenantId == tenantId &&
-                                x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File)
+                                x.InternalEntryId == r.Id && x.EntryType == FileEntryType.File)
                             .Select(s => s.SubjectType).ToList(),
                         ParentShared = ctx.Security.Any(x =>
                             x.TenantId == tenantId &&
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                             x.EntryType == FileEntryType.Folder &&
-                            ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
+                            ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId == x.InternalEntryId)),
                         Order = (
                             from f in ctx.FileOrder
                             where (
@@ -436,13 +436,13 @@ static file class FileQueries
                             ).FirstOrDefault(),
                         UserShared = ctx.Security.Where(x =>
                                 x.TenantId == tenantId &&
-                                x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.File)
+                                x.InternalEntryId == r.Id && x.EntryType == FileEntryType.File)
                             .Select(s => s.SubjectType).ToList(),
                         ParentShared = ctx.Security.Any(x =>
                             x.TenantId == tenantId &&
                             (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                             x.EntryType == FileEntryType.Folder &&
-                            ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
+                            ctx.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId == x.InternalEntryId)),
                         LastOpened = ctx.TagLink
                             .Where(a => a.EntryId == fileId.ToString() &&
                                         a.CreateBy == userId &&
@@ -680,12 +680,12 @@ static file class FileQueries
                     .Where(r => r.Title.EndsWith(".pdf"))
                     .Select(r => r.Id));
 
-    public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteSecurityAsync =
+    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteSecurityAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string fileId) =>
+            (FilesDbContext ctx, int tenantId, int fileId) =>
                 ctx.Security
                     .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.EntryId == fileId)
+                    .Where(r => r.InternalEntryId == fileId)
                     .Where(r => r.EntryType == FileEntryType.File)
                     .ExecuteDelete());
 
@@ -891,8 +891,7 @@ static file class FileQueries
                                 select f
                             ).FirstOrDefault()
                     })
-                    .Join(ctx.Security.DefaultIfEmpty(), r => r.File.Id.ToString(), s => s.EntryId,
-                        (f, s) => new DbFileQueryWithSecurity { DbFileQuery = f, Security = s })
+                    .Join(ctx.Security.DefaultIfEmpty(), r => r.File.Id, s => s.InternalEntryId, (f, s) => new DbFileQueryWithSecurity { DbFileQuery = f, Security = s })
                     .Where(r => r.Security.TenantId == tenantId)
                     .Where(r => r.Security.EntryType == FileEntryType.File)
                     .Where(r => r.Security.Share == FileShare.Restrict));

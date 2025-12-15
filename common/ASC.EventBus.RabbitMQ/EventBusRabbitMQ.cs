@@ -140,7 +140,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
         var body = _serializer.Serialize(@event);
 
-        await pipeline.ExecuteAsync(async (_) =>
+        await pipeline.ExecuteAsync(async _ =>
         {
             // TODO: check this method
             var properties = new BasicProperties

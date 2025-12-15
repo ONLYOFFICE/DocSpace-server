@@ -167,13 +167,16 @@ public static partial class WebhookTriggerExtensions
         }
     }
 
-    public static string ToCustomString(this WebhookTrigger value)
+    extension(WebhookTrigger value)
     {
-        return _customStrings[value];
-    }
+        public string ToCustomString()
+        {
+            return _customStrings[value];
+        }
 
-    public static string GetTargetType(this WebhookTrigger value)
-    {
-        return _customStrings[value].Split('.')[0];
+        public string GetTargetType()
+        {
+            return _customStrings[value].Split('.')[0];
+        }
     }
 }

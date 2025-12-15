@@ -187,7 +187,7 @@ internal class FolderDao(
             q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
         }
 
-        await foreach (var e in (FromQuery(filesDbContext, q)).AsAsyncEnumerable())
+        await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
         {
             yield return mapper.MapDbFolderQueryToDbFolderInternal(e);
         }
@@ -231,7 +231,7 @@ internal class FolderDao(
             q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
         }
 
-        await foreach (var e in (FromQuery(filesDbContext, q)).AsAsyncEnumerable())
+        await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
         {
             yield return mapper.MapDbFolderQueryToDbFolderInternal(e);
         }
@@ -276,7 +276,7 @@ internal class FolderDao(
         
         var q = await GetFoldersQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, withSubfolders, excludeSubject, roomId, filesDbContext);
 
-        q = q.Where(r => !filesDbContext.Security.Any(x => x.TenantId == tenantId && x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder && x.Share == FileShare.Restrict && x.Subject == currentUserId));
+        q = q.Where(r => !filesDbContext.Security.Any(x => x.TenantId == tenantId && x.InternalEntryId == r.Id && x.EntryType == FileEntryType.Folder && x.Share == FileShare.Restrict && x.Subject == currentUserId));
 
         if (containingMyFiles)
         {
@@ -384,7 +384,8 @@ internal class FolderDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await filesDbContext.ContainsFormsInFolder(tenantId, folder.Id);
     }
-    public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(IEnumerable<int> folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
+    
+    public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(IEnumerable<int> folderIds, IEnumerable<int> excludeParentIds = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -393,7 +394,12 @@ internal class FolderDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q = GetFolderQuery(filesDbContext, r => folderIds.Contains(r.Id));
-
+        
+        if (excludeParentIds != null && excludeParentIds.Any())
+        {
+            q = q.Where(r => !filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && excludeParentIds.Contains(r.ParentId) && t.Level == 0));
+        }
+        
         if (searchSubfolders)
         {
             q = GetFolderQuery(filesDbContext)
@@ -532,7 +538,7 @@ internal class FolderDao(
             toUpdate.ModifiedOn = _tenantUtil.DateTimeToUtc(folder.ModifiedOn);
             toUpdate.ModifiedBy = folder.ModifiedBy;
 
-            if (DocSpaceHelper.IsRoom(toUpdate.FolderType))
+            if (toUpdate.FolderType.IsRoom())
             {
                 toUpdate.Settings = new DbRoomSettings
                 {
@@ -556,7 +562,7 @@ internal class FolderDao(
 
             await filesDbContext.SaveChangesAsync();
 
-            if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH || DocSpaceHelper.IsRoom(folder.FolderType))
+            if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH || folder.IsRoom)
             {
                 _ = factoryIndexer.IndexAsync(toUpdate);
             }
@@ -577,7 +583,7 @@ internal class FolderDao(
                 TenantId = tenantId
             };
 
-            if (DocSpaceHelper.IsRoom(newFolder.FolderType))
+            if (newFolder.FolderType.IsRoom())
             {
                 newFolder.Settings = new DbRoomSettings
                 {
@@ -601,7 +607,7 @@ internal class FolderDao(
             newFolder = entityEntry.Entity;
             await filesDbContext.SaveChangesAsync();
 
-            if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH || DocSpaceHelper.IsRoom(folder.FolderType))
+            if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH || folder.IsRoom)
             {
                 _ = factoryIndexer.IndexAsync(newFolder);
             }
@@ -773,7 +779,7 @@ internal class FolderDao(
             Security = filesDbContext.Security
                 .FirstOrDefault(s => s.TenantId == tenantId &&
                                      s.EntryType == FileEntryType.Folder &&
-                                     s.EntryId == x.f.Id.ToString() &&
+                                     s.InternalEntryId == x.f.Id &&
                                      s.Subject.ToString() == x.t.Name),
             OriginRoom = x.t.Type != TagType.RecentByLink ?
                 filesDbContext.Folders
@@ -790,7 +796,7 @@ internal class FolderDao(
                     .OrderByDescending(t => t.tree.Level)
                     .Select(t => new DbFolder { Id = t.folder.Id, Title = t.folder.Title })
                     .FirstOrDefault() :
-                null,
+                null
         });
 
         if (tagType.Any(r => r is TagType.RecentByLink or TagType.Recent or TagType.Favorite))
@@ -812,13 +818,13 @@ internal class FolderDao(
                          .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
                          .Any()),
                 Location.Link => query.Where(x =>
-                    (x.Tag == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)) &&
-                     !filesDbContext.Folders
-                         .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.TRASH)
-                         .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
-                         .Any())),
+                    x.Tag == TagType.RecentByLink && x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow) &&
+                    !filesDbContext.Folders
+                        .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.TRASH)
+                        .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
+                        .Any()),
                 _ => documentsTagType == TagType.Favorite ? query : query.Where(x =>
-                    (x.Tag == TagType.Recent || x.Tag == TagType.RecentByLink && (x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow))) &&
+                    (x.Tag == TagType.Recent || x.Tag == TagType.RecentByLink && x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow)) &&
                         !filesDbContext.Folders
                         .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.TRASH)
                         .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
@@ -901,7 +907,7 @@ internal class FolderDao(
 
             await filesDbContext.DeleteTagOriginAsync(tenantId, folderId.ToString(), subfoldersStrings);
 
-            await filesDbContext.DeleteFilesSecurityAsync(tenantId, subfoldersStrings);
+            await filesDbContext.DeleteFilesSecurityAsync(tenantId, subfolders.Select(r => r));
 
             await filesDbContext.DeleteBunchObjectsAsync(tenantId, folderId.ToString());
 
@@ -948,7 +954,7 @@ internal class FolderDao(
             var oldParentId = folder.ParentId;
 
             if (folder.FolderType is not (FolderType.DEFAULT or FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone) &&
-                !DocSpaceHelper.IsRoom(folder.FolderType))
+                !folder.IsRoom)
             {
                 throw new ArgumentException("It is forbidden to move the System folder.", nameof(folderId));
             }
@@ -1189,7 +1195,7 @@ internal class FolderDao(
 
         var toUpdate = await filesDbContext.FolderForUpdateAsync(tenantId, folder.Id);
 
-        if (DocSpaceHelper.IsRoom(toUpdate.FolderType))
+        if (toUpdate.FolderType.IsRoom())
         {
             toUpdate.Settings = new DbRoomSettings
             {
@@ -1201,8 +1207,11 @@ internal class FolderDao(
                 Cover = folder.SettingsCover,
                 Indexing = folder.SettingsIndexing,
                 DenyDownload = folder.SettingsDenyDownload,
+                Watermark = folder.SettingsWatermark.Map(),
                 Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue,
-                Lifetime = folder.SettingsLifetime.Map()
+                Lifetime = folder.SettingsLifetime.Map(),
+                ChatProviderId = folder.SettingsChatProviderId,
+                ChatParameters = folder.SettingsChatParameters
             };
         }
 
@@ -1220,7 +1229,7 @@ internal class FolderDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var toUpdate = await filesDbContext.FolderWithSettingsAsync(tenantId, folder.Id);
 
-        if (DocSpaceHelper.IsRoom(folder.FolderType))
+        if (folder.IsRoom)
         {
             toUpdate.Settings.Quota = newQuota >= TenantEntityQuotaSettings.NoQuota ? newQuota : TenantEntityQuotaSettings.DefaultQuotaValue;
         }
@@ -1821,13 +1830,13 @@ internal class FolderDao(
                     ).FirstOrDefault(),
                 UserShared = filesDbContext.Security.Where(x =>
                         x.TenantId == tenantId &&
-                        x.EntryId == r.Id.ToString() && x.EntryType == FileEntryType.Folder)
+                        x.InternalEntryId == r.Id && x.EntryType == FileEntryType.Folder)
                     .Select(s => s.SubjectType).ToList(),
                 ParentShared = filesDbContext.Security.Any(x =>
                     x.TenantId == tenantId &&
                     (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) &&
                     x.EntryType == FileEntryType.Folder &&
-                    filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId.ToString() == x.EntryId)),
+                    filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && t.ParentId == x.InternalEntryId)),
                 Order = (
                     from f in filesDbContext.FileOrder
                     where (
@@ -2232,7 +2241,7 @@ internal class FolderDao(
         var q = GetFolderQuery(filesDbContext)
                 .Join(filesDbContext.Tree, folder => folder.Id, tree => tree.FolderId, (folder, tree) => new { folder, tree })
                 .Where(r => r.tree.ParentId == parentId && r.tree.Level != 0)
-                .Join(filesDbContext.Security, r => r.folder.Id.ToString(), security => security.EntryId, (r, security) => new { r.folder, security })
+                .Join(filesDbContext.Security, r => r.folder.Id, security => security.InternalEntryId, (r, security) => new { r.folder, security })
                 .Where(r => r.security.TenantId == tenantId
                     && r.security.EntryType == FileEntryType.Folder
                     && (r.security.SubjectType == SubjectType.ExternalLink || 

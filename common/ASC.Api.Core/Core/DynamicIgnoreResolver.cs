@@ -107,7 +107,7 @@ public class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAccessor,
                         {
                             var interfaces = propType.GetInterfaces();
                             var asyncEnumerableInterface = interfaces.FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>));
-                            var enumerableInterfaces = interfaces.FirstOrDefault(t => t.IsGenericType && (t.GetGenericTypeDefinition() == typeof(IEnumerable<>)));
+                            var enumerableInterfaces = interfaces.FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
                             if (enumerableInterfaces != null)
                             {
                                 var types = ((IEnumerable)propertyValue).Cast<object>().Select(r => r.GetType()).Distinct();

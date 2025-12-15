@@ -87,6 +87,7 @@ public class ChatClientFactory(
 
                 funcClient.MaximumIterationsPerRequest = 32;
                 funcClient.AllowConcurrentInvocation = true;
+                funcClient.IncludeDetailedErrors = true;
                 
                 return funcClient;
             });

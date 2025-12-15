@@ -210,4 +210,7 @@
   <data name="СreateRootFolder" xml:space="preserve">
     <value>Creează folder rădăcină</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Copia de rezervă este mai mare decât spațiul de stocare total disponibil pe portal</value>
+  </data>
 </root>

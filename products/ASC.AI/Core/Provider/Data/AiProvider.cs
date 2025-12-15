@@ -35,6 +35,8 @@ public class AiProvider
     public ProviderType Type { get; init; }
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }
+
+    public bool NeedReset { get; set; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

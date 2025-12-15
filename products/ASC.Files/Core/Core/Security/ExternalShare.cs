@@ -64,7 +64,7 @@ public class ExternalShare(
 
                 url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key);
                 break;
-            case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
+            case Folder<T> folder when folder.IsRoom:
                 url = string.Format(RoomLinkPattern, key);
                 break;
             case Folder<T> { RootFolderType: FolderType.VirtualRooms or FolderType.USER } folder:
@@ -443,9 +443,9 @@ public class ExternalSessionSnapshot
 
     public ExternalSessionSnapshot(Guid linkId, Guid sessionId, string passwordKey)
     {
-        this.LinkId = linkId;
-        this.SessionId = sessionId;
-        this.PasswordKey = passwordKey;
+        LinkId = linkId;
+        SessionId = sessionId;
+        PasswordKey = passwordKey;
     }
 
     [ProtoMember(1)]

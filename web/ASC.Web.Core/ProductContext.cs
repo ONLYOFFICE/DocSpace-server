@@ -28,14 +28,12 @@ namespace ASC.Web.Core;
 
 public class ProductContext : WebItemContext
 {
-    private IProductSubscriptionManager _sunscriptionManager;
-
     public new IProductSubscriptionManager SubscriptionManager
     {
-        get { return _sunscriptionManager; }
+        get;
         set
         {
-            _sunscriptionManager = value;
+            field = value;
             base.SubscriptionManager = value;
         }
     }

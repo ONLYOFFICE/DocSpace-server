@@ -67,11 +67,7 @@ public class TenantWalletSettings : ISettings<TenantWalletSettings>
     public string Currency { get; set; }
 
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{40069709-492A-4F41-988C-F1A053A8A560}"); }
-    }
+    public static Guid ID => new("{40069709-492A-4F41-988C-F1A053A8A560}");
 
     public TenantWalletSettings GetDefault()
     {

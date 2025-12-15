@@ -97,4 +97,7 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Üçüncü taraf kaynak</value>
   </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Bazı dosyalar yedeklemeye dahil edilmedi. Daha fazla bilgi almak için lütfen {0} adresini kontrol edin</value>
+  </data>
 </root>

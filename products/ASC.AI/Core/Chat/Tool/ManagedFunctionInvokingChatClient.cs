@@ -98,13 +98,7 @@ public class ManagedFunctionInvokingChatClient(
         
         if (decision is ToolExecutionDecision.Deny)
         {
-            return new
-            {
-                Content = new List<AIContent>
-                {
-                    new TextContent("The user has chosen to disallow the tool call.")
-                }
-            };
+            return ToFunctionTextResult("The user has chosen to disallow the tool call.");
         }
 
         if (decision is ToolExecutionDecision.AlwaysAllow)
@@ -113,5 +107,57 @@ public class ManagedFunctionInvokingChatClient(
         }
         
         return await base.InvokeFunctionAsync(context, cancellationToken);
+    }
+
+    protected override IList<ChatMessage> CreateResponseMessages(
+        ReadOnlySpan<FunctionInvocationResult> results)
+    {
+        var contents = new List<AIContent>(results.Length);
+        foreach (var t in results)
+        {
+            contents.Add(CreateFunctionResultContent(t));
+        }
+
+        return [new ChatMessage(ChatRole.Tool, contents)];
+
+        FunctionResultContent CreateFunctionResultContent(FunctionInvocationResult result)
+        {
+            ArgumentNullException.ThrowIfNull(result);
+
+            object? functionResult;
+            if (result.Status == FunctionInvocationStatus.RanToCompletion)
+            {
+                functionResult = result.Result ?? ToFunctionTextResult("Success: Function completed.");
+            }
+            else
+            {
+                var message = result.Status switch
+                {
+                    FunctionInvocationStatus.NotFound => $"Error: Requested function \"{result.CallContent.Name}\" not found.",
+                    FunctionInvocationStatus.Exception => "Error: Function failed.",
+                    _ => "Error: Unknown error."
+                };
+
+                if (IncludeDetailedErrors && result.Exception is not null)
+                {
+                    message = $"{message} Exception: {result.Exception.Message}";
+                }
+
+                functionResult = ToFunctionTextResult(message);
+            }
+
+            return new FunctionResultContent(result.CallContent.CallId, functionResult) { Exception = result.Exception };
+        }
+    }
+    
+    private static object ToFunctionTextResult(string message)
+    {
+        return new
+        {
+            Content = new List<AIContent>
+            {
+                new TextContent(message)
+            }
+        };
     }
 }

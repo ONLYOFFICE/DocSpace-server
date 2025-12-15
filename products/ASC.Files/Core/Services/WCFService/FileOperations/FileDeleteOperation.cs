@@ -185,7 +185,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             CancellationToken.ThrowIfCancellationRequested();
 
             var folder = await FolderDao.GetFolderAsync(folderId);
-            var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
+            var isRoom = folder.IsRoom;
 
             var canDelete = await FilesSecurity.CanDeleteAsync(folder);
             checkPermissions = isRoom ? !canDelete : checkPermissions;
@@ -194,6 +194,10 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             if (folder == null)
             {
                 Err = FilesCommonResource.ErrorMessage_FolderNotFound;
+            }
+            else if (!_immediately && folder.IsRoom)
+            {
+                Err = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
             }
             else if (!_ignoreException && checkPermissions && !canDelete)
             {
@@ -206,7 +210,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;
                 await fileMarker.RemoveMarkAsNewForAllAsync(folder);
 
-                if (folder.ProviderEntry && ((folder.Id.Equals(folder.RootId) || isRoom)))
+                if (folder.ProviderEntry && (folder.Id.Equals(folder.RootId) || isRoom))
                 {
                     if (ProviderDao != null)
                     {
@@ -290,13 +294,13 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                         folder, 
                                         _headers, 
                                         folder.Title);
-                                    await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                 }
                                 else
                                 {
                                     await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, _headers, folder.Title);
-                                    await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                 }
+
+                                await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                             }
 
                             ProcessedFolder(folderId);
@@ -365,13 +369,13 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                             folder, 
                                             _headers, 
                                             folder.Title);
-                                        await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                     }
                                     else
                                     {
                                         await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, _headers, folder.Title);
-                                        await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                     }
+
+                                    await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                 }
                             }
                             else
@@ -487,11 +491,11 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         if (file.RootFolderType == FolderType.Archive)
                         {
                             var archiveId = await folderDao.GetFolderIDArchive(false);
-                            await folderDao.ChangeTreeFolderSizeAsync(archiveId, (-1) * file.ContentLength);
+                            await folderDao.ChangeTreeFolderSizeAsync(archiveId, -1 * file.ContentLength);
                         }
                         else if (file.RootFolderType == FolderType.TRASH)
                         {
-                            await folderDao.ChangeTreeFolderSizeAsync(_trashId, (-1) * file.ContentLength);
+                            await folderDao.ChangeTreeFolderSizeAsync(_trashId, -1 * file.ContentLength);
                         }
 
                         if (hasHeaders)

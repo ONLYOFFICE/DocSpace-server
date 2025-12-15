@@ -60,10 +60,7 @@ internal class ProviderDaoBase(IServiceProvider serviceProvider,
         {
             var firstEntry = entries.FirstOrDefault(y => y.Id.Equals(id));
 
-            if (firstEntry != null)
-            {
-                firstEntry.Shared = true;
-            }
+            firstEntry?.Shared = true;
         }
     }
 

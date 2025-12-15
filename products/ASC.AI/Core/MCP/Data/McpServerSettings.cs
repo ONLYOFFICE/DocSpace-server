@@ -24,14 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.FederatedLogin;
-
 namespace ASC.AI.Core.MCP.Data;
 
 public class McpServerSettings
 {
     public OAuth20Token? OauthCredentials { get; set; }
     public ToolsConfiguration? ToolsConfiguration { get; set; }
+
+    public bool NeedReset { get; set; }
 }
 
 public static class DbMcpServerSettingsExtensions
@@ -43,8 +43,20 @@ public static class DbMcpServerSettingsExtensions
         var settings = new McpServerSettings();
         if (dbMcpServerSettings.OauthCredentials != null)
         {
-            var oauthCredential = await crypto.DecryptAsync(dbMcpServerSettings.OauthCredentials);
-            settings.OauthCredentials = OAuth20Token.FromJson(oauthCredential);
+            var oauthCredential = string.Empty;
+            try
+            {
+                oauthCredential = await crypto.DecryptAsync(dbMcpServerSettings.OauthCredentials);
+            }
+            catch (CryptographicException)
+            {
+                settings.NeedReset = true;
+            }
+
+            if (!settings.NeedReset)
+            {
+                settings.OauthCredentials = OAuth20Token.FromJson(oauthCredential);
+            }
         }
         
         settings.ToolsConfiguration = dbMcpServerSettings.ToolsConfiguration;

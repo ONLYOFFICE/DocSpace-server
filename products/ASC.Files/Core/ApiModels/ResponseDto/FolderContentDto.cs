@@ -114,8 +114,7 @@ public class FolderContentDtoHelper(
         }
         
         List<FileShareRecord<string>> currentUsersRecords = null;
-        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID) && 
-            folderItems.FolderInfo is { FolderType: FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates })
+        if (folderItems.FolderInfo is { FolderType: FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates })
         {
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
         }
@@ -166,8 +165,8 @@ public class FolderContentDtoHelper(
         result.PathParts = folderItems.FolderPathParts;
         result.StartIndex = startIndex;
         result.Total = folderItems.Total;
-        result.New = (isEnableBadges.Result) ? folderItems.New : 0;
-        result.Current = (FolderDto<T>)(currentTask.Result);
+        result.New = isEnableBadges.Result ? folderItems.New : 0;
+        result.Current = (FolderDto<T>)currentTask.Result;
 
         if (folderItems.ParentRoom is { FolderType: FolderType.AiRoom })
         {
@@ -223,7 +222,7 @@ public class FolderContentDtoHelper(
             {
                 case Folder<int> fol1:
                     if (currentUsersRecords == null &&
-                        DocSpaceHelper.IsRoom(fol1.FolderType) &&
+                        fol1.IsRoom &&
                         await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
                     {
                         currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
@@ -231,7 +230,7 @@ public class FolderContentDtoHelper(
                     return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, aiReady);
                 case Folder<string> fol2:
                     if (currentUsersRecords == null &&
-                        DocSpaceHelper.IsRoom(fol2.FolderType) &&
+                        fol2.IsRoom &&
                         await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
                     {
                         currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();

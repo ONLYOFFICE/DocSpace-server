@@ -158,7 +158,7 @@ internal class SharePointFolderDao(
         return folders;
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(IEnumerable<string> folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(IEnumerable<string> folderIds, IEnumerable<string> excludeParentIds  = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -381,7 +381,7 @@ internal class SharePointFolderDao(
         {
             newFolderId = (string)await SharePointProviderInfo.RenameFolderAsync(folder.Id, newTitle);
 
-            if (DocSpaceHelper.IsRoom(SharePointProviderInfo.FolderType) && SharePointProviderInfo.FolderId != null)
+            if (SharePointProviderInfo.FolderType.IsRoom() && SharePointProviderInfo.FolderId != null)
             {
                 await DaoSelector.RenameRoomProviderAsync(SharePointProviderInfo, newTitle, newFolderId);
             }

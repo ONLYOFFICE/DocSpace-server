@@ -80,10 +80,16 @@ public class FileOperationDto
     /// The list of folders of the file operation.
     /// </summary>
     public List<FileEntryBaseDto> Folders { get; set; }
+
+    /// <summary>
+    /// The status of the distributed task related to the file operation.
+    /// </summary>
+    public DistributedTaskStatus Status { get; set; }
 }
 
 [Scope]
-public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
+public class FileOperationDtoHelper(
+    FolderDtoHelper folderWrapperHelper,
     FileDtoHelper filesWrapperHelper,
     IDaoFactory daoFactory,
     CommonLinkUtility commonLinkUtility)
@@ -97,7 +103,8 @@ public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
             Progress = o.Progress,
             Error = o.Error,
             Processed = o.Processed,
-            Finished = o.Finished
+            Finished = o.Finished,
+            Status = o.Status
         };
 
         if (string.IsNullOrEmpty(o.Result) || result.OperationType == FileOperationType.Delete)

@@ -66,6 +66,7 @@ public class HistoryService(
         MessageAction.RoomCreateUser,
         MessageAction.RoomUpdateAccessForUser,
         MessageAction.RoomRemoveUser,
+        MessageAction.RoomChangeOwner,
         MessageAction.RoomGroupAdded,
         MessageAction.RoomUpdateAccessForGroup,
         MessageAction.RoomGroupRemove,

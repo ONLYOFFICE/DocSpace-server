@@ -444,30 +444,33 @@ public class Selector<T>(IServiceProvider serviceProvider)
 
 internal static class StringExtension
 {
-    public static string WrapAsterisk(this string value)
+    extension(string value)
     {
-        var result = value;
-
-        if (!value.Contains('*') && !value.Contains('?'))
+        public string WrapAsterisk()
         {
-            result = "*" + result + "*";
+            var result = value;
+
+            if (!value.Contains('*') && !value.Contains('?'))
+            {
+                result = "*" + result + "*";
+            }
+
+            return result;
         }
 
-        return result;
-    }
+        public string ReplaceBackslash()
+        {
+            return value.Replace("\\", "\\\\");
+        }
 
-    public static string ReplaceBackslash(this string value)
-    {
-        return value.Replace("\\", "\\\\");
-    }
+        public string TrimQuotes()
+        {
+            return value.Trim('\"');
+        }
 
-    public static string TrimQuotes(this string value)
-    {
-        return value.Trim('\"');
-    }
-
-    public static string PrepareToSearch(this string value)
-    {
-        return value.ReplaceBackslash().ToLowerInvariant().Replace('ё', 'е').Replace('Ё', 'Е');
+        public string PrepareToSearch()
+        {
+            return value.ReplaceBackslash().ToLowerInvariant().Replace('ё', 'е').Replace('Ё', 'Е');
+        }
     }
 }

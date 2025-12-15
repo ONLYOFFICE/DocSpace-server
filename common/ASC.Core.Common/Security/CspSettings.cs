@@ -27,8 +27,7 @@
 namespace ASC.Core.Common.Security;
 public class CspSettings : ISettings<CspSettings>
 {
-    [JsonIgnore]
-    public Guid ID => new("27504162-16FF-405F-8530-1537B0F2B89D");
+    public static Guid ID => new("27504162-16FF-405F-8530-1537B0F2B89D");
 
     public IEnumerable<string> Domains { get; set; }
 

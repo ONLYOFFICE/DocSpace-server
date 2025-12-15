@@ -490,6 +490,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:delete-guest", guestId);
   }
 
+ function connectTelegram({ tenantId, userId } = {}) {
+    var room = `${tenantId}-telegram`;
+    filesIO.to(room).emit("s:telegram", userId);
+  }
+  
   function updateTelegram({ tenantId, userId, username } = {}) {
     var room = `${tenantId}-telegram-${userId}`;
     filesIO.to(room).emit("s:update-telegram", username);
@@ -561,8 +566,8 @@ module.exports = (io) => {
     filesIO.to(userRoom).emit("s:update-chat", { chatId, chatTitle });
   }
 
-  function exportChat({ room, resultFile }) {
-    filesIO.to(room).emit("s:export-chat", { resultFile });
+  function exportChat({ room, resultFile, error }) {
+    filesIO.to(room).emit("s:export-chat", { resultFile, error });
   }
 
   function changeAccessRightsForFile({ id, room, data, userId } = {}) {
@@ -603,6 +608,7 @@ module.exports = (io) => {
     addGuest,
     updateGuest,
     deleteGuest,
+    connectTelegram,
     updateTelegram,
     backupProgress,
     restoreProgress,

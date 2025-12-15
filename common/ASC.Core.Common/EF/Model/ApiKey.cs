@@ -61,146 +61,150 @@ public static class DbApiKeyExtension
             .Add(PgSqlAddDbApiKeys, Provider.PostgreSql);
     }
 
-    private static void MySqlAddDbApiKeys(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<ApiKey>(entity =>
+        private void MySqlAddDbApiKeys()
         {
-            entity.HasKey(e => new { e.Id })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<ApiKey>(entity =>
+            {
+                entity.HasKey(e => new { e.Id })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("core_user_api_key")
-                .HasCharSet("utf8");
+                entity.ToTable("core_user_api_key")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(a => new { a.TenantId, a.HashedKey })
-                .HasDatabaseName("hashed_key");
+                entity.HasIndex(a => new { a.TenantId, a.HashedKey })
+                    .HasDatabaseName("hashed_key");
 
-            entity.HasIndex(a => a.ExpiresAt)
-                .HasDatabaseName("expires_at");
+                entity.HasIndex(a => a.ExpiresAt)
+                    .HasDatabaseName("expires_at");
 
-            entity.Property(e => e.Name)
-                .HasColumnName("name")
-                .HasColumnType("varchar")
-                .HasMaxLength(255)
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .IsRequired();
+                entity.Property(e => e.Name)
+                    .HasColumnName("name")
+                    .HasColumnType("varchar")
+                    .HasMaxLength(255)
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci")
+                    .IsRequired();
 
-            entity.Property(e => e.KeyPostfix)
-                .HasColumnName("key_postfix")
-                .HasColumnType("varchar")
-                .HasMaxLength(4)
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .IsRequired();
+                entity.Property(e => e.KeyPostfix)
+                    .HasColumnName("key_postfix")
+                    .HasColumnType("varchar")
+                    .HasMaxLength(4)
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci")
+                    .IsRequired();
 
-            entity.Property(e => e.HashedKey)
-                .HasColumnName("hashed_key")
-                .HasColumnType("varchar")
-                .HasMaxLength(255)
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .IsRequired();
+                entity.Property(e => e.HashedKey)
+                    .HasColumnName("hashed_key")
+                    .HasColumnType("varchar")
+                    .HasMaxLength(255)
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci")
+                    .IsRequired();
 
-            entity.Property(e => e.Permissions)
-                  .HasColumnName("permissions")
-                  .HasConversion(
-                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null));
+                entity.Property(e => e.Permissions)
+                    .HasColumnName("permissions")
+                    .HasConversion(
+                        v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                        v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null));
 
-            entity.Property(e => e.LastUsed)
-                .HasColumnName("last_used")
-                .HasColumnType("datetime");
+                entity.Property(e => e.LastUsed)
+                    .HasColumnName("last_used")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.CreateOn)
-                .HasColumnName("create_on")
-                .HasColumnType("datetime")
-                .IsRequired();
+                entity.Property(e => e.CreateOn)
+                    .HasColumnName("create_on")
+                    .HasColumnType("datetime")
+                    .IsRequired();
 
-            entity.Property(e => e.CreateBy)
-                .HasColumnName("create_by")
-                .HasColumnType("varchar(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .IsRequired();
+                entity.Property(e => e.CreateBy)
+                    .HasColumnName("create_by")
+                    .HasColumnType("varchar(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci")
+                    .IsRequired();
 
-            entity.Property(e => e.ExpiresAt)
-                .HasColumnName("expires_at")
-                .HasColumnType("datetime");
+                entity.Property(e => e.ExpiresAt)
+                    .HasColumnName("expires_at")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id")
-                .HasColumnType("int")
-                .IsRequired();
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id")
+                    .HasColumnType("int")
+                    .IsRequired();
 
-        });
-    }
-    private static void PgSqlAddDbApiKeys(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<ApiKey>(entity =>
+            });
+        }
+
+        private void PgSqlAddDbApiKeys()
         {
-            entity.HasKey(e => new { e.Id })
-                .HasName("pk_core_user_api_key");
+            modelBuilder.Entity<ApiKey>(entity =>
+            {
+                entity.HasKey(e => new { e.Id })
+                    .HasName("pk_core_user_api_key");
 
-            entity.ToTable("core_user_api_key");
+                entity.ToTable("core_user_api_key");
 
-            entity.HasIndex(a => new { a.TenantId, a.HashedKey })
-                .HasDatabaseName("idx_core_user_api_key_tenant_id_hashed_key");
+                entity.HasIndex(a => new { a.TenantId, a.HashedKey })
+                    .HasDatabaseName("idx_core_user_api_key_tenant_id_hashed_key");
 
-            entity.HasIndex(a => a.ExpiresAt)
-                .HasDatabaseName("idx_core_user_api_key_expires_at");
+                entity.HasIndex(a => a.ExpiresAt)
+                    .HasDatabaseName("idx_core_user_api_key_expires_at");
 
-            entity.Property(e => e.Name)
-                .HasColumnName("name")
-                .HasColumnType("varchar")
-                .HasMaxLength(255)
-                .IsRequired();
+                entity.Property(e => e.Name)
+                    .HasColumnName("name")
+                    .HasColumnType("varchar")
+                    .HasMaxLength(255)
+                    .IsRequired();
 
-            entity.Property(e => e.KeyPostfix)
-                .HasColumnName("key_postfix")
-                .HasColumnType("varchar")
-                .HasMaxLength(4)
-                .IsRequired();
+                entity.Property(e => e.KeyPostfix)
+                    .HasColumnName("key_postfix")
+                    .HasColumnType("varchar")
+                    .HasMaxLength(4)
+                    .IsRequired();
 
-            entity.Property(e => e.HashedKey)
-                .HasColumnName("hashed_key")
-                .HasColumnType("varchar")
-                .HasMaxLength(255)
-                .IsRequired();
+                entity.Property(e => e.HashedKey)
+                    .HasColumnName("hashed_key")
+                    .HasColumnType("varchar")
+                    .HasMaxLength(255)
+                    .IsRequired();
 
-            entity.Property(e => e.Permissions)
-                  .HasColumnName("permissions")
-                  .HasConversion(
-                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null));
+                entity.Property(e => e.Permissions)
+                    .HasColumnName("permissions")
+                    .HasConversion(
+                        v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                        v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null));
 
-            entity.Property(e => e.LastUsed)
-                .HasColumnName("last_used")
-                .HasColumnType("timestamp");
+                entity.Property(e => e.LastUsed)
+                    .HasColumnName("last_used")
+                    .HasColumnType("timestamp");
 
-            entity.Property(e => e.CreateOn)
-                .HasColumnName("create_on")
-                .HasColumnType("timestamp")
-                .IsRequired();
+                entity.Property(e => e.CreateOn)
+                    .HasColumnName("create_on")
+                    .HasColumnType("timestamp")
+                    .IsRequired();
 
-            entity.Property(e => e.CreateBy)
-                .HasColumnName("create_by")
-                .HasColumnType("uuid")
-                .IsRequired();
+                entity.Property(e => e.CreateBy)
+                    .HasColumnName("create_by")
+                    .HasColumnType("uuid")
+                    .IsRequired();
 
-            entity.Property(e => e.ExpiresAt)
-                .HasColumnName("expires_at")
-                .HasColumnType("timestamp");
+                entity.Property(e => e.ExpiresAt)
+                    .HasColumnName("expires_at")
+                    .HasColumnType("timestamp");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id")
-                .HasColumnType("integer")
-                .IsRequired();
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id")
+                    .HasColumnType("integer")
+                    .IsRequired();
 
-            entity.HasOne(e => e.Tenant)
-                .WithMany()
-                .HasForeignKey(e => e.TenantId)
-                .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(e => e.Tenant)
+                    .WithMany()
+                    .HasForeignKey(e => e.TenantId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-        });
+            });
+        }
     }
 }

@@ -24,53 +24,56 @@ public static class IdentityConsentExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddIdentityConsent(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<IdentityConsent>(entity =>
+        public void MySqlAddIdentityConsent()
         {
-            entity.HasKey(e => new { e.PrincipalId, e.RegisteredClientId }).HasName("PRIMARY");
+            modelBuilder.Entity<IdentityConsent>(entity =>
+            {
+                entity.HasKey(e => new { e.PrincipalId, e.RegisteredClientId }).HasName("PRIMARY");
 
-            entity.ToTable("identity_consents");
+                entity.ToTable("identity_consents");
 
-            entity.Property(e => e.PrincipalId)
-            .HasMaxLength(255)
-            .HasColumnName("principal_id");
-            entity.Property(e => e.RegisteredClientId)
-            .HasMaxLength(36)
-            .HasColumnName("registered_client_id");
-            entity.Property(e => e.IsInvalidated)
-                .HasDefaultValueSql("'0'")
-                .HasColumnName("is_invalidated");
-            entity.Property(e => e.ModifiedAt)
-                .HasMaxLength(6)
-                .HasColumnName("modified_at");
-        });
-    }
+                entity.Property(e => e.PrincipalId)
+                    .HasMaxLength(255)
+                    .HasColumnName("principal_id");
+                entity.Property(e => e.RegisteredClientId)
+                    .HasMaxLength(36)
+                    .HasColumnName("registered_client_id");
+                entity.Property(e => e.IsInvalidated)
+                    .HasDefaultValueSql("'0'")
+                    .HasColumnName("is_invalidated");
+                entity.Property(e => e.ModifiedAt)
+                    .HasMaxLength(6)
+                    .HasColumnName("modified_at");
+            });
+        }
 
-    public static void PgSqlAddIdentityConsent(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<IdentityConsent>(entity =>
+        public void PgSqlAddIdentityConsent()
         {
-            entity.HasKey(e => new { e.PrincipalId, e.RegisteredClientId })
-                .HasName("pk_identity_consents"); // PostgreSQL prefers prefix "pk" for primary keys instead of "PRIMARY"
+            modelBuilder.Entity<IdentityConsent>(entity =>
+            {
+                entity.HasKey(e => new { e.PrincipalId, e.RegisteredClientId })
+                    .HasName("pk_identity_consents"); // PostgreSQL prefers prefix "pk" for primary keys instead of "PRIMARY"
 
-            entity.ToTable("identity_consents");
+                entity.ToTable("identity_consents");
 
-            entity.Property(e => e.PrincipalId)
-                .HasMaxLength(255)
-                .HasColumnName("principal_id");
+                entity.Property(e => e.PrincipalId)
+                    .HasMaxLength(255)
+                    .HasColumnName("principal_id");
 
-            entity.Property(e => e.RegisteredClientId)
-                .HasMaxLength(36)
-                .HasColumnName("registered_client_id");
+                entity.Property(e => e.RegisteredClientId)
+                    .HasMaxLength(36)
+                    .HasColumnName("registered_client_id");
 
-            entity.Property(e => e.IsInvalidated)
-                .HasDefaultValueSql("false") // PostgreSQL uses "false" for boolean false
-                .HasColumnName("is_invalidated");
+                entity.Property(e => e.IsInvalidated)
+                    .HasDefaultValueSql("false") // PostgreSQL uses "false" for boolean false
+                    .HasColumnName("is_invalidated");
 
-            entity.Property(e => e.ModifiedAt)
-                .HasColumnType("timestamp with time zone") // PostgreSQL equivalent for a timestamp column
-                .HasColumnName("modified_at");
-        });
+                entity.Property(e => e.ModifiedAt)
+                    .HasColumnType("timestamp with time zone") // PostgreSQL equivalent for a timestamp column
+                    .HasColumnName("modified_at");
+            });
+        }
     }
 }

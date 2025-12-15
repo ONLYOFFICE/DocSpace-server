@@ -42,7 +42,7 @@ public class TableFormatterState(TextileFormatter f) : FormatterState(f)
         _attsInfo = m.Groups["atts"].Value;
 
         //TODO: check the state (it could already be a table!)
-        this.Formatter.ChangeState(this);
+        Formatter.ChangeState(this);
 
         return string.Empty;
     }

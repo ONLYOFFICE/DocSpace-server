@@ -590,18 +590,18 @@ public static class AccountingHttpClientExtension
                     ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
                         .Handle<HttpRequestException>()
                         .Handle<TaskCanceledException>()
-                        .HandleResult(response => !response.IsSuccessStatusCode),
+                        .HandleResult(response => !response.IsSuccessStatusCode)
                 });
             });
 
         services.AddResiliencePipeline<string, bool>(AccountingClient.BalanceResiliencePipelineName, pipelineBuilder =>
         {
-            pipelineBuilder.AddRetry(new RetryStrategyOptions<bool>()
+            pipelineBuilder.AddRetry(new RetryStrategyOptions<bool>
             {
                 MaxRetryAttempts = 15,
                 Delay = TimeSpan.FromSeconds(1),
                 BackoffType = DelayBackoffType.Constant,
-                ShouldHandle = new PredicateBuilder<bool>().HandleResult(result => result == false)
+                ShouldHandle = new PredicateBuilder<bool>().HandleResult(result => !result)
             });
         });
     }

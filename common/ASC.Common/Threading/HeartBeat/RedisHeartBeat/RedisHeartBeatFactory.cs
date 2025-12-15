@@ -66,13 +66,13 @@ public class RedisHeartBeatFactory(IRedisDatabase database) : IHeartBeatFactory
     {
         var timer = new PeriodicTimer(pulseInterval);
 
-        _ = Task.Run((async () =>
+        _ = Task.Run(async () =>
         {
             while (await timer.WaitForNextTickAsync(cancellationToken))
             {
                 await database.Database.LockExtendAsync(key, id, timeout);
             }
-        }), cancellationToken);
+        }, cancellationToken);
 
         return timer;
     }

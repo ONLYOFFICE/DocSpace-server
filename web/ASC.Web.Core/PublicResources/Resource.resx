@@ -520,7 +520,7 @@
     <value>Phone number from Twilio (required for SMS authorization)</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
     <value>Client ID</value>
@@ -529,10 +529,10 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Enable the application to sign in to the portal using a Twitter account.</value>
+    <value>Enable the application to sign in to the portal using a X account.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Enable this app to allow your users to sign in to {LogoText} using their Twitter and link their customers’ Twitter accounts to the CRM module. {0}Go to Twitter Developers Portal and create a new app {LogoText} integration. Insert the data you received below:</value>
+    <value>Enable this app to allow your users to sign in to {LogoText} using their X and link their customers’ X accounts to the CRM module. {0}Go to X Developers Portal and create a new app {LogoText} integration. Insert the data you received below:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>
@@ -1042,7 +1042,7 @@
     <value>What's New</value>
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Third-party integrations</value>
+    <value>Pro integrations</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Too many login attempts. Please try again later</value>

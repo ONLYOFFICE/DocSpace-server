@@ -31,10 +31,7 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
 {
     public LdapCertificateConfirmRequest CertificateConfirmRequest { get; set; }
 
-    public LdapHelper LdapHelper
-    {
-        get { return LdapImporter.LdapHelper; }
-    }
+    public LdapHelper LdapHelper => LdapImporter.LdapHelper;
 
     public new void Init(LdapUserImporter importer)
     {

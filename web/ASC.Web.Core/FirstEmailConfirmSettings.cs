@@ -30,11 +30,7 @@ public class FirstEmailConfirmSettings : ISettings<FirstEmailConfirmSettings>
 {
     public bool IsFirst { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{EE139F6C-8821-4011-8444-FD87882CD5F5}"); }
-    }
+    public static Guid ID => new("{EE139F6C-8821-4011-8444-FD87882CD5F5}");
 
     public FirstEmailConfirmSettings GetDefault()
     {

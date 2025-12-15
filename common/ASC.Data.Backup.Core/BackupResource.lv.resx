@@ -156,4 +156,7 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Trešās puses resurss</value>
   </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Daži faili netika iekļauti dublējumkopijā. Lai uzzinātu vairāk, lūdzu, skatiet {0}</value>
+  </data>
 </root>

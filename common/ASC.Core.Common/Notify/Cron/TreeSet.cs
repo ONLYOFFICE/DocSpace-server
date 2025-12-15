@@ -87,7 +87,7 @@ public class TreeSet : ArrayList, ISortedSet
     {
         var newList = new TreeSet();
         var i = 0;
-        while ((i < Count) && (Comparator.Compare(this[i], limit) < 0))
+        while (i < Count && Comparator.Compare(this[i], limit) < 0)
         {
             i++;
         }

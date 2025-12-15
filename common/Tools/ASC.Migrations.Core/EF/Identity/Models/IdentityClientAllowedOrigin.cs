@@ -21,54 +21,57 @@ public static class IdentityClientAllowedOriginExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddIdentityClientAllowedOrigin(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<IdentityClientAllowedOrigin>(entity =>
+        public void MySqlAddIdentityClientAllowedOrigin()
         {
-            entity
-                .HasNoKey()
-                .ToTable("identity_client_allowed_origins");
+            modelBuilder.Entity<IdentityClientAllowedOrigin>(entity =>
+            {
+                entity
+                    .HasNoKey()
+                    .ToTable("identity_client_allowed_origins");
 
-            entity.HasIndex(e => e.ClientId, "idx_identity_client_allowed_origins_client_id");
+                entity.HasIndex(e => e.ClientId, "idx_identity_client_allowed_origins_client_id");
 
-            entity.Property(e => e.AllowedOrigin)
-                .HasColumnType("tinytext")
-                .HasColumnName("allowed_origin")
-                .IsRequired();
-            entity.Property(e => e.ClientId)
-                .HasMaxLength(36)
-                .HasColumnName("client_id")
-                .IsRequired();
+                entity.Property(e => e.AllowedOrigin)
+                    .HasColumnType("tinytext")
+                    .HasColumnName("allowed_origin")
+                    .IsRequired();
+                entity.Property(e => e.ClientId)
+                    .HasMaxLength(36)
+                    .HasColumnName("client_id")
+                    .IsRequired();
 
-            entity.HasOne(d => d.Client).WithMany()
-                .HasForeignKey(d => d.ClientId)
-                .HasConstraintName("identity_client_allowed_origins_ibfk_1");
-        });
-    }
+                entity.HasOne(d => d.Client).WithMany()
+                    .HasForeignKey(d => d.ClientId)
+                    .HasConstraintName("identity_client_allowed_origins_ibfk_1");
+            });
+        }
 
-    public static void PgSqlAddIdentityClientAllowedOrigin(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<IdentityClientAllowedOrigin>(entity =>
+        public void PgSqlAddIdentityClientAllowedOrigin()
         {
-            entity
-                .HasNoKey()
-                .ToTable("identity_client_allowed_origins"); // Map to the same table name as in MySQL.
+            modelBuilder.Entity<IdentityClientAllowedOrigin>(entity =>
+            {
+                entity
+                    .HasNoKey()
+                    .ToTable("identity_client_allowed_origins"); // Map to the same table name as in MySQL.
 
-            entity.HasIndex(e => e.ClientId, "idx_identity_client_allowed_origins_client_id");
+                entity.HasIndex(e => e.ClientId, "idx_identity_client_allowed_origins_client_id");
 
-            entity.Property(e => e.AllowedOrigin)
-                .HasColumnType("text") // PostgreSQL equivalent of MySQL's "tinytext".
-                .HasColumnName("allowed_origin")
-                .IsRequired();
+                entity.Property(e => e.AllowedOrigin)
+                    .HasColumnType("text") // PostgreSQL equivalent of MySQL's "tinytext".
+                    .HasColumnName("allowed_origin")
+                    .IsRequired();
 
-            entity.Property(e => e.ClientId)
-                .HasMaxLength(36)
-                .HasColumnName("client_id")
-                .IsRequired();
+                entity.Property(e => e.ClientId)
+                    .HasMaxLength(36)
+                    .HasColumnName("client_id")
+                    .IsRequired();
 
-            entity.HasOne(d => d.Client).WithMany()
-                .HasForeignKey(d => d.ClientId)
-                .HasConstraintName("identity_client_allowed_origins_ibfk_1");
-        });
+                entity.HasOne(d => d.Client).WithMany()
+                    .HasForeignKey(d => d.ClientId)
+                    .HasConstraintName("identity_client_allowed_origins_ibfk_1");
+            });
+        }
     }
 }

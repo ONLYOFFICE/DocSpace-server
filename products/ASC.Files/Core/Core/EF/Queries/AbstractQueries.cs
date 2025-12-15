@@ -100,8 +100,8 @@ public partial class FilesDbContext
         return AbstractQueries.DeleteAuditReferencesAsync(this, entryId, entryType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, FileEntryType.File])]
-    public Task<int> DeleteLinksAsync(int tenantId, string entryId, FileEntryType entryType)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File])]
+    public Task<int> DeleteLinksAsync(int tenantId, int entryId, FileEntryType entryType)
     {
         return AbstractQueries.DeleteLinksAsync(this, tenantId, entryId, entryType);
     }
@@ -239,12 +239,12 @@ static file class AbstractQueries
                     .Where(r => r.EntryType == (byte)entryType)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, string, FileEntryType, Task<int>> DeleteLinksAsync =
+    public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<int>> DeleteLinksAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string entryId, FileEntryType entryType) =>
+            (FilesDbContext ctx, int tenantId, int entryId, FileEntryType entryType) =>
                 ctx.Security
                     .Where(x => x.TenantId == tenantId)
-                    .Where(x => x.EntryId == entryId)
+                    .Where(x => x.InternalEntryId == entryId)
                     .Where(x => x.EntryType == entryType)
                     .Where(x => x.SubjectType == SubjectType.PrimaryExternalLink || x.SubjectType == SubjectType.ExternalLink)
                     .ExecuteDelete());

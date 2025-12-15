@@ -111,7 +111,7 @@ public class WatermarkManager(
             return new WatermarkSettings();
         }
 
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+        if (room is not { IsRoom: true })
         {
             throw new ItemNotFoundException();
         }
@@ -164,8 +164,7 @@ public class WatermarkManager(
 
     public async Task<WatermarkSettings> GetWatermarkAsync<T>(Folder<T> room)
     {
-        if (room == null ||
-            !DocSpaceHelper.IsRoom(room.FolderType) ||
+        if (room is not { IsRoom: true } ||
             room.ProviderEntry ||
             room.RootFolderType == FolderType.Archive ||
             !await fileSecurity.CanEditRoomAsync(room))

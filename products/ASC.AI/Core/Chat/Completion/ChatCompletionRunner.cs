@@ -36,7 +36,8 @@ public class ChatCompletionRunner(
     ILogger<ChatCompletionGenerator> logger,
     AttachmentHandler attachmentHandler,
     SocketManager socketManager,
-    ChatNameGenerator chatNameGenerator)
+    ChatNameGenerator chatNameGenerator,
+    IServiceScopeFactory serviceScopeFactory)
 {
     public async Task<ChatCompletionGenerator> StartNewChatAsync(
         int roomId, string message, IEnumerable<JsonElement>? files = null)
@@ -75,7 +76,15 @@ public class ChatCompletionRunner(
         
         var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
         
-        return new ChatCompletionGenerator(client, logger, socketManager, messages, chatHistory, chatNameGenerator, context);
+        return new ChatCompletionGenerator(
+            client, 
+            logger, 
+            socketManager, 
+            messages, 
+            chatHistory, 
+            chatNameGenerator, 
+            context,
+            serviceScopeFactory);
     }
 
     public async Task<ChatCompletionGenerator> StartChatAsync(
@@ -124,7 +133,15 @@ public class ChatCompletionRunner(
         
         var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
 
-        return new ChatCompletionGenerator(client, logger, socketManager, messages, chatHistory, chatNameGenerator, context);
+        return new ChatCompletionGenerator(
+            client, 
+            logger, 
+            socketManager, 
+            messages, 
+            chatHistory, 
+            chatNameGenerator, 
+            context,
+            serviceScopeFactory);
     }
 
     private async IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(IEnumerable<JsonElement>? files)

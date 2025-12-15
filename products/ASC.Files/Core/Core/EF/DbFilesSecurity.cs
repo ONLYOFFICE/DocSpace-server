@@ -29,8 +29,12 @@ namespace ASC.Files.Core.EF;
 public class DbFilesSecurity : BaseEntity, IDbFile
 {
     public int TenantId { get; set; }
+    
     [MaxLength(50)]
     public string EntryId { get; set; }
+    
+    public int InternalEntryId { get; set; }
+    
     public FileEntryType EntryType { get; set; }
     public SubjectType SubjectType { get; set; }
     public Guid Subject { get; set; }
@@ -60,114 +64,129 @@ public static class DbFilesSecurityExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbFilesSecurity(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbFilesSecurity>(entity =>
+        public void MySqlAddDbFilesSecurity()
         {
-            entity.HasKey(e => new { e.TenantId, e.EntryId, e.EntryType, e.Subject })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbFilesSecurity>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.EntryId, e.EntryType, e.Subject })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("files_security")
-                .HasCharSet("utf8");
+                entity.ToTable("files_security")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.Owner)
-                .HasDatabaseName("owner");
+                entity.HasIndex(e => e.Owner)
+                    .HasDatabaseName("owner");
 
-            entity.HasIndex(e => new { e.TenantId, e.EntryType, e.EntryId, e.Owner })
-                .HasDatabaseName("tenant_id");
+                entity.HasIndex(e => new { e.TenantId, e.EntryType, e.EntryId, e.Owner })
+                    .HasDatabaseName("tenant_id");
 
-            entity.HasIndex(e => new { e.TenantId, e.Subject })
-                .HasDatabaseName("tenant_id_subject");
+                entity.HasIndex(e => new { e.TenantId, e.Subject })
+                    .HasDatabaseName("tenant_id_subject");
+            
+                entity.HasIndex(e => new { e.TenantId, e.InternalEntryId })
+                    .HasDatabaseName("tenant_id_internal_entry_id");
+            
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.EntryId)
+                    .HasColumnName("entry_id")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+            
+                entity.Property(e => e.InternalEntryId)
+                    .HasColumnName("internal_entry_id");
 
-            entity.Property(e => e.EntryId)
-                .HasColumnName("entry_id")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.EntryType).HasColumnName("entry_type");
 
-            entity.Property(e => e.EntryType).HasColumnName("entry_type");
+                entity.Property(e => e.Subject)
+                    .HasColumnName("subject")
+                    .HasColumnType("char(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Subject)
-                .HasColumnName("subject")
-                .HasColumnType("char(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Owner)
+                    .IsRequired()
+                    .HasColumnName("owner")
+                    .HasColumnType("char(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Owner)
-                .IsRequired()
-                .HasColumnName("owner")
-                .HasColumnType("char(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Share).HasColumnName("security");
 
-            entity.Property(e => e.Share).HasColumnName("security");
+                entity.Property(e => e.TimeStamp)
+                    .HasColumnName("timestamp")
+                    .HasColumnType("timestamp");
 
-            entity.Property(e => e.TimeStamp)
-                .HasColumnName("timestamp")
-                .HasColumnType("timestamp");
+                entity.Property(e => e.SubjectType).HasColumnName("subject_type");
 
-            entity.Property(e => e.SubjectType).HasColumnName("subject_type");
+                entity.Property(e => e.Options)
+                    .HasColumnName("options")
+                    .HasColumnType("json")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+            });
+        }
 
-            entity.Property(e => e.Options)
-                .HasColumnName("options")
-                .HasColumnType("json")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-        });
-    }
-
-    public static void PgSqlAddDbFilesSecurity(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbFilesSecurity>(entity =>
+        public void PgSqlAddDbFilesSecurity()
         {
-            // Defining a composite primary key for PostgreSQL database
-            entity.HasKey(e => new { e.TenantId, e.EntryId, e.EntryType, e.Subject })
-                .HasName("files_security_pkey");
+            modelBuilder.Entity<DbFilesSecurity>(entity =>
+            {
+                // Defining a composite primary key for PostgreSQL database
+                entity.HasKey(e => new { e.TenantId, e.EntryId, e.EntryType, e.Subject })
+                    .HasName("files_security_pkey");
 
-            // Setting the table name
-            entity.ToTable("files_security");
+                // Setting the table name
+                entity.ToTable("files_security");
 
-            // Adding indexes for efficiency
-            entity.HasIndex(e => e.Owner)
-                .HasDatabaseName("idx_owner");
+                // Adding indexes for efficiency
+                entity.HasIndex(e => e.Owner)
+                    .HasDatabaseName("idx_owner");
 
-            entity.HasIndex(e => new { e.TenantId, e.EntryType, e.EntryId, e.Owner })
-                .HasDatabaseName("idx_tenant_id");
+                entity.HasIndex(e => new { e.TenantId, e.EntryType, e.EntryId, e.Owner })
+                    .HasDatabaseName("idx_tenant_id");
 
-            entity.HasIndex(e => new { e.TenantId, e.Subject })
-                .HasDatabaseName("idx_tenant_id_subject");
+                entity.HasIndex(e => new { e.TenantId, e.Subject })
+                    .HasDatabaseName("idx_tenant_id_subject");
+            
+                entity.HasIndex(e => new { e.TenantId, e.InternalEntryId })
+                    .HasDatabaseName("idx_tenant_id_internal_entry_id");
+            
+                // Mapping Entity Properties to PostgreSQL Database Columns
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            // Mapping Entity Properties to PostgreSQL Database Columns
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.EntryId)
+                    .HasColumnName("entry_id")
+                    .HasColumnType("character varying(50)");
 
-            entity.Property(e => e.EntryId)
-                .HasColumnName("entry_id")
-                .HasColumnType("character varying(50)");
+                entity.Property(e => e.InternalEntryId)
+                    .HasColumnName("internal_entry_id");
+            
+                entity.Property(e => e.EntryType).HasColumnName("entry_type");
 
-            entity.Property(e => e.EntryType).HasColumnName("entry_type");
+                entity.Property(e => e.Subject)
+                    .HasColumnName("subject")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.Subject)
-                .HasColumnName("subject")
-                .HasColumnType("uuid");
+                entity.Property(e => e.Owner)
+                    .IsRequired()
+                    .HasColumnName("owner")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.Owner)
-                .IsRequired()
-                .HasColumnName("owner")
-                .HasColumnType("uuid");
+                entity.Property(e => e.Share).HasColumnName("security");
 
-            entity.Property(e => e.Share).HasColumnName("security");
+                entity.Property(e => e.TimeStamp)
+                    .HasColumnName("timestamp")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.TimeStamp)
-                .HasColumnName("timestamp")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.SubjectType).HasColumnName("subject_type");
 
-            entity.Property(e => e.SubjectType).HasColumnName("subject_type");
-
-            entity.Property(e => e.Options)
-                .HasColumnName("options")
-                .HasColumnType("jsonb");
-        });
+                entity.Property(e => e.Options)
+                    .HasColumnName("options")
+                    .HasColumnType("jsonb");
+            });
+        }
     }
 }

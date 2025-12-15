@@ -4,44 +4,40 @@ const path = require('path');
 const inputFilePath = path.join(__dirname, '../json/api-docs.json');
 const outputFilePath = path.join(__dirname, '../json/api-docs.json');
 
-function processNode(node, parentNode = null) {
-  if (typeof node !== 'object' || node === null) {
-    return;
-  }
+function processNode(node, preferredEnumType = null, parentNode = null) {
+  if (typeof node !== 'object' || node === null) return;
 
   for (const key in node) {
+    const value = node[key];
 
-    if (key === 'summary' && typeof node[key] === 'string') {
-      node[key] = node[key].replace(/"/g, "");
-    }
-    if (key === 'description' && typeof node[key] === 'string') {
-      node[key] = node[key].replace(/"/g, "");
-    }
-    if (node[key] && typeof node[key] === 'object') {
-      if ((key === 'anyOf' || key === 'oneOf') && Array.isArray(node[key])) {
-        const integerEnum = node[key].find(item => item.type === 'integer' && Array.isArray(item.enum));
-        if (integerEnum) {
+    if (key === 'summary' && typeof node[key] === 'string') node[key] = value.replace(/"/g, "");
+    if (key === 'description' && typeof node[key] === 'string') node[key] = value.replace(/"/g, "");
+
+    if (value && typeof value === 'object') {
+      if ((key === 'anyOf' || key === 'oneOf') && Array.isArray(value)) {
+        let targetType = preferredEnumType || node['x-enum-type'] || 'integer';
+
+        const preferred = value.find(item => (item['x-enum-type'] || item.type) === targetType);
+        if (preferred) {
           const {
             enum: enumValues,
             example,
             description: originalDescription,
             ['x-enum-varnames']: enumVarnames,
             ['x-enum-descriptions']: enumDescriptions
-          } = integerEnum;
+          } = preferred;
 
           node.enum = enumValues;
-          node.type = 'integer';
+          node.type = targetType;
           if (example !== undefined) node.example = example;
-
           if (enumVarnames) node['x-enum-varnames'] = enumVarnames;
           if (enumDescriptions) node['x-enum-descriptions'] = enumDescriptions;
-
           node.description = parentNode?.description || originalDescription;
 
           delete node[key];
         }
       } else {
-        processNode(node[key], node);
+        processNode(value, preferredEnumType, node);
       }
     }
   }
