@@ -137,7 +137,7 @@ public class DiscDataStore(
     {
         return GetReadStreamAsync(domain, path, offset);
     }
-    
+
     public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition)
     {
         return SaveAsync(domain, path, stream, ownerId);
@@ -399,7 +399,7 @@ public class DiscDataStore(
 
     public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true)
     {
-       return await MoveAsync(srcDomain, srcPath, newDomain, newPath, Guid.Empty, quotaCheckFileSize);
+        return await MoveAsync(srcDomain, srcPath, newDomain, newPath, Guid.Empty, quotaCheckFileSize);
     }
 
     public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, Guid ownerId, bool quotaCheckFileSize = true)
@@ -486,7 +486,8 @@ public class DiscDataStore(
             }
             return !Path.GetFileName(r).StartsWith(QuotaController.ExcludePattern);
         }
-        ).ToAsyncEnumerable().SelectAwait(async r => await _crypt.GetFileSizeAsync(r)).SumAsync();
+        ).ToAsyncEnumerable()
+            .Select(async (string r, CancellationToken _) => await _crypt.GetFileSizeAsync(r)).SumAsync();
 
         var subDirs = Directory.GetDirectories(targetDir, "*", SearchOption.AllDirectories).ToList();
         subDirs.Reverse();
@@ -517,7 +518,7 @@ public class DiscDataStore(
         {
             return await Directory.GetFiles(target, "*.*", SearchOption.AllDirectories)
                 .ToAsyncEnumerable()
-                .SelectAwait(async entry => await _crypt.GetFileSizeAsync(entry))
+                .Select(async (string entry, CancellationToken _) => await _crypt.GetFileSizeAsync(entry))
                 .SumAsync();
         }
 
@@ -578,7 +579,7 @@ public class DiscDataStore(
 
     public override string GetRootDirectory(string domain)
     {
-        var targetDir = GetTarget(domain , "");
+        var targetDir = GetTarget(domain, "");
         var dir = GetTarget("", "");
         if (!string.IsNullOrEmpty(targetDir) && !targetDir.EndsWith(Path.DirectorySeparatorChar.ToString()))
         {
@@ -621,7 +622,7 @@ public class DiscDataStore(
         if (Directory.Exists(targetDir))
         {
             var entries = Directory.EnumerateFiles(targetDir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-                .Select(e=> e[targetDir.Length..]);
+                .Select(e => e[targetDir.Length..]);
             return entries.ToAsyncEnumerable();
         }
         return AsyncEnumerable.Empty<string>();
@@ -656,7 +657,10 @@ public class DiscDataStore(
         if (Directory.Exists(target))
         {
             var entries = Directory.GetFiles(target, "*.*", SearchOption.AllDirectories);
-            size = await entries.ToAsyncEnumerable().SelectAwait(async entry => await _crypt.GetFileSizeAsync(entry)).SumAsync();
+            size = await entries
+                .ToAsyncEnumerable()
+                .Select(async (string entry, CancellationToken _) => await _crypt.GetFileSizeAsync(entry))
+                .SumAsync();
         }
         return size;
     }

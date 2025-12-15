@@ -52,7 +52,7 @@ internal class BoxDaoBase(
     {
         return item.Name;
     }
-    
+
     public string GetId(BoxItem item)
     {
         return item.Id;
@@ -140,6 +140,8 @@ internal class BoxDaoBase(
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
+        folder.SettingsCover = ProviderInfo.Cover;
+        
         ProcessFolderAsRoom(folder);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)
@@ -151,8 +153,6 @@ internal class BoxDaoBase(
         {
             folder.ModifiedOn = _tenantUtil.DateTimeFromUtc(folder.ModifiedOn);
         }
-        
-        folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return folder;
     }
@@ -210,7 +210,6 @@ internal class BoxDaoBase(
         file.Title = MakeFileTitle(boxFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
-        file.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return file;
     }
@@ -219,7 +218,7 @@ internal class BoxDaoBase(
     {
         return ToFolder(await GetFolderAsync("0"));
     }
-    
+
     public async Task<BoxFolder> CreateFolderAsync(string title, string folderId)
     {
         return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);

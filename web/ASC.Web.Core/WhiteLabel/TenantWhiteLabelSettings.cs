@@ -271,7 +271,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             LogoText = null
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 
     [JsonIgnore]

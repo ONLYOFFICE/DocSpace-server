@@ -159,6 +159,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Temă de culori s-a schimbat</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Contacte</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Setări cookie actualizate</value>
   </data>
@@ -327,9 +330,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Setări Sphinx au fost actualizate</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>General</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Setările paginii de întâmpinare au fost actualizate</value>
   </data>
@@ -338,9 +338,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Grupul șters: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Grupuri</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Grupul a fost actualizat: {0}</value>
@@ -522,9 +519,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista produse a fost actualizată</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Produse</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Reatribuiri</value>
   </data>
@@ -570,13 +564,16 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesiunea a început</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Setări</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Conectarea unică dezactivată</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>Conectarea unică activată</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Pornire copiere de rezerva</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -704,9 +701,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Utilizatori [{0}]. Au trimis instrucțiuni pentru schimbarea parolei</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Utilizatori</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Utilizatori [{0}]. Instrucțiuni de activare au fost trimise</value>
@@ -857,9 +851,6 @@
   </data>
   <data name="FolderIndexReordered" xml:space="preserve">
     <value>Folderul: {0}. Indexuri au fost înregistrate</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="RoomDenyDownloadDisabled" xml:space="preserve">
     <value>Sală: {0}. Interzicerea încărcării a fost dezactivată</value>
@@ -1043,5 +1034,77 @@
   </data>
   <data name="RoomExternalLinkRevoked" xml:space="preserve">
     <value>Link-ul extern a fost revocat: {1}</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Conectarea prin cont de rețea socială a reușit</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Serverul MCP {0} a fost adăugat la agentul</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agentul a fost creat</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agentul a fost șters</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agentul a fost redenumit {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agenți</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Furnizorul de IA a fost creat: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Furnizorul de IA a fost șters: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Furnizorul de IA a fost actualizat: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Agenți de IA [{0}]. Stabilire cotă de stocare particularizată pentru agenți de IA: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Agenți de IA [{0}]. Stabilire cotă de stocare implicită pentru agenți de IA: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Agenți de IA [{0}]. Cotă de stocare pentru agenți de IA este dezactivată</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Serverul MCP {0} a fost eliminat din agentul</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Stabilire cotă de stocare implicită pentru agenții de IA: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Cotă de stocare implicită pentru agenți de IA este dezactivată</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Setările de vectorizare au fost resetate</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Setările de căutare pe web au fost resetate</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>Serverul MCP a fost creat: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>Severul MCP a fost șters: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Severul MCP a fost dezctivat: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Severul MCP a fost activat: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Severul MCP a fost actualizat: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Setările de vectorizare au fost configurate. Furnizor: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Setările de căutare pe web au fost configurate. Motor: {0}</value>
   </data>
 </root>

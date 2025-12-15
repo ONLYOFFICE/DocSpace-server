@@ -171,6 +171,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Është ndryshuar tema e ngjyrës</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kontaktet</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Cilësimet e biskotës u përditësuar</value>
   </data>
@@ -390,9 +393,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Cilësimet e Sphinx u perditësuan</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Gjeneral</value>
-  </data>
   <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
     <value>Kodi i gjeneruar i autorizimit për klientin {0}</value>
   </data>
@@ -407,9 +407,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Grup i fshirë: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Grupe</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Grupi u përditësua: {0}</value>
@@ -534,9 +531,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Lëvizni</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Pronari u ndryshua: {0}</value>
   </data>
@@ -599,9 +593,6 @@
   </data>
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista e produkteve u përditësua</value>
-  </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Produktet</value>
   </data>
   <data name="QuotaPerPortalChanged" xml:space="preserve">
     <value>Caktoni kuotën e paracaktuar të ruajtje: {0}</value>
@@ -738,13 +729,16 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesioni filloi</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Cilësimet</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO u çaktivizua</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO u aktivizua</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Filloni rezervimin</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -875,9 +869,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Përdoruesit [{0}]. Udhëzimet për ndryshimin e fjalëkalimit është dërguar</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Përdoruesit</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Përdoruesit [{0}]. Udhëzimet e aktivizimit u dërguan</value>
@@ -1043,5 +1034,77 @@
   </data>
   <data name="RoomExternalLinkRevoked" xml:space="preserve">
     <value>Lidhja e jashtme u revokua: {1}</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>U shtua serveri MCP {0} tek agjenti</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agjenti u krijua</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agjenti u fshi</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agjenti u riemërua: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agjentët</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Ofruesi AI u krijua: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Ofruesi AI u fshi: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Ofruesi AI u përditësua: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Agjentët AI [{0}]. Vendos kuotë të personalizuar të hapësirës për agjentët AI: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Agjentët AI [{0}]. Vendos kuotë të parazgjedhur të hapësirës për agjentët AI: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Agjentët AI [{0}]. Çaktivizoi kuotën e hapësirës për agjentët AI</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>U fshi serveri MCP {0} nga agjenti</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Identifikimi përmes llogarisë sociale ishte i suksesshëm</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Vendos kuotën e parazgjedhur të hapësirës për agjentët AI: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Çaktivizoi kuotën e parazgjedhur të hapësirës për agjentët AI</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Cilësimet e vectorizimit janë rivendosur</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Cilësimet e kërkimit në internet janë rivendosur</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>Serveri MCP u krijua: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>Serveri MCP u fshi: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Serveri MCP u çaktivizua: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Serveri MCP u aktivizua: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Serveri MCP u përditësua: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Cilësimet e vectorizimit janë konfiguruar. Ofruesi: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Cilësimet e kërkimit në internet janë konfiguruar. Motorri: {0}</value>
   </data>
 </root>

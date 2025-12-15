@@ -36,26 +36,26 @@ public class ApiKeysDbContext(DbContextOptions<ApiKeysDbContext> options) : Base
                            .AddDbApiKeys()
                            .AddDbTenant();
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public IAsyncEnumerable<ApiKey> ApiKeysForUserAsync(int tenantId, Guid userId)
     {
         return Queries.ApiKeysForUserAsync(this, tenantId, userId);
     }
-    
+
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<ApiKey> ValidateApiKeyAsync(int tenantId, string hashedKey)
     {
-        return Queries.ValidateApiKeyAsync(this, tenantId,hashedKey);
+        return Queries.ValidateApiKeyAsync(this, tenantId, hashedKey);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public Task<ApiKey> GetApiKeyAsync(int tenantId, Guid keyId)
     {
         return Queries.GetApiKeyAsync(this, tenantId, keyId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<ApiKey> GetApiKeyAsync(int tenantId, string hashedKey)
     {
@@ -65,14 +65,14 @@ public class ApiKeysDbContext(DbContextOptions<ApiKeysDbContext> options) : Base
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<ApiKey> GetAllApiKeyAsync(int tenantId)
     {
-        return  Queries.AllApiKeysAsync(this, tenantId);
+        return Queries.AllApiKeysAsync(this, tenantId);
     }
 
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public Task<int> DeleteApiKeyAsync(int tenantId, Guid keyId)
     {
-        return Queries.DeleteApiKeyAsync(this, tenantId,keyId);
+        return Queries.DeleteApiKeyAsync(this, tenantId, keyId);
     }
 }
 
@@ -103,7 +103,7 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (ApiKeysDbContext ctx, int tenantId, string hashedKey) =>
                 ctx.DbApiKey.FirstOrDefault(r => r.TenantId == tenantId && r.HashedKey == hashedKey));
-    
+
     public static readonly Func<ApiKeysDbContext, int, Guid, Task<ApiKey>> GetApiKeyAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (ApiKeysDbContext ctx, int tenantId, Guid keyId) =>

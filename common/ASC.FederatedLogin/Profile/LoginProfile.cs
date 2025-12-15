@@ -32,22 +32,22 @@ namespace ASC.FederatedLogin.Profile;
 public class LoginProfile
 {
     public string LinkId { get; init; }
-    
+
     public LoginProfile() { }
 
-    public LoginProfile([NotNull]string serialized, string linkId = null)
+    public LoginProfile([NotNull] string serialized, string linkId = null)
     {
         ArgumentNullException.ThrowIfNull(serialized);
 
         _fields = serialized.Split(PairSeparator).ToDictionary(x => x.Split(KeyValueSeparator)[0], y => y.Split(KeyValueSeparator)[1]);
         LinkId = linkId;
     }
-    
+
     public LoginProfile(Exception e)
     {
         AuthorizationError = e.Message;
     }
-    
+
     public string Id
     {
         get => GetField(WellKnownFields.Id);
@@ -163,7 +163,7 @@ public class LoginProfile
     private const char PairSeparator = '·';
 
     private readonly Dictionary<string, string> _fields = new();
-    
+
     private string GetField(string name)
     {
         return _fields.TryGetValue(name, out var field) ? field : string.Empty;
@@ -194,8 +194,8 @@ public class LoginProfileTransport(InstanceCrypto instanceCrypto, TenantManager 
 {
     public async Task<string> ToString(LoginProfile profile)
     {
-        var tenantId =  tenantManager.GetCurrentTenant(false)?.Id;
-        var input =  await instanceCrypto.EncryptAsync(Encoding.UTF8.GetBytes(profile.ToString() + tenantId));
+        var tenantId = tenantManager.GetCurrentTenant(false)?.Id;
+        var input = await instanceCrypto.EncryptAsync(Encoding.UTF8.GetBytes(profile.ToString() + tenantId));
         return WebEncoders.Base64UrlEncode(input);
     }
 

@@ -34,7 +34,7 @@ public class MigrationWorker(
 {
     private static readonly SemaphoreSlim _semaphoreSlim = new(1);
     private readonly DistributedTaskQueue<MigrationOperation> _queue = queueFactory.CreateQueue<MigrationOperation>();
-    
+
     public async Task StartParse(int tenantId, Guid userId, string migratorName)
     {
         await Start(tenantId, item => item.InitParse(tenantId, userId, migratorName));

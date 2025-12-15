@@ -25,11 +25,13 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Xml.XPath;
+
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Extensions;
 using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Writers;
+
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
@@ -54,7 +56,7 @@ public static class OpenApiExtension
             c.SwaggerDoc("common", new OpenApiInfo
             {
                 Title = "Api",
-                Version = "3.5.0",
+                Version = "3.6.0",
                 Contact = new OpenApiContact
                 {
                     Name = "API Support",
@@ -66,6 +68,7 @@ public static class OpenApiExtension
             c.DocumentFilter<LowercaseDocumentFilter>();
             c.SchemaFilter<DerivedSchemaFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
+            c.OperationFilter<SwaggerOperationIdFilter>("api/2.0/files/recent", "getFolderRecent");
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
@@ -197,7 +200,7 @@ public static class OpenApiExtension
         {
             c.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}";
         });
-        
+
         return app;
     }
 
@@ -230,7 +233,7 @@ public static class OpenApiExtension
         {
             return name;
         }
-        
+
         if (type.IsGenericType)
         {
             name = name.Split('`')[0];
@@ -347,8 +350,8 @@ public static class OpenApiExtension
                 return;
             }
 
-            var targetMethod = context.MethodInfo.DeclaringType.IsConstructedGenericType ? 
-                context.MethodInfo.GetUnderlyingGenericTypeMethod() : 
+            var targetMethod = context.MethodInfo.DeclaringType.IsConstructedGenericType ?
+                context.MethodInfo.GetUnderlyingGenericTypeMethod() :
                 context.MethodInfo;
 
             if (targetMethod == null)
@@ -398,7 +401,7 @@ public static class OpenApiExtension
             }
 
             var baseProperties = GetAllBaseTypeProperties(type);
-            if(baseProperties.Count == 0)
+            if (baseProperties.Count == 0)
             {
                 return;
             }

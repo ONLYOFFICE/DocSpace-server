@@ -156,4 +156,7 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Ressource eines Drittanbieters</value>
   </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Einige Dateien wurden nicht in die Sicherung aufgenommen. Weitere Details finden Sie unter {0}</value>
+  </data>
 </root>

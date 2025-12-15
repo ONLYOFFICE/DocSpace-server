@@ -1999,4 +1999,101 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Sao lưu DocSpace của bạn không thành công</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Tham gia ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Bạn được mời vào ${LetterLogoText} DocSpace agent</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Sao lưu DocSpace tự động của bạn không thành công</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã tạo một agent mới: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã xóa agent: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã đổi tên agent: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã được chỉ định vai trò &lt;b&gt;{1}&lt;/b&gt; trong agent: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã được thêm vào agent: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã bị xóa khỏi agent: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Xin chào $UserName,
+
+Quá trình sao lưu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" của bạn đã không thành công.
+
+Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, xin vui lòng liên lạc  với chúng tôi qua "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Xin chào $UserName,
+
+Quá trình sao lưu DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) của bạn đã không thành công.
+
+Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, xin vui lòng liên hệ với chúng tôi qua [${__SupportLink}](${__SupportLink})
+
+Trân trọng,
+Nhóm hỗ trợ ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Xin chào!
+
+Bạn được mời tham gia DocSpace agent tại "${__VirtualRootPath}":"${__VirtualRootPath}". Xin hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+
+$OrangeButton
+
+Sau khi nhấp vào liên kết lời mời, xin vui lòng đặt mật khẩu mới cho tài khoản của bạn.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Xin chào!
+
+$__AuthorName đã mời bạn tham gia agent "$Message":"$InviteLink" trên "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Tham gia agent</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Xin chào $UserName,
+
+Quá trình sao lưu theo lịch cho DocSpace của bạn "${__VirtualRootPath}":"${__VirtualRootPath}" đã thất bại.
+
+Chúng tôi khuyên bạn nên kiểm tra cài đặt "Sao lưu":"${__VirtualRootPath}/portal-settings/backup/data-backup" và "Dịch vụ":"${__VirtualRootPath}/portal-settings/services".
+
+Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, xin vui lòng liên lạc với chúng tôi qua "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Xin chào $UserName,
+
+Quá trình sao lưu theo lịch cho DocSpace của bạn [${__VirtualRootPath}](${__VirtualRootPath}) đã thất bạig.
+
+Chúng tôi khuyên bạn nên kiểm tra cài đặt [Sao lưu](${__VirtualRootPath}/portal-settings/backup/data-backup) và [Dịch vụ](${__VirtualRootPath}/portal-settings/services).
+
+Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, xin vui lòng liên hệ với chúng tôi qua [${__SupportLink}](${__SupportLink})
+
+Trân trọng,
+Nhóm hỗ trợ ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
 </root>

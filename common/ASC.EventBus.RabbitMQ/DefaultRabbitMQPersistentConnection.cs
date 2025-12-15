@@ -34,7 +34,7 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
     private readonly ILogger<DefaultRabbitMQPersistentConnection> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private IConnection _connection;
     private bool _disposed;
-   
+
     public bool IsConnected
     {
         get
@@ -169,6 +169,6 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
     {
         await TryConnectAsync();
 
-        return _connection;       
+        return _connection;
     }
 }

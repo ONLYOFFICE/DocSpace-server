@@ -117,7 +117,7 @@ public class FirstTimeTenantSettings(
 
             await tenantManager.SaveTenantAsync(tenant);
             await cspSettingsHelper.SaveAsync(null);
-            
+
             await studioNotifyService.SendCongratulationsAsync(currentUser);
             await studioNotifyService.SendRegDataAsync(currentUser);
 
@@ -157,7 +157,7 @@ public class FirstTimeTenantSettings(
 
     public async Task<bool> GetRequestLicense()
     {
-        return await tenantExtra.GetEnableTariffSettings() && 
+        return await tenantExtra.GetEnableTariffSettings() &&
                tenantExtra.Enterprise &&
                !File.Exists(licenseReader.LicensePath);
     }
@@ -206,11 +206,9 @@ public class FirstTimeTenantSettings(
 
     private async Task<string> GetResponseString(HttpClient httpClient, HttpMethod method, string requestUrl, Dictionary<string, string> headers)
     {
-        string responseString = null;
-
         if (string.IsNullOrEmpty(requestUrl))
         {
-            return responseString;
+            return null;
         }
 
         var request = new HttpRequestMessage
@@ -223,7 +221,9 @@ public class FirstTimeTenantSettings(
         {
             request.Headers.Add(header.Key, header.Value);
         }
-
+        
+        string responseString = null;
+        
         try
         {
             using (var response = await httpClient.SendAsync(request))

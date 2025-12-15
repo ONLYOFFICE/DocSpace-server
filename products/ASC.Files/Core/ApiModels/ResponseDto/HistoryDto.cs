@@ -32,6 +32,11 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 public record HistoryDto
 {
     /// <summary>
+    /// The unique identifier for the file history entry.
+    /// </summary>
+    public required int Id { get; init; }
+    
+    /// <summary>
     /// The action performed on the file.
     /// </summary>
     public required HistoryAction Action { get; init; }
@@ -63,7 +68,7 @@ public class HistoryDtoHelper(EmployeeFullDtoHelper employeeFullDtoHelper, UserM
     public async Task<HistoryDto> GetAsync(HistoryEntry entry)
     {
         EmployeeDto initiator;
-        
+
         if (string.IsNullOrEmpty(entry.InitiatorName))
         {
             initiator = await employeeFullDtoHelper.GetAsync(await userManager.GetUsersAsync(entry.InitiatorId));
@@ -75,9 +80,10 @@ public class HistoryDtoHelper(EmployeeFullDtoHelper employeeFullDtoHelper, UserM
                 DisplayName = entry.InitiatorName
             };
         }
-        
+
         return new HistoryDto
         {
+            Id = entry.Id,
             Action = entry.Action,
             Initiator = initiator,
             Date = apiDateTimeHelper.Get(entry.Date),
@@ -87,7 +93,7 @@ public class HistoryDtoHelper(EmployeeFullDtoHelper employeeFullDtoHelper, UserM
 
     public async Task<UserData> GetAsync(Guid? userId)
     {
-        if (userId.HasValue) 
+        if (userId.HasValue)
         {
             var user = await userManager.GetUsersAsync(userId.Value);
 
@@ -136,18 +142,18 @@ public class HistoryApiHelper(
 
     private async IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> GetEntryEventsAsync(int entryId, FileEntryType entryType, ApiDateTime fromDate, ApiDateTime toDate, int offset, int count, bool setCount = true)
     {
-        var fromDateUtc = fromDate != null 
-            ? tenantUtil.DateTimeToUtc(fromDate) 
+        var fromDateUtc = fromDate != null
+            ? tenantUtil.DateTimeToUtc(fromDate)
             : (DateTime?)null;
-        
-        var toDateUtc = toDate != null 
-            ? tenantUtil.DateTimeToUtc(toDate) 
+
+        var toDateUtc = toDate != null
+            ? tenantUtil.DateTimeToUtc(toDate)
             : (DateTime?)null;
 
         var filterFolderIds = new List<int>();
         var filterFileIds = new List<int>();
         var needFiltering = false;
-        
+
         FileEntry<int> entry = entryType switch
         {
             FileEntryType.File => await daoFactory.GetFileDao<int>().GetFileAsync(entryId),
@@ -182,7 +188,7 @@ public class HistoryApiHelper(
             filterFileIds = await fileDao.GetFilesAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.FilesOnly, false, Guid.Empty, null, null, false, true, false, 0, -1, 0, false, true, f.FolderType).Select(r => r.Id).ToListAsync();
         }
 
-        if (setCount) 
+        if (setCount)
         {
             var totalCountTask = historyService.GetHistoryCountAsync(entryId, entryType, needFiltering, filterFolderIds, filterFileIds, fromDateUtc, toDateUtc);
             var totalCount = await totalCountTask;
@@ -199,12 +205,13 @@ public class HistoryApiHelper(
     private async IAsyncEnumerable<HistoryDto> ToHistoryAsync(IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> events)
     {
         var histories = events
-        .SelectAwait(e => interpreter.ToHistoryAsync(e.Item1, e.Item2)).Where(x => x != null)
-        .GroupByAwait(x => ValueTask.FromResult(x.GetGroupId()),
-            async (_, group) =>
+        .Select(async (Tuple<DbAuditEvent, DbFilesAuditReference> e, CancellationToken _) => await interpreter.ToHistoryAsync(e.Item1, e.Item2))
+        .Where(x => x != null)
+        .GroupBy((x, _) => ValueTask.FromResult(x.GetGroupId()),
+            async (_, group, c) =>
             {
-                var first = await historyDtoHelper.GetAsync(await group.FirstAsync());
-                first.Related = await group.Skip(1).SelectAwait(async x => await historyDtoHelper.GetAsync(x)).ToListAsync();
+                var first = await historyDtoHelper.GetAsync(group.First());
+                first.Related = await group.Skip(1).ToAsyncEnumerable().Select(async (HistoryEntry x, CancellationToken _) => await historyDtoHelper.GetAsync(x)).ToListAsync(cancellationToken: c);
                 return first;
             })
         .OrderByDescending(x => x.Date);
@@ -217,7 +224,7 @@ public class HistoryApiHelper(
 
     public async IAsyncEnumerable<AuditEvent> ToEventsAsync(IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> events)
     {
-        await foreach(var e in events)
+        await foreach (var e in events)
         {
             var description = JsonSerializer.Deserialize<List<string>>(e.Item1.DescriptionRaw);
             var query = new AuditEventQuery

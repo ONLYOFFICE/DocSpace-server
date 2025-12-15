@@ -166,15 +166,15 @@ public abstract class EditorController<T>(
                     CanFill = inDto.Fill,
                 }
             };
-            
+
             formOpenSetup.RootFolder = rootFolder;
         }
 
         var docParams = await documentServiceHelper.GetParamsAsync(
-            formOpenSetup is { Draft: not null } ? formOpenSetup.Draft : file, 
+            formOpenSetup is { Draft: not null } ? formOpenSetup.Draft : file,
             lastVersion,
             await documentServiceHelper.CheckCustomQuota(rootFolder) && (formOpenSetup?.CanEdit ?? !file.IsCompletedForm),
-            !inDto.View, 
+            !inDto.View,
             true, formOpenSetup == null || formOpenSetup.CanFill,
             formOpenSetup?.EditorType ?? inDto.EditorType,
             formOpenSetup is { IsSubmitOnly: true });
@@ -207,7 +207,7 @@ public abstract class EditorController<T>(
             result.EditorConfig.Embedded.ShareUrl = "";
             result.EditorConfig.Customization.Goback = await configuration.EditorConfig?.Customization.GetGoBack(inDto.EditorType, file);
         }
-        
+
         if (formOpenSetup != null)
         {
             if (formOpenSetup.RootFolder.FolderType is FolderType.VirtualDataRoom)
@@ -275,11 +275,11 @@ public abstract class EditorController<T>(
     [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionWrapper>))]
     [HttpGet("{fileId}/sharedusers")]
     public Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
-    {        
-        if (!securityContext.IsAuthenticated)
     {
+        if (!securityContext.IsAuthenticated)
+        {
             return Task.FromResult<List<MentionWrapper>>(null);
-    }
+        }
 
         return fileStorageService.SharedUsersAsync(inDto.FileId);
     }
@@ -455,7 +455,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             DocServiceUrlApi = url,
             DocServicePreloadUrl = preloadUrl,
             DocServiceUrl = filesLinkUtility.GetDocServiceUrl(),
-            DocServiceUrlInternal =filesLinkUtility.GetDocServiceUrlInternal(),
+            DocServiceUrlInternal = filesLinkUtility.GetDocServiceUrlInternal(),
             DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),
             DocServiceSignatureHeader = await filesLinkUtility.GetDocServiceSignatureHeaderAsync(),
             DocServiceSslVerification = await filesLinkUtility.GetDocServiceSslVerificationAsync(),

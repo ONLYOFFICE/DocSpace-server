@@ -71,7 +71,7 @@ public abstract class SecurityController<T>(
     [SwaggerResponse(200, "List of shared file information", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpGet("file/{id}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFileSecurityInfo(FilePrimaryIdRequestDto<T> inDto)
-    {        
+    {
         var counter = 0;
 
         await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.File, ShareFilterType.UserOrGroup, null, inDto.StartIndex, inDto.Count))
@@ -95,7 +95,7 @@ public abstract class SecurityController<T>(
     [SwaggerResponse(200, "List of shared file information", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpGet("folder/{id}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfo(FolderPrimaryIdRequestDto<T> inDto)
-    {        
+    {
         var counter = 0;
 
         await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, null, inDto.StartIndex, inDto.Count))
@@ -162,6 +162,7 @@ public abstract class SecurityController<T>(
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of access rights information", typeof(List<AceShortWrapper>))]
     [HttpPost("file/{fileId}/sendeditornotify")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<List<AceShortWrapper>> SendEditorNotify(MentionMessageWrapperRequestDto<T> inDto)
     {
         return await fileStorageService.SendEditorNotifyAsync(inDto.FileId, inDto.MentionMessage);
@@ -181,7 +182,7 @@ public abstract class SecurityController<T>(
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var text = inDto.Text;
-        
+
         var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.FolderId);
         var totalCount = await fileSharing.GetGroupMembersCountAsync(folder, inDto.GroupId, text);
 
@@ -214,7 +215,7 @@ public abstract class SecurityController<T>(
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var text = inDto.Text;
-        
+
         var file = await daoFactory.GetFileDao<T>().GetFileAsync(inDto.FileId);
         var totalCount = await fileSharing.GetGroupMembersCountAsync(file, inDto.GroupId, text);
 
@@ -302,7 +303,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     {
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
-        
+
         await fileStorageService.RemoveAceAsync(fileIntIds, folderIntIds);
         await fileStorageService.RemoveAceAsync(fileStringIds, folderStringIds);
 
@@ -364,10 +365,10 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     public async Task<ExternalShareDto> ApplyExternalSharePassword(ExternalShareRequestDto inDto)
     {
         var ip = MessageSettings.GetIP(Request);
-        
+
         await bruteForceLoginManager.IncrementAsync(inDto.Key, ip, true, FilesCommonResource.ErrorMessage_SharePasswordManyAttempts);
-        
-        var validationInfo =  await externalLinkHelper.ValidateAsync(inDto.Key, inDto.RequestParam.Password);
+
+        var validationInfo = await externalLinkHelper.ValidateAsync(inDto.Key, inDto.RequestParam.Password);
 
         if (validationInfo.Status != Status.InvalidPassword)
         {

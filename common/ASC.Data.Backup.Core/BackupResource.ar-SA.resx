@@ -156,4 +156,7 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>مورد الطرف الثالث</value>
   </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>لم يتم تضمين بعض الملفات في النسخ الاحتياطي. لمزيد من التفاصيل، يرجى التحقق من {0}</value>
+  </data>
 </root>

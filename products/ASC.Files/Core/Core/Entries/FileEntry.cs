@@ -32,7 +32,7 @@ namespace ASC.Files.Core;
 /// The file entry parameters.
 /// </summary>
 public abstract class FileEntry : ICloneable
-{    
+{
     [JsonIgnore]
     public IServiceProvider ServiceProvider { get; set; }
 
@@ -52,6 +52,11 @@ public abstract class FileEntry : ICloneable
     /// The ID of the user who created the file entry.
     /// </summary>
     public Guid CreateBy { get; set; }
+
+    /// <summary>
+    /// Identifies the user who has shared the file entry.
+    /// </summary>
+    public Guid? SharedBy { get; set; }
 
     /// <summary>
     /// The name of the user who created the file entry.
@@ -104,7 +109,7 @@ public abstract class FileEntry : ICloneable
     /// Specifies if the file entry shared via link or not.
     /// </summary>
     public bool Shared { get; set; }
-    
+
     /// <summary>
     /// Specifies if the file entry shared for user or not.
     /// </summary>
@@ -117,7 +122,7 @@ public abstract class FileEntry : ICloneable
 
     [JsonIgnore]
     public bool FullShared { get => Shared || ParentShared; }
-    
+
     /// <summary>
     /// The provider ID.
     /// </summary>
@@ -153,6 +158,11 @@ public abstract class FileEntry : ICloneable
     /// The parent room type of the file entry.
     /// </summary>
     public FolderType? ParentRoomType { get; set; }
+
+    /// <summary>
+    /// Indicates the unique identifier of the user who created the parent room, if applicable.
+    /// </summary>
+    public Guid? ParentRoomCreatedBy { get; set; }
 
     /// <summary>
     /// The ID of the user who created the root folder of the file entry.
@@ -249,11 +259,13 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
     /// </summary>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
+    public IDictionary<Guid, IDictionary<FilesSecurityActions, bool>> SecurityByUsers { get; set; } = new Dictionary<Guid, IDictionary<FilesSecurityActions, bool>>();
+
     private T _folderIdDisplay;
 
 
     protected FileEntry() { }
-    
+
     protected FileEntry(IServiceProvider serviceProvider) : base(serviceProvider)
     {
     }

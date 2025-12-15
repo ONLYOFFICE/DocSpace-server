@@ -29,7 +29,7 @@ namespace ASC.People.ApiModels.ResponseDto;
 /// <summary>
 /// The response data for the API key operations.
 /// </summary>
-public class ApiKeyResponseDto 
+public class ApiKeyResponseDto
 {
     /// <summary>
     /// The API key unique identifier.
@@ -85,19 +85,19 @@ public class ApiKeyResponseDto
 [Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public partial class ApiKeyMapper(ApiDateTimeHelper apiDateTimeHelper, EmployeeDtoHelper employeeWrapperHelper)
-{       
+{
     [MapperIgnoreTarget(nameof(ApiKeyResponseDto.LastUsed))]
     [MapperIgnoreTarget(nameof(ApiKeyResponseDto.CreateOn))]
     [MapperIgnoreTarget(nameof(ApiKeyResponseDto.CreateBy))]
     [MapperIgnoreTarget(nameof(ApiKeyResponseDto.ExpiresAt))]
     private partial ApiKeyResponseDto Map(ApiKey source);
-    
+
     public async Task<ApiKeyResponseDto> MapManual(ApiKey source)
     {
         var result = Map(source);
         result.LastUsed = source.LastUsed.HasValue ? apiDateTimeHelper.Get(source.LastUsed.Value) : null;
         result.CreateOn = apiDateTimeHelper.Get(source.CreateOn);
-        result.CreateBy =  await employeeWrapperHelper.GetAsync(source.CreateBy);
+        result.CreateBy = await employeeWrapperHelper.GetAsync(source.CreateBy);
         result.ExpiresAt = source.ExpiresAt.HasValue ? apiDateTimeHelper.Get(source.ExpiresAt.Value) : null;
         return result;
     }

@@ -36,9 +36,9 @@ public class TransferProgressItem : BaseBackupProgressItem
 
     public TransferProgressItem()
     {
-        
+
     }
-    
+
     public TransferProgressItem(
         ILogger<TransferProgressItem> logger,
         IServiceScopeFactory serviceScopeFactory,

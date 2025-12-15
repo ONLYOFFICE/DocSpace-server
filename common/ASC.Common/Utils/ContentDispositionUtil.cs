@@ -96,14 +96,14 @@ public static class ContentDispositionUtil
 
         return b switch
         {
-            (byte)'-' or 
-            (byte)'.' or 
-            (byte)'_' or 
-            (byte)'~' or 
-            (byte)':' or 
-            (byte)'!' or 
-            (byte)'$' or 
-            (byte)'&' or 
+            (byte)'-' or
+            (byte)'.' or
+            (byte)'_' or
+            (byte)'~' or
+            (byte)':' or
+            (byte)'!' or
+            (byte)'$' or
+            (byte)'&' or
             (byte)'+' => true,
             _ => false
         };

@@ -34,10 +34,15 @@ namespace ASC.Files.Core.Core.Entries;
 public record HistoryEntry
 {
     /// <summary>
+    /// The unique identifier for the history entry.
+    /// </summary>
+    public required int Id { get; init; }
+    
+    /// <summary>
     /// The action performed on the file.
     /// </summary>
     public HistoryAction Action { get; init; }
-    
+
     /// <summary>
     /// The ID of the action initiator.
     /// </summary>
@@ -47,18 +52,18 @@ public record HistoryEntry
     /// The name of the action initiator.
     /// </summary>
     public string InitiatorName { get; init; }
-    
+
     /// <summary>
     /// The date and time when the action was performed.
     /// </summary>
     public DateTime Date { get; init; }
-    
+
     /// <summary>
     /// The history data.
     /// </summary>
     public HistoryData Data { get; init; }
-    
-    private static readonly HashSet<MessageAction> _gropedActions = 
+
+    private static readonly HashSet<MessageAction> _gropedActions =
     [
         MessageAction.FileUploaded,
         MessageAction.FileMoved,
@@ -80,7 +85,7 @@ public record HistoryEntry
         MessageAction.FileIndexChanged,
         MessageAction.FolderIndexChanged
     ];
-    
+
     private int _groupId;
 
     public int GetGroupId()
@@ -89,7 +94,7 @@ public record HistoryEntry
         {
             return _groupId;
         }
-        
+
         if (_mergedActions.Contains(Action.Id))
         {
             return _groupId = Data?.GetId() ?? 0;
@@ -99,7 +104,7 @@ public record HistoryEntry
         {
             return _groupId = HashCode.Combine(Action.Id, InitiatorId, new DateTime(Date.Year, Date.Month, Date.Day, Date.Hour, Date.Minute, 0), Data?.GetId() ?? 0);
         }
-        
+
         return _groupId = HashCode.Combine(Action.Id, InitiatorId, Date, Data?.GetId() ?? 0, Random.Shared.Next(Int32.MaxValue));
     }
 }

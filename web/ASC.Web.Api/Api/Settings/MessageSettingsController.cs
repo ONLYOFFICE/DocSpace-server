@@ -81,7 +81,7 @@ public class MessageSettingsController(
     [SwaggerResponse(200, "Lifetime value in minutes", typeof(CookieSettingsDto))]
     [HttpGet("cookiesettings")]
     public async Task<CookieSettingsDto> GetCookieSettings()
-    {        
+    {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var result = await cookiesManager.GetLifeTimeAsync();
         return new CookieSettingsDto
@@ -207,7 +207,7 @@ public class MessageSettingsController(
             {
                 throw new Exception(Resource.ErrorNotCorrectEmail);
             }
-            
+
             await CheckCache("sendjoininvite");
 
             var user = await userManager.GetUserByEmailAsync(email);

@@ -90,7 +90,7 @@ public class PortalController(
     [HttpGet("")]
     public async Task<TenantDto> GetPortalInformation()
     {
-        var tenant = tenantManager.GetCurrentTenant();   
+        var tenant = tenantManager.GetCurrentTenant();
 
         if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
         {
@@ -117,15 +117,12 @@ public class PortalController(
     [SwaggerResponse(200, "User information", typeof(UserInfo))]
     [HttpGet("users/{userID:guid}")]
     public async Task<UserInfo> GetUserById(UserIDRequestDto inDto)
-    {        
-        var user = await userManager.GetUsersAsync(inDto.Id);
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-
-        if (!await userManager.CanUserViewAnotherUserAsync(currentUser, user))
+    {
+        if (!await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, inDto.Id))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
-        
+
         return await userManager.GetUsersAsync(inDto.Id);
     }
 
@@ -155,11 +152,11 @@ public class PortalController(
         {
             return string.Empty;
         }
-        
+
         var tenant = tenantManager.GetCurrentTenant();
 
-        var link = commonLinkUtility.GetConfirmationEmailUrl(string.Empty, ConfirmType.LinkInvite, 
-                (int)inDto.EmployeeType + authContext.CurrentAccount.ID.ToString() + tenant.Alias, 
+        var link = commonLinkUtility.GetConfirmationEmailUrl(string.Empty, ConfirmType.LinkInvite,
+                (int)inDto.EmployeeType + authContext.CurrentAccount.ID.ToString() + tenant.Alias,
                 authContext.CurrentAccount.ID) + $"&emplType={inDto.EmployeeType:d}";
 
         return await urlShortener.GetShortenLinkAsync(link);
@@ -182,14 +179,14 @@ public class PortalController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var quota = await quotaHelper.GetCurrentQuotaAsync(inDto.Refresh);
         var docServiceQuota = await documentServiceLicense.GetLicenseQuotaAsync();
-        
+
         var result = new TenantExtraDto
         {
             CustomMode = coreBaseSettings.CustomMode,
             Opensource = tenantExtra.Opensource,
             Enterprise = tenantExtra.Enterprise,
             Developer = tenantExtra.Developer,
-            EnableTariffPage = 
+            EnableTariffPage =
                 (!coreBaseSettings.Standalone || !string.IsNullOrEmpty(licenseReader.LicensePath))
                 && string.IsNullOrEmpty(setupInfo.AmiMetaUrl)
                 && !coreBaseSettings.CustomMode,
@@ -270,7 +267,7 @@ public class PortalController(
             result.DueDate = apiDateTimeHelper.Get(source.DueDate);
             result.DelayDueDate = apiDateTimeHelper.Get(source.DelayDueDate);
         }
-        
+
         if (await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
         {
             result.Id = source.Id;
@@ -281,7 +278,7 @@ public class PortalController(
             result.LicenseDate = apiDateTimeHelper.Get(source.LicenseDate);
             result.Quotas = source.Quotas.Concat(source.OverdueQuotas ?? []).ToList();
         }
-        
+
         return result;
     }
 
@@ -298,12 +295,12 @@ public class PortalController(
     [AllowNotPayment]
     [HttpGet("quota")]
     public async Task<TenantQuota> GetPortalQuota()
-    {        
+    {
         if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();
         }
-        
+
         var tenant = tenantManager.GetCurrentTenant();
         var result = await tenantManager.GetTenantQuotaAsync(tenant.Id);
 
@@ -311,7 +308,7 @@ public class PortalController(
         {
             result.MaxTotalSize = 0;
         }
-        
+
         return result;
     }
 
@@ -448,7 +445,7 @@ public class PortalController(
         {
             throw new BillingException(Resource.ErrorNotAllowedOption);
         }
-        
+
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var alias = inDto.Alias;
@@ -490,7 +487,7 @@ public class PortalController(
             tenant.Alias = newAlias;
             tenant = await tenantManager.SaveTenantAsync(tenant);
             tenantManager.SetCurrentTenant(tenant);
-            
+
             messageService.Send(MessageAction.PortalRenamed, MessageTarget.Create(tenant.Id), oldAlias, newAlias, dateTime: messageDate);
             await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
 
@@ -631,7 +628,7 @@ public class PortalController(
                         !(await tenantManager.GetCurrentTenantQuotaAsync()).Trial;
 
         var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalRemove);
-            
+
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), showAutoRenewText);
     }
 

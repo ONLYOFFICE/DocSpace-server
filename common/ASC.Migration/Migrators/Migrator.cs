@@ -119,28 +119,28 @@ public abstract class Migrator(
 
         var progressStep = _usersForImport.Count == 0 ? 30 : 30 / _usersForImport.Count;
         var i = 1;
-        foreach (var kv in _usersForImport.Where(u=> !_failedUsers.Contains(u.Value.Info.Email)))
+        foreach (var kv in _usersForImport.Where(u => !_failedUsers.Contains(u.Value.Info.Email)))
         {
             try
             {
                 await ReportProgressAsync(_lastProgressUpdate + progressStep, string.Format(MigrationResource.MigratingUserFiles, kv.Value.Info.DisplayUserName(DisplayUserSettingsHelper), i++, _usersForImport.Count));
                 await MigrateStorageAsync(kv.Value.Storage, kv.Value);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log(MigrationResource.CanNotImportUserFiles, e);
-                MigrationInfo.Errors.Add($"{kv.Key} - {MigrationResource.CanNotImportUserFiles}"); 
+                MigrationInfo.Errors.Add($"{kv.Key} - {MigrationResource.CanNotImportUserFiles}");
             }
         }
 
-        if(MigrationInfo.CommonStorage != null)
+        if (MigrationInfo.CommonStorage != null)
         {
             try
             {
                 await ReportProgressAsync(85, string.Format(MigrationResource.MigrationCommonFiles));
                 await MigrateStorageAsync(MigrationInfo.CommonStorage);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log(MigrationResource.СanNotImportCommonFiles, e);
                 MigrationInfo.Errors.Add(MigrationResource.СanNotImportCommonFiles);
@@ -234,7 +234,7 @@ public abstract class Migrator(
                     _importedUsers.Add(user.Info.Email);
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log(MigrationResource.CanNotImportUser, e);
                 MigrationInfo.Errors.Add($"{key} - {MigrationResource.CanNotImportUser}");
@@ -248,7 +248,7 @@ public abstract class Migrator(
     {
         user.Info.UserName ??= user.Info.Email.Split('@').First();
         user.Info.LastName ??= user.Info.FirstName;
-        }
+    }
 
     private async Task MigrateGroupAsync()
     {
@@ -259,7 +259,7 @@ public abstract class Migrator(
             var group = kv.Value;
 
             await ReportProgressAsync(_lastProgressUpdate + progressStep, string.Format(MigrationResource.GroupMigration, group.Info.Name, i++, MigrationInfo.Groups.Count));
-            
+
             if (!group.ShouldImport)
             {
                 return;
@@ -320,12 +320,12 @@ public abstract class Migrator(
 
         var matchingFilesIds = new Dictionary<string, FileEntry<int>>();
         Folder<int> newFolder;
-        if (storage.Type != FolderType.BUNCH) 
+        if (storage.Type != FolderType.BUNCH)
         {
             newFolder = storage.Type == FolderType.USER
             ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
                     : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
-        Log(MigrationResource.СreateRootFolder);
+            Log(MigrationResource.СreateRootFolder);
         }
         else
         {
@@ -337,19 +337,27 @@ public abstract class Migrator(
         var orderedFolders = storage.Folders.OrderBy(f => f.Level);
         foreach (var folder in orderedFolders)
         {
-            if (!storage.ShouldImportSharedFolders ||
-                !storage.Securities.Any(s => s.EntryId == folder.Id && s.EntryType == 1) && matchingFilesIds[$"{FolderKey}-{folder.ParentId}"].Id != 0)
+            var parentEntry = matchingFilesIds[$"{FolderKey}-{folder.ParentId}"];
+            if (parentEntry.Id != 0)
             {
-                if (storage.Type == FolderType.BUNCH && !folder.Private)
+                if (storage.Type == FolderType.BUNCH && parentEntry.Id == -1)
                 {
-                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
+                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, folder.Private ? RoomType.EditingRoom : RoomType.CustomRoom, false, false, null, 0, null, false, null, null, null, null, null);
+
+                    var owner = MigrationInfo.Users[folder.Owner];
+                    if (owner.UserType is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin && newFolder.CreateBy != owner.Info.Id)
+                    {
+                        await FileStorageService.ChangeOwnerAsync([newFolder.Id], [], owner.Info.Id).ToListAsync();
+                    }
+
+                    Log(string.Format(MigrationResource.CreateShareRoom, newFolder.Title));
                 }
                 else
                 {
-                    newFolder = await FileStorageService.CreateFolderAsync(matchingFilesIds[$"{FolderKey}-{folder.ParentId}"].Id, folder.Title);
-                }
+                    newFolder = await FileStorageService.CreateFolderAsync(parentEntry.Id, folder.Title);
 
-                Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
+                    Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
+                }
             }
             else
             {
@@ -374,14 +382,13 @@ public abstract class Migrator(
                 newFile.ContentLength = fs.Length;
                 newFile.Version = file.Version;
                 newFile.VersionGroup = file.VersionGroup;
-                newFile.Comment = file.Comment;
                 newFile.CreateOn = file.Created;
                 newFile.ModifiedOn = file.Modified;
                 if (matchingFilesIds.ContainsKey($"{FileKey}-{file.Id}"))
                 {
                     newFile.Id = matchingFilesIds[$"{FileKey}-{file.Id}"].Id;
                 }
-                if (!storage.ShouldImportSharedFolders || !storage.Securities.Any(s => s.EntryId == file.Folder && s.EntryType == 1) && newFile.ParentId != 0)
+                if (newFile.ParentId != 0)
                 {
                     newFile = await fileDao.SaveFileAsync(newFile, fs);
                     Log(string.Format(MigrationResource.CreateFile, file.Title));
@@ -398,216 +405,104 @@ public abstract class Migrator(
             }
         }
 
-        if (storage.Type == FolderType.COMMON || !storage.ShouldImportSharedFiles && !storage.ShouldImportSharedFolders)
+        if (storage.Type == FolderType.COMMON || (!storage.ShouldImportSharedFiles && !storage.ShouldImportSharedFolders))
         {
             return;
         }
 
-        var aces = new Dictionary<string, AceWrapper>();
-        var matchingRoomIds = new Dictionary<int, FileEntry<int>>();
-        var innerFolders = new List<int>();
-        var orderedSecurity = storage.Securities.OrderBy(s => OrderSecurity(storage,s));
+        var orderedSecurity = storage.Securities.OrderBy(s => OrderSecurity(storage, s));
         foreach (var security in orderedSecurity)
         {
+            var key = string.Empty;
+            FileEntry<int> entry = null;
+
             try
             {
-                if (!MigrationInfo.Users.ContainsKey(security.Subject) && !MigrationInfo.Groups.ContainsKey(security.Subject))
+                var entryIsFile = security.EntryType == 2;
+
+                if (entryIsFile && !storage.ShouldImportSharedFiles)
                 {
                     continue;
                 }
-                var access = (Files.Core.Security.FileShare)security.Security;
 
-                    var entryIsFile = security.EntryType == 2;
-                if (entryIsFile && storage.ShouldImportSharedFiles)
+                if (!entryIsFile && !storage.ShouldImportSharedFolders)
                 {
-                    var key = $"{FileKey}-{security.EntryId}";
-                    if(!matchingFilesIds.ContainsKey(key))
+                    continue;
+                }
+
+                key = $"{(entryIsFile ? FileKey : FolderKey)}-{security.EntryId}";
+
+                if (!matchingFilesIds.TryGetValue(key, out entry) || entry.Id == 0)
+                {
+                    continue;
+                }
+
+                MigrationUser migrationUser = null;
+                MigrationGroup migrationGroup = null;
+
+                if (!MigrationInfo.Users.TryGetValue(security.Subject, out migrationUser) &&
+                    !MigrationInfo.Groups.TryGetValue(security.Subject, out migrationGroup))
+                {
+                    if (security.Subject.Equals(Constants.GroupEveryone.ID.ToString(), StringComparison.OrdinalIgnoreCase))
                     {
-                        continue;
+                        migrationGroup = new MigrationGroup
+                        {
+                            Info = new GroupInfo()
+                            {
+                                ID = Constants.GroupEveryone.ID,
+                                Name = Constants.GroupEveryone.Name
+                            }
+                        };
                     }
-                    await SecurityContext.AuthenticateMeAsync(user.Info.Id);
-                    AceWrapper ace;
-                    if (!aces.ContainsKey($"{security.Security}{matchingFilesIds[key].Id}"))
+                    else if (security.Subject.Equals(Constants.GroupAdmin.ID.ToString(), StringComparison.OrdinalIgnoreCase))
                     {
-                        try
+                        migrationGroup = new MigrationGroup
                         {
-                            ace = await FileStorageService.SetExternalLinkAsync(matchingFilesIds[key].Id, FileEntryType.File, Guid.Empty, null, access, requiredAuth: true,
-                                primary: false);
-                            aces.Add($"{security.Security}{matchingFilesIds[key].Id}", ace);
-                        }
-                        catch
-                        {
-                            ace = null;
-                            aces.Add($"{security.Security}{matchingFilesIds[key].Id}", null);
-                        }
+                            Info = new GroupInfo()
+                            {
+                                ID = Constants.GroupAdmin.ID,
+                                Name = Constants.GroupAdmin.Name
+                            }
+                        };
                     }
                     else
                     {
-                        ace = aces[$"{security.Security}{matchingFilesIds[key].Id}"];
-                    }
-                    if (ace != null)
-                    {
-                        if (MigrationInfo.Users.TryGetValue(security.Subject, out var infoUser))
-                        {
-                            var userForShare = await UserManager.GetUsersAsync(infoUser.Info.Id);
-                            await SecurityContext.AuthenticateMeAsync(userForShare.Id);
-                            await EntryManager.MarkAsRecent(matchingFilesIds[key] as File<int>, ace.Id);
-                        }
-                        else
-                        {
-                            var filter = new UserQueryFilter
-                            {
-                                EmployeeStatus = EmployeeStatus.Active,
-                                IncludeGroups = [[MigrationInfo.Groups[security.Subject].Info.ID]],
-                                SortType = UserSortType.FirstName,
-                                SortOrderAsc = true,
-                                IncludeStrangers = true,
-                                Limit = 100000,
-                                Offset = 0,
-                                Area = Area.All
-                            };
-                            
-                            var users = UserManager.GetUsers(filter).Where(u => u.Id != user.Info.Id);
-                            await foreach (var u in users)
-                            {
-                                await SecurityContext.AuthenticateMeAsync(u.Id);
-                                await EntryManager.MarkAsRecent(matchingFilesIds[key] as File<int>, ace.Id);
-                            }
-                        }
+                        continue;
                     }
                 }
-                else if (storage.ShouldImportSharedFolders)
+
+                if (migrationUser != null && entry.CreateBy == migrationUser.Info.Id)
                 {
-                    var localMatchingRoomIds = new Dictionary<int, FileEntry<int>>();
-                    var key = $"{FolderKey}-{security.EntryId}";
-
-                    if (innerFolders.Contains(security.EntryId))
-                    {
-                        continue;
-                    }
-                    if (!matchingRoomIds.ContainsKey(security.EntryId))
-                    {
-                        if (storage.Type == FolderType.BUNCH)
-                        {
-                            var owner = storage.Folders.FirstOrDefault(f => f.Id == security.EntryId).Owner;
-                            user = MigrationInfo.Users[owner];
-                        }
-
-                        if (user.UserType == EmployeeType.User)
-                        {
-                            await SecurityContext.AuthenticateMeAsync(_currentUser);
-                        }
-                        else
-                        {
-                            await SecurityContext.AuthenticateMeAsync(user.Info.Id);
-                        }
-                        var room = await FileStorageService.CreateRoomAsync($"{matchingFilesIds[key].Title}", RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
-
-                        orderedFolders = storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
-                        matchingRoomIds.Add(security.EntryId, room);
-                        localMatchingRoomIds.Add(security.EntryId, room);
-                        Log(string.Format(MigrationResource.CreateShareRoom, room.Title));
-
-                        if (user.UserType == EmployeeType.User)
-                        {
-                            var aceList = new List<AceWrapper>
-                            {
-                                new()
-                                {
-                                    Access = Files.Core.Security.FileShare.ContentCreator,
-                                    Id = user.Info.Id
-                                }
-                            };
-
-                            var collection = new AceCollection<int>
-                            {
-                                Files = [],
-                                Folders = new List<int> { matchingRoomIds[security.EntryId].Id },
-                                Aces = aceList,
-                                Message = null
-                            };
-
-                            await FileStorageService.SetAceObjectAsync(collection, false);
-                        }
-
-                        foreach (var folder in orderedFolders)
-                        {
-                            newFolder = await FileStorageService.CreateFolderAsync(matchingRoomIds[folder.ParentId].Id, folder.Title);
-                            matchingRoomIds.Add(folder.Id, newFolder);
-                            innerFolders.Add(folder.Id);
-                            Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
-                        }
-                        foreach (var file in storage.Files.Where(f => localMatchingRoomIds.ContainsKey(f.Folder)))
-                        {
-                            try
-                            {
-                                await using var fs = new FileStream(file.Path, FileMode.Open);
-
-                                var newFile = ServiceProvider.GetService<File<int>>();
-                                newFile.ParentId = localMatchingRoomIds[security.EntryId].Id;
-                                newFile.Comment = FilesCommonResource.CommentCreate;
-                                newFile.Title = Path.GetFileName(file.Title);
-                                newFile.ContentLength = fs.Length;
-                                newFile.Version = file.Version;
-                                newFile.VersionGroup = file.VersionGroup;
-                                newFile.CreateOn = file.Created;
-                                newFile.ModifiedOn = file.Modified;
-                                if (matchingFilesIds.ContainsKey($"{FileKey}-{file.Id}"))
-                                {
-                                    newFile.Id = matchingFilesIds[$"{FileKey}-{file.Id}"].Id;
-                                }
-                                newFile = await fileDao.SaveFileAsync(newFile, fs);
-                                Log(string.Format(MigrationResource.CreateFile, file.Title));
-                                if (!matchingFilesIds.ContainsKey($"{FileKey}-{file.Id}"))
-                                {
-                                    matchingFilesIds.Add($"{FileKey}-{file.Id}", newFile);
-                                }
-                            }
-                            catch(Exception ex)
-                            {
-                                Log(string.Format(MigrationResource.CanNotCreateFile, Path.GetFileName(file.Title)), ex);
-                                MigrationInfo.Errors.Add(string.Format(MigrationResource.CanNotCreateFile, Path.GetFileName(file.Title)));
-                            }
-                        }
-                    }
-                    if (_usersForImport.ContainsKey(security.Subject) && _currentUser.ID == _usersForImport[security.Subject].Info.Id)
-                    {
-                        continue;
-                    }
-
-                    var list = new List<AceWrapper>
-                    {
-                        new()
-                        {
-                            Access = access,
-                            Id = MigrationInfo.Users.TryGetValue(security.Subject, out var infoUser) 
-                                ? infoUser.Info.Id 
-                                : MigrationInfo.Groups[security.Subject].Info.ID
-                        }
-                    };
-
-                    var aceCollection = new AceCollection<int>
-                    {
-                        Files = [],
-                        Folders = new List<int> { matchingRoomIds[security.EntryId].Id },
-                        Aces = list,
-                        Message = null
-                    };
-
-                    await FileStorageService.SetAceObjectAsync(aceCollection, false);
+                    continue;
                 }
+
+                var ace = new AceWrapper()
+                {
+                    Access = (Files.Core.Security.FileShare)security.Security,
+                    Id = migrationUser != null ? migrationUser.Info.Id : migrationGroup.Info.ID
+                };
+
+                var aceCollection = new AceCollection<int>
+                {
+                    Files = entryIsFile ? [entry.Id] : [],
+                    Folders = entryIsFile ? [] : [entry.Id],
+                    Aces = [ace],
+                    Message = null
+                };
+
+                await FileStorageService.SetAceObjectAsync(aceCollection, false);
             }
             catch (Exception ex)
             {
-                Log(string.Format(MigrationResource.CanNotShare, security.EntryId, security.Subject), ex);
-                MigrationInfo.Errors.Add(string.Format(MigrationResource.CanNotShare, security.EntryId, security.Subject));
+                Log(string.Format(MigrationResource.CanNotShare, key, security.Subject), ex);
+                MigrationInfo.Errors.Add(string.Format(MigrationResource.CanNotShare, $"{entry?.Title} ({key})", security.Subject));
             }
         }
     }
 
     private static int OrderSecurity(MigrationStorage storage, MigrationSecurity security)
     {
-        if(security.EntryType != 1)
+        if (security.EntryType != 1)
         {
             return 0;
         }

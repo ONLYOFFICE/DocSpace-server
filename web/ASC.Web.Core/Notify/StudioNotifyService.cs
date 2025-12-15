@@ -187,8 +187,8 @@ public class StudioNotifyService(
     public async Task SendEmailActivationInstructionsAsync(UserInfo user, string email)
     {
         var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(email, ConfirmType.EmailActivation, null, user.Id);
-        var shortLink  = await urlShortener.GetShortenLinkAsync(confirmationUrl);
-        
+        var shortLink = await urlShortener.GetShortenLinkAsync(confirmationUrl);
+
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonActivateEmail", GetCulture(user));
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
@@ -201,7 +201,13 @@ public class StudioNotifyService(
                     new TagValue(Tags.UserDisplayName, (user.DisplayUserName(displayUserSettingsHelper) ?? string.Empty).Trim()));
     }
 
-    public async Task SendEmailRoomInviteAsync(string email, string roomTitle, string confirmationUrl, string culture = null, bool limitation = false)
+    public async Task SendEmailRoomInviteAsync(
+        string email, 
+        string roomTitle, 
+        string confirmationUrl,
+        bool isAgent,
+        string culture = null, 
+        bool limitation = false)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? (GetCulture(null)) : new CultureInfo(culture);
 
@@ -209,19 +215,23 @@ public class StudioNotifyService(
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         var tags = new List<ITagValue>
-        { 
+        {
             new TagValue(Tags.Message, roomTitle),
             new TagValue(Tags.InviteLink, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
         };
+        
+        var action = isAgent 
+            ? Actions.SaasAgentInvite
+            : Actions.SaasRoomInvite;
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
-            Actions.SaasRoomInvite,
-                await studioNotifyHelper.RecipientFromEmailAsync(email, false),
-                [EMailSenderName],
-                tags.ToArray());
+            action, 
+            await studioNotifyHelper.RecipientFromEmailAsync(email, false), 
+            [EMailSenderName], 
+            tags.ToArray());
 
         if (limitation)
         {
@@ -229,11 +239,14 @@ public class StudioNotifyService(
         }
     }
 
-    public async Task SendEmailRoomInviteExistingUserAsync(UserInfo user, string roomTitle, string roomUrl)
+    public async Task SendEmailRoomInviteExistingUserAsync(UserInfo user, string roomTitle, string roomUrl, bool isAgent)
     {
         var cultureInfo = GetCulture(user);
 
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonJoinRoom", cultureInfo);
+        var orangeButtonText = isAgent 
+            ? WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonJoinAgent", cultureInfo)
+            : WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonJoinRoom", cultureInfo);
+            
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         var tags = new List<ITagValue>
@@ -244,9 +257,13 @@ public class StudioNotifyService(
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
         };
+        
+        var action = isAgent 
+            ? Actions.SaasAgentInviteExistingUser 
+            : Actions.SaasRoomInviteExistingUser;
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
-            Actions.SaasRoomInviteExistingUser,
+            action,
             [user],
             [EMailSenderName],
             tags.ToArray());
@@ -344,7 +361,7 @@ public class StudioNotifyService(
     {
         var inviteUrl = commonLinkUtility.GetConfirmationEmailUrl(email, ConfirmType.EmpInvite, (int)emplType + "trust") + $"&emplType={(int)emplType}";
         var shortLink = await urlShortener.GetShortenLinkAsync(inviteUrl);
-        
+
         var orangeButtonText = WebstudioNotifyPatternResource.ButtonJoin;
 
         List<ITagValue> tags =
@@ -357,13 +374,13 @@ public class StudioNotifyService(
         {
             tags.Add(new TagValue(CommonTags.Culture, culture));
         }
-        
+
         await studioNotifyServiceHelper.SendNoticeToAsync(
             Actions.JoinUsers,
             await studioNotifyHelper.RecipientFromEmailAsync(email, false),
             [EMailSenderName],
             tags.ToArray());
-        
+
         if (limitation)
         {
             await userInvitationLimitHelper.ReduceLimit();
@@ -521,7 +538,7 @@ public class StudioNotifyService(
            await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
            [EMailSenderName],
         new TagValue(Tags.ActivateUrl, confirmationUrl),
-        TagValues.OrangeButton(orangeButtonText, confirmationUrl), 
+        TagValues.OrangeButton(orangeButtonText, confirmationUrl),
         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
         new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
@@ -930,7 +947,7 @@ public class StudioNotifyService(
     {
         var confirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.Activation, user.Id, user.Id);
 
-        return  await urlShortener.GetShortenLinkAsync(confirmUrl + $"&firstname={HttpUtility.UrlEncode(user.FirstName)}&lastname={HttpUtility.UrlEncode(user.LastName)}");
+        return await urlShortener.GetShortenLinkAsync(confirmUrl + $"&firstname={HttpUtility.UrlEncode(user.FirstName)}&lastname={HttpUtility.UrlEncode(user.LastName)}");
     }
 
 
@@ -1039,7 +1056,7 @@ public class StudioNotifyService(
                 Actions.ZoomWelcome,
                 await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false),
                 [EMailSenderName],
-                portalUrl ??= commonLinkUtility.GetFullAbsolutePath(""),
+                portalUrl ?? commonLinkUtility.GetFullAbsolutePath(""),
                 new TagValue(CommonTags.Culture, culture.Name),
                 new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
                 new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
@@ -1058,7 +1075,7 @@ public class StudioNotifyService(
 
     public async Task SendTopUpWalletErrorAsync(UserInfo payer, UserInfo owner)
     {
-        var users = (new UserInfo[] { payer, owner })
+        var users = (new[] { payer, owner })
             .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
             .DistinctBy(user => user.Email);
 

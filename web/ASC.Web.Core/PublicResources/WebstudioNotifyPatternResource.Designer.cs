@@ -61,6 +61,42 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; created a new agent: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;.
+        /// </summary>
+        public static string ActionAgentCreated {
+            get {
+                return ResourceManager.GetString("ActionAgentCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; deleted the agent: &lt;b&gt;{1}&lt;/b&gt;.
+        /// </summary>
+        public static string ActionAgentRemoved {
+            get {
+                return ResourceManager.GetString("ActionAgentRemoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; renamed the agent: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href=&quot;{2}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;.
+        /// </summary>
+        public static string ActionAgentRenamed {
+            get {
+                return ResourceManager.GetString("ActionAgentRenamed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was assigned the role of &lt;b&gt;{1}&lt;/b&gt; in the agent: &lt;a href=&quot;{2}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{3}&lt;/a&gt;.
+        /// </summary>
+        public static string ActionAgentUpdateAccessForUser {
+            get {
+                return ResourceManager.GetString("ActionAgentUpdateAccessForUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; created a new document: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt; in the room: &lt;a href=&quot;{3}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;.
         /// </summary>
         public static string ActionFileCreated {
@@ -142,6 +178,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was added to the agent: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt;.
+        /// </summary>
+        public static string ActionUserAddedToAgent {
+            get {
+                return ResourceManager.GetString("ActionUserAddedToAgent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was added to the room: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt;.
         /// </summary>
         public static string ActionUserAddedToRoom {
@@ -156,6 +201,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string ActionUserCreated {
             get {
                 return ResourceManager.GetString("ActionUserCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was removed from the agent: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;.
+        /// </summary>
+        public static string ActionUserRemovedFromAgent {
+            get {
+                return ResourceManager.GetString("ActionUserRemovedFromAgent", resourceCulture);
             }
         }
         
@@ -412,6 +466,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Join agent.
+        /// </summary>
+        public static string ButtonJoinAgent {
+            get {
+                return ResourceManager.GetString("ButtonJoinAgent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Join room.
         /// </summary>
         public static string ButtonJoinRoom {
@@ -601,6 +664,38 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_backup_created_tg {
             get {
                 return ResourceManager.GetString("pattern_backup_created_tg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName,
+        ///
+        ///The backup process for your DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; has failed.
+        ///
+        ///If you have any questions or need assistance, please don’t hesitate to contact us via &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_backup_failed {
+            get {
+                return ResourceManager.GetString("pattern_backup_failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName,
+        ///
+        ///The backup process for your DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) has failed.
+        ///
+        ///If you have any questions or need assistance, please don’t hesitate to contact us via [${__SupportLink}](${__SupportLink})
+        ///
+        ///Best regards,
+        ///${LetterLogoText} Support Team
+        ///[${__SiteLink}](${__SiteLink}).
+        /// </summary>
+        public static string pattern_backup_failed_tg {
+            get {
+                return ResourceManager.GetString("pattern_backup_failed_tg", resourceCulture);
             }
         }
         
@@ -1777,6 +1872,38 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hello!
+        ///
+        ///You are invited to join a DocSpace agent at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
+        ///
+        ///$OrangeButton
+        ///
+        ///After clicking on the invitation link, please set a new password for your account.
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_saas_agent_invite {
+            get {
+                return ResourceManager.GetString("pattern_saas_agent_invite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello!
+        ///
+        ///$__AuthorName invited you to join the agent &quot;$Message&quot;:&quot;$InviteLink&quot; on &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
+        ///
+        ///$OrangeButton
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_saas_agent_invite_existing_user {
+            get {
+                return ResourceManager.GetString("pattern_saas_agent_invite_existing_user", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
         ///
         ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
@@ -2281,6 +2408,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_backup_created {
             get {
                 return ResourceManager.GetString("subject_backup_created", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Backup for your DocSpace failed.
+        /// </summary>
+        public static string subject_backup_failed {
+            get {
+                return ResourceManager.GetString("subject_backup_failed", resourceCulture);
             }
         }
         
@@ -2911,6 +3047,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_saas_admin_welcome_v1 {
             get {
                 return ResourceManager.GetString("subject_saas_admin_welcome_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Join ${LetterLogoText} DocSpace.
+        /// </summary>
+        public static string subject_saas_agent_invite {
+            get {
+                return ResourceManager.GetString("subject_saas_agent_invite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You&apos;re invited to the ${LetterLogoText} DocSpace agent.
+        /// </summary>
+        public static string subject_saas_agent_invite_existing_user {
+            get {
+                return ResourceManager.GetString("subject_saas_agent_invite_existing_user", resourceCulture);
             }
         }
         

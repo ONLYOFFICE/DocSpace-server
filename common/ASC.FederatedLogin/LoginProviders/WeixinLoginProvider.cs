@@ -51,8 +51,8 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
         RequestHelper requestHelper,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         _requestHelper = requestHelper;
     }
@@ -85,13 +85,13 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
     public override LoginProfile GetLoginProfile(OAuth20Token token)
     {
         return token is WeixinOAuth20Token weixinOAuth20Token
-            ? GetLoginProfile($"{weixinOAuth20Token?.AccessToken}&openid={weixinOAuth20Token?.UnionId}")
+            ? GetLoginProfile($"{weixinOAuth20Token.AccessToken}&openid={weixinOAuth20Token.UnionId}")
             : GetLoginProfile($"{token?.AccessToken}");
     }
 
     private LoginProfile RequestProfile(string accessToken)
     {
-        var openidProfile = _requestHelper.PerformRequest(ProfileUrl, headers: new Dictionary<string, string> { { "Authorization", "Bearer " + accessToken } });
+        var openidProfile = _requestHelper.PerformRequest($"{ProfileUrl}?access_token={accessToken}");
         var loginProfile = ProfileFromWeixin(openidProfile);
         return loginProfile;
     }
@@ -100,6 +100,11 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
     {
         var jProfile = JObject.Parse(openidProfile)
                        ?? throw new Exception("Failed to correctly process the response");
+
+        if (jProfile.Value<int>("errcode") != 0)
+        {
+            throw new Exception($"Failed to parse profile: {jProfile.Value<int>("errcode")} - {jProfile.Value<int>("errmsg")}");
+        }
 
         // No names, no email
         var profile = new LoginProfile
@@ -111,6 +116,8 @@ public class WeixinLoginProvider : BaseLoginProvider<WeixinLoginProvider>
             Provider = ProviderConstants.Weixin
         };
 
-        return profile;
+        return string.IsNullOrWhiteSpace(profile.Id)
+            ? throw new Exception($"Failed to parse profile: no id found")
+            : profile;
     }
 }

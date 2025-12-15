@@ -47,9 +47,9 @@ public class MigrationOperation : DistributedTaskProgress
 
     public MigrationOperation()
     {
-        
+
     }
-    
+
     public MigrationOperation(ILogger<MigrationOperation> logger,
         MigrationCore migrationCore,
         TenantManager tenantManager,

@@ -1162,4 +1162,76 @@
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
     <value>Omogočite varnostne kopije za svoj DocSpace. Stroški se bodo zaračunavali samodejno.</value>
   </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vektorizacija</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>AI orodja</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Žetoni</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Presežena je bila kvota prostora za AI agente</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Kvote za AI agenta ni bilo mogoče nastaviti. Vnesena vrednost je večja od skupne shrambe DocSpace.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID odjemalca</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Skrivnost odjemalca</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Omogočite aplikaciji prijavo v portal z računom WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Omogočite aplikaciji prijavo v portal z računom WeChat.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Kvota za storitve Dokument ({0})</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Priimek</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Ime</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Število vtičnikov presega omejitev</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Število AI agentov ne sme presegati {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>AI orodja</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Omogočite AI funkcije v svojem DocSpace za povečanje produktivnosti.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>AI spletni iskalnik</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Dodajte sredstva v svojo denarnico, da odklenete spletno iskanje z AI.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Prišlo je do nepričakovane napake. Poskusite znova.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Uspešno ste se povezali Telegram za prejemanje obvestil iz vašega DocSpace.</value>
+  </data>
 </root>

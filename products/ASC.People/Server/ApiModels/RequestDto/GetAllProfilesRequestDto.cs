@@ -53,7 +53,7 @@ public class GetAllProfilesRequestDto
     /// </summary>
     [FromQuery(Name = "filterBy")]
     public string FilterBy { get; set; }
-    
+
     /// <summary>
     /// Specifies the property or field name by which the results should be sorted.
     /// </summary>
@@ -65,7 +65,7 @@ public class GetAllProfilesRequestDto
     /// </summary>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
-    
+
     /// <summary>
     /// The character or string used to separate multiple filter values in a filtering query.
     /// </summary>

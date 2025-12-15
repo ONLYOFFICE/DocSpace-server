@@ -60,7 +60,7 @@ public class ThirdpartyController(
     UserWebhookManager webhookManager,
     GeolocationHelper geolocationHelper)
     : ApiControllerBase
-    {
+{
 
 
     /// <summary>
@@ -132,7 +132,7 @@ public class ThirdpartyController(
 
         if (!(coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Oauth))
         {
-            throw new Exception("ErrorNotAllowedOption");
+            throw new SecurityException(Resource.ErrorNotAllowedOption);
         }
 
         if (string.IsNullOrEmpty(profile.AuthorizationError))
@@ -241,14 +241,16 @@ public class ThirdpartyController(
 
                 await webhookManager.PublishAsync(WebhookTrigger.UserCreated, user);
 
-                await studioNotifyService.UserHasJoinAsync();
-
                 if (mustChangePassword)
                 {
                     await studioNotifyService.UserPasswordChangeAsync(user, true);
                 }
 
                 await userHelpTourHelper.SetIsNewUser(true);
+
+                await securityContext.AuthenticateMeWithoutCookieAsync(user.Id);
+
+                await studioNotifyService.UserHasJoinAsync();
             }
             catch (Exception ex)
             {
@@ -289,7 +291,7 @@ public class ThirdpartyController(
         messageService.Send(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(inDto.Provider));
     }
 
-    private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, 
+    private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink,
         bool inviteByEmail, string cultureName, Guid? invitedBy)
     {
         if (SetupInfo.IsSecretEmail(email))
@@ -317,7 +319,7 @@ public class ThirdpartyController(
         user.FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName;
         user.LastName = string.IsNullOrEmpty(lastName) ? UserControlsCommonResource.UnknownLastName : lastName;
         user.Email = email;
-        
+
         if (coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, cultureName, StringComparison.InvariantCultureIgnoreCase)) != null)
         {
             user.CultureName = cultureName;

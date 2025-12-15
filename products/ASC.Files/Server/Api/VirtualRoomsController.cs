@@ -64,7 +64,7 @@ public class VirtualRoomsInternalController(
         filesMessageService,
         settingsManager,
         apiDateTimeHelper,
-        userManager, 
+        userManager,
         daoFactory)
 {
     /// <summary>
@@ -83,7 +83,9 @@ public class VirtualRoomsInternalController(
             lifetime.StartDate = DateTime.UtcNow;
         }
 
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover, inDto.Tags, inDto.Logo);
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, 
+            inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover, 
+            inDto.Tags, inDto.Logo, inDto.ChatSettings);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -229,7 +231,7 @@ public class VirtualRoomsThirdPartyController(
         filesMessageService,
         settingsManager,
         apiDateTimeHelper,
-        userManager, 
+        userManager,
         daoFactory)
 {
     /// <summary>
@@ -427,7 +429,7 @@ public abstract class VirtualRoomsController<T>(
 
         var taskId = await fileMoveCopyOperationsManager.Publish([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter, false);
         var tasks = await fileMoveCopyOperationsManager.GetOperationResults(id: taskId);
-        
+
         return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
 
@@ -451,21 +453,23 @@ public abstract class VirtualRoomsController<T>(
             return result;
         }
 
+        var newGuestsInvited =
+            inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email) && i.Access != FileShare.None);
+        
         var guestsInvited =
-            inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email) && i.Access != FileShare.None) ||
             await inDto.RoomInvitation.Invitations
                 .Where(r => r.Id != Guid.Empty && r.Access != FileShare.None)
                 .ToAsyncEnumerable()
-                .AnyAwaitAsync(async i => await userManager.IsGuestAsync(i.Id));
-        
+                .AnyAsync(async (i, _) => await userManager.IsGuestAsync(i.Id));
+
         var usersInvited =
             inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email) && i.Access != FileShare.None) ||
             await inDto.RoomInvitation.Invitations
                 .Where(r => r.Id != Guid.Empty && r.Access != FileShare.None)
                 .ToAsyncEnumerable()
-                .AnyAwaitAsync(async i => await userManager.IsUserAsync(i.Id));
-        
-        if (guestsInvited)
+                .AnyAsync(async (i, _) => await userManager.IsUserAsync(i.Id));
+
+        if (newGuestsInvited)
         {
             var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
             if (!invitationSettings.AllowInvitingGuests)
@@ -476,9 +480,9 @@ public abstract class VirtualRoomsController<T>(
 
         var room = await _fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
 
-        if (room.RootId is int root && 
-            root == await globalFolderHelper.FolderRoomTemplatesAsync && 
-            (inDto.RoomInvitation.Invitations.Any(i => i.Access != FileShare.None && i.Access != FileShare.Read) || guestsInvited || usersInvited))
+        if (room.RootId is int root &&
+            root == await globalFolderHelper.FolderRoomTemplatesAsync &&
+            (inDto.RoomInvitation.Invitations.Any(i => i.Access != FileShare.None && i.Access != FileShare.Read) || guestsInvited || newGuestsInvited || usersInvited))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
         }
@@ -499,9 +503,9 @@ public abstract class VirtualRoomsController<T>(
 
         var aceCollection = new AceCollection<T> { Files = [], Folders = [inDto.Id], Aces = wrappers, Message = inDto.RoomInvitation.Message };
 
-        result.Warning = (await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.RoomInvitation.Notify, inDto.RoomInvitation.Culture)).Select(r=> r.Warning).FirstOrDefault();
+        result.Warning = (await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.RoomInvitation.Notify, inDto.RoomInvitation.Culture)).Select(r => r.Warning).FirstOrDefault();
         result.Members = await _fileStorageService.GetRoomSharedInfoAsync(inDto.Id, inDto.RoomInvitation.Invitations.Select(s => s.Id))
-            .SelectAwait(async a => await fileShareDtoHelper.Get(a))
+            .Select(async (AceWrapper a, CancellationToken _) => await fileShareDtoHelper.Get(a))
             .ToListAsync();
 
         return result;
@@ -545,13 +549,13 @@ public abstract class VirtualRoomsController<T>(
         {
             LinkType.Invitation => await _fileStorageService.SetInvitationLinkAsync(inDto.Id, inDto.RoomLink.LinkId, inDto.RoomLink.Title, inDto.RoomLink.Access),
             LinkType.External => await _fileStorageService.SetExternalLinkAsync(
-                inDto.Id, 
-                FileEntryType.Folder, 
-                inDto.RoomLink.LinkId, 
+                inDto.Id,
+                FileEntryType.Folder,
+                inDto.RoomLink.LinkId,
                 inDto.RoomLink.Title,
-                inDto.RoomLink.Access, 
-                inDto.RoomLink.ExpirationDate, 
-                inDto.RoomLink.Password?.Trim(), 
+                inDto.RoomLink.Access,
+                inDto.RoomLink.ExpirationDate,
+                inDto.RoomLink.Password?.Trim(),
                 inDto.RoomLink.DenyDownload,
                 inDto.RoomLink.Internal),
             _ => throw new InvalidOperationException()
@@ -564,7 +568,7 @@ public abstract class VirtualRoomsController<T>(
 
         var result = await fileShareDtoHelper.Get(linkAce);
 
-        if (inDto.RoomLink.LinkId != Guid.Empty && linkAce.Id != inDto.RoomLink.LinkId  && result.SharedLink != null)
+        if (inDto.RoomLink.LinkId != Guid.Empty && linkAce.Id != inDto.RoomLink.LinkId && result.SharedLink != null)
         {
             result.SharedLink.RequestToken = null;
         }
@@ -796,7 +800,7 @@ public abstract class VirtualRoomsController<T>(
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(inDto.Id);
-        
+
         var newItems = await _fileStorageService.GetNewRoomFilesAsync(folder);
         var result = new List<NewItemsDto<FileEntryBaseDto>>();
 
@@ -832,7 +836,7 @@ public class VirtualRoomsCommonController(
     UserManager userManager,
     IServiceProvider serviceProvider,
     ApiDateTimeHelper apiDateTimeHelper,
-    RoomNewItemsDtoHelper roomNewItemsDtoHelper)
+    RootNewItemsDtoHelper rootNewItemsDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -876,6 +880,7 @@ public class VirtualRoomsCommonController(
             filter,
             false,
             inDto.SubjectId,
+            Guid.Empty,
             filterValue,
             [],
             true,
@@ -1082,7 +1087,8 @@ public class VirtualRoomsCommonController(
     [HttpGet("rooms/news")]
     public async Task<List<NewItemsDto<RoomNewItemsDto>>> GetRoomsNewItems()
     {
-        var newItems = await fileStorageService.GetNewRoomFilesAsync();
+        var rootId = await globalFolderHelper.FolderVirtualRoomsAsync;
+        var newItems = await fileStorageService.GetNewRootFilesAsync(rootId);
         var result = new List<NewItemsDto<RoomNewItemsDto>>();
 
         foreach (var (key, value) in newItems)
@@ -1092,7 +1098,12 @@ public class VirtualRoomsCommonController(
 
             foreach (var (k, v) in value)
             {
-                var item = await roomNewItemsDtoHelper.GetAsync(k, v);
+                var item = await rootNewItemsDtoHelper.GetAsync(k, v, (room, roomItems) => 
+                    new RoomNewItemsDto 
+                    { 
+                        Room = room, 
+                        Items = roomItems 
+                    });
                 items.Add(item);
             }
 

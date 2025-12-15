@@ -334,7 +334,7 @@ public enum MessageAction
 
     [SwaggerEnum("File deleted")]
     FileDeleted = 5018,
-    
+
     [SwaggerEnum("File version deleted")]
     FileVersionRemoved = 5119,
 
@@ -591,7 +591,7 @@ public enum MessageAction
     RoomWatermarkDisabled = 5113,
 
     [SwaggerEnum("Room invite resend")]
-    RoomInviteResend = 5118, 
+    RoomInviteResend = 5118,
 
     [SwaggerEnum("Room index export saved")]
     RoomIndexExportSaved = 5106,
@@ -607,6 +607,21 @@ public enum MessageAction
 
     [SwaggerEnum("Form stopped")]
     FormStopped = 5153,
+    
+    [SwaggerEnum("Agent created")]
+    AgentCreated = 5154,
+
+    [SwaggerEnum("Agent renamed")]
+    AgentRenamed = 5155,
+    
+    [SwaggerEnum("Agent deleted")]
+    AgentDeleted = 5156,
+    
+    [SwaggerEnum("MCP server added to agent")]
+    AddedServerToAgent = 5157,
+    
+    [SwaggerEnum("MCP server deleted from agent")]
+    DeletedServerFromAgent = 5158,
 
     #endregion
 
@@ -767,7 +782,7 @@ public enum MessageAction
 
     [SwaggerEnum("Custom quota per user disabled")]
     CustomQuotaPerUserDisabled = 6053,
-    
+
     [SwaggerEnum("DevTools access settings changed")]
     DevToolsAccessSettingsChanged = 6054,
 
@@ -779,7 +794,7 @@ public enum MessageAction
 
     [SwaggerEnum("Webhook deleted")]
     WebhookDeleted = 6057,
-    
+
     [SwaggerEnum("Created api key")]
     ApiKeyCreated = 6058,
 
@@ -801,8 +816,23 @@ public enum MessageAction
     [SwaggerEnum("Start transfer setting")]
     StartTransferSetting = 5040,
 
-    [SwaggerEnum("Start backup setting")]
-    StartBackupSetting = 5041,
+    [SwaggerEnum("Backup started")]
+    BackupStarted = 5041,
+
+    [SwaggerEnum("Backup completed")]
+    BackupCompleted = 5125,
+
+    [SwaggerEnum("Backup failed")]
+    BackupFailed = 5126,
+
+    [SwaggerEnum("Scheduled backup started")]
+    ScheduledBackupStarted = 5127,
+
+    [SwaggerEnum("Scheduled backup completed")]
+    ScheduledBackupCompleted = 5128,
+
+    [SwaggerEnum("Scheduled backup failed")]
+    ScheduledBackupFailed = 5129,
 
     [SwaggerEnum("License key uploaded")]
     LicenseKeyUploaded = 5042,
@@ -840,6 +870,66 @@ public enum MessageAction
     [SwaggerEnum("Customer wallet services settings updated")]
     CustomerWalletServicesSettingsUpdated = 6067,
 
+    [SwaggerEnum("Quota per AI agent changed")]
+    QuotaPerAiAgentChanged = 6068,
+
+    [SwaggerEnum("Quota per AI agent disabled")]
+    QuotaPerAiAgentDisabled = 6069,
+
+    [SwaggerEnum("Custom quota per AI agent default")]
+    CustomQuotaPerAiAgentDefault = 6070,
+
+    [SwaggerEnum("Custom quota per AI agent changed")]
+    CustomQuotaPerAiAgentChanged = 6071,
+
+    [SwaggerEnum("Custom quota per AI agent disabled")]
+    CustomQuotaPerAiAgentDisabled = 6072,
+
+    [SwaggerEnum("AI provider created")]
+    AIProviderCreated = 6073,
+
+    [SwaggerEnum("AI provider updated")]
+    AIProviderUpdated = 6074,
+
+    [SwaggerEnum("AI provider deleted")]
+    AIProviderDeleted = 6075,
+    
+    [SwaggerEnum("MCP server created")]
+    ServerCreated = 6076,
+    
+    [SwaggerEnum("MCP server updated")]
+    ServerUpdated = 6077,
+    
+    [SwaggerEnum("MCP server enabled")]
+    ServerEnabled = 6078,
+    
+    [SwaggerEnum("MCP server disabled")]
+    ServerDisabled = 6079,
+    
+    [SwaggerEnum("MCP server deleted")]
+    ServerDeleted = 6080,
+    
+    [SwaggerEnum("WebSearch settings configured")]
+    SetWebSearchSettings = 6081,
+    
+    [SwaggerEnum("WebSearch settings reset")]
+    ResetWebSearchSettings = 6082,
+    
+    [SwaggerEnum("Vectorization settings configured")]
+    SetVectorizationSettings = 6083,
+    
+    [SwaggerEnum("Vectorization settings reset")]
+    ResetVectorizationSettings = 6084,
+
+    [SwaggerEnum("Webplugin uploaded")]
+    WebpluginUploaded = 6085,
+
+    [SwaggerEnum("Webplugin updated")]
+    WebpluginUpdated = 6086,
+
+    [SwaggerEnum("Webplugin deleted")]
+    WebpluginDeleted = 6087,
+
     #endregion
 
     #region others
@@ -851,44 +941,44 @@ public enum MessageAction
 
     [SwaggerEnum("User created and added to room")]
     UserCreatedAndAddedToRoom = 7002,
-    
+
     [SwaggerEnum("Guest created and added to room")]
     GuestCreatedAndAddedToRoom = 7003,
-    
+
     [SwaggerEnum("Contact sales mail sent")]
     ContactSalesMailSent = 7004,
 
     #endregion
-    
+
     #region Oauth
-    
+
     [SwaggerEnum("Create client")]
     CreateClient = 9901,
-    
+
     [SwaggerEnum("Update client")]
     UpdateClient = 9902,
-    
+
     [SwaggerEnum("Regenerate secret")]
     RegenerateSecret = 9903,
-    
+
     [SwaggerEnum("Delete client")]
     DeleteClient = 9904,
-    
+
     [SwaggerEnum("Change client activation")]
     ChangeClientActivation = 9905,
-    
+
     [SwaggerEnum("Change client visibility")]
     ChangeClientVisibility = 9906,
-    
+
     [SwaggerEnum("Revoke user client")]
     RevokeUserClient = 9907,
-    
+
     [SwaggerEnum("Generate authorization code token")]
     GenerateAuthorizationCodeToken = 9908,
-    
+
     [SwaggerEnum("Generate personal access token")]
     GeneratePersonalAccessToken = 9909,
-    
+
     #endregion
 
     #region Ldap

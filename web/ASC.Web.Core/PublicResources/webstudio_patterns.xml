@@ -87,6 +87,16 @@
     <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_backup_created_tg|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
+  <!-- backup_failed -->
+  <pattern id="backup_failed" sender="email.sender">
+    <subject resource="|subject_backup_failed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_backup_failed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+  <pattern id="backup_failed" sender="telegram.sender">
+    <subject />
+    <body styler="ASC.Notify.Textile.MarkDownStyler,ASC.Core.Common" resource="|pattern_backup_failed_tg|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
   <!-- scheduled_backup_failed -->
   <pattern id="scheduled_backup_failed" sender="email.sender">
     <subject resource="|subject_scheduled_backup_failed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
@@ -569,6 +579,18 @@
   <pattern id="saas_room_invite_existing_user">
     <subject resource="|subject_saas_room_invite_existing_user|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_room_invite_existing_user|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- saas agent invite -->
+  <pattern id="saas_agent_invite">
+    <subject resource="|subject_saas_agent_invite|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_agent_invite|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- saas agent invite existing user -->
+  <pattern id="saas_agent_invite_existing_user">
+    <subject resource="|subject_saas_agent_invite_existing_user|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_saas_agent_invite_existing_user|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
   <!-- saas docspace invite -->

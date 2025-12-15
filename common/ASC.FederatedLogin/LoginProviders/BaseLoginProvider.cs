@@ -70,7 +70,10 @@ public enum LoginProvider
     Yahoo,
 
     [SwaggerEnum("Yandex")]
-    Yandex
+    Yandex,
+    
+    [SwaggerEnum("Github")]
+    Github,
 }
 
 public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : Consumer, ILoginProvider, new()
@@ -105,8 +108,8 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         _oAuth20TokenHelper = oAuth20TokenHelper;
     }

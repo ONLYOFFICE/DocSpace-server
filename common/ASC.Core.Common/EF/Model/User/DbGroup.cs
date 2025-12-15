@@ -116,7 +116,7 @@ public static class DbGroupExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant");
         });
     }
-    
+
     private static void PgSqlAddDbGroup(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbGroup>(entity =>

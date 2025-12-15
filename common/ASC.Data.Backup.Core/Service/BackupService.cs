@@ -43,19 +43,18 @@ public class BackupService(
         ITariffService tariffService,
         TenantManager tenantManager,
         SettingsManager settingsManager,
-        MessageService messageService,
         CoreBaseSettings coreBaseSettings,
         AuthContext authContext,
         PermissionContext permissionContext,
         IDaoFactory daoFactory,
         FileSecurity fileSecurity,
         StorageFactory storageFactory)
-    {
+{
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
     private const int BackupCustomerSessionDuration = 86400; // 60 * 60 * 24;
 
-    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null, int billingSessionId = 0, DateTime billingSessionExpire = default)
+    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null, int billingSessionId = 0, DateTime billingSessionExpire = default, IDictionary<string, string> headers = null)
     {
         await DemandPermissionsBackupAsync();
 
@@ -71,7 +70,8 @@ public class BackupService(
             StorageType = storageType,
             StorageParams = storageParams,
             Dump = dump,
-            ServerBaseUri = serverBaseUri
+            ServerBaseUri = serverBaseUri,
+            Headers = headers
         };
 
         switch (storageType)
@@ -89,8 +89,6 @@ public class BackupService(
                 backupRequest.StorageBasePath = storageParams["filePath"];
                 break;
         }
-
-        messageService.Send(MessageAction.StartBackupSetting);
 
         var progress = await backupWorker.StartBackupAsync(backupRequest, enqueueTask, taskId, billingSessionId, billingSessionExpire);
         if (!string.IsNullOrEmpty(progress.Error))
@@ -448,7 +446,7 @@ public class BackupService(
     public async Task<ScheduleDto> GetScheduleAsync(bool? dump)
     {
         await DemandPermissionsBackupAsync();
-        ScheduleResponse response = null;
+        ScheduleResponse response;
         if (dump.HasValue && dump.Value)
         {
             response = await InnerGetScheduleAsync(-1, dump);
@@ -493,10 +491,10 @@ public class BackupService(
             return null;
         }
 
-        var serviceAccount = await GetBackupServiceAccountId();
+        var serviceName = await GetBackupServiceName();
         var externalRef = Guid.NewGuid().ToString();
 
-        var result = await tariffService.OpenCustomerSessionAsync(tenantId, serviceAccount, externalRef, 1, BackupCustomerSessionDuration);
+        var result = await tariffService.OpenCustomerSessionAsync(tenantId, serviceName, externalRef, 1, BackupCustomerSessionDuration);
 
         return result;
     }
@@ -550,20 +548,17 @@ public class BackupService(
             return false;
         }
 
-        var serviceAccount = await GetBackupServiceAccountId();
+        var serviceName = await GetBackupServiceName();
 
-        var result = await tariffService.CompleteCustomerSessionAsync(tenantId, serviceAccount, sessionId, 1, customerParticipantName, metadata);
-
-        if (result)
-        {
-            messageService.Send(MessageAction.CustomerOperationPerformed);
-        }
+        var result = await tariffService.CompleteCustomerSessionAsync(tenantId, serviceName, sessionId, 1, customerParticipantName, metadata);
 
         return result;
     }
 
     public async Task<int> GetBackupsCountAsync(int tenantId, bool paid, DateTime from, DateTime to)
     {
+        await DemandPermissionsBackupAsync();
+
         return await backupRepository.GetBackupsCountAsync(tenantId, paid, from, to);
     }
 
@@ -644,13 +639,13 @@ public class BackupService(
         }
     }
 
-    private async Task<int> GetBackupServiceAccountId()
+    private async Task<string> GetBackupServiceName()
     {
         var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
 
         var backupQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.Backup);
 
-        return backupQuota == null ? throw new ItemNotFoundException("Backup quota not found") : int.Parse(backupQuota.ProductId);
+        return backupQuota == null ? throw new ItemNotFoundException("Backup quota not found") : backupQuota.GetPaymentId();
     }
 }
 

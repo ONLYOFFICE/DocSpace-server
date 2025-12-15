@@ -95,23 +95,33 @@ public class FileShareConverter : JsonConverter<FileShare>
 
 public static partial class FileShareExtensions
 {
-    public static string GetAccessString(FileShare fileShare, bool useRoomFormat = false, CultureInfo cultureInfo = null)
+    public static string GetAccessString(
+        FileShare fileShare,
+        bool useRoomFormat = false,
+        bool isAgent = false,
+        CultureInfo cultureInfo = null)
     {
+        if (isAgent && fileShare == FileShare.RoomManager)
+        {
+            return FilesCommonResource.AgentManager;
+        }
+        
+        
         var prefix = useRoomFormat && fileShare != FileShare.ReadWrite ? "RoleEnum_" : "AceStatusEnum_";
 
         return fileShare switch
         {
-            FileShare.Read or 
-            FileShare.ReadWrite or 
-            FileShare.CustomFilter or 
-            FileShare.Review or 
-            FileShare.FillForms or 
-            FileShare.Comment or 
-            FileShare.Restrict or 
-            FileShare.RoomManager or 
-            FileShare.Editing or 
-            FileShare.ContentCreator or 
-            FileShare.Varies or 
+            FileShare.Read or
+            FileShare.ReadWrite or
+            FileShare.CustomFilter or
+            FileShare.Review or
+            FileShare.FillForms or
+            FileShare.Comment or
+            FileShare.Restrict or
+            FileShare.RoomManager or
+            FileShare.Editing or
+            FileShare.ContentCreator or
+            FileShare.Varies or
             FileShare.None => FilesCommonResource.ResourceManager.GetString(prefix + fileShare.ToStringFast(), cultureInfo),
             _ => string.Empty
         };

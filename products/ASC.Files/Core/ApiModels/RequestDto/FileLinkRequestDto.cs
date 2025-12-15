@@ -45,13 +45,13 @@ public class FileLinkRequest
     /// The link expiration date.
     /// </summary>
     public ApiDateTime ExpirationDate { get; set; }
-    
+
     /// <summary>
     /// The link name.
     /// </summary>
     [StringLength(255)]
     public string Title { get; set; }
-    
+
     /// <summary>
     /// The link scope, whether it is internal or not.
     /// </summary>
@@ -61,12 +61,12 @@ public class FileLinkRequest
     /// Specifies whether the file link is primary or not.
     /// </summary>
     public bool Primary { get; set; }
-    
+
     /// <summary>
     /// Specifies whether to deny downloading the file or not.
     /// </summary>
     public bool DenyDownload { get; set; }
-    
+
     /// <summary>
     /// Password for access via link.
     /// </summary>

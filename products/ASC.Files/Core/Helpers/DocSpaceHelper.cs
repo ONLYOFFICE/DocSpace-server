@@ -34,9 +34,10 @@ public static class DocSpaceHelper
         FolderType.EditingRoom,
         FolderType.FillingFormsRoom,
         FolderType.PublicRoom,
-        FolderType.VirtualDataRoom
+        FolderType.VirtualDataRoom,
+        FolderType.AiRoom
     ];
-    
+
     public static bool IsRoom(FolderType folderType)
     {
         return RoomTypes.Contains(folderType);
@@ -53,7 +54,7 @@ public static class DocSpaceHelper
     {
         return FormsFillingSystemFolders.Contains(folderType);
     }
-    
+
     public static bool IsFormsFillingFolder<T>(FileEntry<T> entry)
     {
         return entry is Folder<T> f && (f.FolderType == FolderType.FillingFormsRoom || IsFormsFillingSystemFolder(f.FolderType));
@@ -68,6 +69,7 @@ public static class DocSpaceHelper
             FolderType.CustomRoom => RoomType.CustomRoom,
             FolderType.PublicRoom => RoomType.PublicRoom,
             FolderType.VirtualDataRoom => RoomType.VirtualDataRoom,
+            FolderType.AiRoom => RoomType.AiRoom,
             _ => null
         };
     }
@@ -81,17 +83,18 @@ public static class DocSpaceHelper
             RoomType.CustomRoom => FolderType.CustomRoom,
             RoomType.PublicRoom => FolderType.PublicRoom,
             RoomType.VirtualDataRoom => FolderType.VirtualDataRoom,
+            RoomType.AiRoom => FolderType.AiRoom,
             _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, null)
         };
     }
-    
+
     public static IEnumerable<FolderType> MapToFolderTypes(IEnumerable<FilterType> filterTypes)
     {
         if (filterTypes == null)
         {
             return null;
         }
-        
+
         var result = new HashSet<FolderType>();
 
         foreach (var type in filterTypes)
@@ -102,7 +105,7 @@ public static class DocSpaceHelper
                 result.Add(folderType.Value);
             }
         }
-        
+
         return result;
     }
 
@@ -115,6 +118,7 @@ public static class DocSpaceHelper
             FilterType.CustomRooms => FolderType.CustomRoom,
             FilterType.PublicRooms => FolderType.PublicRoom,
             FilterType.VirtualDataRooms => FolderType.VirtualDataRoom,
+            FilterType.AiRooms => FolderType.AiRoom,
             _ => null
         };
     }
@@ -137,7 +141,7 @@ public static class DocSpaceHelper
         {
             return false;
         }
-        
+
         var room = await GetParentRoom(file, folderDao);
 
         return IsWatermarkEnabled(room);
@@ -153,10 +157,8 @@ public static class DocSpaceHelper
         return await folderDao.GetParentFoldersAsync(file.ParentId).FirstOrDefaultAsync(f => IsRoom(f.FolderType));
     }
 
-    public static async Task<bool> IsFormOrCompletedForm<T>(File<T> file, IDaoFactory daoFactory)
+    public static async ValueTask<bool> IsFormOrCompletedForm<T>(File<T> file, IDaoFactory daoFactory)
     {
-        var cacheFileDao = daoFactory.GetCacheFileDao<T>();
-
         var extension = FileUtility.GetFileExtension(file.Title);
         if (FileUtility.GetFileTypeByExtention(extension) != FileType.Pdf)
         {
@@ -167,8 +169,8 @@ public static class DocSpaceHelper
         {
             return true;
         }
-
-        var roles = await cacheFileDao.GetFormRoles(file.Id).ToListAsync();
+        
+        var roles = await daoFactory.GetCacheFileDao<T>().GetFormRoles(file.Id).ToListAsync();
         return roles.Count != 0 && roles.All(r => r.Submitted);
     }
 }

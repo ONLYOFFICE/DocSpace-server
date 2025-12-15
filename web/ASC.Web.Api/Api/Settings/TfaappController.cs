@@ -152,7 +152,7 @@ public class TfaappController(
         }
 
         if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
-        {            
+        {
             var tfaExpired = await TfaAppUserSettings.TfaExpiredAndResetAsync(settingsManager, auditEventsRepository, user.Id);
             var confirmType = tfaExpired || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, authContext.CurrentAccount.ID)
                 ? ConfirmType.TfaActivation
@@ -178,7 +178,7 @@ public class TfaappController(
     public async Task<bool> UpdateTfaSettings(TfaRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        
+
         var result = false;
 
         MessageAction action;
@@ -282,7 +282,7 @@ public class TfaappController(
         {
             throw new InvalidOperationException(Resource.ErrorAccessDenied);
         }
-        
+
         if (await UpdateTfaSettings(inDto))
         {
             return await GetTfaConfirmUrl();
@@ -334,16 +334,16 @@ public class TfaappController(
     [HttpGet("tfaappcodes")]
     public async Task<IEnumerable<object>> GetTfaAppCodes()
     {
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserId = authContext.CurrentAccount.ID;
 
         if (!tfaAppAuthSettingsHelper.IsVisibleSettings ||
             !(await settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting ||
-            !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
+            !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUserId))
         {
             throw new InvalidOperationException(Resource.TfaAppNotAvailable);
         }
 
-        if (await userManager.IsOutsiderAsync(currentUser))
+        if (await userManager.IsOutsiderAsync(currentUserId))
         {
             throw new InvalidOperationException("Not available.");
         }
@@ -363,20 +363,21 @@ public class TfaappController(
     [HttpPut("tfaappnewcodes")]
     public async Task<IEnumerable<object>> UpdateTfaAppCodes()
     {
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserId = authContext.CurrentAccount.ID;
+        var currentUser = await userManager.GetUsersAsync(currentUserId);
 
-        if (!tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUser.Id))
+        if (!tfaAppAuthSettingsHelper.IsVisibleSettings || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, currentUserId))
         {
             throw new InvalidOperationException(Resource.TfaAppNotAvailable);
         }
 
-        if (await userManager.IsOutsiderAsync(currentUser))
+        if (await userManager.IsOutsiderAsync(currentUserId))
         {
             throw new InvalidOperationException("Not available.");
         }
 
         var codes = (await tfaManager.GenerateBackupCodesAsync()).Select(r => new { r.IsUsed, Code = r.GetEncryptedCode(instanceCrypto, signature) }).ToList();
-        messageService.Send(MessageAction.UserConnectedTfaApp, MessageTarget.Create(currentUser.Id), currentUser.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserConnectedTfaApp, MessageTarget.Create(currentUserId), currentUser.DisplayUserName(false, displayUserSettingsHelper));
         return codes;
     }
 
@@ -421,7 +422,7 @@ public class TfaappController(
         await TfaAppUserSettings.DisableForUserAsync(settingsManager, user.Id);
         messageService.Send(MessageAction.UserDisconnectedTfaApp, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
         await userSocketManager.UpdateUserAsync(user);
-        
+
         await cookiesManager.ResetUserCookieAsync(user.Id);
         if (isMe)
         {

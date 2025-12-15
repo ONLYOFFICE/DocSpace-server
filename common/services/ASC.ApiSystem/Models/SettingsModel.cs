@@ -62,6 +62,6 @@ public class DomainModel
     /// <summary>
     /// The host name.
     /// </summary>
-    [StringLength (255)]
+    [StringLength(255)]
     public string HostName { get; set; }
 }

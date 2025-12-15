@@ -27,18 +27,11 @@
 namespace ASC.Files.Core;
 
 [Scope]
-public class FileHelper(FileTrackerHelper fileTracker, 
-                        FilesLinkUtility filesLinkUtility, 
-                        FileUtility fileUtility, 
+public class FileHelper(FileTrackerHelper fileTracker,
+                        FilesLinkUtility filesLinkUtility,
+                        FileUtility fileUtility,
                         FileConverter fileConverter)
 {
-    internal string GetTitle<T>(File<T> file)
-    {
-        return string.IsNullOrEmpty(file.ConvertedType)
-                    ? file.PureTitle
-                    : FileUtility.ReplaceFileExtension(file.PureTitle, fileUtility.GetInternalExtension(file.PureTitle));
-    }
-
     internal async Task<FileStatus> GetFileStatus<T>(File<T> file, FileStatus currentStatus)
     {
         var editingTask = fileUtility.CanWebEdit(file.Title)

@@ -31,4 +31,3 @@ public static partial class DeletePersonalFolderProgressItemLogger
     [LoggerMessage(LogLevel.Error, "DeletePersonalFolderProgressItem")]
     public static partial void ErrorDeletePersonalFolderProgressItem(this ILogger logger, Exception exception);
 }
-

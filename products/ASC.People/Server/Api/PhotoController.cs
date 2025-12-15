@@ -46,7 +46,6 @@ public class PhotoController(
     SetupInfo setupInfo,
     IHttpClientFactory httpClientFactory,
     IHttpContextAccessor httpContextAccessor,
-    TenantManager tenantManager,
     UserWebhookManager webhookManager)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
@@ -66,7 +65,7 @@ public class PhotoController(
     {
         var user = await GetUserInfoAsync(inDto.UserId);
 
-        if (_userManager.IsSystemUser(user.Id))
+        if (_userManager.IsSystemUser(user.Id) || !user.Id.Equals(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();
         }
@@ -122,18 +121,12 @@ public class PhotoController(
     {
         var user = await GetUserInfoAsync(inDto.UserId);
 
-        if (_userManager.IsSystemUser(user.Id) || user.Status == EmployeeStatus.Terminated)
+        if (_userManager.IsSystemUser(user.Id) || !user.Id.Equals(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();
         }
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
-
-        var tenant = tenantManager.GetCurrentTenant();
-        if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != securityContext.CurrentAccount.ID)
-        {
-            throw new Exception(Resource.ErrorAccessDenied);
-        }
 
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
@@ -183,16 +176,12 @@ public class PhotoController(
     {
         var user = await GetUserInfoAsync(inDto.UserId);
 
-        if (_userManager.IsSystemUser(user.Id))
+        if (_userManager.IsSystemUser(user.Id) || !user.Id.Equals(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();
         }
 
-        var tenant = tenantManager.GetCurrentTenant();
-        if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != securityContext.CurrentAccount.ID)
-        {
-            throw new Exception(Resource.ErrorAccessDenied);
-        }
+        await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
         if (inDto.UpdatePhoto.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
         {
@@ -229,23 +218,14 @@ public class PhotoController(
         {
             if (inDto.FormCollection.Files.Count != 0)
             {
-                Guid userId;
-                try
+                var user = await GetUserInfoAsync(inDto.UserId);
+
+                if (_userManager.IsSystemUser(user.Id) || !user.Id.Equals(securityContext.CurrentAccount.ID))
                 {
-                    userId = new Guid(inDto.UserId);
-                }
-                catch
-                {
-                    userId = securityContext.CurrentAccount.ID;
+                    throw new SecurityException();
                 }
 
-                await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(userId), Constants.Action_EditUser);
-
-                var tenant = tenantManager.GetCurrentTenant();
-                if (securityContext.CurrentAccount.ID != tenant.OwnerId && await _userManager.IsDocSpaceAdminAsync(userId) && userId != securityContext.CurrentAccount.ID)
-                {
-                    throw new Exception(Resource.ErrorAccessDenied);
-                }
+                await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
                 var userPhoto = inDto.FormCollection.Files[0];
 
@@ -273,22 +253,22 @@ public class PhotoController(
                         throw new ImageSizeLimitException();
                     }
 
-                    var mainPhoto = await _userPhotoManager.SaveOrUpdatePhoto(userId, data);
-                    var userInfo = await _userManager.GetUsersAsync(userId);
+                    var mainPhoto = await _userPhotoManager.SaveOrUpdatePhoto(user.Id, data);
+                    var userInfo = await _userManager.GetUsersAsync(user.Id);
                     var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
 
                     result.Data =
                         new
                         {
                             main = mainPhoto.Item1 + $"?hash={cacheKey}",
-                            retina = await _userPhotoManager.GetRetinaPhotoURL(userId) + $"?hash={cacheKey}",
-                            max = await _userPhotoManager.GetMaxPhotoURL(userId) + $"?hash={cacheKey}",
-                            big = await _userPhotoManager.GetBigPhotoURL(userId) + $"?hash={cacheKey}",
-                            medium = await _userPhotoManager.GetMediumPhotoURL(userId) + $"?hash={cacheKey}",
-                            small = await _userPhotoManager.GetSmallPhotoURL(userId) + $"?hash={cacheKey}"
+                            retina = await _userPhotoManager.GetRetinaPhotoURL(user.Id) + $"?hash={cacheKey}",
+                            max = await _userPhotoManager.GetMaxPhotoURL(user.Id) + $"?hash={cacheKey}",
+                            big = await _userPhotoManager.GetBigPhotoURL(user.Id) + $"?hash={cacheKey}",
+                            medium = await _userPhotoManager.GetMediumPhotoURL(user.Id) + $"?hash={cacheKey}",
+                            small = await _userPhotoManager.GetSmallPhotoURL(user.Id) + $"?hash={cacheKey}"
                         };
 
-                    messageService.Send(MessageAction.UserAddedAvatar, MessageTarget.Create(userId), userInfo.DisplayUserName(false, displayUserSettingsHelper));
+                    messageService.Send(MessageAction.UserAddedAvatar, MessageTarget.Create(user.Id), userInfo.DisplayUserName(false, displayUserSettingsHelper));
                     await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, userInfo);
                 }
                 else

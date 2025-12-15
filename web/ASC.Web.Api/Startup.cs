@@ -57,10 +57,10 @@ public class Startup : BaseStartup
         services.RegisterQueue<LdapOperationJob>();
         services.RegisterQueue<SmtpJob>();
         services.RegisterQueue<UsersQuotaSyncJob>();
-        
+
         services.AddStartupTask<CspStartupTask>()
                    .TryAddSingleton(services);
-                
+
         services.AddActivePassiveHostedService<NotifySchedulerService>(_configuration, "WebApiNotifySchedulerService");
         services.AddDocumentServiceHttpClient(_configuration);
     }

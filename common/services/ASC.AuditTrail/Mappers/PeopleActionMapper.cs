@@ -34,7 +34,7 @@ internal class PeopleActionMapper : IProductActionMapper
         new GroupsActionMapper()
     ];
 
-    public ProductType Product => ProductType.People;
+    public ProductType Product => ProductType.Contacts;
 }
 
 internal class UsersActionMapper : ILocationActionMapper
@@ -44,17 +44,17 @@ internal class UsersActionMapper : ILocationActionMapper
 
     public UsersActionMapper()
     {
-        Location = LocationType.Users;
+        Location = LocationType.Contacts;
 
-        Actions = new MessageMapsDictionary(ProductType.People, Location)
+        Actions = new MessageMapsDictionary(ProductType.Contacts, Location)
         {
             {
                 EntryType.User,
                 new Dictionary<ActionType, MessageAction[]>
                 {
-                    { 
+                    {
                         ActionType.Create, [
-                            MessageAction.UserCreated, MessageAction.GuestCreated, 
+                            MessageAction.UserCreated, MessageAction.GuestCreated,
                             MessageAction.UserCreatedViaInvite, MessageAction.GuestCreatedViaInvite,
                             MessageAction.SendJoinInvite
                         ]
@@ -67,7 +67,7 @@ internal class UsersActionMapper : ILocationActionMapper
                             MessageAction.UsersUpdatedStatus, MessageAction.UsersSentActivationInstructions
                         ]
                     },
-                    { 
+                    {
                         ActionType.Delete, [MessageAction.UserDeletedAvatar, MessageAction.UserDeleted, MessageAction.UsersDeleted, MessageAction.UserDataRemoving]
                     },
                     { ActionType.Import, [MessageAction.UserImported, MessageAction.GuestImported] },
@@ -84,10 +84,10 @@ internal class UsersActionMapper : ILocationActionMapper
                 ActionType.Send, [MessageAction.UserSentActivationInstructions, MessageAction.UserSentDeleteInstructions, MessageAction.SentInviteInstructions]
             },
             { MessageAction.UserUpdatedPassword, ActionType.Update },
-            { MessageAction.UserSentEmailChangeInstructions, new MessageMaps("UserSentEmailInstructions", ActionType.Send, ProductType.People, Location, EntryType.User) },
-            { MessageAction.UserSentPasswordChangeInstructions, new MessageMaps("UserSentPasswordInstructions", ActionType.Send, ProductType.People, Location, EntryType.User) },
-            { MessageAction.UserConnectedTfaApp, new MessageMaps("UserTfaGenerateCodes", ActionType.Link, ProductType.People, Location, EntryType.User) },
-            { MessageAction.UserDisconnectedTfaApp, new MessageMaps("UserTfaDisconnected", ActionType.Delete, ProductType.People, Location, EntryType.User) }
+            { MessageAction.UserSentEmailChangeInstructions, new MessageMaps(nameof(AuditReportResource.UserSentEmailInstructions), ActionType.Send, ProductType.Contacts, Location, EntryType.User) },
+            { MessageAction.UserSentPasswordChangeInstructions, new MessageMaps(nameof(AuditReportResource.UserSentPasswordInstructions), ActionType.Send, ProductType.Contacts, Location, EntryType.User) },
+            { MessageAction.UserConnectedTfaApp, new MessageMaps(nameof(AuditReportResource.UserTfaGenerateCodes), ActionType.Link, ProductType.Contacts, Location, EntryType.User) },
+            { MessageAction.UserDisconnectedTfaApp, new MessageMaps(nameof(AuditReportResource.UserTfaDisconnected), ActionType.Delete, ProductType.Contacts, Location, EntryType.User) }
         };
     }
 }
@@ -99,9 +99,9 @@ internal class GroupsActionMapper : ILocationActionMapper
 
     public GroupsActionMapper()
     {
-        Location = LocationType.Groups;
+        Location = LocationType.Contacts;
 
-        Actions = new MessageMapsDictionary(ProductType.People, Location)
+        Actions = new MessageMapsDictionary(ProductType.Contacts, Location)
         {
             {
                 EntryType.Group, new Dictionary<ActionType, MessageAction>

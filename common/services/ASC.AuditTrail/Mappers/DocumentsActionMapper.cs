@@ -33,7 +33,8 @@ internal class DocumentsActionMapper : IProductActionMapper
         new FilesActionMapper(),
         new FoldersActionMapper(),
         new RoomsActionMapper(),
-        new SettingsActionMapper()
+        new SettingsActionMapper(),
+        new AgentsActionMapper()
     ];
 
     public ProductType Product => ProductType.Documents;
@@ -73,7 +74,7 @@ internal class FilesActionMapper : ILocationActionMapper
                     },
                     { ActionType.Send, [MessageAction.FileSendAccessLink, MessageAction.FileChangeOwner] },
                     { ActionType.Upload, [MessageAction.FileUploaded, MessageAction.FileUploadedWithOverwriting]}
-                }, 
+                },
                 new Dictionary<ActionType, MessageAction>
                 {
                     { ActionType.Import, MessageAction.FileImported },
@@ -89,8 +90,8 @@ internal class FilesActionMapper : ILocationActionMapper
             }
         };
 
-        Actions.Add(MessageAction.DocumentSignComplete, new MessageMaps("FilesDocumentSigned", ActionType.Send, ProductType.Documents, Location, EntryType.File));
-        Actions.Add(MessageAction.DocumentSendToSign, new MessageMaps("FilesRequestSign", ActionType.Send, ProductType.Documents, Location, EntryType.File));
+        Actions.Add(MessageAction.DocumentSignComplete, new MessageMaps(nameof(AuditReportResource.FilesDocumentSigned), ActionType.Send, ProductType.Documents, Location, EntryType.File));
+        Actions.Add(MessageAction.DocumentSendToSign, new MessageMaps(nameof(AuditReportResource.FilesRequestSign), ActionType.Send, ProductType.Documents, Location, EntryType.File));
     }
 }
 
@@ -144,7 +145,7 @@ internal class RoomsActionMapper : ILocationActionMapper
             {
                 EntryType.Room, new Dictionary<ActionType, MessageAction[]>
                 {
-                    { ActionType.Create, [MessageAction.RoomCreated] },
+                    { ActionType.Create, [MessageAction.RoomCreated, MessageAction.AgentCreated] },
                     { ActionType.Copy, [MessageAction.RoomCopied] },
                     {
                         ActionType.Update, [
@@ -186,7 +187,40 @@ internal class RoomsActionMapper : ILocationActionMapper
             {
                 EntryType.Tag, new Dictionary<ActionType, MessageAction>
                 {
-                    { ActionType.Create, MessageAction.TagCreated }, 
+                    { ActionType.Create, MessageAction.TagCreated },
+                    { ActionType.Delete, MessageAction.TagsDeleted }
+                }
+            }
+        };
+    }
+}
+
+internal class AgentsActionMapper : ILocationActionMapper
+{
+    public LocationType Location { get; }
+    public IDictionary<MessageAction, MessageMaps> Actions { get; }
+
+    public AgentsActionMapper()
+    {
+        Location = LocationType.Agents;
+        Actions = new MessageMapsDictionary(ProductType.Documents, Location)
+        {
+            {
+                EntryType.Room, new Dictionary<ActionType, MessageAction[]>
+                {
+                    { ActionType.Create, [MessageAction.AgentCreated] },
+                    { ActionType.Update, [
+                        MessageAction.AgentRenamed, 
+                        MessageAction.AddedServerToAgent, 
+                        MessageAction.DeletedServerFromAgent
+                    ] },
+                    { ActionType.Delete, [MessageAction.AgentDeleted] }
+                }
+            },
+            {
+                EntryType.Tag, new Dictionary<ActionType, MessageAction>
+                {
+                    { ActionType.Create, MessageAction.TagCreated },
                     { ActionType.Delete, MessageAction.TagsDeleted }
                 }
             }

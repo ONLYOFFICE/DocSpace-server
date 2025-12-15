@@ -70,3 +70,23 @@ public class ContentTypeOperationFilter : IOperationFilter
         }
     }
 }
+
+public class SwaggerOperationIdFilter : IOperationFilter
+{
+    private readonly string _route;
+    private readonly string _newOperationId;
+
+    public SwaggerOperationIdFilter(string route, string newOperationId)
+    {
+        _route = route;
+        _newOperationId = newOperationId;
+    }
+    public void Apply(OpenApiOperation operation, OperationFilterContext context)
+    {
+        if (context.ApiDescription.RelativePath.Equals(_route, System.StringComparison.OrdinalIgnoreCase) &&
+            context.ApiDescription.HttpMethod.Equals("GET", System.StringComparison.OrdinalIgnoreCase))
+        {
+            operation.OperationId = _newOperationId;
+        }
+    }
+}

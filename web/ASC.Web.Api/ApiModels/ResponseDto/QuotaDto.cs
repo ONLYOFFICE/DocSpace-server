@@ -69,12 +69,17 @@ public class QuotaDto
     /// <summary>
     /// The user quota.
     /// </summary>
-    public TenantEntityQuotaSettings UsersQuota {  get; set; }
+    public TenantEntityQuotaSettings UsersQuota { get; set; }
 
     /// <summary>
     /// The room quota.
     /// </summary>
-    public TenantEntityQuotaSettings RoomsQuota {  get; set; }
+    public TenantEntityQuotaSettings RoomsQuota { get; set; }
+
+    /// <summary>
+    /// The ai agent quota.
+    /// </summary>
+    public TenantEntityQuotaSettings AiAgentsQuota { get; set; }
 
     /// <summary>
     /// The tenant custom quota.

@@ -107,12 +107,14 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 return false;
             }
         }
-        if (DocSpaceHelper.IsRoom(rootFolder.FolderType))
+        if (DocSpaceHelper.IsRoom(rootFolder.FolderType) && !rootFolder.ProviderEntry)
         {
-            var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-            if (quotaRoomSettings.EnableQuota)
+            TenantEntityQuotaSettings quotaSettings = rootFolder.FolderType is FolderType.AiRoom
+                   ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                   : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            if (quotaSettings.EnableQuota)
             {
-                var roomQuotaLimit = rootFolder.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : rootFolder.SettingsQuota;
+                var roomQuotaLimit = rootFolder.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : rootFolder.SettingsQuota;
                 if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota && roomQuotaLimit <= rootFolder.Counter)
                 {
                     return false;
@@ -272,7 +274,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                     var editingBy = (await fileTracker.GetEditingByAsync(file.Id)).FirstOrDefault();
                     strError = string.Format(FilesCommonResource.ErrorMessage_EditingMobile, await global.GetUserNameAsync(editingBy, true));
                 }
-                
+
                 rightToEdit = editPossible = reviewPossible = fillFormsPossible = commentPossible = false;
             }
         }
@@ -306,18 +308,18 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             ModifyFilter = rightModifyFilter,
             Print = rightToDownload,
             Download = rightToDownload && noWatermark,
-            Copy = rightToDownload && noWatermark,
+            Copy = rightToDownload,
             Protect = authContext.IsAuthenticated,
-            Chat = file.Access != FileShare.Read   
+            Chat = file.Access != FileShare.Read
         };
-        
+
         configuration.Document.Options = options;
         configuration.EditorConfig.ModeWrite = modeWrite;
         configuration.Error = strError;
 
         if (!lastVersion)
         {
-            configuration.Document.Title =  $"{file.Title} ({file.CreateOnString})";
+            configuration.Document.Title = $"{file.Title} ({file.CreateOnString})";
         }
 
         if (fileUtility.CanWebRestrictedEditing(file.Title))
@@ -385,7 +387,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             runs.Add(new Run(userInfo.DisplayUserName(false, displayUserSettingsHelper)));
             runs.Add(new Run(Environment.NewLine, false));
         }
-        if(watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserEmail))
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserEmail) && !string.IsNullOrWhiteSpace(userInfo.Email))
         {
             runs.Add(new Run(userInfo.Email));
             runs.Add(new Run(Environment.NewLine, false));
@@ -418,7 +420,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var options = new Options
         {
-            WatermarkOnDraw = new WatermarkOnDraw(watermarkSettings.ImageWidth * watermarkSettings.ImageScale / 100, watermarkSettings.ImageHeight * watermarkSettings.ImageScale / 100 , watermarkSettings.ImageUrl, watermarkSettings.Rotate, paragrahs)
+            WatermarkOnDraw = new WatermarkOnDraw(watermarkSettings.ImageWidth * watermarkSettings.ImageScale / 100, watermarkSettings.ImageHeight * watermarkSettings.ImageScale / 100, watermarkSettings.ImageUrl, watermarkSettings.Rotate, paragrahs)
         };
         return options;
     }
@@ -538,7 +540,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             return folder;
         }
 
-        var (rId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(folder);
+        var (rId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(folder);
         if (int.TryParse(rId.ToString(), out var roomId) && roomId != -1)
         {
             var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));
@@ -548,7 +550,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             }
         }
 
-        if(folder.RootFolderType == FolderType.USER)
+        if (folder.RootFolderType == FolderType.USER)
         {
             return await folderDao.GetRootFolderAsync(folder.Id);
         }
@@ -684,7 +686,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                         ? EditorType.Embedded
                         : editorType;
         }
-            return result;
+        return result;
     }
 
     public async Task<FormOpenSetup<T>> GetFormOpenSetupForUserFolderAsync<T>(File<T> file, EditorType editorType, bool edit, bool fill)
@@ -692,8 +694,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var canEdit = await fileSecurity.CanEditAsync(file);
         var canFill = await fileSecurity.CanFillFormsAsync(file);
 
-        FormOpenSetup<T> result = null;
-        if (file.CreateBy == securityContext.CurrentAccount.ID) 
+        FormOpenSetup<T> result;
+        if (file.CreateBy == securityContext.CurrentAccount.ID)
         {
             result = new FormOpenSetup<T>
             {

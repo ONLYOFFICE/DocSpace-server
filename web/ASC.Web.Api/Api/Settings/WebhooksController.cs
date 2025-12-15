@@ -233,7 +233,7 @@ public class WebhooksController(
         }
 
         context.SetTotalCount(await dbWorker.GetTotalByQuery(inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, inDto.UserId, inDto.Trigger));
-        
+
         await foreach (var j in dbWorker.ReadJournal(inDto.StartIndex, inDto.Count, inDto.DeliveryFrom, inDto.DeliveryTo, inDto.HookUri, inDto.ConfigId, inDto.EventId, inDto.GroupStatus, inDto.UserId, inDto.Trigger))
         {
             j.Log.Config = j.Config;
@@ -336,14 +336,14 @@ public class WebhooksController(
 
     private async Task<bool> CheckAdminPermissionsAsync()
     {
-        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserId = authContext.CurrentAccount.ID;
 
-        if (await userManager.IsDocSpaceAdminAsync(currentUser))
+        if (await userManager.IsDocSpaceAdminAsync(currentUserId))
         {
             return true;
         }
 
-        if (await userManager.IsGuestAsync(currentUser))
+        if (await userManager.IsGuestAsync(currentUserId))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }

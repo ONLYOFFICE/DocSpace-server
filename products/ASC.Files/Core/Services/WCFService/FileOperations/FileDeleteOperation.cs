@@ -33,19 +33,19 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
 {
     [ProtoMember(7)]
     public bool IgnoreException { get; set; }
-    
+
     [ProtoMember(8)]
     public bool Immediately { get; set; }
-    
+
     [ProtoMember(9)]
     public bool IsEmptyTrash { get; set; }
 
     [ProtoMember(10)]
     public IEnumerable<int> FilesVersions { get; set; }
-    
+
     public FileDeleteOperationData()
     {
-        
+
     }
 
     public FileDeleteOperationData(
@@ -72,7 +72,7 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
 public class FileDeleteOperation : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>
 {
     public FileDeleteOperation() { }
-    
+
     public FileDeleteOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Delete;
@@ -94,9 +94,9 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
     private readonly bool _isEmptyTrash;
     private readonly Dictionary<string, StringValues> _headers;
     private readonly IEnumerable<int> _filesVersions;
-    
+
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Delete;
-    
+
     public FileDeleteOperation(IServiceProvider serviceProvider, FileDeleteOperationData<T> fileOperationData)
     : base(serviceProvider, fileOperationData)
     {
@@ -106,17 +106,17 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         _isEmptyTrash = fileOperationData.IsEmptyTrash;
         _filesVersions = fileOperationData.FilesVersions;
     }
-    
+
     protected override int InitTotalProgressSteps()
     {
         if (_filesVersions != null && _filesVersions.Any() && Files.Count > 0)
         {
             return _filesVersions.Count();
         }
-        
+
         return base.InitTotalProgressSteps();
     }
-    
+
     protected override async Task DoJob(AsyncServiceScope serviceScope)
     {
         var folderDao = serviceScope.ServiceProvider.GetService<IFolderDao<int>>();
@@ -195,6 +195,10 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             {
                 Err = FilesCommonResource.ErrorMessage_FolderNotFound;
             }
+            else if (!_immediately && DocSpaceHelper.IsRoom(folder.FolderType))
+            {
+                Err = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
+            }
             else if (!_ignoreException && checkPermissions && !canDelete)
             {
                 canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;
@@ -238,7 +242,13 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                         if (isNeedSendActions)
                         {
-                            await filesMessageService.SendAsync(isRoom ? MessageAction.RoomDeleted : MessageAction.ThirdPartyDeleted, folder, _headers, folder.Id.ToString(), folder.ProviderKey);
+                            var action = isRoom 
+                                ? folder.FolderType == FolderType.AiRoom 
+                                    ? MessageAction.AgentDeleted 
+                                    : MessageAction.RoomDeleted 
+                                : MessageAction.ThirdPartyDeleted;
+                            
+                            await filesMessageService.SendAsync(action, folder, _headers, folder.Id.ToString(), folder.ProviderKey);
                             await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                         }
                     }
@@ -279,7 +289,11 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                 if (isRoom)
                                 {
                                     await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
-                                    await filesMessageService.SendAsync(MessageAction.RoomDeleted, folder, _headers, folder.Title);
+                                    await filesMessageService.SendAsync(
+                                        folder.FolderType == FolderType.AiRoom ? MessageAction.AgentDeleted : MessageAction.RoomDeleted, 
+                                        folder, 
+                                        _headers, 
+                                        folder.Title);
                                     await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                 }
                                 else
@@ -308,7 +322,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                             await Task.WhenAll(tasks);
                         }
-                       
+
                         if (folder.ParentRoomType == FolderType.VirtualDataRoom)
                         {
                             var tasks = files.Where(file => file.IsForm).Select(async file =>
@@ -350,7 +364,11 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                     if (isRoom)
                                     {
                                         await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
-                                        await filesMessageService.SendAsync(MessageAction.RoomDeleted, folder, _headers, folder.Title);
+                                        await filesMessageService.SendAsync(
+                                            folder.FolderType == FolderType.AiRoom ? MessageAction.AgentDeleted : MessageAction.RoomDeleted, 
+                                            folder, 
+                                            _headers, 
+                                            folder.Title);
                                         await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                     }
                                     else

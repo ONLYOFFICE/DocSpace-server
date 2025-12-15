@@ -392,7 +392,7 @@
     <value>Numéro de téléphone de Twilio (requis pour l'autorisation SMS)</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
     <value>Client ID</value>
@@ -401,10 +401,10 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Se connecter à l'application pour accéder au portail en utilisant le compte Twitter.</value>
+    <value>Se connecter à l'application pour accéder au portail en utilisant le compte X.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Activez cette application pour permettre aux utilisateurs de se connecter à {LogoText} via leur Twitter et reliez les comptes Twitter de vos clients à votre module CRM. {0}Passez au portail des développeurs Twitter et créez une nouvelle application d'intégration {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
+    <value>Activez cette application pour permettre aux utilisateurs de se connecter à {LogoText} via leur X et reliez les comptes X de vos clients à votre module CRM. {0}Passez au portail des développeurs X et créez une nouvelle application d'intégration {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>
@@ -983,7 +983,7 @@
     <value>Espace cloud pour vos documents bureautiques</value>
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Intégrations tierces</value>
+    <value>Intégrations</value>
   </data>
   <data name="ConsumersZoom" xml:space="preserve">
     <value>Zoom</value>
@@ -1197,5 +1197,41 @@
   </data>
   <data name="ErrorWebPluginMaxCount" xml:space="preserve">
     <value>Le nombre de plugins dépasse la limite</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vectorisation</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Outils IA</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Jetons</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Quota d'espace de l'agent IA dépassé</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Échec de la définition du quota par agent IA. La valeur saisie est supérieure au stockage total DocSpace.</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Le nombre d'agents IA ne doit pas dépasser {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Outils IA</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Activez les fonctionnalités IA dans votre DocSpace pour améliorer la productivité.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Recherche web IA</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Ajoutez des fonds à votre portefeuille pour déverrouiller la recherche web IA.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Une erreur inattendue s'est produite. Veuillez réessayer.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Vous avez été connecté avec succès à Telegram pour recevoir les notifications de votre DocSpace.</value>
   </data>
 </root>

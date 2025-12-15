@@ -39,6 +39,6 @@ public class LdapCronSettingsDto
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class LdapCronSettingsDtoMapper
-{       
+{
     public static partial LdapCronSettingsDto MapToDto(this LdapCronSettings source);
 }

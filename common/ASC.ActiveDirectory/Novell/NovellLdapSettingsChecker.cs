@@ -134,7 +134,8 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
                 _logger.ErrorSecurityException(ex);
                 return LdapSettingsStatus.StrongAuthRequired;
             }
-            catch (LdapException ex) {
+            catch (LdapException ex)
+            {
 
                 if (ex.ResultCode == LdapException.InvalidCredentials)
                 {

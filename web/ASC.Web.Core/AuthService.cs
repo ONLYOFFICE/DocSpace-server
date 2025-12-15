@@ -42,6 +42,8 @@ public class AuthService
 
     public int? Order { get { return Consumer.Order; } }
 
+    public bool Paid { get { return Consumer.Paid; } }
+
     public List<AuthKey> Props { get; private set; }
 
     public static async Task<AuthService> From(Consumer consumer, string logoText)
@@ -54,13 +56,13 @@ public class AuthService
             Instruction = ConsumerExtension.GetResourceString(consumer.Name + "Instruction")?.Replace("{LogoText}", logoText),
             Props = []
         };
-        
+
         foreach (var item in consumer.ManagedKeys)
         {
             result.Props.Add(new AuthKey
             {
-                Name = item, 
-                Value = await consumer.GetAsync(item), 
+                Name = item,
+                Value = await consumer.GetAsync(item),
                 Title = ConsumerExtension.GetResourceString(item) ?? item
             });
         }

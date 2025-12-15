@@ -219,7 +219,7 @@ public class BillingClient
         {
             parameters.Add(Tuple.Create("PartnerId", partnerId));
         }
-        
+
         var result = await RequestAsync("GetProductsPrices", null, parameters);
         var prices = JsonSerializer.Deserialize<Dictionary<int, Dictionary<string, Dictionary<string, decimal>>>>(result);
 
@@ -315,7 +315,7 @@ public class BillingClient
             return result;
         }
 
-       if (result.Contains("{\"Message\":\"error: cannot find "))
+        if (result.Contains("{\"Message\":\"error: cannot find "))
         {
             throw new BillingNotFoundException(result);
         }
@@ -338,7 +338,8 @@ public static class BillingHttpClientExtension
                     Delay = TimeSpan.FromSeconds(1),
                     BackoffType = DelayBackoffType.Exponential,
                     ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
-                        .HandleResult(response => {
+                        .HandleResult(response =>
+                        {
                             var result = response.Content.ReadAsStringAsync().Result;
                             return result.Contains("{\"Message\":\"error: cannot find ");
                         })

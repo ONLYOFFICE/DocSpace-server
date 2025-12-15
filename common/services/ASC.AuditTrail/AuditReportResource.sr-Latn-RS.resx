@@ -165,6 +165,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Boja teme promenjena</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kontakti</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Podešavanja kolačića ažurirana</value>
   </data>
@@ -342,9 +345,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Podešavanja Sphinx-a su ažurirana</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Generalno</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Podešavanja dobrodošli stranice ažurirana</value>
   </data>
@@ -353,9 +353,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Grupa obrisana: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Grupe</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Grupe ažurirane: {0}</value>
@@ -543,9 +540,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista proizvoda ažurirana</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Proizvodi</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Ponovna dodela</value>
   </data>
@@ -612,13 +606,16 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Sesija započeta</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Podešavanja</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO onemogućen</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO omogućen</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Počni rezervnu kopiju</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -747,9 +744,6 @@
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Korisnicima [{0}]. Poslata uputstva za promenu lozinke</value>
   </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Korisnici</value>
-  </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Korisnicima [{0}]. Poslata uputstva za aktivaciju</value>
   </data>
@@ -863,9 +857,6 @@
   </data>
   <data name="FolderIndexReordered" xml:space="preserve">
     <value>Folder: {0}. Indeksi su preuređeni</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="RoomDenyDownloadDisabled" xml:space="preserve">
     <value>Soba: {0}. Zabrani preuzimanje onemogućeno</value>
@@ -1043,5 +1034,77 @@
   </data>
   <data name="RoomExternalLinkRevoked" xml:space="preserve">
     <value>Eksterna veza opozvana: {1}</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Dodat MCP server {0} agentu</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agent je kreiran</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agent je obrisan</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agent preimenovan: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agenti</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>AI provajder kreiran: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>AI provajder obrisan: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>AI provajder ažuriran: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI agenti [{0}]. Podešena prilagođena kvota prostora za AI agente: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI agenti [{0}]. Podešena podrazumevana kvota prostora za AI agente: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI agenti [{0}]. Onemogućena kvota prostora za AI agente</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Obrisan MCP server {0} iz agenta</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Login Via Social Account Success</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Podešena podrazumevana kvota prostora za AI agente: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Onemogućena podrazumevana kvota prostora za AI agente</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Podešavanja vektorizacije su resetovana</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Podešavanja veb pretrage su resetovana</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP server kreiran: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP server obrisan: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP server onemogućen: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP server omogućen: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP server ažuriran: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Podešene su vektorizacione postavke. Provajder: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Podešene su postavke veb pretrage. Pretraživač: {0}</value>
   </data>
 </root>

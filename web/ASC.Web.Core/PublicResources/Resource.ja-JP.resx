@@ -578,10 +578,10 @@
     <value>Twilioの電話番号(SMS承認のために必要です)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Twitterアカウントを使用してポータルにサインインするアプリケーションを有効にする。</value>
+    <value>Xアカウントを使用してポータルにサインインするアプリケーションを有効にする。</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>このアプリを接続すると、Twitterを使用して{LogoText}にサインイン、またはCRMモジュールでお客様のTwitterアカウントをリンクできます。{0} Twitter開発者ポータルで{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
+    <value>このアプリを接続すると、Xを使用して{LogoText}にサインイン、またはCRMモジュールでお客様のXアカウントをリンクできます。{0} X開発者ポータルで{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
   </data>
   <data name="ConsumersVkDescription" xml:space="preserve">
     <value>VKアカウントでポータルにサインインするようにアプリを接続します。</value>
@@ -818,7 +818,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>パスワード</value>
@@ -980,7 +980,7 @@
     <value>テキストメッセージの送信数が多すぎます。後で再試行してください。</value>
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>サードパーティの統合</value>
+    <value>Proの統合</value>
   </data>
   <data name="ConsumersZoom" xml:space="preserve">
     <value>Zoom</value>
@@ -1197,5 +1197,35 @@
   </data>
   <data name="ErrorWebPluginMaxCount" xml:space="preserve">
     <value>プラグインの数が制限を超えています</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>ベクトル化</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>AIツール</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>トークン</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>AIエージェントのスペースクォータが上限に達しました</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>AIエージェントごとのクォータ設定に失敗しました。入力した値がDocSpace全体のストレージ容量を超えています。</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>AIエージェントの数は {0} を超えることはできません</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>AIツール</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>DocSpaceのAI機能を有効にして生産性を向上させましょう。</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>AIウェブ検索</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>AIウェブ検索を有効化するにはウォレットにチャージしてください。</value>
   </data>
 </root>

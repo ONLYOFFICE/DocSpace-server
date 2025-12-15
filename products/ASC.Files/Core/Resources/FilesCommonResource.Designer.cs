@@ -178,6 +178,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Agent Manager.
+        /// </summary>
+        public static string AgentManager {
+            get {
+                return ResourceManager.GetString("AgentManager", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to To work with the file you must grant access to it.
         /// </summary>
         public static string AppAccessDenied {
@@ -1042,6 +1051,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Knowledge.
+        /// </summary>
+        public static string KnowledgeFolder {
+            get {
+                return ResourceManager.GetString("KnowledgeFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Link to form.
         /// </summary>
         public static string LinkToForm {
@@ -1147,6 +1165,15 @@ namespace ASC.Files.Core.Resources {
         public static string ProductUserOpportunities {
             get {
                 return ResourceManager.GetString("ProductUserOpportunities", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Result Storage.
+        /// </summary>
+        public static string ResultStorageFolder {
+            get {
+                return ResourceManager.GetString("ResultStorageFolder", resourceCulture);
             }
         }
         

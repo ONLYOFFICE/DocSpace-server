@@ -42,6 +42,7 @@ public static class Actions
     public static readonly INotifyAction JoinUsers = new NotifyAction("join", "join users");
     public static readonly INotifyAction SendWhatsNew = new NotifyAction("send_whats_new", "send whats new");
     public static readonly INotifyAction BackupCreated = new NotifyAction("backup_created", "backup created");
+    public static readonly INotifyAction BackupFailed = new NotifyAction("backup_failed", "backup failed");
     public static readonly INotifyAction ScheduledBackupFailed = new NotifyAction("scheduled_backup_failed", "scheduled backup failed");
     public static readonly INotifyAction RestoreStarted = new NotifyAction("restore_started", "restore_started");
     public static readonly INotifyAction RestoreCompletedV115 = new NotifyAction("restore_completed_v115");
@@ -94,7 +95,9 @@ public static class Actions
     public static readonly INotifyAction StorageDecryptionError = new NotifyAction("storage_decryption_error");
 
     public static readonly INotifyAction SaasRoomInvite = new NotifyAction("saas_room_invite");
+    public static readonly INotifyAction SaasAgentInvite = new NotifyAction("saas_agent_invite");
     public static readonly INotifyAction SaasRoomInviteExistingUser = new NotifyAction("saas_room_invite_existing_user");
+    public static readonly INotifyAction SaasAgentInviteExistingUser = new NotifyAction("saas_agent_invite_existing_user");
     public static readonly INotifyAction SaasDocSpaceInvite = new NotifyAction("saas_docspace_invite");
     public static readonly INotifyAction SaasDocSpaceRegistration = new NotifyAction("saas_docspace_registration");
 

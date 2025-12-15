@@ -62,9 +62,9 @@ public class ApiKeyManager(
         var currentUserId = authContext.CurrentAccount.ID;
         var newKey = GenerateApiKey();
         var hashedKey = HashApiKey(newKey);
-        
-        if (permissions is { Count: > 0 } && permissions.Exists(x=> x == "*"))
-        { 
+
+        if (permissions is { Count: > 0 } && permissions.Exists(x => x == "*"))
+        {
             permissions = null;
         }
 
@@ -94,17 +94,17 @@ public class ApiKeyManager(
     public async Task<ApiKey> GetApiKeyAsync(Guid keyId)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        
+
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
         return await context.GetApiKeyAsync(tenantId, keyId);
     }
-    
+
     public async Task<ApiKey> GetApiKeyAsync(string apiKey)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var hashedKey = HashApiKey(apiKey);
-        
+
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
         return await context.GetApiKeyAsync(tenantId, hashedKey);
@@ -136,9 +136,9 @@ public class ApiKeyManager(
         return keyData;
     }
 
-    public async Task<bool> UpdateApiKeyAsync(Guid keyId, 
-                                              List<string> permissions, 
-                                              string name, 
+    public async Task<bool> UpdateApiKeyAsync(Guid keyId,
+                                              List<string> permissions,
+                                              string name,
                                               bool? isActive)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -163,7 +163,7 @@ public class ApiKeyManager(
             {
                 permissions = null;
             }
-            
+
             apiKey.Permissions = permissions;
         }
 
@@ -171,7 +171,7 @@ public class ApiKeyManager(
         {
             apiKey.Name = name;
         }
-        
+
         await context.AddOrUpdateAsync(q => q.DbApiKey, apiKey);
         await context.SaveChangesAsync();
 
@@ -206,10 +206,10 @@ public class ApiKeyManager(
     public async IAsyncEnumerable<ApiKey> GetApiKeysAsync(Guid userId)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        
+
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var apiKeys =  context.ApiKeysForUserAsync(tenantId, userId);
+        var apiKeys = context.ApiKeysForUserAsync(tenantId, userId);
 
         await foreach (var apiKey in apiKeys)
         {

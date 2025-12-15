@@ -108,12 +108,12 @@ public class ThirdpartyController(
     public async Task<string> DeleteThirdParty(ProviderIdRequestDto inDto)
     {
         var providerInfo = await fileStorageService.DeleteThirdPartyAsync(inDto.ProviderId.ToString(CultureInfo.InvariantCulture));
-        
+
         if (providerInfo.RootFolderType == FolderType.ThirdpartyBackup)
         {
             await backupRepository.DeleteBackupScheduleAsync(tenantManager.GetCurrentTenantId(), providerInfo.RootFolderId);
         }
-        
+
         return providerInfo.RootFolderId;
     }
 
@@ -325,16 +325,16 @@ public class ThirdpartyController(
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "List of provider", typeof(List<ProviderDto>))]
     [HttpGet("thirdparty/providers")]
-    public async Task<List<ProviderDto>> GetAllProviders()
+    public async Task<List<ProviderDto>> GetAllProviders(GetProvidersRequestDto inDto)
     {
         if (!await CheckAccessAsync())
         {
             return [];
         }
-        
-        return thirdPartyConfiguration.GetAllProviders();
+
+        return thirdPartyConfiguration.GetAllProviders(inDto.ExcludeWebDav);
     }
-    
+
     private async Task<bool> CheckAccessAsync()
     {
         return !await userManager.IsGuestAsync(securityContext.CurrentAccount.ID) && await filesSettingsHelper.GetEnableThirdParty();

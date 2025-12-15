@@ -57,6 +57,11 @@ public class AuthServiceRequestsDto
     public bool CanSet { get; set; }
 
     /// <summary>
+    /// Specifies whether the authorization service is paid or not.
+    /// </summary>
+    public bool Paid { get; set; }
+
+    /// <summary>
     /// The collection of authorization keys associated with the authorization service.
     /// </summary>
     public List<AuthKey> Props { get; set; }
@@ -64,13 +69,14 @@ public class AuthServiceRequestsDto
     public static async Task<AuthServiceRequestsDto> From(Consumer consumer, string logoText)
     {
         var authService = await AuthService.From(consumer, logoText);
-        var result = new AuthServiceRequestsDto 
-        { 
-            Name = authService.Name, 
-            Title = authService.Title, 
-            Description = authService.Description, 
+        var result = new AuthServiceRequestsDto
+        {
+            Name = authService.Name,
+            Title = authService.Title,
+            Description = authService.Description,
             Instruction = authService.Instruction,
-            CanSet = authService.CanSet
+            CanSet = authService.CanSet,
+            Paid = authService.Paid
         };
 
         if (consumer.CanSet)

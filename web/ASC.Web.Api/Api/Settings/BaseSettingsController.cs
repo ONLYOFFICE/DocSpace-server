@@ -41,7 +41,7 @@ public class BaseSettingsController(IFusionCache fusionCache, WebItemManager web
     //private static readonly DistributedTaskQueue quotaTasks = new DistributedTaskQueue("quotaOperations", ONE_THREAD);
     //private static DistributedTaskQueue LDAPTasks { get; } = new DistributedTaskQueue("ldapOperations");
     //private static DistributedTaskQueue SMTPTasks { get; } = new DistributedTaskQueue("smtpOperations");
-    
+
     internal readonly WebItemManager WebItemManager = webItemManager;
     private readonly int _maxCount = 10;
     private readonly int _expirationMinutes = 2;
@@ -66,7 +66,7 @@ public class BaseSettingsController(IFusionCache fusionCache, WebItemManager web
         {
             return "All";
         }
-        
+
         return product != null ? product.Name : productId.ToString();
     }
 }

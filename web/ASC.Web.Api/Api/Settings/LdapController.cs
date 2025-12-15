@@ -170,7 +170,7 @@ public class LdapController(
         var userId = authContext.CurrentAccount.ID.ToString();
 
         var tenant = tenantManager.GetCurrentTenant();
-        
+
         var result = await ldapSaveSyncOperation.SyncLdapAsync(ldapSettings, tenant, userId);
 
         return result.MapToDto();
@@ -194,7 +194,7 @@ public class LdapController(
         var ldapSettings = await settingsManager.LoadAsync<LdapSettings>();
 
         var tenant = tenantManager.GetCurrentTenant();
-        
+
         var result = await ldapSaveSyncOperation.TestLdapSyncAsync(ldapSettings, tenant);
 
         return result.MapToDto();
@@ -225,7 +225,7 @@ public class LdapController(
         var userId = authContext.CurrentAccount.ID.ToString();
 
         var tenant = tenantManager.GetCurrentTenant();
-        
+
         var result = await ldapSaveSyncOperation.SaveLdapSettingsAsync(ldapSettings, tenant, userId);
 
         return result.MapToDto();
@@ -249,7 +249,7 @@ public class LdapController(
         var userId = authContext.CurrentAccount.ID.ToString();
 
         var tenant = tenantManager.GetCurrentTenant();
-        
+
         var result = await ldapSaveSyncOperation.TestLdapSaveAsync(inDto, tenant, userId);
 
         return result.MapToDto();
@@ -271,7 +271,7 @@ public class LdapController(
         await CheckLdapPermissionsAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
-        
+
         var result = await ldapSaveSyncOperation.ToLdapOperationStatus(tenant.Id);
 
         return result.MapToDto();

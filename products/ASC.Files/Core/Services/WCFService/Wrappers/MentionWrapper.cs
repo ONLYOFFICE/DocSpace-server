@@ -83,6 +83,7 @@ public class MentionMessageWrapper
     /// <summary>
     /// The mention message.
     /// </summary>
+    [StringLength(255)]
     public string Message { get; set; }
 }
 
@@ -101,5 +102,5 @@ public class MentionMessageWrapperRequestDto<T>
     /// The mention message.
     /// </summary>
     [FromBody]
-    public MentionMessageWrapper MentionMessage {  get; set; }
+    public MentionMessageWrapper MentionMessage { get; set; }
 }

@@ -2,18 +2,12 @@
   <PropertyGroup>
     <ProductVersion>9.0.30729</ProductVersion>
     <ProjectGuid>{A51D0454-4AFA-46DE-89D4-B03D37E1816C}</ProjectGuid>
-    <TargetFramework>net9.0</TargetFramework>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
-    <AssemblyVersion>1.0.1</AssemblyVersion>
-    <InformationalVersion>1.0.1</InformationalVersion>
     <AssemblyTitle>ASC.Core.Common</AssemblyTitle>
-    <Company>Ascensio System SIA</Company>
     <Product>ASC.Core.Common</Product>
-    <Copyright>(c) Ascensio System SIA. All rights reserved</Copyright>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
@@ -41,19 +35,18 @@
     <EmbeddedResource Include="Notify\Stylers\Resources\style.css" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.402.26" />
-    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.402.63" />
-    <PackageReference Include="CsvHelper" Version="33.1.0" />
-    <PackageReference Include="FirebaseAdmin" Version="3.3.0" />
-    <PackageReference Include="MailKit" Version="4.13.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="9.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.8" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Json.Microsoft" Version="9.0.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
-    <PackageReference Include="System.Linq.Async" Version="6.0.3" />
-    <PackageReference Include="Telegram.Bot" Version="22.6.2" />
+    <PackageReference Include="AWSSDK.Core" />
+    <PackageReference Include="AWSSDK.SimpleEmail" />
+    <PackageReference Include="CsvHelper" />
+    <PackageReference Include="FirebaseAdmin" />
+    <PackageReference Include="MailKit" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Json.Microsoft" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+    <PackageReference Include="Telegram.Bot" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Notify\Stylers\Resources\NotifyTemplateResource.Designer.cs">

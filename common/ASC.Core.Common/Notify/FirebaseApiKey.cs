@@ -44,7 +44,7 @@ class FirebaseApiKey(IConfiguration configuration)
             return configuration["firebase-mobile:projectId"] ?? "";
         }
     }
-    
+
     [JsonPropertyName("private_key_id")]
     public string PrivateKeyId
     {
@@ -53,7 +53,7 @@ class FirebaseApiKey(IConfiguration configuration)
             return configuration["firebase-mobile:privateKeyId"] ?? "";
         }
     }
-    
+
     [JsonPropertyName("private_key")]
     public string PrivateKey
     {
@@ -62,7 +62,7 @@ class FirebaseApiKey(IConfiguration configuration)
             return configuration["firebase-mobile:privateKey"] ?? "";
         }
     }
-    
+
     [JsonPropertyName("client_email")]
     public string ClientEmail
     {
@@ -71,7 +71,7 @@ class FirebaseApiKey(IConfiguration configuration)
             return configuration["firebase-mobile:clientEmail"] ?? "";
         }
     }
-    
+
     [JsonPropertyName("client_id")]
     public string ClientId
     {
@@ -80,7 +80,7 @@ class FirebaseApiKey(IConfiguration configuration)
             return configuration["firebase-mobile:clientId"] ?? "";
         }
     }
-    
+
     [JsonPropertyName("auth_uri")]
     public string AuthUri
     {
@@ -89,7 +89,7 @@ class FirebaseApiKey(IConfiguration configuration)
             return "https://accounts.google.com/o/oauth2/auth";
         }
     }
-    
+
     [JsonPropertyName("token_uri")]
     public string TokenUri
     {
@@ -98,7 +98,7 @@ class FirebaseApiKey(IConfiguration configuration)
             return "https://oauth2.googleapis.com/token";
         }
     }
-    
+
     [JsonPropertyName("auth_provider_x509_cert_url")]
     public string AuthProviderX509CertUrl
     {
@@ -107,7 +107,7 @@ class FirebaseApiKey(IConfiguration configuration)
             return "https://www.googleapis.com/oauth2/v1/certs";
         }
     }
-    
+
     [JsonPropertyName("client_x509_cert_url")]
     public string ClientX509CertUrl
     {

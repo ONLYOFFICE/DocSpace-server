@@ -79,13 +79,13 @@ public sealed class RedisLockOptionsBuilder
         {
             options = null;
         }
-        
+
         var expiry = options?._expiry ?? _defaultExpiry;
         var timeout = options?._timeout ?? _defaultMinimumTimeout;
 
         var extendInterval = expiry / 3;
-        
-        if (options?._extendInterval is { } optExtendInterval 
+
+        if (options?._extendInterval is { } optExtendInterval
             && optExtendInterval > TimeSpan.Zero && optExtendInterval < expiry)
         {
             extendInterval = optExtendInterval;

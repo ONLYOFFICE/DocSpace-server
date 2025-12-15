@@ -60,15 +60,17 @@ public class StorageDto
     {
         var result = new StorageDto
         {
-            Id = consumer.Name, 
-            Title = ConsumerExtension.GetResourceString(consumer.Name) ?? consumer.Name, 
-            Current = consumer.Name == current.Module, 
+            Id = consumer.Name,
+            Title = ConsumerExtension.GetResourceString(consumer.Name) ?? consumer.Name,
+            Current = consumer.Name == current.Module,
             IsSet = await consumer.GetIsSetAsync()
         };
 
         var props = result.Current
             ? current.Props
-            : await current.Switch(consumer).AdditionalKeys.ToAsyncEnumerable().ToDictionaryAwaitAsync(ValueTask.FromResult, async a => await consumer.GetAsync(a));
+            : await current.Switch(consumer).AdditionalKeys
+                .ToAsyncEnumerable()
+                .ToDictionaryAsync((s, _) => ValueTask.FromResult(s), async (a, _) => await consumer.GetAsync(a));
 
         result.Properties = props.Select(
             r => new AuthKey
@@ -77,7 +79,7 @@ public class StorageDto
                 Value = r.Value,
                 Title = ConsumerExtension.GetResourceString(consumer.Name + r.Key) ?? r.Key
             }).ToList();
-        
+
         return result;
     }
 }

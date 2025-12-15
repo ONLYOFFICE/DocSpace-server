@@ -34,13 +34,13 @@ public class RoomDataLifetimeDto
     /// <summary>
     /// Specifies whether to permanently delete the room data or not.
     /// </summary>
-    public required bool DeletePermanently { get; set; }
+    public bool DeletePermanently { get; set; }
 
     /// <summary>
     /// Specifies the time period type of the room data lifetime.
     /// </summary>
     [EnumDataType(typeof(RoomDataLifetimePeriod))]
-    public required RoomDataLifetimePeriod Period { get; set; }
+    public RoomDataLifetimePeriod Period { get; set; }
 
     /// <summary>
     /// Specifies the time period value of the room data lifetime.
@@ -56,6 +56,6 @@ public class RoomDataLifetimeDto
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class RoomDataLifetimeDtoMapper
-{       
+{
     public static partial RoomDataLifetimeDto MapToDto(this RoomDataLifetime source);
 }

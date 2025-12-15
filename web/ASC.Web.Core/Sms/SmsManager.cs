@@ -113,14 +113,12 @@ public class SmsManager(UserManager userManager,
         }
     }
 
-    public async Task<(bool,string)> ValidateSmsCodeAsync(UserInfo user, string code, bool isEntryPoint = false)
+    public async Task<(bool, string)> ValidateSmsCodeAsync(UserInfo user, string code, bool isEntryPoint = false)
     {
-        string token = default;
-
-        if (!await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync()
-            || !await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
+        if (!await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() || 
+            !await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
-            return (false, token);
+            return (false, null);
         }
 
         if (user == null || Equals(user, Constants.LostUser))
@@ -145,6 +143,7 @@ public class SmsManager(UserManager userManager,
             throw new Exception("Error: " + valid);
         }
 
+        string token = null;
         if (!securityContext.IsAuthenticated)
         {
             var action = isEntryPoint ? MessageAction.LoginSuccessViaApiSms : MessageAction.LoginSuccessViaSms;

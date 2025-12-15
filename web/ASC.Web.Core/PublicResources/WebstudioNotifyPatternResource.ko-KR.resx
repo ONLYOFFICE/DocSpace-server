@@ -1499,7 +1499,7 @@ $TrulyYours</value>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 포털에 새로운 사용자가 추가되었습니다
 
-"$__AuthorName":"$__AuthorUrl"님이 "${__VirtualRootPath}":"${__VirtualRootPath}"의 포털에 합류했습니다.
+"$__AuthorName":"$__AuthorUrl" 님이 "${__VirtualRootPath}":"${__VirtualRootPath}" 의 포털에 합류했습니다.
 
 
 ^새로운 사용자에 대한 알림을 받고 싶지 않은 경우 "구독 설정":"$RecipientSubscriptionConfigURL" 을 변경하세요.^</value>
@@ -2054,5 +2054,102 @@ IP: *$IP*
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;님이 새 에이전트를 생성했습니다: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;님이 에이전트를 삭제했습니다: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;님이 에이전트 이름을 변경했습니다: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;님이 에이전트에서 &lt;b&gt;{1}&lt;/b&gt; 역할을 할당받았습니다: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;님이 에이전트에 추가되었습니다: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;님이 에이전트에서 제거되었습니다: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>에이전트 참여</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>DocSpace 백업에 실패했습니다</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace에 참여하세요</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace 에이전트에 초대받았습니다</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>DocSpace 자동 백업에 실패했습니다</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>$UserName님, 안녕하세요.
+
+DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" 의 백업 프로세스가 실패했습니다. 
+
+궁금한 점이 있거나 도움이 필요한 경우 언제든지 문의주세요: "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>$UserName님, 안녕하세요.
+
+DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) 의 백업 프로세스가 실패했습니다. 
+
+궁금한 점이 있거나 도움이 필요한 경우 언제든지 문의주세요: [${__SupportLink}](${__SupportLink})
+
+감사합니다.
+${LetterLogoText} 지원팀 드림
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>안녕하세요!
+
+"${__VirtualRootPath}":"${__VirtualRootPath}" 의 DocSpace 에이전트에 참여하도록 초대받았습니다. 링크를 클릭하여 초대를 수락하세요:
+
+$OrangeButton
+
+초대 링크를 클릭한 후 계정에 새 비밀번호를 설정하세요.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>안녕하세요!
+
+$__AuthorName님으로부터 "${__VirtualRootPath}":"${__VirtualRootPath}" 의 "$Message":"$InviteLink" 에이전트에 참여하도록 초대받았습니다.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>$UserName님, 안녕하세요.
+
+DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" 의 예정된 백업 프로세스가 실패했습니다.
+
+다음 설정을 확인하는 것을 권장합니다: "백업":"${__VirtualRootPath}/portal-settings/backup/data-backup" 및 "서비스":"${__VirtualRootPath}/portal-settings/services".
+
+궁금한 점이 있거나 도움이 필요한 경우 언제든지 문의주세요: "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>$UserName님, 안녕하세요.
+
+DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) 의 예정된 백업 프로세스가 실패했습니다.
+
+다음 설정을 확인하는 것을 권장합니다: [백업](${__VirtualRootPath}/portal-settings/backup/data-backup) 및 [서비스](${__VirtualRootPath}/portal-settings/services)
+
+궁금한 점이 있거나 도움이 필요한 경우 언제든지 문의주세요: [${__SupportLink}](${__SupportLink})
+ 
+감사합니다.
+${LetterLogoText} 지원팀 드림
+[${__SiteLink}](${__SiteLink})</value>
   </data>
 </root>

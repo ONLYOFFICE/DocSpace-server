@@ -1,10 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <LangVersion>12</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -12,16 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build" Version="17.14.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
+    <PackageReference Include="Microsoft.Build" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.8" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\products\ASC.AI\Core\ASC.AI.Core.csproj" />
     <ProjectReference Include="..\..\ASC.Core.Common\ASC.Core.Common.csproj" />
     <ProjectReference Include="..\..\ASC.Data.Backup.Core\ASC.Data.Backup.Core.csproj" />
   </ItemGroup>

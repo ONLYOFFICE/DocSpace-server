@@ -123,8 +123,8 @@ public class DocumentServiceLicense(ICache cache,
     public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync(bool useCache = true)
     {
         var commandResponse = await GetDocumentServiceLicenseAsync(useCache);
-        return commandResponse == null ? 
-            (null, null) : 
-            (commandResponse.Quota?.Users?.ToDictionary(r=> r.UserId, r=> r.Expire), commandResponse.License);
+        return commandResponse == null ?
+            (null, null) :
+            (commandResponse.Quota?.Users?.ToDictionary(r => r.UserId, r => r.Expire), commandResponse.License);
     }
 }

@@ -162,6 +162,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>تم تغيير لون السمات</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>جهات الاتصال</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>تم تحديث إعدادات ملفات تعريف الارتباط</value>
   </data>
@@ -333,9 +336,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>تم تحديث إعدادات Sphinx</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>عام</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>تم تحديث إعدادات البوابة الترحيبية</value>
   </data>
@@ -344,9 +344,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>تم حذف المجموعة: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>المجموعات</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>تم تحديث المجموعات: {0}</value>
@@ -528,9 +525,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>تم تحديث قائمة المنتجات</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>المنتجات</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>إعادات التعيين</value>
   </data>
@@ -588,13 +582,16 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>تم بدء الجلسة</value>
   </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>الإعدادات</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>تم تعطيل بوابة الدخول الموحد</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>تم تفعيل بوابة الدخول الموحد</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>بدء النسخ الاحتياطي</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -723,9 +720,6 @@
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>تم ارسال تعليمات تغيير كلمة المرور بواسطة المستخدمين [{0}]</value>
   </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>المستخدمين</value>
-  </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>تم ارسال تعليمات التفعيل بواسطة المستخدمين [{0}]</value>
   </data>
@@ -851,9 +845,6 @@
   </data>
   <data name="RoomInviteResend" xml:space="preserve">
     <value>تم إرسال الدعوات مرة أخرى: {0}</value>
-  </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
   </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>تم تغيير تنشيط {0} للعميل</value>
@@ -1043,5 +1034,77 @@
   </data>
   <data name="RoomExternalLinkRevoked" xml:space="preserve">
     <value>تم إلغاء الرابط الخارجي: {1}</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>تمت إضافة خادم MCP {0} إلى الوكيل</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>تم إنشاء الوكيل</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>تم حذف الوكيل</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>تمت إعادة تسمية الوكيل: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>الوكلاء</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>تم إنشاء مزود الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>تم حذف مزود الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>تم تحديث مزود الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>وكلاء الذكاء الاصطناعي [{0}]. تعيين حصة تخزين مخصصة لوكلاء الذكاء الاصطناعي: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>وكلاء الذكاء الاصطناعي [{0}]. تعيين حصة تخزين افتراضية لوكلاء الذكاء الاصطناعي: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>وكلاء الذكاء الاصطناعي [{0}]. تم تعطيل حصة التخزين لوكلاء الذكاء الاصطناعي</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>تم حذف خادم MCP {0} من الوكيل</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>تم تسجيل الدخول بنجاح عبر حساب التواصل الاجتماعي</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>تعيين حصة تخزين افتراضية لوكلاء الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>تم تعطيل حصة التخزين الافتراضية لوكلاء الذكاء الاصطناعي</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>تم إعادة تعيين إعدادات التحويل المتجهي (Vectorization)</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>تمت إعادة تعيين إعدادات بحث الويب</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>تم إنشاء خادم MCP: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>تم حذف خادم MCP: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>تم تعطيل خادم MCP: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>تم تمكين خادم MCP: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>تم تحديث خادم MCP: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>تم تكوين إعدادات التحويل المتجهي (Vectorization). المزود: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>تم تكوين إعدادات بحث الويب. المحرك: {0}</value>
   </data>
 </root>

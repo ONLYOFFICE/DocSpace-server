@@ -268,7 +268,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class UserInfoMapper
-{       
+{
     public static partial User Map(this UserInfo source);
     public static partial UserInfo Map(this User source);
     public static partial List<UserInfo> Map(this List<User> source);

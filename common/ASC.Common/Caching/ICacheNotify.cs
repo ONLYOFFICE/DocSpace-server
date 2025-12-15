@@ -32,6 +32,8 @@ public interface ICacheNotify<T> where T : new()
     Task PublishAsync(T obj, CacheNotifyAction action);
 
     void Subscribe(Action<T> onchange, CacheNotifyAction action);
+    
+    void Subscribe(Func<T, Task> onchange, CacheNotifyAction action);
 
     void Unsubscribe(CacheNotifyAction action);
 }

@@ -50,10 +50,15 @@ public class ConfirmDto
     /// The confirmation email.
     /// </summary>
     public string Email { get; set; }
+    
+    /// <summary>
+    /// The confirmation is agent.
+    /// </summary>
+    public bool IsAgent { get; set; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class ConfirmDtoMapper
-{       
+{
     public static partial ConfirmDto Map(this Validation source);
 }

@@ -84,7 +84,7 @@ public class Recaptcha(SetupInfo setupInfo, IHttpClientFactory clientFactory)
             {
                 return true;
             }
-            
+
             if (recaptchData.ErrorCodes is { Count: > 0 })
             {
                 return false;
@@ -101,7 +101,7 @@ public class Recaptcha(SetupInfo setupInfo, IHttpClientFactory clientFactory)
 public class RecaptchData
 {
     public bool? Success { get; set; }
-    
+
     [JsonPropertyName("error-codes")]
     public List<string> ErrorCodes { get; set; }
 }

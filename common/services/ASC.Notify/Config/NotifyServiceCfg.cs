@@ -36,13 +36,13 @@ public class ConfigureNotifyServiceCfg
     public ConfigureNotifyServiceCfg(IConfiguration configuration, IServiceProvider serviceProvider)
     {
         Value = configuration.GetSection("notify").Get<NotifyServiceCfg>();
-        
+
         Value.Process.Init();
 
         foreach (var s in Value.Senders)
         {
             try
-            {        
+            {
                 var sender = (INotifySender)serviceProvider.GetService(Type.GetType(s.Type, true));
                 if (sender != null)
                 {

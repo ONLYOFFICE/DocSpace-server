@@ -65,12 +65,12 @@ public class BaseEvent
 [Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public partial class BaseEventMapper(TenantUtil tenantUtil)
-{   
+{
     [MapPropertyFromSource(nameof(BaseEvent.IP), Use = nameof(Resolve))]
     [MapPropertyFromSource(nameof(BaseEvent.Date), Use = nameof(ResolveDate))]
     public partial BaseEvent Map(DbLoginEvent source);
     public partial List<BaseEvent> Map(List<DbLoginEvent> source);
-    
+
     [UserMapping(Default = false)]
     private static string Resolve(DbLoginEvent source)
     {
@@ -83,9 +83,9 @@ public partial class BaseEventMapper(TenantUtil tenantUtil)
             }
         }
 
-        return null;
+        return source.Ip;
     }
-    
+
     [UserMapping(Default = false)]
     private DateTime ResolveDate(DbLoginEvent source)
     {

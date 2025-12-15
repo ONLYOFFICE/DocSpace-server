@@ -156,4 +156,7 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>타사 리소스</value>
   </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>일부 파일이 백업에 포함되지 않았습니다. 자세한 내용은 다음을 확인하세요: {0}</value>
+  </data>
 </root>

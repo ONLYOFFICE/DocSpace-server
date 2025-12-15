@@ -58,13 +58,12 @@ public class WebhookGroupAccessChecker(
 
     public async Task<bool> CheckAccessAsync(ASC.Core.Users.GroupInfo data, Guid userId)
     {
-        var user = await userManager.GetUsersAsync(userId);
-
-        if (await userManager.IsDocSpaceAdminAsync(user))
+        if (await userManager.IsDocSpaceAdminAsync(userId))
         {
             return true;
         }
-
+        
+        var user = await userManager.GetUsersAsync(userId);
         var account = await authentication.GetAccountByIDAsync(user.TenantId, user.Id);
 
         return await permissionResolver.CheckAsync(account, Constants.Action_ReadGroups);
@@ -81,8 +80,6 @@ public class WebhookUserAccessChecker(UserManager userManager) : IWebhookAccessC
 
     public async Task<bool> CheckAccessAsync(UserInfo data, Guid userId)
     {
-        var user = await userManager.GetUsersAsync(userId);
-
-        return await userManager.CanUserViewAnotherUserAsync(user, data);
+        return await userManager.CanUserViewAnotherUserAsync(userId, data.Id);
     }
 }

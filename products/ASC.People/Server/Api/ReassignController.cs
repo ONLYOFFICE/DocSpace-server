@@ -40,7 +40,7 @@ public class ReassignController(
     WebItemSecurity webItemSecurity,
     FileStorageService fileStorageService)
     : ApiControllerBase
-    {
+{
     /// <summary>
     /// Returns the progress of the started data reassignment for the user with the ID specified in the request.
     /// </summary>
@@ -86,12 +86,12 @@ public class ReassignController(
 
         var fromUser = await userManager.GetUsersAsync(inDto.FromUserId);
         var tenant = tenantManager.GetCurrentTenant();
-        
-        if (userManager.IsSystemUser(fromUser.Id) || 
-            fromUser.IsOwner(tenant) || 
-            fromUser.IsMe(authContext) || 
-            await userManager.IsGuestAsync(toUser) || 
-            fromUser.Status != EmployeeStatus.Terminated || 
+
+        if (userManager.IsSystemUser(fromUser.Id) ||
+            fromUser.IsOwner(tenant) ||
+            fromUser.IsMe(authContext) ||
+            await userManager.IsGuestAsync(toUser) ||
+            fromUser.Status != EmployeeStatus.Terminated ||
             ((await userManager.IsDocSpaceAdminAsync(inDto.FromUserId) || await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, inDto.FromUserId)) && tenant.OwnerId != authContext.CurrentAccount.ID))
         {
             throw new ArgumentException("Can not reassign data from user with id = " + fromUser.Id);
@@ -141,8 +141,7 @@ public class ReassignController(
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
 
         var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-        var user = await userManager.GetUsersAsync(inDto.UserId);
-        var userType = await userManager.GetUserTypeAsync(user);
+        var userType = await userManager.GetUserTypeAsync(inDto.UserId);
         var tenant = tenantManager.GetCurrentTenant();
 
         if (!currentUser.IsOwner(tenant) && userType is EmployeeType.DocSpaceAdmin)

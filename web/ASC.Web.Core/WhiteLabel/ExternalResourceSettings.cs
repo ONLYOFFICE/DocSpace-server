@@ -57,12 +57,12 @@ public class CultureSpecificExternalResources
     /// The link to the product API.
     /// </summary>
     public CultureSpecificExternalResource Api { get; set; }
-    
+
     /// <summary>
     /// The link to the common product information.
     /// </summary>
     public CultureSpecificExternalResource Common { get; set; }
-    
+
     /// <summary>
     /// The link to the forum.
     /// </summary>

@@ -41,13 +41,13 @@ public class StudioNotifyHelper(
     ILogger<StudioNotifyHelper> logger)
 {
     public string SiteLink => commonLinkUtility.GetSiteLink();
-    
+
     private ISubscriptionProvider _subscriptionProvider;
     private ISubscriptionProvider SubscriptionProvider => _subscriptionProvider ??= NotifySource.GetSubscriptionProvider();
-    
+
     private IRecipientProvider _recipientsProvider;
     private IRecipientProvider RecipientsProvider => _recipientsProvider ??= NotifySource.GetRecipientsProvider();
-    
+
     public readonly StudioNotifySource NotifySource = studioNotifySource;
 
     public async Task<IEnumerable<UserInfo>> GetRecipientsAsync(bool toadmins, bool tousers, bool toguests)
@@ -78,11 +78,11 @@ public class StudioNotifyHelper(
             if (toguests)
             {
                 return await (await userManager.GetUsersAsync()).ToAsyncEnumerable()
-                                  .WhereAwait(async u => !await userManager.IsUserInGroupAsync(u.Id, Constants.GroupAdmin.ID)).ToListAsync();
+                                  .Where(async (u, _) => !await userManager.IsUserInGroupAsync(u.Id, Constants.GroupAdmin.ID)).ToListAsync();
             }
 
             return await (await userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.RoomAdmin)).ToAsyncEnumerable()
-                              .WhereAwait(async u => !await userManager.IsUserInGroupAsync(u.Id, Constants.GroupAdmin.ID)).ToListAsync();
+                              .Where(async (u, _) => !await userManager.IsUserInGroupAsync(u.Id, Constants.GroupAdmin.ID)).ToListAsync();
         }
 
         if (toguests)
@@ -145,7 +145,7 @@ public class StudioNotifyHelper(
     }
 
     public string GetNotificationImageUrl(string imageFileName)
-    { 
+    {
         var notificationImagePath = configuration["web:notification:image:path"];
         if (string.IsNullOrEmpty(notificationImagePath))
         {

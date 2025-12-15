@@ -30,4 +30,4 @@ public class Ace(Guid actionId, AceType reaction)
 {
     public Guid ActionId { get; set; } = actionId;
     public AceType Reaction { get; set; } = reaction;
-    }
+}

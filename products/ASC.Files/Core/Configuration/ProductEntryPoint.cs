@@ -171,7 +171,7 @@ public class ProductEntryPoint : Product
 
             switch (e.Action)
             {
-                case (int)MessageAction.RoomCreated when !docSpaceAdmin:
+                case (int)MessageAction.RoomCreated or (int)MessageAction.AgentCreated when !docSpaceAdmin:
                     continue;
                 case (int)MessageAction.FileCreated or (int)MessageAction.FileUpdatedRevisionComment or (int)MessageAction.FileUploaded or (int)MessageAction.UserFileUpdated:
                     activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(e.Target.GetItems().FirstOrDefault()));
@@ -191,6 +191,7 @@ public class ProductEntryPoint : Product
             }
 
             activityInfo.TargetUsers = additionalInfo.UserIds;
+            activityInfo.IsAgent = additionalInfo.IsAgent.HasValue && additionalInfo.IsAgent.Value;
 
             switch (e.Action)
             {
@@ -221,7 +222,7 @@ public class ProductEntryPoint : Product
                 _ => 0
             };
 
-            if (e.Action != (int)MessageAction.RoomCreated)
+            if (e.Action != (int)MessageAction.RoomCreated && e.Action != (int)MessageAction.AgentCreated)
             {
                 if (roomId <= 0 || !userRoomsForSend.Contains(roomId.ToString()))
                 {
@@ -239,18 +240,21 @@ public class ProductEntryPoint : Product
                 }
             }
 
-            activityInfo.RoomUri = _pathProvider.GetRoomsUrl(roomId.ToString(), false);
+            activityInfo.RoomUri = activityInfo.IsAgent 
+                ? _pathProvider.GetAgentUrl(roomId.ToString()) 
+                : _pathProvider.GetRoomsUrl(roomId.ToString(), false);
+            
             activityInfo.RoomTitle = additionalInfo.RoomTitle;
             activityInfo.RoomOldTitle = additionalInfo.RoomOldTitle;
 
             if (e.Action == (int)MessageAction.RoomUpdateAccessForUser)
             {
-                activityInfo.UserRole = GetRoomRoleString((FileShare)additionalInfo.UserRole);
+                activityInfo.UserRole = GetRoomRoleString((FileShare)additionalInfo.UserRole, activityInfo.IsAgent);
             }
 
             result.Add(activityInfo);
         }
-        
+
         return result;
     }
 
@@ -334,7 +338,11 @@ public class ProductEntryPoint : Product
 
         bool IsRoomAdminAction()
         {
-            if (action is MessageAction.RoomRenamed or MessageAction.RoomArchived or MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser)
+            if (action is MessageAction.RoomRenamed or 
+                MessageAction.RoomArchived or 
+                MessageAction.RoomCreateUser or 
+                MessageAction.RoomRemoveUser or 
+                MessageAction.AgentRenamed)
             {
                 return true;
             }
@@ -357,24 +365,29 @@ public class ProductEntryPoint : Product
     {
         return employeeType switch
         {
-            EmployeeType.Guest or 
-            EmployeeType.RoomAdmin or 
-            EmployeeType.DocSpaceAdmin or 
+            EmployeeType.Guest or
+            EmployeeType.RoomAdmin or
+            EmployeeType.DocSpaceAdmin or
             EmployeeType.User => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + employeeType.ToStringFast()),
             _ => string.Empty
         };
     }
 
-    private static string GetRoomRoleString(FileShare userRoomRole)
+    private static string GetRoomRoleString(FileShare userRoomRole, bool isAgent)
     {
+        if (isAgent && userRoomRole == FileShare.RoomManager)
+        {
+            return FilesCommonResource.AgentManager;
+        }
+        
         return userRoomRole switch
         {
-            FileShare.Read or 
-            FileShare.Review or 
-            FileShare.Comment or 
-            FileShare.FillForms or 
-            FileShare.RoomManager or 
-            FileShare.Editing or 
+            FileShare.Read or
+            FileShare.Review or
+            FileShare.Comment or
+            FileShare.FillForms or
+            FileShare.RoomManager or
+            FileShare.Editing or
             FileShare.ContentCreator => FilesCommonResource.ResourceManager.GetString("RoleEnum_" + userRoomRole.ToStringFast()),
             _ => string.Empty
         };

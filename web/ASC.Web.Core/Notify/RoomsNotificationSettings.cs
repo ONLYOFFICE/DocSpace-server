@@ -43,7 +43,7 @@ public class RoomsNotificationSettings : ISettings<RoomsNotificationSettings>
             DisabledRooms = []
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 }
 
@@ -65,9 +65,9 @@ public class RoomsNotificationSettingsHelper(SettingsManager settingsManager, Au
     {
         return CheckMuteForRoomAsync(roomsId, authContext.CurrentAccount.ID);
     }
-    
+
     public async Task<bool> CheckMuteForRoomAsync(object roomsId, Guid userId)
-    {        
+    {
         var settings = await settingsManager.LoadAsync<RoomsNotificationSettings>(userId);
         return settings.DisabledRooms.Select(r => r.ToString()).Contains(roomsId.ToString());
     }
@@ -76,7 +76,7 @@ public class RoomsNotificationSettingsHelper(SettingsManager settingsManager, Au
     {
         var disabledRooms = (await GetDisabledRoomsForCurrentUserAsync()).ToList();
         var id = roomsId.ToString();
-        
+
         if (disabledRooms.Contains(id))
         {
             if (!mute)
@@ -93,7 +93,7 @@ public class RoomsNotificationSettingsHelper(SettingsManager settingsManager, Au
         }
 
         var newSettings = new RoomsNotificationSettings { DisabledRooms = disabledRooms.Select(object (r) => r).ToList() };
-        
+
         await settingsManager.SaveForCurrentUserAsync(newSettings);
 
         return newSettings;

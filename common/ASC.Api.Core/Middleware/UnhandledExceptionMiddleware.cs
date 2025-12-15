@@ -37,7 +37,7 @@ public class UnhandledExceptionMiddleware(RequestDelegate next)
         }
         catch (Exception ex) when (LogError(ex))
         {
-           await OnException(context, ex);
+            await OnException(context, ex);
         }
 
         bool LogError(Exception ex)
@@ -60,7 +60,7 @@ public class UnhandledExceptionMiddleware(RequestDelegate next)
         }
 
         var withStackTrace = true;
-                
+
         switch (exception)
         {
             case ItemNotFoundException:
@@ -88,7 +88,7 @@ public class UnhandledExceptionMiddleware(RequestDelegate next)
                 break;
         }
 
-        var result = new ErrorApiResponse(status, exception, message, withStackTrace);      
+        var result = new ErrorApiResponse(status, exception, message, withStackTrace);
 
         context.Response.StatusCode = (int)status;
 

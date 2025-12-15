@@ -182,7 +182,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             if (fileEntry != null)
             {
-                (fromRoomId, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(fileEntry);
+                (fromRoomId, _, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(fileEntry);
             }
 
             if (int.TryParse(fromRoomId?.ToString(), out var frId) &&
@@ -362,7 +362,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             if (parentRoomId == null)
             {
-                var (rId, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(folder);
+                var (rId, _, _) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(folder);
                 cache.Insert(cacheKey, rId.ToString(), TimeSpan.FromMinutes(5));
                 parentRoomId = rId.ToString();
             }
@@ -384,10 +384,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 toFolderRoom != null &&
                 !string.Equals(parentRoomId, toFolderRoom.Id.ToString()))
             {
-                var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
-                if (quotaRoomSettings.EnableQuota)
+                TenantEntityQuotaSettings quotaSettings = toFolderRoom.FolderType is FolderType.AiRoom
+                   ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                   : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                if (quotaSettings.EnableQuota)
                 {
-                    roomQuotaLimit = toFolderRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : toFolderRoom.SettingsQuota;
+                    roomQuotaLimit = toFolderRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : toFolderRoom.SettingsQuota;
                     if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                     {
                         if (roomQuotaLimit - toFolderRoom.Counter < folder.Counter)
@@ -465,7 +467,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
             else if (!canUseRoomQuota)
             {
-                Err = FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit).Message;
+                Err = FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit, toFolderRoom.FolderType is FolderType.AiRoom).Message;
             }
             else if (!canUseUserQuota)
             {
@@ -520,11 +522,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     roomsCountCheckLock = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(CurrentTenantId));
                                     await countRoomChecker.CheckAppend();
                                 }
-
-                                var title = await global.GetAvailableTitleAsync(folder.Title, toFolderId, folderDao.IsExistAsync, FileEntryType.Folder);
+                                
                                 newFolder = await FolderDao.CopyFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                newFolder.Title = title;
-                                newFolder.Id = await folderDao.SaveFolderAsync(newFolder);
                             }
                             finally
                             {
@@ -587,7 +586,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         {
                             var toNewFolderParents = await folderDao.GetParentFoldersAsync(newFolder.Id).ToListAsync();
 
-                            var foldersForCopyIds = new List<T>();
+                            List<T> foldersForCopyIds;
                             if (folder.FolderType == FolderType.FillingFormsRoom)
                             {
                                 var foldersForCopy = await FolderDao.GetFoldersAsync(folder.Id).ToListAsync();
@@ -710,7 +709,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 await ProviderDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = folder.ProviderId, RootFolderType = toFolder.FolderType });
 
                                 await socketManager.DeleteFolder(folder);
-                                
+
                                 if (folder.RootFolderType is FolderType.USER or FolderType.Privacy && DocSpaceHelper.IsRoom(toFolder.FolderType))
                                 {
                                     var shares = await fileSecurity.GetPureSharesAsync(folder, ShareFilterType.UserOrGroup, null, null).ToListAsync();
@@ -720,10 +719,10 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         await fileSecurity.ShareAsync(folder.Id, folder.FileEntryType, s.Subject, FileShare.None);
                                         forRemove.Add(s.Subject);
                                     }
-                                    
+
                                     await socketManager.RemoveFromSharedAsync(folder, forRemove);
                                 }
-                                
+
                                 folder.FolderIdDisplay = IdConverter.Convert<T>(toFolderId.ToString());
                                 folder.RootFolderType = toFolder.FolderType;
 
@@ -774,11 +773,14 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         }
                                     }
                                     else
-                                    {
-                                        newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                                                        
+                                    {                                            
+                                        await socketManager.DeleteFolder(folder, action: async () =>
+                                        {
+                                            newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                        });
+
                                         if (folder.RootFolderType is FolderType.USER or FolderType.Privacy && DocSpaceHelper.IsRoom(toFolder.FolderType))
-                                        { 
+                                        {
                                             var shares = await fileSecurity.GetPureSharesAsync(folder, ShareFilterType.UserOrGroup, null, null).ToListAsync();
                                             List<Guid> forRemove = [];
                                             foreach (var s in shares)
@@ -786,7 +788,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                                 await fileSecurity.ShareAsync(folder.Id, folder.FileEntryType, s.Subject, FileShare.None);
                                                 forRemove.Add(s.Subject);
                                             }
-                                    
+
                                             await socketManager.RemoveFromSharedAsync(folder, forRemove);
                                         }
                                     }
@@ -891,6 +893,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
         var cachedFolderDao = scope.ServiceProvider.GetService<ICacheFolderDao<T>>();
         var fileSecurity = scope.ServiceProvider.GetService<FileSecurity>();
+        var vectorizationSettings = scope.ServiceProvider.GetService<VectorizationGlobalSettings>();
 
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();
@@ -935,6 +938,15 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             {
                 Err = FilesCommonResource.ErrorMessage_NotSupportedFormat;
             }
+            else if (toFolder.FolderType is FolderType.Knowledge && !vectorizationSettings.IsSupportedContentExtraction(file.Title))
+            {
+                Err = FilesCommonResource.ErrorMessage_NotSupportedFormat;
+            }
+            else if (toFolder.FolderType is FolderType.Knowledge &&
+                     file.ContentLength > vectorizationSettings.MaxContentLength)
+            {
+                Err = FileSizeComment.GetFileSizeExceptionString(vectorizationSettings.MaxContentLength);
+            }
             else
             {
                 if (toFolder.RootFolderType == FolderType.VirtualRooms)
@@ -952,8 +964,10 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 var parentFolder = await FolderDao.GetFolderAsync(file.ParentId);
                 try
                 {
-                    var conflict = _resolveType == FileConflictResolveType.Duplicate
-                                   || file.RootFolderType == FolderType.Privacy || file.Encrypted
+                    var conflict = _resolveType == FileConflictResolveType.Duplicate || 
+                                   file.RootFolderType == FolderType.Privacy || 
+                                   file.Encrypted || 
+                                   toFolder.FolderType == FolderType.Knowledge 
                         ? null
                         : await fileDao.GetFileAsync(toFolderId, file.Title);
 
@@ -964,14 +978,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         {
                             try
                             {
-                                var title = await global.GetAvailableTitleAsync(file.Title, toFolderId, fileDao.IsExistAsync, FileEntryType.File);
                                 newFile = await FileDao.CopyFileAsync(file.Id, toFolderId); //Stream copy will occur inside dao
-                                newFile.Title = title;
-
-                                if (!newFile.ProviderEntry)
-                                {
-                                    await fileDao.SaveFileAsync(newFile, null);
-                                }
                                 
                                 await filesMessageService.SendCopyMessageAsync(newFile, parentFolder, toFolder, toParentFolders, false, _headers, [newFile.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
                                 await webhookManager.PublishAsync(WebhookTrigger.FileCopied, newFile);
@@ -983,7 +990,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     properties.CopyToFillOut = true;
                                     await fileDao.SaveProperties(newFile.Id, properties);
                                 }
-                                
+
                                 //await entryManager.MarkAsRecent(newFile);
                                 await socketManager.CreateFileAsync(newFile);
 
@@ -1011,9 +1018,9 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             else
                             {
                                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
-                                
+
                                 if (file.RootFolderType is FolderType.USER or FolderType.Privacy && DocSpaceHelper.IsRoom(toFolder.FolderType))
-                                { 
+                                {
                                     var shares = await fileSecurity.GetPureSharesAsync(file, ShareFilterType.UserOrGroup, null, null).ToListAsync();
                                     List<Guid> forRemove = [];
                                     foreach (var s in shares)
@@ -1021,26 +1028,26 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         await fileSecurity.ShareAsync(file.Id, file.FileEntryType, s.Subject, FileShare.None);
                                         forRemove.Add(s.Subject);
                                     }
-                                    
+
                                     await socketManager.RemoveFromSharedAsync(file, forRemove);
                                 }
-                                
+
                                 TTo newFileId = default;
                                 await socketManager.DeleteFileAsync(file, action: async () =>
                                 {
                                     newFileId = await FileDao.MoveFileAsync(file.Id, toFolderId, deleteLinks);
                                 });
-                                
+
                                 newFile = await fileDao.GetFileAsync(newFileId);
 
                                 await filesMessageService.SendMoveMessageAsync(newFile, parentFolder, toFolder, toParentFolders, false, _headers, [file.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
                                 await webhookManager.PublishAsync(parentFolder.FolderType == FolderType.TRASH ? WebhookTrigger.FileRestored : WebhookTrigger.FileMoved, newFile);
-                                
+
                                 // if (newFile.RootFolderType != FolderType.TRASH)
                                 // {
                                 //     await entryManager.MarkAsRecent(newFile);
                                 // }
-                                
+
                                 if (file.RootFolderType == FolderType.TRASH && newFile.ThumbnailStatus == Thumbnail.NotRequired)
                                 {
                                     newFile.ThumbnailStatus = Thumbnail.Waiting;
@@ -1197,7 +1204,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                                 await socketManager.CreateFileAsync(newFile);
                                 //await entryManager.MarkAsRecent(newFile);
-                                
+
                                 if (copy)
                                 {
                                     await filesMessageService.SendCopyMessageAsync(newFile, parentFolder, toFolder, toParentFolders.ToList(), true, _headers, [newFile.Title, parentFolder.Title, toFolder.Title, toFolder.Id.ToString()]);

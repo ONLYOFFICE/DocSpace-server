@@ -24,10 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Service.Services;
 
 using ApiKey = ASC.Core.Common.EF.Model.ApiKey;
 
+namespace ASC.Files.Service.Services;
 [Singleton]
 public class AutoDeactivateExpiredApiKeysService(
     IServiceScopeFactory scopeFactory,
@@ -45,7 +45,7 @@ public class AutoDeactivateExpiredApiKeysService(
             await using var scope = _serviceScopeFactory.CreateAsyncScope();
             await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<ApiKeysDbContext>>().CreateDbContextAsync(stoppingToken);
 
-         //   var expiredApiKeys = Queries.GetExpiredApiKeys(dbContext); // TODO: Send notification about expired api keys
+            //   var expiredApiKeys = Queries.GetExpiredApiKeys(dbContext); // TODO: Send notification about expired api keys
 
             await Queries.DeactiveExpiredApiKeys(dbContext);
         }
@@ -64,7 +64,7 @@ static file class Queries
                 ctx.DbApiKey.Where(r => r.ExpiresAt != null && r.ExpiresAt.Value.Date == DateTime.UtcNow.Date)
                     .AsQueryable()
         );
-    
+
     public static readonly Func<ApiKeysDbContext, Task<int>> DeactiveExpiredApiKeys =
         EF.CompileAsyncQuery(
             (ApiKeysDbContext ctx) =>

@@ -32,4 +32,3 @@ internal class NCShare
     public string ShareWith { get; set; }
     public int Premissions { get; set; }
 }
-

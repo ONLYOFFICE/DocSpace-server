@@ -105,7 +105,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
         context.Response.StatusCode = (int)status;
 
         await context.Response.WriteAsJsonAsync(result, cancellationToken);
-        
+
         return true;
     }
 }

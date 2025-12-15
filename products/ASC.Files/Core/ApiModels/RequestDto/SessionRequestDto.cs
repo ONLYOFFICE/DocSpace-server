@@ -77,5 +77,5 @@ public class SessionRequestDto<T>
     /// The session parameters.
     /// </summary>
     [FromBody]
-    public required SessionRequest Session {  get; set; }
+    public required SessionRequest Session { get; set; }
 }

@@ -55,7 +55,7 @@ public class ZipWriteOperator : IDataWriteOperator
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
         var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
-        
+
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream, action);
@@ -89,6 +89,6 @@ public class ZipWriteOperator : IDataWriteOperator
         _tarOutputStream.Close();
         await _tarOutputStream.DisposeAsync();
     }
-    
-    
+
+
 }

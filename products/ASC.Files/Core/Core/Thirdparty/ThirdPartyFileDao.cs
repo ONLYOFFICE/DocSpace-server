@@ -109,7 +109,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         }
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
+    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, IEnumerable<string> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
         bool searchInContent)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
@@ -122,7 +122,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         //Filter
         if (subjectID != Guid.Empty)
         {
-            files = files.WhereAwait(async x => subjectGroup
+            files = files.Where(async (x, _) => subjectGroup
                 ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                 : x.CreateBy == subjectID);
         }
@@ -208,14 +208,14 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         }
         catch
         {
-            filesWait = []; 
+            filesWait = [];
         }
-        
+
         var files = filesWait.Select(item => Dao.ToFile(item as TFile)).ToAsyncEnumerable();
-        
+
         if (subjectID != Guid.Empty)
         {
-            files = files.WhereAwait(async x => subjectGroup
+            files = files.Where(async (x, _) => subjectGroup
                 ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                 : x.CreateBy == subjectID);
         }
@@ -416,7 +416,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         await DeleteFileAsync(fileId);
     }
-    
+
     public async Task DeleteFileAsync(string fileId)
     {
         var file = await Dao.GetFileAsync(fileId);
@@ -662,7 +662,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             var path = uploadSession.TempPath;
             await using var fs = new FileStream(path, FileMode.Append);
             await stream.CopyToAsync(fs);
-            
+
             if (!uploadSession.Items.TryAdd(BytesTransferredKey, chunkLength.ToString()))
             {
                 if (long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred))
@@ -815,11 +815,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
         if (!uploadSession.Items.ContainsKey(UploadSessionKey))
         {
-            return long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred) 
-                ? Task.FromResult(transferred) 
+            return long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred)
+                ? Task.FromResult(transferred)
                 : null;
         }
-        
+
         var nativeSession = uploadSession.GetItemOrDefault<ThirdPartyUploadSessionBase>(UploadSessionKey);
 
         return Task.FromResult(nativeSession.BytesTransferred);
@@ -853,6 +853,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         return Task.FromResult(0);
     }
+    
+    public Task SetVectorizationStatusAsync(string fileId, VectorizationStatus status, Func<Task> action = null)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 static file class Queries
@@ -861,9 +866,9 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx) =>
                 (from ft in ctx.Tag
-                    join ftl in ctx.TagLink.DefaultIfEmpty() on new { ft.TenantId, ft.Id } equals new { ftl.TenantId, Id = ftl.TagId }
-                    where ftl == null
-                    select ft)
+                 join ftl in ctx.TagLink.DefaultIfEmpty() on new { ft.TenantId, ft.Id } equals new { ftl.TenantId, Id = ftl.TagId }
+                 where ftl == null
+                 select ft)
                 .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteTagLinksAsync =

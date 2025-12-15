@@ -47,6 +47,11 @@ public class PathProvider(WebImageSupplier webImageSupplier,
     {
         get { return "/rooms/shared/{0}/filter?withSubfolders={1}&folder={0}&count=100&page=1&sortby=DateAndTime&sortorder=descending"; }
     }
+    
+    public string AgentUrlString
+    {
+        get { return "/ai-agents/{0}/chat?folder={0}"; }
+    }
 
     public string GetRoomsUrl(int roomId, bool withSubfolders = true)
     {
@@ -56,6 +61,11 @@ public class PathProvider(WebImageSupplier webImageSupplier,
     public string GetRoomsUrl(string roomId, bool withSubfolders = true)
     {
         return commonLinkUtility.GetFullAbsolutePath(string.Format(RoomUrlString, roomId, withSubfolders.ToString().ToLowerInvariant()));//ToDo
+    }
+    
+    public string GetAgentUrl(string agentId)
+    {
+        return commonLinkUtility.GetFullAbsolutePath(string.Format(AgentUrlString, agentId));
     }
 
     public string GetFolderUrl<T>(Folder<T> folder, string key = null)
@@ -73,7 +83,7 @@ public class PathProvider(WebImageSupplier webImageSupplier,
                 result = string.Format($"rooms/personal/filter?folder={urlPathEncode}");
                 break;
             case FolderType.Recent:
-                result =  string.Format($"recent/filter?folder={urlPathEncode}");
+                result = string.Format($"recent/filter?folder={urlPathEncode}");
                 break;
             case FolderType.Archive:
                 result = string.Format($"rooms/archived/filter?folder={urlPathEncode}");
@@ -85,13 +95,16 @@ public class PathProvider(WebImageSupplier webImageSupplier,
             case FolderType.RoomTemplates:
                 result = string.Format($"rooms/shared/{urlPathEncode}/filter?folder={urlPathEncode}");
                 break;
+            case FolderType.AiAgents:
+                result = string.Format($"ai-agents/{urlPathEncode}/filter?folder={urlPathEncode}");
+                break;
         }
 
         if (!string.IsNullOrEmpty(key))
         {
             result += $"&key={key}";
         }
-        
+
         return commonLinkUtility.GetFullAbsolutePath(string.Format($"{filesLinkUtility.FilesBaseAbsolutePath}{result}"));
     }
 
@@ -122,12 +135,12 @@ public class PathProvider(WebImageSupplier webImageSupplier,
         }
 
         query += FilesLinkUtility.AuthKey + "=" + emailValidationKeyProvider.GetEmailKey(file.Id.ToString() + version);
-        
+
         query = AddKey(query);
 
         return uriBuilder.Uri + "?" + query;
     }
-    
+
     public string GetFileChangesUrl<T>(File<T> file)
     {
         if (file == null)

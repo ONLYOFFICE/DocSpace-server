@@ -84,7 +84,7 @@ public class UsersWithFileEntitySharedRequestDto<T>
     /// </summary>
     [FromQuery(Name = "employeeTypes")]
     public IEnumerable<EmployeeType> EmployeeTypes { get; set; } = new List<EmployeeType>();
-    
+
     /// <summary>
     /// The maximum number of users to be retrieved in the request.
     /// </summary>
@@ -97,7 +97,7 @@ public class UsersWithFileEntitySharedRequestDto<T>
     /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
-    
+
     /// <summary>
     /// The character or string used to separate multiple filter values in a filtering query.
     /// </summary>

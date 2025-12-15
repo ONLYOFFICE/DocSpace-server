@@ -44,6 +44,12 @@ public class GetFolderRequestDto<T>
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
+    /// The identifier of the user who shared the folder or file.
+    /// </summary>
+    [FromQuery(Name = "sharedBy")]
+    public Guid? SharedBy { get; set; }
+
+    /// <summary>
     /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
@@ -84,13 +90,13 @@ public class GetFolderRequestDto<T>
     /// </summary>
     [FromQuery(Name = "formsItemKey")]
     public string FormsItemKey { get; set; }
-    
+
     /// <summary>
     /// The forms item type.
     /// </summary>
     [FromQuery(Name = "formsItemType")]
-    public string FormsItemType{ get; set; }
-    
+    public string FormsItemType { get; set; }
+
     /// <summary>
     /// The maximum number of items to retrieve in the request.
     /// </summary>
@@ -109,7 +115,7 @@ public class GetFolderRequestDto<T>
     /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
-    
+
     /// <summary>
     /// The order in which the results are sorted.
     /// </summary>
@@ -121,7 +127,7 @@ public class GetFolderRequestDto<T>
     /// </summary>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
-    
+
     /// <summary>
     /// The location context of the request, specifying the area
     /// where the operation is performed, such as a room, documents, or a link.
@@ -164,7 +170,7 @@ public class GetCommonFolderRequestDto
     /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
-    
+
     /// <summary>
     /// The order in which the results are sorted.
     /// </summary>
@@ -219,7 +225,7 @@ public class GetMyTrashFolderRequestDto
     /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
-    
+
     /// <summary>
     /// The order in which the results are sorted.
     /// </summary>
@@ -249,13 +255,13 @@ public class GetRootFolderRequestDto
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
-    
+
     /// <summary>
     /// Specifies whether to return the "Trash" section or not.
     /// </summary>
     [FromQuery(Name = "withoutTrash")]
     public bool? WithoutTrash { get; set; }
-    
+
     /// <summary>
     /// The maximum number of items to retrieve in the response.
     /// </summary>
@@ -274,7 +280,7 @@ public class GetRootFolderRequestDto
     /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
-    
+
     /// <summary>
     /// The order in which the results are sorted.
     /// </summary>
@@ -347,7 +353,7 @@ public class GetRecentFolderRequestDto
     /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
-    
+
     /// <summary>
     /// The order in which the results are sorted.
     /// </summary>

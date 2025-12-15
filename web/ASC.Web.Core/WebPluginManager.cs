@@ -70,6 +70,7 @@ public class WebPluginManager(
     private const string StorageModuleName = "webplugins";
     private const string ConfigFileName = "config.json";
     private const string PluginFileName = "plugin.js";
+    private const string PluginCssFileName = "plugin.css";
     private const string AssetsFolderName = "assets";
 
     private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
@@ -205,14 +206,14 @@ public class WebPluginManager(
 
         if (system)
         {
-            if (tenantWebPlugins.Any(x => 
+            if (tenantWebPlugins.Any(x =>
                     x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) ||
                     x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
                 throw new Exception(Resource.ErrorWebPluginExist);
             }
 
-            if (systemWebPlugins.Any(x => 
+            if (systemWebPlugins.Any(x =>
                     x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
                     !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
@@ -443,7 +444,7 @@ public class WebPluginManager(
             throw new InvalidOperationException(Resource.ErrorWebPluginForbiddenSystem);
         }
 
-        var storage = await GetPluginStorageAsync(tenantId);
+        var storage = await GetPluginStorageAsync(webPlugin.System ? Tenant.DefaultTenant : tenantId);
 
         if (!await storage.IsDirectoryAsync(webPlugin.Name))
         {
@@ -569,6 +570,14 @@ public class WebPluginManager(
             }
 
             await ExtractEntry(zipFile, pluginFile, tempDir);
+
+
+            // extract plugin css file
+            var pluginCssFile = zipFile.GetEntry(PluginCssFileName);
+            if (pluginCssFile != null)
+            {
+                await ExtractEntry(zipFile, pluginCssFile, tempDir);
+            }
 
 
             // extract assets

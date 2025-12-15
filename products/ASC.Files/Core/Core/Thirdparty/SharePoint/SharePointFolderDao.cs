@@ -42,19 +42,19 @@ internal class SharePointFolderDao(
     SharePointDaoSelector regexDaoSelectorBase,
     Global global)
     : SharePointDaoBase(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, fileUtility, regexDaoSelectorBase), IFolderDao<string>
-    {
-        private readonly TenantManager _tenantManager1 = tenantManager;
+{
+    private readonly TenantManager _tenantManager1 = tenantManager;
 
-        public async Task<Folder<string>> GetFolderAsync(string folderId)
+    public async Task<Folder<string>> GetFolderAsync(string folderId)
     {
-        
+
         var folder = SharePointProviderInfo.ToFolder(await SharePointProviderInfo.GetFolderByIdAsync(folderId));
-        
+
         if (folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom))
         {
             return folder;
         }
-        
+
         var tenantId = _tenantManager1.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         folder.Shared = await Queries.SharedAsync(filesDbContext, tenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
@@ -87,7 +87,9 @@ internal class SharePointFolderDao(
             yield break;
         }
 
-        var rooms = roomsIds.ToAsyncEnumerable().SelectAwait(async e => await GetFolderAsync(e).ConfigureAwait(false));
+        var rooms = roomsIds
+            .ToAsyncEnumerable()
+            .Select(async (string e, CancellationToken _) => await GetFolderAsync(e).ConfigureAwait(false));
 
         rooms = FilterByRoomType(rooms, filterTypes);
         rooms = FilterBySubject(rooms, subjectId, excludeSubject, subjectFilter, subjectEntriesIds);
@@ -119,7 +121,7 @@ internal class SharePointFolderDao(
         }
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
         bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, bool containingForms = false)
     {
         if (CheckInvalidFilter(filterType))
@@ -132,7 +134,7 @@ internal class SharePointFolderDao(
         //Filter
         if (subjectID != Guid.Empty)
         {
-            folders = folders.WhereAwait(async x => subjectGroup
+            folders = folders.Where(async (x, _) => subjectGroup
                                              ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                                              : x.CreateBy == subjectID);
         }
@@ -156,18 +158,18 @@ internal class SharePointFolderDao(
         return folders;
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(IEnumerable<string> folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(IEnumerable<string> folderIds, IEnumerable<string> excludeParentIds  = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
     {
         if (CheckInvalidFilter(filterType))
         {
             return AsyncEnumerable.Empty<Folder<string>>();
         }
 
-        var folders = folderIds.ToAsyncEnumerable().SelectAwait(async e => await GetFolderAsync(e));
+        var folders = folderIds.ToAsyncEnumerable().Select(async (string e, CancellationToken _) => await GetFolderAsync(e));
 
         if (subjectID.HasValue && subjectID != Guid.Empty)
         {
-            folders = folders.WhereAwait(async x => subjectGroup
+            folders = folders.Where(async (x, _) => subjectGroup
                                              ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID.Value)
                                              : x.CreateBy == subjectID);
         }
@@ -198,6 +200,11 @@ internal class SharePointFolderDao(
         {
             yield return p;
         }
+    }
+
+    public Task<string> SaveFolderAsync(Folder<string> folder, IEnumerable<Folder<string>> children)
+    {
+        throw new NotSupportedException();
     }
 
     public async Task<string> SaveFolderAsync(Folder<string> folder)
@@ -352,7 +359,7 @@ internal class SharePointFolderDao(
     {
         return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
     }
-    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover)
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null)
     {
         return await RenameFolderAsync(folder, newTitle);
     }
@@ -441,11 +448,11 @@ internal class SharePointFolderDao(
         return Task.FromResult("tar.gz");
     }
 
-    public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
+    public Task<(string RoomId, string RoomTitle, FolderType)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
     {
-        return Task.FromResult(entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates) 
-            ? (string.Empty, string.Empty) 
-            : (ProviderInfo.FolderId, ProviderInfo.CustomerTitle));
+        return Task.FromResult(entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates)
+            ? (string.Empty, string.Empty, FolderType.DEFAULT)
+            : (ProviderInfo.FolderId, ProviderInfo.CustomerTitle, FolderType.PublicRoom));
     }
 
     public Task<Folder<string>> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
@@ -487,7 +494,7 @@ internal class SharePointFolderDao(
     {
         throw new NotImplementedException();
     }
-    
+
     public Task<int> GetFoldersByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, bool excludeSubject, Location? location, int trashId)
     {
@@ -536,14 +543,14 @@ static file class Queries
                     ctx.ThirdpartyIdMapping
                         .Where(r => r.TenantId == tenantId)
                         .Where(m => m.Id.StartsWith(idStart)));
-    
+
     public static readonly Func<FilesDbContext, int, string, FileEntryType, SubjectType, Task<bool>>
         SharedAsync =
             EF.CompileAsyncQuery(
                 (FilesDbContext ctx, int tenantId, string entryId, FileEntryType entryType, SubjectType subjectType) =>
                     ctx.Security
                         .Where(t => t.TenantId == tenantId && t.EntryType == entryType && t.SubjectType == subjectType)
-                        .Join(ctx.ThirdpartyIdMapping, s => s.EntryId, m => m.HashId, 
+                        .Join(ctx.ThirdpartyIdMapping, s => s.EntryId, m => m.HashId,
                             (s, m) => new { s, m.Id })
                         .Any(r => r.Id == entryId));
 }

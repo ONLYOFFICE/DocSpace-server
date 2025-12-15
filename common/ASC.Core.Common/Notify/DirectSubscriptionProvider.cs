@@ -63,12 +63,12 @@ class DirectSubscriptionProvider : ISubscriptionProvider
         ArgumentNullException.ThrowIfNull(action);
 
         return await (await _subscriptionManager.GetRecipientsAsync(_sourceId, action.ID, objectID)).ToAsyncEnumerable()
-            .SelectAwait(GetRecipientAsync)
+            .Select(GetRecipientAsync)
             .Where(r => r != null)
             .ToArrayAsync();
     }
 
-    private async ValueTask<IRecipient> GetRecipientAsync(string value)
+    private async ValueTask<IRecipient> GetRecipientAsync(string value, CancellationToken token)
     {
         return await _recipientProvider.GetRecipientAsync(value);
     }
