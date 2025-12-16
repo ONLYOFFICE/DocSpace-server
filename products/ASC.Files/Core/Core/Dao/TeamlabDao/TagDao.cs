@@ -127,7 +127,7 @@ internal abstract class BaseTagDao<T>(
     public async IAsyncEnumerable<TagInfo> GetTagsInfoAsync(string searchText, TagType tagType, bool byName, int from = 0, int count = 0)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q = (Query(filesDbContext.Tag)).Where(r => r.Type == tagType);
+        var q = Query(filesDbContext.Tag).Where(r => r.Type == tagType);
 
         if (byName)
         {
@@ -582,7 +582,7 @@ internal abstract class BaseTagDao<T>(
         foreach (var r in fileEntries)
         {
             var (id, _) = await daoFactory.GetMapping<T>().MappingIdAsync(r.Id);
-            var entryType = (r.FileEntryType == FileEntryType.File) ? FileEntryType.File : FileEntryType.Folder;
+            var entryType = r.FileEntryType == FileEntryType.File ? FileEntryType.File : FileEntryType.Folder;
 
             entryIds.Add(id);
             entryTypes.Add((int)entryType);

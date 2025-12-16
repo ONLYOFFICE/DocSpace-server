@@ -62,11 +62,6 @@ public class ModelDifferenceChecker
                 scaffolderDependecies.Model.GetRelationalModel(), lastModel)
             : new List<MigrationOperation>();
 
-        if (upMethodOperations.Count > 0 || downMethodOperations.Count > 0)
-        {
-            return true;
-        }
-
-        return false;
+        return upMethodOperations.Count > 0 || downMethodOperations.Count > 0;
     }
 }

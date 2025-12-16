@@ -29,6 +29,8 @@ namespace ASC.AI.Models.ResponseDto;
 public class VectorizationSettingsDto
 {
     public EmbeddingProviderType Type { get; init; }
+
+    public bool NeedReset { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, 

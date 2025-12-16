@@ -210,4 +210,7 @@
   <data name="СanNotImportProjectFiles" xml:space="preserve">
     <value>Не можахме да импортираме файлове на проекта</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Резервното копие е по-голямо от общия размер на портала</value>
+  </data>
 </root>

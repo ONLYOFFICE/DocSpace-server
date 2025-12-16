@@ -43,7 +43,7 @@ public class LdapUserImporter(
     public Dictionary<LdapObject, LdapSettingsStatus> AllSkipedDomainGroups { get; private set; } = new();
 
     private string _ldapDomain;
-    private readonly string _unknownDomain = configuration["ldap:domain"] ?? "LDAP";
+
     public string LDAPDomain
     {
         get
@@ -57,18 +57,16 @@ public class LdapUserImporter(
 
             if (string.IsNullOrEmpty(_ldapDomain))
             {
-                _ldapDomain = _unknownDomain;
+                _ldapDomain = field;
             }
 
             return _ldapDomain;
         }
-    }
+    } = configuration["ldap:domain"] ?? "LDAP";
+
     public List<string> PrimaryGroupIds { get; set; }
 
-    public LdapSettings Settings
-    {
-        get { return LdapHelper.Settings; }
-    }
+    public LdapSettings Settings => LdapHelper.Settings;
 
     public LdapHelper LdapHelper { get; private set; } = novellLdapHelper;
     public LdapLocalization Resource { get; private set; }

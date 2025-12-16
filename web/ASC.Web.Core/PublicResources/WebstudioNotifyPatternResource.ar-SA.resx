@@ -2240,4 +2240,16 @@ $TrulyYours</value>
   <data name="subject_backup_failed" xml:space="preserve">
     <value>فشل النسخ الاحتياطي لـ DocSpace الخاص بكم</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>تم حذف ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>تم حذف ${LetterLogoText} DocSpace.
+
+*البوابة:* ${PortalUrl}
+*المالك:* ${UserName} ${UserEmail}
+*العميل:* ${OwnerName}
+
+يرجى التأكد من إيقاف تشغيل الفوترة التلقائية. تحققوا من حالة الفوترة التلقائية في حساب Stripe الخاص بالعميل.</value>
+  </data>
 </root>

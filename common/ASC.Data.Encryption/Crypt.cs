@@ -40,7 +40,7 @@ public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
         TempDir = tempPath.GetTempPath();
     }
 
-    public byte Version { get { return 1; } }
+    public byte Version => 1;
 
     public async ValueTask EncryptFileAsync(string filePath)
     {

@@ -108,6 +108,9 @@ public interface IFolderDao<T>
     /// Gets the folder (s) by ID (s)
     /// </summary>
     /// <param name="folderIds"></param>
+    /// <param
+    ///     name="excludeParentIds">
+    /// </param>
     /// <param name="filterType"></param>
     /// <param name="subjectGroup"></param>
     /// <param name="subjectID"></param>
@@ -116,7 +119,7 @@ public interface IFolderDao<T>
     /// <param name="checkShare"></param>
     /// <param name="excludeSubject"></param>
     /// <returns></returns>
-    IAsyncEnumerable<Folder<T>> GetFoldersAsync(IEnumerable<T> folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false);
+    IAsyncEnumerable<Folder<T>> GetFoldersAsync(IEnumerable<T> folderIds, IEnumerable<T> excludeParentIds = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false);
 
     /// <summary>
     ///     Get folder, contains folder with id

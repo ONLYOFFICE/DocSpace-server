@@ -215,7 +215,7 @@ public class CookiesManager(
     public async Task<TenantCookieSettings> GetLifeTimeAsync()
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        return (await tenantCookieSettingsHelper.GetForTenantAsync(tenantId));
+        return await tenantCookieSettingsHelper.GetForTenantAsync(tenantId);
     }
 
     public async Task ResetUserCookieAsync(Guid? userId = null, bool keepMeAuthenticated = true)

@@ -148,8 +148,8 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// The file entry type of the folder.
     /// </summary>
-    public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
-    
+    public override FileEntryType FileEntryType => FileEntryType.Folder;
+
     public ChatSettings ChatSettings { get; set; }
     
     public RoomType? RootRoomType { get; set; }
@@ -195,7 +195,7 @@ public class FolderDtoHelper(
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
 
-        if (DocSpaceHelper.IsRoom(folder.FolderType))
+        if (folder.IsRoom)
         {
             if (folder.Tags == null)
             {
@@ -287,7 +287,7 @@ public class FolderDtoHelper(
                 result.RootFolderType = FolderType.SHARE;
             }
             
-            var room = parents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
+            var room = parents.FirstOrDefault(f => f.IsRoom);
             if (room != null)
             {
                 result.OwnedBy = await _employeeWrapperHelper.GetAsync(room.CreateBy);
@@ -296,7 +296,7 @@ public class FolderDtoHelper(
 
         if (folder.Order != 0)
         {
-            if (string.IsNullOrEmpty(order) && (contextFolder == null || !DocSpaceHelper.IsRoom(contextFolder.FolderType)))
+            if (string.IsNullOrEmpty(order) && contextFolder is not { IsRoom: true })
             {
                 order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(folder.ParentId);
             }
@@ -366,6 +366,10 @@ public class FolderDtoHelper(
             else if (Equals(result.OriginRoomId, await _globalFolderHelper.FolderArchiveAsync))
             {
                 result.OriginRoomTitle = result.OriginTitle;
+            }            
+            else if(result.RootFolderType == FolderType.USER)
+            {
+                result.OriginRoomTitle = FilesUCResource.SharedForMe;
             }
         }
 
@@ -423,7 +427,7 @@ public class FolderDtoHelper(
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
 
-        if (!DocSpaceHelper.IsRoom(folder.FolderType))
+        if (!folder.IsRoom)
         {
             return result;
         }

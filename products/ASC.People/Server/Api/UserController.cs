@@ -28,6 +28,7 @@ using System.Globalization;
 
 using ASC.Core.Common.Identity;
 using ASC.MessagingSystem;
+using ASC.Web.Files.Utils;
 
 namespace ASC.People.Api;
 
@@ -953,7 +954,7 @@ public class UserController(
         var isConfirmLink = _httpContextAccessor.HttpContext!.User.Claims
             .Any(role => role.Type == ClaimTypes.Role &&
                 ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) &&
-                (confirmType == ConfirmType.LinkInvite || confirmType == ConfirmType.GuestShareLink));
+                confirmType is ConfirmType.LinkInvite or ConfirmType.GuestShareLink);
 
         if (user.Id == Constants.LostUser.Id)
         {
@@ -1625,7 +1626,7 @@ public class UserController(
         if (authContext.IsAuthenticated)
         {
             var currentUser = await _userManager.GetUserByEmailAsync(inDto.Email);
-            if (currentUser.Id != authContext.CurrentAccount.ID && !(await _userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)))
+            if (currentUser.Id != authContext.CurrentAccount.ID && !await _userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
             {
                 throw new InvalidOperationException(Resource.ErrorAccessDenied);
             }
@@ -1665,14 +1666,17 @@ public class UserController(
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [AllowNotPayment]
     [HttpPut("activationstatus/{activationstatus}")]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "Activation,Everyone")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "Activation,EmailActivation")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserActivationStatus(UpdateMemberActivationStatusRequestDto inDto)
     {
         await securityContext.AuthByClaimAsync();
 
-        var tenant = tenantManager.GetCurrentTenant();
-        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-        var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id);
+        if (inDto?.UpdateMembers?.UserIds == null ||
+            inDto.UpdateMembers.UserIds.Count() > 1 ||
+            !inDto.UpdateMembers.UserIds.Contains(authContext.CurrentAccount.ID))
+        {
+            throw new ArgumentException();
+        }
 
         foreach (var id in inDto.UpdateMembers.UserIds.Where(userId => !_userManager.IsSystemUser(userId)))
         {
@@ -1681,18 +1685,6 @@ public class UserController(
             if (u.Id == Constants.LostUser.Id)
             {
                 continue;
-            }
-
-            if (currentUser.Id != u.Id)
-            {
-                var userType = await _userManager.GetUserTypeAsync(u.Id);
-
-                switch (userType)
-                {
-                    case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
-                    case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
-                        continue;
-                }
             }
 
             u.ActivationStatus = inDto.ActivationStatus;
@@ -2412,7 +2404,7 @@ public class UserController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
+        var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID) ||
                       await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
 
         var excludeGroups = new List<Guid>();
@@ -2600,24 +2592,27 @@ public class UserController(
 
 [ConstraintRoute("int")]
 public class UserControllerAdditionalInternal(
+    FileSharing fileSharing,
     EmployeeFullDtoHelper employeeFullDtoHelper,
     FileSecurity fileSecurity,
     ApiContext apiContext,
     IDaoFactory daoFactory,
     AuthContext authContext,
     UserManager userManager)
-    : UserControllerAdditional<int>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory, authContext, userManager);
+    : UserControllerAdditional<int>(fileSharing, employeeFullDtoHelper, fileSecurity, apiContext, daoFactory, authContext, userManager);
 
 public class UserControllerAdditionalThirdParty(
+    FileSharing fileSharing,
     EmployeeFullDtoHelper employeeFullDtoHelper,
     FileSecurity fileSecurity,
     ApiContext apiContext,
     IDaoFactory daoFactory,
     AuthContext authContext,
     UserManager userManager)
-    : UserControllerAdditional<string>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory, authContext, userManager);
+    : UserControllerAdditional<string>(fileSharing, employeeFullDtoHelper, fileSecurity, apiContext, daoFactory, authContext, userManager);
 
 public class UserControllerAdditional<T>(
+    FileSharing fileSharing,
     EmployeeFullDtoHelper employeeFullDtoHelper,
     FileSecurity fileSecurity,
     ApiContext apiContext,
@@ -2696,25 +2691,14 @@ public class UserControllerAdditional<T>(
         }
 
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
-        var parentUserIds = await daoFactory.GetCacheFolderDao<T>()
-            .GetParentFoldersAsync(fileEntry.ParentId)
-            .Where(r => r.FolderType != FolderType.VirtualRooms && r.FolderType != FolderType.AiAgents)
-            .Select(r => r.CreateBy)
-            .Where(r => !r.Equals(fileEntry.CreateBy))
-            .Distinct()
-            .ToListAsync();
-
-        if (!parentUserIds.Contains(fileEntry.CreateBy))
-        {
-            parentUserIds.Add(fileEntry.CreateBy);
-        }
+        var securityDao = daoFactory.GetSecurityDao<T>();
+        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r=> r.Id).ToListAsync();
 
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var filterValue = inDto.Text;
         var filterSeparator = inDto.FilterSeparator;
-
-        var securityDao = daoFactory.GetSecurityDao<T>();
+        
 
         var totalUsers = await securityDao.GetUsersWithSharedCountAsync(fileEntry,
             filterValue,

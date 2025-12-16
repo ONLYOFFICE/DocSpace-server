@@ -43,7 +43,7 @@ public class ProjectInfoContextFinder : ContextFinder
         }
         catch (Exception)
         {
-            return Array.Empty<Type>();
+            return [];
         }
     }
 }

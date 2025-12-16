@@ -231,10 +231,7 @@ public class DbWorker(
 
         var fromDb = await webhooksDbContext.WebhooksLogAsync(tenantId, id);
 
-        if (fromDb != null)
-        {
-            fromDb.Log.Config = fromDb.Config;
-        }
+        fromDb?.Log.Config = fromDb.Config;
 
         return fromDb?.Log;
     }

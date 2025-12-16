@@ -105,19 +105,19 @@ public partial class TextileFormatter
 
     public bool FormatImages
     {
-        get { return IsBlockModifierEnabled(typeof(ImageBlockModifier)); }
-        set { SwitchBlockModifier(typeof(ImageBlockModifier), value); }
+        get => IsBlockModifierEnabled(typeof(ImageBlockModifier));
+        set => SwitchBlockModifier(typeof(ImageBlockModifier), value);
     }
 
     public bool FormatLinks
     {
-        get { return IsBlockModifierEnabled(typeof(HyperLinkBlockModifier)); }
-        set { SwitchBlockModifier(typeof(HyperLinkBlockModifier), value); }
+        get => IsBlockModifierEnabled(typeof(HyperLinkBlockModifier));
+        set => SwitchBlockModifier(typeof(HyperLinkBlockModifier), value);
     }
 
     public bool FormatLists
     {
-        get { return IsBlockModifierEnabled(typeof(OrderedListFormatterState)); }
+        get => IsBlockModifierEnabled(typeof(OrderedListFormatterState));
         set
         {
             SwitchBlockModifier(typeof(OrderedListFormatterState), value);
@@ -127,7 +127,7 @@ public partial class TextileFormatter
 
     public bool FormatFootNotes
     {
-        get { return IsBlockModifierEnabled(typeof(FootNoteReferenceBlockModifier)); }
+        get => IsBlockModifierEnabled(typeof(FootNoteReferenceBlockModifier));
         set
         {
             SwitchBlockModifier(typeof(FootNoteReferenceBlockModifier), value);
@@ -137,7 +137,7 @@ public partial class TextileFormatter
 
     public bool FormatTables
     {
-        get { return IsFormatterStateEnabled(typeof(TableFormatterState)); }
+        get => IsFormatterStateEnabled(typeof(TableFormatterState));
         set
         {
             SwitchFormatterState(typeof(TableFormatterState), value);

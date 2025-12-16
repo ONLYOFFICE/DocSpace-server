@@ -59,7 +59,7 @@ public class UserGroupRef
 
     public static string CreateKey(int tenant, Guid userId, Guid groupId, UserGroupRefType refType)
     {
-        return tenant + userId.ToString("N") + groupId.ToString("N") + ((int)refType);
+        return tenant + userId.ToString("N") + groupId.ToString("N") + (int)refType;
     }
 
     public string CreateKey()

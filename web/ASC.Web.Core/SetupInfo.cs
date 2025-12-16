@@ -50,7 +50,7 @@ public class SetupInfo
     public long ProviderMaxUploadSize { get; private set; }
     public bool ThirdPartyAuthEnabled { get; private set; }
     public string TipsAddress { get; private set; }
-    public string WebApiBaseUrl { get { return VirtualPathUtility.ToAbsolute(GetAppSettings("api.url", "~/api/2.0/")); } }
+    public string WebApiBaseUrl => VirtualPathUtility.ToAbsolute(GetAppSettings("api.url", "~/api/2.0/"));
 
     public static bool IsSecretEmail(string email)
     {

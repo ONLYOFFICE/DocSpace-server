@@ -112,6 +112,16 @@ public class WebPluginDto
     /// The web plugin settings.
     /// </summary>
     public required string Settings { get; set; }
+
+    /// <summary>
+    /// The web plugin localized name.
+    /// </summary>
+    public Dictionary<string, string> NameLocale { get; set; }
+
+    /// <summary>
+    /// The web plugin localized description.
+    /// </summary>
+    public Dictionary<string, string> DescriptionLocale { get; set; }
 }
 
 [Scope]

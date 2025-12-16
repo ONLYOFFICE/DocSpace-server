@@ -1,0 +1,184 @@
+# {{packageName}}
+
+The ONLYOFFICE DocSpace SDK for Java is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace API by offering ready-to-use methods and models.
+
+{{#infoUrl}}
+For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
+{{/infoUrl}}
+
+## Requirements
+
+Building the API client library requires:
+
+1. Java 1.8+
+2. Maven/Gradle
+
+## Getting Started
+
+Please follow the [installation](#installation) instruction and execute the following Java code:
+
+```java
+{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}
+import {{{invokerPackage}}}.*;
+import {{{invokerPackage}}}.auth.*;
+import {{{modelPackage}}}.*;
+import {{{package}}}.{{{classname}}};
+
+public class {{{classname}}}Example {
+
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+        defaultClient.setBasePath("{{{basePath}}}");
+        {{#hasAuthMethods}}{{#authMethods}}{{#isBasic}}{{#isBasicBasic}}
+        // Configure HTTP basic authorization: {{{name}}}
+        HttpBasicAuth {{{name}}} = (HttpBasicAuth) defaultClient.getAuthentication("{{{name}}}");
+        {{{name}}}.setUsername("YOUR USERNAME");
+        {{{name}}}.setPassword("YOUR PASSWORD");{{/isBasicBasic}}{{#isBasicBearer}}
+        // Configure HTTP bearer authorization: {{{name}}}
+        HttpBearerAuth {{{name}}} = (HttpBearerAuth) defaultClient.getAuthentication("{{{name}}}");
+        {{{name}}}.setBearerToken("BEARER TOKEN");{{/isBasicBearer}}{{/isBasic}}{{#isApiKey}}
+        // Configure API key authorization: {{{name}}}
+        ApiKeyAuth {{{name}}} = (ApiKeyAuth) defaultClient.getAuthentication("{{{name}}}");
+        {{{name}}}.setApiKey("YOUR API KEY");
+        // Uncomment the following line to set a prefix for the API key, e.g. "Token" (defaults to null)
+        //{{{name}}}.setApiKeyPrefix("Token");{{/isApiKey}}{{#isOAuth}}
+        // Configure OAuth2 access token for authorization: {{{name}}}
+        OAuth {{{name}}} = (OAuth) defaultClient.getAuthentication("{{{name}}}");
+        {{{name}}}.setAccessToken("YOUR ACCESS TOKEN");{{/isOAuth}}{{#isHttpSignature}}
+        // Configure HTTP signature authorization: {{{name}}}
+        HttpSignatureAuth {{{name}}} = (HttpSignatureAuth) defaultClient.getAuthentication("{{{name}}}");
+        // All the HTTP signature parameters below should be customized to your environment.
+        // Configure the keyId
+        {{{name}}}.setKeyId("YOUR KEY ID");
+        // Configure the signature algorithm
+        {{{name}}}.setSigningAlgorithm(SigningAlgorithm.HS2019);
+        // Configure the specific cryptographic algorithm
+        {{{name}}}.setAlgorithm(Algorithm.ECDSA_SHA256);
+        // Configure the cryptographic algorithm parameters, if applicable
+        {{{name}}}.setAlgorithmParameterSpec(null);
+        // Set the cryptographic digest algorithm.
+        {{{name}}}.setDigestAlgorithm("SHA-256");
+        // Set the HTTP headers that should be included in the HTTP signature.
+        {{{name}}}.setHeaders(Arrays.asList("date", "host"));
+        // Set the private key used to sign the HTTP messages
+        {{{name}}}.setPrivateKey();{{/isHttpSignature}}
+        {{/authMethods}}
+        {{/hasAuthMethods}}
+
+        {{{classname}}} apiInstance = new {{{classname}}}(defaultClient);
+        {{#allParams}}
+        {{{dataType}}} {{{paramName}}} = {{{example}}}; // {{{dataType}}} | {{{description}}}
+        {{/allParams}}
+        try {
+            {{#returnType}}{{{returnType}}} result = {{/returnType}}apiInstance.{{{operationId}}}({{#allParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{/allParams}});{{#returnType}}
+            System.out.println(result);{{/returnType}}
+        } catch (ApiException e) {
+            System.err.println("Exception when calling {{{classname}}}#{{{operationId}}}");
+            System.err.println("Status code: " + e.getCode());
+            System.err.println("Reason: " + e.getResponseBody());
+            System.err.println("Response headers: " + e.getResponseHeaders());
+            e.printStackTrace();
+        }
+    }
+}
+{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}
+```
+## Documentation for Authorization
+
+{{^authMethods}}Endpoints do not require authorization.{{/authMethods}}
+{{#hasAuthMethods}}Authentication schemes defined for the API:{{/hasAuthMethods}}
+{{#authMethods}}
+<a id="{{name}}"></a>
+### {{name}}
+
+{{#isApiKey}}
+
+- **Type**: API key
+- **API key parameter name**: {{keyParamName}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}
+{{/isApiKey}}
+{{#isBasicBasic}}
+
+- **Type**: HTTP basic authentication
+{{/isBasicBasic}}
+{{#isBasicBearer}}
+
+- **Type**: HTTP Bearer Token authentication{{#bearerFormat}} ({{{.}}}){{/bearerFormat}}
+{{/isBasicBearer}}
+{{#isHttpSignature}}
+
+- **Type**: HTTP signature authentication
+{{/isHttpSignature}}
+{{#isOAuth}}
+
+- **Type**: OAuth
+- **Flow**: {{flow}}
+- **Authorization URL**: {{x-authorizationUrl}}
+- **Token Url**: {{x-tokenUrl}}
+- **Scopes**: {{^scopes}}N/A{{/scopes}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOAuth}}
+{{#isOpenId}}
+
+- **Type**: OpenId Connect
+- **OpenId Connect URL**: {{x-openIdConnectUrl}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOpenId}}
+{{/authMethods}}
+
+## Documentation for API Endpoints
+
+All URIs are relative to *https://your-docspace.onlyoffice.com*
+
+### API Endoints tables:
+
+{{#customApis}}
+<details>
+  <summary>{{folder}}</summary>
+
+  <table>
+    <tbody>
+      <tr>
+        <th>Method</th>
+        <th>HTTP request</th>
+        <th>Description</th>
+      </tr>
+      {{#apis}}<tr>
+        <td colspan="3" style="text-align: center;"><strong>{{x-classname}}</strong></td>
+      </tr>
+      {{#operations.operation}}
+      <tr>
+        <td><a href="{{apiDocPath}}{{classname}}.md#{{operationIdLowerCase}}"><strong>{{operationId}}</strong></a></td>
+        <td><strong>{{httpMethod}}</strong> {{path}}</td>
+        <td>{{summary}}</td>
+      </tr>
+      {{/operations.operation}}
+    {{/apis}}</tbody>
+  </table>
+
+</details>
+{{/customApis}}
+
+## Documentation for Models
+
+<details><summary>Models list</summary>
+
+{{#modelPackage}}
+{{#models}}{{#model}} - [{{{modelPackage}}}.{{{classname}}}]({{modelDocPath}}{{{classname}}}.md)
+{{/model}}{{/models}}
+{{/modelPackage}}
+{{^modelPackage}}
+No model defined in this package
+{{/modelPackage}}
+</details>
+
+## Recommendation
+
+It's recommended to create an instance of `ApiClient` per thread in a multithreaded environment to avoid any potential issues.
+
+## Author
+
+{{#apiInfo}}{{#apis}}{{#-last}}{{infoEmail}}
+{{/-last}}{{/apis}}{{/apiInfo}}

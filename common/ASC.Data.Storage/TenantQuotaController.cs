@@ -38,17 +38,16 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         {
             if (!_lazyCurrentSize.IsValueCreated)
             {
-                return _currentSize = _lazyCurrentSize.Value;
+                return field = _lazyCurrentSize.Value;
             }
 
-            return _currentSize;
+            return field;
         }
-        set => _currentSize = value;
+        set;
     }
 
     private int _tenant;
     private Lazy<long> _lazyCurrentSize;
-    private long _currentSize;
     public string ExcludePattern { get; set; }
 
     public void Init(int tenant, string excludePattern = null)

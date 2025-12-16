@@ -28,25 +28,13 @@ namespace ASC.Web.Core.Jabber;
 
 public class FireBase : Consumer
 {
-    public string Authorization
-    {
-        get { return this["firebase_authorization"]; }
-    }
+    public string Authorization => this["firebase_authorization"];
 
-    public string ProjectId
-    {
-        get { return this["firebase_projectId"]; }
-    }
+    public string ProjectId => this["firebase_projectId"];
 
-    public string ApiKey
-    {
-        get { return this["firebase_apiKey"]; }
-    }
+    public string ApiKey => this["firebase_apiKey"];
 
-    public string MessagingSenderId
-    {
-        get { return this["firebase_messagingSenderId"]; }
-    }
+    public string MessagingSenderId => this["firebase_messagingSenderId"];
 
     public FireBase()
     {

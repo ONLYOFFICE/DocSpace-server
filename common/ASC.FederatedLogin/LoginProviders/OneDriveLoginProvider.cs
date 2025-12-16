@@ -40,15 +40,10 @@ public class OneDriveLoginProvider : Consumer, IOAuthProvider
     public string ClientID => this["skydriveappkey"];
     public string ClientSecret => this["skydriveappsecret"];
 
-    public bool IsEnabled
-    {
-        get
-        {
-            return !string.IsNullOrEmpty(ClientID) &&
-                   !string.IsNullOrEmpty(ClientSecret) &&
-                   !string.IsNullOrEmpty(RedirectUri);
-        }
-    }
+    public bool IsEnabled =>
+        !string.IsNullOrEmpty(ClientID) &&
+        !string.IsNullOrEmpty(ClientSecret) &&
+        !string.IsNullOrEmpty(RedirectUri);
 
     public OneDriveLoginProvider() { }
 

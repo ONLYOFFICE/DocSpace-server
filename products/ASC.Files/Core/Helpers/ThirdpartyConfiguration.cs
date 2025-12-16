@@ -29,8 +29,7 @@ namespace ASC.Web.Files.Helpers;
 [Singleton]
 public class ThirdpartyConfigurationData(IConfiguration configuration)
 {
-    private HashSet<string> _thirdPartyProviders;
-    public HashSet<string> ThirdPartyProviders => _thirdPartyProviders ??=
+    public HashSet<string> ThirdPartyProviders => field ??=
         configuration.GetSection("files:thirdparty:enable").Get<HashSet<string>>() ?? [];
 }
 
@@ -40,17 +39,13 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
     private BoxLoginProvider _boxLoginProvider;
     private BoxLoginProvider BoxLoginProvider => _boxLoginProvider ??= consumerFactory.Get<BoxLoginProvider>();
 
-    private DropboxLoginProvider _dropboxLoginProvider;
-    private DropboxLoginProvider DropboxLoginProvider => _dropboxLoginProvider ??= consumerFactory.Get<DropboxLoginProvider>();
+    private DropboxLoginProvider DropboxLoginProvider => field ??= consumerFactory.Get<DropboxLoginProvider>();
 
-    private OneDriveLoginProvider _oneDriveLoginProvider;
-    private OneDriveLoginProvider OneDriveLoginProvider => _oneDriveLoginProvider ??= consumerFactory.Get<OneDriveLoginProvider>();
+    private OneDriveLoginProvider OneDriveLoginProvider => field ??= consumerFactory.Get<OneDriveLoginProvider>();
 
-    private DocuSignLoginProvider _docuSignLoginProvider;
-    private DocuSignLoginProvider DocuSignLoginProvider => _docuSignLoginProvider ??= consumerFactory.Get<DocuSignLoginProvider>();
+    private DocuSignLoginProvider DocuSignLoginProvider => field ??= consumerFactory.Get<DocuSignLoginProvider>();
 
-    private GoogleLoginProvider _googleLoginProvider;
-    private GoogleLoginProvider GoogleLoginProvider => _googleLoginProvider ??= consumerFactory.Get<GoogleLoginProvider>();
+    private GoogleLoginProvider GoogleLoginProvider => field ??= consumerFactory.Get<GoogleLoginProvider>();
 
     private HashSet<string> ThirdPartyProviders => configuration.ThirdPartyProviders;
 
@@ -99,7 +94,7 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
     private static string YandexKey => "yandex";
     private static string DocuSignKey => "docusign";
 
-    public List<ProviderDto> GetAllProviders()
+    public List<ProviderDto> GetAllProviders(bool excludeWebDav)
     {
         var webDavKey = ProviderTypes.WebDav.ToStringFast();
 
@@ -127,6 +122,11 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
         {
             providers.Add(new ProviderDto("OneDrive", ProviderTypes.OneDrive.ToStringFast(), OneDriveLoginProvider.IsEnabled, true, OneDriveLoginProvider.RedirectUri,
                 ClientId: OneDriveLoginProvider.ClientID));
+        }
+
+        if (excludeWebDav)
+        {
+            return providers;
         }
 
         if (ThirdPartyProviders.Contains(KDriveKey))

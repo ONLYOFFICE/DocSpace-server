@@ -58,86 +58,89 @@ public static class DbFilesTagLinkExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbFilesTagLink(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbFilesTagLink>(entity =>
+        public void MySqlAddDbFilesTagLink()
         {
-            entity.HasKey(e => new { e.TenantId, e.TagId, e.EntryId, e.EntryType })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbFilesTagLink>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.TagId, e.EntryId, e.EntryType })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("files_tag_link")
-                .HasCharSet("utf8");
+                entity.ToTable("files_tag_link")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.CreateOn)
-                .HasDatabaseName("create_on");
+                entity.HasIndex(e => e.CreateOn)
+                    .HasDatabaseName("create_on");
 
-            entity.HasIndex(e => new { e.TenantId, e.EntryId, e.EntryType })
-                .HasDatabaseName("entry_id");
+                entity.HasIndex(e => new { e.TenantId, e.EntryId, e.EntryType })
+                    .HasDatabaseName("entry_id");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.TagId).HasColumnName("tag_id");
+                entity.Property(e => e.TagId).HasColumnName("tag_id");
 
-            entity.Property(e => e.EntryId)
-                .HasColumnName("entry_id")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.EntryId)
+                    .HasColumnName("entry_id")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.EntryType).HasColumnName("entry_type");
+                entity.Property(e => e.EntryType).HasColumnName("entry_type");
 
-            entity.Property(e => e.CreateBy)
-                .HasColumnName("create_by")
-                .HasColumnType("char(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.CreateBy)
+                    .HasColumnName("create_by")
+                    .HasColumnType("char(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.CreateOn)
-                .HasColumnName("create_on")
-                .HasColumnType("datetime");
+                entity.Property(e => e.CreateOn)
+                    .HasColumnName("create_on")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.Count)
-                .HasColumnName("tag_count")
-                .HasDefaultValueSql("'0'");
-        });
-    }
+                entity.Property(e => e.Count)
+                    .HasColumnName("tag_count")
+                    .HasDefaultValueSql("'0'");
+            });
+        }
 
-    public static void PgSqlAddDbFilesTagLink(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbFilesTagLink>(entity =>
+        public void PgSqlAddDbFilesTagLink()
         {
-            entity.HasKey(e => new { e.TenantId, e.TagId, e.EntryId, e.EntryType })
-                .HasName("pk_files_tag_link");
+            modelBuilder.Entity<DbFilesTagLink>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.TagId, e.EntryId, e.EntryType })
+                    .HasName("pk_files_tag_link");
 
-            entity.ToTable("files_tag_link");
+                entity.ToTable("files_tag_link");
 
-            entity.HasIndex(e => e.CreateOn)
-                .HasDatabaseName("idx_create_on");
+                entity.HasIndex(e => e.CreateOn)
+                    .HasDatabaseName("idx_create_on");
 
-            entity.HasIndex(e => new { e.TenantId, e.EntryId, e.EntryType })
-                .HasDatabaseName("idx_entry_id");
+                entity.HasIndex(e => new { e.TenantId, e.EntryId, e.EntryType })
+                    .HasDatabaseName("idx_entry_id");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.TagId).HasColumnName("tag_id");
+                entity.Property(e => e.TagId).HasColumnName("tag_id");
 
-            entity.Property(e => e.EntryId)
-                .HasColumnName("entry_id")
-                .HasColumnType("varchar(32)");
+                entity.Property(e => e.EntryId)
+                    .HasColumnName("entry_id")
+                    .HasColumnType("varchar(32)");
 
-            entity.Property(e => e.EntryType).HasColumnName("entry_type");
+                entity.Property(e => e.EntryType).HasColumnName("entry_type");
 
-            entity.Property(e => e.CreateBy)
-                .HasColumnName("create_by")
-                .HasColumnType("uuid");
+                entity.Property(e => e.CreateBy)
+                    .HasColumnName("create_by")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.CreateOn)
-                .HasColumnName("create_on")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.CreateOn)
+                    .HasColumnName("create_on")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.Count)
-                .HasColumnName("tag_count")
-                .HasDefaultValue(0);
-        });
+                entity.Property(e => e.Count)
+                    .HasColumnName("tag_count")
+                    .HasDefaultValue(0);
+            });
+        }
     }
 }

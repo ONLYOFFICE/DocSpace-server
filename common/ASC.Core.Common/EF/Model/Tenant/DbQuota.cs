@@ -325,121 +325,125 @@ public static class DbQuotaExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbQuota(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbQuota>(entity =>
+        public void MySqlAddDbQuota()
         {
-            entity.HasKey(e => e.TenantId)
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbQuota>(entity =>
+            {
+                entity.HasKey(e => e.TenantId)
+                    .HasName("PRIMARY");
 
-            entity.ToTable("tenants_quota")
-                .HasCharSet("utf8");
+                entity.ToTable("tenants_quota")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant")
-                .ValueGeneratedNever();
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant")
+                    .ValueGeneratedNever();
 
-            entity.Property(e => e.ProductId)
-                .HasColumnName("product_id")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.ProductId)
+                    .HasColumnName("product_id")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.ServiceName)
-                .HasColumnName("service_name")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.ServiceName)
+                    .HasColumnName("service_name")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.ServiceGroup)
-                .HasColumnName("service_group")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.ServiceGroup)
+                    .HasColumnName("service_group")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Description)
-                .HasColumnName("description")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Description)
+                    .HasColumnName("description")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Features)
-                .HasColumnName("features")
-                .HasColumnType("text");
+                entity.Property(e => e.Features)
+                    .HasColumnName("features")
+                    .HasColumnType("text");
 
-            entity.Property(e => e.Name)
-                .HasColumnName("name")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Name)
+                    .HasColumnName("name")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Price)
-                .HasColumnName("price")
-                .HasDefaultValueSql("'0.00'")
-                .HasColumnType("decimal(15,9)");
+                entity.Property(e => e.Price)
+                    .HasColumnName("price")
+                    .HasDefaultValueSql("'0.00'")
+                    .HasColumnType("decimal(15,9)");
 
-            entity.Property(e => e.Visible)
-                .HasColumnName("visible")
-                .HasColumnType("tinyint(1)")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.Visible)
+                    .HasColumnName("visible")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.Wallet)
-                .HasColumnName("wallet")
-                .HasColumnType("tinyint(1)")
-                .HasDefaultValueSql("'0'");
-        });
-    }
-    public static void PgSqlAddDbQuota(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbQuota>(entity =>
+                entity.Property(e => e.Wallet)
+                    .HasColumnName("wallet")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("'0'");
+            });
+        }
+
+        public void PgSqlAddDbQuota()
         {
-            entity.HasKey(e => e.TenantId);
+            modelBuilder.Entity<DbQuota>(entity =>
+            {
+                entity.HasKey(e => e.TenantId);
 
-            entity.ToTable("tenants_quota");
+                entity.ToTable("tenants_quota");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant")
-                .ValueGeneratedNever();
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant")
+                    .ValueGeneratedNever();
 
-            entity.Property(e => e.ProductId)
-                .HasColumnName("product_id")
-                .HasColumnType("varchar(128)");
+                entity.Property(e => e.ProductId)
+                    .HasColumnName("product_id")
+                    .HasColumnType("varchar(128)");
 
-            entity.Property(e => e.ServiceName)
-                .HasColumnName("service_name")
-                .HasColumnType("varchar(128)");
+                entity.Property(e => e.ServiceName)
+                    .HasColumnName("service_name")
+                    .HasColumnType("varchar(128)");
 
-            entity.Property(e => e.ServiceGroup)
-                .HasColumnName("service_group")
-                .HasColumnType("varchar(128)");
+                entity.Property(e => e.ServiceGroup)
+                    .HasColumnName("service_group")
+                    .HasColumnType("varchar(128)");
 
-            entity.Property(e => e.Description)
-                .HasColumnName("description")
-                .HasColumnType("varchar(128)");
+                entity.Property(e => e.Description)
+                    .HasColumnName("description")
+                    .HasColumnType("varchar(128)");
 
-            entity.Property(e => e.Features)
-                .HasColumnName("features")
-                .HasColumnType("text");
+                entity.Property(e => e.Features)
+                    .HasColumnName("features")
+                    .HasColumnType("text");
 
-            entity.Property(e => e.Name)
-                .HasColumnName("name")
-                .HasColumnType("varchar(128)");
+                entity.Property(e => e.Name)
+                    .HasColumnName("name")
+                    .HasColumnType("varchar(128)");
 
-            entity.Property(e => e.Price)
-                .HasColumnName("price")
-                .HasDefaultValue(0.00m)
-                .HasColumnType("decimal(15,9)");
+                entity.Property(e => e.Price)
+                    .HasColumnName("price")
+                    .HasDefaultValue(0.00m)
+                    .HasColumnType("decimal(15,9)");
 
-            entity.Property(e => e.Visible)
-                .HasColumnName("visible")
-                .HasColumnType("boolean")
-                .HasDefaultValue(false);
+                entity.Property(e => e.Visible)
+                    .HasColumnName("visible")
+                    .HasColumnType("boolean")
+                    .HasDefaultValue(false);
 
-            entity.Property(e => e.Wallet)
-                .HasColumnName("wallet")
-                .HasColumnType("boolean")
-                .HasDefaultValue(false);
-        });
+                entity.Property(e => e.Wallet)
+                    .HasColumnName("wallet")
+                    .HasColumnType("boolean")
+                    .HasDefaultValue(false);
+            });
 
+        }
     }
 }

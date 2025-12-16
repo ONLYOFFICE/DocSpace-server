@@ -466,7 +466,7 @@ public partial class SettingsController(
     public async Task<TenantDeepLinkSettings> ConfigureDeepLink(DeepLinkConfigurationRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        if (!Enum.IsDefined(typeof(DeepLinkHandlingMode), inDto.DeepLinkSettings.HandlingMode))
+        if (!Enum.IsDefined(inDto.DeepLinkSettings.HandlingMode))
         {
             throw new ArgumentException(nameof(inDto.DeepLinkSettings.HandlingMode));
         }
@@ -899,12 +899,23 @@ public partial class SettingsController(
         }
 
         var oldTimeZone = tenant.TimeZone;
-        var timeZones = TimeZoneInfo.GetSystemTimeZones().ToList();
-        if (timeZones.All(tz => tz.Id != "UTC"))
+        var newTimeZone = TimeZoneInfo.Utc;
+
+        try
         {
-            timeZones.Add(TimeZoneInfo.Utc);
+            newTimeZone = TimeZoneInfo.FindSystemTimeZoneById(inDto.TimeZoneID);
         }
-        tenant.TimeZone = timeZones.FirstOrDefault(tz => tz.Id == inDto.TimeZoneID)?.Id ?? TimeZoneInfo.Utc.Id;
+        catch
+        {
+            var timeZones = TimeZoneInfo.GetSystemTimeZones().ToList();
+            if (timeZones.All(tz => tz.Id != "UTC"))
+            {
+                timeZones.Add(TimeZoneInfo.Utc);
+            }
+            newTimeZone = timeZones.FirstOrDefault(tz => tz.Id == inDto.TimeZoneID) ?? TimeZoneInfo.Utc;
+        }
+
+        tenant.TimeZone = timeZoneConverter.GetIanaTimeZoneId(newTimeZone);
 
         await tenantManager.SaveTenantAsync(tenant);
 

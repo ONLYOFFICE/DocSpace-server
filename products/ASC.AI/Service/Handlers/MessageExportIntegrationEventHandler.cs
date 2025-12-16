@@ -26,32 +26,31 @@
 
 using ASC.AI.Core.Export;
 
-namespace ASC.AI.Service.Handlers
+namespace ASC.AI.Service.Handlers;
+
+[Scope]
+public class MessageExportIntegrationEventHandler(
+    ILogger<MessageExportIntegrationEventHandler> logger,
+    TenantManager tenantManager,
+    SecurityContext securityContext,
+    AuthManager authManager,
+    IServiceProvider serviceProvider,
+    ExportTaskService<MessageExportTask, MessageExportTaskData> service)
+    : IIntegrationEventHandler<MessageExportIntegrationEvent>
 {
-    [Scope]
-    public class MessageExportIntegrationEventHandler(
-        ILogger<MessageExportIntegrationEventHandler> logger,
-        TenantManager tenantManager,
-        SecurityContext securityContext,
-        AuthManager authManager,
-        IServiceProvider serviceProvider,
-        ExportTaskService<MessageExportTask, MessageExportTaskData> service)
-        : IIntegrationEventHandler<MessageExportIntegrationEvent>
+    public async Task Handle(MessageExportIntegrationEvent @event)
     {
-        public async Task Handle(MessageExportIntegrationEvent @event)
+        CustomSynchronizationContext.CreateContext();
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            CustomSynchronizationContext.CreateContext();
-            using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
-            {
-                logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-                _ = await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-                await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            _ = await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
 
-                var task = serviceProvider.GetRequiredService<MessageExportTask>();
-                task.Init(@event.TenantId, @event.CreateBy, @event.Data);
+            var task = serviceProvider.GetRequiredService<MessageExportTask>();
+            task.Init(@event.TenantId, @event.CreateBy, @event.Data);
 
-                await service.StartAsync(task);
-            }
+            await service.StartAsync(task);
         }
     }
 }

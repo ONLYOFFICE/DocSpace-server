@@ -36,36 +36,39 @@ public class McpServerInfo
 
 public static class FunctionCallContentExtension
 {
-    public static void MarkAsManaged(this FunctionCallContent functionCallContent)
+    extension(FunctionCallContent functionCallContent)
     {
-        functionCallContent.AdditionalProperties ??= new AdditionalPropertiesDictionary();
-        functionCallContent.AdditionalProperties.Add("managed", true);
-    }
-
-    public static bool IsManaged(this FunctionCallContent functionCallContent)
-    {
-        return functionCallContent.AdditionalProperties is not null && 
-            functionCallContent.AdditionalProperties.ContainsKey("managed");
-    }
-    
-    public static void AddMcpServerData(this FunctionCallContent functionCallContent, McpServerInfo mcpServerInfo)
-    {
-        functionCallContent.AdditionalProperties ??= new AdditionalPropertiesDictionary();
-        functionCallContent.AdditionalProperties.Add("mcpServerData", mcpServerInfo);
-    }
-
-    public static McpServerInfo? GetMcpServerInfo(this FunctionCallContent functionCallContent)
-    {
-        if (functionCallContent.AdditionalProperties is null)
+        public void MarkAsManaged()
         {
-            return null;
+            functionCallContent.AdditionalProperties ??= new AdditionalPropertiesDictionary();
+            functionCallContent.AdditionalProperties.Add("managed", true);
         }
-        
-        if (!functionCallContent.AdditionalProperties.TryGetValue("mcpServerData", out var mcpServerData))
+
+        public bool IsManaged()
         {
-            return null;
+            return functionCallContent.AdditionalProperties is not null && 
+                   functionCallContent.AdditionalProperties.ContainsKey("managed");
         }
+
+        public void AddMcpServerData(McpServerInfo mcpServerInfo)
+        {
+            functionCallContent.AdditionalProperties ??= new AdditionalPropertiesDictionary();
+            functionCallContent.AdditionalProperties.Add("mcpServerData", mcpServerInfo);
+        }
+
+        public McpServerInfo? GetMcpServerInfo()
+        {
+            if (functionCallContent.AdditionalProperties is null)
+            {
+                return null;
+            }
         
-        return mcpServerData as McpServerInfo;
+            if (!functionCallContent.AdditionalProperties.TryGetValue("mcpServerData", out var mcpServerData))
+            {
+                return null;
+            }
+        
+            return mcpServerData as McpServerInfo;
+        }
     }
 }

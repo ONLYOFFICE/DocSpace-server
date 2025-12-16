@@ -135,7 +135,7 @@ public class ManagedFunctionInvokingChatClient(
                 {
                     FunctionInvocationStatus.NotFound => $"Error: Requested function \"{result.CallContent.Name}\" not found.",
                     FunctionInvocationStatus.Exception => "Error: Function failed.",
-                    _ => "Error: Unknown error.",
+                    _ => "Error: Unknown error."
                 };
 
                 if (IncludeDetailedErrors && result.Exception is not null)

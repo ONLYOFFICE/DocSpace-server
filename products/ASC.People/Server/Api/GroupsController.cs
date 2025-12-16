@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Files.Utils;
+
 namespace ASC.People.Api;
 
 ///<summary>
@@ -414,16 +416,18 @@ public class GroupController(
 public class GroupControllerInternal(
     ApiContext apiContext,
     IDaoFactory daoFactory,
+    FileSharing fileSharing,
     FileSecurity fileSecurity,
     GroupFullDtoHelper groupFullDtoHelper)
-    : GroupControllerAdditional<int>(apiContext, daoFactory, fileSecurity, groupFullDtoHelper);
+    : GroupControllerAdditional<int>(apiContext, daoFactory, fileSharing, fileSecurity, groupFullDtoHelper);
 
 public class GroupControllerThirdParty(
     ApiContext apiContext,
     IDaoFactory daoFactory,
+    FileSharing fileSharing,
     FileSecurity fileSecurity,
     GroupFullDtoHelper groupFullDtoHelper)
-    : GroupControllerAdditional<string>(apiContext, daoFactory, fileSecurity, groupFullDtoHelper);
+    : GroupControllerAdditional<string>(apiContext, daoFactory, fileSharing, fileSecurity, groupFullDtoHelper);
 
 [Scope]
 [DefaultRoute]
@@ -432,6 +436,7 @@ public class GroupControllerThirdParty(
 public class GroupControllerAdditional<T>(
     ApiContext apiContext,
     IDaoFactory daoFactory,
+    FileSharing fileSharing,
     FileSecurity fileSecurity,
     GroupFullDtoHelper groupFullDtoHelper) : ControllerBase
 {
@@ -505,14 +510,15 @@ public class GroupControllerAdditional<T>(
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var text = inDto.Text;
-
+        
+        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.Group, null, inDto.Text, 0, int.MaxValue).Select(r=> r.Id).ToListAsync();
         var securityDao = daoFactory.GetSecurityDao<T>();
 
-        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false);
+        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false, parentUserIds);
 
         apiContext.SetCount(Math.Min(Math.Max(totalGroups - offset, 0), count)).SetTotalCount(totalGroups);
 
-        await foreach (var item in securityDao.GetGroupsWithSharedAsync(fileEntry, text, inDto.ExcludeShared ?? false, offset, count))
+        await foreach (var item in securityDao.GetGroupsWithSharedAsync(fileEntry, text, inDto.ExcludeShared ?? false, offset, count, parentUserIds))
         {
             yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);
         }

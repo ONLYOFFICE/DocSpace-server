@@ -178,7 +178,7 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider, IDistribute
             Warning = operation.Warning
         };
 
-        if (!(string.IsNullOrEmpty(result.Warning)))
+        if (!string.IsNullOrEmpty(result.Warning))
         {
             operation.Warning = ""; // "mark" as read
         }

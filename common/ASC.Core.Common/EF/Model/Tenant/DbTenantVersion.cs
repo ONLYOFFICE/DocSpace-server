@@ -48,70 +48,74 @@ public static class DbTenantVersionExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbTenantVersion(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbTenantVersion>(entity =>
+        public void MySqlAddDbTenantVersion()
         {
-            entity.ToTable("tenants_version")
-                .HasCharSet("utf8");
+            modelBuilder.Entity<DbTenantVersion>(entity =>
+            {
+                entity.ToTable("tenants_version")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .ValueGeneratedNever();
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .ValueGeneratedNever();
 
-            entity.Property(e => e.DefaultVersion)
-                .HasColumnName("default_version")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.DefaultVersion)
+                    .HasColumnName("default_version")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.Url)
-                .IsRequired()
-                .HasColumnName("url")
-                .HasColumnType("varchar(64)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Url)
+                    .IsRequired()
+                    .HasColumnName("url")
+                    .HasColumnType("varchar(64)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Version)
-                .IsRequired()
-                .HasColumnName("version")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Version)
+                    .IsRequired()
+                    .HasColumnName("version")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Visible)
-                .HasColumnName("visible")
-                .HasColumnType("tinyint(1)")
-                .HasDefaultValueSql("'0'");
-        });
+                entity.Property(e => e.Visible)
+                    .HasColumnName("visible")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("'0'");
+            });
 
-    }
-    public static void PgSqlAddDbTenantVersion(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbTenantVersion>(entity =>
+        }
+
+        public void PgSqlAddDbTenantVersion()
         {
-            entity.ToTable("tenants_version");
+            modelBuilder.Entity<DbTenantVersion>(entity =>
+            {
+                entity.ToTable("tenants_version");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .ValueGeneratedNever();
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .ValueGeneratedNever();
 
-            entity.Property(e => e.DefaultVersion)
-                .HasColumnName("default_version")
-                .HasDefaultValue(0);
+                entity.Property(e => e.DefaultVersion)
+                    .HasColumnName("default_version")
+                    .HasDefaultValue(0);
 
-            entity.Property(e => e.Url)
-                .IsRequired()
-                .HasColumnName("url")
-                .HasColumnType("character varying(64)");
+                entity.Property(e => e.Url)
+                    .IsRequired()
+                    .HasColumnName("url")
+                    .HasColumnType("character varying(64)");
 
-            entity.Property(e => e.Version)
-                .IsRequired()
-                .HasColumnName("version")
-                .HasColumnType("character varying(64)");
+                entity.Property(e => e.Version)
+                    .IsRequired()
+                    .HasColumnName("version")
+                    .HasColumnType("character varying(64)");
 
-            entity.Property(e => e.Visible)
-                .HasColumnName("visible")
-                .HasColumnType("boolean")
-                .HasDefaultValue(false);
-        });
+                entity.Property(e => e.Visible)
+                    .HasColumnName("visible")
+                    .HasColumnType("boolean")
+                    .HasDefaultValue(false);
+            });
+        }
     }
 }

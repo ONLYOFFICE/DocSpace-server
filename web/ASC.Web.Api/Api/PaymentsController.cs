@@ -247,7 +247,7 @@ public class PaymentController(
         var quota = (await quotaService.GetTenantQuotasAsync())
             .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == productName);
 
-        if (quota == null || !quota.Wallet)
+        if (quota is not { Wallet: true })
         {
             return false;
         }
@@ -279,7 +279,7 @@ public class PaymentController(
 
         // inDto.ProductQuantityType === ProductQuantityType.Add
 
-        if (!productQty.HasValue || productQty <= 0)
+        if (productQty is null or <= 0)
         {
             return false;
         }
@@ -363,12 +363,12 @@ public class PaymentController(
         var quota = (await quotaService.GetTenantQuotasAsync())
             .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == productName);
 
-        if (quota == null || !quota.Wallet)
+        if (quota is not { Wallet: true })
         {
             return null;
         }
 
-        if (!productQty.HasValue || productQty <= 0)
+        if (productQty is null or <= 0)
         {
             return null;
         }
@@ -712,7 +712,7 @@ public class PaymentController(
         var tenant = tenantManager.GetCurrentTenant();
 
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null || customerInfo.PaymentMethodStatus != PaymentMethodStatus.Set)
+        if (customerInfo is not { PaymentMethodStatus: PaymentMethodStatus.Set })
         {
             return false;
         }

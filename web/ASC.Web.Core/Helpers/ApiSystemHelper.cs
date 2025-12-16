@@ -39,10 +39,7 @@ public class ApiSystemHelper
 {
     public string ApiSystemUrl { get; }
 
-    public bool ApiCacheEnable
-    {
-        get => _dynamoDbSettings.ApiCacheEnable;
-    }
+    public bool ApiCacheEnable => _dynamoDbSettings.ApiCacheEnable;
 
     private readonly byte[] _skey;
     private readonly ILogger<ApiSystemHelper> _logger;

@@ -214,6 +214,15 @@ namespace ASC.Migration.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Backup is larger than the total size of the portal.
+        /// </summary>
+        public static string LargeBackup {
+            get {
+                return ResourceManager.GetString("LargeBackup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Migrating user files {0} ({1}/{2}).
         /// </summary>
         public static string MigratingUserFiles {

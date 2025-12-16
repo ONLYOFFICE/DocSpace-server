@@ -34,13 +34,7 @@ public class MigrationGenerator
     private readonly Regex _pattern = new Regex(@"\d+$", RegexOptions.Compiled);
     private readonly string _providerName;
 
-    private string ContextFolderName
-    {
-        get
-        {
-            return _typeName;
-        }
-    }
+    private string ContextFolderName => _typeName;
 
     public MigrationGenerator(DbContext context, Provider provider, string providerInfoProjectPath)
     {

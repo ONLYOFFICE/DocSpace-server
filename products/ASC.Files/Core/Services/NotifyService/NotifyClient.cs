@@ -158,7 +158,7 @@ public class NotifyClient(WorkContext notifyContext,
             else
             {
                 userCulture = string.IsNullOrEmpty(u.CultureName)
-                    ? (tenantManager.GetCurrentTenant()).GetCulture()
+                    ? tenantManager.GetCurrentTenant().GetCulture()
                     : CultureInfo.GetCultureInfo(u.CultureName);
             }
 
@@ -375,7 +375,7 @@ public class NotifyClient(WorkContext notifyContext,
 
             if (ace.SubjectGroup
                 || recepientId == userId
-                || ace.Access != FileShare.RoomManager && ace.Owner != true)
+                || ace.Access != FileShare.RoomManager && !ace.Owner)
             {
                 continue;
             }

@@ -77,7 +77,7 @@ public class FirstTimeTenantSettings(
                 }
             }
 
-            var currentUser = await userManager.GetUsersAsync((tenantManager.GetCurrentTenant()).OwnerId);
+            var currentUser = await userManager.GetUsersAsync(tenantManager.GetCurrentTenant().OwnerId);
 
             if (!UserManagerWrapper.ValidateEmail(email))
             {

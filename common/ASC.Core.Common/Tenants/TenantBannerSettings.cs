@@ -41,11 +41,7 @@ public class TenantBannerSettings : ISettings<TenantBannerSettings>
     /// <summary>
     /// The settings ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{89763892-F2B1-40A2-B2E3-B397FAA7B88A}"); }
-    }
+    public static Guid ID => new("{89763892-F2B1-40A2-B2E3-B397FAA7B88A}");
 
     public TenantBannerSettings GetDefault()
     {

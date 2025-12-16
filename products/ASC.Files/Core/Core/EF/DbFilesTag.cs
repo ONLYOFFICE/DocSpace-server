@@ -50,65 +50,69 @@ public static class DbFilesTagExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbFilesTag(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbFilesTag>(entity =>
+        public void MySqlAddDbFilesTag()
         {
-            entity.ToTable("files_tag")
-                .HasCharSet("utf8");
+            modelBuilder.Entity<DbFilesTag>(entity =>
+            {
+                entity.ToTable("files_tag")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => new { e.TenantId, e.Owner, e.Name, e.Type })
-                .HasDatabaseName("name");
+                entity.HasIndex(e => new { e.TenantId, e.Owner, e.Name, e.Type })
+                    .HasDatabaseName("name");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.Type)
-                .HasColumnName("flag")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.Type)
+                    .HasColumnName("flag")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.Name)
-                .IsRequired()
-                .HasColumnName("name")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasColumnName("name")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Owner)
-                .IsRequired()
-                .HasColumnName("owner")
-                .HasColumnType("varchar(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Owner)
+                    .IsRequired()
+                    .HasColumnName("owner")
+                    .HasColumnType("varchar(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
-        });
-    }
-    public static void PgSqlAddDbFilesTag(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbFilesTag>(entity =>
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            });
+        }
+
+        public void PgSqlAddDbFilesTag()
         {
-            entity.ToTable("files_tag");
+            modelBuilder.Entity<DbFilesTag>(entity =>
+            {
+                entity.ToTable("files_tag");
 
-            entity.HasIndex(e => new { e.TenantId, e.Owner, e.Name, e.Type })
-                .HasDatabaseName("name");
+                entity.HasIndex(e => new { e.TenantId, e.Owner, e.Name, e.Type })
+                    .HasDatabaseName("name");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.Type)
-                .HasColumnName("flag")
-                .HasDefaultValueSql("0");
+                entity.Property(e => e.Type)
+                    .HasColumnName("flag")
+                    .HasDefaultValueSql("0");
 
-            entity.Property(e => e.Name)
-                .IsRequired()
-                .HasColumnName("name")
-                .HasColumnType("varchar");
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasColumnName("name")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.Owner)
-                .IsRequired()
-                .HasColumnName("owner")
-                .HasColumnType("uuid");
+                entity.Property(e => e.Owner)
+                    .IsRequired()
+                    .HasColumnName("owner")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
-        });
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            });
+        }
     }
 }

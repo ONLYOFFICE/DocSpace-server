@@ -28,25 +28,25 @@ namespace ASC.Files.Core.Vectorization.Embedding;
 
 public class EmbeddingSettings
 {
-    private readonly int _dimension;
-    private readonly int _contextLength;
     public required string ModelId { get; init; }
+
     public int Dimension
     {
-        get => _dimension;
+        get;
         init
         {
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(value, 0);
-            _dimension = value;
+            field = value;
         }
     }
+
     public int ContextLength
     {
-        get => _contextLength;
+        get;
         init
         {
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(value, 0);
-            _contextLength = value;
+            field = value;
         }
     }
 }

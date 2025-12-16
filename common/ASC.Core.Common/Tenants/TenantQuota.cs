@@ -109,14 +109,8 @@ public class TenantQuota
     /// </summary>
     public string Features
     {
-        get
-        {
-            return string.Join(",", _featuresList);
-        }
-        set
-        {
-            _featuresList = value != null ? value.Split(' ', ',', ';').ToList() : [];
-        }
+        get => string.Join(",", _featuresList);
+        set => _featuresList = value != null ? value.Split(' ', ',', ';').ToList() : [];
     }
 
     private readonly MaxFileSizeFeature _maxFileSizeFeature;

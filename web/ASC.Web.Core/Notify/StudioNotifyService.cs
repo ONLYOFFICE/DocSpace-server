@@ -48,7 +48,7 @@ public class StudioNotifyService(
     IUrlShortener urlShortener,
     ILoggerProvider option)
 {
-    public static string EMailSenderName { get { return Constants.NotifyEMailSenderSysName; } }
+    public static string EMailSenderName => Constants.NotifyEMailSenderSysName;
 
     private readonly ILogger _log = option.CreateLogger("ASC.Notify");
 
@@ -209,7 +209,7 @@ public class StudioNotifyService(
         string culture = null, 
         bool limitation = false)
     {
-        var cultureInfo = string.IsNullOrEmpty(culture) ? (GetCulture(null)) : new CultureInfo(culture);
+        var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", cultureInfo);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
@@ -271,7 +271,7 @@ public class StudioNotifyService(
 
     public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "", bool limitation = false)
     {
-        var cultureInfo = string.IsNullOrEmpty(culture) ? (GetCulture(null)) : new CultureInfo(culture);
+        var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", cultureInfo);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
@@ -299,7 +299,7 @@ public class StudioNotifyService(
 
     public async Task SendDocSpaceRegistration(string email, string confirmationUrl, string culture = "", bool limitation = false)
     {
-        var cultureInfo = string.IsNullOrEmpty(culture) ? (GetCulture(null)) : new CultureInfo(culture);
+        var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonRegister", cultureInfo);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
@@ -826,6 +826,26 @@ public class StudioNotifyService(
                 new TagValue(Tags.OwnerName, owner.DisplayUserName(displayUserSettingsHelper)));
     }
 
+    public async Task SendMsgPaidPortalDeletedToSupportAsync(string tenantDomain, UserInfo owner, CustomerInfo customerInfo)
+    {
+        var email = commonLinkUtility.GetSupportEmail();
+        if (string.IsNullOrEmpty(email))
+        {
+            return;
+        }
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(
+                Actions.PortalDeletedToSupport,
+                await studioNotifyHelper.RecipientFromEmailAsync(email, false),
+                [EMailSenderName],
+                new TagValue(Tags.PortalUrl, tenantDomain),
+                new TagValue(Tags.UserEmail, owner.Email),
+                new TagValue(Tags.UserName, owner.DisplayUserName(displayUserSettingsHelper)),
+                new TagValue(Tags.OwnerName, customerInfo?.Email),
+                new TagValue(CommonTags.Footer, null),
+                TagValues.WithoutUnsubscribe());
+    }
+
     #endregion
 
     public async Task SendMsgConfirmChangeOwnerAsync(UserInfo owner, UserInfo newOwner, string confirmOwnerUpdateUrl)
@@ -1075,7 +1095,7 @@ public class StudioNotifyService(
 
     public async Task SendTopUpWalletErrorAsync(UserInfo payer, UserInfo owner)
     {
-        var users = (new[] { payer, owner })
+        var users = new[] { payer, owner }
             .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
             .DistinctBy(user => user.Email);
 
@@ -1098,7 +1118,7 @@ public class StudioNotifyService(
 
     public async Task SendRenewSubscriptionErrorAsync(UserInfo payer, UserInfo owner)
     {
-        var users = (new UserInfo[] { payer, owner })
+        var users = new UserInfo[] { payer, owner }
             .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
             .DistinctBy(user => user.Email);
 
@@ -1173,6 +1193,6 @@ public class StudioNotifyService(
             culture = user.GetCulture();
         }
 
-        return culture ?? (tenantManager.GetCurrentTenant(false))?.GetCulture() ?? CultureInfo.CurrentUICulture;
+        return culture ?? tenantManager.GetCurrentTenant(false)?.GetCulture() ?? CultureInfo.CurrentUICulture;
     }
 }

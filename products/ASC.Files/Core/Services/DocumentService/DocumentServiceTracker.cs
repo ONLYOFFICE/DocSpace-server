@@ -99,15 +99,10 @@ public class DocumentServiceTracker
 
     public class TrackResponse
     {
-        public int Error
-        {
-            get
-            {
-                return string.IsNullOrEmpty(Message)
-                           ? 0 //error:0 - sended
-                           : 1; //error:1 - some error
-            }
-        }
+        public int Error =>
+            string.IsNullOrEmpty(Message)
+                ? 0 //error:0 - sended
+                : 1; //error:1 - some error
 
         public string Message { get; init; }
 
@@ -242,7 +237,7 @@ public class DocumentServiceTrackerHelper(
                         await socketManager.StopEditAsync(fileForDeletion.Id);
                         await fileDao.SaveProperties(fileForDeletion.Id, null);
                         await socketManager.DeleteFileAsync(fileForDeletion);
-                        await folderDao.ChangeTreeFolderSizeAsync(fileForDeletion.ParentId, (-1) * fileForDeletion.ContentLength);
+                        await folderDao.ChangeTreeFolderSizeAsync(fileForDeletion.ParentId, -1 * fileForDeletion.ContentLength);
                         await fileDao.DeleteFileAsync(fileForDeletion.Id, ASC.Core.Configuration.Constants.CoreSystem.ID);
                     }
                     else if (fileData.Status == TrackerStatus.MustSave)
@@ -401,7 +396,7 @@ public class DocumentServiceTrackerHelper(
             await securityContext.AuthenticateMeWithoutCookieAsync(userId);
 
             user = await userManager.GetUsersAsync(userId);
-            var culture = string.IsNullOrEmpty(user.CultureName) ? (tenantManager.GetCurrentTenant()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
+            var culture = string.IsNullOrEmpty(user.CultureName) ? tenantManager.GetCurrentTenant().GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
             CultureInfo.CurrentCulture = culture;
             CultureInfo.CurrentUICulture = culture;
         }
@@ -568,7 +563,7 @@ public class DocumentServiceTrackerHelper(
             await securityContext.AuthenticateMeWithoutCookieAsync(userId);
 
             var user = await userManager.GetUsersAsync(userId);
-            var culture = string.IsNullOrEmpty(user.CultureName) ? (tenantManager.GetCurrentTenant()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
+            var culture = string.IsNullOrEmpty(user.CultureName) ? tenantManager.GetCurrentTenant().GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
             CultureInfo.CurrentCulture = culture;
             CultureInfo.CurrentUICulture = culture;
 
