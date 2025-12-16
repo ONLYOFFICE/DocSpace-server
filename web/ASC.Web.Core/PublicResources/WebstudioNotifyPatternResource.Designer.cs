@@ -1889,7 +1889,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///You are invited to join a DocSpace agent at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
+        ///You are invited to join a DocSpace AI agent at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
         ///
         ///$OrangeButton
         ///
@@ -1906,7 +1906,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///$__AuthorName invited you to join the agent &quot;$Message&quot;:&quot;$InviteLink&quot; on &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
+        ///$__AuthorName invited you to join the AI agent &quot;$Message&quot;:&quot;$InviteLink&quot; on &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
         ///
         ///$OrangeButton
         ///
@@ -2316,6 +2316,21 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_top_up_wallet_error {
             get {
                 return ResourceManager.GetString("pattern_top_up_wallet_error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello!
+        ///
+        ///You are assigned a new role in the DocSpace AI agent &quot;${RoomTitle}&quot;:&quot;${RoomUrl}&quot;: ${UserRole}.
+        ///
+        ///Learn more about room roles and permissions in &quot;Help Center&quot;:&quot;${HelpCenterUrl}&quot;.
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_user_agent_role_changed {
+            get {
+                return ResourceManager.GetString("pattern_user_agent_role_changed", resourceCulture);
             }
         }
         
@@ -3084,7 +3099,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You&apos;re invited to the ${LetterLogoText} DocSpace agent.
+        ///   Looks up a localized string similar to You&apos;re invited to the ${LetterLogoText} DocSpace AI agent.
         /// </summary>
         public static string subject_saas_agent_invite_existing_user {
             get {
@@ -3314,6 +3329,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_top_up_wallet_error {
             get {
                 return ResourceManager.GetString("subject_top_up_wallet_error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your role in a DocSpace AI agent has changed.
+        /// </summary>
+        public static string subject_user_agent_role_changed {
+            get {
+                return ResourceManager.GetString("subject_user_agent_role_changed", resourceCulture);
             }
         }
         

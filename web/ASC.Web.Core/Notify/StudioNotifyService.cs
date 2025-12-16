@@ -747,7 +747,7 @@ public class StudioNotifyService(
         }
     }
 
-    public async Task SendMsgUserRoleChangedAsync(UserInfo u, string roomTitle, string roomUrl, string userRole)
+    public async Task SendMsgUserRoleChangedAsync(UserInfo u, string roomTitle, string roomUrl, string userRole, bool isAgent = false)
     {
         try
         {
@@ -755,7 +755,7 @@ public class StudioNotifyService(
             var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
             await studioNotifyServiceHelper.SendNoticeToAsync(
-                Actions.UserRoleChanged,
+                isAgent ? Actions.UserAgentRoleChanged : Actions.UserRoleChanged,
                 await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false),
                 [EMailSenderName],
                 new TagValue("RoomTitle", roomTitle),

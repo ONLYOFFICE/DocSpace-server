@@ -2656,7 +2656,7 @@ ${LetterLogoText} Support Team
   <data name="pattern_saas_agent_invite" xml:space="preserve">
     <value>Hello!
 
-You are invited to join a DocSpace agent at "${__VirtualRootPath}":"${__VirtualRootPath}". Accept the invitation by clicking the link:
+You are invited to join a DocSpace AI agent at "${__VirtualRootPath}":"${__VirtualRootPath}". Accept the invitation by clicking the link:
 
 $OrangeButton
 
@@ -2667,7 +2667,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
     <value>Hello!
 
-$__AuthorName invited you to join the agent "$Message":"$InviteLink" on "${__VirtualRootPath}":"${__VirtualRootPath}".
+$__AuthorName invited you to join the AI agent "$Message":"$InviteLink" on "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 $OrangeButton
 
@@ -2677,7 +2677,7 @@ $TrulyYours</value>
     <value>Join ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
-    <value>You're invited to the ${LetterLogoText} DocSpace agent</value>
+    <value>You're invited to the ${LetterLogoText} DocSpace AI agent</value>
   </data>
   <data name="ButtonJoinAgent" xml:space="preserve">
     <value>Join agent</value>
@@ -2693,5 +2693,17 @@ Please make sure that automatic billing is turned off. Check the status of autom
   </data>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
     <value>${LetterLogoText} DocSpace has been deleted</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Hello!
+
+You are assigned a new role in the DocSpace AI agent "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Learn more about room roles and permissions in "Help Center":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Your role in a DocSpace AI agent has changed</value>
   </data>
 </root>
