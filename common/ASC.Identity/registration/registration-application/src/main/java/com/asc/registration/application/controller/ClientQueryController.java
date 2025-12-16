@@ -30,7 +30,6 @@ package com.asc.registration.application.controller;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.registration.application.security.authentication.BasicSignatureTokenPrincipal;
 import com.asc.registration.application.service.ConsentService;
-import com.asc.registration.application.transfer.ErrorResponse;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
 import com.asc.registration.service.transfer.request.fetch.ClientInfoPaginationQuery;
 import com.asc.registration.service.transfer.request.fetch.ClientInfoQuery;
@@ -57,6 +56,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -149,23 +149,23 @@ public class ClientQueryController {
         @ApiResponse(
             responseCode = "400",
             description = "Invalid client ID format",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to view client",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
             description = "Client not found",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
             description = "Too many requests - rate limit exceeded",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
             description = "Internal server error occurred",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<ClientResponse> getClient(
@@ -255,19 +255,19 @@ public class ClientQueryController {
         @ApiResponse(
             responseCode = "400",
             description = "Invalid pagination parameters",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to list clients",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
             description = "Too many requests - rate limit exceeded",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
             description = "Internal server error occurred",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<PageableResponse<ClientResponse>> getClients(
@@ -353,7 +353,7 @@ public class ClientQueryController {
         @ApiResponse(
             responseCode = "429",
             description = "Too many requests",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
             description = "Internal server error",
@@ -431,7 +431,7 @@ public class ClientQueryController {
         @ApiResponse(
             responseCode = "429",
             description = "Too many requests",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
             description = "Internal server error",
@@ -511,7 +511,7 @@ public class ClientQueryController {
         @ApiResponse(
             responseCode = "429",
             description = "Too many requests",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
             description = "Internal server error",

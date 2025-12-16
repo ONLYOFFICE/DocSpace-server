@@ -28,13 +28,13 @@
 package com.asc.registration.application.exception.handler;
 
 import com.asc.common.core.domain.exception.DomainNotFoundException;
-import com.asc.registration.application.transfer.ErrorResponse;
 import com.asc.registration.core.domain.exception.ClientDomainException;
 import com.asc.registration.service.exception.ExceededClientsPerResourceException;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import io.grpc.StatusRuntimeException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ValidationException;
+import java.net.URI;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +42,7 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.ProblemDetail;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -50,328 +50,281 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * GlobalExceptionHandler is a centralized exception handler that intercepts and processes various
- * exceptions thrown during application execution. Each handler method constructs a standardized
- * {@link ErrorResponse} and returns a {@link ResponseEntity} with an appropriate HTTP status code.
+ * exceptions thrown during application execution. Each handler method constructs a standardized RFC
+ * 7807 {@link ProblemDetail} response.
  */
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
+  private static final URI ERROR_TYPE_URI =
+      URI.create("https://api.onlyoffice.com/docspace/api-backend/get-started/basic-concepts");
+
+  /**
+   * Creates a ProblemDetail with the standard type URI and instance path.
+   *
+   * @param status the HTTP status
+   * @param detail the detail message
+   * @param instance the request URI
+   * @return a ProblemDetail instance
+   */
+  private ProblemDetail createProblemDetail(HttpStatus status, String detail, String instance) {
+    var problemDetail = ProblemDetail.forStatusAndDetail(status, detail);
+    problemDetail.setType(ERROR_TYPE_URI);
+    problemDetail.setInstance(URI.create(instance));
+    return problemDetail;
+  }
+
   /**
    * Handles {@link NoResourceFoundException} exceptions thrown when a request targets a
    * non-existing API endpoint.
    *
-   * <p>Spring Boot 3.2+ throws a {@link NoResourceFoundException} for such cases. This handler
-   * returns an error response with an HTTP status of {@code 404 Not Found}.
-   *
    * @param ex the {@link NoResourceFoundException} that was raised.
-   * @return an {@link org.springframework.web.ErrorResponse} encapsulating the error details and a
-   *     {@code 404 Not Found} status.
+   * @param request the {@link HttpServletRequest} associated with the current request.
+   * @return a {@link ProblemDetail} with {@code 404 Not Found} status.
    */
   @ExceptionHandler(value = {NoResourceFoundException.class})
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  public org.springframework.web.ErrorResponse handleNoResourceFoundException(
-      NoResourceFoundException ex) {
-    return org.springframework.web.ErrorResponse.create(ex, HttpStatus.NOT_FOUND, ex.getMessage());
+  public ProblemDetail handleNoResourceFoundException(
+      NoResourceFoundException ex, HttpServletRequest request) {
+    return createProblemDetail(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
   }
 
   /**
    * Handles {@link HttpRequestMethodNotSupportedException} and returns a response with HTTP status
    * 405.
    *
-   * <p>This method logs a warning and returns a {@link ResponseEntity} with HTTP status {@link
-   * HttpStatus#METHOD_NOT_ALLOWED}.
-   *
    * @param ex the {@link HttpRequestMethodNotSupportedException} thrown when an unsupported HTTP
    *     method is used
    * @param request the {@link HttpServletRequest} in which the exception was raised
-   * @return a {@link ResponseEntity} with HTTP status 405 (Method Not Allowed)
+   * @return a {@link ProblemDetail} with HTTP status 405 (Method Not Allowed)
    */
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-  public ResponseEntity<ErrorResponse> handleMethodNotSupportedException(
+  public ProblemDetail handleMethodNotSupportedException(
       HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason(ex.getMessage()).build(), HttpStatus.METHOD_NOT_ALLOWED);
+    return createProblemDetail(
+        HttpStatus.METHOD_NOT_ALLOWED, ex.getMessage(), request.getRequestURI());
   }
 
   /**
    * Handles {@link MissingServletRequestParameterException} and returns a response with HTTP status
    * 400.
    *
-   * <p>This method logs a warning and returns a {@link ResponseEntity} with HTTP status {@link
-   * HttpStatus#BAD_REQUEST}.
-   *
    * @param ex the {@link MissingServletRequestParameterException} thrown when a required request
    *     parameter is missing
    * @param request the {@link HttpServletRequest} in which the exception was raised
-   * @return a {@link ResponseEntity} with HTTP status 400 (Bad Request)
+   * @return a {@link ProblemDetail} with HTTP status 400 (Bad Request)
    */
   @ExceptionHandler(MissingServletRequestParameterException.class)
-  public ResponseEntity<ErrorResponse> handleMissingParameterException(
+  public ProblemDetail handleMissingParameterException(
       MissingServletRequestParameterException ex, HttpServletRequest request) {
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason(ex.getMessage()).build(), HttpStatus.BAD_REQUEST);
+    return createProblemDetail(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI());
   }
 
   /**
    * Handles {@link MethodArgumentNotValidException} exceptions resulting from failed validation of
    * method arguments.
    *
-   * <p>This method extracts and concatenates all default error messages from the validation errors
-   * and returns an error response with an HTTP status of {@code 400 Bad Request}.
-   *
    * @param e the {@link MethodArgumentNotValidException} containing validation error details.
-   * @return a {@link ResponseEntity} with an {@link ErrorResponse} that includes the concatenated
-   *     validation error messages.
+   * @param request the {@link HttpServletRequest} associated with the current request.
+   * @return a {@link ProblemDetail} that includes the concatenated validation error messages.
    */
   @ExceptionHandler(value = {MethodArgumentNotValidException.class})
-  public ResponseEntity<ErrorResponse> handleValidationException(
-      MethodArgumentNotValidException e) {
+  public ProblemDetail handleValidationException(
+      MethodArgumentNotValidException e, HttpServletRequest request) {
     var errors =
         e.getAllErrors().stream()
             .map(DefaultMessageSourceResolvable::getDefaultMessage)
             .collect(Collectors.joining(", "));
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason(errors).build(), HttpStatus.BAD_REQUEST);
+    return createProblemDetail(HttpStatus.BAD_REQUEST, errors, request.getRequestURI());
   }
 
   /**
    * Handles {@link HandlerMethodValidationException} exceptions arising from method-level
    * validation failures.
    *
-   * <p>This method aggregates all resolvable error messages from the validation results and returns
-   * a response with an HTTP status of {@code 400 Bad Request}.
-   *
    * @param e the {@link HandlerMethodValidationException} containing details about the validation
    *     errors.
-   * @return a {@link ResponseEntity} with an {@link ErrorResponse} that includes the concatenated
-   *     error messages.
+   * @param request the {@link HttpServletRequest} associated with the current request.
+   * @return a {@link ProblemDetail} that includes the concatenated error messages.
    */
   @ExceptionHandler(value = HandlerMethodValidationException.class)
-  public ResponseEntity<?> handleValidationException(HandlerMethodValidationException e) {
+  public ProblemDetail handleValidationException(
+      HandlerMethodValidationException e, HttpServletRequest request) {
     var errors =
         e.getAllErrors().stream()
             .map(MessageSourceResolvable::getDefaultMessage)
             .collect(Collectors.joining(", "));
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason(errors).build(), HttpStatus.BAD_REQUEST);
+    return createProblemDetail(HttpStatus.BAD_REQUEST, errors, request.getRequestURI());
   }
 
   /**
    * Handles {@link ValidationException} exceptions thrown during validation processes.
    *
-   * <p>This handler returns an error response with an HTTP status of {@code 400 Bad Request} that
-   * includes the exception's message.
-   *
    * @param e the {@link ValidationException} that was raised.
-   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with the exception's
-   *     message.
+   * @param request the {@link HttpServletRequest} associated with the current request.
+   * @return a {@link ProblemDetail} with the exception's message.
    */
   @ExceptionHandler(value = ValidationException.class)
-  public ResponseEntity<?> handleValidationException(ValidationException e) {
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
+  public ProblemDetail handleValidationException(
+      ValidationException e, HttpServletRequest request) {
+    return createProblemDetail(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
   }
 
   /**
    * Handles {@link AuthorizationDeniedException} exceptions that occur when access to a resource is
    * denied.
    *
-   * <p>This method returns an error response with an HTTP status of {@code 403 Forbidden} and a
-   * message indicating access denial.
-   *
    * @param e the {@link AuthorizationDeniedException} that was raised.
    * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with an "access denied"
-   *     message.
+   * @return a {@link ProblemDetail} with an "access denied" message.
    */
   @ExceptionHandler(value = AuthorizationDeniedException.class)
-  public ResponseEntity<ErrorResponse> handleAccessDeniedException(
+  public ProblemDetail handleAccessDeniedException(
       AuthorizationDeniedException e, HttpServletRequest request) {
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason("access denied").build(), HttpStatus.FORBIDDEN);
+    return createProblemDetail(HttpStatus.FORBIDDEN, "Access denied", request.getRequestURI());
   }
 
   /**
    * Handles {@link ExceededClientsPerResourceException} exceptions thrown when a tenant exceeds
    * their client allocation limit.
    *
-   * <p>This method returns an error response with an HTTP status of {@code 400 Bad Request} that
-   * includes the exception's message explaining the resource limit violation.
-   *
    * @param e the {@link ExceededClientsPerResourceException} that was raised.
    * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with the exception's
-   *     message about exceeding the client limit.
+   * @return a {@link ProblemDetail} with the exception's message about exceeding the client limit.
    */
   @ExceptionHandler(value = ExceededClientsPerResourceException.class)
-  public ResponseEntity<ErrorResponse> handleExceededClientsPerResourceException(
+  public ProblemDetail handleExceededClientsPerResourceException(
       ExceededClientsPerResourceException e, HttpServletRequest request) {
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
+    return createProblemDetail(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
   }
 
   /**
    * Handles {@link ClientDomainException} exceptions indicating issues on the client-side domain
    * logic.
    *
-   * <p>This method logs a warning and returns an error response with an HTTP status of {@code 400
-   * Bad Request}.
-   *
    * @param ex the {@link ClientDomainException} that was raised.
    * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with details of the client
-   *     domain error.
+   * @return a {@link ProblemDetail} with details of the client domain error.
    */
   @ExceptionHandler(ClientDomainException.class)
-  public ResponseEntity<ErrorResponse> handleClientDomainException(
+  public ProblemDetail handleClientDomainException(
       ClientDomainException ex, HttpServletRequest request) {
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason(ex.getMessage()).build(), HttpStatus.BAD_REQUEST);
+    return createProblemDetail(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI());
   }
 
   /**
    * Handles {@link DomainNotFoundException} exceptions thrown when a requested domain entity is not
    * found.
    *
-   * <p>This method logs a warning and returns an error response with an HTTP status of {@code 404
-   * Not Found}.
-   *
    * @param ex the {@link DomainNotFoundException} that was raised.
    * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with a message indicating
-   *     the domain was not found.
+   * @return a {@link ProblemDetail} with a message indicating the domain was not found.
    */
   @ExceptionHandler(DomainNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleDomainNotFound(
+  public ProblemDetail handleDomainNotFound(
       DomainNotFoundException ex, HttpServletRequest request) {
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason(ex.getMessage()).build(), HttpStatus.NOT_FOUND);
+    return createProblemDetail(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
   }
 
   /**
    * Handles {@link DataAccessException} exceptions that occur during database operations.
    *
-   * <p>This method logs the error and returns an empty response with an HTTP status of {@code 500
-   * Internal Server Error}.
-   *
    * @param ex the {@link DataAccessException} that was raised.
    * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ResponseEntity} with HTTP status {@code 500 Internal Server Error}.
+   * @return a {@link ProblemDetail} with HTTP status {@code 500 Internal Server Error}.
    */
   @ExceptionHandler(DataAccessException.class)
-  public ResponseEntity<?> handleDataAccessException(
+  public ProblemDetail handleDataAccessException(
       DataAccessException ex, HttpServletRequest request) {
     log.error("Could not perform a database operation", ex);
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    return createProblemDetail(
+        HttpStatus.INTERNAL_SERVER_ERROR, "A database error occurred", request.getRequestURI());
   }
 
   /**
    * Handles exceptions of type {@link ExecutionException} and {@link UnsupportedOperationException}
    * which may occur during asynchronous execution or unsupported operations.
    *
-   * <p>This method logs the error and returns a generic error response with an HTTP status of
-   * {@code 400 Bad Request}.
-   *
    * @param ex the {@link Throwable} representing the exception that was raised.
    * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with a message indicating
-   *     that the operation could not be performed.
+   * @return a {@link ProblemDetail} with a message indicating that the operation could not be
+   *     performed.
    */
   @ExceptionHandler(value = {ExecutionException.class, UnsupportedOperationException.class})
-  public ResponseEntity<ErrorResponse> handleExecutionException(
-      Throwable ex, HttpServletRequest request) {
+  public ProblemDetail handleExecutionException(Throwable ex, HttpServletRequest request) {
     log.warn("Could not perform an operation", ex);
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason("could not perform operation").build(),
-        HttpStatus.BAD_REQUEST);
+    return createProblemDetail(
+        HttpStatus.BAD_REQUEST, "Could not perform operation", request.getRequestURI());
   }
 
   /**
    * Handles {@link StatusRuntimeException} exceptions that occur during gRPC service
    * communications.
    *
-   * <p>This method inspects the exception message for the keyword "unavailable" (case-insensitive)
-   * to determine if the error is due to a service being unavailable. It returns a response with an
-   * HTTP status of {@code 503 Service Unavailable} if the service is unavailable, or {@code 500
-   * Internal Server Error} otherwise.
-   *
    * @param e the {@link StatusRuntimeException} that was raised.
    * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with a message indicating
-   *     either service unavailability or a generic error.
+   * @return a {@link ProblemDetail} with a message indicating either service unavailability or a
+   *     generic error.
    */
   @ExceptionHandler(value = StatusRuntimeException.class)
-  public ResponseEntity<ErrorResponse> handleServicesCommunicationException(
+  public ProblemDetail handleServicesCommunicationException(
       StatusRuntimeException e, HttpServletRequest request) {
     var isUnavailable =
         e.getMessage() != null && e.getMessage().toLowerCase().contains("unavailable");
-    return new ResponseEntity<>(
-        ErrorResponse.builder()
-            .reason(isUnavailable ? "service unavailable" : "something went wrong")
-            .build(),
-        isUnavailable ? HttpStatus.SERVICE_UNAVAILABLE : HttpStatus.INTERNAL_SERVER_ERROR);
+    if (isUnavailable) {
+      return createProblemDetail(
+          HttpStatus.SERVICE_UNAVAILABLE, "Service unavailable", request.getRequestURI());
+    }
+    return createProblemDetail(
+        HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong", request.getRequestURI());
   }
 
   /**
    * Handles {@link RequestNotPermitted} exceptions thrown when the rate limiter blocks a request.
    *
-   * <p>This method returns a response with an HTTP status of {@code 429 Too Many Requests} and an
-   * error message indicating that too many requests have been made.
-   *
    * @param ex the {@link RequestNotPermitted} exception that was raised.
    * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with a "too many requests"
-   *     message.
+   * @return a {@link ProblemDetail} with a "too many requests" message.
    */
   @ExceptionHandler(value = RequestNotPermitted.class)
-  public ResponseEntity<ErrorResponse> handleRequestNotPermitted(
+  public ProblemDetail handleRequestNotPermitted(
       RequestNotPermitted ex, HttpServletRequest request) {
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason("too many requests").build(), HttpStatus.TOO_MANY_REQUESTS);
+    return createProblemDetail(
+        HttpStatus.TOO_MANY_REQUESTS,
+        "Too many requests. Please try again later.",
+        request.getRequestURI());
   }
 
   /**
    * Handles {@link HttpMediaTypeNotSupportedException} exceptions thrown when a request contains a
    * media type that is not supported by the endpoint.
    *
-   * <p>This method returns an error response with an HTTP status of {@code 415 Unsupported Media
-   * Type} and includes the exception's message detailing the unsupported media type.
-   *
    * @param ex the {@link HttpMediaTypeNotSupportedException} that was raised.
    * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with the exception's
-   *     message about the unsupported media type.
+   * @return a {@link ProblemDetail} with the exception's message about the unsupported media type.
    */
   @ExceptionHandler(value = HttpMediaTypeNotSupportedException.class)
-  public ResponseEntity<ErrorResponse> handleNotSupportedMediaType(
+  public ProblemDetail handleNotSupportedMediaType(
       HttpMediaTypeNotSupportedException ex, HttpServletRequest request) {
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason(ex.getMessage()).build(), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    return createProblemDetail(
+        HttpStatus.UNSUPPORTED_MEDIA_TYPE, ex.getMessage(), request.getRequestURI());
   }
 
   /**
    * Handles all uncaught exceptions that are not explicitly handled by other methods.
    *
-   * <p>This generic fallback handler logs the exception and returns an error response with an HTTP
-   * status of {@code 500 Internal Server Error}.
-   *
    * @param ex the {@link Exception} that was raised.
    * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with a generic error
-   *     message.
+   * @return a {@link ProblemDetail} with a generic error message.
    */
   @ExceptionHandler(Exception.class)
-  public final ResponseEntity<ErrorResponse> handleAllExceptions(
-      Exception ex, HttpServletRequest request) {
+  public ProblemDetail handleAllExceptions(Exception ex, HttpServletRequest request) {
     log.error("Could not perform an action. Unknown exception", ex);
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason("something went wrong").build(),
-        HttpStatus.INTERNAL_SERVER_ERROR);
+    return createProblemDetail(
+        HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong", request.getRequestURI());
   }
 }

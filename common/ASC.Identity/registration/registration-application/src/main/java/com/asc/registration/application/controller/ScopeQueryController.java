@@ -28,7 +28,6 @@
 package com.asc.registration.application.controller;
 
 import com.asc.registration.application.security.authentication.BasicSignatureTokenPrincipal;
-import com.asc.registration.application.transfer.ErrorResponse;
 import com.asc.registration.service.ports.input.service.ScopeApplicationService;
 import com.asc.registration.service.transfer.response.ScopeResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
@@ -45,6 +44,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -109,19 +109,19 @@ public class ScopeQueryController {
         @ApiResponse(
             responseCode = "400",
             description = "Invalid request parameters",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to list scopes",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
             description = "Too many requests - rate limit exceeded",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
             description = "Internal server error occurred",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   public ResponseEntity<Iterable<ScopeResponse>> getScopes(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal) {
