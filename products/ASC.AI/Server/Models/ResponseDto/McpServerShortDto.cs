@@ -33,6 +33,8 @@ public class McpServerShortDto
     public ServerType ServerType { get; init; }
     public bool Enabled { get; init; }
     public Icon? Icon { get; init; }
+
+    public bool NeedReset { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

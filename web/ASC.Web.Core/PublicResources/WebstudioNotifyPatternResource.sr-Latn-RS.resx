@@ -2155,4 +2155,16 @@ $TrulyYours</value>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
     <value>Pozvani ste u ${LetterLogoText} DocSpace agent</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace je obrisan</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace je obrisan.
+
+*Portal:* ${PortalUrl}
+*Vlasnik:* ${UserName} ${UserEmail}
+*Kupac:* ${OwnerName}
+
+Molimo vas da proverite da je automatska naplata isključena. Proverite status automatske naplate u Stripe nalogu kupca.</value>
+  </data>
 </root>

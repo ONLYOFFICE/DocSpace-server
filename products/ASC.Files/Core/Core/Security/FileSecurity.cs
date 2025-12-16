@@ -1790,7 +1790,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access is FileShare.Editing or FileShare.Comment or FileShare.Review or FileShare.CustomFilter)
+                        if (e.Access is FileShare.ReadWrite or FileShare.Editing or FileShare.Comment or FileShare.Review or FileShare.CustomFilter)
                         {
                             return true;
                         }
@@ -2086,7 +2086,12 @@ public class FileSecurity(
                 {
                     return false;
                 }
-                
+
+                if (e.Access != FileShare.Read && e.Access != FileShare.None)
+                {
+                    return true;
+                }
+
                 switch (e.RootFolderType)
                 {                        
                     case FolderType.USER:
@@ -2328,6 +2333,7 @@ public class FileSecurity(
         {
             ace = shares
                 .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
+                .ThenBy(r => r.Level)
                 .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                 .FirstOrDefault();
         }
@@ -3307,7 +3313,10 @@ public class FileSecurity(
             result.Add(new(Constants.GroupAdmin.ID, SubjectOrderType.Group));
         }
 
-        result.Add(new(Constants.GroupEveryone.ID, SubjectOrderType.Group));
+        if (userId != ASC.Core.Configuration.Constants.Guest.ID)
+        {
+            result.Add(new(Constants.GroupEveryone.ID, SubjectOrderType.Group));
+        }
 
         var linkId = await externalShare.GetLinkIdAsync();
         if (linkId != Guid.Empty)
