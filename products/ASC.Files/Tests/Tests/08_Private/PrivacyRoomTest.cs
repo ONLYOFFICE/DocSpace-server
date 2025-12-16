@@ -132,7 +132,7 @@ public class PrivacyRoomTest(
 
         fileTempStream.Position = 0;
         await using var decryptTempStream = new MemoryStream();
-        await FileEncryptionStream.DecryptFileAsync(fileTempStream, decryptTempStream, aesKeyForEncrypt, TestContext.Current.CancellationToken);
+        await FileEncryptionStream.DecryptFileAsync(fileTempStream, decryptTempStream, aesKeyForDecrypt, TestContext.Current.CancellationToken);
 
         AreStreamsEqual(decryptTempStream, stream).Should().BeTrue();
     }
