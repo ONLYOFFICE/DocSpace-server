@@ -4152,12 +4152,17 @@ public class FileStorageService //: IFileStorageService
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId)).NotFoundIfNull();
 
+        var currentUseCount = 0;
         if (maxUseCount.HasValue)
         {
             var link = (await fileSecurity.GetSharesAsync(room, [linkId])).FirstOrDefault();
-            if (link?.Options != null && maxUseCount.Value <= link.Options.CurrentUseCount)
+            if (link?.Options != null)
             {
-                throw new ArgumentException(null, nameof(maxUseCount));
+                currentUseCount = link.Options.CurrentUseCount;
+                if (maxUseCount.Value < currentUseCount)
+                {
+                    throw new ArgumentException(null, nameof(maxUseCount));
+                }
             }
         }
 
@@ -4180,7 +4185,8 @@ public class FileStorageService //: IFileStorageService
                 ? title
                 : FilesCommonResource.DefaultInvitationLinkTitle,
             ExpirationDate = expirationDateUtc,
-            MaxUseCount = maxUseCount
+            MaxUseCount = maxUseCount,
+            CurrentUseCount = currentUseCount
         };
 
         var result = await SetAceLinkAsync(room, SubjectType.InvitationLink, linkId, share, options);
