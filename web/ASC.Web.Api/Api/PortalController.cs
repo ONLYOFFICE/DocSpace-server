@@ -282,14 +282,9 @@ public class PortalController(
             throw new ItemNotFoundException();
         }
 
-        if (inDto.MaxUseCount.HasValue && inDto.MaxUseCount.Value <= invitationLink.CurrentUseCount)
+        if (inDto.MaxUseCount.HasValue && inDto.MaxUseCount.Value < invitationLink.CurrentUseCount)
         {
             throw new ArgumentException(nameof(inDto.MaxUseCount));
-        }
-
-        if (inDto.Expiration.HasValue && inDto.Expiration.Value < DateTime.UtcNow)
-        {
-            throw new ArgumentException(nameof(inDto.Expiration));
         }
 
         var expiration = DateTime.UtcNow.AddDays(7);
