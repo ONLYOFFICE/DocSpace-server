@@ -936,8 +936,6 @@ public partial class SettingsController(
     [HttpPut("defaultfolder")]
     public async Task<StudioDefaultPageSettings> SaveDefaultFolder(DefaultProductRequestDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
         List<FolderType> allowedFolderTypes =
         [
             FolderType.AiAgents,
