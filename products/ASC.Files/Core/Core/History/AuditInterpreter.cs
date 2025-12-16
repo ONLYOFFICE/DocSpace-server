@@ -75,6 +75,7 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomCreateUser, new RoomUserAddedInterpreter() },
         { (int)MessageAction.RoomUpdateAccessForUser, new RoomUserUpdatedAccessInterpreter() },
         { (int)MessageAction.RoomRemoveUser, new RoomUserRemovedInterpreter() },
+        { (int)MessageAction.RoomChangeOwner, new ChangeRoomOwnerInterpreter() },
         { (int)MessageAction.RoomGroupAdded, new RoomGroupAddedInterpreter() },
         { (int)MessageAction.RoomUpdateAccessForGroup, new RoomGroupAccessUpdatedInterpreter() },
         { (int)MessageAction.RoomGroupRemove, new RoomRemovedGroupInterpreter() },

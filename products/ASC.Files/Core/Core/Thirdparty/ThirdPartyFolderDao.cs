@@ -435,7 +435,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         var parentFolderId = dao.GetParentFolderId(thirdFolder);
         var renamedThirdFolder = thirdFolder;
 
-        if (dao.IsRoot(thirdFolder) || DocSpaceHelper.IsRoom(folder.FolderType))
+        if (dao.IsRoot(thirdFolder) || folder.IsRoom)
         {
             await daoSelector.RenameProviderAsync(_providerInfo, newTitle);
         }

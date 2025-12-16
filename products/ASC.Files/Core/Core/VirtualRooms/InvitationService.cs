@@ -353,7 +353,7 @@ public class InvitationService(
 
         async Task<bool> CheckRoomAsync<T>(Folder<T> room)
         {
-            if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+            if (room is not { IsRoom: true })
             {
                 return false;
             }

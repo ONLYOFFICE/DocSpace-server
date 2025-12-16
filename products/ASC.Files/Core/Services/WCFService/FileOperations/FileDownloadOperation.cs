@@ -99,7 +99,7 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
 
         var thirdPartyFileOnly = thirdPartyOperation?.Files.Count == 1 && thirdPartyOperation.Folders.Count == 0;
         var daoFileOnly = daoOperation?.Files.Count == 1 && daoOperation.Folders.Count == 0;
-        var compress = !((thirdPartyFileOnly || daoFileOnly) && (thirdPartyFileOnly != daoFileOnly));
+        var compress = !((thirdPartyFileOnly || daoFileOnly) && thirdPartyFileOnly != daoFileOnly);
 
         string archiveExtension;
 
@@ -132,7 +132,7 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
 
             var thirdPartyFolderOnly = thirdPartyOperation?.Folders.Count == 1 && thirdPartyOperation.Files.Count == 0;
             var daoFolderOnly = daoOperation?.Folders.Count == 1 && daoOperation.Files.Count == 0;
-            if ((thirdPartyFolderOnly || daoFolderOnly) && (thirdPartyFolderOnly != daoFolderOnly))
+            if ((thirdPartyFolderOnly || daoFolderOnly) && thirdPartyFolderOnly != daoFolderOnly)
             {
                 fileName = $@"{(thirdPartyFolderOnly ?
                     (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title :
@@ -144,7 +144,7 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
             }
             else
             {
-                fileName = $@"{(tenantManager.GetCurrentTenant()).Alias.ToLower()}-{FileConstant.DownloadTitle}-{DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}{archiveExtension}";
+                fileName = $@"{tenantManager.GetCurrentTenant().Alias.ToLower()}-{FileConstant.DownloadTitle}-{DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}{archiveExtension}";
             }
 
             var store = await globalStore.GetStoreAsync();
@@ -431,6 +431,8 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                 File<T> file = null;
                 var convertToExt = string.Empty;
                 var password = string.Empty;
+                ThumbnailData thumbnail = null;
+                SpreadsheetLayout spreadsheetLayout = null;
 
                 if (!Equals(entryId, default(T)))
                 {
@@ -447,7 +449,19 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                     {
                         (convertToExt, password) = convertData;
                         var sourceFileName = Path.GetFileName(path);
-                        var targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, convertToExt);
+                        var targetFileName = string.Empty;
+
+                        if (FileUtility.GetFileTypeByExtention(convertToExt) == FileType.Image)
+                        {
+                            thumbnail = new ThumbnailData { Aspect = 2, First = false };
+                            spreadsheetLayout = new SpreadsheetLayout { IgnorePrintArea = true, Scale = 100 };
+                            targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, CompressToArchive.ZipExt);
+                        }
+                        else
+                        {
+                            targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, convertToExt);
+                        }
+
                         newTitle = path.Replace(sourceFileName, targetFileName);
                     }
                 }
@@ -472,7 +486,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                     try
                     {
                         await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt, true) ?
-                            await fileConverter.ExecAsync(file, convertToExt, password) :
+                            await fileConverter.ExecAsync(file, convertToExt, password, false, thumbnail, spreadsheetLayout) :
                             await fileDao.GetFileStreamAsync(file);
 
                         var t = Task.Run(async () => await compressTo.PutStream(readStream));
@@ -556,6 +570,8 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         File<T> file = null;
         var convertToExt = string.Empty;
         var password = string.Empty;
+        ThumbnailData thumbnail = null;
+        SpreadsheetLayout spreadsheetLayout = null;
 
         if (!Equals(entryId, default(T)))
         {
@@ -572,7 +588,19 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             {
                 (convertToExt, password) = convertData;
                 var sourceFileName = Path.GetFileName(path);
-                var targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, convertToExt);
+                var targetFileName = string.Empty;
+
+                if (FileUtility.GetFileTypeByExtention(convertToExt) == FileType.Image)
+                {
+                    thumbnail = new ThumbnailData { Aspect = 2, First = false };
+                    spreadsheetLayout = new SpreadsheetLayout { IgnorePrintArea = true, Scale = 100 };
+                    targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, CompressToArchive.ZipExt);
+                }
+                else
+                {
+                    targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, convertToExt);
+                }
+
                 newTitle = path.Replace(sourceFileName, targetFileName);
             }
         }
@@ -582,7 +610,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             try
             {
                 await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt, true) ?
-                    await fileConverter.ExecAsync(file, convertToExt, password) :
+                    await fileConverter.ExecAsync(file, convertToExt, password, false, thumbnail, spreadsheetLayout) :
                     await fileDao.GetFileStreamAsync(file);
 
                 await readStream.CopyToAsync(stream);

@@ -451,7 +451,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
     protected IProviderInfo<TFile, TFolder, TItem> ProviderInfo { get; set; }
     protected string PathPrefix { get; set; }
 
-    protected string Id { get => ProviderInfo.Selector.Id; }
+    protected string Id => ProviderInfo.Selector.Id;
 
     protected Folder<string> GetFolder()
     {

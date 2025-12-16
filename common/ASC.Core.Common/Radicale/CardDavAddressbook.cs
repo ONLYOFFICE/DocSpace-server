@@ -80,7 +80,7 @@ public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
 
     public async Task<DavResponse> GetCollection(string url, string authorization, string myUri)
     {
-        var path = (new Uri(url).AbsolutePath.StartsWith("/carddav")) ? (new Uri(url).AbsolutePath.Remove(0, 8)) : new Uri(url).AbsolutePath;
+        var path = new Uri(url).AbsolutePath.StartsWith("/carddav") ? new Uri(url).AbsolutePath.Remove(0, 8) : new Uri(url).AbsolutePath;
         var defaultUrlconn = _defaultRadicaleUrl + path;
         var davRequest = new DavRequest
         {
@@ -94,7 +94,7 @@ public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
 
     public async Task<DavResponse> UpdateItem(string url, string authorization, string data, string headerUrl = "")
     {
-        var path = (new Uri(url).AbsolutePath.StartsWith("/carddav")) ? (new Uri(url).AbsolutePath.Remove(0, 8)) : new Uri(url).AbsolutePath;
+        var path = new Uri(url).AbsolutePath.StartsWith("/carddav") ? new Uri(url).AbsolutePath.Remove(0, 8) : new Uri(url).AbsolutePath;
         var requrl = _defaultRadicaleUrl + path;
         var davRequest = new DavRequest
         {
@@ -109,7 +109,7 @@ public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
 
     public string GetUserSerialization(CardDavItem user)
     {
-        var sex = (user.Sex.HasValue) ? user.Sex.Value ? "M" : "W" : string.Empty;
+        var sex = user.Sex.HasValue ? user.Sex.Value ? "M" : "W" : string.Empty;
 
         var builder = new StringBuilder();
 

@@ -240,10 +240,7 @@ public class TenantManager(
         if (tenant != null)
         {
             _currentTenant = tenant;
-            if (httpContextAccessor?.HttpContext != null)
-            {
-                httpContextAccessor.HttpContext.Items[CurrentTenant] = tenant;
-            }
+            httpContextAccessor?.HttpContext?.Items[CurrentTenant] = tenant;
 
             CultureInfo.CurrentCulture = tenant.GetCulture();
             CultureInfo.CurrentUICulture = tenant.GetCulture();

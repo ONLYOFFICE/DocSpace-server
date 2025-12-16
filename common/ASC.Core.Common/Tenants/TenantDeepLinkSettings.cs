@@ -35,10 +35,7 @@ public class TenantDeepLinkSettings : ISettings<TenantDeepLinkSettings>
     /// <summary>
     /// The tenant ID.
     /// </summary>
-    public static Guid ID
-    {
-        get { return new Guid("{926A6850-7C19-4744-B4AD-813DE3CD55B1}"); }
-    }
+    public static Guid ID => new("{926A6850-7C19-4744-B4AD-813DE3CD55B1}");
 
     /// <summary>
     /// The deep link handling mode.

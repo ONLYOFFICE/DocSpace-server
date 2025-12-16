@@ -46,59 +46,62 @@ public static class OpenTelemetryExtension
         public string Bucket { get; set; }
     }
 
-    public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
+    extension<TBuilder>(TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
-        var telemetrySettings = builder.Configuration.GetSection("openTelemetry").Get<OpenTelemetrySettings>();
-
-        builder.Logging.AddOpenTelemetry(logging =>
+        public TBuilder ConfigureOpenTelemetry()
         {
-            logging.IncludeFormattedMessage = true;
-            logging.IncludeScopes = true;
-        });
+            var telemetrySettings = builder.Configuration.GetSection("openTelemetry").Get<OpenTelemetrySettings>();
 
-        builder.Services.AddOpenTelemetry()
-            .WithMetrics(metrics =>
+            builder.Logging.AddOpenTelemetry(logging =>
             {
-                metrics.AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation()
-                    .AddFusionCacheInstrumentation();
-
-                if (telemetrySettings.InfluxDB != null)
-                {
-                    metrics.AddInfluxDBMetricsExporter(options =>
-                    {
-                        options.Endpoint = new Uri(telemetrySettings.InfluxDB.Endpoint);
-                        options.Token = telemetrySettings.InfluxDB.Token;
-                        options.Bucket = telemetrySettings.InfluxDB.Bucket;
-                        options.Org = telemetrySettings.InfluxDB.Org;
-                    });
-                }
-
-                metrics.AddMeter("MySqlConnector");
-            })
-            .WithTracing(tracing =>
-            {
-                tracing
-                    .AddHttpClientInstrumentation()
-                    .AddAspNetCoreInstrumentation()
-                    .AddFusionCacheInstrumentation();
+                logging.IncludeFormattedMessage = true;
+                logging.IncludeScopes = true;
             });
 
-        builder.AddOpenTelemetryExporters();
+            builder.Services.AddOpenTelemetry()
+                .WithMetrics(metrics =>
+                {
+                    metrics.AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddRuntimeInstrumentation()
+                        .AddFusionCacheInstrumentation();
 
-        return builder;
-    }
+                    if (telemetrySettings.InfluxDB != null)
+                    {
+                        metrics.AddInfluxDBMetricsExporter(options =>
+                        {
+                            options.Endpoint = new Uri(telemetrySettings.InfluxDB.Endpoint);
+                            options.Token = telemetrySettings.InfluxDB.Token;
+                            options.Bucket = telemetrySettings.InfluxDB.Bucket;
+                            options.Org = telemetrySettings.InfluxDB.Org;
+                        });
+                    }
 
-    private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
-    {
-        var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
+                    metrics.AddMeter("MySqlConnector");
+                })
+                .WithTracing(tracing =>
+                {
+                    tracing
+                        .AddHttpClientInstrumentation()
+                        .AddAspNetCoreInstrumentation()
+                        .AddFusionCacheInstrumentation();
+                });
 
-        if (useOtlpExporter)
-        {
-            builder.Services.AddOpenTelemetry().UseOtlpExporter();
+            builder.AddOpenTelemetryExporters();
+
+            return builder;
         }
 
-        return builder;
+        private TBuilder AddOpenTelemetryExporters()
+        {
+            var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
+
+            if (useOtlpExporter)
+            {
+                builder.Services.AddOpenTelemetry().UseOtlpExporter();
+            }
+
+            return builder;
+        }
     }
 }

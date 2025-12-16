@@ -104,8 +104,8 @@ public class ExternalLinkHelper(
             {
                 var canReadWithoutPassword = entry switch
                 {
-                    Folder<int> entryInt => DocSpaceHelper.IsRoom(entryInt.FolderType) && await fileSecurity.CanReadAsync(entryInt),
-                    Folder<string> entryString => DocSpaceHelper.IsRoom(entryString.FolderType) && await fileSecurity.CanReadAsync(entryString),
+                    Folder<int> entryInt => entryInt.IsRoom && await fileSecurity.CanReadAsync(entryInt),
+                    Folder<string> entryString => entryString.IsRoom && await fileSecurity.CanReadAsync(entryString),
                     _ => false
                 };
 
@@ -133,12 +133,12 @@ public class ExternalLinkHelper(
             }
             else
             {
-                result.Shared = (entry switch
+                result.Shared = entry switch
                 {
                     FileEntry<int> entryInt => await IsSharedAsync(entryInt, userId, isDocSpaceAdmin),
                     FileEntry<string> entryString => await IsSharedAsync(entryString, userId, isDocSpaceAdmin),
                     _ => false
-                });
+                };
             }
 
             if (!result.Shared && result.Status == Status.Ok)
@@ -153,7 +153,7 @@ public class ExternalLinkHelper(
                 };
             }
 
-            if (!string.IsNullOrEmpty(password) && entry is IFolder folder && DocSpaceHelper.IsRoom(folder.FolderType))
+            if (!string.IsNullOrEmpty(password) && entry is IFolder { IsRoom: true })
             {
                 switch (entry)
                 {
@@ -191,7 +191,7 @@ public class ExternalLinkHelper(
             info.Id = entry.Id.ToString();
             info.Title = entry.Title;
             info.Type = FileEntryType.Folder;
-            info.IsRoom = DocSpaceHelper.IsRoom(((Folder<T>)entry).FolderType);
+            info.IsRoom = ((Folder<T>)entry).IsRoom;
         }
         else
         {
@@ -206,7 +206,7 @@ public class ExternalLinkHelper(
             info.Type = FileEntryType.File;
         }
 
-        FileEntry<T> room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(entry.Id).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+        FileEntry<T> room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(entry.Id).FirstOrDefaultAsync(f => f.IsRoom);
         if (info.IsAuthenticated)
         {
             info.IsRoomMember = (await daoFactory.GetSecurityDao<T>().GetSharesAsync(room, [securityContext.CurrentAccount.ID])).Select(r => r.EntryId).Any();
@@ -259,7 +259,7 @@ public class ExternalLinkHelper(
     {
         await fileMarker.MarkAsRecentByLink(room, linkId);
 
-        if (DocSpaceHelper.IsRoom(room.FolderType))
+        if (room.IsRoom)
         {
             room.FolderIdDisplay = IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync);
             await socketManager.CreateFolderAsync(room, [userId]);

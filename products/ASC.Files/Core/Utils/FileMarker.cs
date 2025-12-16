@@ -140,7 +140,7 @@ public class FileMarker(
             var additionalSubjects = Array.Empty<Guid>();
             if (fileEntry.RootFolderType is FolderType.VirtualRooms or FolderType.AiAgents)
             {
-                var room = parentFolders.Find(f => DocSpaceHelper.IsRoom(f.FolderType));
+                var room = parentFolders.Find(f => f.IsRoom);
                 if (room.CreateBy != obj.CurrentAccountId)
                 {
                     additionalSubjects = [room.CreateBy];
@@ -159,7 +159,7 @@ public class FileMarker(
                 }
                 else
                 {
-                    var room = parentFolders.Find(f => DocSpaceHelper.IsRoom(f.FolderType));
+                    var room = parentFolders.Find(f => f.IsRoom);
 
                     await foreach (var ace in fileSecurity.GetPureSharesAsync(room, guids))
                     {
@@ -186,7 +186,7 @@ public class FileMarker(
 
                     foreach (var folder in parentFolders)
                     {
-                        if (DocSpaceHelper.IsRoom(folder.FolderType))
+                        if (folder.IsRoom)
                         {
                             parents.Add(folder);
                             break;
@@ -788,12 +788,12 @@ public class FileMarker(
         void GroupEntries<TId>(Dictionary<string, FileEntry<TId>> entriesTree)
         {
             var rooms = entriesTree
-                .Where(x => x.Value is IFolder f && DocSpaceHelper.IsRoom(f.FolderType))
+                .Where(x => x.Value is IFolder { IsRoom: true })
                 .ToDictionary(x => x.Key, x => x.Value);
 
             foreach (var (path, entry) in entriesTree)
             {
-                if (entry is IFolder folder && DocSpaceHelper.IsRoom(folder.FolderType))
+                if (entry is IFolder { IsRoom: true })
                 {
                     continue;
                 }

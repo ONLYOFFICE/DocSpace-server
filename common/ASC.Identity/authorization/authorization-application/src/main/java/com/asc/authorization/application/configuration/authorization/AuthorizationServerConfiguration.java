@@ -54,6 +54,7 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationProvider;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationConsentAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
@@ -119,6 +120,7 @@ public class AuthorizationServerConfiguration {
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @SneakyThrows
   public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) {
+    var prefixedCodeGenerator = new PrefixedAuthorizationCodeGenerator(environment, region);
     var authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
     var endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
     var supportedScopes =
@@ -131,7 +133,7 @@ public class AuthorizationServerConfiguration {
     http.securityMatcher(endpointsMatcher)
         .authorizeHttpRequests(
             authorize -> {
-              authorize.requestMatchers("oauth2/introspect").permitAll();
+              authorize.requestMatchers("/oauth2/introspect").permitAll();
               authorize.anyRequest().authenticated();
             })
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
@@ -222,10 +224,12 @@ public class AuthorizationServerConfiguration {
                     for (var provider : providers) {
                       if (provider
                           instanceof
-                          OAuth2AuthorizationCodeRequestAuthenticationProvider codeProvider) {
-                        codeProvider.setAuthorizationCodeGenerator(
-                            new PrefixedAuthorizationCodeGenerator(environment, region));
-                      }
+                          OAuth2AuthorizationCodeRequestAuthenticationProvider codeProvider)
+                        codeProvider.setAuthorizationCodeGenerator(prefixedCodeGenerator);
+                      if (provider
+                          instanceof
+                          OAuth2AuthorizationConsentAuthenticationProvider consentProvider)
+                        consentProvider.setAuthorizationCodeGenerator(prefixedCodeGenerator);
                     }
                   });
               e.authorizationResponseHandler(authenticationSuccessHandler);

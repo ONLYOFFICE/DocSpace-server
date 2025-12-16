@@ -73,82 +73,85 @@ public static class DbUserGroupExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddUserGroup(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<UserGroup>(entity =>
+        public void MySqlAddUserGroup()
         {
-            entity.HasKey(e => new { e.TenantId, e.Userid, e.UserGroupId, e.RefType })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<UserGroup>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.Userid, e.UserGroupId, e.RefType })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("core_usergroup")
-                .HasCharSet("utf8");
+                entity.ToTable("core_usergroup")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.LastModified)
-                .HasDatabaseName("last_modified");
+                entity.HasIndex(e => e.LastModified)
+                    .HasDatabaseName("last_modified");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
 
-            entity.Property(e => e.Userid)
-                .HasColumnName("userid")
-                .HasColumnType("varchar(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Userid)
+                    .HasColumnName("userid")
+                    .HasColumnType("varchar(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.UserGroupId)
-                .HasColumnName("groupid")
-                .HasColumnType("varchar(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.UserGroupId)
+                    .HasColumnName("groupid")
+                    .HasColumnType("varchar(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.RefType).HasColumnName("ref_type");
+                entity.Property(e => e.RefType).HasColumnName("ref_type");
 
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("timestamp");
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("timestamp");
 
-            entity.Property(e => e.Removed)
-            .HasColumnName("removed")
-            .HasColumnType("tinyint(1)")
-            .HasDefaultValueSql("'0'");
-        });
-    }
+                entity.Property(e => e.Removed)
+                    .HasColumnName("removed")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("'0'");
+            });
+        }
 
-    public static void PgSqlAddUserGroup(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<UserGroup>(entity =>
+        public void PgSqlAddUserGroup()
         {
-            // Define composite primary key
-            entity.HasKey(e => new { e.TenantId, e.Userid, e.UserGroupId, e.RefType })
-                .HasName("core_usergroup_pkey");
+            modelBuilder.Entity<UserGroup>(entity =>
+            {
+                // Define composite primary key
+                entity.HasKey(e => new { e.TenantId, e.Userid, e.UserGroupId, e.RefType })
+                    .HasName("core_usergroup_pkey");
 
-            // Define the table name
-            entity.ToTable("core_usergroup");
+                // Define the table name
+                entity.ToTable("core_usergroup");
 
-            // Define indexes
-            entity.HasIndex(e => e.LastModified)
-                .HasDatabaseName("core_usergroup_last_modified_idx");
+                // Define indexes
+                entity.HasIndex(e => e.LastModified)
+                    .HasDatabaseName("core_usergroup_last_modified_idx");
 
-            // Map properties to database columns
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+                // Map properties to database columns
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
 
-            entity.Property(e => e.Userid)
-                .HasColumnName("userid")
-                .HasColumnType("uuid"); // PostgreSQL UUID type
+                entity.Property(e => e.Userid)
+                    .HasColumnName("userid")
+                    .HasColumnType("uuid"); // PostgreSQL UUID type
 
-            entity.Property(e => e.UserGroupId)
-                .HasColumnName("groupid")
-                .HasColumnType("uuid"); // PostgreSQL UUID type
+                entity.Property(e => e.UserGroupId)
+                    .HasColumnName("groupid")
+                    .HasColumnType("uuid"); // PostgreSQL UUID type
 
-            entity.Property(e => e.RefType).HasColumnName("ref_type");
+                entity.Property(e => e.RefType).HasColumnName("ref_type");
 
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.Removed)
-                .HasColumnName("removed")
-                .HasColumnType("boolean")
-                .HasDefaultValueSql("false");
-        });
+                entity.Property(e => e.Removed)
+                    .HasColumnName("removed")
+                    .HasColumnType("boolean")
+                    .HasDefaultValueSql("false");
+            });
+        }
     }
 }

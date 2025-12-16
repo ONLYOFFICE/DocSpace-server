@@ -30,10 +30,7 @@ public class RoomsNotificationSettings : ISettings<RoomsNotificationSettings>
 {
     public List<object> DisabledRooms { get; init; }
 
-    public static Guid ID
-    {
-        get { return new Guid("D69680EC-58DA-40D1-8CB3-424D2F402A83"); }
-    }
+    public static Guid ID => new("D69680EC-58DA-40D1-8CB3-424D2F402A83");
 
     public RoomsNotificationSettings GetDefault()
     {

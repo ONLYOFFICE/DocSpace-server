@@ -35,13 +35,7 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
     private IConnection _connection;
     private bool _disposed;
 
-    public bool IsConnected
-    {
-        get
-        {
-            return _connection is { IsOpen: true } && !_disposed;
-        }
-    }
+    public bool IsConnected => _connection is { IsOpen: true } && !_disposed;
 
     public async Task<IChannel> CreateModelAsync()
     {
@@ -107,7 +101,7 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
             }
         }).Build();
 
-        await pipeline.ExecuteAsync(async (_) =>
+        await pipeline.ExecuteAsync(async _ =>
         {
             _connection = await _connectionFactory.CreateConnectionAsync();
         });

@@ -77,7 +77,7 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
         var token = new JwtSecurityToken(
         issuer: serverRootPath,
             audience: serverRootPath,
-        claims: new List<Claim>() {
+        claims: new List<Claim> {
                 new("sub", userId.ToString()),
                 new("user_id", userId.ToString()),
                 new("user_name", userFormatter.GetUserName(userInfo)),

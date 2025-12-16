@@ -28,18 +28,21 @@ namespace ASC.Core.Users;
 
 public static class StudioUserInfoExtension
 {
-    public static async Task<string> GetUserProfilePageUrl(this UserInfo userInfo, CommonLinkUtility commonLinkUtility)
+    extension(UserInfo userInfo)
     {
-        return userInfo == null ? "" : await commonLinkUtility.GetUserProfileAsync(userInfo.Id);
-    }
+        public async Task<string> GetUserProfilePageUrl(CommonLinkUtility commonLinkUtility)
+        {
+            return userInfo == null ? "" : await commonLinkUtility.GetUserProfileAsync(userInfo.Id);
+        }
 
-    public static async Task<List<string>> GetListAdminModulesAsync(this UserInfo ui, WebItemSecurity webItemSecurity, WebItemManager webItemManager)
-    {
-        var products = webItemManager.GetItemsAll().Where(i => i is IProduct);
+        public async Task<List<string>> GetListAdminModulesAsync(WebItemSecurity webItemSecurity, WebItemManager webItemManager)
+        {
+            var products = webItemManager.GetItemsAll().Where(i => i is IProduct);
 
-        return await products
-            .ToAsyncEnumerable()
-            .Where(async (q, _) => await webItemSecurity.IsProductAdministratorAsync(q.ID, ui.Id))
-            .Select(q => q.ProductClassName).ToListAsync();
+            return await products
+                .ToAsyncEnumerable()
+                .Where(async (q, _) => await webItemSecurity.IsProductAdministratorAsync(q.ID, userInfo.Id))
+                .Select(q => q.ProductClassName).ToListAsync();
+        }
     }
 }

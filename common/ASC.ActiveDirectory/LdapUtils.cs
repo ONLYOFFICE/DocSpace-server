@@ -157,35 +157,38 @@ public static class LdapUtils
         }
     }
 
-    public static string GetContactsString(this UserInfo userInfo)
+    extension(UserInfo userInfo)
     {
-        if (userInfo.ContactsList == null || userInfo.ContactsList.Count == 0)
+        public string GetContactsString()
         {
-            return null;
+            if (userInfo.ContactsList == null || userInfo.ContactsList.Count == 0)
+            {
+                return null;
+            }
+
+            var sBuilder = new StringBuilder();
+            foreach (var contact in userInfo.Contacts)
+            {
+                sBuilder.Append($"{contact}|");
+            }
+            return sBuilder.ToString();
         }
 
-        var sBuilder = new StringBuilder();
-        foreach (var contact in userInfo.Contacts)
+        public string GetUserInfoString()
         {
-            sBuilder.Append($"{contact}|");
+            return string.Format(
+                "{{ ID: '{0}' SID: '{1}' Email '{2}' UserName: '{3}' FirstName: '{4}' LastName: '{5}' Title: '{6}' Location: '{7}' Contacts: '{8}' Status: '{9}' }}",
+                userInfo.Id,
+                userInfo.Sid,
+                userInfo.Email,
+                userInfo.UserName,
+                userInfo.FirstName,
+                userInfo.LastName,
+                userInfo.Title,
+                userInfo.Location,
+                userInfo.GetContactsString(),
+                Enum.GetName(userInfo.Status));
         }
-        return sBuilder.ToString();
-    }
-
-    public static string GetUserInfoString(this UserInfo userInfo)
-    {
-        return string.Format(
-            "{{ ID: '{0}' SID: '{1}' Email '{2}' UserName: '{3}' FirstName: '{4}' LastName: '{5}' Title: '{6}' Location: '{7}' Contacts: '{8}' Status: '{9}' }}",
-            userInfo.Id,
-            userInfo.Sid,
-            userInfo.Email,
-            userInfo.UserName,
-            userInfo.FirstName,
-            userInfo.LastName,
-            userInfo.Title,
-            userInfo.Location,
-            userInfo.GetContactsString(),
-            Enum.GetName(userInfo.Status));
     }
 
     public static string UnescapeLdapString(string ldapString)

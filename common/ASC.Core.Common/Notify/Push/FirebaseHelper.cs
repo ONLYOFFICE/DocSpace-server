@@ -36,8 +36,6 @@ public class FirebaseHelper(AuthContext authContext,
     CacheFirebaseDao cacheFirebaseDao,
     IFusionCache cache)
 {
-    protected readonly UserManager _userManager = userManager;
-
     public async Task SendMessageAsync(NotifyMessage msg)
     {
         var receiver = msg.Reciever;
@@ -55,7 +53,7 @@ public class FirebaseHelper(AuthContext authContext,
 
         if (Equals(userId, Guid.Empty))
         {
-            var user = await _userManager.GetUserByUserNameAsync(receiver);
+            var user = await userManager.GetUserByUserNameAsync(receiver);
             if (user == null)
             {
                 return;
@@ -73,7 +71,7 @@ public class FirebaseHelper(AuthContext authContext,
 
     private static readonly SemaphoreSlim _firebaseInitLock = new(initialCount: 1, maxCount: 1);
     private static bool _firebaseInitialized;
-    private static string _credentials;
+    private static GoogleCredential _credentials;
     private async Task InitializeFirebaseAsync()
     {
         if (_firebaseInitialized)
@@ -86,10 +84,10 @@ public class FirebaseHelper(AuthContext authContext,
         {
             if (FirebaseApp.DefaultInstance == null)
             {
-                var credentials = GetFirebaseCredentials();
+                var credential = GetFirebaseCredentials();
                 FirebaseApp.Create(new AppOptions
                 {
-                    Credential = CredentialFactory.FromJson<GoogleCredential>(credentials)
+                    Credential = credential
                 });
                 _firebaseInitialized = true;
             }
@@ -105,13 +103,24 @@ public class FirebaseHelper(AuthContext authContext,
         }
     }
 
-    private string GetFirebaseCredentials()
+    private GoogleCredential GetFirebaseCredentials()
     {
-        if (_credentials == null)
+        if (_credentials != null)
         {
-            var apiKey = new FirebaseApiKey(configuration);
-            _credentials = JsonSerializer.Serialize(apiKey);
+            return _credentials;
         }
+        var apiKey = new FirebaseApiKey(configuration);
+
+        var serviceCredential = new ServiceAccountCredential(
+            new ServiceAccountCredential.Initializer(apiKey.ClientEmail)
+            {
+                ProjectId = apiKey.ProjectId
+            }
+            .FromPrivateKey(apiKey.PrivateKey.Replace("\\n", "\n"))
+        );
+
+        _credentials = GoogleCredential.FromServiceAccountCredential(serviceCredential);
+
         return _credentials;
     }
 
@@ -138,8 +147,7 @@ public class FirebaseHelper(AuthContext authContext,
             }
             catch (FirebaseAdmin.Messaging.FirebaseMessagingException ex)
             {
-                if (ex.MessagingErrorCode == FirebaseAdmin.Messaging.MessagingErrorCode.InvalidArgument ||
-                    ex.MessagingErrorCode == FirebaseAdmin.Messaging.MessagingErrorCode.Unregistered)
+                if (ex.MessagingErrorCode is FirebaseAdmin.Messaging.MessagingErrorCode.InvalidArgument or FirebaseAdmin.Messaging.MessagingErrorCode.Unregistered)
                 {
                     await HandleInvalidTokenAsync(userId, tenantId, message.Token);
                 }

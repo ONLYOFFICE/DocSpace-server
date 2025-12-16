@@ -42,7 +42,7 @@ builder.Configuration.AddDefaultConfiguration(builder.Environment)
 var logger = LogManager.Setup()
                             .SetupExtensions(s =>
                             {
-                                s.RegisterLayoutRenderer("application-context", (logevent) => AppName);
+                                s.RegisterLayoutRenderer("application-context", logevent => AppName);
                             })
                             .LoadConfiguration(builder.Configuration, builder.Environment)
                             .GetLogger(typeof(Startup).Namespace);
@@ -66,10 +66,7 @@ try
 }
 catch (Exception ex)
 {
-    if (logger != null)
-    {
-        logger.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
-    }
+    logger?.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
 
     throw;
 }

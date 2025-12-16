@@ -54,11 +54,11 @@ public abstract class Product : IProduct
         return Task.FromResult(Enumerable.Empty<ActivityInfo>());
     }
 
-    WebItemContext IWebItem.Context { get { return ((IProduct)this).Context; } }
+    WebItemContext IWebItem.Context => ((IProduct)this).Context;
 
-    Guid IWebItem.ID { get { return ProductID; } }
+    Guid IWebItem.ID => ProductID;
 
-    public virtual bool IsPrimary { get => false; }
+    public virtual bool IsPrimary => false;
 
     public abstract string ApiURL { get; }
 }

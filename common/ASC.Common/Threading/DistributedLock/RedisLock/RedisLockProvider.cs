@@ -165,7 +165,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
     {
         var timeoutInMilliseconds = (long)timeout.TotalMilliseconds;
 
-        var code = (int)(await database.Database.ScriptEvaluateAsync(_lockTakeScript, new
+        var code = (int)await database.Database.ScriptEvaluateAsync(_lockTakeScript, new
         {
             lockKey = resource,
             queue = queueKey,
@@ -174,7 +174,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
             id = lockId,
             lockTimeout = timeoutInMilliseconds,
             currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-        }));
+        });
 
         return (LockStatus)code;
     }
@@ -183,7 +183,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
     {
         var timer = new PeriodicTimer(_options.ExtendInterval);
 
-        _ = Task.Run((async () =>
+        _ = Task.Run(async () =>
         {
             while (await timer.WaitForNextTickAsync(cancellationToken))
             {
@@ -195,7 +195,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
                         expiry = _expiryInMilliseconds
                     });
             }
-        }), cancellationToken);
+        }, cancellationToken);
 
         return timer;
     }

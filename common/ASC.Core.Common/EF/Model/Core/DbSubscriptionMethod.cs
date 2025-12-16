@@ -93,70 +93,74 @@ public static class SubscriptionMethodExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddSubscriptionMethod(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbSubscriptionMethod>(entity =>
+        public void MySqlAddSubscriptionMethod()
         {
-            entity.HasKey(e => new { e.TenantId, e.Source, e.Action, e.Recipient })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbSubscriptionMethod>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.Source, e.Action, e.Recipient })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("core_subscriptionmethod")
-                .HasCharSet("utf8");
+                entity.ToTable("core_subscriptionmethod")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
 
-            entity.Property(e => e.Source)
-                .HasColumnName("source")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Source)
+                    .HasColumnName("source")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Action)
-                .HasColumnName("action")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Action)
+                    .HasColumnName("action")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Recipient)
-                .HasColumnName("recipient")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Recipient)
+                    .HasColumnName("recipient")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Sender)
-                .IsRequired()
-                .HasColumnName("sender")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-        });
-    }
-    public static void PgSqlAddSubscriptionMethod(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbSubscriptionMethod>(entity =>
+                entity.Property(e => e.Sender)
+                    .IsRequired()
+                    .HasColumnName("sender")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+            });
+        }
+
+        public void PgSqlAddSubscriptionMethod()
         {
-            entity.HasKey(e => new { e.TenantId, e.Source, e.Action, e.Recipient });
+            modelBuilder.Entity<DbSubscriptionMethod>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.Source, e.Action, e.Recipient });
 
-            entity.ToTable("core_subscriptionmethod");
+                entity.ToTable("core_subscriptionmethod");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
 
-            entity.Property(e => e.Source)
-                .HasColumnName("source")
-                .HasColumnType("varchar");
+                entity.Property(e => e.Source)
+                    .HasColumnName("source")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.Action)
-                .HasColumnName("action")
-                .HasColumnType("varchar");
+                entity.Property(e => e.Action)
+                    .HasColumnName("action")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.Recipient)
-                .HasColumnName("recipient")
-                .HasColumnType("varchar");
+                entity.Property(e => e.Recipient)
+                    .HasColumnName("recipient")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.Sender)
-                .IsRequired()
-                .HasColumnName("sender")
-                .HasColumnType("varchar");
-        });
+                entity.Property(e => e.Sender)
+                    .IsRequired()
+                    .HasColumnName("sender")
+                    .HasColumnType("varchar");
+            });
+        }
     }
 }

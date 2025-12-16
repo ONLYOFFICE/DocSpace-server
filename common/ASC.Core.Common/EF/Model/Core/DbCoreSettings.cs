@@ -81,58 +81,62 @@ public static class CoreSettingsExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddCoreSettings(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbCoreSettings>(entity =>
+        public void MySqlAddCoreSettings()
         {
-            entity.HasKey(e => new { e.TenantId, e.Id })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbCoreSettings>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.Id })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("core_settings")
-                .HasCharSet("utf8");
+                entity.ToTable("core_settings")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("timestamp");
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("timestamp");
 
-            entity.Property(e => e.Value)
-                .IsRequired()
-                .HasColumnName("value")
-                .HasColumnType("mediumblob");
-        });
-    }
-    public static void PgSqlAddCoreSettings(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbCoreSettings>(entity =>
+                entity.Property(e => e.Value)
+                    .IsRequired()
+                    .HasColumnName("value")
+                    .HasColumnType("mediumblob");
+            });
+        }
+
+        public void PgSqlAddCoreSettings()
         {
-            entity.HasKey(e => new { e.TenantId, e.Id })
-                .HasName("core_settings_pkey");
+            modelBuilder.Entity<DbCoreSettings>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.Id })
+                    .HasName("core_settings_pkey");
 
-            entity.ToTable("core_settings");
+                entity.ToTable("core_settings");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasColumnType("character varying")
-                .HasMaxLength(128);
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(128);
 
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.Value)
-                .IsRequired()
-                .HasColumnName("value")
-                .HasColumnType("bytea");
-        });
+                entity.Property(e => e.Value)
+                    .IsRequired()
+                    .HasColumnName("value")
+                    .HasColumnType("bytea");
+            });
+        }
     }
 }

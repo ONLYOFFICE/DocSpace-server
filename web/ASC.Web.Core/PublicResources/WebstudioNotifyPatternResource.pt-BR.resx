@@ -2100,4 +2100,16 @@ $TrulyYours</value>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
     <value>Você está convidado(a) ao agente DocSpace da(o) ${LetterLogoText}</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>O DocSpace ${LetterLogoText} foi excluído</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>O DocSpace ${LetterLogoText} foi excluído.
+
+*Portal:* ${PortalUrl}
+*Proprietário:* ${UserName} ${UserEmail}
+*Cliente:* ${OwnerName}
+
+Certifique-se de que a cobrança automática esteja desativada. Verifique o status da cobrança automática na conta Stripe do cliente.</value>
+  </data>
 </root>

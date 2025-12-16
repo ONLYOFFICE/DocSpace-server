@@ -92,7 +92,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             return;
         }
 
-        if (authContext.IsAuthenticated && !(await ipSecurity.VerifyAsync()))
+        if (authContext.IsAuthenticated && !await ipSecurity.VerifyAsync())
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             await context.Response.WriteAsync(Resource.ErrorIpSecurity);
@@ -181,7 +181,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var sessionId = await externalShare.GetSessionIdAsync();
 
             if (session != null && sessionId != Guid.Empty && session.Id == sessionId &&
-                (await externalShare.ValidateAsync(session.LinkId, securityContext.IsAuthenticated)) == Status.Ok)
+                await externalShare.ValidateAsync(session.LinkId, securityContext.IsAuthenticated) == Status.Ok)
             {
                 path = $@"{session.LinkId}\{session.Id}\{filename}";
             }
@@ -393,7 +393,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         {
                             if (await fileDao.IsSupportedPreSignedUriAsync(file))
                             {
-                                var url = (await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1), externalShare.GetKey()));
+                                var url = await fileDao.GetPreSignedUriAsync(file, TimeSpan.FromHours(1), externalShare.GetKey());
 
                                 context.Response.Redirect(url, false);
 
@@ -479,9 +479,9 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         }
 
         return (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)) &&
-               ((file.ShareRecord is
-        { IsLink: true, Share: not FileShare.Restrict } or
-        { Share: FileShare.Read, SubjectType: SubjectType.User or SubjectType.Group }) ||
+               (file.ShareRecord is
+                    { IsLink: true, Share: not FileShare.Restrict } or
+                    { Share: FileShare.Read, SubjectType: SubjectType.User or SubjectType.Group } ||
                (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)));
     }
 
@@ -1289,7 +1289,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         context.Response.Redirect(
             (context.Request.Query["openfolder"].FirstOrDefault() ?? "").Equals("true")
                     ? await pathProvider.GetFolderUrlByIdAsync(file.ParentId)
-                    : (filesLinkUtility.GetFileWebEditorUrl(file.Id) + "&message=" + HttpUtility.UrlEncode(string.Format(FilesCommonResource.MessageFileCreated, folder.Title))));
+                    : filesLinkUtility.GetFileWebEditorUrl(file.Id) + "&message=" + HttpUtility.UrlEncode(string.Format(FilesCommonResource.MessageFileCreated, folder.Title)));
     }
 
     private async Task WriteError(HttpContext context, Exception ex, bool responseMessage)

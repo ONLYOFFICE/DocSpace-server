@@ -53,52 +53,55 @@ public static class DbFilesPropertiesExtension
         return modelBuilder;
     }
 
-    public static void MySqlDbFilesProperties(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbFilesProperties>(entity =>
+        public void MySqlDbFilesProperties()
         {
-            entity.HasKey(e => new { e.TenantId, e.EntryId })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbFilesProperties>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.EntryId })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("files_properties");
+                entity.ToTable("files_properties");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id");
 
-            entity.Property(e => e.EntryId)
-                .HasColumnName("entry_id")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.EntryId)
+                    .HasColumnName("entry_id")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Data)
-                .HasColumnName("data")
-                .HasColumnType("mediumtext")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Data)
+                    .HasColumnName("data")
+                    .HasColumnType("mediumtext")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-        });
-    }
+            });
+        }
 
-    public static void PgSqlDbFilesProperties(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbFilesProperties>(entity =>
+        public void PgSqlDbFilesProperties()
         {
-            entity.HasKey(e => new { e.TenantId, e.EntryId })
-                .HasName("pk_files_properties");
+            modelBuilder.Entity<DbFilesProperties>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.EntryId })
+                    .HasName("pk_files_properties");
 
-            entity.ToTable("files_properties");
+                entity.ToTable("files_properties");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id");
 
-            entity.Property(e => e.EntryId)
-                .HasColumnName("entry_id")
-                .HasColumnType("varchar(32)");
+                entity.Property(e => e.EntryId)
+                    .HasColumnName("entry_id")
+                    .HasColumnType("varchar(32)");
 
-            entity.Property(e => e.Data)
-                .HasColumnName("data")
-                .HasColumnType("text");
-        });
+                entity.Property(e => e.Data)
+                    .HasColumnName("data")
+                    .HasColumnType("text");
+            });
+        }
     }
 }

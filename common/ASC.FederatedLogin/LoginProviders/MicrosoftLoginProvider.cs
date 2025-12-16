@@ -30,12 +30,12 @@ public class MicrosoftLoginProvider : BaseLoginProvider<MicrosoftLoginProvider>
 {
     private const string MicrosoftProfileUrl = "https://graph.microsoft.com/oidc/userinfo";
 
-    public override string AccessTokenUrl { get { return "https://login.microsoftonline.com/consumers/oauth2/v2.0/token"; } }
-    public override string RedirectUri { get { return this["microsoftRedirectUrl"]; } }
-    public override string ClientID { get { return this["microsoftClientId"]; } }
-    public override string ClientSecret { get { return this["microsoftClientSecret"]; } }
-    public override string CodeUrl { get { return "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize"; } }
-    public override string Scopes { get { return "openid,email,profile"; } }
+    public override string AccessTokenUrl => "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
+    public override string RedirectUri => this["microsoftRedirectUrl"];
+    public override string ClientID => this["microsoftClientId"];
+    public override string ClientSecret => this["microsoftClientSecret"];
+    public override string CodeUrl => "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
+    public override string Scopes => "openid,email,profile";
 
     private readonly RequestHelper _requestHelper;
 

@@ -35,7 +35,7 @@ public class IpSecurityFilter(
 {
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
-        if (authContext.IsAuthenticated && !(await ipSecurity.VerifyAsync()))
+        if (authContext.IsAuthenticated && !await ipSecurity.VerifyAsync())
         {
             context.Result = new ObjectResult(Resource.ErrorIpSecurity)
             {

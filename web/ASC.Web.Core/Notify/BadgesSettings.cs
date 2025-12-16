@@ -29,11 +29,8 @@ public class BadgesSettings : ISettings<BadgesSettings>
 {
     public bool EnableBadges { get; set; }
 
-    public static Guid ID
-    {
-        get { return new Guid("23491DC6-FF99-43E0-885A-D6F7B9DD7665"); }
-    }
-    
+    public static Guid ID => new("23491DC6-FF99-43E0-885A-D6F7B9DD7665");
+
     public BadgesSettings GetDefault()
     {
         return new BadgesSettings

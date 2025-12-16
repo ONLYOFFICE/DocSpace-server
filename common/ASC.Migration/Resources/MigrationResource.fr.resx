@@ -210,4 +210,7 @@
   <data name="СreateRootFolder" xml:space="preserve">
     <value>Créer un dossier racine</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>La sauvegarde est plus grande que la taille totale du portail</value>
+  </data>
 </root>

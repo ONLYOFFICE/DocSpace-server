@@ -2094,4 +2094,13 @@ $TrulyYours</value>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
     <value>Sie sind zum ${LetterLogoText}-DocSpace-Agenten eingeladen</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace wurde gelöscht.
+
+*Portal:* ${PortalUrl}
+*Besitzer:* ${UserName} ${UserEmail} 
+*Kunde:* ${OwnerName}
+
+Bitte stellen Sie sicher, dass die automatische Abrechnung deaktiviert ist. Überprüfen Sie den Status der automatischen Abrechnung im Stripe-Kundenkonto.</value>
+  </data>
 </root>

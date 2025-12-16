@@ -234,7 +234,7 @@ public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
             {
                 CacheExtention.GetProviderTag(selector, id),
                 CacheExtention.GetProviderFolderTag(selector, id, folderId),
-                CacheExtention.GetProviderFolderItemsTag(selector, id, folderId),
+                CacheExtention.GetProviderFolderItemsTag(selector, id, folderId)
             };
 
             foreach (var item in items)

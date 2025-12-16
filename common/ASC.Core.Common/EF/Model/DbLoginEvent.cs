@@ -64,137 +64,140 @@ public static class LoginEventsExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddLoginEvents(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbLoginEvent>(entity =>
+        public void MySqlAddLoginEvents()
         {
-            entity.ToTable("login_events")
-                .HasCharSet("utf8");
+            modelBuilder.Entity<DbLoginEvent>(entity =>
+            {
+                entity.ToTable("login_events")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.Date)
-                .HasDatabaseName("date");
+                entity.HasIndex(e => e.Date)
+                    .HasDatabaseName("date");
 
-            entity.HasIndex(e => new { e.TenantId, e.UserId })
-                .HasDatabaseName("tenant_id");
+                entity.HasIndex(e => new { e.TenantId, e.UserId })
+                    .HasDatabaseName("tenant_id");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.Action)
-                .HasColumnName("action")
-                .IsRequired(false);
+                entity.Property(e => e.Action)
+                    .HasColumnName("action")
+                    .IsRequired(false);
 
-            entity.Property(e => e.Browser)
-                .HasColumnName("browser")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Browser)
+                    .HasColumnName("browser")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Date)
-                .HasColumnName("date")
-                .HasColumnType("datetime");
+                entity.Property(e => e.Date)
+                    .HasColumnName("date")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.DescriptionRaw)
-                .HasColumnName("description")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.DescriptionRaw)
+                    .HasColumnName("description")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Ip)
-                .HasColumnName("ip")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Ip)
+                    .HasColumnName("ip")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Login)
-                .HasColumnName("login")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Login)
+                    .HasColumnName("login")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Page)
-                .HasColumnName("page")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Page)
+                    .HasColumnName("page")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Platform)
-                .HasColumnName("platform")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Platform)
+                    .HasColumnName("platform")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id");
 
-            entity.Property(e => e.Active)
-                .HasColumnName("active");
+                entity.Property(e => e.Active)
+                    .HasColumnName("active");
 
-            entity.Property(e => e.UserId)
-                .IsRequired()
-                .HasColumnName("user_id")
-                .HasColumnType("char(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-        });
-    }
+                entity.Property(e => e.UserId)
+                    .IsRequired()
+                    .HasColumnName("user_id")
+                    .HasColumnType("char(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+            });
+        }
 
-    public static void PgSqlAddLoginEvents(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbLoginEvent>(entity =>
+        public void PgSqlAddLoginEvents()
         {
-            entity.ToTable("login_events");
+            modelBuilder.Entity<DbLoginEvent>(entity =>
+            {
+                entity.ToTable("login_events");
 
-            entity.HasIndex(e => e.Date)
-                .HasDatabaseName("idx_date");
+                entity.HasIndex(e => e.Date)
+                    .HasDatabaseName("idx_date");
 
-            entity.HasIndex(e => new { e.TenantId, e.UserId })
-                .HasDatabaseName("idx_tenant_id_user_id");
+                entity.HasIndex(e => new { e.TenantId, e.UserId })
+                    .HasDatabaseName("idx_tenant_id_user_id");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id");
 
-            entity.Property(e => e.Action)
-                .HasColumnName("action")
-                .IsRequired(false);
+                entity.Property(e => e.Action)
+                    .HasColumnName("action")
+                    .IsRequired(false);
 
-            entity.Property(e => e.Browser)
-                .HasColumnName("browser")
-                .HasColumnType("varchar");
+                entity.Property(e => e.Browser)
+                    .HasColumnName("browser")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.Date)
-                .HasColumnName("date")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.Date)
+                    .HasColumnName("date")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.DescriptionRaw)
-                .HasColumnName("description")
-                .HasColumnType("varchar");
+                entity.Property(e => e.DescriptionRaw)
+                    .HasColumnName("description")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.Ip)
-                .HasColumnName("ip")
-                .HasColumnType("varchar");
+                entity.Property(e => e.Ip)
+                    .HasColumnName("ip")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.Login)
-                .HasColumnName("login")
-                .HasColumnType("varchar");
+                entity.Property(e => e.Login)
+                    .HasColumnName("login")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.Page)
-                .HasColumnName("page")
-                .HasColumnType("varchar");
+                entity.Property(e => e.Page)
+                    .HasColumnName("page")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.Platform)
-                .HasColumnName("platform")
-                .HasColumnType("varchar");
+                entity.Property(e => e.Platform)
+                    .HasColumnName("platform")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id");
 
-            entity.Property(e => e.Active)
-                .HasColumnName("active");
+                entity.Property(e => e.Active)
+                    .HasColumnName("active");
 
-            entity.Property(e => e.UserId)
-                .IsRequired()
-                .HasColumnName("user_id")
-                .HasColumnType("uuid");
-        });
+                entity.Property(e => e.UserId)
+                    .IsRequired()
+                    .HasColumnName("user_id")
+                    .HasColumnType("uuid");
+            });
+        }
     }
 }

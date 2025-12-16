@@ -63,10 +63,7 @@ public class TenantQuotaFeature<T>(TenantQuota tenantQuota, string name, T @defa
 
             return result;
         }
-        set
-        {
-            tenantQuota.ReplaceFeature(Name, value, Default);
-        }
+        set => tenantQuota.ReplaceFeature(Name, value, Default);
     }
 
     public T Default { get; } = @default;

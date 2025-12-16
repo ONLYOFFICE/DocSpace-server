@@ -210,4 +210,7 @@
   <data name="СanNotImportProjectFiles" xml:space="preserve">
     <value>Projektnih datotek ni bilo mogoče uvoziti</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Varnostna kopija je večja od celotne velikosti portala</value>
+  </data>
 </root>

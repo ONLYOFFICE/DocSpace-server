@@ -111,10 +111,7 @@ public class AgentsController(
     public async Task<FolderDto<int>> CreateAgent(CreateAgentRequestDto inDto)
     {
         var lifetime = inDto.Lifetime.Map();
-        if (lifetime != null)
-        {
-            lifetime.StartDate = DateTime.UtcNow;
-        }
+        lifetime?.StartDate = DateTime.UtcNow;
 
         var room = await fileStorageService.CreateAiAgentAsync(
             inDto.Title, 

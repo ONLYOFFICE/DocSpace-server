@@ -54,70 +54,74 @@ public static class TelegramUsersExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddTelegramUsers(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<TelegramUser>(entity =>
+        public void MySqlAddTelegramUsers()
         {
-            entity.HasKey(e => new { e.TenantId, e.PortalUserId })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<TelegramUser>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.PortalUserId })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("telegram_users")
-                .HasCharSet("utf8");
+                entity.ToTable("telegram_users")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.TelegramUserId)
-                .HasDatabaseName("tgId");
+                entity.HasIndex(e => e.TelegramUserId)
+                    .HasDatabaseName("tgId");
 
-            entity.HasIndex(e => e.TelegramUsername)
-                .HasDatabaseName("tgUsername");
+                entity.HasIndex(e => e.TelegramUsername)
+                    .HasDatabaseName("tgUsername");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.PortalUserId)
-                .HasColumnName("portal_user_id")
-                .HasColumnType("varchar(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.PortalUserId)
+                    .HasColumnName("portal_user_id")
+                    .HasColumnType("varchar(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.TelegramUserId)
-                .HasColumnName("telegram_user_id")
-                .HasColumnType("int");
+                entity.Property(e => e.TelegramUserId)
+                    .HasColumnName("telegram_user_id")
+                    .HasColumnType("int");
 
-            entity.Property(e => e.TelegramUsername)
-                .HasColumnName("telegram_username")
-                .HasColumnType("varchar(35)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-        });
-    }
-    public static void PgSqlAddTelegramUsers(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<TelegramUser>(entity =>
+                entity.Property(e => e.TelegramUsername)
+                    .HasColumnName("telegram_username")
+                    .HasColumnType("varchar(35)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+            });
+        }
+
+        public void PgSqlAddTelegramUsers()
         {
-            entity.HasKey(e => new { e.TenantId, e.PortalUserId })
-                .HasName("pk_telegram_user");
+            modelBuilder.Entity<TelegramUser>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.PortalUserId })
+                    .HasName("pk_telegram_user");
 
-            entity.ToTable("telegram_users");
+                entity.ToTable("telegram_users");
 
-            entity.HasIndex(e => e.TelegramUserId)
-                .HasDatabaseName("ix_telegram_user_id");
+                entity.HasIndex(e => e.TelegramUserId)
+                    .HasDatabaseName("ix_telegram_user_id");
 
-            entity.HasIndex(e => e.TelegramUsername)
-                .HasDatabaseName("ix_telegram_username");
+                entity.HasIndex(e => e.TelegramUsername)
+                    .HasDatabaseName("ix_telegram_username");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.PortalUserId)
-                .HasColumnName("portal_user_id")
-                .HasColumnType("uuid");
+                entity.Property(e => e.PortalUserId)
+                    .HasColumnName("portal_user_id")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.TelegramUserId)
-                .HasColumnName("telegram_user_id")
-                .HasColumnType("bigint");
+                entity.Property(e => e.TelegramUserId)
+                    .HasColumnName("telegram_user_id")
+                    .HasColumnType("bigint");
 
-            entity.Property(e => e.TelegramUsername)
-                .HasColumnName("telegram_username")
-                .HasColumnType("char(35)");
-        });
+                entity.Property(e => e.TelegramUsername)
+                    .HasColumnName("telegram_username")
+                    .HasColumnType("char(35)");
+            });
 
+        }
     }
 }

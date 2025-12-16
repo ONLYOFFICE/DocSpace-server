@@ -83,6 +83,7 @@ public class RabbitListenerContainerFactoryConfiguration {
             "audit", AuditMessage.class,
             "clientRemoved", ClientRemovedEvent.class,
             "retrieveAuthorization", RetrieveAuthorizationMessage.class,
+            "saveAuthorization", SaveAuthorizationMessage.class,
             "tenantClientsRemoved", TenantClientsRemovedEvent.class,
             "userClientsRemoved", UserClientsRemovedEvent.class));
     messageConverter.setClassMapper(classMapper);

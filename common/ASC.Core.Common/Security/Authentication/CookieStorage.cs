@@ -61,7 +61,7 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
 
         try
         {
-            cookie = (HttpUtility.UrlDecode(cookie)).Replace(' ', '+');
+            cookie = HttpUtility.UrlDecode(cookie).Replace(' ', '+');
             var s = instanceCrypto.Decrypt(cookie).Split('$');
 
             if (1 < s.Length)
@@ -111,7 +111,7 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
 
         try
         {
-            cookie = (HttpUtility.UrlDecode(cookie)).Replace(' ', '+');
+            cookie = HttpUtility.UrlDecode(cookie).Replace(' ', '+');
             var s = instanceCrypto.Decrypt(cookie).Split('$');
             if (8 < s.Length)
             {

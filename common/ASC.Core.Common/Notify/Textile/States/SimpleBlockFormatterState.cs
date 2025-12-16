@@ -46,7 +46,7 @@ public abstract class SimpleBlockFormatterState(TextileFormatter formatter) : Fo
 
         OnContextAcquired();
 
-        this.Formatter.ChangeState(this);
+        Formatter.ChangeState(this);
 
         return input;
     }

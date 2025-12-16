@@ -435,7 +435,7 @@ public class EmployeeFullDtoHelper(
             return;
         }
         
-        var groupsFromDb = (await _userManager.GetUserGroupsAsync(userInfo.Id));
+        var groupsFromDb = await _userManager.GetUserGroupsAsync(userInfo.Id);
         List<GroupSummaryDto> groups = [];
 
         foreach (var g in groupsFromDb)

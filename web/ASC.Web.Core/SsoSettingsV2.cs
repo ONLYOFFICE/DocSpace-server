@@ -31,10 +31,7 @@ namespace ASC.Web.Studio.UserControls.Management.SingleSignOnSettings;
 /// </summary>
 public class SsoSettingsV2 : ISettings<SsoSettingsV2>
 {
-    public static Guid ID
-    {
-        get { return new Guid("{1500187F-B8AB-406F-97B8-04BFE8261DBE}"); }
-    }
+    public static Guid ID => new("{1500187F-B8AB-406F-97B8-04BFE8261DBE}");
 
     public const string SSO_SP_LOGIN_LABEL = "Single Sign-on";
 

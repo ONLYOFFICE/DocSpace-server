@@ -193,7 +193,7 @@ public abstract class BaseIndexer<T>(Client client,
 
     internal async Task IndexAsync(T data, bool immediately = true)
     {
-        if (!(await BeforeIndexAsync(data)))
+        if (!await BeforeIndexAsync(data))
         {
             return;
         }

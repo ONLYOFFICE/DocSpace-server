@@ -70,7 +70,7 @@ internal abstract class SecurityBaseDao<T>(
 
         foreach (var record in records)
         {
-            var (mappedId, _) = (await mapping.MappingIdAsync(record.EntryId));
+            var (mappedId, _) = await mapping.MappingIdAsync(record.EntryId);
             var query = await filesDbContext
                 .ForDeleteShareRecordsAsync(record.TenantId, record.EntryType, record.Subject, mappedId)
                 .ToListAsync();
@@ -472,7 +472,7 @@ internal abstract class SecurityBaseDao<T>(
 
             switch (filterType)
             {
-                case ShareFilterType.User when (entry is IFolder folder && DocSpaceHelper.IsRoom(folder.FolderType)):
+                case ShareFilterType.User when entry is IFolder { IsRoom: true }:
                     {
                         var predicate = ShareCompareHelper.GetCompareExpression<SecurityUserRecord>(s => s.Security.Share, entry.RootFolderType);
 
@@ -1151,34 +1151,19 @@ internal abstract class SecurityBaseDao<T>(
             
             q = filesDbContext.Security.FromSqlRaw(q1.ToQueryString());
         }
-        
-        switch (filterType)
+
+        q = filterType switch
         {
-            case ShareFilterType.UserOrGroup:
-                q = q.Where(s => s.SubjectType == SubjectType.User || s.SubjectType == SubjectType.Group);
-                break;
-            case ShareFilterType.InvitationLink:
-                q = q.Where(s => s.SubjectType == SubjectType.InvitationLink);
-                break;
-            case ShareFilterType.ExternalLink:
-                q = q.Where(s => s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink);
-                break;
-            case ShareFilterType.AdditionalExternalLink:
-                q = q.Where(s => s.SubjectType == SubjectType.ExternalLink);
-                break;
-            case ShareFilterType.PrimaryExternalLink:
-                q = q.Where(s => s.SubjectType == SubjectType.PrimaryExternalLink);
-                break;
-            case ShareFilterType.Link:
-                q = q.Where(s => s.SubjectType == SubjectType.InvitationLink || s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink);
-                break;
-            case ShareFilterType.Group:
-                q = q.Where(s => s.SubjectType == SubjectType.Group);
-                break;
-            case ShareFilterType.User:
-                q = q.Where(s => s.SubjectType == SubjectType.User);
-                break;
-        }
+            ShareFilterType.UserOrGroup => q.Where(s => s.SubjectType == SubjectType.User || s.SubjectType == SubjectType.Group),
+            ShareFilterType.InvitationLink => q.Where(s => s.SubjectType == SubjectType.InvitationLink),
+            ShareFilterType.ExternalLink => q.Where(s => s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink),
+            ShareFilterType.AdditionalExternalLink => q.Where(s => s.SubjectType == SubjectType.ExternalLink),
+            ShareFilterType.PrimaryExternalLink => q.Where(s => s.SubjectType == SubjectType.PrimaryExternalLink),
+            ShareFilterType.Link => q.Where(s => s.SubjectType == SubjectType.InvitationLink || s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink),
+            ShareFilterType.Group => q.Where(s => s.SubjectType == SubjectType.Group),
+            ShareFilterType.User => q.Where(s => s.SubjectType == SubjectType.User),
+            _ => q
+        };
 
         return q;
     }

@@ -210,4 +210,7 @@
   <data name="CanNotShare" xml:space="preserve">
     <value>{0} から {1} までのエントリを共有できませんでした</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>バックアップがポータルの合計サイズより大きいです</value>
+  </data>
 </root>

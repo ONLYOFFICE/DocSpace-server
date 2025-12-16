@@ -28,10 +28,7 @@ namespace ASC.Web.Core.Users;
 
 public class UserHelpTourSettings : ISettings<UserHelpTourSettings>
 {
-    public static Guid ID
-    {
-        get { return new Guid("{DF4B94B7-42C8-4fce-AAE2-D479F3B39BDD}"); }
-    }
+    public static Guid ID => new("{DF4B94B7-42C8-4fce-AAE2-D479F3B39BDD}");
 
     public Dictionary<Guid, int> ModuleHelpTour { get; set; }
 
