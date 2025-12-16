@@ -217,7 +217,7 @@ public class InvitationValidator(
             return (EmailValidationKeyProvider.ValidationResult.Invalid, linkId);
         }
 
-        if (link.Expiration < DateTime.UtcNow)
+        if (link.Expiration != DateTime.MinValue && link.Expiration < DateTime.UtcNow)
         {
             return (EmailValidationKeyProvider.ValidationResult.Expired, linkId);
         }

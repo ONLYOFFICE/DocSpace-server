@@ -188,11 +188,11 @@ public class PortalController(
             throw new ArgumentException(nameof(inDto.EmployeeType));
         }
 
-        var expiration = DateTime.UtcNow.AddDays(7);
+        var expiration = DateTime.MinValue;
         if (inDto.Expiration.HasValue)
         {
             expiration = tenantUtil.DateTimeToUtc(inDto.Expiration.Value);
-            if (expiration < DateTime.UtcNow)
+            if (expiration != DateTime.MinValue && expiration < DateTime.UtcNow)
             {
                 throw new ArgumentException(nameof(inDto.Expiration));
             }
@@ -287,11 +287,11 @@ public class PortalController(
             throw new ArgumentException(nameof(inDto.MaxUseCount));
         }
 
-        var expiration = DateTime.UtcNow.AddDays(7);
+        var expiration = DateTime.MinValue;
         if (inDto.Expiration.HasValue)
         {
             expiration = tenantUtil.DateTimeToUtc(inDto.Expiration.Value);
-            if (expiration < DateTime.UtcNow)
+            if (expiration != DateTime.MinValue && expiration < DateTime.UtcNow)
             {
                 throw new ArgumentException(nameof(inDto.Expiration));
             }

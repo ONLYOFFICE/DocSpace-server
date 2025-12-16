@@ -4166,6 +4166,15 @@ public class FileStorageService //: IFileStorageService
             }
         }
 
+        var options = new FileShareOptions
+        {
+            Title = !string.IsNullOrEmpty(title)
+                ? title
+                : FilesCommonResource.DefaultInvitationLinkTitle,
+            MaxUseCount = maxUseCount,
+            CurrentUseCount = currentUseCount
+        };
+
         var expirationDateUtc = tenantUtil.DateTimeToUtc(expirationDate);
         if (expirationDateUtc != DateTime.MinValue)
         {
@@ -4173,21 +4182,9 @@ public class FileStorageService //: IFileStorageService
             {
                 throw new ArgumentException(null, nameof(expirationDate));
             }
-        }
-        else
-        {
-            expirationDateUtc = DateTime.UtcNow.Add(invitationValidator.IndividualLinkExpirationInterval);
-        }
 
-        var options = new FileShareOptions
-        {
-            Title = !string.IsNullOrEmpty(title)
-                ? title
-                : FilesCommonResource.DefaultInvitationLinkTitle,
-            ExpirationDate = expirationDateUtc,
-            MaxUseCount = maxUseCount,
-            CurrentUseCount = currentUseCount
-        };
+            options.ExpirationDate = expirationDateUtc;
+        }
 
         var result = await SetAceLinkAsync(room, SubjectType.InvitationLink, linkId, share, options);
 

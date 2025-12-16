@@ -50,6 +50,11 @@ public class InvitationLinkDto
     public ApiDateTime Expiration { get; set; }
 
     /// <summary>
+    /// Indicates whether the invitation link has expired.
+    /// </summary>
+    public bool IsExpired { get; set; }
+
+    /// <summary>
     /// The maximum number of times the invitation link can be used.
     /// </summary>
     public int? MaxUseCount { get; set; }
@@ -84,7 +89,8 @@ public class InvitationLinkDtoHelper(
         {
             Id = source.Id,
             EmployeeType = source.EmployeeType,
-            Expiration = apiDateTimeHelper.Get(tenantUtil.DateTimeFromUtc(source.Expiration)),
+            IsExpired = source.Expiration != DateTime.MinValue && source.Expiration < DateTime.UtcNow,
+            Expiration = source.Expiration != DateTime.MinValue ? apiDateTimeHelper.Get(tenantUtil.DateTimeFromUtc(source.Expiration)) : null,
             MaxUseCount = source.MaxUseCount,
             CurrentUseCount = source.CurrentUseCount
         };

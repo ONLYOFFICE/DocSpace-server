@@ -273,9 +273,9 @@ public class InvitationService(
             return data;
         }
 
-        data.Result = record.Options.ExpirationDate > DateTime.UtcNow
-            ? EmailValidationKeyProvider.ValidationResult.Ok
-            : EmailValidationKeyProvider.ValidationResult.Expired;
+        data.Result = record.Options.IsExpired
+            ? EmailValidationKeyProvider.ValidationResult.Expired
+            : EmailValidationKeyProvider.ValidationResult.Ok;
 
         if (data.Result == EmailValidationKeyProvider.ValidationResult.Ok &&
             record.Options.MaxUseCount.HasValue &&
