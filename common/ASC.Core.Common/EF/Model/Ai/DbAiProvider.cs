@@ -35,7 +35,8 @@ public enum ProviderType
     Anthropic = 4,
     OpenRouter = 5,
     DeepSeek = 6,
-    XAi = 7
+    XAi = 7,
+    GoogleAi = 8
 }
 
 public class DbAiProvider : BaseEntity

@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Mscc.GenerativeAI;
+using Mscc.GenerativeAI.Microsoft;
+
 namespace ASC.AI.Core.Chat;
 
 [Scope]
@@ -42,31 +45,44 @@ public class ChatClientFactory(
 
         ChatClientBuilder builder;
 
-        if (options.Provider == ProviderType.Anthropic)
+        switch (options.Provider)
         {
-            var client = new AnthropicClient(
-                new APIAuthentication(options.Key), httpClientFactory.CreateClient()).Messages;
-
-            builder = client.AsBuilder()
-                .ConfigureOptions(x =>
+            case ProviderType.Anthropic:
                 {
-                    x.ModelId = options.ModelId;
-                    x.MaxOutputTokens = 6144;
-                });
-        }
-        else
-        {
-            var credential = new ApiKeyCredential(options.Key);
-            var openAiOptions = new OpenAIClientOptions
-            {
-                Endpoint = new Uri(options.Endpoint),
-                Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
-            };
+                    var client = new AnthropicClient(
+                        new APIAuthentication(options.Key), httpClientFactory.CreateClient()).Messages;
+
+                    builder = client.AsBuilder()
+                        .ConfigureOptions(x =>
+                        {
+                            x.ModelId = options.ModelId;
+                            x.MaxOutputTokens = 6144;
+                        });
+                    break;
+                }
+            case ProviderType.GoogleAi:
+                {
+                    var googleAi = new GoogleAI(apiKey: options.Key, httpClientFactory: httpClientFactory);
+                    var client = new GoogleAiChatClient(googleAi.GenerativeModel().AsIChatClient());
+
+                    builder = client.AsBuilder();
+                    break;
+                }
+            default:
+                {
+                    var credential = new ApiKeyCredential(options.Key);
+                    var openAiOptions = new OpenAIClientOptions
+                    {
+                        Endpoint = new Uri(options.Endpoint),
+                        Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
+                    };
         
-            var openAiClient = new OpenAIClient(credential, openAiOptions);
-            var chatClient = openAiClient.GetChatClient(options.ModelId);
+                    var openAiClient = new OpenAIClient(credential, openAiOptions);
+                    var chatClient = openAiClient.GetChatClient(options.ModelId);
         
-            builder = chatClient.AsIChatClient().AsBuilder();
+                    builder = chatClient.AsIChatClient().AsBuilder();
+                    break;
+                }
         }
 
         if (toolHolder?.Tools is { Count: > 0 })

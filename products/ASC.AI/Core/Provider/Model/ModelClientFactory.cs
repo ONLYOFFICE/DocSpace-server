@@ -43,6 +43,8 @@ public class ModelClientFactory(IHttpClientFactory httpClientFactory)
                 new DocSpaceModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.OpenRouter =>
                 new OpenRouterModelClient(httpClientFactory.CreateClient(), url, apiKey),
+            ProviderType.GoogleAi =>
+                new GoogleModelClient(httpClientFactory, apiKey),
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
     }
