@@ -68,7 +68,7 @@ public static class OpenApiExtension
             c.DocumentFilter<LowercaseDocumentFilter>();
             c.SchemaFilter<DerivedSchemaFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
-            c.OperationFilter<SwaggerOperationIdFilter>("api/2.0/files/recent", "getFolderRecent");
+            c.OperationFilter<SwaggerOperationIdFilter>("api/2.0/files/recent", "getFolderRecent", "Get recent files");
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
