@@ -61,7 +61,7 @@ public class MyPythonCodegen extends PythonClientCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
-        this.outputFolder = "generated-code/my-python";
+        this.outputFolder = "../../../sdk/docspace-api-sdk-python";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);

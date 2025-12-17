@@ -37,7 +37,7 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
     public void processOpts() {
         super.processOpts();
 
-        this.outputFolder = "generated-code/my-kotlin";
+        this.outputFolder = "../../../sdk/docspace-api-sdk-kotlin";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
