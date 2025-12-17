@@ -30,3 +30,7 @@
 	path = sdk/docspace-api-sdk-csharp
 	url = https://github.com/ONLYOFFICE/docspace-api-sdk-csharp.git
 	branch = develop
+[submodule "sdk/docspace-api-postman-collections"]
+	path = sdk/docspace-api-postman-collections
+	url = https://github.com/ONLYOFFICE/docspace-api-postman-collections.git
+	branch = master
