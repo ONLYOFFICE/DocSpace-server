@@ -98,7 +98,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     [SwaggerResponse(200, "Information about created session", typeof(object))]
     [SwaggerResponse(403, "You don't have enough permission to edit the file")]
     [HttpPost("file/{fileId}/edit_session")]
-    public async Task<object> CreateEditSession(CreateEditSessionRequestDto<T> inDto)
+    public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateEditSession(CreateEditSessionRequestDto<T> inDto)
     {
         return await filesControllerHelper.CreateEditSessionAsync(inDto.FileId, inDto.FileSize);
     }

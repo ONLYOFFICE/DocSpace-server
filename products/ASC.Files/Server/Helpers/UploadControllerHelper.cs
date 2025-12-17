@@ -56,7 +56,7 @@ public class UploadControllerHelper(
         tenantManager,
         authContext)
 {
-    public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
+    public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
 
