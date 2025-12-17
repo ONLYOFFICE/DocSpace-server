@@ -627,6 +627,20 @@ public abstract class FilesController<T>(
     {
         await fileStorageService.ManageFormFilling(inDto.FormId, inDto.Action);
     }
+
+    /// <summary>
+    /// Returns the results of form submissions.
+    /// </summary>
+    /// <short>Get form submission results</short>
+    /// <path>api/2.0/files/file/{fileId}/submissions</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Form submission results were successfully retrieved")]
+    [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
+    [HttpGet("file/{fileId}/submissions")]
+    public IAsyncEnumerable<FormResultsDto> GetFormSubmissions(FileIdRequestDto<int> inDto)
+    {
+        return fileStorageService.GetSubmissionsByFormId(inDto.FileId);
+    }
 }
 
 public class FilesControllerCommon(
