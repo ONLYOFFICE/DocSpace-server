@@ -14,7 +14,7 @@ function processNode(node, preferredEnumType = null, parentNode = null) {
     if (key === 'description' && typeof node[key] === 'string') node[key] = value.replace(/"/g, "");
 
     if (value && typeof value === 'object') {
-      if ((key === 'anyOf' || key === 'oneOf') && Array.isArray(value)) {
+      if ((key === 'anyOf' || key === 'oneOf') && Array.isArray(value) && isEnumAnyOf(value)) {
         let targetType = preferredEnumType || node['x-enum-type'] || 'integer';
 
         const preferred = value.find(item => (item['x-enum-type'] || item.type) === targetType);
@@ -67,3 +67,9 @@ fs.readFile(inputFilePath, 'utf8', (err, data) => {
     }
   });
 });
+
+function isEnumAnyOf(arr) {
+  return arr.every(item =>
+    item && typeof item === 'object' && !item.$ref && (item.type === 'string' || item.type === 'integer') && Array.isArray(item.enum)
+  );
+}
