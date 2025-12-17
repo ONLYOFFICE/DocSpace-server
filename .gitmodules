@@ -2,3 +2,31 @@
 	path = products/ASC.Files/Server/DocStore
 	url = https://github.com/ONLYOFFICE/document-templates
 	branch = main/community-server
+[submodule "sdk/docspace-api-sdk-python"]
+	path = sdk/docspace-api-sdk-python
+	url = https://github.com/ONLYOFFICE/docspace-api-sdk-python.git
+	branch = master
+[submodule "sdk/docspace-api-sdk-kotlin"]
+	path = sdk/docspace-api-sdk-kotlin
+	url = https://github.com/ONLYOFFICE/docspace-api-sdk-kotlin.git
+	branch = master
+[submodule "sdk/docspace-api-sdk-swift"]
+	path = sdk/docspace-api-sdk-swift
+	url = https://github.com/ONLYOFFICE/docspace-api-sdk-swift.git
+	branch = master
+[submodule "sdk/docspace-api-sdk-php"]
+	path = sdk/docspace-api-sdk-php
+	url = https://github.com/ONLYOFFICE/docspace-api-sdk-php.git
+	branch = master
+[submodule "sdk/docspace-api-sdk-java"]
+	path = sdk/docspace-api-sdk-java
+	url = https://github.com/ONLYOFFICE/docspace-api-sdk-java.git
+	branch = master
+[submodule "sdk/docspace-api-sdk-typescript"]
+	path = sdk/docspace-api-sdk-typescript
+	url = https://github.com/ONLYOFFICE/docspace-api-sdk-typescript.git
+	branch = develop
+[submodule "sdk/docspace-api-sdk-csharp"]
+	path = sdk/docspace-api-sdk-csharp
+	url = https://github.com/ONLYOFFICE/docspace-api-sdk-csharp.git
+	branch = develop
