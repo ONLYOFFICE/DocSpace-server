@@ -285,17 +285,19 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         return WriteResponse(context, true, data, string.Empty, statusCode);
     }
 
+    private static readonly JsonSerializerOptions _options = new()
+    {
+        WriteIndented = false, 
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, 
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+    
     private static Task WriteResponse(HttpContext context, bool success, object data, string message, int statusCode)
     {
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/json";
 
-        return context.Response.WriteAsync(JsonSerializer.Serialize(new { success, data, message }, new JsonSerializerOptions
-        {
-            WriteIndented = false,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        }));
+        return context.Response.WriteAsync(JsonSerializer.Serialize(new { success, data, message }, _options));
     }
 
     private async Task<object> ToResponseObject<T>(File<T> file)

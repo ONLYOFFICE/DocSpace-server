@@ -33,8 +33,7 @@ public class FilesLinkUtility
     public const string EditorPage = "doceditor";
     public TimeSpan DefaultLinkLifeTime { get; }
     public const int MaxLinkLifeTimeInYears = 10;
-
-    private readonly string _filesUploaderUrl;
+    
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly BaseCommonLinkUtility _baseCommonLinkUtility;
     private readonly CoreBaseSettings _coreBaseSettings;
@@ -56,7 +55,6 @@ public class FilesLinkUtility
         _coreSettings = coreSettings;
         _configuration = configuration;
         _instanceCrypto = instanceCrypto;
-        _filesUploaderUrl = _configuration["files:uploader:url"] ?? "~";
         DefaultLinkLifeTime = !TimeSpan.TryParse(configuration["externalLink:defaultLifetime"], out var defaultLifetime) ? TimeSpan.FromDays(7) : defaultLifetime;
     }
 
@@ -452,21 +450,17 @@ public class FilesLinkUtility
             queryString = queryString + "&" + FolderId + "=" + HttpUtility.UrlEncode(folderId.ToString());
         }
 
-        return _commonLinkUtility.GetFullAbsolutePath(GetFileUploaderHandlerVirtualPath() + queryString);
+        return _commonLinkUtility.GetFullAbsolutePath(FileUploaderHandlerVirtualPath + queryString);
     }
 
     public string GetUploadChunkLocationUrl(string uploadId)
     {
         var queryString = "?uid=" + uploadId;
-        return _commonLinkUtility.GetFullAbsolutePath(GetFileUploaderHandlerVirtualPath() + queryString);
+        return _commonLinkUtility.GetFullAbsolutePath(FileUploaderHandlerVirtualPath + queryString);
     }
 
-    public bool IsLocalFileUploader => !Regex.IsMatch(_filesUploaderUrl, "^http(s)?://\\.*");
+    private string FileUploaderHandlerVirtualPath => "/ChunkedUploader.ashx";
 
-    private string GetFileUploaderHandlerVirtualPath()
-    {
-        return _filesUploaderUrl.EndsWith(".ashx") ? _filesUploaderUrl : _filesUploaderUrl.TrimEnd('/') + "/ChunkedUploader.ashx";
-    }
 
     private string GetUrlSetting(FilesUrlKeys key)
     {

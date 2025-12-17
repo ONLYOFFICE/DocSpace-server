@@ -71,10 +71,25 @@ public class ChunkedUploadSession<T>(File<T> file, long bytesTotal) : CommonChun
     }
 }
 
+public class ChunkedUploadSessionResponse<T>
+{
+    public string Id { get; init; }
+    public IEnumerable<T> Path { get; init; }
+    public DateTime Created { get; init; }
+    public DateTime Expired { get; init; }
+    public string Location { get; init; }
+    
+    [JsonPropertyName("bytes_uploaded")]
+    public long BytesUploaded { get; init; }
+    
+    [JsonPropertyName("bytes_total")]
+    public long BytesTotal { get; init; }
+}
+
 [Scope]
 public class ChunkedUploadSessionHelper(ILogger<ChunkedUploadSessionHelper> logger, BreadCrumbsManager breadCrumbsManager)
 {
-    public async Task<object> ToResponseObjectAsync<T>(ChunkedUploadSession<T> session, bool appendBreadCrumbs = false)
+    public async Task<ChunkedUploadSessionResponse<T>> ToResponseObjectAsync<T>(ChunkedUploadSession<T> session, bool appendBreadCrumbs = false)
     {
         var breadCrumbs = await breadCrumbsManager.GetBreadCrumbsAsync(session.FolderId); //todo: check how?
         var pathFolder = appendBreadCrumbs
@@ -101,14 +116,14 @@ public class ChunkedUploadSessionHelper(ILogger<ChunkedUploadSessionHelper> logg
             })
             : new List<T> { session.FolderId };
 
-        return new
+        return new ChunkedUploadSessionResponse<T>
         {
-            id = session.Id,
-            path = pathFolder,
-            created = session.Created,
-            expired = session.Expired,
-            location = session.Location,
-            bytes_total = session.BytesTotal
+            Id = session.Id,
+            Path = pathFolder,
+            Created = session.Created,
+            Expired = session.Expired,
+            Location = session.Location,
+            BytesTotal = session.BytesTotal
         };
     }
 }
