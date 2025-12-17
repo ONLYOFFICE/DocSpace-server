@@ -61,7 +61,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; created a new agent: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; created a new AI agent: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;.
         /// </summary>
         public static string ActionAgentCreated {
             get {
@@ -70,7 +70,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; deleted the agent: &lt;b&gt;{1}&lt;/b&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; deleted the AI agent: &lt;b&gt;{1}&lt;/b&gt;.
         /// </summary>
         public static string ActionAgentRemoved {
             get {
@@ -79,7 +79,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; renamed the agent: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href=&quot;{2}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; renamed the AI agent: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href=&quot;{2}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;.
         /// </summary>
         public static string ActionAgentRenamed {
             get {
@@ -88,7 +88,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was assigned the role of &lt;b&gt;{1}&lt;/b&gt; in the agent: &lt;a href=&quot;{2}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{3}&lt;/a&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was assigned the role of &lt;b&gt;{1}&lt;/b&gt; in the AI agent: &lt;a href=&quot;{2}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{3}&lt;/a&gt;.
         /// </summary>
         public static string ActionAgentUpdateAccessForUser {
             get {
@@ -120,6 +120,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string ActionFileUploaded {
             get {
                 return ResourceManager.GetString("ActionFileUploaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; uploaded a new document: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt; to the knowledge base of the AI agent: &lt;a href=&quot;{3}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{4}&lt;/a&gt;.
+        /// </summary>
+        public static string ActionFileUploadedToAgentKnowledge {
+            get {
+                return ResourceManager.GetString("ActionFileUploadedToAgentKnowledge", resourceCulture);
             }
         }
         
@@ -178,7 +187,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was added to the agent: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was added to the AI agent: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt;.
         /// </summary>
         public static string ActionUserAddedToAgent {
             get {
@@ -205,7 +214,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was removed from the agent: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;.
+        ///   Looks up a localized string similar to &lt;b&gt;{0}&lt;/b&gt; was removed from the AI agent: &lt;a href=&quot;{1}&quot; style=&quot;color:#FF6F3D;&quot;&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;.
         /// </summary>
         public static string ActionUserRemovedFromAgent {
             get {
@@ -466,7 +475,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join agent.
+        ///   Looks up a localized string similar to Join AI agent.
         /// </summary>
         public static string ButtonJoinAgent {
             get {
