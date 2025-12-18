@@ -297,7 +297,9 @@ public class BackupController(
     [HttpPost("cancelbackup")]
     public async Task CancelBackupAsync()
     {
-        await backupAjaxHandler.CancelBackupAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        await backupService.CancelBackupAsync(tenantId);
     }
 
     /// <summary>
@@ -312,7 +314,9 @@ public class BackupController(
     [HttpPost("cancelrestore")]
     public async Task CancelRestoreAsync()
     {
-        await backupAjaxHandler.CancelRestoreAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        await backupService.CancelRestoreAsync(tenantId);
     }
 
     /// <summary>
