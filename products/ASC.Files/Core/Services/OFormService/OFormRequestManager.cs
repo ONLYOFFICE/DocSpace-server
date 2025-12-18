@@ -39,15 +39,15 @@ public class OFormRequestManager(
         PropertyNameCaseInsensitive = true
     };
 
-    public async Task<Stream> Get(int id)
+    public async Task<Stream> Get(int id, string ext)
     {
         try
         {
             using var httpClient = httpClientFactory.CreateClient();
-            using var response = await httpClient.GetAsync($"{_configuration.Domain.TrimEnd('/')}/{_configuration.Path.Trim('/')}/{id}?populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={_configuration.Ext}");
+            using var response = await httpClient.GetAsync($"{_configuration.Domain.TrimEnd('/')}/{_configuration.Path.Trim('/')}/{id}?populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={ext}");
             var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(), _options);
 
-            var file = data.Data.Attributes.File.Data.FirstOrDefault(f => f.Attributes.Ext == _configuration.Ext);
+            var file = data.Data.Attributes.File.Data.FirstOrDefault(f => f.Attributes.Ext == ext);
             var streamResponse = await httpClient.GetAsync(file?.Attributes.Url);
             return await streamResponse.Content.ReadAsStreamAsync();
         }
