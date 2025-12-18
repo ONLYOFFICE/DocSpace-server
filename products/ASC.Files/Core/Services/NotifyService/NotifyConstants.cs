@@ -38,11 +38,14 @@ public static class NotifyConstants
     public static readonly INotifyAction EventShareFolder = new NotifyAction("ShareFolder", "share folder");
     public static readonly INotifyAction EventEditorMentions = new NotifyAction("EditorMentions", "editor mentions");
     public static readonly INotifyAction EventRoomRemoved = new NotifyAction("RoomRemoved", "room removed");
+    public static readonly INotifyAction EventAgentRemoved = new NotifyAction("AgentRemoved", "agent removed");
     public static readonly INotifyAction EventFormSubmitted = new NotifyAction("FormSubmitted", "form submitted");
     public static readonly INotifyAction EventFormReceived = new NotifyAction("FormReceived", "form received");
     public static readonly INotifyAction EventRoomMovedArchive = new NotifyAction("RoomMovedArchive");
     public static readonly INotifyAction EventInvitedToRoom = new NotifyAction("InvitedToRoom");
+    public static readonly INotifyAction EventInvitedToAgent = new NotifyAction("InvitedToAgent");
     public static readonly INotifyAction EventRoomUpdateAccessForUser = new NotifyAction("RoomUpdateAccessForUser");
+    public static readonly INotifyAction EventAgentUpdateAccessForUser = new NotifyAction("AgentUpdateAccessForUser");
     public static readonly INotifyAction EventDocumentCreatedInRoom = new NotifyAction("DocumentCreatedInRoom");
     public static readonly INotifyAction EventDocumentUploadedToRoom = new NotifyAction("DocumentUploadedTo");
     public static readonly INotifyAction EventDocumentsUploadedToRoom = new NotifyAction("DocumentsUploadedTo");

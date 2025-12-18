@@ -356,9 +356,9 @@ public class NotifyClient(WorkContext notifyContext,
             );
     }
 
-    public async Task SendRoomRemovedAsync<T>(FileEntry<T> folder, List<AceWrapper> aces, Guid userId)
+    public async Task SendRoomRemovedAsync<T>(Folder<T> folder, List<AceWrapper> aces, Guid userId)
     {
-        if (folder is not { FileEntryType: FileEntryType.Folder } || aces.Count == 0)
+        if (aces.Count == 0)
         {
             return;
         }
@@ -398,7 +398,7 @@ public class NotifyClient(WorkContext notifyContext,
             }
 
             await client.SendNoticeToAsync(
-                NotifyConstants.EventRoomRemoved,
+                folder.FolderType == FolderType.AiRoom ? NotifyConstants.EventAgentRemoved : NotifyConstants.EventRoomRemoved,
                 folder.UniqID,
                 [recipient],
                 [ConfigurationConstants.NotifyEMailSenderSysName, ConfigurationConstants.NotifyTelegramSenderSysName],
@@ -437,7 +437,7 @@ public class NotifyClient(WorkContext notifyContext,
                 new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType)
                 );
     }
-    public async Task SendInvitedToRoom<T>(FileEntry<T> room, UserInfo user)
+    public async Task SendInvitedToRoom<T>(Folder<T> room, UserInfo user)
     {
         if (!await CanNotifyRoom(room, user))
         {
@@ -447,7 +447,7 @@ public class NotifyClient(WorkContext notifyContext,
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
 
         await client.SendNoticeAsync(
-            NotifyConstants.EventInvitedToRoom,
+            room.FolderType == FolderType.AiRoom ? NotifyConstants.EventInvitedToAgent : NotifyConstants.EventInvitedToRoom,
             room.UniqID,
             new DirectRecipient(user.Id.ToString(), user.ToString()),
             ConfigurationConstants.NotifyPushSenderSysName,
@@ -457,7 +457,7 @@ public class NotifyClient(WorkContext notifyContext,
             new TagValue(NotifyConstants.RoomTitle, room.Title)
             );
     }
-    public async Task SendRoomUpdateAccessForUser<T>(FileEntry<T> room, UserInfo user, FileShare currentRole)
+    public async Task SendRoomUpdateAccessForUser<T>(Folder<T> room, UserInfo user, FileShare currentRole)
     {
         if (!await CanNotifyRoom(room, user))
         {
@@ -465,10 +465,11 @@ public class NotifyClient(WorkContext notifyContext,
         }
 
         var client = notifyContext.RegisterClient(serviceProvider, notifySource);
-        var accessString = FileShareExtensions.GetAccessString(currentRole);
+        var isAgent = room.FolderType == FolderType.AiRoom;
+        var accessString = FileShareExtensions.GetAccessString(currentRole, isAgent: isAgent);
 
         await client.SendNoticeAsync(
-            NotifyConstants.EventRoomUpdateAccessForUser,
+            isAgent ? NotifyConstants.EventAgentUpdateAccessForUser : NotifyConstants.EventRoomUpdateAccessForUser,
             room.UniqID,
             new DirectRecipient(user.Id.ToString(), user.ToString()),
             ConfigurationConstants.NotifyPushSenderSysName,

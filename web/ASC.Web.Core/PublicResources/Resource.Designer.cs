@@ -286,7 +286,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to set quota per ai agent. The entered value is greater than the total DocSpace storage..
+        ///   Looks up a localized string similar to Failed to set quota per AI agent. The entered value is greater than the total DocSpace storage..
         /// </summary>
         public static string AiAgentQuotaGreaterPortalError {
             get {
