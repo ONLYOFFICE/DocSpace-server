@@ -41,4 +41,6 @@ public interface IPattern2
     Func<string> Subject { get; }
     Func<string> Body { get; }
     Type Styler { get; }
+    
+    string ContentType => "html";
 }

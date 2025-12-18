@@ -28,48 +28,48 @@ namespace ASC.Web.Studio.Core.Notify;
 
 public static class Actions
 {
-    public static readonly INotifyAction AdminNotify = new NotifyAction("admin_notify", "admin notifications");
-    public static readonly INotifyAction PeriodicNotify = new NotifyAction("periodic_notify", "periodic notifications");
+    public static readonly INotifyAction AdminNotify = new NotifyAction("admin_notify");
+    public static readonly INotifyAction PeriodicNotify = new NotifyAction("periodic_notify");
 
-    public static readonly INotifyAction SelfProfileUpdated = new NotifyAction("self_profile_updated", "self profile updated");
-    public static readonly INotifyAction UserHasJoin = new NotifyAction("user_has_join", "user has join");
-    public static readonly INotifyAction UserMessageToAdmin = new NotifyAction("for_admin_notify", "for_admin_notify");
-    public static readonly INotifyAction UserMessageToSales = new NotifyAction("for_sales_notify", "for_sales_notify");
-    public static readonly INotifyAction RequestTariff = new NotifyAction("request_tariff", "request_tariff");
-    public static readonly INotifyAction RequestLicense = new NotifyAction("request_license", "request_license");
+    public static readonly INotifyAction SelfProfileUpdated = new NotifyAction("self_profile_updated");
+    public static readonly INotifyAction UserHasJoin = new NotifyAction("user_has_join");
+    public static readonly INotifyAction UserMessageToAdmin = new NotifyAction("for_admin_notify");
+    public static readonly INotifyAction UserMessageToSales = new NotifyAction("for_sales_notify");
+    public static readonly INotifyAction RequestTariff = new NotifyAction("request_tariff");
+    public static readonly INotifyAction RequestLicense = new NotifyAction("request_license");
 
-    public static readonly INotifyAction YourProfileUpdated = new NotifyAction("profile_updated", "profile updated");
-    public static readonly INotifyAction JoinUsers = new NotifyAction("join", "join users");
-    public static readonly INotifyAction SendWhatsNew = new NotifyAction("send_whats_new", "send whats new");
-    public static readonly INotifyAction BackupCreated = new NotifyAction("backup_created", "backup created");
-    public static readonly INotifyAction BackupFailed = new NotifyAction("backup_failed", "backup failed");
-    public static readonly INotifyAction ScheduledBackupFailed = new NotifyAction("scheduled_backup_failed", "scheduled backup failed");
-    public static readonly INotifyAction RestoreStarted = new NotifyAction("restore_started", "restore_started");
+    public static readonly INotifyAction YourProfileUpdated = new NotifyAction("profile_updated");
+    public static readonly INotifyAction JoinUsers = new NotifyAction("join");
+    public static readonly INotifyAction SendWhatsNew = new NotifyAction("send_whats_new");
+    public static readonly INotifyAction BackupCreated = new NotifyAction("backup_created");
+    public static readonly INotifyAction BackupFailed = new NotifyAction("backup_failed");
+    public static readonly INotifyAction ScheduledBackupFailed = new NotifyAction("scheduled_backup_failed");
+    public static readonly INotifyAction RestoreStarted = new NotifyAction("restore_started");
     public static readonly INotifyAction RestoreCompletedV115 = new NotifyAction("restore_completed_v115");
-    public static readonly INotifyAction PortalDeactivate = new NotifyAction("portal_deactivate", "portal deactivate");
-    public static readonly INotifyAction PortalDelete = new NotifyAction("portal_delete", "portal delete");
+    public static readonly INotifyAction PortalDeactivate = new NotifyAction("portal_deactivate");
+    public static readonly INotifyAction PortalDelete = new NotifyAction("portal_delete");
 
-    public static readonly INotifyAction ProfileDelete = new NotifyAction("profile_delete", "profile_delete");
-    public static readonly INotifyAction ProfileHasDeletedItself = new NotifyAction("profile_has_deleted_itself", "profile_has_deleted_itself");
-    public static readonly INotifyAction ReassignsCompleted = new NotifyAction("reassigns_completed", "reassigns_completed");
-    public static readonly INotifyAction ReassignsFailed = new NotifyAction("reassigns_failed", "reassigns_failed");
-    public static readonly INotifyAction RemoveUserDataCompleted = new NotifyAction("remove_user_data_completed", "remove_user_data_completed");
+    public static readonly INotifyAction ProfileDelete = new NotifyAction("profile_delete");
+    public static readonly INotifyAction ProfileHasDeletedItself = new NotifyAction("profile_has_deleted_itself");
+    public static readonly INotifyAction ReassignsCompleted = new NotifyAction("reassigns_completed");
+    public static readonly INotifyAction ReassignsFailed = new NotifyAction("reassigns_failed");
+    public static readonly INotifyAction RemoveUserDataCompleted = new NotifyAction("remove_user_data_completed");
     public static readonly INotifyAction RemoveUserDataCompletedCustomMode = new NotifyAction("remove_user_data_completed_custom_mode");
-    public static readonly INotifyAction RemoveUserDataFailed = new NotifyAction("remove_user_data_failed", "remove_user_data_failed");
+    public static readonly INotifyAction RemoveUserDataFailed = new NotifyAction("remove_user_data_failed");
 
-    public static readonly INotifyAction ConfirmOwnerChange = new NotifyAction("owner_confirm_change", "owner_confirm_change");
-    public static readonly INotifyAction ActivateEmail = new NotifyAction("activate_email", "activate_email");
-    public static readonly INotifyAction EmailChangeV115 = new NotifyAction("change_email_v115", "change_email_v115");
-    public static readonly INotifyAction PasswordChangeV115 = new NotifyAction("change_password_v115", "change_password_v115");
-    public static readonly INotifyAction PasswordChanged = new NotifyAction("password_changed", "password_changed");
-    public static readonly INotifyAction PasswordSet = new NotifyAction("set_password", "set_password");
-    public static readonly INotifyAction PhoneChange = new NotifyAction("change_phone", "change_phone");
-    public static readonly INotifyAction TfaChange = new NotifyAction("change_tfa", "change_tfa");
-    public static readonly INotifyAction MigrationPortalStart = new NotifyAction("migration_start", "migration start");
+    public static readonly INotifyAction ConfirmOwnerChange = new NotifyAction("owner_confirm_change");
+    public static readonly INotifyAction ActivateEmail = new NotifyAction("activate_email");
+    public static readonly INotifyAction EmailChangeV115 = new NotifyAction("change_email_v115");
+    public static readonly INotifyAction PasswordChangeV115 = new NotifyAction("change_password_v115");
+    public static readonly INotifyAction PasswordChanged = new NotifyAction("password_changed");
+    public static readonly INotifyAction PasswordSet = new NotifyAction("set_password");
+    public static readonly INotifyAction PhoneChange = new NotifyAction("change_phone");
+    public static readonly INotifyAction TfaChange = new NotifyAction("change_tfa");
+    public static readonly INotifyAction MigrationPortalStart = new NotifyAction("migration_start");
     public static readonly INotifyAction MigrationPortalSuccessV115 = new NotifyAction("migration_success_v115");
-    public static readonly INotifyAction MigrationPortalError = new NotifyAction("migration_error", "migration error");
-    public static readonly INotifyAction MigrationPortalServerFailure = new NotifyAction("migration_server_failure", "migration_server_failure");
-    public static readonly INotifyAction PortalRename = new NotifyAction("portal_rename", "portal_rename");
+    public static readonly INotifyAction MigrationPortalError = new NotifyAction("migration_error");
+    public static readonly INotifyAction MigrationPortalServerFailure = new NotifyAction("migration_server_failure");
+    public static readonly INotifyAction PortalRename = new NotifyAction("portal_rename");
 
     public static readonly INotifyAction MailboxCreated = new NotifyAction("mailbox_created");
     public static readonly INotifyAction MailboxWithoutSettingsCreated = new NotifyAction("mailbox_without_settings_created");
@@ -135,7 +135,7 @@ public static class Actions
     public static readonly INotifyAction SaasAdminUserAppsTipsV1 = new NotifyAction("saas_admin_user_apps_tips_v1");
     public static readonly INotifyAction EnterpriseAdminUserAppsTipsV1 = new NotifyAction("enterprise_admin_user_apps_tips_v1");
 
-    public static readonly INotifyAction RoomsActivity = new NotifyAction("rooms_activity", "rooms activity");
+    public static readonly INotifyAction RoomsActivity = new NotifyAction("rooms_activity");
 
     public static readonly INotifyAction SaasOwnerPaymentWarningGracePeriodBeforeActivation = new NotifyAction("saas_owner_payment_warning_grace_period_before_activation");
     public static readonly INotifyAction SaasOwnerPaymentWarningGracePeriodActivation = new NotifyAction("saas_owner_payment_warning_grace_period_activation");

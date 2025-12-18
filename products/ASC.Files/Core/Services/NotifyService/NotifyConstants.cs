@@ -30,17 +30,17 @@ public static class NotifyConstants
 {
     #region Events
 
-    public static readonly INotifyAction EventDocuSignComplete = new NotifyAction("DocuSignComplete", "docusign complete");
-    public static readonly INotifyAction EventDocuSignStatus = new NotifyAction("DocuSignStatus", "docusign status");
-    public static readonly INotifyAction EventMailMergeEnd = new NotifyAction("MailMergeEnd", "mail merge end");
-    public static readonly INotifyAction EventShareDocument = new NotifyAction("ShareDocument", "share document");
-    public static readonly INotifyAction EventShareEncryptedDocument = new NotifyAction("ShareEncryptedDocument", "share encrypted document");
-    public static readonly INotifyAction EventShareFolder = new NotifyAction("ShareFolder", "share folder");
-    public static readonly INotifyAction EventEditorMentions = new NotifyAction("EditorMentions", "editor mentions");
-    public static readonly INotifyAction EventRoomRemoved = new NotifyAction("RoomRemoved", "room removed");
-    public static readonly INotifyAction EventAgentRemoved = new NotifyAction("AgentRemoved", "agent removed");
-    public static readonly INotifyAction EventFormSubmitted = new NotifyAction("FormSubmitted", "form submitted");
-    public static readonly INotifyAction EventFormReceived = new NotifyAction("FormReceived", "form received");
+    public static readonly INotifyAction EventDocuSignComplete = new NotifyAction("DocuSignComplete");
+    public static readonly INotifyAction EventDocuSignStatus = new NotifyAction("DocuSignStatus");
+    public static readonly INotifyAction EventMailMergeEnd = new NotifyAction("MailMergeEnd");
+    public static readonly INotifyAction EventShareDocument = new NotifyAction("ShareDocument");
+    public static readonly INotifyAction EventShareEncryptedDocument = new NotifyAction("ShareEncryptedDocument");
+    public static readonly INotifyAction EventShareFolder = new NotifyAction("ShareFolder");
+    public static readonly INotifyAction EventEditorMentions = new NotifyAction("EditorMentions");
+    public static readonly INotifyAction EventRoomRemoved = new NotifyAction("RoomRemoved");
+    public static readonly INotifyAction EventAgentRemoved = new NotifyAction("AgentRemoved");
+    public static readonly INotifyAction EventFormSubmitted = new NotifyAction("FormSubmitted");
+    public static readonly INotifyAction EventFormReceived = new NotifyAction("FormReceived");
     public static readonly INotifyAction EventRoomMovedArchive = new NotifyAction("RoomMovedArchive");
     public static readonly INotifyAction EventInvitedToRoom = new NotifyAction("InvitedToRoom");
     public static readonly INotifyAction EventInvitedToAgent = new NotifyAction("InvitedToAgent");

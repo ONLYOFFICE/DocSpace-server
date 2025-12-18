@@ -39,7 +39,7 @@ public class NotifyEngine(Context context,
     private readonly ILogger _logger = options.CreateLogger("ASC.Notify");
     private readonly Context _context = context ?? throw new ArgumentNullException(nameof(context));
     internal readonly List<SendMethodWrapper> SendMethods = [];
-    private readonly Dictionary<string, IPatternStyler> _stylers = new();
+    private readonly Dictionary<Type, IPatternStyler> _stylers = new();
     private readonly ReplacePatternFormatter _sysTagFormatter = new(@"_#(?<tagName>[A-Z0-9_\-.]+)#_", true);
     internal readonly ICollection<Type> Actions = new List<Type>();
 
@@ -200,8 +200,8 @@ public class NotifyEngine(Context context,
             }
 
             await PrepareRequestFillSendersAsync(request, serviceScope);
-            await PrepareRequestFillPatterns(request, serviceScope);
-            await PrepareRequestFillTags(request, serviceScope);
+            PrepareRequestFillPatterns(request);
+            PrepareRequestFillTags(request);
         }
         catch (Exception ex)
         {
@@ -304,7 +304,7 @@ public class NotifyEngine(Context context,
         noticeMessage.AddArgument(request.Arguments.ToArray());
         var patternProvider = await request.GetPatternProvider(serviceScope);
 
-        var formatter = patternProvider.GetFormatter(pattern);
+        var formatter = new NVelocityPatternFormatter();
         try
         {
             formatter?.FormatMessage(noticeMessage, noticeMessage.Arguments);
@@ -317,7 +317,7 @@ public class NotifyEngine(Context context,
                 ]
             );
             //Do styling here
-            if (!string.IsNullOrEmpty(pattern.Styler))
+            if (pattern.Styler != null)
             {
                 var tenantManager = serviceScope.ServiceProvider.GetService<TenantManager>();
                 var userManager = serviceScope.ServiceProvider.GetService<UserManager>();
@@ -343,7 +343,7 @@ public class NotifyEngine(Context context,
         {
             if (!_stylers.ContainsKey(message.Pattern.Styler))
             {
-                if (scope.ServiceProvider.GetService(Type.GetType(message.Pattern.Styler, true)) is IPatternStyler styler)
+                if (scope.ServiceProvider.GetService(message.Pattern.Styler) is IPatternStyler styler)
                 {
                     _stylers.Add(message.Pattern.Styler, styler);
                 }
@@ -371,58 +371,48 @@ public class NotifyEngine(Context context,
         }
     }
 
-    private async Task PrepareRequestFillPatterns(NotifyRequest request, IServiceScope serviceScope)
+    private void PrepareRequestFillPatterns(NotifyRequest request)
     {
         if (request._patterns == null)
         {
-            request._patterns = new IPattern[request._senderNames.Length];
+            request._patterns = new IPattern2[request._senderNames.Length];
             if (request._patterns.Length == 0)
             {
                 return;
             }
-
-            var apProvider = await request.GetPatternProvider(serviceScope);
+            
             for (var i = 0; i < request._senderNames.Length; i++)
             {
                 var senderName = request._senderNames[i];
-                IPattern pattern = null;
-                if (apProvider.GetPatternMethod != null)
-                {
-                    pattern = apProvider.GetPatternMethod(request.NotifyAction, senderName, request);
-                }
-
-                pattern ??= apProvider.GetPattern(request.NotifyAction, senderName);
-
+                var pattern = request.NotifyAction.Patterns.Find(r => r.SenderName == senderName);
                 request._patterns[i] = pattern ?? throw new NotifyException($"For action \"{request.NotifyAction.ID}\" by sender \"{senderName}\" no one patterns getted.");
             }
         }
     }
 
-    private async Task PrepareRequestFillTags(NotifyRequest request, IServiceScope serviceScope)
+    private void PrepareRequestFillTags(NotifyRequest request)
     {
-        var patternProvider = await request.GetPatternProvider(serviceScope);
         foreach (var pattern in request._patterns)
         {
             IPatternFormatter formatter;
             try
             {
-                formatter = patternProvider.GetFormatter(pattern);
+                formatter = new NVelocityPatternFormatter();
             }
             catch (Exception exc)
             {
-                throw new NotifyException(string.Format("For pattern \"{0}\" formatter not instanced.", pattern), exc);
+                throw new NotifyException($"For pattern \"{pattern}\" formatter not instanced.", exc);
             }
-            var tags = Array.Empty<string>();
+
+            List<string> tags;
+            
             try
             {
-                if (formatter != null)
-                {
-                    tags = formatter.GetTags(pattern) ?? [];
-                }
+                tags = formatter.GetTags(pattern) ?? [];
             }
             catch (Exception exc)
             {
-                throw new NotifyException(string.Format("Get tags from formatter of pattern \"{0}\" failed.", pattern), exc);
+                throw new NotifyException($"Get tags from formatter of pattern \"{pattern}\" failed.", exc);
             }
 
             foreach (var tag in tags.Where(tag => !request.Arguments.Exists(tagValue => Equals(tagValue.Tag, tag)) && !request._requaredTags.Exists(rtag => Equals(rtag, tag))))
